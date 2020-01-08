@@ -2,3 +2,12 @@ target/
 .idea/
 *.iml
 .DS_Store
+*.pdf
+*.aux
+*.log
+*.bcf
+*.bbl
+*.fdb_latexmk
+*.fls
+*.run.xml
+*.blg
