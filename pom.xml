@@ -90,6 +90,16 @@ SOFTWARE.
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.0</version>
         </plugin>
+        <plugin>
+          <!--
+            @todo #1:30min Fix qulice errors which comes from
+            new qulice version 0.18.19 and enable qulice profile back
+            in .travis.yml
+          -->
+          <groupId>com.qulice</groupId>
+          <artifactId>qulice-maven-plugin</artifactId>
+          <version>0.18.19</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>

@@ -6,7 +6,7 @@ cache:
 script:
   - set -e
   - go version
-  - mvn clean install -Pqulice --errors --batch-mode
+  - mvn clean install --errors --batch-mode
   - mvn clean
   - pdd -f /dev/null
 before_install:
