@@ -93,8 +93,8 @@ SOFTWARE.
         <plugin>
           <!--
             @todo #1:30min Fix qulice errors which comes from
-            new qulice version 0.18.19 and enable qulice profile back
-            in .travis.yml
+             new qulice version 0.18.19 and enable qulice profile back
+             in .travis.yml
           -->
           <groupId>com.qulice</groupId>
           <artifactId>qulice-maven-plugin</artifactId>
@@ -111,8 +111,8 @@ SOFTWARE.
           <target>11</target>
           <!--
             @todo #1:30min Update maven dependencies and plugins
-            to support JDK>=11 version. It's: surefire, failsafe and
-            maybe others.
+             to support JDK>=11 version. It's: surefire, failsafe and
+             maybe others.
           -->
         </configuration>
       </plugin>
