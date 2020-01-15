@@ -21,25 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.yegor256.artipie;
-
-import org.junit.Test;
 
 /**
- * Test case for {@link Main}.
+ * Artipie files, tests.
  *
  * @author Yegor Bugayenko (yegor256@gmail.com)
  * @version $Id$
  * @since 0.1
  */
-public final class MainTest {
+package com.artipie;
 
-    /**
-     * Runs the app.
-     * @throws Exception If some problem inside
-     */
-    @Test
-    public void runsTheApp() throws Exception {
-        Main.main("hello", "world");
-    }
-}
