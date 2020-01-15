@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2020 Yegor Bugayenko
@@ -28,8 +28,6 @@ import com.jcabi.log.Logger;
 /**
  * The main entrance.
  *
- * @author Yegor Bugayenko (yegor256@gmail.com)
- * @version $Id$
  * @since 0.1
  */
 public final class Main {
@@ -43,6 +41,7 @@ public final class Main {
      * The ctor.
      * @param cmd Command line arguments
      */
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     private Main(final String... cmd) {
         this.args = cmd;
     }
