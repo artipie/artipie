@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2020 Yegor Bugayenko
@@ -29,5 +29,5 @@
  * @version $Id$
  * @since 0.1
  */
-package com.yegor256.artipie;
+package com.artipie;
 

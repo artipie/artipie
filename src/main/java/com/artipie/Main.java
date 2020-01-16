@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2020 Yegor Bugayenko
@@ -21,13 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package com.artipie;
+
+import com.jcabi.log.Logger;
 
 /**
- * Artipie files.
+ * The main entrance.
  *
- * @author Yegor Bugayenko (yegor256@gmail.com)
- * @version $Id$
  * @since 0.1
  */
-package com.yegor256.artipie;
+public final class Main {
 
+    /**
+     * The args.
+     */
+    private final String[] args;
+
+    /**
+     * The ctor.
+     * @param cmd Command line arguments
+     */
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
+    private Main(final String... cmd) {
+        this.args = cmd;
+    }
+
+    /**
+     * The main entry point.
+     *
+     * @param cmd Command line arguments
+     * @throws Exception If fails
+     */
+    public static void main(final String... cmd) throws Exception {
+        new Main(cmd).exec();
+    }
+
+    /**
+     * Run it.
+     *
+     * @throws Exception If fails
+     */
+    public void exec() throws Exception {
+        assert this.args != null;
+        Logger.info(this, "Works just fine!");
+    }
+
+}
