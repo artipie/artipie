@@ -11,7 +11,7 @@ install: |
 merge:
   script: |
     pdd -f /dev/null
-    mvn clean install -Pqulice --errors --settings ../settings.xml
+    mvn clean install --errors --settings ../settings.xml
 deploy:
   script: |
     echo There is nothing to deploy
@@ -20,4 +20,4 @@ release:
   script: |-
     mvn versions:set "-DnewVersion=${tag}"
     git commit -am "${tag}"
-    mvn clean deploy -Partipie -Psonatype -Pqulice --errors --settings ../settings.xml
+    mvn clean deploy -Partipie -Psonatype --errors --settings ../settings.xml
