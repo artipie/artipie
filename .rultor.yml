@@ -1,5 +1,3 @@
-readers:
-  - "urn:github:526301"
 docker:
   image: g4s8/rultor-jdk11:alpine3.10
 assets:
