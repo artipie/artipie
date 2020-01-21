@@ -94,7 +94,7 @@ SOFTWARE.
           <!--
             @todo #1:30min Fix qulice errors which comes from
              new qulice version 0.18.19 and enable qulice profile back
-             in .travis.yml
+             in .travis.yml and .rultor.yml
           -->
           <groupId>com.qulice</groupId>
           <artifactId>qulice-maven-plugin</artifactId>
