@@ -11,3 +11,6 @@ target/
 *.fls
 *.run.xml
 *.blg
+.project
+.classpath
+.settings/**
