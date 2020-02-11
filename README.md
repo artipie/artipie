@@ -13,7 +13,24 @@
 
 This is a simple experimental binary artifacts manager.
 
-TBD...
+## How does it work
+
+Artipie uses external server implementation to start itself,
+one of possible servers is https://github.com/artipie/vertx-server/
+
+Server accepts `Slice` interface and serves all requests to encapsulated `Slice`.
+Server can be started with a single adapter module (since all adapters implements `Slice` interface)
+or with Artipie assembly.
+
+Artipie reads server settings from yaml file and contructs
+`Storage` to read repositories configurations.
+
+On each request it reads repository name from request URI path
+and find related repo configuration in `Storage`. Repo configuration
+knows repo type (e.g. `maven` or `docker`) and storage settings for repo
+(different repos may have different storage back ends).
+After reading repo config it constructs new `Slice` for config
+and proxies current request to this slice.
 
 ## How to contribute
 

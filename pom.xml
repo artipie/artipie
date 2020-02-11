@@ -26,8 +26,8 @@ SOFTWARE.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.artipie</groupId>
-    <artifactId>parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>ppom</artifactId>
+    <version>0.2.1</version>
   </parent>
   <artifactId>artipie</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -75,11 +75,6 @@ SOFTWARE.
       <url>https://github.com/artipie/artipie</url>
     </site>
   </distributionManagement>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -87,27 +82,17 @@ SOFTWARE.
       <version>0.18.1</version>
     </dependency>
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
+      <groupId>com.artipie</groupId>
+      <artifactId>http</artifactId>
+      <version>0.2</version>
     </dependency>
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
+      <groupId>com.artipie</groupId>
+      <artifactId>asto</artifactId>
+      <version>0.13.0</version>
     </dependency>
   </dependencies>
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.0</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-failsafe-plugin</artifactId>
-          <version>3.0.0-M4</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
     <plugins>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
@@ -125,24 +110,4 @@ SOFTWARE.
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>qulice</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.qulice</groupId>
-            <artifactId>qulice-maven-plugin</artifactId>
-            <configuration>
-              <excludes combine.children="append">
-                <exclude>findbugs:.*</exclude>
-                <exclude>duplicatefinder:.*</exclude>
-                <exclude>xml:/src/it/settings.xml</exclude>
-              </excludes>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
