@@ -11,6 +11,7 @@ target/
 *.fls
 *.run.xml
 *.blg
-.project
 .classpath
-.settings/**
+.project
+.vscode/
+.settings/

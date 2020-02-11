@@ -1,22 +1,13 @@
-readers:
-  - "urn:github:526301"
 docker:
-  image: yegor256/java8
+  image: g4s8/rultor-jdk11:alpine3.10
 assets:
   settings.xml: yegor256/home#assets/artipie/settings.xml
   pubring.gpg: yegor256/home#assets/pubring.gpg
   secring.gpg: yegor256/home#assets/secring.gpg
-env:
-  MAVEN_OPTS: -XX:MaxPermSize=256m -Xmx1g
-  JAVA_OPTS: -XX:MaxPermSize=256m -Xmx1g
 install: |
-  sudo locale-gen en_US en_US.UTF-8
-  sudo dpkg-reconfigure locales
   export LC_ALL=en_US.UTF-8
   export LANG=en_US.UTF-8
   export LANGUAGE=en_US.UTF-8
-  sudo gem install --no-rdoc --no-ri pdd
-  sudo gem install --no-rdoc --no-ri xcop
 merge:
   script: |
     pdd -f /dev/null
