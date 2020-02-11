@@ -25,22 +25,21 @@ SOFTWARE.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.jcabi</groupId>
-    <artifactId>parent</artifactId>
-    <version>0.49.5</version>
+    <groupId>com.artipie</groupId>
+    <artifactId>ppom</artifactId>
+    <version>0.2.1</version>
   </parent>
-  <groupId>com.yegor256</groupId>
   <artifactId>artipie</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>artipie</name>
   <description>Binary Artifact Management Tool</description>
-  <url>https://github.com/yegor256/artipie</url>
+  <url>https://github.com/artipie/artipie</url>
   <inceptionYear>2020</inceptionYear>
   <licenses>
     <license>
       <name>MIT</name>
-      <url>https://github.com/yegor256/artipie/blob/master/LICENSE.txt</url>
+      <url>https://github.com/artipie/artipie/blob/master/LICENSE.txt</url>
     </license>
   </licenses>
   <developers>
@@ -59,12 +58,12 @@ SOFTWARE.
   </developers>
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/yegor256/artipie/issues</url>
+    <url>https://github.com/artipie/artipie/issues</url>
   </issueManagement>
   <scm>
-    <connection>scm:git:git@github.com:yegor256/artipie.git</connection>
-    <developerConnection>scm:git:git@github.com:yegor256/artipie.git</developerConnection>
-    <url>https://github.com/yegor256/artipie</url>
+    <connection>scm:git:git@github.com:artipie/artipie.git</connection>
+    <developerConnection>scm:git:git@github.com:artipie/artipie.git</developerConnection>
+    <url>https://github.com/artipie/artipie</url>
   </scm>
   <ciManagement>
     <system>rultor</system>
@@ -73,25 +72,33 @@ SOFTWARE.
   <distributionManagement>
     <site>
       <id>github-pages</id>
-      <url>https://github.com/yegor256/artipie</url>
+      <url>https://github.com/artipie/artipie</url>
     </site>
   </distributionManagement>
   <dependencies>
     <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-log</artifactId>
-      <version>0.18.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
+    <testResources>
+      <testResource>
+        <directory>${basedir}/src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
     <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
@@ -108,25 +115,4 @@ SOFTWARE.
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>qulice</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.qulice</groupId>
-            <artifactId>qulice-maven-plugin</artifactId>
-            <version>0.18.19</version>
-            <configuration>
-              <excludes combine.children="append">
-                <exclude>findbugs:.*</exclude>
-                <exclude>duplicatefinder:.*</exclude>
-                <exclude>xml:/src/it/settings.xml</exclude>
-              </excludes>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
