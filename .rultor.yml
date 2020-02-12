@@ -10,8 +10,6 @@ install: |
   export LC_ALL=en_US.UTF-8
   export LANG=en_US.UTF-8
   export LANGUAGE=en_US.UTF-8
-  sudo gem install pdd -v 0.20.5
-  sudo gem install xcop
 merge:
   script: |
     echo We don't merge via Rultor
