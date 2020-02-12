@@ -4,20 +4,30 @@ assets:
   settings.xml: yegor256/home#assets/artipie/settings.xml
   pubring.gpg: yegor256/home#assets/pubring.gpg
   secring.gpg: yegor256/home#assets/secring.gpg
+env:
+  JAVA_HOME: /usr/lib/jvm/java-11-openjdk
 install: |
   export LC_ALL=en_US.UTF-8
   export LANG=en_US.UTF-8
   export LANGUAGE=en_US.UTF-8
+  sudo gem install pdd
+  sudo gem install xcop
 merge:
   script: |
-    pdd -f /dev/null
-    mvn clean install -Pqulice --errors --settings ../settings.xml
+    echo We don't merge via Rultor
+    exit 1
 deploy:
   script: |
     echo There is nothing to deploy
     exit 1
 release:
   script: |-
-    mvn versions:set "-DnewVersion=${tag}"
+    pdd -f /dev/null
+    gpg --import /home/r/pubring.gpg
+    gpg --allow-secret-key-import --no-tty --batch --import /home/r/secring.gpg
+    mvn versions:set "-DnewVersion=${tag}" --settings ../settings.xml
     git commit -am "${tag}"
-    mvn clean deploy -Partipie -Psonatype -Pqulice --errors --settings ../settings.xml
+    mvn clean deploy -Partipie,publish,sonatype,qulice,gpg-sign --errors --settings ../settings.xml
+architect:
+  - g4s8
+  - yegor256
