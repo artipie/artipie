@@ -31,3 +31,4 @@ jobs:
       - name: Lint
         run: |
           curl https://raw.githubusercontent.com/llorllale/go-gitlint/master/download-gitlint.sh | sh
+          ./bin/gitlint
