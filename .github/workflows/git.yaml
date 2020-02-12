@@ -21,7 +21,7 @@
 # SOFTWARE.
 ---
 name: GitHub validator
-"on": [push]
+"on": [push, pull_request]
 jobs:
   check:
     runs-on: ubuntu-latest
