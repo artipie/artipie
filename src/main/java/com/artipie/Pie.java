@@ -1,5 +1,5 @@
 /*
- * MIT License
+ * The MIT License (MIT)
  *
  * Copyright (c) 2020 artipie.com
  *
@@ -10,12 +10,12 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -41,9 +41,9 @@ import java.util.concurrent.Flow.Publisher;
 
 /**
  * Pie of slices.
- * @since 0.1
+ * @since 1.0
  * @todo #12:30min Implement slice resolving strategy
- *  based on yaml configuration file. Now StupSlice
+ *  based on yaml configuration file. Now SliceStub
  *  is used instead of real slice implementation.
  *  We should parse publisher of bytes into yaml
  *  config, construct ASTO from this config and find
@@ -80,7 +80,7 @@ public final class Pie implements Slice {
             return new RsWithStatus(200);
         }
         final String[] path = uri.getPath().split("/");
-        if (path.length == 0) {
+        if (uri.getPath().equals("/") || path.length == 0) {
             return new RsWithStatus(200);
         }
         final String repo = path[0];
@@ -106,6 +106,9 @@ public final class Pie implements Slice {
     /**
      * Async slice.
      * @since 1.0
+     * @todo #12:30min Move all Async* implementation to artipie/http module.
+     *  We need to wrap asynchronous slices and responses with Slice and
+     *  Response interfaces.
      */
     private static final class AsyncSlice implements Slice {
 
