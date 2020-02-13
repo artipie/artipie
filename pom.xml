@@ -77,6 +77,11 @@ SOFTWARE.
   </distributionManagement>
   <dependencies>
     <dependency>
+      <groupId>com.amihaiemil.web</groupId>
+      <artifactId>eo-yaml</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+    <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-log</artifactId>
     </dependency>
@@ -88,6 +93,12 @@ SOFTWARE.
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit-platform.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
