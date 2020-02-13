@@ -38,17 +38,17 @@ import java.nio.file.Path;
 public final class YamlSettings implements Settings {
 
     /**
-     * Source to read YAML from.
+     * YAML file content.
      */
-    private final String source;
+    private final String content;
 
     /**
      * Ctor.
      *
-     * @param source Source to read YAML from.
+     * @param content YAML file content.
      */
-    public YamlSettings(final String source) {
-        this.source = source;
+    public YamlSettings(final String content) {
+        this.content = content;
     }
 
     @Override
@@ -70,7 +70,7 @@ public final class YamlSettings implements Settings {
     private YamlMapping storageYaml() throws IOException {
         return mapping(
             mapping(
-                Yaml.createYamlInput(this.source).readYamlMapping(),
+                Yaml.createYamlInput(this.content).readYamlMapping(),
                 "meta"
             ),
             "storage"
