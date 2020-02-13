@@ -54,7 +54,11 @@ import java.util.concurrent.Flow.Publisher;
 public final class Pie implements Slice {
 
     /**
-     * Configuration storage.
+     * Artipie server main configration storage.
+     * <p>
+     * We uses this storage to find and read repositories configuration
+     * settings.
+     * </p>
      */
     private final Storage cfg;
 
