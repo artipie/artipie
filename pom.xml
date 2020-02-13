@@ -77,11 +77,6 @@ SOFTWARE.
   </distributionManagement>
   <dependencies>
     <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>asto</artifactId>
-      <version>0.13.0</version>
-    </dependency>
-    <dependency>
       <groupId>com.amihaiemil.web</groupId>
       <artifactId>eo-yaml</artifactId>
       <version>2.0.1</version>
@@ -105,6 +100,16 @@ SOFTWARE.
       <artifactId>junit-jupiter-params</artifactId>
       <version>${junit-platform.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>http</artifactId>
+      <version>0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>asto</artifactId>
+      <version>0.13.0</version>
     </dependency>
   </dependencies>
   <build>
