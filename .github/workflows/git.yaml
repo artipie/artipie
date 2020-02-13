@@ -21,7 +21,7 @@
 # SOFTWARE.
 ---
 name: GitHub validator
-"on": [push]
+"on": [push, pull_request]
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -31,3 +31,4 @@ jobs:
       - name: Lint
         run: |
           curl https://raw.githubusercontent.com/llorllale/go-gitlint/master/download-gitlint.sh | sh
+          ./bin/gitlint
