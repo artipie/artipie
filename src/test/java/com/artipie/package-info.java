@@ -25,8 +25,6 @@
 /**
  * Artipie files, tests.
  *
- * @author Yegor Bugayenko (yegor256@gmail.com)
- * @version $Id$
  * @since 0.1
  */
 package com.artipie;

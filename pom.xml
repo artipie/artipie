@@ -90,6 +90,16 @@ SOFTWARE.
       <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>http</artifactId>
+      <version>0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>asto</artifactId>
+      <version>0.13.0</version>
+    </dependency>
   </dependencies>
   <build>
     <testResources>
