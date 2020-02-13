@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
@@ -55,20 +54,9 @@ public final class YamlSettings implements Settings {
     @Override
     public Storage storage() throws IOException {
         final YamlMapping yaml = this.storageYaml();
-        final String type = yaml.string("type");
-        if (type == null) {
-            throw new IllegalStateException(
-                String.format("Cannot find 'type' in storage settings:\n%s", yaml)
-            );
-        }
+        final String type = string(yaml, "type");
         if (type.equals("fs")) {
-            final String path = yaml.string("path");
-            if (path == null) {
-                throw new IllegalStateException(
-                    String.format("Cannot find 'path' in storage settings:\n%s", yaml)
-                );
-            }
-            return new FileStorage(Path.of(path));
+            return new FileStorage(Path.of(string(yaml, "path")));
         }
         throw new IllegalStateException(String.format("Unsupported storage type: '%s'", type));
     }
@@ -80,19 +68,46 @@ public final class YamlSettings implements Settings {
      * @throws IOException In case of problems with reading YAML from source.
      */
     private YamlMapping storageYaml() throws IOException {
-        final YamlMapping root = Yaml.createYamlInput(this.source).readYamlMapping();
-        final YamlMapping meta = root.yamlMapping("meta");
-        if (meta == null) {
-            throw new IllegalStateException(
-                String.format("Cannot find 'meta' part in settings:\n%s", root)
+        return mapping(
+            mapping(
+                Yaml.createYamlInput(this.source).readYamlMapping(),
+                "meta"
+            ),
+            "storage"
+        );
+    }
+
+    /**
+     * Gets mapping by key from YAML, fails if no such key exists.
+     *
+     * @param yaml YAML to take the value from.
+     * @param key Key to take value by.
+     * @return Value found by key.
+     */
+    private static YamlMapping mapping(final YamlMapping yaml, final String key) {
+        final YamlMapping mapping = yaml.yamlMapping(key);
+        if (mapping == null) {
+            throw new IllegalArgumentException(
+                String.format("Cannot find '%s' mapping:\n%s", key, yaml)
             );
         }
-        final YamlMapping storage = meta.yamlMapping("storage");
-        if (storage == null) {
-            throw new IllegalStateException(
-                String.format("Cannot find 'storage' part in meta settings:\n%s", root)
+        return mapping;
+    }
+
+    /**
+     * Gets string by key from YAML, fails if no such key exists.
+     *
+     * @param yaml YAML to take the value from.
+     * @param key Key to take value by.
+     * @return Value found by key.
+     */
+    private static String string(final YamlMapping yaml, final String key) {
+        final String string = yaml.string(key);
+        if (string == null) {
+            throw new IllegalArgumentException(
+                String.format("Cannot find '%s' string:\n%s", key, yaml)
             );
         }
-        return storage;
+        return string;
     }
 }

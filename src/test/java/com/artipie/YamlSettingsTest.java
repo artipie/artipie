@@ -26,7 +26,10 @@ package com.artipie;
 import com.artipie.asto.fs.FileStorage;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Tests for {@link YamlSettings}.
@@ -44,5 +47,18 @@ class YamlSettingsTest {
             settings.storage(),
             Matchers.instanceOf(FileStorage.class)
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "",
+        "meta:\n",
+        "meta:\n  storage:\n",
+        "meta:\n  storage:\n    type: unknown\n",
+        "meta:\n  storage:\n    type: fs\n"
+    })
+    public void shouldFailProvideStorageFromBadYaml(final String yaml) {
+        final YamlSettings settings = new YamlSettings(yaml);
+        Assertions.assertThrows(RuntimeException.class, settings::storage);
     }
 }
