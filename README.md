@@ -32,6 +32,85 @@ knows repo type (e.g. `maven` or `docker`) and storage settings for repo
 After reading repo config it constructs new `Slice` for config
 and proxies current request to this slice.
 
+### Artipie architecture
+
+Main components of Artipie software are:
+ - Adapter: this component works with single binary artifact format, e.g.
+ Maven-adapter or Docker-adapter. Adapter usually consist of two logical parts:
+ front-end and back-end. The back-end of adapter works with binary artifacts
+ and its metadata. It can be used independently as a library to store artifacts
+ and generate metadata. It uses `Storage` from `artipie/asto` as a storage.
+ Front-end of adapter implements `Slice` interface from `artipie/http` module.
+ It handles incoming HTTP requests, process it using back-end objects, and
+ generate HTTP responses.
+ - Storage: Artipie uses abstract key-value storage `artipie/asto` in all modules.
+ Storage support atomic transactional operations and it's thread safe.
+ Artipie has multiple storage implementations: in-memory storage,
+ file-system storage, AWS S3 storage. Storage can be used to store binary artifacts
+ or for configuration files.
+ - Artipie: configured assebmly of adapters. Artipie can be configured to read
+ repository configuration files from the storage. Artipie can find configuration
+ file by repository as a key name. Artipie implements `Slice` interface and can
+ handle HTTP requests. It reads repository name from request URI path,
+ finds configuration for adapter, constructs appropriate storage for adapter,
+ and redirects the request to adapter.
+ - Web server: any `Slice` implementation (Artipie or single module) can be used
+ as a back-end for web server. We require the server to be reactive and to support
+ non-blocking network IO operations. One of possible implementations is
+ [vertx-server](https://github.com/artipie/vertx-server/).
+
+Here is cross-module dependency diagram:
+
+![diagram](/_docs/artipie-classes.png)
+
+### Configuration
+
+Artipie should be configured before startup.
+Main meta configuration `yaml` file should contains storage config,
+where adapter configuration files are located. Storage back-end
+can be either `fs` or `s3`. File-system `fs` storage uses local
+file system to store key-value data. AWS `s3` storage uses S3 cloud
+service to store data in blobs.
+```yaml
+meta:
+  # configuration storage
+  storage:
+    # storage type (either `fs` or `s3`)
+    type: fs
+    path: /artipie/storage
+```
+
+Meta storage contains adapters configuration, where key is a repository name,
+and value is adapter config `yaml` file:
+```text
+config storage
+├── maven-repo
+├── docker-one
+├── hello-npm
+└── rpm
+```
+Each configuration file should specify what is the type of repository should be used
+(adapter), and storage configuration (each repository may reference to different storage).
+```yaml
+repo:
+  type:
+    maven
+  storage:
+    type: s3
+    url: s3://acme.com/snapshot
+    username: admin
+    password: 123qwe
+```
+
+### Deployment
+
+Artipie web server can be started as standalone Java application, or
+started in a cluster with multiple instance behind load balancer.
+If Artipie was started in a cluster, all instances should receive
+single meta configuration for Artipie module. It's recommended
+that S3 storage be used for multi-instance deployment.
+
+
 ## How to contribute
 
 Fork repository, make changes, send us a pull request. We will review
