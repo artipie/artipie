@@ -67,12 +67,15 @@ Here is cross-module dependency diagram:
 
 Artipie should be configured before startup.
 Main meta configuration `yaml` file should contains storage config,
-where adapter configuration files are located:
+where adapter configuration files are located. Storage back-end
+can be either `fs` or `s3`. File-system `fs` storage uses local
+file system to store key-value data. AWS `s3` storage uses S3 cloud
+service to store data in blobs.
 ```yaml
 meta:
   # configuration storage
   storage:
-    # storage type
+    # storage type (either `fs` or `s3`)
     type: fs
     path: /artipie/storage
 ```
@@ -81,7 +84,7 @@ Meta storage contains adapters configuration, where key is a repository name,
 and value is adapter config `yaml` file:
 ```text
 config storage
-├── maven1
+├── maven-repo
 ├── docker-one
 ├── hello-npm
 └── rpm
@@ -104,8 +107,8 @@ repo:
 Artipie web server can be started as standalone Java application, or
 started in a cluster with multiple instance behind load balancer.
 If Artipie was started in a cluster, all instances should receive
-single meta configuration for Artipie module. It's recommented to
-use S3 storage for multi-instance deployment.
+single meta configuration for Artipie module. It's recommended
+that S3 storage be used for multi-instance deployment.
 
 
 ## How to contribute
