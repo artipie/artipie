@@ -111,6 +111,11 @@ SOFTWARE.
       <artifactId>asto</artifactId>
       <version>0.13.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>vertx-server</artifactId>
+      <version>0.1.1</version>
+    </dependency>
   </dependencies>
   <build>
     <testResources>
@@ -120,6 +125,29 @@ SOFTWARE.
       </testResource>
     </testResources>
     <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <finalName>artipie</finalName>
+          <archive>
+            <manifest>
+              <mainClass>com.artipie.VertxMain</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
