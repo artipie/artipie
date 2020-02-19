@@ -26,60 +26,48 @@ package com.artipie;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.files.FilesSlice;
 import com.artipie.http.Connection;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsWithStatus;
-import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Flow.Publisher;
+import java.util.function.Function;
+import org.cactoos.scalar.Unchecked;
 
 /**
  * Pie of slices.
  * @since 1.0
- * @todo #12:30min Implement slice resolving strategy
- *  based on yaml configuration file. Now SliceStub
- *  is used instead of real slice implementation.
- *  We should parse publisher of bytes into yaml
- *  config, construct ASTO from this config and find
- *  corresponding slice implementation by type parameter.
  * @checkstyle MagicNumberCheck (500 lines)
  * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class Pie implements Slice {
 
     /**
-     * Artipie server main configration storage.
-     * <p>
-     * We uses this storage to find and read repositories configuration
-     * settings.
-     * </p>
+     * Artipie server settings.
      */
-    private final Storage cfg;
+    private final Settings settings;
 
     /**
-     * Ctro.
-     * @param cfg Configuration
+     * Artipie entry point.
+     * @param settings Artipie settings
      */
-    public Pie(final Storage cfg) {
-        this.cfg = cfg;
+    public Pie(final Settings settings) {
+        this.settings = settings;
     }
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final URI uri;
-        try {
-            uri = new RequestLineFrom(line).uri();
-        } catch (final IOException err) {
-            return new RsWithStatus(400);
-        }
+        final URI uri = new RequestLineFrom(line).uri();
         if (uri.getPath().equals("*")) {
             return new RsWithStatus(200);
         }
@@ -89,22 +77,30 @@ public final class Pie implements Slice {
         }
         final String repo = path[0];
         return new AsyncSlice(
-            this.cfg.value(new Key.From(repo)).thenApply(something -> new SliceStub())
+            CompletableFuture.supplyAsync(
+                () -> new Unchecked<>(() -> this.settings.storage()).value()
+            )
+            .thenComposeAsync(storage -> storage.value(new Key.From(repo)))
+            .thenApply(content -> new RepoConfig(content))
+            .thenCompose(Pie::sliceForConfig)
         ).response(line, headers, body);
     }
 
     /**
-     * Slice stub.
-     * @since 1.0
+     * Find a slice implementation for config.
+     * @param cfg Repository config
+     * @return Async slice
      */
-    private static final class SliceStub implements Slice {
-
-        @Override
-        public Response response(final String line,
-            final Iterable<Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body) {
-            return new RsWithStatus(404);
-        }
+    private static CompletionStage<Slice> sliceForConfig(final RepoConfig cfg) {
+        return cfg.type().thenApply(
+            type -> {
+                if (!"file".equals(type)) {
+                    throw new IllegalStateException("We suport only `file` repo type");
+                }
+                final Function<Storage, Slice> func = sto -> new FilesSlice(sto);
+                return func;
+            }
+        ).thenCombine(cfg.storage(), (factory, storage) -> factory.apply(storage));
     }
 
     /**
