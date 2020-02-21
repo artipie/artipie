@@ -24,15 +24,20 @@
 
 package com.artipie;
 
-import com.artipie.asto.fs.FileStorage;
 import com.artipie.http.Slice;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
  * Vertx server entry point.
  * @since 1.0
+ * @todo #12:30min Parse command line options instead of system properties.
+ *  We need to pass two mandatory options: server port and Artipie configuration
+ *  storage URI (to local filesystem or cloud storage).
  */
 public final class VertxMain implements Runnable {
 
@@ -58,30 +63,35 @@ public final class VertxMain implements Runnable {
 
     @Override
     public void run() {
-        new VertxSliceServer(this.slice, this.port).start();
+        try (VertxSliceServer srv = new VertxSliceServer(this.slice, this.port)) {
+            srv.start();
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    // @checkstyle MagicNumberCheck (1 line)
+                    Thread.sleep(100);
+                } catch (final InterruptedException iox) {
+                    Logger.info(this, "interrupted: %s", iox);
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 
     /**
      * Entry point.
      * @param args CLI args
+     * @throws IOException On failure
      */
-    public static void main(final String... args) {
+    public static void main(final String... args) throws IOException {
         final String storage = System.getProperty("artipie.storage");
         final int port = Integer.getInteger("artipie.port");
-        final Thread thread = new Thread(
-            new VertxMain(
-                new Pie(new FileStorage(Path.of(storage))),
-                port
-            )
-        );
-        thread.setName(VertxMain.class.getSimpleName());
-        thread.checkAccess();
-        thread.setPriority(Thread.MAX_PRIORITY);
-        thread.start();
-        try {
-            thread.join();
-        } catch (final InterruptedException iox) {
-            Logger.info(VertxMain.class, "interrupted: %s", iox);
-        }
+        new VertxMain(
+            new Pie(
+                new YamlSettings(
+                    new String(Files.readAllBytes(Path.of(storage)), Charset.defaultCharset())
+                )
+            ),
+            port
+        ).run();
     }
 }
