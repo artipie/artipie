@@ -110,6 +110,16 @@ If Artipie was started in a cluster, all instances should receive
 single meta configuration for Artipie module. It's recommended
 that S3 storage be used for multi-instance deployment.
 
+### How to start
+
+To start Vertx server with Artipie service, you need to build package first:
+`mvn clean package`; And start it with Java command then:
+```bash
+java -Dartipie.storage=/tmp/artipie -Dartipie.port=8080 \
+  -jar ./target/artipie-jar-with-dependencies.jar
+```
+where `artipie.storage` system property is a location of root of configuration file-system storage,
+`artipie.port` is a property for server HTTP port.
 
 ## How to contribute
 
