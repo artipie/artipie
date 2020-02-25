@@ -72,14 +72,15 @@ public final class Pie implements Slice {
         final Publisher<ByteBuffer> body) {
         Logger.info(this, "Request: %s", line);
         final URI uri = new RequestLineFrom(line).uri();
-        if (uri.getPath().equals("*")) {
+        final String path = uri.getPath();
+        if (path.equals("*")) {
             return new RsWithStatus(200);
         }
-        final String[] path = uri.getPath().replaceAll("^/+", "").split("/");
-        if (uri.getPath().equals("/") || path.length == 0) {
+        final String[] parts = path.replaceAll("^/+", "").split("/");
+        if (path.equals("/") || parts.length == 0) {
             return new RsWithStatus(200);
         }
-        final String repo = path[0];
+        final String repo = parts[0];
         Logger.debug(this, "Slice repo=%s", repo);
         return new AsyncSlice(
             CompletableFuture.supplyAsync(
