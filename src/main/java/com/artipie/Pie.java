@@ -31,9 +31,12 @@ import com.artipie.http.Connection;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
+import com.jcabi.log.Logger;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -67,20 +70,25 @@ public final class Pie implements Slice {
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
+        Logger.info(this, "Request: %s", line);
         final URI uri = new RequestLineFrom(line).uri();
-        if (uri.getPath().equals("*")) {
+        final String path = uri.getPath();
+        if (path.equals("*")) {
             return new RsWithStatus(200);
         }
-        final String[] path = uri.getPath().split("/");
-        if (uri.getPath().equals("/") || path.length == 0) {
+        final String[] parts = path.replaceAll("^/+", "").split("/");
+        if (path.equals("/") || parts.length == 0) {
             return new RsWithStatus(200);
         }
-        final String repo = path[0];
+        final String repo = parts[0];
+        Logger.debug(this, "Slice repo=%s", repo);
         return new AsyncSlice(
             CompletableFuture.supplyAsync(
                 () -> new Unchecked<>(() -> this.settings.storage()).value()
             )
-            .thenComposeAsync(storage -> storage.value(new Key.From(repo)))
+            .thenComposeAsync(
+                storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
+            )
             .thenApply(content -> new RepoConfig(content))
             .thenCompose(Pie::sliceForConfig)
         ).response(line, headers, body);
@@ -156,7 +164,15 @@ public final class Pie implements Slice {
 
         @Override
         public void send(final Connection con) {
-            this.rsp.thenAccept(target -> target.send(con));
+            this.rsp.exceptionally(
+                err -> {
+                    Logger.error(Pie.class, "Unhandled error: %[exception]s", err);
+                    return new RsWithBody(
+                        new RsWithStatus(500),
+                        err.getMessage(), StandardCharsets.UTF_8
+                    );
+                }
+            ).thenAccept(target -> target.send(con));
         }
     }
 }
