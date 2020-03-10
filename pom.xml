@@ -79,7 +79,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.amihaiemil.web</groupId>
       <artifactId>eo-yaml</artifactId>
-      <version>2.0.1</version>
+      <version>3.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>

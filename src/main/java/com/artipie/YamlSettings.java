@@ -53,61 +53,12 @@ public final class YamlSettings implements Settings {
 
     @Override
     public Storage storage() throws IOException {
-        final YamlMapping yaml = this.storageYaml();
-        final String type = string(yaml, "type");
-        if (type.equals("fs")) {
-            return new FileStorage(Path.of(string(yaml, "path")));
+        final YamlMapping yaml =
+            Yaml.createYamlInput(this.content).readYamlMapping().yamlMapping("meta").yamlMapping("storage");
+        final String type =  yaml.string("type");
+        if ("fs".equals(yaml.string("type"))) {
+            return new FileStorage(Path.of(yaml.string("path")));
         }
         throw new IllegalStateException(String.format("Unsupported storage type: '%s'", type));
-    }
-
-    /**
-     * Read storage section from YAML.
-     *
-     * @return Storage section.
-     * @throws IOException In case of problems with reading YAML from source.
-     */
-    private YamlMapping storageYaml() throws IOException {
-        return mapping(
-            mapping(
-                Yaml.createYamlInput(this.content).readYamlMapping(),
-                "meta"
-            ),
-            "storage"
-        );
-    }
-
-    /**
-     * Gets mapping by key from YAML, fails if no such key exists.
-     *
-     * @param yaml YAML to take the value from.
-     * @param key Key to take value by.
-     * @return Value found by key.
-     */
-    private static YamlMapping mapping(final YamlMapping yaml, final String key) {
-        final YamlMapping mapping = yaml.yamlMapping(key);
-        if (mapping == null) {
-            throw new IllegalArgumentException(
-                String.format("Cannot find '%s' mapping:\n%s", key, yaml)
-            );
-        }
-        return mapping;
-    }
-
-    /**
-     * Gets string by key from YAML, fails if no such key exists.
-     *
-     * @param yaml YAML to take the value from.
-     * @param key Key to take value by.
-     * @return Value found by key.
-     */
-    private static String string(final YamlMapping yaml, final String key) {
-        final String string = yaml.string(key);
-        if (string == null) {
-            throw new IllegalArgumentException(
-                String.format("Cannot find '%s' string:\n%s", key, yaml)
-            );
-        }
-        return string;
     }
 }
