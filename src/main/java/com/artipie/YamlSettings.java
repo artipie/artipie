@@ -23,6 +23,7 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.StrictYamlMapping;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
@@ -54,9 +55,14 @@ public final class YamlSettings implements Settings {
     @Override
     public Storage storage() throws IOException {
         final YamlMapping yaml =
-            Yaml.createYamlInput(this.content).readYamlMapping().yamlMapping("meta").yamlMapping("storage");
+            new StrictYamlMapping(
+                Yaml.createYamlInput(this.content)
+                .readYamlMapping()
+                .yamlMapping("meta")
+                .yamlMapping("storage")
+            );
         final String type =  yaml.string("type");
-        if ("fs".equals(yaml.string("type"))) {
+        if ("fs".equals(type)) {
             return new FileStorage(Path.of(yaml.string("path")));
         }
         throw new IllegalStateException(String.format("Unsupported storage type: '%s'", type));
