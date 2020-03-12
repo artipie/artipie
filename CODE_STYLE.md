@@ -11,3 +11,12 @@ MatcherAssert.assertThat(target, new IsEquals<>(expected));
 // don't use
 MatcherAssert.assertThat(target, Matchers.isEquals(expected));
 ```
+
+2. Avoid adding reason to assertions in unit tests with single assertion:
+```java
+// use
+MatcherAssert.assertThat(target, matcher);
+
+// don't use
+MatcherAssert.assertThat("Some reason", target, matcher);
+```
