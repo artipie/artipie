@@ -8,6 +8,6 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: myDocker/repository
-          username: ${{ secrets.DOCKER_USERNAME }}
+          name: artipie/artipie
+          username: artipie
           password: ${{ secrets.DOCKER_PASSWORD }}
