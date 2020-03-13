@@ -11,3 +11,4 @@ jobs:
           name: artipie/artipie
           username: artipie
           password: ${{ secrets.DOCKER_PASSWORD }}
+          cache: true
