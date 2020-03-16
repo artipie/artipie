@@ -15,7 +15,6 @@ RUN echo -e "meta:\n\
     type: fs\n\
     path: /artipie/repositories\n"\
 >> /artipie/config.yml
-RUN cat  /artipie/config.yml
 EXPOSE 80
 ENTRYPOINT java -Dartipie.storage=/artipie/config.yml \
                 -Dartipie.port=80 \
