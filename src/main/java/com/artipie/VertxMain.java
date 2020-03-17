@@ -31,13 +31,15 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 /**
  * Vertx server entry point.
  * @since 1.0
- * @todo #12:30min Parse command line options instead of system properties.
- *  We need to pass two mandatory options: server port and Artipie configuration
- *  storage URI (to local filesystem or cloud storage).
  */
 public final class VertxMain implements Runnable {
 
@@ -80,15 +82,35 @@ public final class VertxMain implements Runnable {
     /**
      * Entry point.
      * @param args CLI args
-     * @throws IOException On failure
+     * @throws IOException If fails
+     * @throws ParseException If fails
      */
-    public static void main(final String... args) throws IOException {
-        final String storage = System.getProperty("artipie.storage");
-        final int port = Integer.getInteger("artipie.port");
+    public static void main(final String... args) throws IOException, ParseException {
+        final String storage;
+        final int port;
+        final int defp = 80;
+        final Options options = new Options();
+        final String popt = "p";
+        final String fopt = "f";
+        options.addOption(popt, "port", true, "The port to start artipie on");
+        options.addOption(fopt, "config-file", true, "The path to artipie configuration file");
+        final CommandLineParser parser = new DefaultParser();
+        final CommandLine cmd = parser.parse(options, args);
+        if (cmd.hasOption(popt)) {
+            port = Integer.parseInt(cmd.getOptionValue(popt));
+        } else {
+            Logger.info(VertxMain.class, "Using default port: %d", defp);
+            port = defp;
+        }
+        if (cmd.hasOption(fopt)) {
+            storage = cmd.getOptionValue(fopt);
+        } else {
+            throw new IllegalStateException("Storage is not configured");
+        }
         new VertxMain(
             new Pie(
                 new YamlSettings(
-                    new String(Files.readAllBytes(Path.of(storage)), Charset.defaultCharset())
+                    Files.readString(Path.of(storage), Charset.defaultCharset())
                 )
             ),
             port
