@@ -4,7 +4,7 @@ WORKDIR /jar
 COPY pom.xml .
 RUN mvn dependency:go-offline
 COPY src/ /jar/src/
-RUN mvn package
+RUN mvn package -B --quiet
 
 FROM adoptopenjdk/openjdk13:alpine-jre
 WORKDIR /artipie
