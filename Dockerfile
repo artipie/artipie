@@ -3,7 +3,7 @@ RUN yum install git -y
 WORKDIR /jar
 COPY pom.xml .
 RUN mvn dependency:go-offline
-COPY src/ /jar/src/
+COPY src/ .
 # @todo #40 Propagate git tag
 #  I.e. if docker image is based on version 1.5.0, the version should be propagated to the app jar
 #  file.
