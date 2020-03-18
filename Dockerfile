@@ -10,6 +10,8 @@ COPY src/ .
 RUN mvn package -B --quiet
 
 FROM adoptopenjdk/openjdk13:alpine-jre
+LABEL description="Artipie is a binary repository managment tool."
+LABEL maintainer="titantins@gmail.com"
 WORKDIR /artipie
 COPY --from=build_jar /jar/target/artipie-jar-with-dependencies.jar /artipie/artipie.jar
 VOLUME /artipie/repositories
@@ -19,6 +21,5 @@ RUN echo -e "meta:\n\
     path: /artipie/repositories\n"\
 >> /artipie/config.yml
 EXPOSE 80
-ENTRYPOINT java -Dartipie.storage=/artipie/config.yml \
-                -Dartipie.port=80 \
-                -jar /artipie/artipie.jar
+ENTRYPOINT java -jar /artipie/artipie.jar
+CMD --config-file=/artipie/config.yml --port=80
