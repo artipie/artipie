@@ -3,6 +3,9 @@ on:
   create:
     tags:
       - .*
+  push:
+    branches:
+      - .*
 jobs:
   build:
     runs-on: ubuntu-latest
