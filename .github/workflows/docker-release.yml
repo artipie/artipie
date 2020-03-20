@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Publish to Registry
+      - name: Publish Image to Docker Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
           name: artipie/artipie
