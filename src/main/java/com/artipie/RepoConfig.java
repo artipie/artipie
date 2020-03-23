@@ -32,14 +32,14 @@ import com.artipie.asto.fs.FileStorage;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
+import io.vertx.reactivex.core.Vertx;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Flow;
-import org.reactivestreams.FlowAdapters;
+import org.reactivestreams.Publisher;
 
 /**
  * Repository config.
@@ -57,7 +57,7 @@ public final class RepoConfig {
      * Ctor.
      * @param content Flow content
      */
-    public RepoConfig(final Flow.Publisher<ByteBuffer> content) {
+    public RepoConfig(final Publisher<ByteBuffer> content) {
         this.yaml = RepoConfig.yamlFromPublisher(content);
     }
 
@@ -95,7 +95,7 @@ public final class RepoConfig {
         }
         final Path root = Paths.get(cfg.string("path"));
         Logger.info(RepoConfig.class, "using file storage at %s", root);
-        return new FileStorage(root);
+        return new FileStorage(root, Vertx.vertx().fileSystem());
     }
 
     /**
@@ -104,9 +104,9 @@ public final class RepoConfig {
      * @return Completion stage of yaml
      */
     private static CompletionStage<YamlMapping> yamlFromPublisher(
-        final Flow.Publisher<ByteBuffer> pub
+        final Publisher<ByteBuffer> pub
     ) {
-        return Flowable.<ByteBuffer>fromPublisher(FlowAdapters.toPublisher(pub))
+        return Flowable.fromPublisher(pub)
             .reduce(
                 new StringBuilder(),
                 (acc, buf) -> acc.append(
