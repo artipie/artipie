@@ -99,7 +99,7 @@ public final class Pie implements Slice {
                 .thenComposeAsync(
                     storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
                 )
-                .thenApply(RepoConfig::new)
+                .thenApply(content -> new RepoConfig(content))
                 .thenCompose(Pie::sliceForConfig)
         ).response(line, headers, body);
     }
