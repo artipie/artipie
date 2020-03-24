@@ -1,6 +1,6 @@
 FROM maven:3.6.3-jdk-13 as build_jar
 RUN yum install git -y
-RUN mkdir /jar
+RUN mkdir /jar && cd /jar
 COPY pom.xml /jar/pom.xml
 RUN cd /jar && mvn dependency:go-offline
 COPY src/ /jar/src/
@@ -22,4 +22,4 @@ RUN echo -e "meta:\n\
 >> /artipie/config.yml
 EXPOSE 80
 ENTRYPOINT java -jar /artipie/artipie.jar
-CMD --config-file=/artipie/config.yml --port=80
+CMD "--config-file=/artipie/config.yml" "--port=80"

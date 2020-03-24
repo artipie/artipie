@@ -27,31 +27,41 @@ package com.artipie;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.files.FilesSlice;
-import com.artipie.http.Connection;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rq.RequestLineFrom;
-import com.artipie.http.rs.RsWithBody;
+import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.npm.Npm;
+import com.artipie.npm.http.NpmSlice;
 import com.jcabi.log.Logger;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Flow.Publisher;
 import java.util.function.Function;
+import org.cactoos.map.MapEntry;
+import org.cactoos.map.MapOf;
 import org.cactoos.scalar.Unchecked;
+import org.reactivestreams.Publisher;
 
 /**
  * Pie of slices.
  * @since 1.0
- * @checkstyle MagicNumberCheck (500 lines)
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class Pie implements Slice {
+
+    /**
+     * Adapters slice factories.
+     */
+    private static final Map<String, Function<Storage, Slice>> ADAPTERS = new MapOf<>(
+        new MapEntry<>("file", FilesSlice::new),
+        new MapEntry<>("npm", sto -> new NpmSlice(new Npm(sto), sto))
+    );
 
     /**
      * Artipie server settings.
@@ -74,23 +84,23 @@ public final class Pie implements Slice {
         final URI uri = new RequestLineFrom(line).uri();
         final String path = uri.getPath();
         if (path.equals("*")) {
-            return new RsWithStatus(200);
+            return new RsWithStatus(RsStatus.OK);
         }
         final String[] parts = path.replaceAll("^/+", "").split("/");
         if (path.equals("/") || parts.length == 0) {
-            return new RsWithStatus(200);
+            return new RsWithStatus(RsStatus.OK);
         }
         final String repo = parts[0];
         Logger.debug(this, "Slice repo=%s", repo);
         return new AsyncSlice(
             CompletableFuture.supplyAsync(
-                () -> new Unchecked<>(() -> this.settings.storage()).value()
+                () -> new Unchecked<>(this.settings::storage).value()
             )
-            .thenComposeAsync(
-                storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
-            )
-            .thenApply(content -> new RepoConfig(content))
-            .thenCompose(Pie::sliceForConfig)
+                .thenComposeAsync(
+                    storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
+                )
+                .thenApply(content -> new RepoConfig(content))
+                .thenCompose(Pie::sliceForConfig)
         ).response(line, headers, body);
     }
 
@@ -102,78 +112,17 @@ public final class Pie implements Slice {
     private static CompletionStage<Slice> sliceForConfig(final RepoConfig cfg) {
         return cfg.type().thenApply(
             type -> {
-                if (!"file".equals(type)) {
-                    throw new IllegalStateException("We suport only `file` repo type");
-                }
-                final Function<Storage, Slice> func = sto -> new FilesSlice(sto);
-                return func;
-            }
-        ).thenCombine(cfg.storage(), (factory, storage) -> factory.apply(storage));
-    }
-
-    /**
-     * Async slice.
-     * @since 1.0
-     * @todo #12:30min Move all Async* implementation to artipie/http module.
-     *  We need to wrap asynchronous slices and responses with Slice and
-     *  Response interfaces.
-     */
-    private static final class AsyncSlice implements Slice {
-
-        /**
-         * Async slice.
-         */
-        private final CompletionStage<Slice> slice;
-
-        /**
-         * Ctor.
-         * @param slice Async slice.
-         */
-        AsyncSlice(final CompletionStage<Slice> slice) {
-            this.slice = slice;
-        }
-
-        @Override
-        public Response response(final String line,
-            final Iterable<Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body) {
-            return new RsAsync(
-                this.slice.thenApply(target -> target.response(line, headers, body))
-            );
-        }
-    }
-
-    /**
-     * Async response.
-     * @since 1.0
-     */
-    private static final class RsAsync implements Response {
-
-        /**
-         * Async response.
-         */
-        private final CompletionStage<Response> rsp;
-
-        /**
-         * Ctor.
-         * @param rsp Response
-         */
-        RsAsync(final CompletionStage<Response> rsp) {
-            this.rsp = rsp;
-        }
-
-        @Override
-        public void send(final Connection con) {
-            this.rsp.exceptionally(
-                err -> {
-                    Logger.error(Pie.class, "Unhandled error: %[exception]s", err);
-                    return new RsWithBody(
-                        new RsWithStatus(500),
-                        err.getMessage(), StandardCharsets.UTF_8
+                if (!Pie.ADAPTERS.containsKey(type)) {
+                    throw new IllegalStateException(
+                        String.format(
+                            "Unsupported repository type '%s', use one of '%s'",
+                            type, String.join(",", Pie.ADAPTERS.keySet())
+                        )
                     );
                 }
-            ).thenAccept(target -> target.send(con));
-        }
+                return Pie.ADAPTERS.get(type);
+            }
+        ).thenCombine(cfg.storage(), Function::apply);
     }
 }
 
