@@ -73,7 +73,7 @@ public final class YamlSettings implements Settings {
         final Storage storage;
         if ("fs".equals(type)) {
             storage = new FileStorage(Path.of(yaml.string("path")), Vertx.vertx().fileSystem());
-        } else if (type.equals("s3")) {
+        } else if ("s3".equals(type)) {
             storage = new S3Storage(s3Client(yaml), yaml.string("bucket"));
         } else {
             throw new IllegalStateException(String.format("Unsupported storage type: '%s'", type));
