@@ -109,7 +109,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.13.0</version>
+      <version>0.16</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -125,6 +125,11 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>npm-adapter</artifactId>
       <version>0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>gem-adapter</artifactId>
+      <version>0.1</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>

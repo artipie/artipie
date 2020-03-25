@@ -27,6 +27,7 @@ package com.artipie;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.files.FilesSlice;
+import com.artipie.gem.GemSlice;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
@@ -60,7 +61,8 @@ public final class Pie implements Slice {
      */
     private static final Map<String, Function<Storage, Slice>> ADAPTERS = new MapOf<>(
         new MapEntry<>("file", FilesSlice::new),
-        new MapEntry<>("npm", sto -> new NpmSlice(new Npm(sto), sto))
+        new MapEntry<>("npm", sto -> new NpmSlice(new Npm(sto), sto)),
+        new MapEntry<>("gem", GemSlice::new)
     );
 
     /**
@@ -99,7 +101,7 @@ public final class Pie implements Slice {
                 .thenComposeAsync(
                     storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
                 )
-                .thenApply(RepoConfig::new)
+                .thenApply(content -> new RepoConfig(content))
                 .thenCompose(Pie::sliceForConfig)
         ).response(line, headers, body);
     }

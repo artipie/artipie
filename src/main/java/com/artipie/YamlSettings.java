@@ -28,6 +28,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
+import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -63,7 +64,7 @@ public final class YamlSettings implements Settings {
             );
         final String type =  yaml.string("type");
         if ("fs".equals(type)) {
-            return new FileStorage(Path.of(yaml.string("path")));
+            return new FileStorage(Path.of(yaml.string("path")), Vertx.vertx().fileSystem());
         }
         throw new IllegalStateException(String.format("Unsupported storage type: '%s'", type));
     }
