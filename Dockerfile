@@ -1,6 +1,6 @@
 FROM maven:3.6.3-jdk-13 as build_jar
+WORKDIR /jar
 RUN yum install git -y
-RUN mkdir /jar && cd /jar
 COPY pom.xml /jar/pom.xml
 RUN cd /jar && mvn dependency:go-offline
 COPY src/ /jar/src/
