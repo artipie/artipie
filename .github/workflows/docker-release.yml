@@ -1,0 +1,21 @@
+name: Docker Release
+on:
+  create:
+    tags:
+      - .*
+  push:
+    branches:
+      - .*
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Publish Image to Docker Registry
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: artipie/artipie
+          username: artipie
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          cache: true
+          tag_names: true
