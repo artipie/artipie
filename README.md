@@ -32,6 +32,60 @@ knows repo type (e.g. `maven` or `docker`) and storage settings for repo
 After reading repo config it constructs new `Slice` for config
 and proxies current request to this slice.
 
+### Setup the server
+
+Create primary server configuration file with location to repositories config directory:
+```yaml
+meta:
+  storage:
+    type: fs
+    path: /var/artipie/repositories
+```
+
+Repositories config contains configuration files for each repository, the name of the file is the name of repository:
+```yaml
+repo:
+  type:
+    maven
+  storage:
+    type: fs
+    path: /var/artipie/maven
+```
+
+### Examples
+
+NPM-js registry. First create the directory for repository configs `mkdir /tmp/artipie`,
+actual repository configurations: `mkdir /tmp/artipie/repos` and repository data:
+`mkdir /tmp/artipie/data`.
+Put yaml config for Artipie server into `/tmp/artipie/config.yaml`:
+```yaml
+meta:
+  storage:
+    type: fs
+    path: /tmp/artipie/repos
+```
+Create NPM repository configuration file in `/tmp/artipie/repos/npm.yaml`:
+```yaml
+repo:
+  type: file
+  storage:
+    type: fs
+    path: /tmp/artipie/data
+```
+
+Before running the server make sure your java version is >= 11 version: `java -version`.
+
+Build Artipie server if needed: `mvn clean package` and run it with command:
+```bash
+java -jar ./target/artipie-jar-with-dependencies.jar --config-file=/tmp/artipie/config.yaml --port=8080
+```
+
+Then go into your npm project and publish it to local registry using command:
+```bash
+npm publish --registry=http://localhost:8080/npm
+```
+
+
 ### Artipie architecture
 
 Main components of Artipie software are:
