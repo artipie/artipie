@@ -20,15 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ---
-name: GitHub validator
+name: Git linter
 "on": [push, pull_request]
 jobs:
-  check:
+  gitlint:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
       - name: Lint
-        run: |
-          curl https://raw.githubusercontent.com/llorllale/go-gitlint/master/download-gitlint.sh | sh
-          ./bin/gitlint
+        uses: g4s8/gitlint-action@0.2
+        with:
+          since: "2020-03-30"
