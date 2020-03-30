@@ -26,6 +26,7 @@ package com.artipie;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
 import com.artipie.http.Response;
@@ -62,7 +63,8 @@ public final class Pie implements Slice {
     private static final Map<String, Function<Storage, Slice>> ADAPTERS = new MapOf<>(
         new MapEntry<>("file", FilesSlice::new),
         new MapEntry<>("npm", sto -> new NpmSlice(new Npm(sto), sto)),
-        new MapEntry<>("gem", GemSlice::new)
+        new MapEntry<>("gem", GemSlice::new),
+        new MapEntry<>("php", storage -> new PhpComposer("", storage))
     );
 
     /**
