@@ -158,13 +158,16 @@ repo:
 
 ### Deployment
 
+To build Artipie application you need to have JDK 11 version or higher,
+Maven 3.2+. Optionally you may need Docker installed to build container image.
+
+### How to start
+
 Artipie web server can be started as standalone Java application, or
 started in a cluster with multiple instance behind load balancer.
 If Artipie was started in a cluster, all instances should receive
 single meta configuration for Artipie module. It's recommended
 that S3 storage be used for multi-instance deployment.
-
-### How to start
 
 To start Vertx server with Artipie service, you need to build package first:
 `mvn clean package`; And start it with Java command then:
