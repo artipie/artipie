@@ -25,7 +25,6 @@
 package com.artipie;
 
 import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
@@ -44,8 +43,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 import org.cactoos.scalar.Unchecked;
 import org.reactivestreams.Publisher;
 
@@ -56,16 +53,6 @@ import org.reactivestreams.Publisher;
  * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class Pie implements Slice {
-
-    /**
-     * Adapters slice factories.
-     */
-    private static final Map<String, Function<Storage, Slice>> ADAPTERS = new MapOf<>(
-        new MapEntry<>("file", FilesSlice::new),
-        new MapEntry<>("npm", sto -> new NpmSlice(new Npm(sto), sto)),
-        new MapEntry<>("gem", GemSlice::new),
-        new MapEntry<>("php", storage -> new PhpComposer("", storage))
-    );
 
     /**
      * Artipie server settings.
@@ -114,19 +101,35 @@ public final class Pie implements Slice {
      * @return Async slice
      */
     private static CompletionStage<Slice> sliceForConfig(final RepoConfig cfg) {
-        return cfg.type().thenApply(
-            type -> {
-                if (!Pie.ADAPTERS.containsKey(type)) {
-                    throw new IllegalStateException(
-                        String.format(
-                            "Unsupported repository type '%s', use one of '%s'",
-                            type, String.join(",", Pie.ADAPTERS.keySet())
-                        )
-                    );
+        return cfg.type().thenCombine(
+            cfg.storage(),
+            (type, storage) -> {
+                final CompletionStage<Slice> slice;
+                switch (type) {
+                    case "file":
+                        slice = CompletableFuture.completedStage(new FilesSlice(storage));
+                        break;
+                    case "npm":
+                        slice = CompletableFuture.completedStage(
+                            new NpmSlice(new Npm(storage), storage)
+                        );
+                        break;
+                    case "gem":
+                        slice = CompletableFuture.completedStage(new GemSlice(storage));
+                        break;
+                    case "php":
+                        slice = cfg.path().thenApply(
+                            path -> new PhpComposer(path, storage)
+                        );
+                        break;
+                    default:
+                        throw new IllegalStateException(
+                            String.format("Unsupported repository type '%s'", type)
+                        );
                 }
-                return Pie.ADAPTERS.get(type);
+                return slice;
             }
-        ).thenCombine(cfg.storage(), Function::apply);
+        ).thenCompose(Function.identity());
     }
 }
 
