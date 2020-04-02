@@ -11,14 +11,9 @@ RUN cd /jar && mvn versions:set -DnewVersion=${version} && mvn package -B --quie
 FROM adoptopenjdk/openjdk13:alpine-jre
 LABEL description="Artipie is a binary repository managment tool."
 LABEL maintainer="titantins@gmail.com"
-RUN mkdir /artipie
-COPY --from=build_jar /jar/target/artipie-jar-with-dependencies.jar /artipie/artipie.jar
-VOLUME /artipie/repositories
-RUN echo -e "meta:\n\
-  storage:\n\
-    type: fs\n\
-    path: /artipie/repositories\n"\
->> /artipie/config.yml
+COPY --from=build_jar /jar/target/artipie-jar-with-dependencies.jar /usr/lib/artipie.jar
+COPY _config.yml /etc/artipie.yml
+VOLUME /var/artipie
 EXPOSE 80
-ENTRYPOINT java -jar /artipie/artipie.jar
-CMD "--config-file=/artipie/config.yml" "--port=80"
+ENTRYPOINT ["java", "-jar", "/usr/lib/artipie.jar"]
+CMD ["--config-file=/etc/artipie.yml", "--port=80"]

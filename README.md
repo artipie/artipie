@@ -32,6 +32,14 @@ knows repo type (e.g. `maven` or `docker`) and storage settings for repo
 After reading repo config it constructs new `Slice` for config
 and proxies current request to this slice.
 
+### Run as a Docker image
+
+Configure your repositories as yaml somewhere in a file system (e.g. `/tmp/artipie`),
+then start docker image using:
+```bash
+docker run -v /tmp/artipie:/var/artipie -p 80:80 artipie/artipie:latest
+```
+
 ### Setup the server
 
 Create primary server configuration file with location to repositories config directory:

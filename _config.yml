@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Default config for Artipie docker image
+meta:
+  storage:
+    type: fs
+    path: /var/artipie/repo
