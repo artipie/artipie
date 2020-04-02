@@ -66,12 +66,18 @@ public final class RepoConfig {
      * @return Async string of type
      */
     public CompletionStage<String> type() {
-        return this.yaml.thenApply(
-            map -> Objects.requireNonNull(
-                Objects.requireNonNull(map.yamlMapping("repo"), "yaml repo is null")
-                    .string("type"),
-                "yaml repo.type is null"
-            )
+        return this.repo().thenApply(
+            map -> Objects.requireNonNull(map.string("type"), "yaml repo.type is null")
+        );
+    }
+
+    /**
+     * Repository path.
+     * @return Async string of path
+     */
+    public CompletionStage<String> path() {
+        return this.repo().thenApply(
+            map -> Objects.requireNonNull(map.string("path"), "yaml repo.path is null")
         );
     }
 
@@ -80,8 +86,20 @@ public final class RepoConfig {
      * @return Async storage for repo
      */
     public CompletionStage<Storage> storage() {
-        return this.yaml.thenApply(map -> map.yamlMapping("repo").yamlMapping("storage"))
+        return this.repo()
+            .thenApply(map -> map.yamlMapping("storage"))
             .thenApply(RepoConfig::storageFromConfig);
+    }
+
+    /**
+     * Repo part of YAML.
+     *
+     * @return Async YAML mapping
+     */
+    private CompletionStage<YamlMapping> repo() {
+        return this.yaml.thenApply(
+            map -> Objects.requireNonNull(map.yamlMapping("repo"), "yaml repo is null")
+        );
     }
 
     /**
