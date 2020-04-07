@@ -27,7 +27,7 @@ SOFTWARE.
   <parent>
     <groupId>com.artipie</groupId>
     <artifactId>ppom</artifactId>
-    <version>0.2.1</version>
+    <version>0.3</version>
   </parent>
   <artifactId>artipie</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -75,6 +75,10 @@ SOFTWARE.
       <url>https://github.com/artipie/artipie</url>
     </site>
   </distributionManagement>
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.amihaiemil.web</groupId>
@@ -129,6 +133,11 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>gem-adapter</artifactId>
+      <version>0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>composer-adapter</artifactId>
       <version>0.1</version>
     </dependency>
     <dependency>

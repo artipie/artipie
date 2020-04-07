@@ -3,9 +3,10 @@ ARG version="1.0-SNAPSHOT"
 WORKDIR /jar
 RUN yum install git -y
 COPY pom.xml /jar/pom.xml
-RUN mvn dependency:go-offline
+RUN cd /jar && mvn dependency:go-offline
 COPY src/ /jar/src/
-RUN mvn versions:set -DnewVersion=${version} && mvn package -B --quiet
+
+RUN cd /jar && mvn versions:set -DnewVersion=${version} && mvn package -B --quiet
 
 FROM adoptopenjdk/openjdk13:alpine-jre
 LABEL description="Artipie is a binary repository managment tool."
