@@ -19,14 +19,14 @@ Artipie uses external server implementation to start itself,
 one of possible servers is https://github.com/artipie/vertx-server/
 
 Server accepts `Slice` interface and serves all requests to encapsulated `Slice`.
-Server can be started with a single adapter module (since all adapters implements `Slice` interface)
+Server can be started with a single adapter module (since all adapters implement `Slice` interface)
 or with Artipie assembly.
 
-Artipie reads server settings from yaml file and contructs
+Artipie reads server settings from yaml file and constructs
 `Storage` to read repositories configurations.
 
 On each request it reads repository name from request URI path
-and find related repo configuration in `Storage`. Repo configuration
+and finds related repo configuration in `Storage`. Repo configuration
 knows repo type (e.g. `maven` or `docker`) and storage settings for repo
 (different repos may have different storage back ends).
 After reading repo config it constructs new `Slice` for config
@@ -102,7 +102,7 @@ Main components of Artipie software are:
  Artipie has multiple storage implementations: in-memory storage,
  file-system storage, AWS S3 storage. Storage can be used to store binary artifacts
  or for configuration files.
- - Artipie: configured assebmly of adapters. Artipie can be configured to read
+ - Artipie: configured assembly of adapters. Artipie can be configured to read
  repository configuration files from the storage. Artipie can find configuration
  file by repository as a key name. Artipie implements `Slice` interface and can
  handle HTTP requests. It reads repository name from request URI path,
@@ -120,7 +120,7 @@ Here is cross-module dependency diagram:
 ### Configuration
 
 Artipie should be configured before startup.
-Main meta configuration `yaml` file should contains storage config,
+Main meta configuration `yaml` file should contain storage config,
 where adapter configuration files are located. Storage back-end
 can be either `fs` or `s3`. File-system `fs` storage uses local
 file system to store key-value data. AWS `s3` storage uses S3 cloud
@@ -143,7 +143,7 @@ config storage
 ├── hello-npm
 └── rpm
 ```
-Each configuration file should specify what is the type of repository should be used
+Each configuration file should specify what type of repository should be used
 (adapter), and storage configuration (each repository may reference to different storage).
 ```yaml
 repo:
@@ -163,11 +163,11 @@ Maven 3.2+. Optionally you may need Docker installed to build container image.
 
 ### How to start
 
-Artipie web server can be started as standalone Java application, or
-started in a cluster with multiple instance behind load balancer.
+Artipie web server can be started as standalone Java application, or 
+in a cluster with multiple instances behind load balancer.
 If Artipie was started in a cluster, all instances should receive
 single meta configuration for Artipie module. It's recommended
-that S3 storage be used for multi-instance deployment.
+to use S3 storage for multi-instance deployment.
 
 To start Vertx server with Artipie service, you need to build package first:
 `mvn clean package`; And start it with Java command then:
