@@ -28,15 +28,11 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
-import com.artipie.asto.fs.FileStorage;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
-import io.vertx.reactivex.core.Vertx;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import org.reactivestreams.Publisher;
@@ -88,7 +84,8 @@ public final class RepoConfig {
     public CompletionStage<Storage> storage() {
         return this.repo()
             .thenApply(map -> map.yamlMapping("storage"))
-            .thenApply(RepoConfig::storageFromConfig);
+            .thenApply(YamlStorageSettings::new)
+            .thenApply(YamlStorageSettings::storage);
     }
 
     /**
@@ -100,20 +97,6 @@ public final class RepoConfig {
         return this.yaml.thenApply(
             map -> Objects.requireNonNull(map.yamlMapping("repo"), "yaml repo is null")
         );
-    }
-
-    /**
-     * Create ASTO storage from yaml config.
-     * @param cfg Storage config mapping
-     * @return Storage instance
-     */
-    private static Storage storageFromConfig(final YamlMapping cfg) {
-        if (!"fs".equals(cfg.string("type"))) {
-            throw new IllegalStateException("We support only `fs` storage type for now");
-        }
-        final Path root = Paths.get(cfg.string("path"));
-        Logger.info(RepoConfig.class, "using file storage at %s", root);
-        return new FileStorage(root, Vertx.vertx().fileSystem());
     }
 
     /**
