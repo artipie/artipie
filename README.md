@@ -19,20 +19,30 @@ Artipie uses external server implementation to start itself,
 one of possible servers is https://github.com/artipie/vertx-server/
 
 Server accepts `Slice` interface and serves all requests to encapsulated `Slice`.
-Server can be started with a single adapter module (since all adapters implements `Slice` interface)
+Server can be started with a single adapter module (since all adapters implement `Slice` interface)
 or with Artipie assembly.
 
-Artipie reads server settings from yaml file and contructs
+Artipie reads server settings from yaml file and constructs
 `Storage` to read repositories configurations.
 
 On each request it reads repository name from request URI path
-and find related repo configuration in `Storage`. Repo configuration
+and finds related repo configuration in `Storage`. Repo configuration
 knows repo type (e.g. `maven` or `docker`) and storage settings for repo
 (different repos may have different storage back ends).
 After reading repo config it constructs new `Slice` for config
 and proxies current request to this slice.
 
-### Setup the server
+### Run Artipie as a Docker image
+
+Create new directory for Artipie storage, `cd` into this directory.
+Create subdirectory with `repo` name. Put all repository configuration files to
+`repo` directory, the name of config file is the name of repository.
+Start Docker container with mounting current directory to `/var/artipie`:
+```bash
+docker run -v $PWD:/var/artipie -p 80:80 artipie/artipie:0.1.2
+```
+
+### Setup the server manually
 
 Create primary server configuration file with location to repositories config directory:
 ```yaml
@@ -67,7 +77,7 @@ meta:
 Create NPM repository configuration file in `/tmp/artipie/repos/npm.yaml`:
 ```yaml
 repo:
-  type: file
+  type: npm
   storage:
     type: fs
     path: /tmp/artipie/data
@@ -88,6 +98,9 @@ npm publish --registry=http://localhost:8080/npm
 
 ### Artipie architecture
 
+See the [white-paper](https://github.com/artipie/white-paper) "architecture" section
+for platform design.
+
 Main components of Artipie software are:
  - Adapter: this component works with single binary artifact format, e.g.
  Maven-adapter or Docker-adapter. Adapter usually consist of two logical parts:
@@ -102,7 +115,7 @@ Main components of Artipie software are:
  Artipie has multiple storage implementations: in-memory storage,
  file-system storage, AWS S3 storage. Storage can be used to store binary artifacts
  or for configuration files.
- - Artipie: configured assebmly of adapters. Artipie can be configured to read
+ - Artipie: configured assembly of adapters. Artipie can be configured to read
  repository configuration files from the storage. Artipie can find configuration
  file by repository as a key name. Artipie implements `Slice` interface and can
  handle HTTP requests. It reads repository name from request URI path,
@@ -113,14 +126,10 @@ Main components of Artipie software are:
  non-blocking network IO operations. One of possible implementations is
  [vertx-server](https://github.com/artipie/vertx-server/).
 
-Here is cross-module dependency diagram:
-
-![diagram](/_docs/artipie-classes.png)
-
 ### Configuration
 
 Artipie should be configured before startup.
-Main meta configuration `yaml` file should contains storage config,
+Main meta configuration `yaml` file should contain storage config,
 where adapter configuration files are located. Storage back-end
 can be either `fs` or `s3`. File-system `fs` storage uses local
 file system to store key-value data. AWS `s3` storage uses S3 cloud
@@ -143,7 +152,7 @@ config storage
 ├── hello-npm
 └── rpm
 ```
-Each configuration file should specify what is the type of repository should be used
+Each configuration file should specify what type of repository should be used
 (adapter), and storage configuration (each repository may reference to different storage).
 ```yaml
 repo:
@@ -160,23 +169,6 @@ repo:
 
 To build Artipie application you need to have JDK 11 version or higher,
 Maven 3.2+. Optionally you may need Docker installed to build container image.
-
-### How to start
-
-Artipie web server can be started as standalone Java application, or
-started in a cluster with multiple instance behind load balancer.
-If Artipie was started in a cluster, all instances should receive
-single meta configuration for Artipie module. It's recommended
-that S3 storage be used for multi-instance deployment.
-
-To start Vertx server with Artipie service, you need to build package first:
-`mvn clean package`; And start it with Java command then:
-```bash
-java -Dartipie.storage=/tmp/artipie -Dartipie.port=8080 \
-  -jar ./target/artipie-jar-with-dependencies.jar
-```
-where `artipie.storage` system property is a location of root of configuration file-system storage,
-`artipie.port` is a property for server HTTP port.
 
 ## How to contribute
 
