@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Yegor Bugayenko
+ * Copyright (c) 2020 artipie.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,47 +23,38 @@
  */
 package com.artipie;
 
-import com.jcabi.log.Logger;
+import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.asto.Storage;
+import java.io.IOException;
 
 /**
- * The main entrance.
+ * Settings built from YAML.
  *
  * @since 0.1
  */
-public final class Main {
+public final class YamlSettings implements Settings {
 
     /**
-     * The args.
+     * YAML file content.
      */
-    private final String[] args;
+    private final String content;
 
     /**
-     * The ctor.
-     * @param cmd Command line arguments
-     */
-    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
-    private Main(final String... cmd) {
-        this.args = cmd;
-    }
-
-    /**
-     * The main entry point.
+     * Ctor.
      *
-     * @param cmd Command line arguments
-     * @throws Exception If fails
+     * @param content YAML file content.
      */
-    public static void main(final String... cmd) throws Exception {
-        new Main(cmd).exec();
+    public YamlSettings(final String content) {
+        this.content = content;
     }
 
-    /**
-     * Run it.
-     *
-     * @throws Exception If fails
-     */
-    public void exec() throws Exception {
-        assert this.args != null;
-        Logger.info(this, "Works just fine!");
+    @Override
+    public Storage storage() throws IOException {
+        return new YamlStorageSettings(
+            Yaml.createYamlInput(this.content)
+                .readYamlMapping()
+                .yamlMapping("meta")
+                .yamlMapping("storage")
+        ).storage();
     }
-
 }

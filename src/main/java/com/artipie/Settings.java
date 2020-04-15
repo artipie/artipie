@@ -21,11 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package com.artipie;
+
+import com.artipie.asto.Storage;
+import java.io.IOException;
 
 /**
- * Artipie files, tests.
+ * Application settings.
  *
  * @since 0.1
  */
-package com.artipie;
-
+public interface Settings {
+    /**
+     * Provides a storage.
+     *
+     * @return Storage instance.
+     * @throws IOException In case of problems with reading settings.
+     */
+    Storage storage() throws IOException;
+}

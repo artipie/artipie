@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Yegor Bugayenko
+ * Copyright (c) 2020 artipie.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,38 @@
  */
 package com.artipie;
 
-import org.junit.Test;
+import com.artipie.http.auth.Permissions;
+import java.io.File;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
- * Test case for {@link Main}.
- *
- * @since 0.1
+ * Repository permissions: this implementation is based on
+ * on repository yaml configuration file.
+ * @since 0.2
+ * @todo #69:30min Implement this interface to read and process permissions from
+ *  repository yaml configuration file. Test is already implemented, see {@link RpPermissionsTest},
+ *  don't forget to enable is when this class is ready. Remove also PMD suppressions please.
+ *  For more details check issue #69.
  */
-public final class MainTest {
+@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
+public final class RpPermissions implements Permissions {
 
     /**
-     * Runs the app.
-     * @throws Exception If some problem inside
+     * Repository yaml configuration file.
      */
-    @Test
-    public void runsTheApp() throws Exception {
-        Main.main("hello", "world");
+    private final File conf;
+
+    /**
+     * Ctor.
+     * @param conf Conf file
+     */
+    public RpPermissions(final File conf) {
+        this.conf = conf;
     }
+
+    @Override
+    public boolean allowed(final String name, final String action) {
+        throw new NotImplementedException("this method is not yet implemented");
+    }
+
 }
