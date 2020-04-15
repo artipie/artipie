@@ -78,7 +78,7 @@ public final class RpPermissions implements Permissions {
     }
 
     /**
-     * Checks if permissions sequence has given action.
+     * Checks if permissions sequence has a given action.
      * @param seq Permissions
      * @param action Action
      * @return True if action is allowed
