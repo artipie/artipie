@@ -23,38 +23,70 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.http.auth.Permissions;
 import java.io.File;
-import org.apache.commons.lang3.NotImplementedException;
+import java.io.IOException;
 
 /**
  * Repository permissions: this implementation is based on
  * on repository yaml configuration file.
  * @since 0.2
- * @todo #69:30min Implement this interface to read and process permissions from
- *  repository yaml configuration file. Test is already implemented, see {@link RpPermissionsTest},
- *  don't forget to enable is when this class is ready. Remove also PMD suppressions please.
- *  For more details check issue #69.
  */
-@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 public final class RpPermissions implements Permissions {
 
     /**
-     * Repository yaml configuration file.
+     * YAML storage settings.
      */
-    private final File conf;
+    private final YamlMapping yaml;
 
     /**
      * Ctor.
-     * @param conf Conf file
+     * @param conf Config file
      */
     public RpPermissions(final File conf) {
-        this.conf = conf;
+        this(readYaml(conf));
+    }
+
+    /**
+     * Ctor.
+     * @param yaml Configuration yaml
+     */
+    public RpPermissions(final YamlMapping yaml) {
+        this.yaml = yaml;
     }
 
     @Override
     public boolean allowed(final String name, final String action) {
-        throw new NotImplementedException("this method is not yet implemented");
+        final YamlMapping all = this.yaml.yamlMapping("permissions");
+        return check(all.yamlSequence(name), action) || check(all.yamlSequence("*"), action);
+    }
+
+    /**
+     * Read provided file into Yaml object.
+     * @param conf File
+     * @return Yaml mapping
+     */
+    private static YamlMapping readYaml(final File conf) {
+        try {
+            return Yaml.createYamlInput(conf).readYamlMapping().yamlMapping("repo");
+        } catch (final IOException ex) {
+            throw new IllegalArgumentException("Invalid configuration file", ex);
+        }
+    }
+
+    /**
+     * Checks if permissions sequence has given action.
+     * @param seq Permissions
+     * @param action Action
+     * @return True if action is allowed
+     */
+    private static boolean check(final YamlSequence seq, final String action) {
+        return seq != null
+            && seq.values().stream().map(Object::toString)
+                .anyMatch(item -> item.equals(action) || item.equals("*"));
     }
 
 }
