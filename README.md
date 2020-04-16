@@ -60,8 +60,15 @@ repo:
   storage:
     type: fs
     path: /var/artipie/maven
+  permissions:
+    user_name:
+      - download
+      - deploy  
 ```
-
+Permissions section maps users and list of permissions for each user. Wildcard asterisk (`*`) is supported 
+for both users and permissions. Asterisk for user means that any user has listed permissions, 
+asterisk for permission means that the user is allowed to do anything. In yaml configuration file 
+`*` has to be escaped with `\`. 
 ### Examples
 
 NPM-js registry. First create the directory for repository configs `mkdir /tmp/artipie`,
@@ -81,6 +88,16 @@ repo:
   storage:
     type: fs
     path: /tmp/artipie/data
+  permissions:  
+    admin:
+        - \*
+      john:
+        - deploy
+        - delete
+      jane:
+        - deploy
+      \*:
+        - download
 ```
 
 Before running the server make sure your java version is >= 11 version: `java -version`.
