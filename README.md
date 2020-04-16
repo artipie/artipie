@@ -42,6 +42,33 @@ Start Docker container with mounting current directory to `/var/artipie`:
 docker run -v $PWD:/var/artipie -p 80:80 artipie/artipie:0.1.2
 ```
 
+### RUN RPM repository
+
+Create new directory `/var/artipie`, directory for configuration files `/var/artipie/repo`
+and directory for RPM repository `/var/artipie/centos`.
+Put repository config file to `/var/artipie/repo/centos.yaml`:
+```yaml
+repo:
+  type: rpm
+  storage:
+    type: fs
+    path: /var/artipie/centos
+```
+Put all RPM packages to repository directory: `/var/artipie/centos/centos`.
+
+*Optional:* generate metadata using https://github.com/artipie/rpm-adapter/ CLI tool.
+
+Start Artipie Docker image:
+```bash
+docker run -v /var/artipie:/var/artipie artipie/artipie:latest
+```
+
+On client machine add local repository to the list of repos:
+ - install `yum-utils` if needed: `yum install yum-utils`
+ - add repository with command: `yum-config-manager --add-repo=http://yourepo/`
+ - refresh the repo: `yum upgrade all`
+ - download packages: `yum install package-name`
+
 ### Setup the server manually
 
 Create primary server configuration file with location to repositories config directory:
