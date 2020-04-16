@@ -119,7 +119,7 @@ public final class Pie implements Slice {
                         slice = CompletableFuture.completedStage(new GemSlice(storage));
                         break;
                     case "rpm":
-                        slice = CompletableFuture.completedFuture(new RpmSlice(storage));
+                        slice = CompletableFuture.completedStage(new RpmSlice(storage));
                         break;
                     case "php":
                         slice = cfg.path().thenApply(
