@@ -36,6 +36,7 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
+import com.artipie.rpm.http.RpmSlice;
 import com.jcabi.log.Logger;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -116,6 +117,9 @@ public final class Pie implements Slice {
                         break;
                     case "gem":
                         slice = CompletableFuture.completedStage(new GemSlice(storage));
+                        break;
+                    case "rpm":
+                        slice = CompletableFuture.completedFuture(new RpmSlice(storage));
                         break;
                     case "php":
                         slice = cfg.path().thenApply(
