@@ -15,6 +15,7 @@ repo:
       - deploy
       - delete
     jane:
+      - ~
       - deploy
     \*:
       - download

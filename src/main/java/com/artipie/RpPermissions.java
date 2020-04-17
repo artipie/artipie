@@ -38,6 +38,11 @@ import java.io.IOException;
 public final class RpPermissions implements Permissions {
 
     /**
+     * Asterisk wildcard.
+     */
+    private static final String WILDCARD = "*";
+
+    /**
      * YAML storage settings.
      */
     private final YamlMapping yaml;
@@ -61,7 +66,8 @@ public final class RpPermissions implements Permissions {
     @Override
     public boolean allowed(final String name, final String action) {
         final YamlMapping all = this.yaml.yamlMapping("permissions");
-        return check(all.yamlSequence(name), action) || check(all.yamlSequence("*"), action);
+        return check(all.yamlSequence(name), action)
+            || check(all.yamlSequence(RpPermissions.WILDCARD), action);
     }
 
     /**
@@ -84,9 +90,8 @@ public final class RpPermissions implements Permissions {
      * @return True if action is allowed
      */
     private static boolean check(final YamlSequence seq, final String action) {
-        return seq != null
-            && seq.values().stream().map(Object::toString)
-                .anyMatch(item -> item.equals(action) || item.equals("*"));
+        return seq != null && seq.values().stream().map(Object::toString)
+            .anyMatch(item -> item.equals(action) || item.equals(RpPermissions.WILDCARD));
     }
 
 }
