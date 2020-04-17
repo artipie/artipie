@@ -97,6 +97,14 @@ public final class RepoConfig {
     }
 
     /**
+     * Custom repository configuration.
+     * @return Async custom repository config
+     */
+    public CompletionStage<YamlMapping> custom() {
+        return this.repo().thenApply(map -> map.yamlMapping("custom"));
+    }
+
+    /**
      * Repo part of YAML.
      *
      * @return Async YAML mapping

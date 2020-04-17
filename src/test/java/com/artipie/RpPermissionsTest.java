@@ -42,7 +42,7 @@ class RpPermissionsTest {
     /**
      * Test configuration file location.
      */
-    private static final String CONF_YAML = "src/test/resources/repo_permissions.yml";
+    private static final String CONF_YAML = "src/test/resources/repo-config.yml";
 
     @Test
     void johnCanDownloadDeployAndDelete() {
