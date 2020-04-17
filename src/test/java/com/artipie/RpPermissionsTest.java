@@ -61,6 +61,22 @@ class RpPermissionsTest {
     }
 
     @Test
+    void janeCanDownloadAndDeploy() {
+        final String uname = "Jane";
+        MatcherAssert.assertThat(
+            new RpPermissions(new File(RpPermissionsTest.CONF_YAML)),
+            new AllOf<RpPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super RpPermissions>>(
+                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "deploy"))),
+                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "download"))),
+                    new MatcherOf<>(new ProcOf<>(perm -> !perm.allowed(uname, "install"))),
+                    new MatcherOf<>(new ProcOf<>(perm -> !perm.allowed(uname, "update")))
+                )
+            )
+        );
+    }
+
+    @Test
     void anyoneCanDownload() {
         MatcherAssert.assertThat(
             new RpPermissions(new File(RpPermissionsTest.CONF_YAML)).allowed("anyone", "download"),
