@@ -27,6 +27,7 @@ package com.artipie;
 import com.artipie.http.Slice;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
+import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -41,7 +42,13 @@ import org.apache.commons.cli.ParseException;
  * Vertx server entry point.
  * @since 1.0
  */
+@SuppressWarnings("PMD.PrematureDeclaration")
 public final class VertxMain implements Runnable {
+
+    /**
+     * The Vert.x instance.
+     */
+    private final Vertx vertx;
 
     /**
      * Slice to serve.
@@ -56,16 +63,18 @@ public final class VertxMain implements Runnable {
     /**
      * Ctor.
      * @param slice To server
+     * @param vertx The Vert.x instance.
      * @param port HTTP port
      */
-    private VertxMain(final Slice slice, final int port) {
+    private VertxMain(final Slice slice, final Vertx vertx, final int port) {
         this.slice = slice;
+        this.vertx = vertx;
         this.port = port;
     }
 
     @Override
     public void run() {
-        try (VertxSliceServer srv = new VertxSliceServer(this.slice, this.port)) {
+        try (VertxSliceServer srv = new VertxSliceServer(this.vertx, this.slice, this.port)) {
             srv.start();
             while (!Thread.currentThread().isInterrupted()) {
                 try {
@@ -86,6 +95,7 @@ public final class VertxMain implements Runnable {
      * @throws ParseException If fails
      */
     public static void main(final String... args) throws IOException, ParseException {
+        final Vertx vertx = Vertx.vertx();
         final String storage;
         final int port;
         final int defp = 80;
@@ -110,9 +120,12 @@ public final class VertxMain implements Runnable {
         new VertxMain(
             new Pie(
                 new YamlSettings(
-                    Files.readString(Path.of(storage), Charset.defaultCharset())
-                )
+                    Files.readString(Path.of(storage), Charset.defaultCharset()),
+                    vertx
+                ),
+                vertx
             ),
+            vertx,
             port
         ).run();
     }

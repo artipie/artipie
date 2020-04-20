@@ -38,6 +38,7 @@ import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
 import com.artipie.rpm.http.RpmSlice;
 import com.jcabi.log.Logger;
+import io.vertx.reactivex.core.Vertx;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -61,11 +62,18 @@ public final class Pie implements Slice {
     private final Settings settings;
 
     /**
+     * The Vert.x instance.
+     */
+    private final Vertx vertx;
+
+    /**
      * Artipie entry point.
      * @param settings Artipie settings
+     * @param vertx The Vert.x instance.
      */
-    public Pie(final Settings settings) {
+    public Pie(final Settings settings, final Vertx vertx) {
         this.settings = settings;
+        this.vertx = vertx;
     }
 
     @Override
@@ -91,7 +99,7 @@ public final class Pie implements Slice {
                 .thenComposeAsync(
                     storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
                 )
-                .thenApply(content -> new RepoConfig(content))
+                .thenApply(content -> new RepoConfig(this.vertx, content))
                 .thenCompose(Pie::sliceForConfig)
         ).response(line, headers, body);
     }

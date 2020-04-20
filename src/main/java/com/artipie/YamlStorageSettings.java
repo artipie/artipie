@@ -50,12 +50,18 @@ final class YamlStorageSettings {
     private final YamlMapping yaml;
 
     /**
-     * Ctor.
-     *
-     * @param yaml YAML storage settings.
+     * The Vert.x instance.
      */
-    YamlStorageSettings(final YamlMapping yaml) {
+    private final Vertx vertx;
+
+    /**
+     * Ctor.
+     * @param yaml YAML storage settings.
+     * @param vertx The Vert.x instance.
+     */
+    YamlStorageSettings(final YamlMapping yaml, final Vertx vertx) {
         this.yaml = yaml;
+        this.vertx = vertx;
     }
 
     /**
@@ -68,7 +74,7 @@ final class YamlStorageSettings {
         final String type =  strict.string("type");
         final Storage storage;
         if ("fs".equals(type)) {
-            storage = new FileStorage(Path.of(strict.string("path")), Vertx.vertx().fileSystem());
+            storage = new FileStorage(Path.of(strict.string("path")), this.vertx.fileSystem());
         } else if ("s3".equals(type)) {
             storage = new S3Storage(s3Client(strict), strict.string("bucket"));
         } else {

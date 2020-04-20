@@ -31,6 +31,7 @@ import com.artipie.asto.Storage;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
+import io.vertx.reactivex.core.Vertx;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -45,15 +46,22 @@ import org.reactivestreams.Publisher;
 public final class RepoConfig {
 
     /**
+     * The Vert.x instance.
+     */
+    private final Vertx vertx;
+
+    /**
      * Source yaml future.
      */
     private final CompletionStage<YamlMapping> yaml;
 
     /**
      * Ctor.
+     * @param vertx The Vert.x instance.
      * @param content Flow content
      */
-    public RepoConfig(final Publisher<ByteBuffer> content) {
+    public RepoConfig(final Vertx vertx, final Publisher<ByteBuffer> content) {
+        this.vertx = vertx;
         this.yaml = RepoConfig.yamlFromPublisher(content);
     }
 
@@ -84,7 +92,7 @@ public final class RepoConfig {
     public CompletionStage<Storage> storage() {
         return this.repo()
             .thenApply(map -> map.yamlMapping("storage"))
-            .thenApply(YamlStorageSettings::new)
+            .thenApply((YamlMapping mapping) -> new YamlStorageSettings(mapping, this.vertx))
             .thenApply(YamlStorageSettings::storage);
     }
 
