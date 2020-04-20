@@ -31,6 +31,8 @@ import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -38,27 +40,48 @@ import org.junit.jupiter.api.Test;
  * @since 0.2
  */
 public class RepoConfigTest {
+    private Vertx vertx;
+
     @Test
     public void readsCustom() throws URISyntaxException, ExecutionException, InterruptedException {
-        final Vertx vertx = Vertx.vertx();
-        try {
-            final RxFile file = new RxFile(
-                Paths.get(
-                    Thread.currentThread()
-                        .getContextClassLoader()
-                        .getResource("repo-config.yml")
-                        .toURI()
-                ),
-                vertx.fileSystem()
-            );
-            final RepoConfig config = new RepoConfig(file.flow());
-            final YamlMapping yaml = config.custom().toCompletableFuture().get();
-            MatcherAssert.assertThat(
-                yaml.string("custom-property"),
-                new IsEqual<>("custom-value")
-            );
-        } finally {
-            vertx.close();
-        }
+        final RepoConfig config = readFromResource("repo-full-config.yml");
+        final YamlMapping yaml = config.custom().toCompletableFuture().get().orElseThrow();
+        MatcherAssert.assertThat(
+            yaml.string("custom-property"),
+            new IsEqual<>("custom-value")
+        );
+    }
+
+    @Test
+    public void failsToReadCustom() throws URISyntaxException, ExecutionException, InterruptedException {
+        final RepoConfig config = readFromResource("repo-min-config.yml");
+        MatcherAssert.assertThat(
+            "Unexpected custom config",
+            config.custom().toCompletableFuture().get().isEmpty()
+        );
+    }
+
+    @BeforeEach
+    void setUp() {
+        this.vertx = Vertx.vertx();
+    }
+
+    @AfterEach
+    void tearDown() {
+        this.vertx.close();
+    }
+
+    private RepoConfig readFromResource(final String name)
+        throws URISyntaxException {
+        final RxFile file = new RxFile(
+            Paths.get(
+                Thread.currentThread()
+                    .getContextClassLoader()
+                    .getResource(name)
+                    .toURI()
+            ),
+            this.vertx.fileSystem()
+        );
+        return new RepoConfig(file.flow());
     }
 }
