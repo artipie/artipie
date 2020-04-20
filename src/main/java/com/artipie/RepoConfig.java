@@ -35,6 +35,7 @@ import io.vertx.reactivex.core.Vertx;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import org.reactivestreams.Publisher;
 
@@ -100,8 +101,10 @@ public final class RepoConfig {
      * Custom repository configuration.
      * @return Async custom repository config
      */
-    public CompletionStage<YamlMapping> custom() {
-        return this.repo().thenApply(map -> map.yamlMapping("custom"));
+    public CompletionStage<Optional<YamlMapping>> custom() {
+        return this.repo().thenApply(map ->
+            Optional.ofNullable(map.yamlMapping("custom"))
+        );
     }
 
     /**
