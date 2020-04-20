@@ -28,7 +28,9 @@ jobs:
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: '20'
       - name: Lint
         uses: g4s8/gitlint-action@0.2
         with:
-          since: "2020-03-30"
+          since: "2020-04-18"
