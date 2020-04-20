@@ -100,6 +100,9 @@ public final class Pie implements Slice {
      * Find a slice implementation for config.
      * @param cfg Repository config
      * @return Async slice
+     * @todo #76:30min Extract the logic in switch into separate class.
+     *  It can be named like `SliceFromConfig`: it implements Slice interface
+     *  and behaves as a factory by creating `Slice` instance for configuration.
      */
     private static CompletionStage<Slice> sliceForConfig(final RepoConfig cfg) {
         return cfg.type().thenCombine(
