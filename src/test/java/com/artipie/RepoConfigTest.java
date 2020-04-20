@@ -39,12 +39,16 @@ import org.junit.jupiter.api.Test;
  * Test for {@link RepoConfig}.
  * @since 0.2
  */
-public class RepoConfigTest {
+public final class RepoConfigTest {
+    /**
+     * Vertx instance.
+     */
     private Vertx vertx;
 
     @Test
-    public void readsCustom() throws URISyntaxException, ExecutionException, InterruptedException {
-        final RepoConfig config = readFromResource("repo-full-config.yml");
+    public void readsCustom()
+        throws URISyntaxException, ExecutionException, InterruptedException {
+        final RepoConfig config = this.readFromResource("repo-full-config.yml");
         final YamlMapping yaml = config.custom().toCompletableFuture().get().orElseThrow();
         MatcherAssert.assertThat(
             yaml.string("custom-property"),
@@ -53,8 +57,9 @@ public class RepoConfigTest {
     }
 
     @Test
-    public void failsToReadCustom() throws URISyntaxException, ExecutionException, InterruptedException {
-        final RepoConfig config = readFromResource("repo-min-config.yml");
+    public void failsToReadCustom()
+        throws URISyntaxException, ExecutionException, InterruptedException {
+        final RepoConfig config = this.readFromResource("repo-min-config.yml");
         MatcherAssert.assertThat(
             "Unexpected custom config",
             config.custom().toCompletableFuture().get().isEmpty()
@@ -82,6 +87,6 @@ public class RepoConfigTest {
             ),
             this.vertx.fileSystem()
         );
-        return new RepoConfig(file.flow());
+        return new RepoConfig(this.vertx, file.flow());
     }
 }

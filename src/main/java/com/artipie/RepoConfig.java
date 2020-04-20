@@ -99,11 +99,11 @@ public final class RepoConfig {
 
     /**
      * Custom repository configuration.
-     * @return Async custom repository config
+     * @return Async custom repository config or Optional.empty
      */
     public CompletionStage<Optional<YamlMapping>> custom() {
-        return this.repo().thenApply(map ->
-            Optional.ofNullable(map.yamlMapping("custom"))
+        return this.repo().thenApply(
+            map -> Optional.ofNullable(map.yamlMapping("custom"))
         );
     }
 
