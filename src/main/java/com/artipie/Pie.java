@@ -24,6 +24,7 @@
 
 package com.artipie;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
@@ -33,6 +34,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
@@ -41,10 +43,12 @@ import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.cactoos.scalar.Unchecked;
 import org.reactivestreams.Publisher;
 
@@ -92,15 +96,37 @@ public final class Pie implements Slice {
         }
         final String repo = parts[0];
         Logger.debug(this, "Slice repo=%s", repo);
+        final MutableBoolean found = new MutableBoolean(true);
         return new AsyncSlice(
             CompletableFuture.supplyAsync(
                 () -> new Unchecked<>(this.settings::storage).value()
+            ).thenComposeAsync(
+                storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
+            ).exceptionally(
+                throwable -> {
+                    found.setFalse();
+                    return new Content.From(new byte[] {});
+                }
+            ).thenCompose(
+                content -> {
+                    final CompletionStage<Slice> result;
+                    if (found.booleanValue()) {
+                        result = CompletableFuture.completedStage(
+                            new RepoConfig(this.vertx, content)
+                        ).thenCompose(Pie::sliceForConfig);
+                    } else {
+                        result = CompletableFuture.completedStage(
+                            (lin, header, bdy) -> new RsWithStatus(
+                                new RsWithBody(
+                                    String.format("repository %s was not found", repo),
+                                    StandardCharsets.UTF_8
+                                ), RsStatus.NOT_FOUND
+                            )
+                        );
+                    }
+                    return result;
+                }
             )
-                .thenComposeAsync(
-                    storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
-                )
-                .thenApply(content -> new RepoConfig(this.vertx, content))
-                .thenCompose(Pie::sliceForConfig)
         ).response(line, headers, body);
     }
 
@@ -147,4 +173,3 @@ public final class Pie implements Slice {
         ).thenCompose(Function.identity());
     }
 }
-
