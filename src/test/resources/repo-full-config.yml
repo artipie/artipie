@@ -19,5 +19,5 @@ repo:
       - deploy
     \*:
       - download
-  custom:
+  settings:
     custom-property: custom-value

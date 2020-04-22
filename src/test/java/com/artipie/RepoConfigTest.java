@@ -49,7 +49,7 @@ public final class RepoConfigTest {
     public void readsCustom()
         throws URISyntaxException, ExecutionException, InterruptedException {
         final RepoConfig config = this.readFromResource("repo-full-config.yml");
-        final YamlMapping yaml = config.custom().toCompletableFuture().get().orElseThrow();
+        final YamlMapping yaml = config.settings().toCompletableFuture().get().orElseThrow();
         MatcherAssert.assertThat(
             yaml.string("custom-property"),
             new IsEqual<>("custom-value")
@@ -62,7 +62,7 @@ public final class RepoConfigTest {
         final RepoConfig config = this.readFromResource("repo-min-config.yml");
         MatcherAssert.assertThat(
             "Unexpected custom config",
-            config.custom().toCompletableFuture().get().isEmpty()
+            config.settings().toCompletableFuture().get().isEmpty()
         );
     }
 
