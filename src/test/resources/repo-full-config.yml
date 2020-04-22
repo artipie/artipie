@@ -1,6 +1,6 @@
 repo:
-  type:
-    maven
+  type: maven
+  path: mvn
   storage:
     type: fs
     path: /var/artipie/maven
@@ -19,3 +19,5 @@ repo:
       - deploy
     \*:
       - download
+  settings:
+    custom-property: custom-value
