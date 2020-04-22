@@ -35,6 +35,7 @@ import io.vertx.reactivex.core.Vertx;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import org.reactivestreams.Publisher;
 
@@ -94,6 +95,16 @@ public final class RepoConfig {
             .thenApply(map -> map.yamlMapping("storage"))
             .thenApply((YamlMapping mapping) -> new YamlStorageSettings(mapping, this.vertx))
             .thenApply(YamlStorageSettings::storage);
+    }
+
+    /**
+     * Custom repository configuration.
+     * @return Async custom repository config or Optional.empty
+     */
+    public CompletionStage<Optional<YamlMapping>> settings() {
+        return this.repo().thenApply(
+            map -> Optional.ofNullable(map.yamlMapping("settings"))
+        );
     }
 
     /**
