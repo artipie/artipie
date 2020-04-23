@@ -34,6 +34,7 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
 import com.artipie.rpm.http.RpmSlice;
@@ -136,6 +137,9 @@ public final class Pie implements Slice {
                         slice = cfg.path().thenApply(
                             path -> new PhpComposer(path, storage)
                         );
+                        break;
+                    case "maven":
+                        slice = CompletableFuture.completedStage(new MavenSlice(storage));
                         break;
                     default:
                         throw new IllegalStateException(
