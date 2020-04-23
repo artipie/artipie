@@ -132,6 +132,11 @@ SOFTWARE.
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
+      <artifactId>maven-adapter</artifactId>
+      <version>0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
       <artifactId>rpm-adapter</artifactId>
       <version>0.7</version>
     </dependency>
