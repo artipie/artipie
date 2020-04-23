@@ -15,7 +15,8 @@ jobs:
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
           name: artipie/artipie
-          username: artipie
+          username: artemlazarev
           password: ${{ secrets.DOCKER_PASSWORD }}
           cache: true
           tag_names: true
+	      tags: "latest"
