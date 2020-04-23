@@ -19,4 +19,3 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           cache: true
           tag_names: true
-
