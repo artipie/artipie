@@ -117,14 +117,14 @@ repo:
     path: /tmp/artipie/data
   permissions:  
     admin:
-        - \*
-      john:
-        - deploy
-        - delete
-      jane:
-        - deploy
-      \*:
-        - download
+      - \*
+    john:
+      - deploy
+      - delete
+    jane:
+      - deploy
+    \*:
+      - download
 ```
 
 Before running the server make sure your java version is >= 11 version: `java -version`.
