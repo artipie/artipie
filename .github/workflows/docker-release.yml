@@ -18,18 +18,18 @@ jobs:
           username: artemlazarev
           password: ${{ secrets.DOCKER_PASSWORD }}
           cache: true
-          tag_names: true
-  publish-latest:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - name: Publish Image to Docker Registry
-        uses: elgohr/Publish-Docker-Github-Action@master
-        with:
-          name: artemlazarev/artipie
-          username: artemlazarev
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          cache: true
-          tag_names: true
-          tags: "latest"
+#          tag_names: true
+          tags: "latest,${{ env.RELEASE_VERSION }}"
+#  publish-latest:
+#    needs: build
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Publish Image to Docker Registry
+#        uses: elgohr/Publish-Docker-Github-Action@master
+#        with:
+#          name: artemlazarev/artipie
+#          username: artemlazarev
+#          password: ${{ secrets.DOCKER_PASSWORD }}
+#          cache: true
+#          tag_names: true
+#          tags: "latest"
