@@ -14,7 +14,7 @@ jobs:
       - name: Publish Image to Docker Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: artipie/artipie
+          name: artemlazarev/artipie
           username: artemlazarev
           password: ${{ secrets.DOCKER_PASSWORD }}
           cache: true
