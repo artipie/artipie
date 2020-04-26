@@ -37,6 +37,9 @@ import com.jcabi.log.Logger;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import org.cactoos.map.MapEntry;
+import org.cactoos.map.MapOf;
 import org.reactivestreams.Publisher;
 
 /**
@@ -44,6 +47,7 @@ import org.reactivestreams.Publisher;
  * @since 0.1.4
  * @todo #90:30min We still don't have tests for Pie. But now that this class was extracted, we have
  *  a more cohesive class that could be tested. Write unit tests for SliceFromConfig class.
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class SliceFromConfig implements Slice {
 
@@ -88,42 +92,43 @@ public final class SliceFromConfig implements Slice {
         return cfg.type().thenCombine(
             cfg.storage(),
             (type, storage) -> {
-                final Slice slice;
-                switch (type) {
-                    case "file":
-                        slice = new FilesSlice(storage);
-                        break;
-                    case "npm":
-                        slice = new NpmSlice(new Npm(storage), storage);
-                        break;
-                    case "gem":
-                        slice = new GemSlice(storage);
-                        break;
-                    case "rpm":
-                        slice = new RpmSlice(storage);
-                        break;
-                    case "php":
-                        try {
-                            slice = cfg.path().thenApply(
-                                path -> new PhpComposer(path, storage)
-                            ).toCompletableFuture().get();
-                        } catch (final InterruptedException ex) {
-                            Logger.error(SliceFromConfig.class, "Interrupted PhpComposer creation");
-                            throw new IllegalArgumentException(ex);
-                        } catch (final ExecutionException ex) {
-                            Logger.error(SliceFromConfig.class, "Exception getting PhpComposer");
-                            throw new IllegalArgumentException(ex);
+                return new MapOf<String, Function<RepoConfig, Slice>>(
+                    new MapEntry<String, Function<RepoConfig, Slice>>(
+                        "file", config -> new FilesSlice(storage)
+                    ),
+                    new MapEntry<String, Function<RepoConfig, Slice>>(
+                        "npm", config -> new NpmSlice(new Npm(storage), storage)
+                    ),
+                    new MapEntry<String, Function<RepoConfig, Slice>>(
+                        "gem", config -> new GemSlice(storage)
+                    ),
+                    new MapEntry<String, Function<RepoConfig, Slice>>(
+                        "rpm", config -> new RpmSlice(storage)
+                    ),
+                    new MapEntry<String, Function<RepoConfig, Slice>>(
+                        "php",
+                        config -> {
+                            try {
+                                return config.path().thenApply(
+                                    path -> new PhpComposer(path, storage)
+                                ).toCompletableFuture().get();
+                            } catch (final InterruptedException ex) {
+                                Logger.error(
+                                    SliceFromConfig.class, "Interrupted PhpComposer creation"
+                                );
+                                throw new IllegalArgumentException(ex);
+                            } catch (final ExecutionException ex) {
+                                Logger.error(
+                                    SliceFromConfig.class, "Exception getting PhpComposer"
+                                );
+                                throw new IllegalArgumentException(ex);
+                            }
                         }
-                        break;
-                    case "maven":
-                        slice = new MavenSlice(storage);
-                        break;
-                    default:
-                        throw new IllegalStateException(
-                            String.format("Unsupported repository type '%s'", type)
-                        );
-                }
-                return slice;
+                    ),
+                    new MapEntry<String, Function<RepoConfig, Slice>>(
+                        "maven", config -> new MavenSlice(storage)
+                    )
+                ).get(type).apply(cfg);
             }
         ).toCompletableFuture().get();
     }
