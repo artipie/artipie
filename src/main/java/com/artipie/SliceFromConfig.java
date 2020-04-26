@@ -86,6 +86,10 @@ public final class SliceFromConfig implements Slice {
      * @return Slice
      * @throws ExecutionException If error getting the slice
      * @throws InterruptedException If error getting the slice
+     * @todo #90:30min This method still needs more refactoring. First, we should extract
+     *  PhpComposer Slice construction to a private method to make it more readable. And then,
+     *  we should test if the type exist in the constructed map. If the type does not exist,
+     *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
      */
     private static Slice build(final RepoConfig cfg) throws InterruptedException,
         ExecutionException {
