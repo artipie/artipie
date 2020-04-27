@@ -91,7 +91,7 @@ public final class Pie implements Slice {
                     storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
                 )
                 .thenApply(content -> new RepoConfig(this.vertx, content))
-                .thenCompose(cfg -> CompletableFuture.completedStage(new SliceFromConfig(cfg)))
+                .thenApply(cfg -> new SliceFromConfig(cfg))
         ).response(line, headers, body);
     }
 }
