@@ -36,6 +36,7 @@ import com.artipie.npm.http.NpmSlice;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.NpmProxyConfig;
 import com.artipie.npm.proxy.http.NpmProxySlice;
+import com.artipie.nuget.http.NuGet;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.file.FileSystem;
 import java.util.concurrent.CompletableFuture;
@@ -100,6 +101,14 @@ public final class SliceFromConfig extends Slice.Wrap {
                                 path -> new PhpComposer(path, storage)
                             );
                         }
+                    ),
+                    new MapEntry<>(
+                        "nuget",
+                        config -> cfg.url().thenCompose(
+                            url -> cfg.path().thenApply(
+                                path -> new NuGet(url, path, storage)
+                            )
+                        )
                     ),
                     new MapEntry<>(
                         "maven", config -> CompletableFuture.completedStage(new MavenSlice(storage))

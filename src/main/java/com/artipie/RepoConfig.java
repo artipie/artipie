@@ -32,6 +32,8 @@ import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
 import io.vertx.reactivex.core.Vertx;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -83,6 +85,28 @@ public final class RepoConfig {
     public CompletionStage<String> path() {
         return this.repo().thenApply(
             map -> Objects.requireNonNull(map.string("path"), "yaml repo.path is null")
+        );
+    }
+
+    /**
+     * Repository URL.
+     *
+     * @return Async string of URL
+     */
+    public CompletionStage<URL> url() {
+        return this.repo().thenApply(
+            map -> Objects.requireNonNull(map.string("url"), "yaml repo.url is null")
+        ).thenApply(
+            str -> {
+                try {
+                    return new URL(str);
+                } catch (final MalformedURLException ex) {
+                    throw new IllegalArgumentException(
+                        String.format("Failed to build URL from '%s'", str),
+                        ex
+                    );
+                }
+            }
         );
     }
 
