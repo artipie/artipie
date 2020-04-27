@@ -15,7 +15,6 @@ jobs:
         run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
       - name: Test
         run: |
-          echo $RELEASE_VERSION
           echo ${{ env.RELEASE_VERSION }}
       - name: Publish Image to Docker Registry
         uses: elgohr/Publish-Docker-Github-Action@master
@@ -24,18 +23,4 @@ jobs:
           username: artemlazarev
           password: ${{ secrets.DOCKER_PASSWORD }}
           cache: true
-#          tag_names: true
           tags: "latest,${{ env.RELEASE_VERSION }}"
-#  publish-latest:
-#    needs: build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Publish Image to Docker Registry
-#        uses: elgohr/Publish-Docker-Github-Action@master
-#        with:
-#          name: artemlazarev/artipie
-#          username: artemlazarev
-#          password: ${{ secrets.DOCKER_PASSWORD }}
-#          cache: true
-#          tag_names: true
-#          tags: "latest"
