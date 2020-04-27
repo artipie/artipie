@@ -30,7 +30,13 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: '20'
+      - name: Debugger
+        uses: g4s8/debugger-action@master
+        with:
+          payload: "false"
+          gitlog: "true"
+          env: "false"
       - name: Lint
         uses: g4s8/gitlint-action@0.3.1
         with:
-          since: "2020-04-18"
+          since: "2020-04-28"
