@@ -1,9 +1,9 @@
 docker:
   image: g4s8/rultor-jdk11:alpine3.10
 assets:
-  settings.xml: yegor256/home#assets/artipie/settings.xml
-  pubring.gpg: yegor256/home#assets/pubring.gpg
-  secring.gpg: yegor256/home#assets/secring.gpg
+  settings.xml: "yegor256/artipie-keys#settings.xml"
+  pubring.gpg: "yegor256/artipie-keys#pubring.gpg"
+  secring.gpg: "yegor256/artipie-keys#secring.gpg"
 env:
   JAVA_HOME: /usr/lib/jvm/java-11-openjdk
 install: |

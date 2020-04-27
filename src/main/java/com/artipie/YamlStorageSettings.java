@@ -35,6 +35,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3AsyncClientBuilder;
 
 /**
  * Storage settings built from YAML.
@@ -76,7 +77,7 @@ final class YamlStorageSettings {
         if ("fs".equals(type)) {
             storage = new FileStorage(Path.of(strict.string("path")), this.vertx.fileSystem());
         } else if ("s3".equals(type)) {
-            storage = new S3Storage(s3Client(strict), strict.string("bucket"));
+            storage = new S3Storage(this.s3Client(), strict.string("bucket"));
         } else {
             throw new IllegalStateException(String.format("Unsupported storage type: '%s'", type));
         }
@@ -86,15 +87,23 @@ final class YamlStorageSettings {
     /**
      * Creates {@link S3AsyncClient} instance based on YAML config.
      *
-     * @param yaml YAML config to build client from.
      * @return Built S3 client.
      * @checkstyle MethodNameCheck (2 lines)
      */
-    private static S3AsyncClient s3Client(final YamlMapping yaml) {
-        return S3AsyncClient.builder()
-            .region(Region.of(yaml.string("region")))
-            .endpointOverride(URI.create(yaml.string("endpoint")))
-            .credentialsProvider(credentials(yaml.yamlMapping("credentials")))
+    private S3AsyncClient s3Client() {
+        final S3AsyncClientBuilder builder = S3AsyncClient.builder();
+        final String region = this.yaml.string("region");
+        if (region != null) {
+            builder.region(Region.of(region));
+        }
+        final String endpoint = this.yaml.string("endpoint");
+        if (endpoint != null) {
+            builder.endpointOverride(URI.create(endpoint));
+        }
+        return builder
+            .credentialsProvider(
+                credentials(new StrictYamlMapping(this.yaml).yamlMapping("credentials"))
+            )
             .build();
     }
 
