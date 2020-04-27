@@ -29,14 +29,15 @@ import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.async.AsyncSlice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
 import com.artipie.rpm.http.RpmSlice;
-import com.jcabi.log.Logger;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
@@ -67,73 +68,51 @@ public final class SliceFromConfig implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        try {
-            return SliceFromConfig.build(this.config).response(
-                line, headers, body
-            );
-        } catch (final InterruptedException ex) {
-            Logger.error(this, "Interruption when getting slice from config");
-            throw new IllegalArgumentException(ex);
-        } catch (final ExecutionException ex) {
-            Logger.error(this, "Exception when getting slice from config");
-            throw new IllegalArgumentException(ex);
-        }
+        return new AsyncSlice(
+            SliceFromConfig.build(this.config)
+        ).response(line, headers, body);
     }
 
     /**
      * Find a slice implementation for config.
      * @param cfg Repository config
-     * @return Slice
-     * @throws ExecutionException If error getting the slice
-     * @throws InterruptedException If error getting the slice
-     * @todo #90:30min This method still needs more refactoring. First, we should extract
-     *  PhpComposer Slice construction to a private method to make it more readable. And then,
-     *  we should test if the type exist in the constructed map. If the type does not exist,
+     * @return Slice completionStage
+     * @todo #90:30min This method still needs more refactoring.
+     *  We should test if the type exist in the constructed map. If the type does not exist,
      *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
      */
-    private static Slice build(final RepoConfig cfg) throws InterruptedException,
-        ExecutionException {
+    private static CompletionStage<Slice> build(final RepoConfig cfg) {
         return cfg.type().thenCombine(
             cfg.storage(),
             (type, storage) -> {
-                return new MapOf<String, Function<RepoConfig, Slice>>(
-                    new MapEntry<String, Function<RepoConfig, Slice>>(
-                        "file", config -> new FilesSlice(storage)
+                return new MapOf<String, Function<RepoConfig, CompletionStage<Slice>>>(
+                    new MapEntry<>(
+                        "file", config -> CompletableFuture.completedStage(new FilesSlice(storage))
                     ),
-                    new MapEntry<String, Function<RepoConfig, Slice>>(
-                        "npm", config -> new NpmSlice(new Npm(storage), storage)
+                    new MapEntry<>(
+                        "npm", config -> CompletableFuture.completedStage(
+                            new NpmSlice(new Npm(storage), storage)
+                        )
                     ),
-                    new MapEntry<String, Function<RepoConfig, Slice>>(
-                        "gem", config -> new GemSlice(storage)
+                    new MapEntry<>(
+                        "gem", config -> CompletableFuture.completedStage(new GemSlice(storage))
                     ),
-                    new MapEntry<String, Function<RepoConfig, Slice>>(
-                        "rpm", config -> new RpmSlice(storage)
+                    new MapEntry<>(
+                        "rpm", config -> CompletableFuture.completedStage(new RpmSlice(storage))
                     ),
-                    new MapEntry<String, Function<RepoConfig, Slice>>(
+                    new MapEntry<>(
                         "php",
                         config -> {
-                            try {
-                                return config.path().thenApply(
-                                    path -> new PhpComposer(path, storage)
-                                ).toCompletableFuture().get();
-                            } catch (final InterruptedException ex) {
-                                Logger.error(
-                                    SliceFromConfig.class, "Interrupted PhpComposer creation"
-                                );
-                                throw new IllegalArgumentException(ex);
-                            } catch (final ExecutionException ex) {
-                                Logger.error(
-                                    SliceFromConfig.class, "Exception getting PhpComposer"
-                                );
-                                throw new IllegalArgumentException(ex);
-                            }
+                            return config.path().thenApply(
+                                path -> new PhpComposer(path, storage)
+                            );
                         }
                     ),
-                    new MapEntry<String, Function<RepoConfig, Slice>>(
-                        "maven", config -> new MavenSlice(storage)
+                    new MapEntry<>(
+                        "maven", config -> CompletableFuture.completedStage(new MavenSlice(storage))
                     )
                 ).get(type).apply(cfg);
             }
-        ).toCompletableFuture().get();
+        ).thenCompose(Function.identity());
     }
 }
