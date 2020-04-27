@@ -24,8 +24,8 @@
 
 package com.artipie;
 
-import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
@@ -48,7 +48,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.cactoos.scalar.Unchecked;
 import org.reactivestreams.Publisher;
 
@@ -57,6 +56,7 @@ import org.reactivestreams.Publisher;
  * @since 1.0
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ReturnCountCheck (500 lines)
+ * @checkstyle IllegalCatchCheck (500 lines)
  */
 public final class Pie implements Slice {
 
@@ -81,7 +81,7 @@ public final class Pie implements Slice {
     }
 
     @Override
-    @SuppressWarnings("PMD.OnlyOneReturn")
+    @SuppressWarnings({"PMD.OnlyOneReturn", "PMD.AvoidCatchingGenericException"})
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         Logger.info(this, "Request: %s", line);
@@ -96,25 +96,23 @@ public final class Pie implements Slice {
         }
         final String repo = parts[0];
         Logger.debug(this, "Slice repo=%s", repo);
-        final MutableBoolean found = new MutableBoolean(true);
         return new AsyncSlice(
             CompletableFuture.supplyAsync(
                 () -> new Unchecked<>(this.settings::storage).value()
             ).thenComposeAsync(
-                storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
-            ).exceptionally(
-                throwable -> {
-                    found.setFalse();
-                    return new Content.From(new byte[] {});
-                }
+                storage -> CompletableFuture.completedStage(
+                    new RxStorageWrapper(storage).value(
+                        new Key.From(String.format("%s.yaml", repo))
+                    )
+                )
             ).thenCompose(
                 content -> {
-                    final CompletionStage<Slice> result;
-                    if (found.booleanValue()) {
+                    CompletionStage<Slice> result;
+                    try {
                         result = CompletableFuture.completedStage(
-                            new RepoConfig(this.vertx, content)
+                            new RepoConfig(this.vertx, content.blockingGet())
                         ).thenCompose(Pie::sliceForConfig);
-                    } else {
+                    } catch (final Exception ex) {
                         result = CompletableFuture.completedStage(
                             (lin, header, bdy) -> new RsWithStatus(
                                 new RsWithBody(
