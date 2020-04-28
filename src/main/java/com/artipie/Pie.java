@@ -99,11 +99,9 @@ public final class Pie implements Slice {
         return new AsyncSlice(
             CompletableFuture.supplyAsync(
                 () -> new Unchecked<>(this.settings::storage).value()
-            ).thenComposeAsync(
-                storage -> CompletableFuture.completedStage(
-                    new RxStorageWrapper(storage).value(
-                        new Key.From(String.format("%s.yaml", repo))
-                    )
+            ).thenApply(
+                storage -> new RxStorageWrapper(storage).value(
+                    new Key.From(String.format("%s.yaml", repo))
                 )
             ).thenCompose(
                 content -> {
