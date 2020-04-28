@@ -60,7 +60,7 @@ class YamlStorageSettingsTest {
     }
 
     @Test
-    public void shouldBuildS3StorageFromSettings(final Vertx vertx) throws Exception {
+    public void shouldBuildS3StorageFromFullSettings(final Vertx vertx) throws Exception {
         final YamlStorageSettings settings = new YamlStorageSettings(
             Yaml.createYamlInput(
                 String.join(
@@ -69,6 +69,29 @@ class YamlStorageSettingsTest {
                     "bucket: my-bucket\n",
                     "region: my-region\n",
                     "endpoint: https://my-s3-provider.com\n",
+                    "credentials:\n",
+                    "  type: basic\n",
+                    "  accessKeyId: ***\n",
+                    "  secretAccessKey: ***\n"
+                )
+            ).readYamlMapping(),
+            vertx
+        );
+        MatcherAssert.assertThat(
+            settings.storage(),
+            Matchers.instanceOf(S3Storage.class)
+        );
+    }
+
+    @Test
+    public void shouldBuildS3StorageFromMinimalSettings(final Vertx vertx) throws Exception {
+        System.getProperties().put("aws.region", "my-region");
+        final YamlStorageSettings settings = new YamlStorageSettings(
+            Yaml.createYamlInput(
+                String.join(
+                    "",
+                    "type: s3\n",
+                    "bucket: my-bucket\n",
                     "credentials:\n",
                     "  type: basic\n",
                     "  accessKeyId: ***\n",
