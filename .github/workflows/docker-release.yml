@@ -11,6 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - name: Set env
+        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
+      - name: Test
+        run: |
+          echo ${{ env.RELEASE_VERSION }}
       - name: Publish Image to Docker Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
@@ -18,4 +23,4 @@ jobs:
           username: artipie
           password: ${{ secrets.DOCKER_PASSWORD }}
           cache: true
-          tag_names: true
+          tags: "latest,${{ env.RELEASE_VERSION }}"
