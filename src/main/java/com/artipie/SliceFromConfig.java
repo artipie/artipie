@@ -27,21 +27,17 @@ package com.artipie;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
-import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
 import com.artipie.rpm.http.RpmSlice;
-import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice from repo config.
@@ -50,27 +46,16 @@ import org.reactivestreams.Publisher;
  *  a more cohesive class that could be tested. Write unit tests for SliceFromConfig class.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-public final class SliceFromConfig implements Slice {
-
-    /**
-     * Repository config.
-     */
-    private final RepoConfig config;
+public final class SliceFromConfig extends Slice.Wrap {
 
     /**
      * Ctor.
      * @param config Repo config
      */
     public SliceFromConfig(final RepoConfig config) {
-        this.config = config;
-    }
-
-    @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
-        return new AsyncSlice(
-            SliceFromConfig.build(this.config)
-        ).response(line, headers, body);
+        super(
+            new AsyncSlice(SliceFromConfig.build(config))
+        );
     }
 
     /**
