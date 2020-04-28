@@ -25,34 +25,24 @@
 package com.artipie;
 
 import com.artipie.asto.Key;
-import com.artipie.composer.http.PhpComposer;
-import com.artipie.files.FilesSlice;
-import com.artipie.gem.GemSlice;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import com.artipie.maven.http.MavenSlice;
-import com.artipie.npm.Npm;
-import com.artipie.npm.http.NpmSlice;
-import com.artipie.rpm.http.RpmSlice;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Function;
 import org.cactoos.scalar.Unchecked;
 import org.reactivestreams.Publisher;
 
 /**
  * Pie of slices.
  * @since 1.0
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class Pie implements Slice {
@@ -101,54 +91,7 @@ public final class Pie implements Slice {
                     storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
                 )
                 .thenApply(content -> new RepoConfig(this.vertx, content))
-                .thenCompose(Pie::sliceForConfig)
+                .thenApply(cfg -> new SliceFromConfig(cfg))
         ).response(line, headers, body);
     }
-
-    /**
-     * Find a slice implementation for config.
-     * @param cfg Repository config
-     * @return Async slice
-     * @todo #76:30min Extract the logic in switch into separate class.
-     *  It can be named like `SliceFromConfig`: it implements Slice interface
-     *  and behaves as a factory by creating `Slice` instance for configuration.
-     */
-    private static CompletionStage<Slice> sliceForConfig(final RepoConfig cfg) {
-        return cfg.type().thenCombine(
-            cfg.storage(),
-            (type, storage) -> {
-                final CompletionStage<Slice> slice;
-                switch (type) {
-                    case "file":
-                        slice = CompletableFuture.completedStage(new FilesSlice(storage));
-                        break;
-                    case "npm":
-                        slice = CompletableFuture.completedStage(
-                            new NpmSlice(new Npm(storage), storage)
-                        );
-                        break;
-                    case "gem":
-                        slice = CompletableFuture.completedStage(new GemSlice(storage));
-                        break;
-                    case "rpm":
-                        slice = CompletableFuture.completedStage(new RpmSlice(storage));
-                        break;
-                    case "php":
-                        slice = cfg.path().thenApply(
-                            path -> new PhpComposer(path, storage)
-                        );
-                        break;
-                    case "maven":
-                        slice = CompletableFuture.completedStage(new MavenSlice(storage));
-                        break;
-                    default:
-                        throw new IllegalStateException(
-                            String.format("Unsupported repository type '%s'", type)
-                        );
-                }
-                return slice;
-            }
-        ).thenCompose(Function.identity());
-    }
 }
-
