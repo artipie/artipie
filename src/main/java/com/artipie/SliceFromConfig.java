@@ -27,6 +27,7 @@ package com.artipie;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
+import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.maven.http.MavenSlice;
@@ -95,6 +96,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                     ),
                     new MapEntry<>(
                         "maven", config -> CompletableFuture.completedStage(new MavenSlice(storage))
+                    ),
+                    new MapEntry<>(
+                        "go", config -> CompletableFuture.completedStage(new GoSlice(storage))
                     )
                 ).get(type).apply(cfg);
             }
