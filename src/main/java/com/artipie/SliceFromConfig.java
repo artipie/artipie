@@ -33,6 +33,9 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
+import com.artipie.npm.proxy.NpmProxy;
+import com.artipie.npm.proxy.NpmProxyConfig;
+import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.rpm.http.RpmSlice;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -99,6 +102,19 @@ public final class SliceFromConfig extends Slice.Wrap {
                     ),
                     new MapEntry<>(
                         "go", config -> CompletableFuture.completedStage(new GoSlice(storage))
+                    ),
+                    new MapEntry<>(
+                        "npm-proxy", config -> config.path().thenCombine(
+                            config.settings(),
+                            (path, settings) -> new NpmProxySlice(
+                                path,
+                                new NpmProxy(
+                                    new NpmProxyConfig(settings.orElseThrow()),
+                                    cfg.vertx(),
+                                    storage
+                                )
+                            )
+                        )
                     )
                 ).get(type).apply(cfg);
             }
