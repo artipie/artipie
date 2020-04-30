@@ -43,7 +43,7 @@ import org.reactivestreams.Publisher;
  * Repository config.
  * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.AvoidFieldNameMatchingMethodName"})
 public final class RepoConfig {
 
     /**
@@ -105,6 +105,14 @@ public final class RepoConfig {
         return this.repo().thenApply(
             map -> Optional.ofNullable(map.yamlMapping("settings"))
         );
+    }
+
+    /**
+     * Get vertx instance.
+     * @return Vertx instance
+     */
+    public Vertx vertx() {
+        return this.vertx;
     }
 
     /**
