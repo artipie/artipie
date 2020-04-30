@@ -96,9 +96,10 @@ Permissions section maps users and list of permissions for each user. Wildcard a
 for both users and permissions. Asterisk for user means that any user has listed permissions, 
 asterisk for permission means that the user is allowed to do anything. In yaml configuration file 
 `*` has to be escaped with `\`. 
-### Examples
 
-NPM-js registry. First create the directory for repository configs `mkdir /tmp/artipie`,
+### Example
+
+First create the directory for repository configs `mkdir /tmp/artipie`,
 actual repository configurations: `mkdir /tmp/artipie/repos` and repository data:
 `mkdir /tmp/artipie/data`.
 Put yaml config for Artipie server into `/tmp/artipie/config.yaml`:
@@ -108,13 +109,26 @@ meta:
     type: fs
     path: /tmp/artipie/repos
 ```
+
+Then put repository config files into `/tmp/artipie/repos` directory (see
+examples below).
+
+Before running the server make sure your java version is >= 11 version: `java -version`.
+
+Build Artipie server if needed: `mvn clean package` and run it with command:
+```bash
+java -jar ./target/artipie-jar-with-dependencies.jar --config-file=/tmp/artipie/config.yaml --port=8080
+```
+
+
+#### NPM registry config
 Create NPM repository configuration file in `/tmp/artipie/repos/npm.yaml`:
 ```yaml
 repo:
   type: npm
   storage:
     type: fs
-    path: /tmp/artipie/data
+    path: /tmp/artipie/data/npm
   permissions:  
     admin:
       - \*
@@ -127,18 +141,34 @@ repo:
       - download
 ```
 
-Before running the server make sure your java version is >= 11 version: `java -version`.
-
-Build Artipie server if needed: `mvn clean package` and run it with command:
-```bash
-java -jar ./target/artipie-jar-with-dependencies.jar --config-file=/tmp/artipie/config.yaml --port=8080
-```
-
-Then go into your npm project and publish it to local registry using command:
+To publish your npm project use the following command:
 ```bash
 npm publish --registry=http://localhost:8080/npm
 ```
 
+#### NPM Proxy registry config
+
+Create NPM Proxy repository configuration file in `/tmp/artipie/repos/npm-proxy.yaml`:
+```yaml
+repo:
+  type: npm-proxy
+  path: npm-proxy
+  storage:
+    type: fs
+    path: /tmp/artipie/data/npm-proxy
+  settings:
+    remote:
+      url: https://registry.npmjs.org
+```
+
+To use it for downloading packages use the following command:
+```bash
+npm install --registry=http://localhost:8080/npm-proxy <package name>
+```
+or set it as a default repository:
+```bash
+npm set registry http://localhost:8080/npm-proxy
+```
 
 ### Artipie architecture
 
