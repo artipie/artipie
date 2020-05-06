@@ -107,18 +107,13 @@ SOFTWARE.
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
-      <artifactId>http</artifactId>
-      <version>0.7.4</version>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
       <version>0.17</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>vertx-server</artifactId>
-      <version>0.2.2</version>
+      <version>0.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -143,12 +138,27 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>gem-adapter</artifactId>
-      <version>0.1</version>
+      <version>0.1.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>composer-adapter</artifactId>
       <version>0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>go-adapter</artifactId>
+      <version>0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>npm-proxy-adapter</artifactId>
+      <version>0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>nuget-adapter</artifactId>
+      <version>0.1.2</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>

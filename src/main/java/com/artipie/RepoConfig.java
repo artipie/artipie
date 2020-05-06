@@ -32,6 +32,8 @@ import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
 import io.vertx.reactivex.core.Vertx;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -43,7 +45,7 @@ import org.reactivestreams.Publisher;
  * Repository config.
  * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.AvoidFieldNameMatchingMethodName"})
 public final class RepoConfig {
 
     /**
@@ -71,9 +73,7 @@ public final class RepoConfig {
      * @return Async string of type
      */
     public CompletionStage<String> type() {
-        return this.repo().thenApply(
-            map -> Objects.requireNonNull(map.string("type"), "yaml repo.type is null")
-        );
+        return this.string("type");
     }
 
     /**
@@ -81,8 +81,26 @@ public final class RepoConfig {
      * @return Async string of path
      */
     public CompletionStage<String> path() {
-        return this.repo().thenApply(
-            map -> Objects.requireNonNull(map.string("path"), "yaml repo.path is null")
+        return this.string("path");
+    }
+
+    /**
+     * Repository URL.
+     *
+     * @return Async string of URL
+     */
+    public CompletionStage<URL> url() {
+        return this.string("url").thenApply(
+            str -> {
+                try {
+                    return new URL(str);
+                } catch (final MalformedURLException ex) {
+                    throw new IllegalArgumentException(
+                        String.format("Failed to build URL from '%s'", str),
+                        ex
+                    );
+                }
+            }
         );
     }
 
@@ -104,6 +122,29 @@ public final class RepoConfig {
     public CompletionStage<Optional<YamlMapping>> settings() {
         return this.repo().thenApply(
             map -> Optional.ofNullable(map.yamlMapping("settings"))
+        );
+    }
+
+    /**
+     * Get vertx instance.
+     * @return Vertx instance
+     */
+    public Vertx vertx() {
+        return this.vertx;
+    }
+
+    /**
+     * Reads string by key from repo part of YAML.
+     *
+     * @param key String key.
+     * @return String value.
+     */
+    private CompletionStage<String> string(final String key) {
+        return this.repo().thenApply(
+            map -> Objects.requireNonNull(
+                map.string(key),
+                String.format("yaml repo.%s is null", key)
+            )
         );
     }
 
