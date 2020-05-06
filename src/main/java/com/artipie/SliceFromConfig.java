@@ -72,7 +72,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      *  We should test if the type exist in the constructed map. If the type does not exist,
      *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
      */
-    static CompletionStage<Slice> build(final RepoConfig cfg) {
+    static CompletionStage<Slice> build(final RepoConfig cfg, final FileSystem fs) {
         return cfg.type().thenCombine(
             cfg.storage(),
             (type, storage) -> {

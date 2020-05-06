@@ -27,13 +27,13 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.http.GoSlice;
+import com.artipie.http.Slice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.http.NpmSlice;
 import com.artipie.rpm.http.RpmSlice;
 import io.reactivex.Flowable;
 import io.vertx.reactivex.core.Vertx;
 import java.nio.ByteBuffer;
-import java.util.concurrent.ExecutionException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.AfterEach;
@@ -52,49 +52,49 @@ class SliceFromConfigTest {
     private Vertx vertx;
 
     @Test
-    void returnsMavenSliceForMavenRepo() throws ExecutionException, InterruptedException {
+    void returnsMavenSliceForMavenRepo() throws Exception {
         MatcherAssert.assertThat(
-            SliceFromConfig.build(this.config("maven")).toCompletableFuture().get(),
+            this.buildSlice("maven"),
             new IsInstanceOf(MavenSlice.class)
         );
     }
 
     @Test
-    void returnsFileSliceForFileRepo() throws ExecutionException, InterruptedException {
+    void returnsFileSliceForFileRepo() throws Exception {
         MatcherAssert.assertThat(
-            SliceFromConfig.build(this.config("file")).toCompletableFuture().get(),
+            this.buildSlice("file"),
             new IsInstanceOf(FilesSlice.class)
         );
     }
 
     @Test
-    void returnsNpmSliceForNpmRepo() throws ExecutionException, InterruptedException {
+    void returnsNpmSliceForNpmRepo() throws Exception {
         MatcherAssert.assertThat(
-            SliceFromConfig.build(this.config("npm")).toCompletableFuture().get(),
+            this.buildSlice("npm"),
             new IsInstanceOf(NpmSlice.class)
         );
     }
 
     @Test
-    void returnsRpmSliceForRpmRepo() throws ExecutionException, InterruptedException {
+    void returnsRpmSliceForRpmRepo() throws Exception {
         MatcherAssert.assertThat(
-            SliceFromConfig.build(this.config("rpm")).toCompletableFuture().get(),
+            this.buildSlice("rpm"),
             new IsInstanceOf(RpmSlice.class)
         );
     }
 
     @Test
-    void returnsPhpSliceForPhpRepo() throws ExecutionException, InterruptedException {
+    void returnsPhpSliceForPhpRepo() throws Exception {
         MatcherAssert.assertThat(
-            SliceFromConfig.build(this.config("php")).toCompletableFuture().get(),
+            this.buildSlice("php"),
             new IsInstanceOf(PhpComposer.class)
         );
     }
 
     @Test
-    void returnsGoSliceForGoRepo() throws ExecutionException, InterruptedException {
+    void returnsGoSliceForGoRepo() throws Exception {
         MatcherAssert.assertThat(
-            SliceFromConfig.build(this.config("go")).toCompletableFuture().get(),
+            this.buildSlice("go"),
             new IsInstanceOf(GoSlice.class)
         );
     }
@@ -115,27 +115,30 @@ class SliceFromConfigTest {
      * @return Config
      */
     @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-    private RepoConfig config(final String type) {
-        return new RepoConfig(
-            this.vertx,
-            Flowable.just(
-                ByteBuffer.wrap(
-                    Yaml.createYamlMappingBuilder()
-                        .add(
-                            "repo",
-                            Yaml.createYamlMappingBuilder()
-                                .add("type", type)
-                                .add("path", "some")
-                                .add(
-                                    "storage",
-                                    Yaml.createYamlMappingBuilder()
-                                        .add("type", "fs")
-                                        .add("path", "/opt/storage").build()
-                                ).build()
-                        ).build().toString().getBytes()
+    private Slice buildSlice(final String type) throws Exception {
+        return SliceFromConfig.build(
+            new RepoConfig(
+                this.vertx,
+                Flowable.just(
+                    ByteBuffer.wrap(
+                        Yaml.createYamlMappingBuilder()
+                            .add(
+                                "repo",
+                                Yaml.createYamlMappingBuilder()
+                                    .add("type", type)
+                                    .add("path", "some")
+                                    .add(
+                                        "storage",
+                                        Yaml.createYamlMappingBuilder()
+                                            .add("type", "fs")
+                                            .add("path", "/opt/storage").build()
+                                    ).build()
+                            ).build().toString().getBytes()
+                    )
                 )
-            )
-        );
+            ),
+            this.vertx.fileSystem()
+        ).toCompletableFuture().get();
     }
 
 }
