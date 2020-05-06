@@ -33,7 +33,11 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
+import com.artipie.npm.proxy.NpmProxy;
+import com.artipie.npm.proxy.NpmProxyConfig;
+import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.rpm.http.RpmSlice;
+import io.vertx.reactivex.core.file.FileSystem;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
@@ -44,22 +48,25 @@ import org.cactoos.map.MapOf;
  * Slice from repo config.
  * @since 0.1.4
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ParameterNameCheck (500 lines)
  */
 public final class SliceFromConfig extends Slice.Wrap {
 
     /**
      * Ctor.
      * @param config Repo config
+     * @param fs The file system
      */
-    public SliceFromConfig(final RepoConfig config) {
+    public SliceFromConfig(final RepoConfig config, final FileSystem fs) {
         super(
-            new AsyncSlice(SliceFromConfig.build(config))
+            new AsyncSlice(SliceFromConfig.build(config, fs))
         );
     }
 
     /**
      * Find a slice implementation for config.
      * @param cfg Repository config
+     * @param fs The file system
      * @return Slice completionStage
      * @todo #90:30min This method still needs more refactoring.
      *  We should test if the type exist in the constructed map. If the type does not exist,
@@ -79,7 +86,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                         )
                     ),
                     new MapEntry<>(
-                        "gem", config -> CompletableFuture.completedStage(new GemSlice(storage))
+                        "gem", config -> CompletableFuture.completedStage(new GemSlice(storage, fs))
                     ),
                     new MapEntry<>(
                         "rpm", config -> CompletableFuture.completedStage(new RpmSlice(storage))
@@ -97,6 +104,19 @@ public final class SliceFromConfig extends Slice.Wrap {
                     ),
                     new MapEntry<>(
                         "go", config -> CompletableFuture.completedStage(new GoSlice(storage))
+                    ),
+                    new MapEntry<>(
+                        "npm-proxy", config -> config.path().thenCombine(
+                            config.settings(),
+                            (path, settings) -> new NpmProxySlice(
+                                path,
+                                new NpmProxy(
+                                    new NpmProxyConfig(settings.orElseThrow()),
+                                    cfg.vertx(),
+                                    storage
+                                )
+                            )
+                        )
                     )
                 ).get(type).apply(cfg);
             }
