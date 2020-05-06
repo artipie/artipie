@@ -24,6 +24,7 @@
 
 package com.artipie;
 
+import com.artipie.asto.Storage;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
@@ -36,6 +37,7 @@ import com.artipie.npm.http.NpmSlice;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.NpmProxyConfig;
 import com.artipie.npm.proxy.http.NpmProxySlice;
+import com.artipie.nuget.http.NuGet;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.file.FileSystem;
 import java.util.concurrent.CompletableFuture;
@@ -95,11 +97,11 @@ public final class SliceFromConfig extends Slice.Wrap {
                     ),
                     new MapEntry<>(
                         "php",
-                        config -> {
-                            return config.path().thenApply(
-                                path -> new PhpComposer(path, storage)
-                            );
-                        }
+                        config -> php(config, storage)
+                    ),
+                    new MapEntry<>(
+                        "nuget",
+                        config -> nuGet(cfg, storage)
                     ),
                     new MapEntry<>(
                         "maven", config -> CompletableFuture.completedStage(new MavenSlice(storage))
@@ -123,5 +125,33 @@ public final class SliceFromConfig extends Slice.Wrap {
                 ).get(type).apply(cfg);
             }
         ).thenCompose(Function.identity());
+    }
+
+    /**
+     * Creates PHP Composer slice.
+     *
+     * @param config Repository config.
+     * @param storage Storage.
+     * @return Slice instance.
+     */
+    private static CompletionStage<Slice> php(final RepoConfig config, final Storage storage) {
+        return config.path().thenApply(
+            path -> new PhpComposer(path, storage)
+        );
+    }
+
+    /**
+     * Creates NuGet slice.
+     *
+     * @param config Repository config.
+     * @param storage Storage.
+     * @return Slice instance.
+     */
+    private static CompletionStage<Slice> nuGet(final RepoConfig config, final Storage storage) {
+        return config.url().thenCompose(
+            url -> config.path().thenApply(
+                path -> new NuGet(url, path, storage)
+            )
+        );
     }
 }
