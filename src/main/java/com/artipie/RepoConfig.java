@@ -73,9 +73,7 @@ public final class RepoConfig {
      * @return Async string of type
      */
     public CompletionStage<String> type() {
-        return this.repo().thenApply(
-            map -> Objects.requireNonNull(map.string("type"), "yaml repo.type is null")
-        );
+        return this.string("type");
     }
 
     /**
@@ -83,9 +81,7 @@ public final class RepoConfig {
      * @return Async string of path
      */
     public CompletionStage<String> path() {
-        return this.repo().thenApply(
-            map -> Objects.requireNonNull(map.string("path"), "yaml repo.path is null")
-        );
+        return this.string("path");
     }
 
     /**
@@ -94,9 +90,7 @@ public final class RepoConfig {
      * @return Async string of URL
      */
     public CompletionStage<URL> url() {
-        return this.repo().thenApply(
-            map -> Objects.requireNonNull(map.string("url"), "yaml repo.url is null")
-        ).thenApply(
+        return this.string("url").thenApply(
             str -> {
                 try {
                     return new URL(str);
@@ -137,6 +131,21 @@ public final class RepoConfig {
      */
     public Vertx vertx() {
         return this.vertx;
+    }
+
+    /**
+     * Reads string by key from repo part of YAML.
+     *
+     * @param key String key.
+     * @return String value.
+     */
+    private CompletionStage<String> string(final String key) {
+        return this.repo().thenApply(
+            map -> Objects.requireNonNull(
+                map.string(key),
+                String.format("yaml repo.%s is null", key)
+            )
+        );
     }
 
     /**
