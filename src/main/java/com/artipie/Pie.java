@@ -30,11 +30,14 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.slice.SliceSimple;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.cactoos.scalar.Unchecked;
@@ -44,6 +47,7 @@ import org.reactivestreams.Publisher;
  * Pie of slices.
  * @since 1.0
  * @checkstyle ReturnCountCheck (500 lines)
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class Pie implements Slice {
 
@@ -83,15 +87,38 @@ public final class Pie implements Slice {
         }
         final String repo = parts[0];
         Logger.debug(this, "Slice repo=%s", repo);
+        final Key.From key = new Key.From(String.format("%s.yaml", repo));
         return new AsyncSlice(
             CompletableFuture.supplyAsync(
                 () -> new Unchecked<>(this.settings::storage).value()
-            )
-                .thenComposeAsync(
-                    storage -> storage.value(new Key.From(String.format("%s.yaml", repo)))
+            ).thenCompose(
+                storage -> storage.exists(key).thenApply(
+                    exist -> {
+                        final Slice slice;
+                        if (exist) {
+                            slice = new AsyncSlice(
+                                storage.value(key).thenApply(
+                                    content -> new SliceFromConfig(
+                                        new RepoConfig(this.vertx, content),
+                                        this.vertx.fileSystem()
+                                    )
+                                )
+                            );
+                        } else {
+                            slice = new SliceSimple(
+                                new RsWithStatus(
+                                    new RsWithBody(
+                                        String.format("Repository '%s' was not found", repo),
+                                        StandardCharsets.UTF_8
+                                    ),
+                                    RsStatus.NOT_FOUND
+                                )
+                            );
+                        }
+                        return slice;
+                    }
                 )
-                .thenApply(content -> new RepoConfig(this.vertx, content))
-                .thenApply(cfg -> new SliceFromConfig(cfg, this.vertx.fileSystem()))
+            )
         ).response(line, headers, body);
     }
 }
