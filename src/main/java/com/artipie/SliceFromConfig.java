@@ -49,8 +49,6 @@ import org.cactoos.map.MapOf;
 /**
  * Slice from repo config.
  * @since 0.1.4
- * @todo #90:30min We still don't have tests for Pie. But now that this class was extracted, we have
- *  a more cohesive class that could be tested. Write unit tests for SliceFromConfig class.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ParameterNameCheck (500 lines)
  */
@@ -76,7 +74,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      *  We should test if the type exist in the constructed map. If the type does not exist,
      *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
      */
-    private static CompletionStage<Slice> build(final RepoConfig cfg, final FileSystem fs) {
+    static CompletionStage<Slice> build(final RepoConfig cfg, final FileSystem fs) {
         return cfg.type().thenCombine(
             cfg.storage(),
             (type, storage) -> {
