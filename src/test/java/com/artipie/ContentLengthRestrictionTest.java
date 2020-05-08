@@ -37,16 +37,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 /**
- * Test for {@link ContentLengthLimiter}.
+ * Test for {@link ContentLengthRestriction}.
  *
  * @since 0.2
  */
-class ContentLengthLimiterTest {
+class ContentLengthRestrictionTest {
 
     @Test
     public void shouldNotPassRequestsAboveLimit() {
         final int limit = 10;
-        final Slice slice = new ContentLengthLimiter(
+        final Slice slice = new ContentLengthRestriction(
             (line, headers, body) -> new RsWithStatus(RsStatus.OK),
             limit
         );
@@ -57,7 +57,7 @@ class ContentLengthLimiterTest {
     @ParameterizedTest
     @CsvSource({"10,0", "10,not number", "10,1", "10,10"})
     public void shouldPassRequestsWithinLimit(final int limit, final String value) {
-        final Slice slice = new ContentLengthLimiter(
+        final Slice slice = new ContentLengthRestriction(
             (line, headers, body) -> new RsWithStatus(RsStatus.OK),
             limit
         );
@@ -68,7 +68,7 @@ class ContentLengthLimiterTest {
     @Test
     public void shouldPassRequestsWithoutContentLength() {
         final int limit = 10;
-        final Slice slice = new ContentLengthLimiter(
+        final Slice slice = new ContentLengthRestriction(
             (line, headers, body) -> new RsWithStatus(RsStatus.OK),
             limit
         );

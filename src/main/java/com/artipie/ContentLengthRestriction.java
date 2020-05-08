@@ -39,7 +39,7 @@ import org.reactivestreams.Publisher;
  *
  * @since 0.2
  */
-public final class ContentLengthLimiter implements Slice {
+public final class ContentLengthRestriction implements Slice {
 
     /**
      * Delegate slice.
@@ -57,7 +57,7 @@ public final class ContentLengthLimiter implements Slice {
      * @param delegate Delegate slice.
      * @param limit Max allowed value.
      */
-    public ContentLengthLimiter(final Slice delegate, final long limit) {
+    public ContentLengthRestriction(final Slice delegate, final long limit) {
         this.delegate = delegate;
         this.limit = limit;
     }
