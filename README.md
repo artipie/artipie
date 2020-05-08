@@ -34,7 +34,7 @@ and proxies current request to this slice.
 
 ### Run Artipie as a Docker image
 
-Create new directory for Artipie storage, `cd` into this directory.
+You have [Docker installed](https://docs.docker.com/get-docker/) to run it. Create new directory for Artipie storage, `cd` into this directory.
 Create subdirectory with `repo` name. Put all repository configuration files to
 `repo` directory, the name of config file is the name of repository.
 Start Docker container with mounting current directory to `/var/artipie`:
