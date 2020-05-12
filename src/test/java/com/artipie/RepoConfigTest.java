@@ -28,6 +28,7 @@ import com.artipie.asto.fs.RxFile;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -48,7 +49,7 @@ public final class RepoConfigTest {
     @Test
     public void readsCustom()
         throws URISyntaxException, ExecutionException, InterruptedException {
-        final RepoConfig config = this.readFromResource("repo-full-config.yml");
+        final RepoConfig config = this.readFull();
         final YamlMapping yaml = config.settings().toCompletableFuture().get().orElseThrow();
         MatcherAssert.assertThat(
             yaml.string("custom-property"),
@@ -59,10 +60,29 @@ public final class RepoConfigTest {
     @Test
     public void failsToReadCustom()
         throws URISyntaxException, ExecutionException, InterruptedException {
-        final RepoConfig config = this.readFromResource("repo-min-config.yml");
+        final RepoConfig config = this.readMin();
         MatcherAssert.assertThat(
             "Unexpected custom config",
             config.settings().toCompletableFuture().get().isEmpty()
+        );
+    }
+
+    @Test
+    public void readContentLengthMax() throws Exception {
+        final RepoConfig config = this.readFull();
+        final long value = 123L;
+        MatcherAssert.assertThat(
+            config.contentLengthMax().toCompletableFuture().join(),
+            new IsEqual<>(Optional.of(value))
+        );
+    }
+
+    @Test
+    public void readEmptyContentLengthMax() throws Exception {
+        final RepoConfig config = this.readMin();
+        MatcherAssert.assertThat(
+            config.contentLengthMax().toCompletableFuture().join().isEmpty(),
+            new IsEqual<>(true)
         );
     }
 
@@ -74,6 +94,14 @@ public final class RepoConfigTest {
     @AfterEach
     void tearDown() {
         this.vertx.close();
+    }
+
+    private RepoConfig readFull() throws URISyntaxException {
+        return this.readFromResource("repo-full-config.yml");
+    }
+
+    private RepoConfig readMin() throws URISyntaxException {
+        return this.readFromResource("repo-min-config.yml");
     }
 
     private RepoConfig readFromResource(final String name)

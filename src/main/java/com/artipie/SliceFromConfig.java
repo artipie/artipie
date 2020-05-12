@@ -126,7 +126,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                     )
                 ).get(type).apply(cfg);
             }
-        ).thenCompose(Function.identity());
+        ).thenCompose(Function.identity()).thenCompose(
+            slice -> cfg.contentLengthMax().thenApply(
+                opt -> opt.<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
+                    .orElse(slice)
+            )
+        );
     }
 
     /**
