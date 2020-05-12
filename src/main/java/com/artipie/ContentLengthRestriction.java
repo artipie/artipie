@@ -72,7 +72,7 @@ public final class ContentLengthRestriction implements Slice {
         if (new RqHeaders(headers, "Content-Length").stream().allMatch(this::withinLimit)) {
             response = this.delegate.response(line, headers, body);
         } else {
-            response = new RsWithStatus(RsStatus.BAD_REQUEST);
+            response = new RsWithStatus(RsStatus.PAYLOAD_TOO_LARGE);
         }
         return response;
     }
