@@ -105,6 +105,15 @@ public final class RepoConfig {
     }
 
     /**
+     * Read maximum allowed Content-Length value for incoming requests.
+     *
+     * @return Maximum allowed value, empty if none specified.
+     */
+    public CompletionStage<Optional<Long>> contentLengthMax() {
+        return this.stringOpt("content-length-max").thenApply(opt -> opt.map(Long::valueOf));
+    }
+
+    /**
      * Storage.
      * @return Async storage for repo
      */
@@ -140,12 +149,21 @@ public final class RepoConfig {
      * @return String value.
      */
     private CompletionStage<String> string(final String key) {
-        return this.repo().thenApply(
-            map -> Objects.requireNonNull(
-                map.string(key),
-                String.format("yaml repo.%s is null", key)
+        return this.stringOpt(key).thenApply(
+            opt -> opt.orElseThrow(
+                () -> new IllegalStateException(String.format("yaml repo.%s is absent", key))
             )
         );
+    }
+
+    /**
+     * Reads string by key from repo part of YAML.
+     *
+     * @param key String key.
+     * @return String value, empty if none present.
+     */
+    private CompletionStage<Optional<String>> stringOpt(final String key) {
+        return this.repo().thenApply(map -> Optional.ofNullable(map.string(key)));
     }
 
     /**
