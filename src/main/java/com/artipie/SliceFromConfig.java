@@ -38,6 +38,7 @@ import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.NpmProxyConfig;
 import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
+import com.artipie.pypi.PySlice;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.file.FileSystem;
 import java.util.concurrent.CompletableFuture;
@@ -119,6 +120,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                                 )
                             )
                         )
+                    ),
+                    new MapEntry<>(
+                        "pypi", config -> pypi(cfg, storage)
                     )
                 ).get(type).apply(cfg);
             }
@@ -135,6 +139,19 @@ public final class SliceFromConfig extends Slice.Wrap {
     private static CompletionStage<Slice> php(final RepoConfig config, final Storage storage) {
         return config.path().thenApply(
             path -> new PhpComposer(path, storage)
+        );
+    }
+
+    /**
+     * Creates Python slice.
+     *
+     * @param config Repository config.
+     * @param storage Storage.
+     * @return Slice instance.
+     */
+    private static CompletionStage<Slice> pypi(final RepoConfig config, final Storage storage) {
+        return config.path().thenApply(
+            path ->  new PySlice(path, storage)
         );
     }
 
