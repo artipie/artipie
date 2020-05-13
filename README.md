@@ -39,7 +39,7 @@ Create subdirectory with `repo` name. Put all repository configuration files to
 `repo` directory, the name of config file is the name of repository.
 Start Docker container with mounting current directory to `/var/artipie`:
 ```bash
-docker run -v $PWD:/var/artipie -p 80:80 artipie/artipie:0.1.2
+docker run -v $PWD:/var/artipie -p 80:80 artipie/artipie:latest
 ```
 
 ### Configuration
