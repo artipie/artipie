@@ -54,7 +54,7 @@ repo:
 Finally, start the container:
 
 ```bash
-$ docker run -v "$(pwd):/var/artipie" -p 80:8080 artipie/artipie
+$ docker run -v "$(pwd):/var/artipie" -p 8080:80 artipie/artipie
 ```
 
 You should be able to use it with Maven at `http://localhost:8080`.
@@ -65,7 +65,7 @@ understand how Artipie is designed.
 
 ## Binary Repo
 
-Try this:
+Try this `repo.yml` file:
 
 ```yaml
 repo:
@@ -75,14 +75,13 @@ repo:
     path: /var/artipie/storage
 ```
 
-You can send HTTP PUT requests
-to `<hostname>/myrepo/<filename>` to upload binary file,
-e.g. `PUT localhost/myrepo/libsqlite3.so HTTP/1.1`,
-and `GET localhost/myrep/libsqlite3.so HTTP/1.1` to download it.
+You can send HTTP PUT/GET requests
+to `http://localhost:8080/repo/<filename>` to upload/download a binary file,
+e.g. `http://localhost:8080/repo/libsqlite3.so`.
 
 ## Maven Repo
 
-Try this:
+Try this `maven.yaml` file:
 
 ```yaml
 repo:
@@ -92,18 +91,17 @@ repo:
     path: /var/artipie/maven
 ```
 
-Add `<distributionManagement>` to your `pom.xml`
-(replace `localhost` with the actual Artipie server address):
+Add `<distributionManagement>` to your `pom.xml`:
 
 ```xml
 <distributionManagement>
   <snapshotRepository>
     <id>artipie</id>
-    <url>http://localhost/maven</url>
+    <url>http://localhost:8080/maven</url>
   </snapshotRepository>
   <repository>
     <id>artipie</id>
-    <url>http://localhost/maven</url>
+    <url>http://localhost:8080/maven</url>
   </repository>
 </distributionManagement>
 ```
@@ -119,14 +117,14 @@ it via `settings.xml`) to use deployed artifacts:
   <pluginRepository>
     <id>artipie</id>
     <name>artipie plugins</name>
-    <url>http://localhost/maven</url>
+    <url>http://localhost:8080/maven</url>
   </pluginRepository>
 </pluginRepositories>
 <repositories>
   <repository>
     <id>artipie</id>
     <name>artipie builds</name>
-    <url>http://localhost/maven</url>
+    <url>http://localhost:8080/maven</url>
   </repository>
 </repositories>
 ```
@@ -166,7 +164,7 @@ On the client machine add local repository to the list of repos:
 
 ## NPM Repo
 
-Try this:
+Try this `npm.yaml` file:
 
 ```yaml
 repo:
@@ -194,7 +192,7 @@ $ npm publish --registry=http://localhost:8080/npm
 
 ## NPM Proxy Repo
 
-Try this:
+Try this `npm-proxy.yaml` file:
 
 ```yaml
 repo:
@@ -222,7 +220,7 @@ $ npm set registry http://localhost:8080/npm-proxy
 
 ## Go Repo
 
-Try this:
+Try this `go.yaml` file:
 
 ```yaml
 repo:
