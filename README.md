@@ -1,17 +1,17 @@
 <img src="https://www.artipie.com/logo.svg" width="64px" height="64px"/>
 
 [![EO principles respected here](https://www.elegantobjects.org/badge.svg)](https://www.elegantobjects.org)
-[![DevOps By Rultor.com](http://www.rultor.com/b/yegor256/artipie)](http://www.rultor.com/p/yegor256/artipie)
+[![DevOps By Rultor.com](http://www.rultor.com/b/artipie/artipie)](http://www.rultor.com/p/artipie/artipie)
 [![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
 
-[![Build Status](https://img.shields.io/travis/yegor256/artipie/master.svg)](https://travis-ci.org/yegor256/artipie)
-[![Javadoc](http://www.javadoc.io/badge/com.yegor256/artipie.svg)](http://www.javadoc.io/doc/com.yegor256/artipie)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/yegor256/artipie/blob/master/LICENSE.txt)
-[![Hits-of-Code](https://hitsofcode.com/github/yegor256/artipie)](https://hitsofcode.com/view/github/yegor256/artipie)
-[![Maven Central](https://img.shields.io/maven-central/v/com.yegor256/artipie.svg)](https://maven-badges.herokuapp.com/maven-central/com.yegor256/artipie)
-[![PDD status](http://www.0pdd.com/svg?name=yegor256/artipie)](http://www.0pdd.com/p?name=yegor256/artipie)
+[![Build Status](https://img.shields.io/travis/artipie/artipie/master.svg)](https://travis-ci.org/artipie/artipie)
+[![Javadoc](http://www.javadoc.io/badge/com.artipie/artipie.svg)](http://www.javadoc.io/doc/com.artipie/artipie)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
+[![Hits-of-Code](https://hitsofcode.com/github/artipie/artipie)](https://hitsofcode.com/view/github/artipie/artipie)
+[![Maven Central](https://img.shields.io/maven-central/v/com.artipie/artipie.svg)](https://maven-badges.herokuapp.com/maven-central/com.artipie/artipie)
+[![PDD status](http://www.0pdd.com/svg?name=artipie/artipie)](http://www.0pdd.com/p?name=artipie/artipie)
 
-Artipie is an experimental binary artifacts manager, similar to
+Artipie is an experimental binary artifact management tool, similar to
 [Artifactory](https://jfrog.com/artifactory/),
 [Nexus](https://www.sonatype.com/product-nexus-repository),
 [Archiva](https://archiva.apache.org/),
@@ -31,7 +31,8 @@ The fastest way to start using Artipie is via
 [Docker](https://docs.docker.com/get-docker/). First,
 create a new directory and a `repo` sub-directory inside it. Then, put your
 YAML config file into the `repo` sub-dir. Make sure that the name of your config file
-is the name of repository you are going to host, for example `foo.yaml`:
+is the name of repository you are going to host, and its name matches `[a-z0-9_]{3,32}`.
+For example `foo.yaml`:
 
 ```yaml
 repo:
@@ -52,32 +53,30 @@ $ docker run -v "$(pwd):/var/artipie" -p 80:8080 artipie/artipie
 
 You should be able to use it with, for example, Maven, as `http://localhost:8080`.
 
-More usage examples are [here](https://github.com/artipie/artipie/wiki/Examples).
-
 We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
 understand how Artipie is designed.
 
-## YAML Config File
+## Binary Repo
 
-Repository configuration is a yaml file located at configuration
-directory root. Repository name will be the same as configuration file name (with `yaml` extension).
-A valid repository name must be 3-33 characters, may contain lower
-Latin characters, digits and underscores: `[a-z0-9_]{3,32}`:
+Try this:
 
- - `my_rpm_repo1` - valid
- - `2maven` - valid
- - `my-repo` - invalid
- - `MyRepo` - invalid
+```yaml
+repo:
+  type: rpm
+  storage:
+    type: fs
+    path: /var/artipie/storage
+```
 
-Repository configuration consists in two parts (some parts are optional):
+Start Artipie server with this file. Now you can send HTTP PUT requests
+to `<hostname>/myrepo/<filename>` to upload binary file,
+e.g. `PUT localhost/myrepo/libsqlite3.so HTTP/1.1`,
+and `GET localhost/myrep/libsqlite3.so HTTP/1.1` to download it.
 
-  * `type` (required) - repository type name, one of
-    `maven`, `file`, `rpm`, `nuget`, `npm`, `docker`, `go`, `php`, `npm-proxy`
-  * `storage` (required) - repository storage configuration, may be different for some storages
-  * `permissions` (optional) - permission settings, repository considered to be public if `permissions` is ommited
+## Maven Repo
 
-Example:
+Try this:
 
 ```yaml
 repo:
@@ -85,47 +84,182 @@ repo:
   storage:
     type: fs
     path: /var/artipie/maven
+```
+
+Add `<distributionManagement>` to your `pom.xml`
+(replace `localhost` with the actual Artipie server address):
+
+```xml
+<distributionManagement>
+  <snapshotRepository>
+    <id>artipie</id>
+    <url>http://localhost/maven</url>
+  </snapshotRepository>
+  <repository>
+    <id>artipie</id>
+    <url>http://localhost/maven</url>
+  </repository>
+</distributionManagement>
+```
+
+Then run `mvn deploy` from Maven project directory.
+
+Then you'll be able to install from this repository.
+Add `<repository>` and `<pluginRepository>`
+to your `pom.xml` (alternatively [configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
+it via `settings.xml`):
+
+```xml
+<pluginRepositories>
+  <pluginRepository>
+    <id>artipie</id>
+    <name>artipie plugins</name>
+    <url>http://localhost/maven</url>
+  </pluginRepository>
+</pluginRepositories>
+<repositories>
+  <repository>
+    <id>artipie</id>
+    <name>artipie builds</name>
+    <url>http://localhost/maven</url>
+  </repository>
+</repositories>
+```
+
+Muild your project with `mvn install` (or `mvn install -U` to force download dependencies).
+
+## RPM Repo
+
+Create new directory `/var/artipie`, directory for configuration files
+`/var/artipie/repo` and directory for RPM repository `/var/artipie/centos`.
+Put repository config file to `/var/artipie/repo/centos.yaml`:
+
+```yaml
+repo:
+  type: rpm
+  storage:
+    type: fs
+    path: /var/artipie/centos
+```
+
+Put all RPM packages to repository directory: `/var/artipie/centos/centos`.
+
+Optional: generate metadata using [CLI tool](https://github.com/artipie/rpm-adapter/).
+
+Start Artipie Docker image:
+
+```bash
+$ docker run -v /var/artipie:/var/artipie artipie/artipie
+```
+
+On the client machine add local repository to the list of repos:
+
+ - Install `yum-utils` if needed: `yum install yum-utils`
+ - Add repository: `yum-config-manager --add-repo=http://yourepo/`
+ - Refresh the repo: `yum upgrade all`
+ - Download packages: `yum install package-name`
+
+## NPM Repo
+
+Try this:
+
+```yaml
+repo:
+  type: npm
+  storage:
+    type: fs
+    path: /tmp/artipie/data/npm
   permissions:
-    user_name:
-      - download
+    admin:
+      - \*
+    john:
       - deploy
+      - delete
+    jane:
+      - deploy
+    \*:
+      - download
 ```
 
-The `storage/type` field can be `fs` for file system or `s3` for S3 blob storage API.
+To publish your npm project use the following command:
 
-File system storage should contain the location of storage root in the local file system:
+```bash
+$ npm publish --registry=http://localhost:8080/npm
+```
+
+## NPM Proxy Repo
+
+Try this:
 
 ```yaml
-storage:
-  type: fs
-  path: /var/artipie
+repo:
+  type: npm-proxy
+  path: npm-proxy
+  storage:
+    type: fs
+    path: /tmp/artipie/data/npm-proxy
+  settings:
+    remote:
+      url: https://registry.npmjs.org
 ```
 
-S3 storage configuration contains these parameters:
+To use it for downloading packages use the following command:
 
- - `bucket` (required) - S3 bucket name
- - `region` (optional) - AWS region name
- - `url` (optional) - S3 URL
- - `endpoint` (optional) - S3 endpoint, can be used for non-AWS S3 API
- - `credentials` (required) - S3 credentials
-   - `type` (required) - credentials type (can be `basic` for now)
-   - `accessKeyId` - AWS API access key for user with S3 bucket read and write permissions
-   - `secretAccessKey` - AWS API secret key for access key
+```bash
+$ npm install --registry=http://localhost:8080/npm-proxy <package name>
+```
 
-Example:
+or set it as a default repository:
+
+```bash
+$ npm set registry http://localhost:8080/npm-proxy
+```
+
+## Go Repo
+
+Try this:
 
 ```yaml
-storage:
-  type: s3
-  region: eu-central-1
-  url: s3://artipie.test/binary
-  endpoint: https://s3.eu-central-1.amazonaws.com
-  bucket: artipie.test
-  credentials:
-    type: basic
-    accessKeyId: <access-key>
-    secretAccessKey: <secret-key>
+repo:
+  type: go
+  storage:
+    type: fs
+    path: /tmp/artipie/data/go
+  permissions:
+    admin:
+      - \*
+    \*:
+      - download
 ```
+
+To use it for installing packages add it to `GOPROXY` environment variable:
+
+```bash
+$ export GOPROXY="http://localhost:8080/go,https://proxy.golang.org,direct"
+```
+
+Go packages have to be located in the local repository by their
+names and versions, contain Go module and dependencies information
+in `.mod` and `.info` files. Here is an example for package
+`example.com/foo/bar` versions `0.0.1` and `0.0.2`:
+
+```
+/example.com
+  /foo
+    /bar
+      /@v
+        list
+        v0.0.1.zip
+        v0.0.1.mod
+        v0.0.1.info
+        v0.0.2.zip
+        v0.0.2.mod
+        v0.0.2.info
+```
+
+`list` is simple text file with list of the available versions.
+You can use [go-adapter](https://github.com/artipie/go-adapter#how-it-works)
+to generate necessary files and layout for Go source code.
 
 ## How to contribute
 
