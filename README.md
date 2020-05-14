@@ -164,7 +164,7 @@ On the client machine add local repository to the list of repos:
 
 ## NPM Repo
 
-Try this:
+Try this `npm.yaml` file:
 
 ```yaml
 repo:
@@ -192,7 +192,7 @@ $ npm publish --registry=http://localhost:8080/npm
 
 ## NPM Proxy Repo
 
-Try this:
+Try this `npm-proxy.yaml` file:
 
 ```yaml
 repo:
@@ -220,7 +220,7 @@ $ npm set registry http://localhost:8080/npm-proxy
 
 ## Go Repo
 
-Try this:
+Try this `go.yaml` file:
 
 ```yaml
 repo:
