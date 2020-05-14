@@ -75,7 +75,7 @@ repo:
     path: /var/artipie/storage
 ```
 
-Start Artipie server with this file. Now you can send HTTP PUT requests
+You can send HTTP PUT requests
 to `<hostname>/myrepo/<filename>` to upload binary file,
 e.g. `PUT localhost/myrepo/libsqlite3.so HTTP/1.1`,
 and `GET localhost/myrep/libsqlite3.so HTTP/1.1` to download it.
@@ -108,12 +108,11 @@ Add `<distributionManagement>` to your `pom.xml`
 </distributionManagement>
 ```
 
-Then run `mvn deploy` from Maven project directory.
+Then, `mvn deploy` your project.
 
-Then you'll be able to install from this repository.
 Add `<repository>` and `<pluginRepository>`
 to your `pom.xml` (alternatively [configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
-it via `settings.xml`):
+it via `settings.xml`) to use deployed artifacts:
 
 ```xml
 <pluginRepositories>
@@ -132,7 +131,7 @@ it via `settings.xml`):
 </repositories>
 ```
 
-Muild your project with `mvn install` (or `mvn install -U` to force download dependencies).
+Run `mvn install` (or `mvn install -U` to force download dependencies).
 
 ## RPM Repo
 
@@ -269,7 +268,8 @@ to generate necessary files and layout for Go source code.
 
 ## How to contribute
 
-Fork the repository, make changes, and send us a pull request. We will review
+Fork the repository, make changes, and send us a
+[pull request](https://www.yegor256.com/2014/04/15/github-guidelines.html). We will review
 your changes and apply them to the `master` branch shortly, provided
 they don't violate our quality standards. To avoid frustration, before
 sending us your pull request please run full Maven build:
