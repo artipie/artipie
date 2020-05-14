@@ -22,7 +22,13 @@ The following set of features makes Artipie unique among all others:
   * It is open source (MIT license)
   * It is horizontally scalable, you can add servers easily
   * It is written in reactive Java (using [Vert.x](https://vertx.io/))
-  * It supports 10+ package managers, incl. Maven, NuGet, Pip, Gem, etc.
+  * It supports 10+ package managers, incl.
+    [Maven](https://maven.apache.org/),
+    [NuGet](https://www.nuget.org/),
+    [Pip](https://pypi.org/project/pip/),
+    [Bundler](https://bundler.io/),
+    [Go](https://golang.org/),
+    [Docker](https://www.docker.com/), etc.
   * It is database-free
   * It can host the data in the file system, Amazon S3, Google Cloud, etc.
   * Its quality of Java code is extraordinary high :)
@@ -51,7 +57,7 @@ Finally, start the container:
 $ docker run -v "$(pwd):/var/artipie" -p 80:8080 artipie/artipie
 ```
 
-You should be able to use it with, for example, Maven, as `http://localhost:8080`.
+You should be able to use it with Maven at `http://localhost:8080`.
 
 We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
