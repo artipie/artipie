@@ -65,7 +65,7 @@ understand how Artipie is designed.
 
 ## Binary Repo
 
-Try this 'repo.yml' file:
+Try this `repo.yml` file:
 
 ```yaml
 repo:
