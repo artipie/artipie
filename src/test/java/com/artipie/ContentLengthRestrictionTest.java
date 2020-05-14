@@ -51,7 +51,7 @@ class ContentLengthRestrictionTest {
             limit
         );
         final Response response = slice.response("", this.headers("11"), Flowable.empty());
-        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.BAD_REQUEST));
+        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.PAYLOAD_TOO_LARGE));
     }
 
     @ParameterizedTest
