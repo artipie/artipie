@@ -98,16 +98,19 @@ repo:
 Add `<distributionManagement>` to your `pom.xml`:
 
 ```xml
-<distributionManagement>
-  <snapshotRepository>
-    <id>artipie</id>
-    <url>http://localhost:8080/maven</url>
-  </snapshotRepository>
-  <repository>
-    <id>artipie</id>
-    <url>http://localhost:8080/maven</url>
-  </repository>
-</distributionManagement>
+<project>
+  [...]
+  <distributionManagement>
+    <snapshotRepository>
+      <id>artipie</id>
+      <url>http://localhost:8080/maven</url>
+    </snapshotRepository>
+    <repository>
+      <id>artipie</id>
+      <url>http://localhost:8080/maven</url>
+    </repository>
+  </distributionManagement>
+</project>
 ```
 
 Then, `mvn deploy` your project.
@@ -117,20 +120,23 @@ to your `pom.xml` (alternatively [configure](https://maven.apache.org/guides/min
 it via `settings.xml`) to use deployed artifacts:
 
 ```xml
-<pluginRepositories>
-  <pluginRepository>
-    <id>artipie</id>
-    <name>artipie plugins</name>
-    <url>http://localhost:8080/maven</url>
-  </pluginRepository>
-</pluginRepositories>
-<repositories>
-  <repository>
-    <id>artipie</id>
-    <name>artipie builds</name>
-    <url>http://localhost:8080/maven</url>
-  </repository>
-</repositories>
+<project>
+  [...]
+  <pluginRepositories>
+    <pluginRepository>
+      <id>artipie</id>
+      <name>artipie plugins</name>
+      <url>http://localhost:8080/maven</url>
+    </pluginRepository>
+  </pluginRepositories>
+  <repositories>
+    <repository>
+      <id>artipie</id>
+      <name>artipie builds</name>
+      <url>http://localhost:8080/maven</url>
+    </repository>
+  </repositories>
+</project>
 ```
 
 Run `mvn install` (or `mvn install -U` to force download dependencies).
