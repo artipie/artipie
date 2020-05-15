@@ -35,10 +35,10 @@ The following set of features makes Artipie unique among all others:
 
 The fastest way to start using Artipie is via
 [Docker](https://docs.docker.com/get-docker/). First,
-create a new directory and a `repo` sub-directory inside it. Then, put your
+create a new directory `artipie` and `repo` sub-directory inside it. Then, put your
 YAML config file into the `repo` sub-dir. Make sure that the name of your config file
 is the name of repository you are going to host, and its name matches `[a-z0-9_]{3,32}`.
-For example `foo.yaml`:
+For example `foo.yml`:
 
 ```yaml
 repo:
@@ -51,13 +51,17 @@ repo:
     password: 123qwe
 ```
 
-Finally, start the container:
+Now, go back to `artipie` and start the container:
 
 ```bash
 $ docker run -v "$(pwd):/var/artipie" -p 8080:80 artipie/artipie
 ```
 
-You should be able to use it with Maven at `http://localhost:8080`.
+You should be able to use it with [Maven](https://maven.apache.org/)
+at `http://localhost:8080`.
+
+In the sections below you can see how to configure Artipie
+to use it with different package managers.
 
 We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
@@ -81,7 +85,7 @@ e.g. `http://localhost:8080/repo/libsqlite3.so`.
 
 ## Maven Repo
 
-Try this `maven.yaml` file:
+Try this `maven.yml` file to host a [Maven](https://maven.apache.org/) repo:
 
 ```yaml
 repo:
@@ -91,42 +95,53 @@ repo:
     path: /var/artipie/maven
 ```
 
-Add `<distributionManagement>` to your `pom.xml`:
+Add [`<distributionManagement>`](https://maven.apache.org/pom.html#Distribution_Management)
+section to your
+[`pom.xml`](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html):
 
 ```xml
-<distributionManagement>
-  <snapshotRepository>
-    <id>artipie</id>
-    <url>http://localhost:8080/maven</url>
-  </snapshotRepository>
-  <repository>
-    <id>artipie</id>
-    <url>http://localhost:8080/maven</url>
-  </repository>
-</distributionManagement>
+<project>
+  [...]
+  <distributionManagement>
+    <snapshotRepository>
+      <id>artipie</id>
+      <url>http://localhost:8080/maven</url>
+    </snapshotRepository>
+    <repository>
+      <id>artipie</id>
+      <url>http://localhost:8080/maven</url>
+    </repository>
+  </distributionManagement>
+</project>
 ```
 
 Then, `mvn deploy` your project.
 
-Add `<repository>` and `<pluginRepository>`
-to your `pom.xml` (alternatively [configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
-it via `settings.xml`) to use deployed artifacts:
+Add [`<repository>`](https://maven.apache.org/pom.html#Repositories) and
+[`<pluginRepository>`](https://maven.apache.org/pom.html#Repositories)
+to your `pom.xml` (alternatively
+[configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
+it via
+[`settings.xml`](https://maven.apache.org/settings.html)) to use deployed artifacts:
 
 ```xml
-<pluginRepositories>
-  <pluginRepository>
-    <id>artipie</id>
-    <name>artipie plugins</name>
-    <url>http://localhost:8080/maven</url>
-  </pluginRepository>
-</pluginRepositories>
-<repositories>
-  <repository>
-    <id>artipie</id>
-    <name>artipie builds</name>
-    <url>http://localhost:8080/maven</url>
-  </repository>
-</repositories>
+<project>
+  [...]
+  <pluginRepositories>
+    <pluginRepository>
+      <id>artipie</id>
+      <name>artipie plugins</name>
+      <url>http://localhost:8080/maven</url>
+    </pluginRepository>
+  </pluginRepositories>
+  <repositories>
+    <repository>
+      <id>artipie</id>
+      <name>artipie builds</name>
+      <url>http://localhost:8080/maven</url>
+    </repository>
+  </repositories>
+</project>
 ```
 
 Run `mvn install` (or `mvn install -U` to force download dependencies).
