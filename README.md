@@ -35,10 +35,10 @@ The following set of features makes Artipie unique among all others:
 
 The fastest way to start using Artipie is via
 [Docker](https://docs.docker.com/get-docker/). First,
-create a new directory and a `repo` sub-directory inside it. Then, put your
+create a new directory `artipie` and `repo` sub-directory inside it. Then, put your
 YAML config file into the `repo` sub-dir. Make sure that the name of your config file
 is the name of repository you are going to host, and its name matches `[a-z0-9_]{3,32}`.
-For example `foo.yaml`:
+For example `foo.yml`:
 
 ```yaml
 repo:
@@ -51,13 +51,14 @@ repo:
     password: 123qwe
 ```
 
-Finally, start the container:
+Now, go back to `artipie` and start the container:
 
 ```bash
 $ docker run -v "$(pwd):/var/artipie" -p 8080:80 artipie/artipie
 ```
 
-You should be able to use it with Maven at `http://localhost:8080`.
+You should be able to use it with [Maven](https://maven.apache.org/)
+at `http://localhost:8080`.
 
 We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
@@ -81,7 +82,7 @@ e.g. `http://localhost:8080/repo/libsqlite3.so`.
 
 ## Maven Repo
 
-Try this `maven.yaml` file:
+Try this `maven.yml` file to host a [Maven](https://maven.apache.org/) repo:
 
 ```yaml
 repo:
