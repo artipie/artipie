@@ -51,7 +51,7 @@ repo:
     password: 123qwe
 ```
 
-Finally, start the container:
+Now, go back to `artipie` and start the container:
 
 ```bash
 $ docker run -v "$(pwd):/var/artipie" -p 8080:80 artipie/artipie
