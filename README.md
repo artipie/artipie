@@ -57,7 +57,8 @@ Now, go back to `artipie` and start the container:
 $ docker run -v "$(pwd):/var/artipie" -p 8080:80 artipie/artipie
 ```
 
-You should be able to use it with Maven at `http://localhost:8080`.
+You should be able to use it with [Maven](https://maven.apache.org/)
+at `http://localhost:8080`.
 
 We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
@@ -81,7 +82,7 @@ e.g. `http://localhost:8080/repo/libsqlite3.so`.
 
 ## Maven Repo
 
-Try this `maven.yaml` file:
+Try this `maven.yml` file to host a [Maven](https://maven.apache.org/) repo:
 
 ```yaml
 repo:
