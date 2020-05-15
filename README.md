@@ -35,10 +35,10 @@ The following set of features makes Artipie unique among all others:
 
 The fastest way to start using Artipie is via
 [Docker](https://docs.docker.com/get-docker/). First,
-create a new directory and a `repo` sub-directory inside it. Then, put your
+create a new directory `artipie` and `repo` sub-directory inside it. Then, put your
 YAML config file into the `repo` sub-dir. Make sure that the name of your config file
 is the name of repository you are going to host, and its name matches `[a-z0-9_]{3,32}`.
-For example `foo.yaml`:
+For example `foo.yml`:
 
 ```yaml
 repo:
