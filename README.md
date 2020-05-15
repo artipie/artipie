@@ -60,6 +60,9 @@ $ docker run -v "$(pwd):/var/artipie" -p 8080:80 artipie/artipie
 You should be able to use it with [Maven](https://maven.apache.org/)
 at `http://localhost:8080`.
 
+In the sections below you can see how to configure Artipie
+to use it with different package managers.
+
 We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
 understand how Artipie is designed.
