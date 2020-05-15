@@ -95,7 +95,9 @@ repo:
     path: /var/artipie/maven
 ```
 
-Add `<distributionManagement>` to your `pom.xml`:
+Add [`<distributionManagement>`](https://maven.apache.org/pom.html#Distribution_Management)
+section to your
+[`pom.xml`](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html):
 
 ```xml
 <project>
@@ -115,9 +117,12 @@ Add `<distributionManagement>` to your `pom.xml`:
 
 Then, `mvn deploy` your project.
 
-Add `<repository>` and `<pluginRepository>`
-to your `pom.xml` (alternatively [configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
-it via `settings.xml`) to use deployed artifacts:
+Add [`<repository>`](https://maven.apache.org/pom.html#Repositories) and
+[`<pluginRepository>`](https://maven.apache.org/pom.html#Repositories)
+to your `pom.xml` (alternatively
+[configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
+it via
+[`settings.xml`](https://maven.apache.org/settings.html)) to use deployed artifacts:
 
 ```xml
 <project>
