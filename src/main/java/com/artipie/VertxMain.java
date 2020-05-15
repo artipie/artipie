@@ -128,5 +128,6 @@ public final class VertxMain implements Runnable {
             vertx,
             port
         ).run();
+        Logger.info(VertxMain.class, "Artipie was started on port %d", port);
     }
 }
