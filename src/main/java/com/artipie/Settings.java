@@ -24,8 +24,11 @@
 package com.artipie;
 
 import com.artipie.asto.Storage;
+import com.artipie.asto.fs.FileStorage;
 import com.artipie.http.auth.Authentication;
+import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -49,4 +52,43 @@ public interface Settings {
      * @throws IOException On Error
      */
     CompletionStage<Authentication> auth() throws IOException;
+
+    /**
+     * Fake {@link Settings} using a file storage.
+     *
+     * @since 0.2
+     */
+    final class Fake implements Settings {
+
+        /**
+         * Storage path.
+         */
+        private final Path storage;
+
+        /**
+         * Vertx.
+         */
+        private final Vertx vertx;
+
+        /**
+         * Ctor.
+         *
+         * @param storage Storage path
+         * @param vertx Vertx
+         */
+        public Fake(final Path storage, final Vertx vertx) {
+            this.storage = storage;
+            this.vertx = vertx;
+        }
+
+        @Override
+        public Storage storage() throws IOException {
+            return new FileStorage(this.storage, this.vertx.fileSystem());
+        }
+
+        @Override
+        public CompletionStage<Authentication> auth() throws IOException {
+            throw new UnsupportedOperationException();
+        }
+    }
 }
