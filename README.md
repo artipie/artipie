@@ -47,8 +47,6 @@ repo:
   storage:
     type: fs
     path: /var/artipie
-    username: admin
-    password: 123qwe
 ```
 
 Now, go back to `artipie` and start the container:
