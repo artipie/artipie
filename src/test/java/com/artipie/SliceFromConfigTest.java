@@ -34,6 +34,7 @@ import com.artipie.rpm.http.RpmSlice;
 import io.reactivex.Flowable;
 import io.vertx.reactivex.core.Vertx;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.AfterEach;
@@ -137,8 +138,8 @@ class SliceFromConfigTest {
                     )
                 )
             ),
-            this.vertx.fileSystem()
+            this.vertx.fileSystem(),
+            (user, pass) -> Optional.of(user)
         ).toCompletableFuture().get();
     }
-
 }

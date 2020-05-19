@@ -279,6 +279,20 @@ in `.mod` and `.info` files. Here is an example for package
 You can use [go-adapter](https://github.com/artipie/go-adapter#how-it-works)
 to generate necessary files and layout for Go source code.
 
+## Authentication
+
+The simplest way to start Artipie with authentication is to configure single user via
+environment variables:
+ - `ARTIPIE_USER_NAME` - user name
+ - `ARTIPIE_USER_PASS` - user password
+
+E.g. to start Docker image use `-e` CLI option:
+```bash
+docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
+  -e ARTIPIE_USER_NAME=artipie -e ARTIPIE_USER_PASS=qwerty \
+  artipie/artipie:latest
+```
+
 ## How to contribute
 
 Fork the repository, make changes, and send us a
