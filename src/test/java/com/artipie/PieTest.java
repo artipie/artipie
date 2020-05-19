@@ -45,7 +45,7 @@ public final class PieTest {
     @Test
     public void unexistingRepoReturnNotFound(final Vertx vertx, @TempDir final Path tmp) {
         MatcherAssert.assertThat(
-            "Must return 400 HTTP status",
+            "Must return 404 HTTP status",
             new Pie(new Settings.Fake(tmp, vertx), vertx).response(
                 new RequestLine("GET", "/repo/foo", "HTTP/1.1").toString(),
                 Headers.EMPTY,
