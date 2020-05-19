@@ -38,7 +38,7 @@ The fastest way to start using Artipie is via
 create a new directory `artipie` and `repo` sub-directory inside it. Then, put your
 YAML config file into the `repo` sub-dir. Make sure that the name of your config file
 is the name of repository you are going to host, and its name matches `[a-z0-9_]{3,32}`.
-For example `foo.yml`:
+For example `foo.yaml`:
 
 ```yaml
 repo:
@@ -67,7 +67,7 @@ understand how Artipie is designed.
 
 ## Binary Repo
 
-Try this `repo.yml` file:
+Try this `repo.yaml` file:
 
 ```yaml
 repo:
@@ -83,7 +83,7 @@ e.g. `http://localhost:8080/repo/libsqlite3.so`.
 
 ## Maven Repo
 
-Try this `maven.yml` file to host a [Maven](https://maven.apache.org/) repo:
+Try this `maven.yaml` file to host a [Maven](https://maven.apache.org/) repo:
 
 ```yaml
 repo:
