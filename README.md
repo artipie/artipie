@@ -26,7 +26,7 @@ The following set of features makes Artipie unique among all others:
     [Maven](https://maven.apache.org/),
     [NuGet](https://www.nuget.org/),
     [Pip](https://pypi.org/project/pip/),
-    [Bundler](https://bundler.io/),
+    [Gem](https://guides.rubygems.org/what-is-a-gem/),
     [Go](https://golang.org/),
     [Docker](https://www.docker.com/), etc.
   * It is database-free
@@ -347,6 +347,30 @@ To install the package into a project use the following command:
 
 ```bash
 $ nuget install MyLib -Version 1.0.0 -Source=http://localhost:8080/my-nuget/index.json
+```
+
+## Gem Repo
+
+Try this `gem.yaml` file:
+
+```yaml
+repo:
+  type: gem
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-nuget
+```
+
+Publish a gem:
+
+```bash
+$ gem push my_first_gem-0.0.0.gem --host http://localhost:8080/gem
+```
+
+Install a gem:
+
+```bash
+$ gem install my_first_gem --source http://localhost:8080/gem
 ```
 
 ## How to contribute
