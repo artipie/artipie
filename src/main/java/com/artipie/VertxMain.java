@@ -74,18 +74,7 @@ public final class VertxMain implements Runnable {
 
     @Override
     public void run() {
-        try (VertxSliceServer srv = new VertxSliceServer(this.vertx, this.slice, this.port)) {
-            srv.start();
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    // @checkstyle MagicNumberCheck (1 line)
-                    Thread.sleep(100);
-                } catch (final InterruptedException iox) {
-                    Logger.info(this, "interrupted: %s", iox);
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
+        new VertxSliceServer(this.vertx, this.slice, this.port).start();
     }
 
     /**
