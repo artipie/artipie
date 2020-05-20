@@ -26,7 +26,7 @@ The following set of features makes Artipie unique among all others:
     [Maven](https://maven.apache.org/),
     [NuGet](https://www.nuget.org/),
     [Pip](https://pypi.org/project/pip/),
-    [Bundler](https://bundler.io/),
+    [Gem](https://guides.rubygems.org/what-is-a-gem/),
     [Go](https://golang.org/),
     [Docker](https://www.docker.com/), etc.
   * It is database-free
@@ -38,7 +38,7 @@ The fastest way to start using Artipie is via
 create a new directory `artipie` and `repo` sub-directory inside it. Then, put your
 YAML config file into the `repo` sub-dir. Make sure that the name of your config file
 is the name of repository you are going to host, and its name matches `[a-z0-9_]{3,32}`.
-For example `foo.yml`:
+For example `foo.yaml`:
 
 ```yaml
 repo:
@@ -47,8 +47,6 @@ repo:
   storage:
     type: fs
     path: /var/artipie
-    username: admin
-    password: 123qwe
 ```
 
 Now, go back to `artipie` and start the container:
@@ -69,7 +67,7 @@ understand how Artipie is designed.
 
 ## Binary Repo
 
-Try this `repo.yml` file:
+Try this `repo.yaml` file:
 
 ```yaml
 repo:
@@ -85,7 +83,7 @@ e.g. `http://localhost:8080/repo/libsqlite3.so`.
 
 ## Maven Repo
 
-Try this `maven.yml` file to host a [Maven](https://maven.apache.org/) repo:
+Try this `maven.yaml` file to host a [Maven](https://maven.apache.org/) repo:
 
 ```yaml
 repo:
@@ -278,6 +276,102 @@ in `.mod` and `.info` files. Here is an example for package
 `list` is simple text file with list of the available versions.
 You can use [go-adapter](https://github.com/artipie/go-adapter#how-it-works)
 to generate necessary files and layout for Go source code.
+
+## PHP Composer Repo
+
+Try this `my-php.yaml` file:
+
+```yaml
+repo:
+  type: php
+  path: my-php
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-php
+```
+
+To publish your PHP Composer package create package description JSON file `my-package.json` 
+with the following content:
+
+```json
+{
+  "name": "my-org/my-package",
+  "version": "1.0.0",
+  "dist": {
+    "url": "https://www.my-org.com/files/my-package.1.0.0.zip",
+    "type": "zip"
+  }
+}
+```
+
+And add it to repository using PUT request:
+
+```bash
+$ curl -X PUT -T 'my-package.json' "http://localhost:8080/my-php"
+```
+
+To use this library in your project add requirement and repository to `composer.json`:
+
+```json
+{
+    "repositories": [
+         {"type": "composer", "url": "http://localhost:8080/my-php"}
+    ],
+    "require": {
+        "my-org/my-package": "1.0.0"
+    }
+}
+```
+
+## NuGet Repo
+
+Try this `nuget.yaml` file:
+
+```yaml
+repo:
+  type: nuget
+  path: my-nuget
+  url: http://localhost:8080/my-nuget
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-nuget
+```
+
+To publish your NuGet package use the following command:
+
+```bash
+$ nuget push my.lib.1.0.0.nupkg -Source=http://localhost:8080/my-nuget/index.json
+```
+
+To install the package into a project use the following command:
+
+```bash
+$ nuget install MyLib -Version 1.0.0 -Source=http://localhost:8080/my-nuget/index.json
+```
+
+## Gem Repo
+
+Try this `gem.yaml` file:
+
+```yaml
+repo:
+  type: gem
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-nuget
+```
+
+Publish a gem:
+
+```bash
+$ gem push my_first_gem-0.0.0.gem --host http://localhost:8080/gem
+```
+
+Install a gem:
+
+```bash
+$ gem install my_first_gem --source http://localhost:8080/gem
+```
 
 ## Authentication
 
