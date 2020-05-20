@@ -25,12 +25,14 @@
 package com.artipie;
 
 import com.artipie.asto.Storage;
+import com.artipie.auth.AuthFromEnv;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
 import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
+import com.artipie.http.auth.Authentication;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
@@ -62,7 +64,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      */
     public SliceFromConfig(final RepoConfig config, final FileSystem fs) {
         super(
-            new AsyncSlice(SliceFromConfig.build(config, fs))
+            new AsyncSlice(SliceFromConfig.build(config, fs, new AuthFromEnv()))
         );
     }
 
@@ -70,23 +72,26 @@ public final class SliceFromConfig extends Slice.Wrap {
      * Find a slice implementation for config.
      * @param cfg Repository config
      * @param fs The file system
+     * @param auth Authentication implementation
      * @return Slice completionStage
      * @todo #90:30min This method still needs more refactoring.
      *  We should test if the type exist in the constructed map. If the type does not exist,
      *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
+     * @checkstyle LineLengthCheck (100 lines)
      */
-    static CompletionStage<Slice> build(final RepoConfig cfg, final FileSystem fs) {
-        return cfg.type().thenCombine(
-            cfg.storage(),
-            (type, storage) -> {
-                return new MapOf<String, Function<RepoConfig, CompletionStage<Slice>>>(
+    static CompletionStage<Slice> build(final RepoConfig cfg, final FileSystem fs,
+        final Authentication auth) {
+        return cfg.type().thenCompose(
+            type -> cfg.storage().thenCombine(
+                cfg.permissions(),
+                (storage, permissions) -> new MapOf<String, Function<RepoConfig, CompletionStage<Slice>>>(
                     new MapEntry<>(
-                        "file", config -> CompletableFuture.completedStage(new FilesSlice(storage))
+                        "file", config -> CompletableFuture.completedStage(new FilesSlice(storage, permissions, auth))
                     ),
                     new MapEntry<>(
                         "npm", config -> CompletableFuture.completedStage(
-                            new NpmSlice(new Npm(storage), storage)
-                        )
+                        new NpmSlice(new Npm(storage), storage)
+                    )
                     ),
                     new MapEntry<>(
                         "gem", config -> CompletableFuture.completedStage(new GemSlice(storage, fs))
@@ -103,13 +108,14 @@ public final class SliceFromConfig extends Slice.Wrap {
                         config -> nuGet(cfg, storage)
                     ),
                     new MapEntry<>(
-                        "maven", config -> CompletableFuture.completedStage(new MavenSlice(storage))
+                        "maven", config -> CompletableFuture.completedStage(new MavenSlice(storage, permissions, auth))
                     ),
                     new MapEntry<>(
                         "go", config -> CompletableFuture.completedStage(new GoSlice(storage))
                     ),
                     new MapEntry<>(
-                        "npm-proxy", config -> config.path().thenCombine(
+                        "npm-proxy",
+                        config -> config.path().thenCombine(
                             config.settings(),
                             (path, settings) -> new NpmProxySlice(
                                 path,
@@ -124,12 +130,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                     new MapEntry<>(
                         "pypi", config -> pypi(cfg, storage)
                     )
-                ).get(type).apply(cfg);
-            }
-        ).thenCompose(Function.identity()).thenCompose(
-            slice -> cfg.contentLengthMax().thenApply(
-                opt -> opt.<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
-                    .orElse(slice)
+                ).get(type).apply(cfg)
+            ).thenCompose(Function.identity()).thenCompose(
+                slice -> cfg.contentLengthMax().thenApply(
+                    opt -> opt.<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
+                        .orElse(slice)
+                )
             )
         );
     }
@@ -156,7 +162,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      */
     private static CompletionStage<Slice> pypi(final RepoConfig config, final Storage storage) {
         return config.path().thenApply(
-            path ->  new PySlice(path, storage)
+            path -> new PySlice(path, storage)
         );
     }
 
