@@ -26,7 +26,7 @@ The following set of features makes Artipie unique among all others:
     [Maven](https://maven.apache.org/),
     [NuGet](https://www.nuget.org/),
     [Pip](https://pypi.org/project/pip/),
-    [Bundler](https://bundler.io/),
+    [Gem](https://guides.rubygems.org/what-is-a-gem/),
     [Go](https://golang.org/),
     [Docker](https://www.docker.com/), etc.
   * It is database-free
@@ -38,7 +38,7 @@ The fastest way to start using Artipie is via
 create a new directory `artipie` and `repo` sub-directory inside it. Then, put your
 YAML config file into the `repo` sub-dir. Make sure that the name of your config file
 is the name of repository you are going to host, and its name matches `[a-z0-9_]{3,32}`.
-For example `foo.yml`:
+For example `foo.yaml`:
 
 ```yaml
 repo:
@@ -47,8 +47,6 @@ repo:
   storage:
     type: fs
     path: /var/artipie
-    username: admin
-    password: 123qwe
 ```
 
 Now, go back to `artipie` and start the container:
@@ -60,13 +58,16 @@ $ docker run -v "$(pwd):/var/artipie" -p 8080:80 artipie/artipie
 You should be able to use it with [Maven](https://maven.apache.org/)
 at `http://localhost:8080`.
 
+In the sections below you can see how to configure Artipie
+to use it with different package managers.
+
 We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
 understand how Artipie is designed.
 
 ## Binary Repo
 
-Try this `repo.yml` file:
+Try this `repo.yaml` file:
 
 ```yaml
 repo:
@@ -82,7 +83,7 @@ e.g. `http://localhost:8080/repo/libsqlite3.so`.
 
 ## Maven Repo
 
-Try this `maven.yml` file to host a [Maven](https://maven.apache.org/) repo:
+Try this `maven.yaml` file to host a [Maven](https://maven.apache.org/) repo:
 
 ```yaml
 repo:
@@ -92,42 +93,53 @@ repo:
     path: /var/artipie/maven
 ```
 
-Add `<distributionManagement>` to your `pom.xml`:
+Add [`<distributionManagement>`](https://maven.apache.org/pom.html#Distribution_Management)
+section to your
+[`pom.xml`](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html):
 
 ```xml
-<distributionManagement>
-  <snapshotRepository>
-    <id>artipie</id>
-    <url>http://localhost:8080/maven</url>
-  </snapshotRepository>
-  <repository>
-    <id>artipie</id>
-    <url>http://localhost:8080/maven</url>
-  </repository>
-</distributionManagement>
+<project>
+  [...]
+  <distributionManagement>
+    <snapshotRepository>
+      <id>artipie</id>
+      <url>http://localhost:8080/maven</url>
+    </snapshotRepository>
+    <repository>
+      <id>artipie</id>
+      <url>http://localhost:8080/maven</url>
+    </repository>
+  </distributionManagement>
+</project>
 ```
 
 Then, `mvn deploy` your project.
 
-Add `<repository>` and `<pluginRepository>`
-to your `pom.xml` (alternatively [configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
-it via `settings.xml`) to use deployed artifacts:
+Add [`<repository>`](https://maven.apache.org/pom.html#Repositories) and
+[`<pluginRepository>`](https://maven.apache.org/pom.html#Repositories)
+to your `pom.xml` (alternatively
+[configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
+it via
+[`settings.xml`](https://maven.apache.org/settings.html)) to use deployed artifacts:
 
 ```xml
-<pluginRepositories>
-  <pluginRepository>
-    <id>artipie</id>
-    <name>artipie plugins</name>
-    <url>http://localhost:8080/maven</url>
-  </pluginRepository>
-</pluginRepositories>
-<repositories>
-  <repository>
-    <id>artipie</id>
-    <name>artipie builds</name>
-    <url>http://localhost:8080/maven</url>
-  </repository>
-</repositories>
+<project>
+  [...]
+  <pluginRepositories>
+    <pluginRepository>
+      <id>artipie</id>
+      <name>artipie plugins</name>
+      <url>http://localhost:8080/maven</url>
+    </pluginRepository>
+  </pluginRepositories>
+  <repositories>
+    <repository>
+      <id>artipie</id>
+      <name>artipie builds</name>
+      <url>http://localhost:8080/maven</url>
+    </repository>
+  </repositories>
+</project>
 ```
 
 Run `mvn install` (or `mvn install -U` to force download dependencies).
@@ -265,6 +277,116 @@ in `.mod` and `.info` files. Here is an example for package
 `list` is simple text file with list of the available versions.
 You can use [go-adapter](https://github.com/artipie/go-adapter#how-it-works)
 to generate necessary files and layout for Go source code.
+
+## PHP Composer Repo
+
+Try this `my-php.yaml` file:
+
+```yaml
+repo:
+  type: php
+  path: my-php
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-php
+```
+
+To publish your PHP Composer package create package description JSON file `my-package.json` 
+with the following content:
+
+```json
+{
+  "name": "my-org/my-package",
+  "version": "1.0.0",
+  "dist": {
+    "url": "https://www.my-org.com/files/my-package.1.0.0.zip",
+    "type": "zip"
+  }
+}
+```
+
+And add it to repository using PUT request:
+
+```bash
+$ curl -X PUT -T 'my-package.json' "http://localhost:8080/my-php"
+```
+
+To use this library in your project add requirement and repository to `composer.json`:
+
+```json
+{
+    "repositories": [
+         {"type": "composer", "url": "http://localhost:8080/my-php"}
+    ],
+    "require": {
+        "my-org/my-package": "1.0.0"
+    }
+}
+```
+
+## NuGet Repo
+
+Try this `nuget.yaml` file:
+
+```yaml
+repo:
+  type: nuget
+  path: my-nuget
+  url: http://localhost:8080/my-nuget
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-nuget
+```
+
+To publish your NuGet package use the following command:
+
+```bash
+$ nuget push my.lib.1.0.0.nupkg -Source=http://localhost:8080/my-nuget/index.json
+```
+
+To install the package into a project use the following command:
+
+```bash
+$ nuget install MyLib -Version 1.0.0 -Source=http://localhost:8080/my-nuget/index.json
+```
+
+## Gem Repo
+
+Try this `gem.yaml` file:
+
+```yaml
+repo:
+  type: gem
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-nuget
+```
+
+Publish a gem:
+
+```bash
+$ gem push my_first_gem-0.0.0.gem --host http://localhost:8080/gem
+```
+
+Install a gem:
+
+```bash
+$ gem install my_first_gem --source http://localhost:8080/gem
+```
+
+## Authentication
+
+The simplest way to start Artipie with authentication is to configure single user via
+environment variables:
+ - `ARTIPIE_USER_NAME` - user name
+ - `ARTIPIE_USER_PASS` - user password
+
+E.g. to start Docker image use `-e` CLI option:
+```bash
+docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
+  -e ARTIPIE_USER_NAME=artipie -e ARTIPIE_USER_PASS=qwerty \
+  artipie/artipie:latest
+```
 
 ## How to contribute
 
