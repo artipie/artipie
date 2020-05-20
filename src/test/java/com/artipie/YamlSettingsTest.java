@@ -25,14 +25,11 @@ package com.artipie;
 
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.s3.S3Storage;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.reactivex.core.Vertx;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -42,15 +39,13 @@ import org.junit.jupiter.params.provider.MethodSource;
  * @since 0.1
  * @checkstyle MethodNameCheck (500 lines)
  */
-@ExtendWith(VertxExtension.class)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class YamlSettingsTest {
 
     @Test
-    public void shouldBuildFileStorageFromSettings(final Vertx vertx) throws Exception {
+    public void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            "meta:\n  storage:\n    type: fs\n    path: /artipie/storage\n",
-            vertx
+            "meta:\n  storage:\n    type: fs\n    path: /artipie/storage\n"
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -59,7 +54,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void shouldBuildS3StorageFromSettings(final Vertx vertx) throws Exception {
+    public void shouldBuildS3StorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
             String.join(
                 "",
@@ -73,8 +68,7 @@ class YamlSettingsTest {
                 "      type: basic\n",
                 "      accessKeyId: ***\n",
                 "      secretAccessKey: ***"
-            ),
-            vertx
+            )
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -84,8 +78,8 @@ class YamlSettingsTest {
 
     @ParameterizedTest
     @MethodSource("badYamls")
-    public void shouldFailProvideStorageFromBadYaml(final String yaml, final Vertx vertx) {
-        final YamlSettings settings = new YamlSettings(yaml, vertx);
+    public void shouldFailProvideStorageFromBadYaml(final String yaml) {
+        final YamlSettings settings = new YamlSettings(yaml);
         Assertions.assertThrows(RuntimeException.class, settings::storage);
     }
 

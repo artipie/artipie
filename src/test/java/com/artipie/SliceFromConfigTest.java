@@ -119,7 +119,7 @@ class SliceFromConfigTest {
     private Slice buildSlice(final String type) throws Exception {
         return SliceFromConfig.build(
             new RepoConfig(
-                this.vertx,
+                "",
                 Flowable.just(
                     ByteBuffer.wrap(
                         Yaml.createYamlMappingBuilder()
@@ -138,7 +138,7 @@ class SliceFromConfigTest {
                     )
                 )
             ),
-            this.vertx.fileSystem(),
+            this.vertx,
             (user, pass) -> Optional.of(user)
         ).toCompletableFuture().get();
     }

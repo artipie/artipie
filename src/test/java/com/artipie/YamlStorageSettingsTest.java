@@ -26,14 +26,11 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.s3.S3Storage;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.reactivex.core.Vertx;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -43,15 +40,13 @@ import org.junit.jupiter.params.provider.MethodSource;
  * @checkstyle MethodNameCheck (500 lines)
  * @since 0.2
  */
-@ExtendWith(VertxExtension.class)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class YamlStorageSettingsTest {
 
     @Test
-    public void shouldBuildFileStorageFromSettings(final Vertx vertx) throws Exception {
+    public void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlStorageSettings settings = new YamlStorageSettings(
-            Yaml.createYamlInput("type: fs\npath: /artipie/storage\n").readYamlMapping(),
-            vertx
+            Yaml.createYamlInput("type: fs\npath: /artipie/storage\n").readYamlMapping()
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -60,7 +55,7 @@ class YamlStorageSettingsTest {
     }
 
     @Test
-    public void shouldBuildS3StorageFromFullSettings(final Vertx vertx) throws Exception {
+    public void shouldBuildS3StorageFromFullSettings() throws Exception {
         final YamlStorageSettings settings = new YamlStorageSettings(
             Yaml.createYamlInput(
                 String.join(
@@ -74,8 +69,7 @@ class YamlStorageSettingsTest {
                     "  accessKeyId: ***\n",
                     "  secretAccessKey: ***\n"
                 )
-            ).readYamlMapping(),
-            vertx
+            ).readYamlMapping()
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -84,7 +78,7 @@ class YamlStorageSettingsTest {
     }
 
     @Test
-    public void shouldBuildS3StorageFromMinimalSettings(final Vertx vertx) throws Exception {
+    public void shouldBuildS3StorageFromMinimalSettings() throws Exception {
         System.getProperties().put("aws.region", "my-region");
         final YamlStorageSettings settings = new YamlStorageSettings(
             Yaml.createYamlInput(
@@ -97,8 +91,7 @@ class YamlStorageSettingsTest {
                     "  accessKeyId: ***\n",
                     "  secretAccessKey: ***\n"
                 )
-            ).readYamlMapping(),
-            vertx
+            ).readYamlMapping()
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -108,11 +101,10 @@ class YamlStorageSettingsTest {
 
     @ParameterizedTest
     @MethodSource("badYamls")
-    public void shouldFailProvideStorageFromBadYaml(final String yaml, final Vertx vertx)
+    public void shouldFailProvideStorageFromBadYaml(final String yaml)
         throws Exception {
         final YamlStorageSettings settings = new YamlStorageSettings(
-            Yaml.createYamlInput(yaml).readYamlMapping(),
-            vertx
+            Yaml.createYamlInput(yaml).readYamlMapping()
         );
         Assertions.assertThrows(RuntimeException.class, settings::storage);
     }

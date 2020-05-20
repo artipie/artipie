@@ -25,7 +25,6 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Storage;
-import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 
 /**
@@ -41,18 +40,11 @@ public final class YamlSettings implements Settings {
     private final String content;
 
     /**
-     * The Vert.x instance.
-     */
-    private final Vertx vertx;
-
-    /**
      * Ctor.
      * @param content YAML file content.
-     * @param vertx The Vert.x instance.
      */
-    public YamlSettings(final String content, final Vertx vertx) {
+    public YamlSettings(final String content) {
         this.content = content;
-        this.vertx = vertx;
     }
 
     @Override
@@ -61,8 +53,7 @@ public final class YamlSettings implements Settings {
             Yaml.createYamlInput(this.content)
                 .readYamlMapping()
                 .yamlMapping("meta")
-                .yamlMapping("storage"),
-                this.vertx
+                .yamlMapping("storage")
         ).storage();
     }
 }

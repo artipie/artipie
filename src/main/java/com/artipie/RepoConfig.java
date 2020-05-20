@@ -26,13 +26,14 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
+import com.artipie.asto.SubStorage;
 import com.artipie.http.auth.Permissions;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
-import io.vertx.reactivex.core.Vertx;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -46,17 +47,12 @@ import org.reactivestreams.Publisher;
  * Repository config.
  * @since 0.2
  */
-@SuppressWarnings(
-    {
-        "PMD.AvoidDuplicateLiterals", "PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"
-    }
-)
 public final class RepoConfig {
 
     /**
-     * The Vert.x instance.
+     * Repo name.
      */
-    private final Vertx vertx;
+    private final String repo;
 
     /**
      * Source yaml future.
@@ -65,11 +61,11 @@ public final class RepoConfig {
 
     /**
      * Ctor.
-     * @param vertx The Vert.x instance.
+     * @param repo Repository name
      * @param content Flow content
      */
-    public RepoConfig(final Vertx vertx, final Publisher<ByteBuffer> content) {
-        this.vertx = vertx;
+    public RepoConfig(final String repo, final Publisher<ByteBuffer> content) {
+        this.repo = repo;
         this.yaml = RepoConfig.yamlFromPublisher(content);
     }
 
@@ -123,10 +119,11 @@ public final class RepoConfig {
      * @return Async storage for repo
      */
     public CompletionStage<Storage> storage() {
-        return this.repo()
+        return this.repoConfig()
             .thenApply(map -> map.yamlMapping("storage"))
-            .thenApply((YamlMapping mapping) -> new YamlStorageSettings(mapping, this.vertx))
-            .thenApply(YamlStorageSettings::storage);
+            .thenApply(YamlStorageSettings::new)
+            .thenApply(YamlStorageSettings::storage)
+            .thenApply(storage -> new SubStorage(new Key.From(this.repo), storage));
     }
 
     /**
@@ -134,7 +131,7 @@ public final class RepoConfig {
      * @return Async custom repository config or Optional.empty
      */
     public CompletionStage<Optional<YamlMapping>> settings() {
-        return this.repo().thenApply(
+        return this.repoConfig().thenApply(
             map -> Optional.ofNullable(map.yamlMapping("settings"))
         );
     }
@@ -144,15 +141,7 @@ public final class RepoConfig {
      * @return Async permissions
      */
     public CompletionStage<Permissions> permissions() {
-        return this.repo().thenApply(RpPermissions::new);
-    }
-
-    /**
-     * Get vertx instance.
-     * @return Vertx instance
-     */
-    public Vertx vertx() {
-        return this.vertx;
+        return this.repoConfig().thenApply(RpPermissions::new);
     }
 
     /**
@@ -176,7 +165,7 @@ public final class RepoConfig {
      * @return String value, empty if none present.
      */
     private CompletionStage<Optional<String>> stringOpt(final String key) {
-        return this.repo().thenApply(map -> Optional.ofNullable(map.string(key)));
+        return this.repoConfig().thenApply(map -> Optional.ofNullable(map.string(key)));
     }
 
     /**
@@ -184,7 +173,7 @@ public final class RepoConfig {
      *
      * @return Async YAML mapping
      */
-    private CompletionStage<YamlMapping> repo() {
+    private CompletionStage<YamlMapping> repoConfig() {
         return this.yaml.thenApply(
             map -> Objects.requireNonNull(map.yamlMapping("repo"), "yaml repo is null")
         );
