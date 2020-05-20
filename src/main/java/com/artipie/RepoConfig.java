@@ -28,6 +28,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
+import com.artipie.http.auth.Permissions;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
@@ -45,7 +46,11 @@ import org.reactivestreams.Publisher;
  * Repository config.
  * @since 0.2
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.AvoidFieldNameMatchingMethodName"})
+@SuppressWarnings(
+    {
+        "PMD.AvoidDuplicateLiterals", "PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"
+    }
+)
 public final class RepoConfig {
 
     /**
@@ -132,6 +137,14 @@ public final class RepoConfig {
         return this.repo().thenApply(
             map -> Optional.ofNullable(map.yamlMapping("settings"))
         );
+    }
+
+    /**
+     * Repository permissions.
+     * @return Async permissions
+     */
+    public CompletionStage<Permissions> permissions() {
+        return this.repo().thenApply(RpPermissions::new);
     }
 
     /**
