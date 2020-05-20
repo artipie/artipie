@@ -238,6 +238,7 @@ Try this `go.yaml` file:
 ```yaml
 repo:
   type: go
+  path: go
   storage:
     type: fs
     path: /tmp/artipie/data/go
