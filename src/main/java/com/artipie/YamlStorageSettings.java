@@ -72,7 +72,7 @@ final class YamlStorageSettings {
      */
     public Storage storage() {
         final YamlMapping strict = new StrictYamlMapping(this.yaml);
-        final String type =  strict.string("type");
+        final String type = strict.string("type");
         final Storage storage;
         if ("fs".equals(type)) {
             storage = new FileStorage(Path.of(strict.string("path")), this.vertx.fileSystem());
