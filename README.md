@@ -373,6 +373,20 @@ Install a gem:
 $ gem install my_first_gem --source http://localhost:8080/gem
 ```
 
+## Authentication
+
+The simplest way to start Artipie with authentication is to configure single user via
+environment variables:
+ - `ARTIPIE_USER_NAME` - user name
+ - `ARTIPIE_USER_PASS` - user password
+
+E.g. to start Docker image use `-e` CLI option:
+```bash
+docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
+  -e ARTIPIE_USER_NAME=artipie -e ARTIPIE_USER_PASS=qwerty \
+  artipie/artipie:latest
+```
+
 ## How to contribute
 
 Fork the repository, make changes, and send us a
