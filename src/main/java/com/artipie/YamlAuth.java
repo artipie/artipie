@@ -32,7 +32,7 @@ import org.apache.commons.lang3.NotImplementedException;
  * Authentication implementation based on yaml file with credentials.
  * @since 0.3
  * @todo #146:30min Implements this class to find user by credentials and enable test. For more
- *  details check #146 and note that password is Base64 encoded.
+ *  details check #146.
  */
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 public final class YamlAuth implements Authentication {

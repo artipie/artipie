@@ -25,7 +25,6 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import java.util.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -47,7 +46,7 @@ class YamlAuthTest {
         MatcherAssert.assertThat(
             new YamlAuth(
                 YamlAuthTest.settings(user, String.format("plain:%s", pass))
-            ).user(user, Base64.getEncoder().encodeToString(pass.getBytes())).get(),
+            ).user(user, pass).get(),
             new IsEqual<>(user)
         );
     }
@@ -59,7 +58,7 @@ class YamlAuthTest {
         MatcherAssert.assertThat(
             new YamlAuth(
                 YamlAuthTest.settings(user, String.format("sha256:%s", DigestUtils.sha256Hex(pass)))
-            ).user(user, Base64.getEncoder().encodeToString(pass.getBytes())).get(),
+            ).user(user, pass).get(),
             new IsEqual<>(user)
         );
     }
@@ -74,7 +73,7 @@ class YamlAuthTest {
                 YamlAuthTest.settings(
                     user, String.format("sha256:%s", DigestUtils.sha256Hex(pass)), login
                 )
-            ).user(login, Base64.getEncoder().encodeToString(pass.getBytes())).get(),
+            ).user(login, pass).get(),
             new IsEqual<>(user)
         );
     }
@@ -90,7 +89,7 @@ class YamlAuthTest {
                     String.format("sha256:%s", DigestUtils.sha256Hex(pass)),
                     "sasha@example.com"
                 )
-            ).user(user, Base64.getEncoder().encodeToString(pass.getBytes())).isEmpty(),
+            ).user(user, pass).isEmpty(),
             new IsEqual<>(true)
         );
     }
@@ -101,7 +100,7 @@ class YamlAuthTest {
         MatcherAssert.assertThat(
             new YamlAuth(
                 YamlAuthTest.settings(user, "plain:123")
-            ).user(user, Base64.getEncoder().encodeToString("456".getBytes())).isEmpty(),
+            ).user(user, "456").isEmpty(),
             new IsEqual<>(true)
         );
     }
@@ -114,7 +113,7 @@ class YamlAuthTest {
                 YamlAuthTest.settings(
                     "ann", String.format("sha256:%s", DigestUtils.sha256Hex(pass))
                 )
-            ).user("anna", Base64.getEncoder().encodeToString(pass.getBytes())).isEmpty(),
+            ).user("anna", pass).isEmpty(),
             new IsEqual<>(true)
         );
     }
