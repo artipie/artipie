@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
+package com.artipie.auth;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
@@ -32,20 +32,19 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link YamlAuth}.
+ * Test for {@link AuthFromYaml}.
  * @since 0.3
  */
-@Disabled
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class YamlAuthTest {
+class AuthFromYamlTest {
 
     @Test
     void authorisesByPlainPassword() {
         final String user = "john";
         final String pass = "qwerty";
         MatcherAssert.assertThat(
-            new YamlAuth(
-                YamlAuthTest.settings(user, String.format("plain:%s", pass))
+            new AuthFromYaml(
+                AuthFromYamlTest.settings(user, String.format("plain:%s", pass))
             ).user(user, pass).get(),
             new IsEqual<>(user)
         );
@@ -56,41 +55,12 @@ class YamlAuthTest {
         final String user = "bob";
         final String pass = "123";
         MatcherAssert.assertThat(
-            new YamlAuth(
-                YamlAuthTest.settings(user, String.format("sha256:%s", DigestUtils.sha256Hex(pass)))
+            new AuthFromYaml(
+                AuthFromYamlTest.settings(
+                    user, String.format("sha256:%s", DigestUtils.sha256Hex(pass))
+                )
             ).user(user, pass).get(),
             new IsEqual<>(user)
-        );
-    }
-
-    @Test
-    void authorisesByAlternativeLogin() {
-        final String user = "mary";
-        final String pass = "def";
-        final String login = "mary@example.com";
-        MatcherAssert.assertThat(
-            new YamlAuth(
-                YamlAuthTest.settings(
-                    user, String.format("sha256:%s", DigestUtils.sha256Hex(pass)), login
-                )
-            ).user(login, pass).get(),
-            new IsEqual<>(user)
-        );
-    }
-
-    @Test
-    void doesNotAuthoriseByMainLogin() {
-        final String user = "sasha";
-        final String pass = "999";
-        MatcherAssert.assertThat(
-            new YamlAuth(
-                YamlAuthTest.settings(
-                    user,
-                    String.format("sha256:%s", DigestUtils.sha256Hex(pass)),
-                    "sasha@example.com"
-                )
-            ).user(user, pass).isEmpty(),
-            new IsEqual<>(true)
         );
     }
 
@@ -98,8 +68,8 @@ class YamlAuthTest {
     void doesNotAuthoriseByWrongPassword() {
         final String user = "mark";
         MatcherAssert.assertThat(
-            new YamlAuth(
-                YamlAuthTest.settings(user, "plain:123")
+            new AuthFromYaml(
+                AuthFromYamlTest.settings(user, "plain:123")
             ).user(user, "456").isEmpty(),
             new IsEqual<>(true)
         );
@@ -109,11 +79,56 @@ class YamlAuthTest {
     void doesNotAuthoriseByWrongLogin() {
         final String pass = "abc";
         MatcherAssert.assertThat(
-            new YamlAuth(
-                YamlAuthTest.settings(
+            new AuthFromYaml(
+                AuthFromYamlTest.settings(
                     "ann", String.format("sha256:%s", DigestUtils.sha256Hex(pass))
                 )
             ).user("anna", pass).isEmpty(),
+            new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    void doesNotAuthoriseWhenPassIsMalformed() {
+        final String pass = "098";
+        final String user = "barton";
+        MatcherAssert.assertThat(
+            new AuthFromYaml(
+                AuthFromYamlTest.settings(user, "098")
+            ).user(user, pass).isEmpty(),
+            new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    @Disabled
+    void authorisesByAlternativeLogin() {
+        final String user = "mary";
+        final String pass = "def";
+        final String login = "mary@example.com";
+        MatcherAssert.assertThat(
+            new AuthFromYaml(
+                AuthFromYamlTest.settings(
+                    user, String.format("sha256:%s", DigestUtils.sha256Hex(pass)), login
+                )
+            ).user(login, pass).get(),
+            new IsEqual<>(user)
+        );
+    }
+
+    @Test
+    @Disabled
+    void doesNotAuthoriseByMainLogin() {
+        final String user = "sasha";
+        final String pass = "999";
+        MatcherAssert.assertThat(
+            new AuthFromYaml(
+                AuthFromYamlTest.settings(
+                    user,
+                    String.format("sha256:%s", DigestUtils.sha256Hex(pass)),
+                    "sasha@example.com"
+                )
+            ).user(user, pass).isEmpty(),
             new IsEqual<>(true)
         );
     }

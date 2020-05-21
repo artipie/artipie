@@ -21,18 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
+package com.artipie.auth;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.auth.Authentication;
 import java.util.Optional;
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * Authentication implementation based on yaml file with credentials.
  * @since 0.3
- * @todo #146:30min Implements this class to find user by credentials and enable test. For more
- *  details check #146.
  * @todo #146:30min Consider adding opportunity to configure alternative login, for example:
  *  joe:
  *    login: joe@mail.com
@@ -40,8 +40,12 @@ import org.apache.commons.lang3.NotImplementedException;
  *  This configuration would mean that Joe should use his email to login instead of username. Do not
  *  forget to validate credentials, logins should be unique.
  */
-@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-public final class YamlAuth implements Authentication {
+public final class AuthFromYaml implements Authentication {
+
+    /**
+     * Password format.
+     */
+    private static final Pattern PSWD = Pattern.compile("(plain:|sha256:)(.+)");
 
     /**
      * YAML credentials settings.
@@ -52,12 +56,38 @@ public final class YamlAuth implements Authentication {
      * Ctor.
      * @param cred Credentials settings
      */
-    public YamlAuth(final YamlMapping cred) {
+    public AuthFromYaml(final YamlMapping cred) {
         this.cred = cred;
     }
 
     @Override
     public Optional<String> user(final String user, final String pass) {
-        throw new NotImplementedException("Not yet implemented");
+        final YamlMapping users = this.cred.yamlMapping("credentials");
+        Optional<String> res = Optional.empty();
+        if (users != null && users.yamlMapping(user) != null) {
+            final String stored = users.yamlMapping(user).string("pass");
+            if (stored != null && check(stored, pass)) {
+                res = Optional.of(user);
+            }
+        }
+        return res;
     }
+
+    /**
+     * Obtains password from settings by username.
+     * @param stored Password from settings
+     * @param given Password to check
+     * @return Password if present and properly formatted
+     */
+    private static boolean check(final String stored, final String given) {
+        boolean res = false;
+        final Matcher matcher = AuthFromYaml.PSWD.matcher(stored);
+        if (matcher.find()) {
+            final String pswd = matcher.group(2);
+            res = stored.startsWith("sha256") && DigestUtils.sha256Hex(given).equals(pswd)
+                || given.equals(pswd);
+        }
+        return res;
+    }
+
 }

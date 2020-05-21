@@ -21,32 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
-
-import com.artipie.asto.Storage;
-import com.artipie.http.auth.Authentication;
-import java.io.IOException;
-import java.util.List;
 
 /**
- * Application settings.
+ * Artipie authentication providers tests.
  *
- * @since 0.1
+ * @since 0.3
  */
-public interface Settings {
-    /**
-     * Provides a storage.
-     *
-     * @return Storage instance.
-     * @throws IOException In case of problems with reading settings.
-     */
-    Storage storage() throws IOException;
+package com.artipie.auth;
 
-    /**
-     * Provides authorization.
-     *
-     * @return Authentication instance
-     * @throws IOException In case of problems with reading settings.
-     */
-    List<Authentication> auth() throws IOException;
-}
