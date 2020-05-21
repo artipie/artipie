@@ -33,6 +33,12 @@ import org.apache.commons.lang3.NotImplementedException;
  * @since 0.3
  * @todo #146:30min Implements this class to find user by credentials and enable test. For more
  *  details check #146.
+ * @todo #146:30min Consider adding opportunity to configure alternative login, for example:
+ *  joe:
+ *    login: joe@mail.com
+ *    pass: "plain:123"
+ *  This configuration would mean that Joe should use his email to login instead of username. Do not
+ *  forget to validate credentials, logins should be unique.
  */
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 public final class YamlAuth implements Authentication {
