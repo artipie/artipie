@@ -397,16 +397,12 @@ Authentication cal also be configured with yaml credentials file:
 credentials: 
   jane: 
     pass: "plain:qwerty"
-  joe: 
-    login: joe@mail.com
-    pass: "sha256:xxxxxxxxxxxxxxxxxxxxxx"
   john: 
     pass: "sha256:xxxxxxxxxxxxxxxxxxxxxxx"
 ```
-The root element `credentials` contains unique usernames mapping with the password and 
-optional `login` element to override the login. Password format is `{type}:{data}`, where `type` can be 
-either `plain`, which means that the password is a plain text `data` part of `pass`, or `sha256`, 
-which means that password is `sha256` hashed.
+The root element `credentials` contains unique usernames mapping with the password. Password 
+format is `{type}:{data}`, where `type` can be either `plain`, which means that the password is a 
+plain text `data` part of `pass`, or `sha256`, which means that password is `sha256` hashed.
 
 ## How to contribute
 
