@@ -72,7 +72,7 @@ public final class YamlSettings implements Settings {
     @Override
     public CompletionStage<Authentication> auth() throws IOException {
         //@checkstyle MethodBodyCommentsCheck (12 lines)
-        // @todo #146 - Implement this method to obtain authentications: for now
+        // @todo #146:30min Implement this method to obtain authentications: for now
         //  we have AuthFromEnv, which is available when `credentials.type` equals `env`, and
         //  AuthFromYaml, which is available when `credentials.type` equals
         //  `file` and `credentials.path` specified. New `credentials` section in main artipie

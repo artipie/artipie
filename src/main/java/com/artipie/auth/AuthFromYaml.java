@@ -33,7 +33,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 /**
  * Authentication implementation based on yaml file with credentials.
  * @since 0.3
- * @todo #146 - Consider adding opportunity to configure alternative login, for example:
+ * @todo #146:30min Consider adding opportunity to configure alternative login, for example:
  *  joe:
  *    login: joe@mail.com
  *    pass: "plain:123"
