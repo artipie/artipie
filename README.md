@@ -389,6 +389,43 @@ docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
   artipie/artipie:latest
 ```
 
+## Artipie central
+
+Artipie central is located at http://central.artipie.com
+
+It has few public repositories available:
+ - http://central.artipie.com/maven for Maven artifacts
+ - http://central.artipie.com/bin - binary storage
+ - http://central.artipie.com/npmjs - NPM proxy repository with caching layer
+
+### Maven
+
+To use maven repository add repositories configuration to `pom.xml` or `settings.xml`:
+```xml
+  <pluginRepositories>
+    <pluginRepository>
+      <id>artipie-central</id>
+      <name>artipie plugins</name>
+      <url>http://central.artipie.com/maven</url>
+    </pluginRepository>
+  </pluginRepositories>
+  <repositories>
+    <repository>
+      <id>artipie</id>
+      <name>artipie builds</name>
+      <url>http://central.artipie.com/maven</url>
+    </repository>
+  </repositories>
+```
+
+### NPM proxy
+
+NPM js proxy will cache all artifacts from npmjs, so if somebody decides to remove it, Artipie central cache won't be affected:
+
+```bash
+npm --registry=http://central.artipie.com/npmjs/ install npm
+```
+
 ### Credentials settings
 
 Authentication cal also be configured with yaml credentials file:
