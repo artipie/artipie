@@ -33,7 +33,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 /**
  * Authentication implementation based on yaml file with credentials.
  * @since 0.3
- * @todo #146:30min Consider adding opportunity to configure alternative login, for example:
+ * @todo #146 - Consider adding opportunity to configure alternative login, for example:
  *  joe:
  *    login: joe@mail.com
  *    pass: "plain:123"
@@ -45,7 +45,7 @@ public final class AuthFromYaml implements Authentication {
     /**
      * Password format.
      */
-    private static final Pattern PSWD = Pattern.compile("(plain:|sha256:)(.+)");
+    private static final Pattern PSWD_FORMAT = Pattern.compile("(plain:|sha256:)(.+)");
 
     /**
      * YAML credentials settings.
@@ -74,15 +74,15 @@ public final class AuthFromYaml implements Authentication {
     }
 
     /**
-     * Obtains password from settings by username.
+     * Checks stored password against the given one.
      * @param stored Password from settings
      * @param given Password to check
-     * @return Password if present and properly formatted
+     * @return True if passwords are the same
      */
     private static boolean check(final String stored, final String given) {
         boolean res = false;
-        final Matcher matcher = AuthFromYaml.PSWD.matcher(stored);
-        if (matcher.find()) {
+        final Matcher matcher = AuthFromYaml.PSWD_FORMAT.matcher(stored);
+        if (matcher.matches()) {
             final String pswd = matcher.group(2);
             res = stored.startsWith("sha256") && DigestUtils.sha256Hex(given).equals(pswd)
                 || given.equals(pswd);

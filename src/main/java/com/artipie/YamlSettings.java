@@ -28,7 +28,7 @@ import com.artipie.asto.Storage;
 import com.artipie.http.auth.Authentication;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
-import java.util.List;
+import java.util.concurrent.CompletionStage;
 import org.apache.commons.lang3.NotImplementedException;
 
 /**
@@ -70,13 +70,15 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public List<Authentication> auth() throws IOException {
-        //@checkstyle MethodBodyCommentsCheck (11 lines)
-        // @todo #146:30min Implement this method to obtain authentications: for now
-        //  we have AuthFromEnv, which is always available and should be active by default, and
-        //  AuthFromYaml, which can be configured in main artipie config with `credentials` section:
+    public CompletionStage<Authentication> auth() throws IOException {
+        //@checkstyle MethodBodyCommentsCheck (12 lines)
+        // @todo #146 - Implement this method to obtain authentications: for now
+        //  we have AuthFromEnv, which is available when `credentials.type` equals `env`, and
+        //  AuthFromYaml, which is available when `credentials.type` equals
+        //  `file` and `credentials.path` specified. New `credentials` section in main artipie
+        //  config:
         //  credentials:
-        //    # let's support only `file` type for now
+        //    # let's support `env` and `file` types for now
         //    type: file
         //    # file location, storage key, relative to `meta.storage.path`
         //    path: _credentials.yml
