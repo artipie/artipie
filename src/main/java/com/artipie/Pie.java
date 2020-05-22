@@ -101,10 +101,12 @@ public final class Pie implements Slice {
                         final Slice slice;
                         if (exist) {
                             slice = new AsyncSlice(
-                                storage.value(key).thenApply(
-                                    content -> new SliceFromConfig(
+                                storage.value(key).thenCombine(
+                                    new Unchecked<>(this.settings::auth).value(),
+                                    (content, auth) -> new SliceFromConfig(
                                         new RepoConfig(this.vertx, content),
-                                        this.vertx.fileSystem()
+                                        this.vertx.fileSystem(),
+                                        auth
                                     )
                                 )
                             );

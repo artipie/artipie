@@ -46,7 +46,7 @@ public interface Settings {
      * Provides authorization.
      *
      * @return Authentication instance
-     * @throws IOException In case of problems with reading settings.
+     * @throws IOException On Error
      */
     CompletionStage<Authentication> auth() throws IOException;
 }

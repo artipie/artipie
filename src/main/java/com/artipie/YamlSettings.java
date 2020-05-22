@@ -24,12 +24,23 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
+import com.artipie.auth.AuthFromEnv;
+import com.artipie.auth.AuthFromYaml;
 import com.artipie.http.auth.Authentication;
+import com.artipie.http.slice.KeyFromPath;
+import com.jcabi.log.Logger;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
+import io.reactivex.Flowable;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.apache.commons.lang3.NotImplementedException;
+import org.reactivestreams.Publisher;
 
 /**
  * Settings built from YAML.
@@ -37,6 +48,11 @@ import org.apache.commons.lang3.NotImplementedException;
  * @since 0.1
  */
 public final class YamlSettings implements Settings {
+
+    /**
+     * Meta section.
+     */
+    private static final String META = "meta";
 
     /**
      * YAML file content.
@@ -63,7 +79,7 @@ public final class YamlSettings implements Settings {
         return new YamlStorageSettings(
             Yaml.createYamlInput(this.content)
                 .readYamlMapping()
-                .yamlMapping("meta")
+                .yamlMapping(YamlSettings.META)
                 .yamlMapping("storage"),
                 this.vertx
         ).storage();
@@ -71,19 +87,54 @@ public final class YamlSettings implements Settings {
 
     @Override
     public CompletionStage<Authentication> auth() throws IOException {
-        //@checkstyle MethodBodyCommentsCheck (12 lines)
-        // @todo #146:30min Implement this method to obtain authentications: for now
-        //  we have AuthFromEnv, which is available when `credentials.type` equals `env`, and
-        //  AuthFromYaml, which is available when `credentials.type` equals
-        //  `file` and `credentials.path` specified. New `credentials` section in main artipie
-        //  config:
-        //  credentials:
-        //    # let's support `env` and `file` types for now
-        //    type: file
-        //    # file location, storage key, relative to `meta.storage.path`
-        //    path: _credentials.yml
-        //  For details check comments in #146.
-        //  After implementing pass found authentications to slices.
-        throw new NotImplementedException("Not yet implemented");
+        final YamlMapping cred = Yaml.createYamlInput(this.content)
+            .readYamlMapping()
+            .yamlMapping(YamlSettings.META)
+            .yamlMapping("credentials");
+        final CompletionStage<Authentication> res;
+        final String path = "path";
+        if (cred != null && "file".equals(cred.string("type")) && cred.string(path) != null) {
+            final KeyFromPath key = new KeyFromPath(cred.string(path));
+            final Storage strg = this.storage();
+            res = strg.exists(key).thenCompose(
+                exists -> {
+                    final CompletionStage<Authentication> auth;
+                    if (exists) {
+                        auth = strg.value(key).thenCompose(
+                            file -> yamlFromPublisher(file).thenApply(AuthFromYaml::new)
+                        );
+                    } else {
+                        auth = CompletableFuture.completedStage(new AuthFromEnv());
+                    }
+                    return auth;
+                }
+            );
+        } else {
+            res = CompletableFuture.completedStage(new AuthFromEnv());
+        }
+        return res;
+    }
+
+    /**
+     * Create async yaml config from content publisher.
+     * @param pub Flow publisher
+     * @return Completion stage of yaml
+     * @todo #146:30min Extract this method to a class: we have the same method in RepoConfig. After
+     *  extracting use this new class here and in RepoConfig. Do not forget about test.
+     */
+    private static CompletionStage<YamlMapping> yamlFromPublisher(
+        final Publisher<ByteBuffer> pub
+    ) {
+        return Flowable.fromPublisher(pub)
+            .reduce(
+                new StringBuilder(),
+                (acc, buf) -> acc.append(
+                    new String(new Remaining(buf).bytes(), StandardCharsets.UTF_8)
+                )
+            )
+            .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config: %s", yaml))
+            .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
+            .to(SingleInterop.get())
+            .toCompletableFuture();
     }
 }

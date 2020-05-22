@@ -25,7 +25,6 @@
 package com.artipie;
 
 import com.artipie.asto.Storage;
-import com.artipie.auth.AuthFromEnv;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
@@ -61,10 +60,12 @@ public final class SliceFromConfig extends Slice.Wrap {
      * Ctor.
      * @param config Repo config
      * @param fs The file system
+     * @param auth Authentication
      */
-    public SliceFromConfig(final RepoConfig config, final FileSystem fs) {
+    public SliceFromConfig(final RepoConfig config, final FileSystem fs,
+        final Authentication auth) {
         super(
-            new AsyncSlice(SliceFromConfig.build(config, fs, new AuthFromEnv()))
+            new AsyncSlice(SliceFromConfig.build(config, fs, auth))
         );
     }
 
