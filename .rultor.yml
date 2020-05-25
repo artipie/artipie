@@ -19,8 +19,11 @@ deploy:
     echo There is nothing to deploy
     exit 1
 release:
+  sensitive:
+    - settings.xml
   script: |-
     echo done
 architect:
   - g4s8
   - yegor256
+

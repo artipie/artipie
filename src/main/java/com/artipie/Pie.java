@@ -87,7 +87,7 @@ public final class Pie implements Slice {
         }
         final String[] parts = path.replaceAll("^/+", "").split("/");
         if (path.equals("/") || parts.length == 0) {
-            return new RsWithStatus(RsStatus.OK);
+            return new RsWithStatus(RsStatus.NO_CONTENT);
         }
         final String repo = parts[0];
         Logger.debug(this, "Slice repo=%s", repo);

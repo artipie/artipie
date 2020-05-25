@@ -24,7 +24,9 @@
 package com.artipie;
 
 import com.artipie.asto.Storage;
+import com.artipie.http.auth.Authentication;
 import java.io.IOException;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Application settings.
@@ -39,4 +41,12 @@ public interface Settings {
      * @throws IOException In case of problems with reading settings.
      */
     Storage storage() throws IOException;
+
+    /**
+     * Provides authorization.
+     *
+     * @return Authentication instance
+     * @throws IOException In case of problems with reading settings.
+     */
+    CompletionStage<Authentication> auth() throws IOException;
 }

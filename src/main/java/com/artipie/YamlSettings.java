@@ -25,7 +25,10 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Storage;
+import com.artipie.http.auth.Authentication;
 import java.io.IOException;
+import java.util.concurrent.CompletionStage;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Settings built from YAML.
@@ -55,5 +58,23 @@ public final class YamlSettings implements Settings {
                 .yamlMapping("meta")
                 .yamlMapping("storage")
         ).storage();
+    }
+
+    @Override
+    public CompletionStage<Authentication> auth() throws IOException {
+        //@checkstyle MethodBodyCommentsCheck (12 lines)
+        // @todo #146:30min Implement this method to obtain authentications: for now
+        //  we have AuthFromEnv, which is available when `credentials.type` equals `env`, and
+        //  AuthFromYaml, which is available when `credentials.type` equals
+        //  `file` and `credentials.path` specified. New `credentials` section in main artipie
+        //  config:
+        //  credentials:
+        //    # let's support `env` and `file` types for now
+        //    type: file
+        //    # file location, storage key, relative to `meta.storage.path`
+        //    path: _credentials.yml
+        //  For details check comments in #146.
+        //  After implementing pass found authentications to slices.
+        throw new NotImplementedException("Not yet implemented");
     }
 }

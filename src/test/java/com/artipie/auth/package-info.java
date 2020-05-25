@@ -21,37 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
-
-import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.http.auth.Authentication;
-import java.util.Optional;
-import org.apache.commons.lang3.NotImplementedException;
 
 /**
- * Authentication implementation based on yaml file with credentials.
+ * Artipie authentication providers tests.
+ *
  * @since 0.3
- * @todo #146:30min Implements this class to find user by credentials and enable test. For more
- *  details check #146.
  */
-@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-public final class YamlAuth implements Authentication {
+package com.artipie.auth;
 
-    /**
-     * YAML credentials settings.
-     */
-    private final YamlMapping cred;
-
-    /**
-     * Ctor.
-     * @param cred Credentials settings
-     */
-    public YamlAuth(final YamlMapping cred) {
-        this.cred = cred;
-    }
-
-    @Override
-    public Optional<String> user(final String user, final String pass) {
-        throw new NotImplementedException("Not yet implemented");
-    }
-}
