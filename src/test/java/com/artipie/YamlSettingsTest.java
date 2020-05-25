@@ -28,8 +28,6 @@ import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.s3.S3Storage;
 import com.artipie.auth.AuthFromEnv;
 import com.artipie.auth.AuthFromYaml;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.reactivex.core.Vertx;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -38,7 +36,6 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -87,7 +84,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void shouldCreateAuthFromEnv(final Vertx vertx) throws Exception {
+    public void shouldCreateAuthFromEnv() throws Exception {
         final YamlSettings settings = new YamlSettings(
             Yaml.createYamlMappingBuilder()
             .add(
@@ -101,8 +98,7 @@ class YamlSettingsTest {
             ).add(
                 "credentials",
                 Yaml.createYamlMappingBuilder().add("type", "env").build()
-            ).build().toString(),
-            vertx
+            ).build().toString()
         );
         MatcherAssert.assertThat(
             settings.auth().toCompletableFuture().get(),
@@ -111,7 +107,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void shouldCreateAuthFromYaml(final Vertx vertx, @TempDir final Path tmp)
+    public void shouldCreateAuthFromYaml(@TempDir final Path tmp)
         throws Exception {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
@@ -129,8 +125,7 @@ class YamlSettingsTest {
                             .add("type", "file")
                             .add("path", fname).build()
                     ).build()
-                ).build().toString(),
-            vertx
+                ).build().toString()
         );
         final Path yaml = tmp.resolve(fname);
         Files.writeString(
