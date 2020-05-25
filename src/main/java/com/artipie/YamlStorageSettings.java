@@ -28,7 +28,6 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.s3.S3Storage;
-import io.vertx.reactivex.core.Vertx;
 import java.net.URI;
 import java.nio.file.Path;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -51,18 +50,11 @@ final class YamlStorageSettings {
     private final YamlMapping yaml;
 
     /**
-     * The Vert.x instance.
-     */
-    private final Vertx vertx;
-
-    /**
      * Ctor.
      * @param yaml YAML storage settings.
-     * @param vertx The Vert.x instance.
      */
-    YamlStorageSettings(final YamlMapping yaml, final Vertx vertx) {
+    YamlStorageSettings(final YamlMapping yaml) {
         this.yaml = yaml;
-        this.vertx = vertx;
     }
 
     /**
@@ -75,7 +67,7 @@ final class YamlStorageSettings {
         final String type = strict.string("type");
         final Storage storage;
         if ("fs".equals(type)) {
-            storage = new FileStorage(Path.of(strict.string("path")), this.vertx.fileSystem());
+            storage = new FileStorage(Path.of(strict.string("path")));
         } else if ("s3".equals(type)) {
             storage = new S3Storage(this.s3Client(), strict.string("bucket"));
         } else {

@@ -41,7 +41,7 @@ import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.pypi.PySlice;
 import com.artipie.rpm.http.RpmSlice;
-import io.vertx.reactivex.core.file.FileSystem;
+import io.vertx.reactivex.core.Vertx;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
@@ -59,20 +59,20 @@ public final class SliceFromConfig extends Slice.Wrap {
     /**
      * Ctor.
      * @param config Repo config
-     * @param fs The file system
+     * @param vertx Vertx instance
      * @param auth Authentication
      */
-    public SliceFromConfig(final RepoConfig config, final FileSystem fs,
+    public SliceFromConfig(final RepoConfig config, final Vertx vertx,
         final Authentication auth) {
         super(
-            new AsyncSlice(SliceFromConfig.build(config, fs, auth))
+            new AsyncSlice(SliceFromConfig.build(config, vertx, auth))
         );
     }
 
     /**
      * Find a slice implementation for config.
      * @param cfg Repository config
-     * @param fs The file system
+     * @param vertx Vertx instance
      * @param auth Authentication implementation
      * @return Slice completionStage
      * @todo #90:30min This method still needs more refactoring.
@@ -80,7 +80,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
      * @checkstyle LineLengthCheck (100 lines)
      */
-    static CompletionStage<Slice> build(final RepoConfig cfg, final FileSystem fs,
+    static CompletionStage<Slice> build(final RepoConfig cfg, final Vertx vertx,
         final Authentication auth) {
         return cfg.type().thenCompose(
             type -> cfg.storage().thenCombine(
@@ -95,7 +95,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                     )
                     ),
                     new MapEntry<>(
-                        "gem", config -> CompletableFuture.completedStage(new GemSlice(storage, fs))
+                        "gem", config -> CompletableFuture.completedStage(new GemSlice(storage, vertx.fileSystem()))
                     ),
                     new MapEntry<>(
                         "rpm", config -> CompletableFuture.completedStage(new RpmSlice(storage))
@@ -122,7 +122,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                                 path,
                                 new NpmProxy(
                                     new NpmProxyConfig(settings.orElseThrow()),
-                                    cfg.vertx(),
+                                    vertx,
                                     storage
                                 )
                             )

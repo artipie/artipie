@@ -34,7 +34,6 @@ import com.artipie.http.slice.KeyFromPath;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
-import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -60,18 +59,11 @@ public final class YamlSettings implements Settings {
     private final String content;
 
     /**
-     * The Vert.x instance.
-     */
-    private final Vertx vertx;
-
-    /**
      * Ctor.
      * @param content YAML file content.
-     * @param vertx The Vert.x instance.
      */
-    public YamlSettings(final String content, final Vertx vertx) {
+    public YamlSettings(final String content) {
         this.content = content;
-        this.vertx = vertx;
     }
 
     @Override
@@ -80,8 +72,7 @@ public final class YamlSettings implements Settings {
             Yaml.createYamlInput(this.content)
                 .readYamlMapping()
                 .yamlMapping(YamlSettings.META)
-                .yamlMapping("storage"),
-                this.vertx
+                .yamlMapping("storage")
         ).storage();
     }
 

@@ -104,8 +104,8 @@ public final class Pie implements Slice {
                                 storage.value(key).thenCombine(
                                     new Unchecked<>(this.settings::auth).value(),
                                     (content, auth) -> new SliceFromConfig(
-                                        new RepoConfig(this.vertx, content),
-                                        this.vertx.fileSystem(),
+                                        new RepoConfig(repo, content),
+                                        this.vertx,
                                         auth
                                     )
                                 )
