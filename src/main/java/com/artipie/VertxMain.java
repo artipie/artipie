@@ -109,8 +109,7 @@ public final class VertxMain implements Runnable {
         new VertxMain(
             new Pie(
                 new YamlSettings(
-                    Files.readString(Path.of(storage), Charset.defaultCharset()),
-                    vertx
+                    Files.readString(Path.of(storage), Charset.defaultCharset())
                 ),
                 vertx
             ),

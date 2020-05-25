@@ -103,8 +103,8 @@ public final class Pie implements Slice {
                             slice = new AsyncSlice(
                                 storage.value(key).thenApply(
                                     content -> new SliceFromConfig(
-                                        new RepoConfig(this.vertx, content),
-                                        this.vertx.fileSystem()
+                                        new RepoConfig(repo, content),
+                                        this.vertx
                                     )
                                 )
                             );
