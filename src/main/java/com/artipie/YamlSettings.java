@@ -84,7 +84,7 @@ public final class YamlSettings implements Settings {
             .yamlMapping("credentials");
         final CompletionStage<Authentication> res;
         final String path = "path";
-        if (cred != null && "file".equals(cred.string("type")) && cred.string(path) != null) {
+        if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
             final KeyFromPath key = new KeyFromPath(cred.string(path));
             final Storage strg = this.storage();
             res = strg.exists(key).thenCompose(
@@ -100,10 +100,25 @@ public final class YamlSettings implements Settings {
                     return auth;
                 }
             );
+        } else if (YamlSettings.hasTypeFile(cred)) {
+            res = CompletableFuture.failedFuture(
+                new RuntimeException(
+                    "Invalid credentials configuration: type `file` requires `path`!"
+                )
+            );
         } else {
             res = CompletableFuture.completedStage(new AuthFromEnv());
         }
         return res;
+    }
+
+    /**
+     * Check that yaml has `type: file` mapping in the credentials setting.
+     * @param cred Credentials yaml section
+     * @return True if setting is present
+     */
+    private static boolean hasTypeFile(final YamlMapping cred) {
+        return cred != null && "file".equals(cred.string("type"));
     }
 
     /**

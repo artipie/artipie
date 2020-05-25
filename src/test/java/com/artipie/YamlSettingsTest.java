@@ -87,18 +87,18 @@ class YamlSettingsTest {
     public void shouldCreateAuthFromEnv() throws Exception {
         final YamlSettings settings = new YamlSettings(
             Yaml.createYamlMappingBuilder()
-            .add(
-                "meta",
-                Yaml.createYamlMappingBuilder().add(
-                    "storage",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "fs")
-                        .add("path", "some/path").build()
-                ).build()
-            ).add(
-                "credentials",
-                Yaml.createYamlMappingBuilder().add("type", "env").build()
-            ).build().toString()
+                .add(
+                    "meta",
+                    Yaml.createYamlMappingBuilder().add(
+                        "storage",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "fs")
+                            .add("path", "some/path").build()
+                    ).add(
+                        "credentials",
+                        Yaml.createYamlMappingBuilder().add("type", "env").build()
+                    ).build()
+                ).build().toString()
         );
         MatcherAssert.assertThat(
             settings.auth().toCompletableFuture().get(),
@@ -142,6 +142,29 @@ class YamlSettingsTest {
         MatcherAssert.assertThat(
             settings.auth().toCompletableFuture().get(),
             new IsInstanceOf(AuthFromYaml.class)
+        );
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenPathIsNotSet() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    "meta",
+                    Yaml.createYamlMappingBuilder().add(
+                        "storage",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "fs")
+                            .add("path", "some/path").build()
+                    ).add(
+                        "credentials",
+                        Yaml.createYamlMappingBuilder().add("type", "file").build()
+                    ).build()
+                ).toString()
+        );
+        Assertions.assertThrows(
+            RuntimeException.class,
+            () -> settings.auth().toCompletableFuture().get()
         );
     }
 
