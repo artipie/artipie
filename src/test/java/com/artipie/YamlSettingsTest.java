@@ -23,13 +23,20 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.s3.S3Storage;
+import com.artipie.auth.AuthFromEnv;
+import com.artipie.auth.AuthFromYaml;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -73,6 +80,91 @@ class YamlSettingsTest {
         MatcherAssert.assertThat(
             settings.storage(),
             Matchers.instanceOf(S3Storage.class)
+        );
+    }
+
+    @Test
+    public void shouldCreateAuthFromEnv() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    "meta",
+                    Yaml.createYamlMappingBuilder().add(
+                        "storage",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "fs")
+                            .add("path", "some/path").build()
+                    ).add(
+                        "credentials",
+                        Yaml.createYamlMappingBuilder().add("type", "env").build()
+                    ).build()
+                ).build().toString()
+        );
+        MatcherAssert.assertThat(
+            settings.auth().toCompletableFuture().get(),
+            new IsInstanceOf(AuthFromEnv.class)
+        );
+    }
+
+    @Test
+    public void shouldCreateAuthFromYaml(@TempDir final Path tmp)
+        throws Exception {
+        final String fname = "_cred.yml";
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    "meta",
+                    Yaml.createYamlMappingBuilder().add(
+                        "storage",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "fs")
+                            .add("path", tmp.toString()).build()
+                    ).add(
+                        "credentials",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "file")
+                            .add("path", fname).build()
+                    ).build()
+                ).build().toString()
+        );
+        final Path yaml = tmp.resolve(fname);
+        Files.writeString(
+            yaml,
+            Yaml.createYamlMappingBuilder().add(
+                "credentials",
+                Yaml.createYamlMappingBuilder()
+                    .add(
+                        "john",
+                        Yaml.createYamlMappingBuilder().add("password", "plain:123").build()
+                    ).build()
+            ).build().toString()
+        );
+        MatcherAssert.assertThat(
+            settings.auth().toCompletableFuture().get(),
+            new IsInstanceOf(AuthFromYaml.class)
+        );
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenPathIsNotSet() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    "meta",
+                    Yaml.createYamlMappingBuilder().add(
+                        "storage",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "fs")
+                            .add("path", "some/path").build()
+                    ).add(
+                        "credentials",
+                        Yaml.createYamlMappingBuilder().add("type", "file").build()
+                    ).build()
+                ).toString()
+        );
+        Assertions.assertThrows(
+            RuntimeException.class,
+            () -> settings.auth().toCompletableFuture().get()
         );
     }
 
