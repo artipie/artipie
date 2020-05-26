@@ -374,21 +374,6 @@ Install a gem:
 $ gem install my_first_gem --source http://localhost:8080/gem
 ```
 
-## Authentication
-
-### Environment variables
-The simplest way to start Artipie with authentication is to configure single user via
-environment variables:
- - `ARTIPIE_USER_NAME` - user name
- - `ARTIPIE_USER_PASS` - user password
-
-E.g. to start Docker image use `-e` CLI option:
-```bash
-docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
-  -e ARTIPIE_USER_NAME=artipie -e ARTIPIE_USER_PASS=qwerty \
-  artipie/artipie:latest
-```
-
 ## Artipie central
 
 Artipie central is located at http://central.artipie.com
@@ -426,9 +411,36 @@ NPM js proxy will cache all artifacts from npmjs, so if somebody decides to remo
 npm --registry=http://central.artipie.com/npmjs/ install npm
 ```
 
-### Credentials settings
+## Authentication
 
-Authentication cal also be configured with yaml credentials file:
+For now, we have two ways to configure authentication in Artipie: via environment variables and via 
+yaml credentials file. Authentication type should be set in main Artipie config inside `meta`
+section:
+```yaml
+credentials:
+  type: file
+  path: _credentials.yml
+```
+`type` can be either `env` for auth via environment variables or `file` for auth via yaml credentials 
+file. `path` is required for `file` configuration, it should be a yaml credentials file location 
+relative to `meta.storage.path` (or, in other words, a storage key).
+
+### Environment variables
+The simplest way to start Artipie with authentication is to configure single user via
+environment variables:
+ - `ARTIPIE_USER_NAME` - user name
+ - `ARTIPIE_USER_PASS` - user password
+
+E.g. to start Docker image use `-e` CLI option:
+```bash
+docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
+  -e ARTIPIE_USER_NAME=artipie -e ARTIPIE_USER_PASS=qwerty \
+  artipie/artipie:latest
+```
+
+### Yaml credentials file
+
+Yaml credentials file has the following format:
 
 ```yaml
 credentials: 
