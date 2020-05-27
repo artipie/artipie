@@ -414,9 +414,10 @@ For now, we have two ways to configure authentication in Artipie: via environmen
 yaml credentials file. Authentication type should be set in main Artipie config inside `meta`
 section:
 ```yaml
-credentials:
-  type: file
-  path: _credentials.yml
+meta:
+  credentials:
+    type: file
+    path: _credentials.yml
 ```
 `type` can be either `env` for auth via environment variables or `file` for auth via yaml credentials 
 file. `path` is required for `file` configuration, it should be a yaml credentials file location 
