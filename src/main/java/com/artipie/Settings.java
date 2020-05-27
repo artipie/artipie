@@ -24,6 +24,7 @@
 package com.artipie;
 
 import com.artipie.asto.Storage;
+import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import java.io.IOException;
 import java.util.concurrent.CompletionStage;
@@ -49,4 +50,43 @@ public interface Settings {
      * @throws IOException On Error
      */
     CompletionStage<Authentication> auth() throws IOException;
+
+    /**
+     * Fake {@link Settings} using a file storage.
+     *
+     * @since 0.2
+     */
+    final class Fake implements Settings {
+
+        /**
+         * Storage.
+         */
+        private final Storage storage;
+
+        /**
+         * Ctor.
+         */
+        public Fake() {
+            this(new InMemoryStorage());
+        }
+
+        /**
+         * Ctor.
+         *
+         * @param storage Storage
+         */
+        public Fake(final Storage storage) {
+            this.storage = storage;
+        }
+
+        @Override
+        public Storage storage() throws IOException {
+            return this.storage;
+        }
+
+        @Override
+        public CompletionStage<Authentication> auth() throws IOException {
+            throw new UnsupportedOperationException();
+        }
+    }
 }
