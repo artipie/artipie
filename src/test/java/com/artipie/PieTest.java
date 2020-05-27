@@ -30,11 +30,9 @@ import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.reactivex.core.Vertx;
-import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Test for {@link Pie}.
@@ -43,10 +41,10 @@ import org.junit.jupiter.api.io.TempDir;
 @ExtendWith(VertxExtension.class)
 public final class PieTest {
     @Test
-    public void unexistingRepoReturnNotFound(final Vertx vertx, @TempDir final Path tmp) {
+    public void unexistingRepoReturnNotFound(final Vertx vertx) {
         MatcherAssert.assertThat(
             "Must return 404 HTTP status",
-            new Pie(new Settings.Fake(tmp, vertx), vertx).response(
+            new Pie(new Settings.Fake(), vertx).response(
                 new RequestLine("GET", "/repo/foo", "HTTP/1.1").toString(),
                 Headers.EMPTY,
                 Flowable.empty()

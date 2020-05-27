@@ -24,11 +24,9 @@
 package com.artipie;
 
 import com.artipie.asto.Storage;
-import com.artipie.asto.fs.FileStorage;
+import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
-import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -61,29 +59,29 @@ public interface Settings {
     final class Fake implements Settings {
 
         /**
-         * Storage path.
+         * Storage.
          */
-        private final Path storage;
+        private final Storage storage;
 
         /**
-         * Vertx.
+         * Ctor.
          */
-        private final Vertx vertx;
+        public Fake() {
+            this(new InMemoryStorage());
+        }
 
         /**
          * Ctor.
          *
-         * @param storage Storage path
-         * @param vertx Vertx
+         * @param storage Storage
          */
-        public Fake(final Path storage, final Vertx vertx) {
+        public Fake(final Storage storage) {
             this.storage = storage;
-            this.vertx = vertx;
         }
 
         @Override
         public Storage storage() throws IOException {
-            return new FileStorage(this.storage, this.vertx.fileSystem());
+            return this.storage;
         }
 
         @Override
