@@ -25,7 +25,6 @@
 package com.artipie;
 
 import com.artipie.asto.Storage;
-import com.artipie.auth.AuthFromEnv;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
@@ -33,6 +32,7 @@ import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.BasicIdentities;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
@@ -61,10 +61,12 @@ public final class SliceFromConfig extends Slice.Wrap {
      * Ctor.
      * @param config Repo config
      * @param vertx Vertx instance
+     * @param auth Authentication
      */
-    public SliceFromConfig(final RepoConfig config, final Vertx vertx) {
+    public SliceFromConfig(final RepoConfig config, final Vertx vertx,
+        final Authentication auth) {
         super(
-            new AsyncSlice(SliceFromConfig.build(config, vertx, new AuthFromEnv()))
+            new AsyncSlice(SliceFromConfig.build(config, vertx, auth))
         );
     }
 
@@ -89,9 +91,16 @@ public final class SliceFromConfig extends Slice.Wrap {
                         "file", config -> CompletableFuture.completedStage(new FilesSlice(storage, permissions, auth))
                     ),
                     new MapEntry<>(
-                        "npm", config -> CompletableFuture.completedStage(
-                        new NpmSlice(new Npm(storage), storage)
-                    )
+                        "npm", config -> config.path().thenCombine(
+                            config.settings(),
+                            (path, settings) -> new NpmSlice(
+                                path,
+                                new Npm(storage),
+                                storage,
+                                permissions,
+                                new BasicIdentities(auth)
+                            )
+                        )
                     ),
                     new MapEntry<>(
                         "gem", config -> CompletableFuture.completedStage(new GemSlice(storage, vertx.fileSystem()))

@@ -46,10 +46,6 @@ import org.reactivestreams.Publisher;
 /**
  * Pie of slices.
  * @since 1.0
- * @todo #74:30min Create a unit test for 404 response.
- *  Let's test that the response for request for not existing repository
- *  returns 404 error, e.g. if request line is `GET /repo/foo HTTP/1.1`
- *  but we don't have `foo.yml` configuration, then this class should return 404.
  * @checkstyle ReturnCountCheck (500 lines)
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
@@ -101,10 +97,12 @@ public final class Pie implements Slice {
                         final Slice slice;
                         if (exist) {
                             slice = new AsyncSlice(
-                                storage.value(key).thenApply(
-                                    content -> new SliceFromConfig(
+                                storage.value(key).thenCombine(
+                                    new Unchecked<>(this.settings::auth).value(),
+                                    (content, auth) -> new SliceFromConfig(
                                         new RepoConfig(repo, content),
-                                        this.vertx
+                                        this.vertx,
+                                        auth
                                     )
                                 )
                             );
