@@ -182,19 +182,16 @@ Try this `npm.yaml` file:
 ```yaml
 repo:
   type: npm
+  path: /npm
   storage:
     type: fs
     path: /tmp/artipie/data/npm
   permissions:
-    admin:
-      - \*
     john:
-      - deploy
-      - delete
-    jane:
-      - deploy
-    \*:
       - download
+      - upload
+    jane:
+      - upload
 ```
 
 To publish your npm project use the following command:
