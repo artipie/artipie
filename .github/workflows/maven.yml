@@ -22,3 +22,4 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Build it with Maven
         run: mvn -B verify -Pqulice
+        
