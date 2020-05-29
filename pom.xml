@@ -201,6 +201,9 @@ SOFTWARE.
   <profiles>
     <profile>
       <id>qulice</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
       <build>
         <testResources>
           <testResource>
