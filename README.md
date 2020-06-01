@@ -421,7 +421,8 @@ meta:
 ```
 `type` can be either `env` for auth via environment variables or `file` for auth via yaml credentials 
 file. `path` is required for `file` configuration, it should be a yaml credentials file location 
-relative to `meta.storage.path` (or, in other words, a storage key).
+relative to `meta.storage.path` (or, in other words, a storage key). Docker image uses `env` credentials by default,
+to change default settings, mount custom config file to `/etc/artipie.yml`.
 
 ### Environment variables
 The simplest way to start Artipie with authentication is to configure single user via
