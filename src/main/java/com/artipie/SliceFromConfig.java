@@ -62,7 +62,7 @@ public final class SliceFromConfig extends Slice.Wrap {
     /**
      * Repository path prefix.
      */
-    private static final Pattern REPO_PREF = Pattern.compile("/[a-zA-Z0-9]+/");
+    private static final Pattern REPO_PREF = Pattern.compile("/(?:[a-zA-Z0-9]+)(/.*)");
 
     /**
      * Ctor.
