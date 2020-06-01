@@ -33,6 +33,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicIdentities;
+import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
@@ -46,6 +47,7 @@ import io.vertx.reactivex.core.Vertx;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 
@@ -56,6 +58,11 @@ import org.cactoos.map.MapOf;
  * @checkstyle ParameterNameCheck (500 lines)
  */
 public final class SliceFromConfig extends Slice.Wrap {
+
+    /**
+     * Repository path prefix.
+     */
+    private static final Pattern REPO_PREF = Pattern.compile("/[a-zA-Z0-9]+/");
 
     /**
      * Ctor.
@@ -88,10 +95,17 @@ public final class SliceFromConfig extends Slice.Wrap {
                 cfg.permissions(),
                 (storage, permissions) -> new MapOf<String, Function<RepoConfig, CompletionStage<Slice>>>(
                     new MapEntry<>(
-                        "file", config -> CompletableFuture.completedStage(new FilesSlice(storage, permissions, auth))
+                        "file",
+                        config -> CompletableFuture.completedStage(
+                            new TrimPathSlice(
+                                new FilesSlice(storage, permissions, auth),
+                                SliceFromConfig.REPO_PREF
+                            )
+                        )
                     ),
                     new MapEntry<>(
-                        "npm", config -> config.path().thenCombine(
+                        "npm",
+                        config -> config.path().thenCombine(
                             config.settings(),
                             (path, settings) -> new NpmSlice(
                                 path,
@@ -103,10 +117,16 @@ public final class SliceFromConfig extends Slice.Wrap {
                         )
                     ),
                     new MapEntry<>(
-                        "gem", config -> CompletableFuture.completedStage(new GemSlice(storage, vertx.fileSystem()))
+                        "gem",
+                        config -> CompletableFuture.completedStage(new GemSlice(storage, vertx.fileSystem()))
                     ),
                     new MapEntry<>(
-                        "rpm", config -> CompletableFuture.completedStage(new RpmSlice(storage))
+                        "rpm",
+                        config -> CompletableFuture.completedStage(
+                            new TrimPathSlice(
+                                new RpmSlice(storage), SliceFromConfig.REPO_PREF
+                            )
+                        )
                     ),
                     new MapEntry<>(
                         "php",
@@ -117,7 +137,13 @@ public final class SliceFromConfig extends Slice.Wrap {
                         config -> nuGet(cfg, storage)
                     ),
                     new MapEntry<>(
-                        "maven", config -> CompletableFuture.completedStage(new MavenSlice(storage, permissions, auth))
+                        "maven",
+                        config -> CompletableFuture.completedStage(
+                            new TrimPathSlice(
+                                new MavenSlice(storage, permissions, auth),
+                                SliceFromConfig.REPO_PREF
+                            )
+                        )
                     ),
                     new MapEntry<>(
                         "go", config -> CompletableFuture.completedStage(new GoSlice(storage))
