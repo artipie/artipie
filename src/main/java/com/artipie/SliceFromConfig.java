@@ -28,6 +28,7 @@ import com.artipie.asto.Storage;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
+import com.artipie.helm.HelmSlice;
 import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
@@ -119,6 +120,10 @@ public final class SliceFromConfig extends Slice.Wrap {
                     new MapEntry<>(
                         "gem",
                         config -> CompletableFuture.completedStage(new GemSlice(storage, vertx.fileSystem()))
+                    ),
+                    new MapEntry<>(
+                        "helm",
+                        config -> CompletableFuture.completedStage(new HelmSlice(storage))
                     ),
                     new MapEntry<>(
                         "rpm",
