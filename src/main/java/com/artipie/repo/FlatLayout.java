@@ -42,6 +42,11 @@ import org.cactoos.scalar.Unchecked;
 
 /**
  * Flat repositories layout.
+ * <p>
+ * Artipie doesn't use any structural layout, all repositories
+ * are located at the root of base path, e.g. URI {@code https://central.artipie.com/maven}
+ * accesses {@code maven} repository.
+ * </p>
  * @see RepoLayout
  * @since 0.4
  * @checkstyle ReturnCountCheck (500 lines)
@@ -52,7 +57,7 @@ public final class FlatLayout implements RepoLayout {
     /**
      * Repository path prefix.
      */
-    private static final Pattern REPO_PREF = Pattern.compile("/(?:[a-zA-Z0-9]+)(/.*)");
+    private static final Pattern REPO_PREF = Pattern.compile("/(?:[a-zA-Z0-9_]+)(/.*)");
 
     /**
      * Artipie settings.

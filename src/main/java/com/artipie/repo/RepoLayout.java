@@ -34,7 +34,7 @@ import com.artipie.http.Slice;
  *     <li>Flat layout - Artipie doesn't use any structural layout, all repositories
  *     are located at the root of base path, e.g. URI {@code https://central.artipie.com/maven}
  *     accesses {@code maven} repository.</li>
- *     <li>User based - Artipie installation has multiple namespaces/organizations/users,
+ *     <li>Hierarchical layout - Artipie installation has multiple namespaces/organizations/users,
  *     so first part of the request is a namespace name, second part is a repository name,
  *     e.g. URI {@code https://central.artipie.com/public/maven} accesses {@code maven}
  *     repository under {@code public} namespace.</li>

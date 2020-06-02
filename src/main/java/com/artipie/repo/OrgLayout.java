@@ -41,7 +41,13 @@ import java.util.regex.Pattern;
 import org.cactoos.scalar.Unchecked;
 
 /**
- * Flat repositories layout.
+ * Hierarchical repositories layout.
+ * <p>
+ * Artipie installation has multiple namespaces/organizations/users,
+ * so first part of the request is a namespace name, second part is a repository name,
+ * e.g. URI {@code https://central.artipie.com/public/maven} accesses {@code maven}
+ * repository under {@code public} namespace.
+ * </p>
  * @see RepoLayout
  * @since 0.4
  * @checkstyle ReturnCountCheck (500 lines)
@@ -53,7 +59,7 @@ public final class OrgLayout implements RepoLayout {
      * Repository path prefix.
      */
     private static final Pattern REPO_PREF =
-        Pattern.compile("/(?:[a-zA-Z0-9]+)/(?:[a-zA-Z0-9]+)(/.*)");
+        Pattern.compile("/(?:[a-zA-Z0-9_]+)/(?:[a-zA-Z0-9_]+)(/.*)");
 
     /**
      * Artipie settings.
