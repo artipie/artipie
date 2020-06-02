@@ -31,9 +31,13 @@ import com.artipie.auth.AuthFromEnv;
 import com.artipie.auth.AuthFromYaml;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
+import com.artipie.repo.FlatLayout;
+import com.artipie.repo.OrgLayout;
+import com.artipie.repo.RepoLayout;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
+import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -108,6 +112,23 @@ public final class YamlSettings implements Settings {
             );
         } else {
             res = CompletableFuture.completedStage(new AuthFromEnv());
+        }
+        return res;
+    }
+
+    @Override
+    public RepoLayout layout(final Vertx vertx) throws IOException {
+        final String layout = Yaml.createYamlInput(this.content)
+            .readYamlMapping()
+            .yamlMapping(YamlSettings.META)
+            .string("layout");
+        final RepoLayout res;
+        if (layout == null || "flat".equals(layout)) {
+            res = new FlatLayout(this, vertx);
+        } else if ("org".equals(layout)) {
+            res = new OrgLayout(this, vertx);
+        } else {
+            throw new IOException(String.format("Unsupported layout kind: %s", layout));
         }
         return res;
     }

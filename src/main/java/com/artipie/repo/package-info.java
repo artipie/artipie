@@ -21,10 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 /**
- * Artipie authentication providers.
+ * Artipie repositories.
  *
- * @since 0.3
+ * @since 0.4
  */
-package com.artipie.auth;
+package com.artipie.repo;

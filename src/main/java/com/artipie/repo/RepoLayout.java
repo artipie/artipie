@@ -21,10 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package com.artipie.repo;
+
+import com.artipie.http.Slice;
 
 /**
- * Artipie authentication providers.
- *
- * @since 0.3
+ * Repositories layout.
+ * <p>
+ * This object resolves repository HTTP endpoints for specified URL.
+ * Artipie supports two primary layout configurations:
+ * <ul>
+ *     <li>Flat layout - Artipie doesn't use any structural layout, all repositories
+ *     are located at the root of base path, e.g. URI {@code https://central.artipie.com/maven}
+ *     accesses {@code maven} repository.</li>
+ *     <li>User based - Artipie installation has multiple namespaces/organizations/users,
+ *     so first part of the request is a namespace name, second part is a repository name,
+ *     e.g. URI {@code https://central.artipie.com/public/maven} accesses {@code maven}
+ *     repository under {@code public} namespace.</li>
+ * </ul>
+ * </p>
+ * @see FlatLayout
+ * @see OrgLayout
+ * @since 0.4
  */
-package com.artipie.auth;
+public interface RepoLayout {
+
+    /**
+     * Resolve slice based on URI path.
+     * @param path URI path
+     * @return Repository API
+     */
+    Slice resolve(String path);
+}
