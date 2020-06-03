@@ -24,8 +24,10 @@
 
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
@@ -50,6 +52,11 @@ import org.reactivestreams.Publisher;
 public final class RepoConfig {
 
     /**
+     * Storages.
+     */
+    private final StorageAliases storages;
+
+    /**
      * Storage prefix.
      */
     private final Key prefix;
@@ -57,23 +64,26 @@ public final class RepoConfig {
     /**
      * Source yaml future.
      */
-    private final CompletionStage<YamlMapping> yaml;
+    private final YamlMapping yaml;
 
     /**
      * Ctor.
+     * @param storages Repository storage aliases
      * @param prefix Storage prefix
-     * @param content Flow content
+     * @param yaml Config yaml
      */
-    public RepoConfig(final Key prefix, final Publisher<ByteBuffer> content) {
+    public RepoConfig(final StorageAliases storages, final Key prefix,
+        final YamlMapping yaml) {
         this.prefix = prefix;
-        this.yaml = RepoConfig.yamlFromPublisher(content);
+        this.yaml = yaml;
+        this.storages = storages;
     }
 
     /**
      * Repository type.
      * @return Async string of type
      */
-    public CompletionStage<String> type() {
+    public String type() {
         return this.string("type");
     }
 
@@ -81,7 +91,7 @@ public final class RepoConfig {
      * Repository path.
      * @return Async string of path
      */
-    public CompletionStage<String> path() {
+    public String path() {
         return this.string("path");
     }
 
@@ -90,19 +100,16 @@ public final class RepoConfig {
      *
      * @return Async string of URL
      */
-    public CompletionStage<URL> url() {
-        return this.string("url").thenApply(
-            str -> {
-                try {
-                    return new URL(str);
-                } catch (final MalformedURLException ex) {
-                    throw new IllegalArgumentException(
-                        String.format("Failed to build URL from '%s'", str),
-                        ex
-                    );
-                }
-            }
-        );
+    public URL url() {
+        final String str = this.string("url");
+        try {
+            return new URL(str);
+        } catch (final MalformedURLException ex) {
+            throw new IllegalArgumentException(
+                String.format("Failed to build URL from '%s'", str),
+                ex
+            );
+        }
     }
 
     /**
@@ -110,83 +117,54 @@ public final class RepoConfig {
      *
      * @return Maximum allowed value, empty if none specified.
      */
-    public CompletionStage<Optional<Long>> contentLengthMax() {
-        return this.stringOpt("content-length-max").thenApply(opt -> opt.map(Long::valueOf));
+    public Optional<Long> contentLengthMax() {
+        return this.stringOpt("content-length-max").map(Long::valueOf);
     }
 
     /**
      * Storage.
      * @return Async storage for repo
      */
-    public CompletionStage<Storage> storage() {
-        return this.repoConfig()
-            .thenApply(map -> map.yamlMapping("storage"))
-            .thenApply(YamlStorageSettings::new)
-            .thenApply(YamlStorageSettings::storage)
-            .thenApply(storage -> new SubStorage(this.prefix, storage));
+    public Storage storage() {
+        final YamlMapping repo = this.repoConfig();
+        final Storage storage;
+        final YamlNode node = repo.value("storage");
+        if (node instanceof Scalar) {
+            storage = this.storages.storage(((Scalar) node).value());
+        } else if (node instanceof YamlMapping) {
+            storage = new YamlStorage((YamlMapping) node).storage();
+        } else {
+            throw new IllegalStateException(String.format("Invalid storage config: %s", node));
+        }
+        return new SubStorage(this.prefix, storage);
     }
 
     /**
      * Custom repository configuration.
      * @return Async custom repository config or Optional.empty
      */
-    public CompletionStage<Optional<YamlMapping>> settings() {
-        return this.repoConfig().thenApply(
-            map -> Optional.ofNullable(map.yamlMapping("settings"))
-        );
+    public Optional<YamlMapping> settings() {
+        return Optional.ofNullable(this.repoConfig().yamlMapping("settings"));
     }
 
     /**
      * Repository permissions.
      * @return Async permissions
      */
-    public CompletionStage<Permissions> permissions() {
-        return this.repoConfig().thenApply(RpPermissions::new);
-    }
-
-    /**
-     * Reads string by key from repo part of YAML.
-     *
-     * @param key String key.
-     * @return String value.
-     */
-    private CompletionStage<String> string(final String key) {
-        return this.stringOpt(key).thenApply(
-            opt -> opt.orElseThrow(
-                () -> new IllegalStateException(String.format("yaml repo.%s is absent", key))
-            )
-        );
-    }
-
-    /**
-     * Reads string by key from repo part of YAML.
-     *
-     * @param key String key.
-     * @return String value, empty if none present.
-     */
-    private CompletionStage<Optional<String>> stringOpt(final String key) {
-        return this.repoConfig().thenApply(map -> Optional.ofNullable(map.string(key)));
-    }
-
-    /**
-     * Repo part of YAML.
-     *
-     * @return Async YAML mapping
-     */
-    private CompletionStage<YamlMapping> repoConfig() {
-        return this.yaml.thenApply(
-            map -> Objects.requireNonNull(map.yamlMapping("repo"), "yaml repo is null")
-        );
+    public Permissions permissions() {
+        return new RpPermissions(this.repoConfig());
     }
 
     /**
      * Create async yaml config from content publisher.
-     * @param pub Flow publisher
+     * @param storages Storage aliases
+     * @param prefix Repository prefix
+     * @param pub Yaml content publisher
      * @return Completion stage of yaml
      */
-    private static CompletionStage<YamlMapping> yamlFromPublisher(
-        final Publisher<ByteBuffer> pub
-    ) {
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static CompletionStage<RepoConfig> fromPublisher(final StorageAliases storages,
+        final Key prefix, final Publisher<ByteBuffer> pub) {
         return Flowable.fromPublisher(pub)
             .reduce(
                 new StringBuilder(),
@@ -197,6 +175,37 @@ public final class RepoConfig {
             .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config: %s", yaml))
             .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
             .to(SingleInterop.get())
-            .toCompletableFuture();
+            .thenApply(yaml -> new RepoConfig(storages, prefix, yaml));
+    }
+
+    /**
+     * Reads string by key from repo part of YAML.
+     *
+     * @param key String key.
+     * @return String value.
+     */
+    private String string(final String key) {
+        return this.stringOpt(key).orElseThrow(
+            () -> new IllegalStateException(String.format("yaml repo.%s is absent", key))
+        );
+    }
+
+    /**
+     * Reads string by key from repo part of YAML.
+     *
+     * @param key String key.
+     * @return String value, empty if none present.
+     */
+    private Optional<String> stringOpt(final String key) {
+        return Optional.ofNullable(this.repoConfig().string(key));
+    }
+
+    /**
+     * Repo part of YAML.
+     *
+     * @return Async YAML mapping
+     */
+    private YamlMapping repoConfig() {
+        return Objects.requireNonNull(this.yaml.yamlMapping("repo"), "yaml repo is null");
     }
 }
