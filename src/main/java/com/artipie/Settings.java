@@ -26,6 +26,9 @@ package com.artipie;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
+import com.artipie.repo.FlatLayout;
+import com.artipie.repo.RepoLayout;
+import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.util.concurrent.CompletionStage;
 
@@ -35,6 +38,7 @@ import java.util.concurrent.CompletionStage;
  * @since 0.1
  */
 public interface Settings {
+
     /**
      * Provides a storage.
      *
@@ -50,6 +54,14 @@ public interface Settings {
      * @throws IOException On Error
      */
     CompletionStage<Authentication> auth() throws IOException;
+
+    /**
+     * Repository layout.
+     * @param vertx Vertx instance
+     * @return Repository layout
+     * @throws IOException If failet to parse settings
+     */
+    RepoLayout layout(Vertx vertx) throws IOException;
 
     /**
      * Fake {@link Settings} using a file storage.
@@ -80,13 +92,18 @@ public interface Settings {
         }
 
         @Override
-        public Storage storage() throws IOException {
+        public Storage storage() {
             return this.storage;
         }
 
         @Override
-        public CompletionStage<Authentication> auth() throws IOException {
+        public CompletionStage<Authentication> auth() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public RepoLayout layout(final Vertx vertx) {
+            return new FlatLayout(this, vertx);
         }
     }
 }
