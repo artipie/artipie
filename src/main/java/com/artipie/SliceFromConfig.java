@@ -34,6 +34,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicIdentities;
+import com.artipie.http.auth.Permissions;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
@@ -57,24 +58,21 @@ import org.cactoos.map.MapOf;
  * @since 0.1.4
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ParameterNameCheck (500 lines)
+ * @checkstyle ParameterNumberCheck (500 lines)
  */
 public final class SliceFromConfig extends Slice.Wrap {
-
-    /**
-     * Repository path prefix.
-     */
-    private static final Pattern REPO_PREF = Pattern.compile("/(?:[a-zA-Z0-9]+)(/.*)");
 
     /**
      * Ctor.
      * @param config Repo config
      * @param vertx Vertx instance
      * @param auth Authentication
+     * @param prefix Path prefix
      */
     public SliceFromConfig(final RepoConfig config, final Vertx vertx,
-        final Authentication auth) {
+        final Authentication auth, final Pattern prefix) {
         super(
-            new AsyncSlice(SliceFromConfig.build(config, vertx, auth))
+            new AsyncSlice(SliceFromConfig.build(config, vertx, auth, prefix))
         );
     }
 
@@ -83,6 +81,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param cfg Repository config
      * @param vertx Vertx instance
      * @param auth Authentication implementation
+     * @param prefix Path prefix pattern
      * @return Slice completionStage
      * @todo #90:30min This method still needs more refactoring.
      *  We should test if the type exist in the constructed map. If the type does not exist,
@@ -90,7 +89,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @checkstyle LineLengthCheck (100 lines)
      */
     static CompletionStage<Slice> build(final RepoConfig cfg, final Vertx vertx,
-        final Authentication auth) {
+        final Authentication auth, final Pattern prefix) {
         return cfg.type().thenCompose(
             type -> cfg.storage().thenCombine(
                 cfg.permissions(),
@@ -100,7 +99,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                         config -> CompletableFuture.completedStage(
                             new TrimPathSlice(
                                 new FilesSlice(storage, permissions, auth),
-                                SliceFromConfig.REPO_PREF
+                                prefix
                             )
                         )
                     ),
@@ -129,7 +128,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                         "rpm",
                         config -> CompletableFuture.completedStage(
                             new TrimPathSlice(
-                                new RpmSlice(storage), SliceFromConfig.REPO_PREF
+                                new RpmSlice(storage), prefix
                             )
                         )
                     ),
@@ -139,14 +138,14 @@ public final class SliceFromConfig extends Slice.Wrap {
                     ),
                     new MapEntry<>(
                         "nuget",
-                        config -> nuGet(cfg, storage)
+                        config -> nuGet(cfg, storage, permissions, auth)
                     ),
                     new MapEntry<>(
                         "maven",
                         config -> CompletableFuture.completedStage(
                             new TrimPathSlice(
                                 new MavenSlice(storage, permissions, auth),
-                                SliceFromConfig.REPO_PREF
+                                prefix
                             )
                         )
                     ),
@@ -211,12 +210,19 @@ public final class SliceFromConfig extends Slice.Wrap {
      *
      * @param config Repository config.
      * @param storage Storage.
+     * @param permissions Access permissions.
+     * @param auth Auth details.
      * @return Slice instance.
      */
-    private static CompletionStage<Slice> nuGet(final RepoConfig config, final Storage storage) {
+    private static CompletionStage<Slice> nuGet(
+        final RepoConfig config,
+        final Storage storage,
+        final Permissions permissions,
+        final Authentication auth
+    ) {
         return config.url().thenCompose(
             url -> config.path().thenApply(
-                path -> new NuGet(url, path, storage)
+                path -> new NuGet(url, path, storage, permissions, auth)
             )
         );
     }

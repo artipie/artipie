@@ -24,6 +24,7 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Key;
 import com.artipie.asto.fs.RxFile;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URISyntaxException;
@@ -115,6 +116,6 @@ public final class RepoConfigTest {
                     .toURI()
             )
         );
-        return new RepoConfig(name, file.flow());
+        return new RepoConfig(new Key.From(name), file.flow());
     }
 }

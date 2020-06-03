@@ -45,6 +45,8 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * @since 0.1
  * @checkstyle MethodNameCheck (500 lines)
+ * @todo #187:30min Add a test for layout structure, it can be either `flat` or `org`. If it's
+ *  omitted, it should treated as a `flat` layout. See RepoLayout javadocs for more details.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class YamlSettingsTest {
