@@ -50,9 +50,9 @@ import org.reactivestreams.Publisher;
 public final class RepoConfig {
 
     /**
-     * Repo name.
+     * Storage prefix.
      */
-    private final String repo;
+    private final Key prefix;
 
     /**
      * Source yaml future.
@@ -61,11 +61,11 @@ public final class RepoConfig {
 
     /**
      * Ctor.
-     * @param repo Repository name
+     * @param prefix Storage prefix
      * @param content Flow content
      */
-    public RepoConfig(final String repo, final Publisher<ByteBuffer> content) {
-        this.repo = repo;
+    public RepoConfig(final Key prefix, final Publisher<ByteBuffer> content) {
+        this.prefix = prefix;
         this.yaml = RepoConfig.yamlFromPublisher(content);
     }
 
@@ -123,7 +123,7 @@ public final class RepoConfig {
             .thenApply(map -> map.yamlMapping("storage"))
             .thenApply(YamlStorageSettings::new)
             .thenApply(YamlStorageSettings::storage)
-            .thenApply(storage -> new SubStorage(new Key.From(this.repo), storage));
+            .thenApply(storage -> new SubStorage(this.prefix, storage));
     }
 
     /**
