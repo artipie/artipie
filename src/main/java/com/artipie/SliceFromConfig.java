@@ -33,6 +33,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicIdentities;
+import com.artipie.http.auth.Permissions;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
@@ -132,7 +133,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                     ),
                     new MapEntry<>(
                         "nuget",
-                        config -> nuGet(cfg, storage)
+                        config -> nuGet(cfg, storage, permissions, auth)
                     ),
                     new MapEntry<>(
                         "maven",
@@ -204,12 +205,19 @@ public final class SliceFromConfig extends Slice.Wrap {
      *
      * @param config Repository config.
      * @param storage Storage.
+     * @param permissions Access permissions.
+     * @param auth Auth details.
      * @return Slice instance.
      */
-    private static CompletionStage<Slice> nuGet(final RepoConfig config, final Storage storage) {
+    private static CompletionStage<Slice> nuGet(
+        final RepoConfig config,
+        final Storage storage,
+        final Permissions permissions,
+        final Authentication auth
+    ) {
         return config.url().thenCompose(
             url -> config.path().thenApply(
-                path -> new NuGet(url, path, storage)
+                path -> new NuGet(url, path, storage, permissions, auth)
             )
         );
     }
