@@ -57,7 +57,7 @@ public final class FlatLayout implements RepoLayout {
     /**
      * Repository path prefix.
      */
-    private static final Pattern REPO_PREF = Pattern.compile("/(?:[a-zA-Z0-9_]+)(/.*)");
+    private static final Pattern REPO_PREF = Pattern.compile("/(?:[^/.]+)(/.*)");
 
     /**
      * Artipie settings.

@@ -59,7 +59,7 @@ public final class OrgLayout implements RepoLayout {
      * Repository path prefix.
      */
     private static final Pattern REPO_PREF =
-        Pattern.compile("/(?:[a-zA-Z0-9_]+)/(?:[a-zA-Z0-9_]+)(/.*)");
+        Pattern.compile("/(?:[^/.]+)/(?:[^/.]+)(/.*)");
 
     /**
      * Artipie settings.
