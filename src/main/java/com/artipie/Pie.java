@@ -30,6 +30,7 @@ import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.slice.LoggingSlice;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
@@ -37,6 +38,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.logging.Level;
 import org.reactivestreams.Publisher;
 
 /**
@@ -82,7 +84,8 @@ public final class Pie implements Slice {
             return new RsWithStatus(RsStatus.NO_CONTENT);
         }
         try {
-            return this.settings.layout(this.vertx).resolve(path).response(line, headers, body);
+            return new LoggingSlice(Level.INFO, this.settings.layout(this.vertx).resolve(path))
+                .response(line, headers, body);
         } catch (final IOException err) {
             Logger.error(this, "Failed to read settings layout: %[exception]s", err);
             return new RsWithStatus(
