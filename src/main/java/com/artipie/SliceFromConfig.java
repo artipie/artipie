@@ -26,6 +26,8 @@ package com.artipie;
 
 import com.artipie.asto.Storage;
 import com.artipie.composer.http.PhpComposer;
+import com.artipie.docker.asto.AstoDocker;
+import com.artipie.docker.http.DockerSlice;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
@@ -168,6 +170,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                     ),
                     new MapEntry<>(
                         "pypi", config -> pypi(cfg, storage)
+                    ),
+                    new MapEntry<>(
+                        "docker", config -> docker(cfg, storage)
                     )
                 ).get(type).apply(cfg)
             ).thenCompose(Function.identity()).thenCompose(
@@ -224,6 +229,19 @@ public final class SliceFromConfig extends Slice.Wrap {
             url -> config.path().thenApply(
                 path -> new NuGet(url, path, storage, permissions, auth)
             )
+        );
+    }
+
+    /**
+     * Creates Docker slice.
+     *
+     * @param config Repository config.
+     * @param storage Storage.
+     * @return Slice instance.
+     */
+    private static CompletionStage<Slice> docker(final RepoConfig config, final Storage storage) {
+        return config.path().thenApply(
+            path -> new DockerSlice(path, new AstoDocker(storage))
         );
     }
 }

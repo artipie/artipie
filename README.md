@@ -371,6 +371,36 @@ Install a gem:
 $ gem install my_first_gem --source http://localhost:8080/gem
 ```
 
+## Docker Repo
+
+Try this `docker.yaml` file:
+
+```yaml
+repo:
+  type: docker
+  path: my-docker
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-docker
+```
+
+Docker registry has to be protected by HTTPS and should have no prefix in path.
+In order to access this Docker repository it is required to run a reverse proxy such as
+[nginx](https://nginx.org/) or [lighttpd](https://www.lighttpd.net/) to protect Artipie
+with HTTPS and add forwarding of requests from `my-docker.my-company.com/<path>` to
+`my-artipie.my-company.com/my-docker/<path>`.
+Then to push your Docker image use the following command:
+
+```bash
+$ docker push my-docker.my-company.com/my-image
+```
+
+To pull the image use the following command:
+
+```bash
+$ docker pull my-docker.my-company.com/my-image
+```
+
 ## Artipie central
 
 Artipie central is located at http://central.artipie.com
