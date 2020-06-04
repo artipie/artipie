@@ -28,6 +28,7 @@ import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
+import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
@@ -35,7 +36,6 @@ import com.artipie.asto.SubStorage;
 import com.artipie.http.auth.Permissions;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
-import io.reactivex.Flowable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -165,13 +165,9 @@ public final class RepoConfig {
     @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     public static CompletionStage<RepoConfig> fromPublisher(final StorageAliases storages,
         final Key prefix, final Publisher<ByteBuffer> pub) {
-        return Flowable.fromPublisher(pub)
-            .reduce(
-                new StringBuilder(),
-                (acc, buf) -> acc.append(
-                    new String(new Remaining(buf).bytes(), StandardCharsets.UTF_8)
-                )
-            )
+        return new Concatenation(pub).single()
+            .map(buf -> new Remaining(buf).bytes())
+            .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
             .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config: %s", yaml))
             .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
             .to(SingleInterop.get())

@@ -25,11 +25,11 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
-import io.reactivex.Flowable;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
@@ -67,14 +67,10 @@ public interface StorageAliases {
                 final CompletableFuture<StorageAliases> res;
                 if (found) {
                     res = storage.value(key).thenCompose(
-                        pub -> Flowable.fromPublisher(pub)
-                            .reduce(
-                                new StringBuilder(),
-                                (acc, buf) -> acc.append(
-                                    new String(new Remaining(buf).bytes(), StandardCharsets.UTF_8)
-                                )
-                            )
-                            .map(cnt -> Yaml.createYamlInput(cnt.toString()).readYamlMapping())
+                        pub -> new Concatenation(pub).single()
+                            .map(buf -> new Remaining(buf).bytes())
+                            .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
+                            .map(cnt -> Yaml.createYamlInput(cnt).readYamlMapping())
                             .to(SingleInterop.get())
                             .thenApply(FromYaml::new)
                     );
