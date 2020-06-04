@@ -36,6 +36,7 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicIdentities;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.slice.TrimPathSlice;
+import com.artipie.maven.http.MavenProxySlice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
@@ -46,6 +47,7 @@ import com.artipie.nuget.http.NuGet;
 import com.artipie.pypi.PySlice;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.Vertx;
+import java.net.URI;
 import java.util.regex.Pattern;
 
 /**
@@ -117,6 +119,11 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "maven":
                 slice = new TrimPathSlice(new MavenSlice(storage, permissions, auth), prefix);
+                break;
+            case "maven-proxy":
+                slice = new TrimPathSlice(
+                    new MavenProxySlice(URI.create("https://repo.maven.apache.org/maven2")), prefix
+                );
                 break;
             case "go":
                 slice = new GoSlice(storage);

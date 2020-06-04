@@ -144,6 +144,32 @@ it via
 
 Run `mvn install` (or `mvn install -U` to force download dependencies).
 
+## Maven proxy Repo
+
+Try this `maven-central.yaml` file to host a proxy to Maven central:
+
+```yaml
+repo:
+  type: maven-proxy
+  storage: default
+```
+
+Artipie will redirect all Maven requests to Maven central.
+Add it [as a mirror](https://maven.apache.org/guides/mini/guide-mirror-settings.html)
+to `settings.xml`:
+```xml
+<settings>
+  <mirrors>
+    <mirror>
+      <id>artipie-mirror</id>
+      <name>Artipie Mirror Repository</name>
+      <url>https://central.artipie.com/mirrors/maven-central</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>
+```
+
 ## RPM Repo
 
 Create new directory `/var/artipie`, directory for configuration files
