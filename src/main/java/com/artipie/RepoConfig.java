@@ -30,6 +30,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
+import com.artipie.asto.LoggingStorage;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
@@ -43,6 +44,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.logging.Level;
 import org.reactivestreams.Publisher;
 
 /**
@@ -136,7 +138,7 @@ public final class RepoConfig {
         } else {
             throw new IllegalStateException(String.format("Invalid storage config: %s", node));
         }
-        return new SubStorage(this.prefix, storage);
+        return new SubStorage(this.prefix, new LoggingStorage(Level.INFO, storage));
     }
 
     /**
