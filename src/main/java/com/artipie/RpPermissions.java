@@ -23,6 +23,7 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlSequence;
@@ -90,7 +91,7 @@ public final class RpPermissions implements Permissions {
      * @return True if action is allowed
      */
     private static boolean check(final YamlSequence seq, final String action) {
-        return seq != null && seq.values().stream().map(Object::toString)
+        return seq != null && seq.values().stream().map(node -> Scalar.class.cast(node).value())
             .anyMatch(item -> item.equals(action) || item.equals(RpPermissions.WILDCARD));
     }
 
