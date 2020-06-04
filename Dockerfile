@@ -6,7 +6,7 @@ COPY pom.xml /jar/pom.xml
 RUN cd /jar && mvn dependency:go-offline
 COPY src/ /jar/src/
 
-RUN cd /jar && mvn versions:set -DnewVersion=${version} && mvn package -B --quiet
+RUN cd /jar && mvn versions:set -DnewVersion=${version} && mvn package -B --quiet -P assembly
 
 FROM adoptopenjdk/openjdk13:alpine-jre
 LABEL description="Artipie is a binary repository managment tool."
