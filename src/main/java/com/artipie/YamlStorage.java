@@ -70,7 +70,11 @@ final class YamlStorage {
         if ("fs".equals(type)) {
             storage = new FileStorage(Path.of(strict.string("path")));
         } else if ("s3".equals(type)) {
-            storage = new S3Storage(this.s3Client(), strict.string("bucket"));
+            storage = new S3Storage(
+                this.s3Client(),
+                strict.string("bucket"),
+                !"false".equals(this.yaml.string("multipart"))
+            );
         } else {
             throw new IllegalStateException(String.format("Unsupported storage type: '%s'", type));
         }
