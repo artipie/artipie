@@ -35,17 +35,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * Tests for {@link YamlStorageSettings}.
+ * Tests for {@link YamlStorage}.
  *
  * @checkstyle MethodNameCheck (500 lines)
  * @since 0.2
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class YamlStorageSettingsTest {
+class YamlStorageTest {
 
     @Test
     public void shouldBuildFileStorageFromSettings() throws Exception {
-        final YamlStorageSettings settings = new YamlStorageSettings(
+        final YamlStorage settings = new YamlStorage(
             Yaml.createYamlInput("type: fs\npath: /artipie/storage\n").readYamlMapping()
         );
         MatcherAssert.assertThat(
@@ -56,7 +56,7 @@ class YamlStorageSettingsTest {
 
     @Test
     public void shouldBuildS3StorageFromFullSettings() throws Exception {
-        final YamlStorageSettings settings = new YamlStorageSettings(
+        final YamlStorage settings = new YamlStorage(
             Yaml.createYamlInput(
                 String.join(
                     "",
@@ -80,7 +80,7 @@ class YamlStorageSettingsTest {
     @Test
     public void shouldBuildS3StorageFromMinimalSettings() throws Exception {
         System.getProperties().put("aws.region", "my-region");
-        final YamlStorageSettings settings = new YamlStorageSettings(
+        final YamlStorage settings = new YamlStorage(
             Yaml.createYamlInput(
                 String.join(
                     "",
@@ -103,7 +103,7 @@ class YamlStorageSettingsTest {
     @MethodSource("badYamls")
     public void shouldFailProvideStorageFromBadYaml(final String yaml)
         throws Exception {
-        final YamlStorageSettings settings = new YamlStorageSettings(
+        final YamlStorage settings = new YamlStorage(
             Yaml.createYamlInput(yaml).readYamlMapping()
         );
         Assertions.assertThrows(RuntimeException.class, settings::storage);

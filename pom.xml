@@ -83,7 +83,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.amihaiemil.web</groupId>
       <artifactId>eo-yaml</artifactId>
-      <version>3.1.0</version>
+      <version>4.3.5</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -133,7 +133,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.3</version>
+      <version>0.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>

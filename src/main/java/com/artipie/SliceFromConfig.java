@@ -33,11 +33,11 @@ import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
 import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicIdentities;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.slice.TrimPathSlice;
+import com.artipie.maven.http.MavenProxySlice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
@@ -48,12 +48,8 @@ import com.artipie.nuget.http.NuGet;
 import com.artipie.pypi.PySlice;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.Vertx;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Function;
+import java.net.URI;
 import java.util.regex.Pattern;
-import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 
 /**
  * Slice from repo config.
@@ -61,6 +57,7 @@ import org.cactoos.map.MapOf;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ParameterNameCheck (500 lines)
  * @checkstyle ParameterNumberCheck (500 lines)
+ * @checkstyle CyclomaticComplexityCheck (500 lines)
  */
 public final class SliceFromConfig extends Slice.Wrap {
 
@@ -74,7 +71,7 @@ public final class SliceFromConfig extends Slice.Wrap {
     public SliceFromConfig(final RepoConfig config, final Vertx vertx,
         final Authentication auth, final Pattern prefix) {
         super(
-            new AsyncSlice(SliceFromConfig.build(config, vertx, auth, prefix))
+            SliceFromConfig.build(config, vertx, auth, prefix)
         );
     }
 
@@ -90,158 +87,67 @@ public final class SliceFromConfig extends Slice.Wrap {
      *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
      * @checkstyle LineLengthCheck (100 lines)
      */
-    static CompletionStage<Slice> build(final RepoConfig cfg, final Vertx vertx,
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    static Slice build(final RepoConfig cfg, final Vertx vertx,
         final Authentication auth, final Pattern prefix) {
-        return cfg.type().thenCompose(
-            type -> cfg.storage().thenCombine(
-                cfg.permissions(),
-                (storage, permissions) -> new MapOf<String, Function<RepoConfig, CompletionStage<Slice>>>(
-                    new MapEntry<>(
-                        "file",
-                        config -> CompletableFuture.completedStage(
-                            new TrimPathSlice(
-                                new FilesSlice(storage, permissions, auth),
-                                prefix
-                            )
-                        )
-                    ),
-                    new MapEntry<>(
-                        "npm",
-                        config -> config.path().thenCombine(
-                            config.settings(),
-                            (path, settings) -> new NpmSlice(
-                                path,
-                                new Npm(storage),
-                                storage,
-                                permissions,
-                                new BasicIdentities(auth)
-                            )
-                        )
-                    ),
-                    new MapEntry<>(
-                        "gem",
-                        config -> CompletableFuture.completedStage(new GemSlice(storage, vertx.fileSystem()))
-                    ),
-                    new MapEntry<>(
-                        "helm",
-                        config -> CompletableFuture.completedStage(new HelmSlice(storage))
-                    ),
-                    new MapEntry<>(
-                        "rpm",
-                        config -> CompletableFuture.completedStage(
-                            new TrimPathSlice(
-                                new RpmSlice(storage), prefix
-                            )
-                        )
-                    ),
-                    new MapEntry<>(
-                        "php",
-                        config -> php(config, storage)
-                    ),
-                    new MapEntry<>(
-                        "nuget",
-                        config -> nuGet(cfg, storage, permissions, auth)
-                    ),
-                    new MapEntry<>(
-                        "maven",
-                        config -> CompletableFuture.completedStage(
-                            new TrimPathSlice(
-                                new MavenSlice(storage, permissions, auth),
-                                prefix
-                            )
-                        )
-                    ),
-                    new MapEntry<>(
-                        "go", config -> CompletableFuture.completedStage(new GoSlice(storage))
-                    ),
-                    new MapEntry<>(
-                        "npm-proxy",
-                        config -> config.path().thenCombine(
-                            config.settings(),
-                            (path, settings) -> new NpmProxySlice(
-                                path,
-                                new NpmProxy(
-                                    new NpmProxyConfig(settings.orElseThrow()),
-                                    vertx,
-                                    storage
-                                )
-                            )
-                        )
-                    ),
-                    new MapEntry<>(
-                        "pypi", config -> pypi(cfg, storage)
-                    ),
-                    new MapEntry<>(
-                        "docker", config -> docker(cfg, storage)
-                    )
-                ).get(type).apply(cfg)
-            ).thenCompose(Function.identity()).thenCompose(
-                slice -> cfg.contentLengthMax().thenApply(
-                    opt -> opt.<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
-                        .orElse(slice)
-                )
-            )
-        );
-    }
-
-    /**
-     * Creates PHP Composer slice.
-     *
-     * @param config Repository config.
-     * @param storage Storage.
-     * @return Slice instance.
-     */
-    private static CompletionStage<Slice> php(final RepoConfig config, final Storage storage) {
-        return config.path().thenApply(
-            path -> new PhpComposer(path, storage)
-        );
-    }
-
-    /**
-     * Creates Python slice.
-     *
-     * @param config Repository config.
-     * @param storage Storage.
-     * @return Slice instance.
-     */
-    private static CompletionStage<Slice> pypi(final RepoConfig config, final Storage storage) {
-        return config.path().thenApply(
-            path -> new PySlice(path, storage)
-        );
-    }
-
-    /**
-     * Creates NuGet slice.
-     *
-     * @param config Repository config.
-     * @param storage Storage.
-     * @param permissions Access permissions.
-     * @param auth Auth details.
-     * @return Slice instance.
-     */
-    private static CompletionStage<Slice> nuGet(
-        final RepoConfig config,
-        final Storage storage,
-        final Permissions permissions,
-        final Authentication auth
-    ) {
-        return config.url().thenCompose(
-            url -> config.path().thenApply(
-                path -> new NuGet(url, path, storage, permissions, auth)
-            )
-        );
-    }
-
-    /**
-     * Creates Docker slice.
-     *
-     * @param config Repository config.
-     * @param storage Storage.
-     * @return Slice instance.
-     */
-    private static CompletionStage<Slice> docker(final RepoConfig config, final Storage storage) {
-        return config.path().thenApply(
-            path -> new DockerSlice(path, new AstoDocker(storage))
-        );
+        final Slice slice;
+        final Storage storage = cfg.storage();
+        final Permissions permissions = cfg.permissions();
+        switch (cfg.type()) {
+            case "file":
+                slice = new TrimPathSlice(new FilesSlice(storage, permissions, auth), prefix);
+                break;
+            case "npm":
+                slice = new NpmSlice(
+                    cfg.path(),
+                    new Npm(storage),
+                    storage,
+                    permissions,
+                    new BasicIdentities(auth)
+                );
+                break;
+            case "gem":
+                slice = new GemSlice(storage, vertx.fileSystem());
+                break;
+            case "rpm":
+                slice = new TrimPathSlice(new RpmSlice(storage), prefix);
+                break;
+            case "php":
+                slice = new PhpComposer(cfg.path(), storage);
+                break;
+            case "nuget":
+                slice = new NuGet(cfg.url(), cfg.path(), storage, permissions, auth);
+                break;
+            case "maven":
+                slice = new TrimPathSlice(new MavenSlice(storage, permissions, auth), prefix);
+                break;
+            case "maven-proxy":
+                slice = new TrimPathSlice(
+                    new MavenProxySlice(URI.create("https://repo.maven.apache.org/maven2")), prefix
+                );
+                break;
+            case "go":
+                slice = new GoSlice(storage);
+                break;
+            case "npm-proxy":
+                slice = new NpmProxySlice(
+                    cfg.path(),
+                    new NpmProxy(new NpmProxyConfig(cfg.settings().orElseThrow()), vertx, storage)
+                );
+                break;
+            case "pypi":
+                slice = new PySlice(cfg.path(), storage);
+                break;
+            case "docker":
+                slice = new DockerSlice(cfg.path(), new AstoDocker(storage));
+                break;
+            default:
+                throw new IllegalStateException(
+                    String.format("Unsupported repository type '%s", cfg.type())
+                );
+        }
+        return cfg.contentLengthMax()
+            .<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
+            .orElse(slice);
     }
 }

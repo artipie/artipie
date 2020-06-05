@@ -26,6 +26,7 @@ package com.artipie.repo;
 import com.artipie.RepoConfig;
 import com.artipie.Settings;
 import com.artipie.SliceFromConfig;
+import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
@@ -106,13 +107,16 @@ public final class OrgLayout implements RepoLayout {
                         final Slice slice;
                         if (exist) {
                             slice = new AsyncSlice(
-                                storage.value(key).thenCombine(
+                                StorageAliases.find(storage, key.parent().get()).thenCompose(
+                                    aliases -> storage.value(key).thenCompose(
+                                        config -> RepoConfig.fromPublisher(
+                                            aliases, new Key.From(repo), config
+                                        )
+                                    )
+                                ).thenCombine(
                                     new Unchecked<>(this.settings::auth).value(),
-                                    (content, auth) -> new SliceFromConfig(
-                                        new RepoConfig(new Key.From(namespace, repo), content),
-                                        this.vertx,
-                                        auth,
-                                        OrgLayout.REPO_PREF
+                                    (config, auth) -> new SliceFromConfig(
+                                        config, this.vertx, auth, OrgLayout.REPO_PREF
                                     )
                                 )
                             );

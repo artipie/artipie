@@ -72,7 +72,7 @@ public final class YamlSettings implements Settings {
 
     @Override
     public Storage storage() throws IOException {
-        return new YamlStorageSettings(
+        return new YamlStorage(
             Yaml.createYamlInput(this.content)
                 .readYamlMapping()
                 .yamlMapping(YamlSettings.META)
