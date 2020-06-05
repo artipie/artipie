@@ -109,6 +109,9 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "gem":
                 slice = new GemSlice(storage, vertx.fileSystem());
                 break;
+            case "helm":
+                slice = new HelmSlice(storage);
+                break;
             case "rpm":
                 slice = new TrimPathSlice(new RpmSlice(storage), prefix);
                 break;
