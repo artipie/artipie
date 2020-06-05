@@ -172,6 +172,11 @@ SOFTWARE.
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
+      <artifactId>helm-adapter</artifactId>
+      <version>0.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
       <version>0.2.1</version>
     </dependency>

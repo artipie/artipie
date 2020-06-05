@@ -30,6 +30,7 @@ import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.http.DockerSlice;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
+import com.artipie.helm.HelmSlice;
 import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
@@ -107,6 +108,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "gem":
                 slice = new GemSlice(storage, vertx.fileSystem());
+                break;
+            case "helm":
+                slice = new HelmSlice(storage);
                 break;
             case "rpm":
                 slice = new TrimPathSlice(new RpmSlice(storage), prefix);
