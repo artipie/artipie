@@ -24,6 +24,7 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Key;
 import com.artipie.asto.fs.RxFile;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URISyntaxException;
@@ -48,10 +49,9 @@ public final class RepoConfigTest {
     private Vertx vertx;
 
     @Test
-    public void readsCustom()
-        throws URISyntaxException, ExecutionException, InterruptedException {
+    public void readsCustom() throws Exception {
         final RepoConfig config = this.readFull();
-        final YamlMapping yaml = config.settings().toCompletableFuture().get().orElseThrow();
+        final YamlMapping yaml = config.settings().orElseThrow();
         MatcherAssert.assertThat(
             yaml.string("custom-property"),
             new IsEqual<>("custom-value")
@@ -59,12 +59,11 @@ public final class RepoConfigTest {
     }
 
     @Test
-    public void failsToReadCustom()
-        throws URISyntaxException, ExecutionException, InterruptedException {
+    public void failsToReadCustom() throws Exception {
         final RepoConfig config = this.readMin();
         MatcherAssert.assertThat(
             "Unexpected custom config",
-            config.settings().toCompletableFuture().get().isEmpty()
+            config.settings().isEmpty()
         );
     }
 
@@ -73,7 +72,7 @@ public final class RepoConfigTest {
         final RepoConfig config = this.readFull();
         final long value = 123L;
         MatcherAssert.assertThat(
-            config.contentLengthMax().toCompletableFuture().join(),
+            config.contentLengthMax(),
             new IsEqual<>(Optional.of(value))
         );
     }
@@ -82,7 +81,7 @@ public final class RepoConfigTest {
     public void readEmptyContentLengthMax() throws Exception {
         final RepoConfig config = this.readMin();
         MatcherAssert.assertThat(
-            config.contentLengthMax().toCompletableFuture().join().isEmpty(),
+            config.contentLengthMax().isEmpty(),
             new IsEqual<>(true)
         );
     }
@@ -97,16 +96,16 @@ public final class RepoConfigTest {
         this.vertx.close();
     }
 
-    private RepoConfig readFull() throws URISyntaxException {
+    private RepoConfig readFull() throws Exception {
         return this.readFromResource("repo-full-config.yml");
     }
 
-    private RepoConfig readMin() throws URISyntaxException {
+    private RepoConfig readMin() throws Exception {
         return this.readFromResource("repo-min-config.yml");
     }
 
     private RepoConfig readFromResource(final String name)
-        throws URISyntaxException {
+        throws URISyntaxException, ExecutionException, InterruptedException {
         final RxFile file = new RxFile(
             Paths.get(
                 Thread.currentThread()
@@ -115,6 +114,7 @@ public final class RepoConfigTest {
                     .toURI()
             )
         );
-        return new RepoConfig(name, file.flow());
+        return RepoConfig.fromPublisher(StorageAliases.EMPTY, new Key.From(name), file.flow())
+            .toCompletableFuture().get();
     }
 }

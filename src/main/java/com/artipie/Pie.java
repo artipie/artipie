@@ -24,23 +24,21 @@
 
 package com.artipie;
 
-import com.artipie.asto.Key;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.slice.SliceSimple;
+import com.artipie.http.slice.LoggingSlice;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import org.cactoos.scalar.Unchecked;
+import java.util.logging.Level;
 import org.reactivestreams.Publisher;
 
 /**
@@ -85,42 +83,18 @@ public final class Pie implements Slice {
         if (path.equals("/") || parts.length == 0) {
             return new RsWithStatus(RsStatus.NO_CONTENT);
         }
-        final String repo = parts[0];
-        Logger.debug(this, "Slice repo=%s", repo);
-        final Key.From key = new Key.From(String.format("%s.yaml", repo));
-        return new AsyncSlice(
-            CompletableFuture.supplyAsync(
-                () -> new Unchecked<>(this.settings::storage).value()
-            ).thenCompose(
-                storage -> storage.exists(key).thenApply(
-                    exist -> {
-                        final Slice slice;
-                        if (exist) {
-                            slice = new AsyncSlice(
-                                storage.value(key).thenCombine(
-                                    new Unchecked<>(this.settings::auth).value(),
-                                    (content, auth) -> new SliceFromConfig(
-                                        new RepoConfig(repo, content),
-                                        this.vertx,
-                                        auth
-                                    )
-                                )
-                            );
-                        } else {
-                            slice = new SliceSimple(
-                                new RsWithStatus(
-                                    new RsWithBody(
-                                        String.format("Repository '%s' was not found", repo),
-                                        StandardCharsets.UTF_8
-                                    ),
-                                    RsStatus.NOT_FOUND
-                                )
-                            );
-                        }
-                        return slice;
-                    }
-                )
-            )
-        ).response(line, headers, body);
+        try {
+            return new LoggingSlice(Level.INFO, this.settings.layout(this.vertx).resolve(path))
+                .response(line, headers, body);
+        } catch (final IOException err) {
+            Logger.error(this, "Failed to read settings layout: %[exception]s", err);
+            return new RsWithStatus(
+                new RsWithBody(
+                    String.format("Failed to read Artipie settings: %s", err.getMessage()),
+                    StandardCharsets.UTF_8
+                ),
+                RsStatus.INTERNAL_ERROR
+            );
+        }
     }
 }

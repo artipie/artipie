@@ -83,7 +83,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.amihaiemil.web</groupId>
       <artifactId>eo-yaml</artifactId>
-      <version>3.1.0</version>
+      <version>4.3.5</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -108,12 +108,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>0.9.2</version>
+      <version>0.9.7</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.20.2</version>
+      <version>0.21</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -133,7 +133,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.3</version>
+      <version>0.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -163,12 +163,22 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>nuget-adapter</artifactId>
-      <version>0.1.2</version>
+      <version>0.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
       <version>0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>helm-adapter</artifactId>
+      <version>0.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>docker-adapter</artifactId>
+      <version>0.2.1</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>

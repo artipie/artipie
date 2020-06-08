@@ -144,6 +144,32 @@ it via
 
 Run `mvn install` (or `mvn install -U` to force download dependencies).
 
+## Maven proxy Repo
+
+Try this `maven-central.yaml` file to host a proxy to Maven central:
+
+```yaml
+repo:
+  type: maven-proxy
+  storage: default
+```
+
+Artipie will redirect all Maven requests to Maven central.
+Add it [as a mirror](https://maven.apache.org/guides/mini/guide-mirror-settings.html)
+to `settings.xml`:
+```xml
+<settings>
+  <mirrors>
+    <mirror>
+      <id>artipie-mirror</id>
+      <name>Artipie Mirror Repository</name>
+      <url>https://central.artipie.com/mirrors/maven-central</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>
+```
+
 ## RPM Repo
 
 Create new directory `/var/artipie`, directory for configuration files
@@ -371,6 +397,61 @@ Install a gem:
 $ gem install my_first_gem --source http://localhost:8080/gem
 ```
 
+## Helm chart repo
+
+Try this `helm.yaml` file:
+
+```yaml
+repo:
+  type: helm
+  storage:
+    type: fs
+    path: /tmp/artipie/data/helm-charts
+```
+
+Publish a chart:
+
+```bash
+$ curl --data-binary "@my_chart-1.6.4.tgz" http://localhost:8080/helm
+```
+
+Install a chart:
+
+```bash
+$ helm repo add artipie http://localhost:8080/helm/charts
+$ helm install my_chart artipie
+```
+
+## Docker Repo
+
+Try this `docker.yaml` file:
+
+```yaml
+repo:
+  type: docker
+  path: my-docker
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-docker
+```
+
+Docker registry has to be protected by HTTPS and should have no prefix in path.
+In order to access this Docker repository it is required to run a reverse proxy such as
+[nginx](https://nginx.org/) or [lighttpd](https://www.lighttpd.net/) to protect Artipie
+with HTTPS and add forwarding of requests from `my-docker.my-company.com/<path>` to
+`my-artipie.my-company.com/my-docker/<path>`.
+Then to push your Docker image use the following command:
+
+```bash
+$ docker push my-docker.my-company.com/my-image
+```
+
+To pull the image use the following command:
+
+```bash
+$ docker pull my-docker.my-company.com/my-image
+```
+
 ## Artipie central
 
 Artipie central is located at http://central.artipie.com
@@ -421,7 +502,8 @@ meta:
 ```
 `type` can be either `env` for auth via environment variables or `file` for auth via yaml credentials 
 file. `path` is required for `file` configuration, it should be a yaml credentials file location 
-relative to `meta.storage.path` (or, in other words, a storage key).
+relative to `meta.storage.path` (or, in other words, a storage key). Docker image uses `env` credentials by default,
+to change default settings, mount custom config file to `/etc/artipie.yml`.
 
 ### Environment variables
 The simplest way to start Artipie with authentication is to configure single user via

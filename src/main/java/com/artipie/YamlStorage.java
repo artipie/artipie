@@ -42,7 +42,7 @@ import software.amazon.awssdk.services.s3.S3AsyncClientBuilder;
  * @since 0.2
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-final class YamlStorageSettings {
+final class YamlStorage {
 
     /**
      * YAML storage settings.
@@ -53,7 +53,7 @@ final class YamlStorageSettings {
      * Ctor.
      * @param yaml YAML storage settings.
      */
-    YamlStorageSettings(final YamlMapping yaml) {
+    YamlStorage(final YamlMapping yaml) {
         this.yaml = yaml;
     }
 
@@ -63,13 +63,18 @@ final class YamlStorageSettings {
      * @return Storage instance.
      */
     public Storage storage() {
-        final YamlMapping strict = new StrictYamlMapping(this.yaml);
+        @SuppressWarnings("deprecation") final YamlMapping strict =
+            new StrictYamlMapping(this.yaml);
         final String type = strict.string("type");
         final Storage storage;
         if ("fs".equals(type)) {
             storage = new FileStorage(Path.of(strict.string("path")));
         } else if ("s3".equals(type)) {
-            storage = new S3Storage(this.s3Client(), strict.string("bucket"));
+            storage = new S3Storage(
+                this.s3Client(),
+                strict.string("bucket"),
+                !"false".equals(this.yaml.string("multipart"))
+            );
         } else {
             throw new IllegalStateException(String.format("Unsupported storage type: '%s'", type));
         }
@@ -80,8 +85,9 @@ final class YamlStorageSettings {
      * Creates {@link S3AsyncClient} instance based on YAML config.
      *
      * @return Built S3 client.
-     * @checkstyle MethodNameCheck (2 lines)
+     * @checkstyle MethodNameCheck (3 lines)
      */
+    @SuppressWarnings("deprecation")
     private S3AsyncClient s3Client() {
         final S3AsyncClientBuilder builder = S3AsyncClient.builder();
         final String region = this.yaml.string("region");
