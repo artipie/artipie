@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+</head>
+<body>
+<section id="config">
+  <span id="config-hint"></span>
+  <form id="config-form">
+    <textarea id="repo-config" name="config" type="textarea" rows="10" cols="64">
+    </textarea>
+    <br/>
+    <input id="config-submit" type="submit" value="Update"/>
+  </form>
+
+  <script>
+
+  function isEmpty(obj) {
+    Object.keys(obj).length === 0 && obj.constructor === Object
+  }
+
+  function onConfigChange() {
+    if (this.value) {
+      patch[this.name] = this.value;
+    } else {
+      delete patch[this.name];
+    }
+    document.getElementById('config-submit').disabled = isEmpty(patch);
+    console.log(`patch: ${JSON.stringify(patch)}`);
+  }
+
+  async function main() {
+    document.title = window.location.pathname;
+
+    const elConfig = document.getElementById('repo-config');
+    const elHint = document.getElementById('config-hint');
+    let exists = false;
+
+    const response = await fetch('/api/repos' + window.location.pathname);
+    if (response.status == 200) {
+      const config = await response.text();
+      elConfig.value = config;
+      elHint.innerHTML = `Update repo config: ${window.location.pathname}`;
+      exists = true;
+    } else if (response.status == 404) {
+      elConfig.value = `repo:
+  type: file
+  storage: default
+  permissions:
+    \\*:
+      - \\*
+`;
+      elHint.innerHTML = `Create new repo: ${window.location.pathname}`;
+    } else {
+      console.error(response);
+      alert(`Error ${response.status}`);
+      return;
+    }
+
+
+    document.getElementById('config-submit').addEventListener('click', async (evt) => {
+      evt.preventDefault();
+      document.getElementById('config-submit').disabled = true;
+      const rsp = await fetch(`/api/repos${window.location.pathname}`, {
+        body: elConfig.value,
+        method: exists ? 'PATCH' : 'PUT'
+      });
+      console.log(rsp);
+      if (rsp.status == 200) {
+        location.reload();
+      }
+    });
+  }
+  main()
+  </script>
+</section>
+</body>
+</html>

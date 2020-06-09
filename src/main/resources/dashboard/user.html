@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script>
+    async function main() {
+      var response = await fetch('/api/repos' + window.location.pathname);
+      var json = await response.json();
+      console.log(json);
+
+      document.title = json.user;
+
+      var divRepos = document.getElementById('repos');
+      var ul = document.createElement('ul');
+      divRepos.appendChild(ul);
+      var repos = json.repositories;
+      for (var i=0; i < repos.length; i++) {
+        var li = document.createElement('li');
+        ul.appendChild(li);
+        var link = document.createElement('a');
+        link.href = '/' + repos[i];
+        link.innerHTML = repos[i];
+        li.appendChild(link);
+      }
+    }
+    main()
+    </script>
+</head>
+<body>
+<section id="repos"></section>
+<form>
+  <input id="new-repo-name" type="text" required="true" pattern="[a-z0-9]{3,16}"/>
+  <input id="new-repo-submit" type="submit" value="Create"/>
+</form>
+  <script>
+    document.getElementById('new-repo-submit').addEventListener('click', (evt) => {
+      evt.preventDefault();
+      const nme = document.getElementById('new-repo-name').value;
+      window.location += `/${nme}`;
+    });
+  </script>
+</body>
+</html>

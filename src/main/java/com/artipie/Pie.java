@@ -24,6 +24,7 @@
 
 package com.artipie;
 
+import com.artipie.api.ArtipieApi;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLineFrom;
@@ -82,6 +83,9 @@ public final class Pie implements Slice {
         final String[] parts = path.replaceAll("^/+", "").split("/");
         if (path.equals("/") || parts.length == 0) {
             return new RsWithStatus(RsStatus.NO_CONTENT);
+        }
+        if (path.startsWith("/api")) {
+            return new ArtipieApi(this.settings).response(line, headers, body);
         }
         try {
             return new LoggingSlice(Level.INFO, this.settings.layout(this.vertx).resolve(path))

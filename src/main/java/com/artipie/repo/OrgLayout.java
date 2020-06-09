@@ -28,6 +28,7 @@ import com.artipie.Settings;
 import com.artipie.SliceFromConfig;
 import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
+import com.artipie.dashboard.ResourceSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rs.RsStatus;
@@ -86,6 +87,12 @@ public final class OrgLayout implements RepoLayout {
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Slice resolve(final String path) {
         final String[] parts = path.replaceAll("^/+", "").split("/");
+        if (parts.length == 1) {
+            return new ResourceSlice("dashboard/user.html");
+        }
+        if (parts.length == 2) {
+            return new ResourceSlice("dashboard/repo.html");
+        }
         if (parts.length < 2) {
             return new SliceSimple(
                 new RsWithStatus(
