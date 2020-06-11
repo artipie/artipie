@@ -113,7 +113,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.21</version>
+      <version>0.22</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -178,7 +178,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>0.2.1</version>
+      <version>0.2.2</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>
