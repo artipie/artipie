@@ -19,7 +19,7 @@ Artipie is an experimental binary artifact management tool, similar to
 and many others.
 The following set of features makes Artipie unique among all others:
 
-  * It is open source (MIT license)
+  * It is open source ([MIT license](https://github.com/artipie/artipie/blob/master/LICENSE.txt))
   * It is horizontally scalable, you can add servers easily
   * It is written in reactive Java (using [Vert.x](https://vertx.io/))
   * It supports 10+ package managers, incl.
