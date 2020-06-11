@@ -460,6 +460,7 @@ a global configuration file `/etc/artipie.yml`:
 
 ```yaml
 meta:
+  layout: org
   storage:
     type: fs
     path: /tmp/artipie/data/my-docker
@@ -469,7 +470,7 @@ meta:
 ```
 
 If the `type` is set to `file`, another YAML file is required in the storage, with
-a list of users, who will be allowed to create repos
+a list of users who will be allowed to create repos
 (each `pass` is combination or either `plain` or `sha256` and a text):
 
 
