@@ -456,7 +456,7 @@ $ docker pull my-docker.my-company.com/my-image
 
 You may want to run Artipie for your company, which has a few teams. Each
 team may want to have its own repository. To do this, you create
-a global configuration file:
+a global configuration file `/etc/artipie.yml`:
 
 ```yaml
 meta:
