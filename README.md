@@ -65,7 +65,7 @@ We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
 understand how Artipie is designed.
 
-## Binary Repo
+### Binary Repo
 
 Try this `repo.yaml` file:
 
@@ -81,7 +81,7 @@ You can send HTTP PUT/GET requests
 to `http://localhost:8080/repo/<filename>` to upload/download a binary file,
 e.g. `http://localhost:8080/repo/libsqlite3.so`.
 
-## Maven Repo
+### Maven Repo
 
 Try this `maven.yaml` file to host a [Maven](https://maven.apache.org/) repo:
 
@@ -144,7 +144,7 @@ it via
 
 Run `mvn install` (or `mvn install -U` to force download dependencies).
 
-## Maven proxy Repo
+### Maven proxy Repo
 
 Try this `maven-central.yaml` file to host a proxy to Maven central:
 
@@ -170,7 +170,7 @@ to `settings.xml`:
 </settings>
 ```
 
-## RPM Repo
+### RPM Repo
 
 Create new directory `/var/artipie`, directory for configuration files
 `/var/artipie/repo` and directory for RPM repository `/var/artipie/centos`.
@@ -201,7 +201,7 @@ On the client machine add local repository to the list of repos:
  - Refresh the repo: `yum upgrade all`
  - Download packages: `yum install package-name`
 
-## NPM Repo
+### NPM Repo
 
 Try this `npm.yaml` file:
 
@@ -226,7 +226,7 @@ To publish your npm project use the following command:
 $ npm publish --registry=http://localhost:8080/npm
 ```
 
-## NPM Proxy Repo
+### NPM Proxy Repo
 
 Try this `npm-proxy.yaml` file:
 
@@ -254,7 +254,7 @@ or set it as a default repository:
 $ npm set registry http://localhost:8080/npm-proxy
 ```
 
-## Go Repo
+### Go Repo
 
 Try this `go.yaml` file:
 
@@ -301,7 +301,7 @@ in `.mod` and `.info` files. Here is an example for package
 You can use [go-adapter](https://github.com/artipie/go-adapter#how-it-works)
 to generate necessary files and layout for Go source code.
 
-## PHP Composer Repo
+### PHP Composer Repo
 
 Try this `my-php.yaml` file:
 
@@ -314,7 +314,7 @@ repo:
     path: /tmp/artipie/data/my-php
 ```
 
-To publish your PHP Composer package create package description JSON file `my-package.json` 
+To publish your PHP Composer package create package description JSON file `my-package.json`
 with the following content:
 
 ```json
@@ -347,7 +347,7 @@ To use this library in your project add requirement and repository to `composer.
 }
 ```
 
-## NuGet Repo
+### NuGet Repo
 
 Try this `nuget.yaml` file:
 
@@ -373,7 +373,7 @@ To install the package into a project use the following command:
 $ nuget install MyLib -Version 1.0.0 -Source=http://localhost:8080/my-nuget/index.json
 ```
 
-## Gem Repo
+### Gem Repo
 
 Try this `gem.yaml` file:
 
@@ -397,7 +397,7 @@ Install a gem:
 $ gem install my_first_gem --source http://localhost:8080/gem
 ```
 
-## Helm chart repo
+### Helm chart repo
 
 Try this `helm.yaml` file:
 
@@ -422,7 +422,7 @@ $ helm repo add artipie http://localhost:8080/helm/charts
 $ helm install my_chart artipie
 ```
 
-## Docker Repo
+### Docker Repo
 
 Try this `docker.yaml` file:
 
@@ -452,86 +452,44 @@ To pull the image use the following command:
 $ docker pull my-docker.my-company.com/my-image
 ```
 
-## Artipie central
+## Multi-Team Setup
 
-Artipie central is located at http://central.artipie.com
+You may want to run Artipie for your company, which has a few teams. Each
+team may want to have its own repository. To do this, you create
+a global configuration file:
 
-It has few public repositories available:
- - http://central.artipie.com/maven for Maven artifacts
- - http://central.artipie.com/bin - binary storage
- - http://central.artipie.com/npmjs - NPM proxy repository with caching layer
-
-### Maven
-
-To use maven repository add repositories configuration to `pom.xml` or `settings.xml`:
-```xml
-  <pluginRepositories>
-    <pluginRepository>
-      <id>artipie-central</id>
-      <name>artipie plugins</name>
-      <url>http://central.artipie.com/maven</url>
-    </pluginRepository>
-  </pluginRepositories>
-  <repositories>
-    <repository>
-      <id>artipie</id>
-      <name>artipie builds</name>
-      <url>http://central.artipie.com/maven</url>
-    </repository>
-  </repositories>
-```
-
-### NPM proxy
-
-NPM js proxy will cache all artifacts from npmjs, so if somebody decides to remove it, Artipie central cache won't be affected:
-
-```bash
-npm --registry=http://central.artipie.com/npmjs/ install npm
-```
-
-## Authentication
-
-For now, we have two ways to configure authentication in Artipie: via environment variables and via 
-yaml credentials file. Authentication type should be set in main Artipie config inside `meta`
-section:
 ```yaml
 meta:
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-docker
   credentials:
     type: file
     path: _credentials.yml
 ```
-`type` can be either `env` for auth via environment variables or `file` for auth via yaml credentials 
-file. `path` is required for `file` configuration, it should be a yaml credentials file location 
-relative to `meta.storage.path` (or, in other words, a storage key). Docker image uses `env` credentials by default,
-to change default settings, mount custom config file to `/etc/artipie.yml`.
 
-### Environment variables
-The simplest way to start Artipie with authentication is to configure single user via
-environment variables:
- - `ARTIPIE_USER_NAME` - user name
- - `ARTIPIE_USER_PASS` - user password
+If the `type` is set to `file`, another YAML file is required in the storage, with
+a list of users, who will be allowed to create repos
+(each `pass` is combination or either `plain` or `sha256` and a text):
 
-E.g. to start Docker image use `-e` CLI option:
+
+```yaml
+credentials:
+  jane:
+    pass: "plain:qwerty"
+  john:
+    pass: "sha256:xxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+If the `type` is set to `env`, the following environment variables are expected:
+`ARTIPIE_USER_NAME` and `ARTIPIE_USER_PASS`. For example, you start
+Docker container with the `-e` option:
+
 ```bash
 docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
   -e ARTIPIE_USER_NAME=artipie -e ARTIPIE_USER_PASS=qwerty \
   artipie/artipie:latest
 ```
-
-### Yaml credentials file
-
-Yaml credentials file has the following format:
-
-```yaml
-credentials: 
-  jane: 
-    pass: "plain:qwerty"
-  john: 
-    pass: "sha256:xxxxxxxxxxxxxxxxxxxxxxx"
-```
-The root element `credentials` contains unique usernames mapping with the password. Password 
-format is `{type}:{data}`, where `type` can be either `plain`, which means that the password is a 
-plain text `data` part of `pass`, or `sha256`, which means that password is `sha256` hashed.
 
 ## How to contribute
 
