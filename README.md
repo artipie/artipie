@@ -98,7 +98,9 @@ repo:
 
 Add [`<distributionManagement>`](https://maven.apache.org/pom.html#Distribution_Management)
 section to your
-[`pom.xml`](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html):
+[`pom.xml`](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html)
+(don't forget to specify authentication credentials in
+[`~/.m2/settings.xml`](https://maven.apache.org/settings.html)):
 
 ```xml
 <project>
@@ -123,7 +125,7 @@ Add [`<repository>`](https://maven.apache.org/pom.html#Repositories) and
 to your `pom.xml` (alternatively
 [configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
 it via
-[`settings.xml`](https://maven.apache.org/settings.html)) to use deployed artifacts:
+[`~/.m2/settings.xml`](https://maven.apache.org/settings.html)) to use deployed artifacts:
 
 ```xml
 <project>
