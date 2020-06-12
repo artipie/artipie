@@ -100,7 +100,7 @@ Add [`<distributionManagement>`](https://maven.apache.org/pom.html#Distribution_
 section to your
 [`pom.xml`](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html)
 (don't forget to specify authentication credentials in
-[`~/.m2/settings.xml`](https://maven.apache.org/settings.html)):
+[`~/.m2/settings.xml`](https://maven.apache.org/settings.html#Servers)):
 
 ```xml
 <project>
