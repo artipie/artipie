@@ -458,10 +458,10 @@ To pull the image use the following command:
 $ docker pull my-docker.my-company.com/my-image
 ```
 
-## Multi-Team Setup
+## Multitenancy
 
-You may want to run Artipie for your company, which has a few teams. Each
-team may want to have its own repository. To do this, you create
+You may want to run Artipie for your company, which has a few teams.
+Each team may want to have its own repository. To do this, you create
 a global configuration file `/etc/artipie.yml`:
 
 ```yaml
