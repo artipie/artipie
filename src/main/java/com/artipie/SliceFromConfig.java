@@ -50,6 +50,8 @@ import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URI;
 import java.util.regex.Pattern;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 /**
  * Slice from repo config.
@@ -86,8 +88,10 @@ public final class SliceFromConfig extends Slice.Wrap {
      *  We should test if the type exist in the constructed map. If the type does not exist,
      *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
      * @checkstyle LineLengthCheck (100 lines)
+     * @checkstyle ExecutableStatementCountCheck (100 lines)
+     * @checkstyle JavaNCSSCheck (500 lines)
      */
-    @SuppressWarnings("PMD.CyclomaticComplexity")
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.AvoidCatchingGenericException"})
     static Slice build(final RepoConfig cfg, final Vertx vertx,
         final Authentication auth, final Pattern prefix) {
         final Slice slice;
@@ -125,8 +129,24 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new TrimPathSlice(new MavenSlice(storage, permissions, auth), prefix);
                 break;
             case "maven-proxy":
+                final SslContextFactory.Client ssl = new SslContextFactory.Client();
+                final HttpClient http = new HttpClient(ssl);
+                try {
+                    http.start();
+                    // @checkstyle IllegalCatchCheck (1 line)
+                } catch (final Exception err) {
+                    throw new IllegalStateException(err);
+                }
                 slice = new TrimPathSlice(
-                    new MavenProxySlice(URI.create("https://repo.maven.apache.org/maven2")), prefix
+                    new MavenProxySlice(
+                        http,
+                        URI.create(
+                            cfg.settings()
+                                .orElseThrow(() -> new IllegalStateException("Repo settings missed"))
+                                .string("remote_uri")
+                        )
+                    ),
+                    prefix
                 );
                 break;
             case "go":
