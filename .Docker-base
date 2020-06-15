@@ -1,5 +1,7 @@
 FROM maven:3.6.3-jdk-13
-WORKDIR /project
-COPY pom.xml .
+WORKDIR /tmp/build
 RUN yum install git -y
-RUN mvn dependency:go-offline -Passembly
+COPY pom.xml src/ ./
+RUN mvn versions:set -DnewVersion=1.0-SNAPSHOT && \
+  mvn package -Passembly
+RUN rm -fr /tmp/build

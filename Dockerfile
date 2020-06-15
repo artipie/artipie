@@ -1,10 +1,10 @@
 FROM g4s8/artipie-base:latest as build_jar
 ARG version="1.0-SNAPSHOT"
 WORKDIR /jar
-COPY pom.xml /jar/pom.xml
-COPY pom.xml src/ ./
+COPY pom.xml ./
+COPY src ./src
 RUN mvn versions:set -DnewVersion=${version} && \
-  mvn package -Passembly
+  mvn package -P assembly
 
 FROM adoptopenjdk/openjdk13:alpine-jre
 LABEL description="Artipie binary repository managment tool"
