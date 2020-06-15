@@ -1,0 +1,5 @@
+FROM maven:3.6.3-jdk-13
+WORKDIR /project
+COPY pom.xml .
+RUN yum install git -y
+RUN mvn dependency:go-offline -Passembly
