@@ -268,5 +268,21 @@ SOFTWARE.
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>hot</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.dazraf</groupId>
+            <artifactId>vertx-hot-maven-plugin</artifactId>
+            <version>2.1.0</version>
+            <configuration>
+              <verticleReference>com.artipie.VertxMain</verticleReference>
+              <configFile>debug-config.json</configFile>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>

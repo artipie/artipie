@@ -24,11 +24,16 @@
 
 package com.artipie;
 
-import com.artipie.http.Slice;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
-import io.vertx.reactivex.core.Vertx;
+import io.reactivex.Completable;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Verticle;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,54 +41,31 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 /**
  * Vertx server entry point.
  * @since 1.0
  */
-@SuppressWarnings("PMD.PrematureDeclaration")
-public final class VertxMain implements Runnable {
+@SuppressWarnings({"PMD.PrematureDeclaration", "PMD.AvoidDuplicateLiterals", "deprecation"})
+public final class VertxMain implements Verticle {
 
     /**
      * The Vert.x instance.
      */
-    private final Vertx vertx;
+    private Vertx vrtx;
 
     /**
-     * Slice to serve.
+     * Slice server.
      */
-    private final Slice slice;
-
-    /**
-     * Server port.
-     */
-    private final int port;
-
-    /**
-     * Ctor.
-     * @param slice To server
-     * @param vertx The Vert.x instance.
-     * @param port HTTP port
-     */
-    private VertxMain(final Slice slice, final Vertx vertx, final int port) {
-        this.slice = slice;
-        this.vertx = vertx;
-        this.port = port;
-    }
-
-    @Override
-    public void run() {
-        new VertxSliceServer(this.vertx, this.slice, this.port).start();
-    }
+    private VertxSliceServer server;
 
     /**
      * Entry point.
      * @param args CLI args
-     * @throws IOException If fails
-     * @throws ParseException If fails
+     * @throws Exception If fails
+     * @checkstyle ExecutableStatementCountCheck (30 lines)
      */
-    public static void main(final String... args) throws IOException, ParseException {
+    public static void main(final String... args) throws Exception {
         final Vertx vertx = Vertx.vertx();
         final String storage;
         final int port;
@@ -106,16 +88,57 @@ public final class VertxMain implements Runnable {
         } else {
             throw new IllegalStateException("Storage is not configured");
         }
-        new VertxMain(
-            new Pie(
-                new YamlSettings(
-                    Files.readString(Path.of(storage), Charset.defaultCharset())
-                ),
-                vertx
-            ),
-            vertx,
-            port
-        ).run();
+        final Context ctx = vertx.getOrCreateContext();
+        final JsonObject config = ctx.config();
+        config.put("storage", storage);
+        config.put("port", port);
+        final VertxMain main = new VertxMain();
+        main.init(vertx, ctx);
+        main.start(
+            Future.future(
+                event -> {
+                }
+            )
+        );
         Logger.info(VertxMain.class, "Artipie was started on port %d", port);
+    }
+
+    @Override
+    public Vertx getVertx() {
+        return this.vrtx;
+    }
+
+    @Override
+    public void init(final Vertx vertx, final Context context) {
+        this.vrtx = vertx;
+        final JsonObject config = context.config();
+        try {
+            this.server = new VertxSliceServer(
+                io.vertx.reactivex.core.Vertx.newInstance(this.vrtx),
+                new Pie(
+                    new YamlSettings(
+                        Files.readString(
+                            Path.of(config.getString("storage")), Charset.defaultCharset()
+                        )
+                    ),
+                    io.vertx.reactivex.core.Vertx.newInstance(this.vrtx)
+                ),
+                config.getInteger("port")
+            );
+        } catch (final IOException iex) {
+            throw new UncheckedIOException(iex);
+        }
+    }
+
+    @Override
+    public void start(final Future<Void> future) {
+        Completable.fromAction(this.server::start)
+            .subscribe(future::complete, future::fail);
+    }
+
+    @Override
+    public void stop(final Future<Void> future) {
+        Completable.fromAction(this.server::stop)
+            .subscribe(future::complete, future::fail);
     }
 }
