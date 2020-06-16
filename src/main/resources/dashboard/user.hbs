@@ -1,0 +1,24 @@
+{{#partial "content"}}
+<section id="repos">
+    Repositories:
+    <ul>
+    {{#repos}}
+        <li><a href="/{{this}}">{{this}}</a></li>
+    {{/repos}}
+    </ul>
+
+    <form>
+      <input id="new-repo-name" type="text" required="true" pattern="[a-z0-9]{3,16}"/>
+      <input id="new-repo-submit" type="submit" value="Create"/>
+    </form>
+    <script>
+    document.getElementById('new-repo-submit').addEventListener('click', (evt) => {
+      // create new repository and relocate to new repo page
+      evt.preventDefault();
+      const nme = document.getElementById('new-repo-name').value;
+      window.location += `/${nme}`;
+    });
+    </script>
+</section>
+{{/partial}}
+{{> base}}

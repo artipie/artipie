@@ -31,6 +31,7 @@ import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.LoggingSlice;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
@@ -86,6 +87,9 @@ public final class Pie implements Slice {
         }
         if (path.startsWith("/api")) {
             return new ArtipieApi(this.settings).response(line, headers, body);
+        }
+        if (path.startsWith("/css") || path.startsWith("/js")) {
+            return StandardRs.NOT_FOUND;
         }
         try {
             return new LoggingSlice(Level.INFO, this.settings.layout(this.vertx).resolve(path))

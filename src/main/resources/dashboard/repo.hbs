@@ -1,0 +1,42 @@
+{{#partial "content"}}
+
+<section id="config">
+  <form id="config-form">
+    <textarea id="repo-config" name="config" type="textarea" rows="10" cols="64">
+    {{#if found}}
+    {{config}}
+    {{else}}
+repo:
+  type: file
+  storage: default
+  permissions:
+    \\*:
+      - \\*
+    {{/if}}
+    </textarea>
+    <br/>
+    <input id="config-submit" type="submit" value="Update"/>
+  </form>
+  <script>
+    {{#if found}}
+    const exists = true;
+    {{else}}
+    const exists = false;
+    {{/if}}
+    const elConfig = document.getElementById('repo-config');
+    document.getElementById('config-submit').addEventListener('click', async (evt) => {
+      // create or update
+      evt.preventDefault();
+      const rsp = await fetch(`/api/repos${window.location.pathname}`, {
+        body: elConfig.value,
+        method: exists ? 'PATCH' : 'PUT'
+      });
+      console.log(rsp);
+      if (rsp.status == 200) {
+        location.reload();
+      }
+    });
+  </script>
+</section>
+{{/partial}}
+{{> base}}

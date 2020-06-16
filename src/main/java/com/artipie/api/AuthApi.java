@@ -51,12 +51,13 @@ import org.apache.commons.codec.binary.Hex;
  * API authentication wrapper.
  * @since 0.6
  */
-final class AuthApi implements Identities {
+public final class AuthApi implements Identities {
 
     /**
      * URI path pattern.
      */
-    private static final Pattern PTN_PATH = Pattern.compile("/api/repos/(?<user>[^/.]+)(?:/.*)?");
+    private static final Pattern PTN_PATH =
+        Pattern.compile("(?:/api/repos)?/(?<user>[^/.]+)(?:/.*)?");
 
     /**
      * Origin authentication.
@@ -67,7 +68,7 @@ final class AuthApi implements Identities {
      * Wraps authentication with API restrictions.
      * @param auth Origin
      */
-    AuthApi(final Authentication auth) {
+    public AuthApi(final Authentication auth) {
         this.auth = auth;
     }
 

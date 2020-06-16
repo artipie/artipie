@@ -4,5 +4,6 @@ meta:
     type: fs
     path: /var/artipie/repo
   credentials:
-    type: env
-  layout: flat
+    type: file
+    path: _credentials.yml
+  layout: org
