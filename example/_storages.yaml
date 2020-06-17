@@ -1,0 +1,4 @@
+storages:
+  default:
+    type: file
+    path: __location__

@@ -512,4 +512,15 @@ $ mvn clean install -Pqulice
 
 To avoid build errors use Maven 3.2+.
 
+## How to run it locally
+
+To run Artipie server locally, you need configuration files first.
+To generate config files use `example/setup.sh` script. E.g.: `./example/setup.sh /tmp`
+creates configuration files in `/tmp/artipie` directory and print instructions how to run using
+`docker` or `java` tools. This scripts creates `org` layout of Artipie with two level hierarchy,
+creates user `test` with password `123`, and configures `default` storage in provided directory
+(e.g. `setup.sh /tmp` configures `default` storage at `/tmp/artipie/data/`). To access the dashboard
+start the server with provided configuration and open `http://localhost/test` in your browser.
+
+
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.
