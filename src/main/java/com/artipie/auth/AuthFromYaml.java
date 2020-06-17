@@ -26,8 +26,6 @@ package com.artipie.auth;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.auth.Authentication;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.codec.digest.DigestUtils;
 
 /**
@@ -41,11 +39,6 @@ import org.apache.commons.codec.digest.DigestUtils;
  *  forget to validate credentials, logins should be unique.
  */
 public final class AuthFromYaml implements Authentication {
-
-    /**
-     * Password format.
-     */
-    private static final Pattern PSWD_FORMAT = Pattern.compile("(plain:|sha256:)(.+)");
 
     /**
      * YAML credentials settings.
@@ -66,7 +59,8 @@ public final class AuthFromYaml implements Authentication {
         Optional<String> res = Optional.empty();
         if (users != null && users.yamlMapping(user) != null) {
             final String stored = users.yamlMapping(user).string("pass");
-            if (stored != null && check(stored, pass)) {
+            final String type = users.yamlMapping(user).string("type");
+            if (stored != null && type != null && check(stored, type, pass)) {
                 res = Optional.of(user);
             }
         }
@@ -76,18 +70,13 @@ public final class AuthFromYaml implements Authentication {
     /**
      * Checks stored password against the given one.
      * @param stored Password from settings
+     * @param type Type of Password from settings
      * @param given Password to check
      * @return True if passwords are the same
      */
-    private static boolean check(final String stored, final String given) {
-        boolean res = false;
-        final Matcher matcher = AuthFromYaml.PSWD_FORMAT.matcher(stored);
-        if (matcher.matches()) {
-            final String pswd = matcher.group(2);
-            res = stored.startsWith("sha256") && DigestUtils.sha256Hex(given).equals(pswd)
-                || given.equals(pswd);
-        }
-        return res;
+    private static boolean check(final String stored, final String type, final String given) {
+        return type.equals("sha256") && DigestUtils.sha256Hex(given).equals(stored)
+            || given.equals(stored);
     }
 
 }
