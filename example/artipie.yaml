@@ -1,7 +1,7 @@
 meta:
   storage:
     type: fs
-    path: __storage__
+    path: ./example/storage/repo
   credentials:
     type: file
     path: _credentials.yaml
