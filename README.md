@@ -512,4 +512,16 @@ $ mvn clean install -Pqulice
 
 To avoid build errors use Maven 3.2+.
 
+## How to run it locally
+
+To run Artipie server locally, build it with `mvn clean package -Passembly`
+and run with *(change port if needed)*:
+```java
+java -jar target/artipie-jar-with-dependencies.jar --config=example/artipie.yaml --port=8080
+```
+Example configuration uses `org` layout of Artipie with two level hierarchy,
+user `test` with password `123`, and `default` storage in `./example/storage` direcotry.
+To access the dashboard open `http://localhost/test` in your browser and enter user credentials.
+
+
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.

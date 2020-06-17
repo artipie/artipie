@@ -1,0 +1,8 @@
+meta:
+  storage:
+    type: fs
+    path: ./example/storage/repo
+  credentials:
+    type: file
+    path: _credentials.yaml
+  layout: org
