@@ -1,13 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <title>{{title}}</title>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="shortcut icon" href="/logo.png"/>
-    <link rel="stylesheet" href="/css/tacit-css.min.css"/>
-</head>
-<body>
-{{#block "content"}}
-{{/block}}
-</body>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css"/>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <ul>
+          <li>
+            <img src="https://www.artipie.com/logo.svg" style="height:92px;" alt="logo"/>
+          </li>
+        </ul>
+      </nav>
+    </header>
+    <section>
+      <article>
+        {{#block "content"}}
+        {{/block}}
+      </article>
+    </section>
+    <footer>
+      <nav>
+        <ul>
+          <li>
+            &copy; 2020 Artipie
+          </li>
+        </ul>
+      </nav>
+    </footer>
+  </body>
 </html>
