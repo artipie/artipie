@@ -1,8 +1,9 @@
 #!/bin/bash
 
-[[ -z "$1" ]] && usage
-
-base="$1/artipie"
+function usage {
+  echo -ne "Usage: setup.sh <basedir>\n\t- basedir - the root of Artipie configuration\n"
+  exit 0
+}
 
 function die {
   echo "$1"
@@ -10,10 +11,9 @@ function die {
   exit 1
 }
 
-function usage {
-  echo -ne "Usage: setup.sh <basedir>\n\t- basedir - the root of Artipie configuration\n"
-  exit 0
-}
+[[ -z "$1" ]] && usage
+
+base="$1/artipie"
 
 if [[ -d "${base}" ]]; then
   read -p "Directory \`${base}' already exist. Remove to continue? [y/n] " -n 1 -r
@@ -23,7 +23,6 @@ if [[ -d "${base}" ]]; then
   fi
   rm -vfr "${base}"
 fi
-
 
 mkdir -pv "${base}/repo" || die "Failed to create repo layout"
 mkdir -pv "${base}/data" || die "Failed to create data directory"
