@@ -458,6 +458,11 @@ To pull the image use the following command:
 $ docker pull my-docker.my-company.com/my-image
 ```
 
+## Additional configuration
+
+Environment variables:
+ - `SSL_TRUSTALL` - trust all unkown certificates
+
 ## Multitenancy
 
 You may want to run Artipie for your company, which has a few teams.
