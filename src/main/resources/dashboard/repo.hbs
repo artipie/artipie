@@ -41,6 +41,8 @@ repo:
     console.log(rsp);
     if (rsp.status == 200) {
       location.reload();
+    } else {
+      alert('Failed to update repository: invalid YAML configuration.')
     }
   });
 </script>
@@ -69,20 +71,20 @@ only be able to download them. Nobody else will have any access to the repo.</p>
 
 <p>This is how you may configure it inside your
 <a href="https://maven.apache.org/guides/introduction/introduction-to-the-pom.html"><code>pom.xml</code></a>
-provided your repository name is <code>yegor256/test</code>:</p>
+provided your repository name is <code>{{name}}</code>:</p>
 
 <pre>&lt;project>
   [...]
   &lt;distributionManagement>
     &lt;snapshotRepository>
       &lt;id>artipie&lt;/id>
-      &lt;url>https://central.artipie.com/yegor256/test&lt;/url>
+      &lt;url>https://central.artipie.com/{{name}}&lt;/url>
     &lt;/snapshotRepository>
   &lt;/distributionManagement>
   &lt;repositories>
     &lt;repository>
       &lt;id>artipie&lt;/id>
-      &lt;url>https://central.artipie.com/yegor256/test&lt;/url>
+      &lt;url>https://central.artipie.com/{{name}}&lt;/url>
     &lt;/repository>
   &lt;/repositories>
 &lt;/project></pre>

@@ -112,6 +112,7 @@ final class RepoPage implements Page {
                         yaml -> this.handlebars.compile("repo").apply(
                             new MapOf<>(
                                 new MapEntry<>("title", name),
+                                new MapEntry<>("name", name),
                                 new MapEntry<>("config", yaml.toString()),
                                 new MapEntry<>("found", true)
                             )
@@ -122,6 +123,7 @@ final class RepoPage implements Page {
                     () -> this.handlebars.compile("repo").apply(
                         new MapOf<>(
                             new MapEntry<>("title", name),
+                            new MapEntry<>("name", name),
                             new MapEntry<>("found", false)
                         )
                     )
