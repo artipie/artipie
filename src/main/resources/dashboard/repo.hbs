@@ -2,7 +2,7 @@
 
 <p>
   This is <a href="https://yaml.org/">YAML</a> config
-  of your repository
+  of your repository <code>{{user}}/{{name}}</code>
   (read this
   <a href="https://github.com/artipie/artipie/blob/master/README.md">README</a>
   file to get help):
@@ -68,21 +68,20 @@ will be able to publish Maven artifacts and
 only be able to download them. Nobody else will have any access to the repo.</p>
 
 <p>This is how you may configure it inside your
-<a href="https://maven.apache.org/guides/introduction/introduction-to-the-pom.html"><code>pom.xml</code></a>
-provided your repository name is <code>{{user}}/test</code>:</p>
+<a href="https://maven.apache.org/guides/introduction/introduction-to-the-pom.html"><code>pom.xml</code></a>:</p>
 
 <pre>&lt;project&gt;
   [...]
   &lt;distributionManagement&gt;
     &lt;snapshotRepository&gt;
       &lt;id&gt;artipie&lt;/id&gt;
-      &lt;url&gt;https://central.artipie.com/{{user}}/test&lt;/url&gt;
+      &lt;url&gt;https://central.artipie.com/{{user}}/{{name}}&lt;/url&gt;
     &lt;/snapshotRepository&gt;
   &lt;/distributionManagement&gt;
   &lt;repositories&gt;
     &lt;repository&gt;
       &lt;id&gt;artipie&lt;/id&gt;
-      &lt;url&gt;https://central.artipie.com/{{user}}/test&lt;/url&gt;
+      &lt;url&gt;https://central.artipie.com/{{user}}/{{name}}&lt;/url&gt;
     &lt;/repository&gt;
   &lt;/repositories&gt;
 &lt;/project&gt;</pre
