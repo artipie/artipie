@@ -9,7 +9,7 @@
         for (let file of data) {
           if (file.type === 'dir') {
             htmlString += `<li>${file.name}</li><ul>`;
-            htmlString += `<li><a href="${file.path}/files/upload/index.html">Files upload</a></li>`;
+            htmlString += `<li><a href="${file.name}/files/upload/index.html">Files upload</a></li>`;
             htmlString += '</ul>';
           }
         }
