@@ -47,10 +47,14 @@ import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.pypi.PySlice;
 import com.artipie.rpm.http.RpmSlice;
+import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URI;
 import java.util.regex.Pattern;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.HttpProxy;
+import org.eclipse.jetty.client.Origin;
+import org.eclipse.jetty.client.ProxyConfiguration;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 /**
@@ -60,24 +64,39 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
  * @checkstyle ParameterNameCheck (500 lines)
  * @checkstyle ParameterNumberCheck (500 lines)
  * @checkstyle CyclomaticComplexityCheck (500 lines)
+ * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidCatchingGenericException")
+@SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.StaticAccessToStaticFields"})
 public final class SliceFromConfig extends Slice.Wrap {
 
     /**
      * Http client.
      */
-    private static final HttpClient HTTP =
-        new HttpClient(
-            new SslContextFactory.Client("true".equals(System.getenv("SSL_TRUSTALL")))
-        );
+    private static final HttpClient HTTP;
 
     static {
+        final boolean trustall = "true".equals(System.getenv("SSL_TRUSTALL"));
+        HTTP = new HttpClient(new SslContextFactory.Client(trustall));
+        Logger.info(SliceFromConfig.class, "Created HTTP client, trustall=%b", trustall);
         try {
-            HTTP.start();
+            SliceFromConfig.HTTP.start();
             // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Exception err) {
             throw new IllegalStateException(err);
+        }
+        final ProxyConfiguration config = SliceFromConfig.HTTP.getProxyConfiguration();
+        final String phost = System.getProperty("http.proxyHost");
+        final String pport = System.getProperty("http.proxyPort");
+        if (phost != null && pport != null) {
+            final HttpProxy proxy = new HttpProxy(
+                new Origin.Address(
+                    phost,
+                    Integer.parseInt(pport)
+                ),
+                true
+            );
+            config.getProxies().add(proxy);
+            Logger.info(SliceFromConfig.class, "Added HTTP client proxy: %s", proxy);
         }
     }
 
