@@ -61,7 +61,25 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
  * @checkstyle ParameterNumberCheck (500 lines)
  * @checkstyle CyclomaticComplexityCheck (500 lines)
  */
+@SuppressWarnings("PMD.AvoidCatchingGenericException")
 public final class SliceFromConfig extends Slice.Wrap {
+
+    /**
+     * Http client.
+     */
+    private static final HttpClient HTTP =
+        new HttpClient(
+            new SslContextFactory.Client("true".equals(System.getenv("SSL_TRUSTALL")))
+        );
+
+    static {
+        try {
+            HTTP.start();
+            // @checkstyle IllegalCatchCheck (1 line)
+        } catch (final Exception err) {
+            throw new IllegalStateException(err);
+        }
+    }
 
     /**
      * Ctor.
@@ -91,7 +109,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @checkstyle ExecutableStatementCountCheck (100 lines)
      * @checkstyle JavaNCSSCheck (500 lines)
      */
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.AvoidCatchingGenericException"})
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     static Slice build(final RepoConfig cfg, final Vertx vertx,
         final Authentication auth, final Pattern prefix) {
         final Slice slice;
@@ -129,17 +147,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new TrimPathSlice(new MavenSlice(storage, permissions, auth), prefix);
                 break;
             case "maven-proxy":
-                final SslContextFactory.Client ssl = new SslContextFactory.Client();
-                final HttpClient http = new HttpClient(ssl);
-                try {
-                    http.start();
-                    // @checkstyle IllegalCatchCheck (1 line)
-                } catch (final Exception err) {
-                    throw new IllegalStateException(err);
-                }
                 slice = new TrimPathSlice(
                     new MavenProxySlice(
-                        http,
+                        SliceFromConfig.HTTP,
                         URI.create(
                             cfg.settings()
                                 .orElseThrow(() -> new IllegalStateException("Repo settings missed"))
