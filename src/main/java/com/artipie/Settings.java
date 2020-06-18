@@ -23,6 +23,7 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
@@ -62,6 +63,13 @@ public interface Settings {
      * @throws IOException If failet to parse settings
      */
     RepoLayout layout(Vertx vertx) throws IOException;
+
+    /**
+     * Artipie meta configuration.
+     * @return Yaml mapping
+     * @throws IOException On error
+     */
+    YamlMapping meta() throws IOException;
 
     /**
      * Fake {@link Settings} using a file storage.
@@ -104,6 +112,11 @@ public interface Settings {
         @Override
         public RepoLayout layout(final Vertx vertx) {
             return new FlatLayout(this, vertx);
+        }
+
+        @Override
+        public YamlMapping meta() {
+            throw new UnsupportedOperationException();
         }
     }
 }

@@ -154,7 +154,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new HelmSlice(storage);
                 break;
             case "rpm":
-                slice = new TrimPathSlice(new RpmSlice(storage), prefix);
+                slice = new TrimPathSlice(new RpmSlice(storage, permissions, auth), prefix);
                 break;
             case "php":
                 slice = new PhpComposer(cfg.path(), storage);

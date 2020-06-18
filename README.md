@@ -94,6 +94,15 @@ repo:
   storage:
     type: fs
     path: /var/artipie/maven
+  permissions:
+    admin:
+      - upload
+      - download
+    jeff:
+      - upload
+      - download
+    "*":
+      - download
 ```
 
 Add [`<distributionManagement>`](https://maven.apache.org/pom.html#Distribution_Management)

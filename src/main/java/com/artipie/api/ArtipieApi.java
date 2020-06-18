@@ -91,6 +91,13 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByMethod(RqMethod.PUT)
                                 ),
                                 new ApiRepoCreateSlice(settings)
+                            ),
+                            new SliceRoute.Path(
+                                new RtRule.Multiple(
+                                    new RtRule.ByPath(Pattern.compile("/api/users/(?:[^/.]+)/password")),
+                                    new RtRule.ByMethod(RqMethod.POST)
+                                ),
+                                new ApiChangeUserPassword(settings)
                             )
                         ),
                         new Permission.ByName("api", perm),
