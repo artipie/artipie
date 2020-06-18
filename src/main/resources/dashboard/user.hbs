@@ -25,6 +25,12 @@ document.getElementById('new-repo-submit').addEventListener('click', (evt) => {
 {{/repos}}
 </ul>
 
+<form action="/api/users/{{user}}/password" method="POST">
+  <label>Change password:</label>
+  <input id="new-password" name="password" type="password" size="25" required="true"/>
+  <input id="new-repo-submit" type="submit" value="Change"/>
+</form>
+
 <p>
 DISCLAIMER: The service provided to you by Artipie is free of charge
 and we expect you to behave good. Don't host here anything aside from

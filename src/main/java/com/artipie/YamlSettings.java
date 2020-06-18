@@ -55,7 +55,7 @@ public final class YamlSettings implements Settings {
     /**
      * Meta section.
      */
-    private static final String META = "meta";
+    private static final String KEY_META = "meta";
 
     /**
      * YAML file content.
@@ -75,7 +75,7 @@ public final class YamlSettings implements Settings {
         return new YamlStorage(
             Yaml.createYamlInput(this.content)
                 .readYamlMapping()
-                .yamlMapping(YamlSettings.META)
+                .yamlMapping(YamlSettings.KEY_META)
                 .yamlMapping("storage")
         ).storage();
     }
@@ -84,7 +84,7 @@ public final class YamlSettings implements Settings {
     public CompletionStage<Authentication> auth() throws IOException {
         final YamlMapping cred = Yaml.createYamlInput(this.content)
             .readYamlMapping()
-            .yamlMapping(YamlSettings.META)
+            .yamlMapping(YamlSettings.KEY_META)
             .yamlMapping("credentials");
         final CompletionStage<Authentication> res;
         final String path = "path";
@@ -120,7 +120,7 @@ public final class YamlSettings implements Settings {
     public RepoLayout layout(final Vertx vertx) throws IOException {
         final String layout = Yaml.createYamlInput(this.content)
             .readYamlMapping()
-            .yamlMapping(YamlSettings.META)
+            .yamlMapping(YamlSettings.KEY_META)
             .string("layout");
         final RepoLayout res;
         if (layout == null || "flat".equals(layout)) {
@@ -131,6 +131,13 @@ public final class YamlSettings implements Settings {
             throw new IOException(String.format("Unsupported layout kind: %s", layout));
         }
         return res;
+    }
+
+    @Override
+    public YamlMapping meta() throws IOException {
+        return Yaml.createYamlInput(this.content)
+            .readYamlMapping()
+            .yamlMapping(YamlSettings.KEY_META);
     }
 
     /**

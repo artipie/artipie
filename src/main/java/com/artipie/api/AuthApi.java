@@ -57,7 +57,7 @@ public final class AuthApi implements Identities {
      * URI path pattern.
      */
     private static final Pattern PTN_PATH =
-        Pattern.compile("(?:/api/repos)?/(?<user>[^/.]+)(?:/.*)?");
+        Pattern.compile("(?:/api/\\w+)?/(?<user>[^/.]+)(?:/.*)?");
 
     /**
      * Origin authentication.
