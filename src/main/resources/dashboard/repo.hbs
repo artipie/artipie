@@ -41,6 +41,8 @@ repo:
     console.log(rsp);
     if (rsp.status == 200) {
       location.reload();
+    } else {
+      alert('Failed to update repository: invalid YAML configuration.')
     }
   });
 </script>
@@ -84,7 +86,7 @@ only be able to download them. Nobody else will have any access to the repo.</p>
       &lt;url&gt;https://central.artipie.com/{{user}}/{{name}}&lt;/url&gt;
     &lt;/repository&gt;
   &lt;/repositories&gt;
-&lt;/project&gt;</pre
+&lt;/project&gt;</pre>
 
 <p>You publish just with
 <a href="https://maven.apache.org/plugins/maven-deploy-plugin/usage.html"><code>mvn deploy</code></a>

@@ -83,6 +83,7 @@ final class RepoPage implements Page {
             throw new IllegalStateException("Should match");
         }
         final String name = matcher.group("key");
+        final String[] parts = name.split("/");
         final Key.From key = new Key.From(String.format("%s.yaml", name));
         // @checkstyle LineLengthCheck (30 lines)
         return Single.fromCallable(this.settings::storage).map(RxStorageWrapper::new).flatMap(
@@ -112,6 +113,8 @@ final class RepoPage implements Page {
                         yaml -> this.handlebars.compile("repo").apply(
                             new MapOf<>(
                                 new MapEntry<>("title", name),
+                                new MapEntry<>("user", parts[0]),
+                                new MapEntry<>("name", parts[1]),
                                 new MapEntry<>("config", yaml.toString()),
                                 new MapEntry<>("found", true)
                             )
@@ -122,6 +125,8 @@ final class RepoPage implements Page {
                     () -> this.handlebars.compile("repo").apply(
                         new MapOf<>(
                             new MapEntry<>("title", name),
+                            new MapEntry<>("user", parts[0]),
+                            new MapEntry<>("name", parts[1]),
                             new MapEntry<>("found", false)
                         )
                     )
