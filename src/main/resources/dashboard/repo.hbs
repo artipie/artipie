@@ -1,42 +1,54 @@
 {{#partial "content"}}
 
-<section id="config">
-  <form id="config-form">
-    <textarea id="repo-config" name="config" type="textarea" rows="10" cols="64">
-    {{#if found}}
-    {{config}}
-    {{else}}
+<p>
+  This is <a href="https://yaml.org/">YAML</a> config
+  of your repository
+  (read this
+  <a href="https://github.com/artipie/artipie/blob/master/README.md">README</a>
+  file to get help):
+</p>
+
+<form id="config-form">
+  <fieldset>
+    <textarea id="repo-config" name="config" type="textarea" rows="10" cols="64"
+>{{#if found}}
+{{config}}
+{{else}}
 repo:
   type: file
   storage: default
   permissions:
     \\*:
       - \\*
-    {{/if}}
-    </textarea>
-    <br/>
+{{/if}}</textarea>
     <input id="config-submit" type="submit" value="Update"/>
-  </form>
-  <script>
-    {{#if found}}
-    const exists = true;
-    {{else}}
-    const exists = false;
-    {{/if}}
-    const elConfig = document.getElementById('repo-config');
-    document.getElementById('config-submit').addEventListener('click', async (evt) => {
-      // create or update
-      evt.preventDefault();
-      const rsp = await fetch(`/api/repos${window.location.pathname}`, {
-        body: elConfig.value,
-        method: exists ? 'PATCH' : 'PUT'
-      });
-      console.log(rsp);
-      if (rsp.status == 200) {
-        location.reload();
-      }
+  </fieldset>
+</form>
+<script>
+  {{#if found}}
+  const exists = true;
+  {{else}}
+  const exists = false;
+  {{/if}}
+  const elConfig = document.getElementById('repo-config');
+  document.getElementById('config-submit').addEventListener('click', async (evt) => {
+    // create or update
+    evt.preventDefault();
+    const rsp = await fetch(`/api/repos${window.location.pathname}`, {
+      body: elConfig.value,
+      method: exists ? 'PATCH' : 'PUT'
     });
-  </script>
-</section>
+    console.log(rsp);
+    if (rsp.status == 200) {
+      location.reload();
+    }
+  });
+</script>
+
+<p>
+  This is the URL of your repo:
+  <code>https://central.artipie.com/...</code>
+</p>
+
 {{/partial}}
 {{> base}}

@@ -1,24 +1,37 @@
 {{#partial "content"}}
-<section id="repos">
-    Repositories:
-    <ul>
-    {{#repos}}
-        <li><a href="/{{this}}">{{this}}</a></li>
-    {{/repos}}
-    </ul>
+<form>
+  <label>New repository:</label>
+  <input id="new-repo-name" type="text" size="25" required="true" pattern="[a-z0-9]{3,16}"/>
+  <input id="new-repo-submit" type="submit" value="Add"/>
+</form>
+<script>
+document.getElementById('new-repo-submit').addEventListener('click', (evt) => {
+  // create new repository and relocate to new repo page
+  evt.preventDefault();
+  const nme = document.getElementById('new-repo-name').value;
+  window.location += `/${nme}`;
+});
+</script>
 
-    <form>
-      <input id="new-repo-name" type="text" required="true" pattern="[a-z0-9]{3,16}"/>
-      <input id="new-repo-submit" type="submit" value="Create"/>
-    </form>
-    <script>
-    document.getElementById('new-repo-submit').addEventListener('click', (evt) => {
-      // create new repository and relocate to new repo page
-      evt.preventDefault();
-      const nme = document.getElementById('new-repo-name').value;
-      window.location += `/${nme}`;
-    });
-    </script>
-</section>
+<p>
+  Your repositories:
+</p>
+
+<ul>
+{{#repos}}
+  <li>
+    <a href="/{{this}}">{{this}}</a>
+  </li>
+{{/repos}}
+</ul>
+
+<p>
+DISCLAIMER: The service provided to you by Artipie is free of charge
+and we expect you to behave good. Don't host here anything aside from
+your private software packages. Too large or abusive files may be deleted without
+notice. We truly hope that you enjoy our service and want it to stay alive.
+Thanks!
+</p>
+
 {{/partial}}
 {{> base}}
