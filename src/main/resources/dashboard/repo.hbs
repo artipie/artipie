@@ -10,7 +10,7 @@
 
 <form id="config-form">
   <fieldset>
-    <textarea id="repo-config" name="config" type="textarea" rows="10" cols="64"
+    <textarea id="repo-config" name="config" type="textarea" style="width: 100%; height: 12em;"
 >{{#if found}}
 {{config}}
 {{else}}
@@ -18,8 +18,8 @@ repo:
   type: file
   storage: default
   permissions:
-    \\*:
-      - \\*
+    \*:
+      - \*
 {{/if}}</textarea>
     <input id="config-submit" type="submit" value="Update"/>
   </fieldset>
@@ -46,9 +46,51 @@ repo:
 </script>
 
 <p>
-  This is the URL of your repo:
-  <code>https://central.artipie.com/...</code>
+  Try this config for a simple private
+  <a href="https://maven.apache.org/">Maven repo</a>
+  (full explanation is <a href="https://github.com/artipie/artipie/blob/master/README.md#maven-repo">here</a>):
 </p>
+
+<pre>repo:
+  type: maven
+  storage: default
+  permissions:
+    yegor256:
+      - upload
+      - download
+    g4s8:
+      - download</pre>
+
+<p>With this confirmation,
+the GitHub user <a href="https://github.com/yegor256"><code>@yegor256</code></a>
+will be able to publish Maven artifacts and
+<a href="https://github.com/g4s8"><code>@g4s8</code></a> will
+only be able to download them. Nobody else will have any access to the repo.</p>
+
+<p>This is how you may configure it inside your
+<a href="https://maven.apache.org/guides/introduction/introduction-to-the-pom.html"><code>pom.xml</code></a>
+provided your repository name is <code>yegor256/test</code>:</p>
+
+<pre>&lt;project>
+  [...]
+  &lt;distributionManagement>
+    &lt;snapshotRepository>
+      &lt;id>artipie&lt;/id>
+      &lt;url>https://central.artipie.com/yegor256/test&lt;/url>
+    &lt;/snapshotRepository>
+  &lt;/distributionManagement>
+  &lt;repositories>
+    &lt;repository>
+      &lt;id>artipie&lt;/id>
+      &lt;url>https://central.artipie.com/yegor256/test&lt;/url>
+    &lt;/repository>
+  &lt;/repositories>
+&lt;/project></pre>
+
+<p>You publish just with
+<a href="https://maven.apache.org/plugins/maven-deploy-plugin/usage.html"><code>mvn deploy</code></a>
+and you download with
+<a href="https://maven.apache.org/plugins/maven-compiler-plugin/index.html"><code>mvn compile</code></a>.
 
 {{/partial}}
 {{> base}}
