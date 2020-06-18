@@ -2,7 +2,7 @@
 
 <p>
   This is <a href="https://yaml.org/">YAML</a> config
-  of your repository
+  of your repository <code>{{user}}/{{name}}</code>
   (read this
   <a href="https://github.com/artipie/artipie/blob/master/README.md">README</a>
   file to get help):
@@ -57,37 +57,36 @@ repo:
   type: maven
   storage: default
   permissions:
-    yegor256:
+    {{user}}:
       - upload
       - download
-    g4s8:
+    torvalds:
       - download</pre>
 
 <p>With this confirmation,
-the GitHub user <a href="https://github.com/yegor256"><code>@yegor256</code></a>
+the GitHub user <a href="https://github.com/{{user}}"><code>@{{user}}</code></a>
 will be able to publish Maven artifacts and
-<a href="https://github.com/g4s8"><code>@g4s8</code></a> will
+<a href="https://github.com/torvalds"><code>@torvalds</code></a> will
 only be able to download them. Nobody else will have any access to the repo.</p>
 
 <p>This is how you may configure it inside your
-<a href="https://maven.apache.org/guides/introduction/introduction-to-the-pom.html"><code>pom.xml</code></a>
-provided your repository name is <code>{{name}}</code>:</p>
+<a href="https://maven.apache.org/guides/introduction/introduction-to-the-pom.html"><code>pom.xml</code></a>:</p>
 
-<pre>&lt;project>
+<pre>&lt;project&gt;
   [...]
-  &lt;distributionManagement>
-    &lt;snapshotRepository>
-      &lt;id>artipie&lt;/id>
-      &lt;url>https://central.artipie.com/{{name}}&lt;/url>
-    &lt;/snapshotRepository>
-  &lt;/distributionManagement>
-  &lt;repositories>
-    &lt;repository>
-      &lt;id>artipie&lt;/id>
-      &lt;url>https://central.artipie.com/{{name}}&lt;/url>
-    &lt;/repository>
-  &lt;/repositories>
-&lt;/project></pre>
+  &lt;distributionManagement&gt;
+    &lt;snapshotRepository&gt;
+      &lt;id&gt;artipie&lt;/id&gt;
+      &lt;url&gt;https://central.artipie.com/{{user}}/{{name}}&lt;/url&gt;
+    &lt;/snapshotRepository&gt;
+  &lt;/distributionManagement&gt;
+  &lt;repositories&gt;
+    &lt;repository&gt;
+      &lt;id&gt;artipie&lt;/id&gt;
+      &lt;url&gt;https://central.artipie.com/{{user}}/{{name}}&lt;/url&gt;
+    &lt;/repository&gt;
+  &lt;/repositories&gt;
+&lt;/project&gt;</pre>
 
 <p>You publish just with
 <a href="https://maven.apache.org/plugins/maven-deploy-plugin/usage.html"><code>mvn deploy</code></a>
