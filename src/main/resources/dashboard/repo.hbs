@@ -8,10 +8,10 @@
   file to get help):
 </p>
 
-<form id="config-form">
+<form id="config-form" action="/api/repos/{{user}}" method="POST">
   <fieldset>
     <textarea id="repo-config" name="config" type="textarea" style="width: 100%; height: 12em;"
->{{#if found}}
+>{{#if config}}
 {{config}}
 {{else}}
 repo:
@@ -21,31 +21,10 @@ repo:
     \*:
       - \*
 {{/if}}</textarea>
+    <input name="repo" type="hidden" value="{{name}}"/>
     <input id="config-submit" type="submit" value="Update"/>
   </fieldset>
 </form>
-<script>
-  {{#if found}}
-  const exists = true;
-  {{else}}
-  const exists = false;
-  {{/if}}
-  const elConfig = document.getElementById('repo-config');
-  document.getElementById('config-submit').addEventListener('click', async (evt) => {
-    // create or update
-    evt.preventDefault();
-    const rsp = await fetch(`/api/repos${window.location.pathname}`, {
-      body: elConfig.value,
-      method: exists ? 'PATCH' : 'PUT'
-    });
-    console.log(rsp);
-    if (rsp.status == 200) {
-      location.reload();
-    } else {
-      alert('Failed to update repository: invalid YAML configuration.')
-    }
-  });
-</script>
 
 <p>
   Try this config for a simple private
