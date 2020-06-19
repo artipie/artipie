@@ -28,9 +28,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.Settings;
-import com.artipie.asto.Concatenation;
 import com.artipie.asto.Content;
-import com.artipie.asto.Remaining;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -97,21 +95,14 @@ final class ApiChangeUserPassword implements Slice {
                     key ->
                         Single.zip(
                             new RxStorageWrapper(this.settings.storage())
-                                .value(key)
-                                .flatMap(pub -> new Concatenation(pub).single())
-                                .map(
-                                    buf -> Yaml.createYamlInput(
-                                        new String(new Remaining(buf).bytes(), StandardCharsets.UTF_8)
-                                    ).readYamlMapping()),
-                            new Concatenation(body).single()
-                                .map(buf -> new String(new Remaining(buf).bytes(), StandardCharsets.UTF_8))
-                                .map(
-                                    encoded -> URLEncodedUtils.parse(encoded, StandardCharsets.UTF_8)
-                                        .stream()
-                                        .filter(pair -> pair.getName().equals("password"))
-                                        .map(NameValuePair::getValue)
-                                        .findFirst().orElseThrow()
-                                ),
+                                .value(key).to(ContentAs.YAML),
+                            Single.just(body).to(ContentAs.STRING).map(
+                                encoded -> URLEncodedUtils.parse(encoded, StandardCharsets.UTF_8)
+                                    .stream()
+                                    .filter(pair -> pair.getName().equals("password"))
+                                    .map(NameValuePair::getValue)
+                                    .findFirst().orElseThrow()
+                            ),
                             (YamlMapping yaml, String pass) -> {
                                 YamlMappingBuilder result = Yaml.createYamlMappingBuilder();
                                 final YamlMapping credentials = yaml.yamlMapping("credentials");
