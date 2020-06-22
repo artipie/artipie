@@ -24,32 +24,28 @@
 
 package com.artipie;
 
-import com.artipie.asto.Key;
+import com.artipie.api.ArtipieApi;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.slice.SliceSimple;
+import com.artipie.http.rs.StandardRs;
+import com.artipie.http.slice.LoggingSlice;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import org.cactoos.scalar.Unchecked;
+import java.util.logging.Level;
 import org.reactivestreams.Publisher;
 
 /**
  * Pie of slices.
  * @since 1.0
- * @todo #74:30min Create a unit test for 404 response.
- *  Let's test that the response for request for not existing repository
- *  returns 404 error, e.g. if request line is `GET /repo/foo HTTP/1.1`
- *  but we don't have `foo.yml` configuration, then this class should return 404.
  * @checkstyle ReturnCountCheck (500 lines)
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
@@ -87,42 +83,40 @@ public final class Pie implements Slice {
         }
         final String[] parts = path.replaceAll("^/+", "").split("/");
         if (path.equals("/") || parts.length == 0) {
-            return new RsWithStatus(RsStatus.OK);
+            return new RsWithStatus(RsStatus.NO_CONTENT);
         }
-        final String repo = parts[0];
-        Logger.debug(this, "Slice repo=%s", repo);
-        final Key.From key = new Key.From(String.format("%s.yaml", repo));
-        return new AsyncSlice(
-            CompletableFuture.supplyAsync(
-                () -> new Unchecked<>(this.settings::storage).value()
-            ).thenCompose(
-                storage -> storage.exists(key).thenApply(
-                    exist -> {
-                        final Slice slice;
-                        if (exist) {
-                            slice = new AsyncSlice(
-                                storage.value(key).thenApply(
-                                    content -> new SliceFromConfig(
-                                        new RepoConfig(this.vertx, content),
-                                        this.vertx.fileSystem()
-                                    )
-                                )
-                            );
-                        } else {
-                            slice = new SliceSimple(
-                                new RsWithStatus(
-                                    new RsWithBody(
-                                        String.format("Repository '%s' was not found", repo),
-                                        StandardCharsets.UTF_8
-                                    ),
-                                    RsStatus.NOT_FOUND
-                                )
-                            );
-                        }
-                        return slice;
-                    }
-                )
-            )
-        ).response(line, headers, body);
+        if (path.startsWith("/css") || path.startsWith("/js")) {
+            return StandardRs.NOT_FOUND;
+        }
+        try {
+            return this.slice(line).response(line, headers, body);
+        } catch (final IOException err) {
+            Logger.error(this, "Failed to read settings layout: %[exception]s", err);
+            return new RsWithStatus(
+                new RsWithBody(
+                    String.format("Failed to read Artipie settings: %s", err.getMessage()),
+                    StandardCharsets.UTF_8
+                ),
+                RsStatus.INTERNAL_ERROR
+            );
+        }
+    }
+
+    /**
+     * Find slice for request.
+     * @param line Request line
+     * @return Slice
+     * @throws IOException On error
+     */
+    private Slice slice(final String line) throws IOException {
+        final URI uri = new RequestLineFrom(line).uri();
+        final String path = uri.getPath();
+        final Slice res;
+        if (path.startsWith("/api")) {
+            res = new ArtipieApi(this.settings);
+        } else {
+            res = this.settings.layout(this.vertx).resolve(path);
+        }
+        return new LoggingSlice(Level.INFO, new TrimSlice(res));
     }
 }

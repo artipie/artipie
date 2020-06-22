@@ -23,16 +23,20 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.s3.S3Storage;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.reactivex.core.Vertx;
+import com.artipie.auth.AuthFromEnv;
+import com.artipie.auth.AuthFromYaml;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -41,16 +45,16 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * @since 0.1
  * @checkstyle MethodNameCheck (500 lines)
+ * @todo #187:30min Add a test for layout structure, it can be either `flat` or `org`. If it's
+ *  omitted, it should treated as a `flat` layout. See RepoLayout javadocs for more details.
  */
-@ExtendWith(VertxExtension.class)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class YamlSettingsTest {
 
     @Test
-    public void shouldBuildFileStorageFromSettings(final Vertx vertx) throws Exception {
+    public void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            "meta:\n  storage:\n    type: fs\n    path: /artipie/storage\n",
-            vertx
+            "meta:\n  storage:\n    type: fs\n    path: /artipie/storage\n"
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -59,7 +63,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void shouldBuildS3StorageFromSettings(final Vertx vertx) throws Exception {
+    public void shouldBuildS3StorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
             String.join(
                 "",
@@ -73,8 +77,7 @@ class YamlSettingsTest {
                 "      type: basic\n",
                 "      accessKeyId: ***\n",
                 "      secretAccessKey: ***"
-            ),
-            vertx
+            )
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -82,10 +85,95 @@ class YamlSettingsTest {
         );
     }
 
+    @Test
+    public void shouldCreateAuthFromEnv() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    "meta",
+                    Yaml.createYamlMappingBuilder().add(
+                        "storage",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "fs")
+                            .add("path", "some/path").build()
+                    ).add(
+                        "credentials",
+                        Yaml.createYamlMappingBuilder().add("type", "env").build()
+                    ).build()
+                ).build().toString()
+        );
+        MatcherAssert.assertThat(
+            settings.auth().toCompletableFuture().get(),
+            new IsInstanceOf(AuthFromEnv.class)
+        );
+    }
+
+    @Test
+    public void shouldCreateAuthFromYaml(@TempDir final Path tmp)
+        throws Exception {
+        final String fname = "_cred.yml";
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    "meta",
+                    Yaml.createYamlMappingBuilder().add(
+                        "storage",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "fs")
+                            .add("path", tmp.toString()).build()
+                    ).add(
+                        "credentials",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "file")
+                            .add("path", fname).build()
+                    ).build()
+                ).build().toString()
+        );
+        final Path yaml = tmp.resolve(fname);
+        Files.writeString(
+            yaml,
+            Yaml.createYamlMappingBuilder().add(
+                "credentials",
+                Yaml.createYamlMappingBuilder()
+                    .add(
+                        "john",
+                        Yaml.createYamlMappingBuilder().add("password", "plain:123").build()
+                    ).build()
+            ).build().toString()
+        );
+        MatcherAssert.assertThat(
+            settings.auth().toCompletableFuture().get(),
+            new IsInstanceOf(AuthFromYaml.class)
+        );
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenPathIsNotSet() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    "meta",
+                    Yaml.createYamlMappingBuilder().add(
+                        "storage",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "fs")
+                            .add("path", "some/path").build()
+                    ).add(
+                        "credentials",
+                        Yaml.createYamlMappingBuilder().add("type", "file").build()
+                    ).build()
+                ).toString()
+        );
+        Assertions.assertThrows(
+            RuntimeException.class,
+            () -> settings.auth().toCompletableFuture().get()
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("badYamls")
-    public void shouldFailProvideStorageFromBadYaml(final String yaml, final Vertx vertx) {
-        final YamlSettings settings = new YamlSettings(yaml, vertx);
+    public void shouldFailProvideStorageFromBadYaml(final String yaml) {
+        final YamlSettings settings = new YamlSettings(yaml);
         Assertions.assertThrows(RuntimeException.class, settings::storage);
     }
 

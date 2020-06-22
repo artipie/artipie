@@ -24,9 +24,26 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
+import com.artipie.auth.AuthFromEnv;
+import com.artipie.auth.AuthFromYaml;
+import com.artipie.http.auth.Authentication;
+import com.artipie.http.slice.KeyFromPath;
+import com.artipie.repo.FlatLayout;
+import com.artipie.repo.OrgLayout;
+import com.artipie.repo.RepoLayout;
+import com.jcabi.log.Logger;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
+import io.reactivex.Flowable;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import org.reactivestreams.Publisher;
 
 /**
  * Settings built from YAML.
@@ -36,33 +53,122 @@ import java.io.IOException;
 public final class YamlSettings implements Settings {
 
     /**
+     * Meta section.
+     */
+    private static final String KEY_META = "meta";
+
+    /**
      * YAML file content.
      */
     private final String content;
 
     /**
-     * The Vert.x instance.
-     */
-    private final Vertx vertx;
-
-    /**
      * Ctor.
      * @param content YAML file content.
-     * @param vertx The Vert.x instance.
      */
-    public YamlSettings(final String content, final Vertx vertx) {
+    public YamlSettings(final String content) {
         this.content = content;
-        this.vertx = vertx;
     }
 
     @Override
     public Storage storage() throws IOException {
-        return new YamlStorageSettings(
+        return new YamlStorage(
             Yaml.createYamlInput(this.content)
                 .readYamlMapping()
-                .yamlMapping("meta")
-                .yamlMapping("storage"),
-                this.vertx
+                .yamlMapping(YamlSettings.KEY_META)
+                .yamlMapping("storage")
         ).storage();
+    }
+
+    @Override
+    public CompletionStage<Authentication> auth() throws IOException {
+        final YamlMapping cred = Yaml.createYamlInput(this.content)
+            .readYamlMapping()
+            .yamlMapping(YamlSettings.KEY_META)
+            .yamlMapping("credentials");
+        final CompletionStage<Authentication> res;
+        final String path = "path";
+        if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
+            final KeyFromPath key = new KeyFromPath(cred.string(path));
+            final Storage strg = this.storage();
+            res = strg.exists(key).thenCompose(
+                exists -> {
+                    final CompletionStage<Authentication> auth;
+                    if (exists) {
+                        auth = strg.value(key).thenCompose(
+                            file -> yamlFromPublisher(file).thenApply(AuthFromYaml::new)
+                        );
+                    } else {
+                        auth = CompletableFuture.completedStage(new AuthFromEnv());
+                    }
+                    return auth;
+                }
+            );
+        } else if (YamlSettings.hasTypeFile(cred)) {
+            res = CompletableFuture.failedFuture(
+                new RuntimeException(
+                    "Invalid credentials configuration: type `file` requires `path`!"
+                )
+            );
+        } else {
+            res = CompletableFuture.completedStage(new AuthFromEnv());
+        }
+        return res;
+    }
+
+    @Override
+    public RepoLayout layout(final Vertx vertx) throws IOException {
+        final String layout = Yaml.createYamlInput(this.content)
+            .readYamlMapping()
+            .yamlMapping(YamlSettings.KEY_META)
+            .string("layout");
+        final RepoLayout res;
+        if (layout == null || "flat".equals(layout)) {
+            res = new FlatLayout(this, vertx);
+        } else if ("org".equals(layout)) {
+            res = new OrgLayout(this, vertx);
+        } else {
+            throw new IOException(String.format("Unsupported layout kind: %s", layout));
+        }
+        return res;
+    }
+
+    @Override
+    public YamlMapping meta() throws IOException {
+        return Yaml.createYamlInput(this.content)
+            .readYamlMapping()
+            .yamlMapping(YamlSettings.KEY_META);
+    }
+
+    /**
+     * Check that yaml has `type: file` mapping in the credentials setting.
+     * @param cred Credentials yaml section
+     * @return True if setting is present
+     */
+    private static boolean hasTypeFile(final YamlMapping cred) {
+        return cred != null && "file".equals(cred.string("type"));
+    }
+
+    /**
+     * Create async yaml config from content publisher.
+     * @param pub Flow publisher
+     * @return Completion stage of yaml
+     * @todo #146:30min Extract this method to a class: we have the same method in RepoConfig. After
+     *  extracting use this new class here and in RepoConfig. Do not forget about test.
+     */
+    private static CompletionStage<YamlMapping> yamlFromPublisher(
+        final Publisher<ByteBuffer> pub
+    ) {
+        return Flowable.fromPublisher(pub)
+            .reduce(
+                new StringBuilder(),
+                (acc, buf) -> acc.append(
+                    new String(new Remaining(buf).bytes(), StandardCharsets.UTF_8)
+                )
+            )
+            .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config: %s", yaml))
+            .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
+            .to(SingleInterop.get())
+            .toCompletableFuture();
     }
 }

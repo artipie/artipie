@@ -74,18 +74,7 @@ public final class VertxMain implements Runnable {
 
     @Override
     public void run() {
-        try (VertxSliceServer srv = new VertxSliceServer(this.vertx, this.slice, this.port)) {
-            srv.start();
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    // @checkstyle MagicNumberCheck (1 line)
-                    Thread.sleep(100);
-                } catch (final InterruptedException iox) {
-                    Logger.info(this, "interrupted: %s", iox);
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
+        new VertxSliceServer(this.vertx, this.slice, this.port).start();
     }
 
     /**
@@ -120,13 +109,13 @@ public final class VertxMain implements Runnable {
         new VertxMain(
             new Pie(
                 new YamlSettings(
-                    Files.readString(Path.of(storage), Charset.defaultCharset()),
-                    vertx
+                    Files.readString(Path.of(storage), Charset.defaultCharset())
                 ),
                 vertx
             ),
             vertx,
             port
         ).run();
+        Logger.info(VertxMain.class, "Artipie was started on port %d", port);
     }
 }
