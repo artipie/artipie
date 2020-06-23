@@ -480,7 +480,7 @@ repo:
 ```
 
 Publish a package(whl or tar.gz):
-  * Install twine utility, if you don't do it already.
+  * Install twine utility, if you don't do it already [docs](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives).
 ```bash
 $ python3 -m pip install --user --upgrade twine
 ```
