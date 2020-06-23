@@ -39,6 +39,7 @@ import com.artipie.http.auth.Permissions;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.http.MavenProxySlice;
 import com.artipie.maven.http.MavenSlice;
+import com.artipie.maven.repository.StorageCache;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
 import com.artipie.npm.proxy.NpmProxy;
@@ -173,7 +174,8 @@ public final class SliceFromConfig extends Slice.Wrap {
                             cfg.settings()
                                 .orElseThrow(() -> new IllegalStateException("Repo settings missed"))
                                 .string("remote_uri")
-                        )
+                        ),
+                        new StorageCache(storage)
                     ),
                     prefix
                 );
