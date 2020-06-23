@@ -1,0 +1,62 @@
+{
+  "Publish medium file" : {
+    "transaction" : "Publish medium file",
+    "sampleCount" : 9907,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 35.31553447057636,
+    "minResTime" : 11.0,
+    "maxResTime" : 635.0,
+    "pct1ResTime" : 55.0,
+    "pct2ResTime" : 66.0,
+    "pct3ResTime" : 95.0,
+    "throughput" : 33.08918080313156,
+    "receivedKBytesPerSec" : 1.8418782282993156,
+    "sentKBytesPerSec" : 33891.33131768156
+  },
+  "Publish large file" : {
+    "transaction" : "Publish large file",
+    "sampleCount" : 109,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 1474.7339449541287,
+    "minResTime" : 900.0,
+    "maxResTime" : 2205.0,
+    "pct1ResTime" : 1895.0,
+    "pct2ResTime" : 1970.0,
+    "pct3ResTime" : 2195.3000000000006,
+    "throughput" : 0.3636909627800671,
+    "receivedKBytesPerSec" : 0.020244516482874828,
+    "sentKBytesPerSec" : 23834.938311084024
+  },
+  "Total" : {
+    "transaction" : "Total",
+    "sampleCount" : 174903,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 11.249040896954327,
+    "minResTime" : 1.0,
+    "maxResTime" : 2205.0,
+    "pct1ResTime" : 17.0,
+    "pct2ResTime" : 27.0,
+    "pct3ResTime" : 51.0,
+    "throughput" : 581.6702195942014,
+    "receivedKBytesPerSec" : 32.37812745788035,
+    "sentKBytesPerSec" : 58182.67417862628
+  },
+  "Publish small file" : {
+    "transaction" : "Publish small file",
+    "sampleCount" : 164887,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 8.835590434661285,
+    "minResTime" : 1.0,
+    "maxResTime" : 632.0,
+    "pct1ResTime" : 14.0,
+    "pct2ResTime" : 17.0,
+    "pct3ResTime" : 28.0,
+    "throughput" : 550.767092996456,
+    "receivedKBytesPerSec" : 30.657933887498036,
+    "sentKBytesPerSec" : 682.717858800317
+  }
+}
