@@ -94,7 +94,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                     phost,
                     Integer.parseInt(pport)
                 ),
-                true
+                false
             );
             config.getProxies().add(proxy);
             Logger.info(SliceFromConfig.class, "Added HTTP client proxy: %s", proxy);
