@@ -467,6 +467,19 @@ To pull the image use the following command:
 $ docker pull my-docker.my-company.com/my-image
 ```
 
+### Docker Proxy Repo
+
+Try this `docker-proxy.yaml` file to host a proxy to `mcr.microsoft.com` registry:
+
+```yaml
+repo:
+  type: docker-proxy
+  settings:
+    host: mcr.microsoft.com
+```
+
+Artipie will redirect all pull requests to specified registry.
+
 ### Python repo
 
 Try this `pypi.yaml` file:
