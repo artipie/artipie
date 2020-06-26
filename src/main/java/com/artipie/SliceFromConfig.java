@@ -28,6 +28,8 @@ import com.artipie.asto.Storage;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.http.DockerSlice;
+import com.artipie.docker.proxy.ClientSlice;
+import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
@@ -194,6 +196,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "docker":
                 slice = new DockerSlice(cfg.path(), new AstoDocker(storage));
+                break;
+            case "docker-proxy":
+                final String host = cfg.settings()
+                    .orElseThrow(() -> new IllegalStateException("Repo settings not found"))
+                    .string("host");
+                slice = new DockerSlice(
+                    cfg.path(),
+                    new ProxyDocker(new ClientSlice(SliceFromConfig.HTTP, host))
+                );
                 break;
             default:
                 throw new IllegalStateException(
