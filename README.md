@@ -45,8 +45,7 @@ For example `foo.yaml`:
 
 ```yaml
 repo:
-  type:
-    maven
+  type: maven
   storage:
     type: fs
     path: /var/artipie
