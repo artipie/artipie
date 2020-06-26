@@ -155,7 +155,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new HelmSlice(storage);
                 break;
             case "rpm":
-                slice = new TrimPathSlice(new RpmSlice(storage, permissions, auth), prefix);
+                slice = new TrimPathSlice(
+                    new RpmSlice(
+                        storage, permissions, new BasicIdentities(auth),
+                        new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings())
+                    ), prefix
+                );
                 break;
             case "php":
                 slice = new PhpComposer(cfg.path(), storage);

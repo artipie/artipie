@@ -197,6 +197,11 @@ repo:
   storage:
     type: fs
     path: /var/artipie/centos
+  settings:
+    digest: sha256 # Digest algorithm for rpm packages checksum calculation, sha256 (default) and sha1 are supported
+    naming-policy: sha1 # Naming policy for metadata files: plain (default), sha1 or sha256 prefixed
+    filelists: true # Calculate metadata filelists.xml, true by default
+      
 ```
 
 Put all RPM packages to repository directory: `/var/artipie/centos/centos`.
