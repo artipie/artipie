@@ -21,24 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics;
+package com.artipie.metrics.memory;
+
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * Monotonically increasing cumulative counter.
+ * Tests for {@link InMemoryCounter}.
  *
  * @since 0.6
  */
-public interface Counter {
+class InMemoryCounterTest {
 
-    /**
-     * Add amount to counter value.
-     *
-     * @param amount Amount to be added to counter.
-     */
-    void add(long amount);
+    @Test
+    void shouldBeInitializedWithZero() {
+        MatcherAssert.assertThat(new InMemoryCounter().get(), new IsEqual<>(0L));
+    }
 
-    /**
-     * Increment counter value. Shortcut for <code>add(1)</code>.
-     */
-    void inc();
+    @Test
+    void shouldAddValue() {
+        final InMemoryCounter counter = new InMemoryCounter();
+        final long value = 123L;
+        counter.add(value);
+        MatcherAssert.assertThat(counter.get(), new IsEqual<>(value));
+    }
+
+    @Test
+    void shouldFailAddNegativeValue() {
+        final InMemoryCounter counter = new InMemoryCounter();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> counter.add(-1));
+    }
+
+    @Test
+    void shouldIncrement() {
+        final InMemoryCounter counter = new InMemoryCounter();
+        final int count = 5;
+        IntStream.rangeClosed(1, count).forEach(ignored -> counter.inc());
+        MatcherAssert.assertThat(counter.get(), new IsEqual<>((long) count));
+    }
 }
