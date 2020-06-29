@@ -36,6 +36,7 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Permission;
 import com.artipie.http.auth.SliceAuth;
 import com.artipie.http.rt.RtRule;
+import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
@@ -77,11 +78,11 @@ public final class DashboardSlice extends Slice.Wrap {
                         .map(RpPermissions::new),
                     (auth, perm) -> new SliceAuth(
                         new SliceRoute(
-                            new SliceRoute.Path(
+                            new RtRulePath(
                                 new RtRule.ByPath(Pattern.compile("/(?:[^/.]+)/?")),
                                 new PageSlice(new UserPage(tpl, settings))
                             ),
-                            new SliceRoute.Path(
+                            new RtRulePath(
                                 new RtRule.ByPath(Pattern.compile("/(?:[^/.]+)/(?:[^/.]+)/?")),
                                 new PageSlice(new RepoPage(tpl, settings))
                             )

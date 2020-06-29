@@ -198,7 +198,7 @@ repo:
     path: /var/artipie/centos
   settings:
     digest: sha256 # Digest algorithm for rpm packages checksum calculation, sha256 (default) and sha1 are supported
-    naming-policy: sha1 # Naming policy for metadata files: plain (default), sha1 or sha256 prefixed
+    naming-policy: sha1 # Naming policy for metadata files: plain, sha1 or sha256 (default) prefixed
     filelists: true # Calculate metadata filelists.xml, true by default
       
 ```
