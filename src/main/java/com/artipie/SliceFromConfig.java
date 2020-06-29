@@ -28,6 +28,8 @@ import com.artipie.asto.Storage;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.http.DockerSlice;
+import com.artipie.docker.proxy.ClientSlice;
+import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
@@ -46,7 +48,7 @@ import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.NpmProxyConfig;
 import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
-import com.artipie.pypi.PySlice;
+import com.artipie.pypi.http.PySlice;
 import com.artipie.rpm.http.RpmSlice;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
@@ -195,10 +197,19 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "pypi":
-                slice = new PySlice(cfg.path(), storage);
+                slice = new PySlice(storage, permissions, auth);
                 break;
             case "docker":
                 slice = new DockerSlice(cfg.path(), new AstoDocker(storage));
+                break;
+            case "docker-proxy":
+                final String host = cfg.settings()
+                    .orElseThrow(() -> new IllegalStateException("Repo settings not found"))
+                    .string("host");
+                slice = new DockerSlice(
+                    cfg.path(),
+                    new ProxyDocker(new ClientSlice(SliceFromConfig.HTTP, host))
+                );
                 break;
             default:
                 throw new IllegalStateException(
