@@ -48,7 +48,7 @@ import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.NpmProxyConfig;
 import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
-import com.artipie.pypi.PySlice;
+import com.artipie.pypi.http.PySlice;
 import com.artipie.rpm.http.RpmSlice;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
@@ -192,7 +192,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "pypi":
-                slice = new PySlice(cfg.path(), storage);
+                slice = new PySlice(storage, permissions, auth);
                 break;
             case "docker":
                 slice = new DockerSlice(cfg.path(), new AstoDocker(storage));
