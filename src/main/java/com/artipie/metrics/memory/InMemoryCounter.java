@@ -29,14 +29,14 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * {@link Counter} implementation storing data in memory.
  *
- * @since 0.6
+ * @since 0.8
  */
 final class InMemoryCounter implements Counter {
 
     /**
      * Current counter value.
      */
-    private final AtomicLong value = new AtomicLong();
+    private final AtomicLong counter = new AtomicLong();
 
     @Override
     public void add(final long amount) {
@@ -45,12 +45,12 @@ final class InMemoryCounter implements Counter {
                 String.format("Amount should not be negative: %d", amount)
             );
         }
-        this.value.addAndGet(amount);
+        this.counter.addAndGet(amount);
     }
 
     @Override
     public void inc() {
-        this.value.incrementAndGet();
+        this.counter.incrementAndGet();
     }
 
     /**
@@ -58,7 +58,7 @@ final class InMemoryCounter implements Counter {
      *
      * @return Counter value.
      */
-    public long get() {
-        return this.value.get();
+    public long value() {
+        return this.counter.get();
     }
 }

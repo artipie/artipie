@@ -32,13 +32,13 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link InMemoryCounter}.
  *
- * @since 0.6
+ * @since 0.8
  */
 class InMemoryCounterTest {
 
     @Test
     void shouldBeInitializedWithZero() {
-        MatcherAssert.assertThat(new InMemoryCounter().get(), new IsEqual<>(0L));
+        MatcherAssert.assertThat(new InMemoryCounter().value(), new IsEqual<>(0L));
     }
 
     @Test
@@ -46,7 +46,7 @@ class InMemoryCounterTest {
         final InMemoryCounter counter = new InMemoryCounter();
         final long value = 123L;
         counter.add(value);
-        MatcherAssert.assertThat(counter.get(), new IsEqual<>(value));
+        MatcherAssert.assertThat(counter.value(), new IsEqual<>(value));
     }
 
     @Test
@@ -60,6 +60,6 @@ class InMemoryCounterTest {
         final InMemoryCounter counter = new InMemoryCounter();
         final int count = 5;
         IntStream.rangeClosed(1, count).forEach(ignored -> counter.inc());
-        MatcherAssert.assertThat(counter.get(), new IsEqual<>((long) count));
+        MatcherAssert.assertThat(counter.value(), new IsEqual<>((long) count));
     }
 }
