@@ -21,24 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics;
+package com.artipie.metrics.memory;
+
+import com.artipie.metrics.Counter;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Monotonically increasing cumulative counter.
+ * {@link Counter} implementation storing data in memory.
  *
- * @since 0.6
+ * @since 0.8
  */
-public interface Counter {
+final class InMemoryCounter implements Counter {
 
     /**
-     * Add amount to counter value.
+     * Current counter value.
+     */
+    private final AtomicLong counter = new AtomicLong();
+
+    @Override
+    public void add(final long amount) {
+        if (amount < 0) {
+            throw new IllegalArgumentException(
+                String.format("Amount should not be negative: %d", amount)
+            );
+        }
+        this.counter.addAndGet(amount);
+    }
+
+    @Override
+    public void inc() {
+        this.counter.incrementAndGet();
+    }
+
+    /**
+     * Get counter value.
      *
-     * @param amount Amount to be added to counter.
+     * @return Counter value.
      */
-    void add(long amount);
-
-    /**
-     * Increment counter value. Shortcut for <code>add(1)</code>.
-     */
-    void inc();
+    public long value() {
+        return this.counter.get();
+    }
 }
