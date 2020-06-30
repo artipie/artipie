@@ -108,7 +108,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>0.9.7</version>
+      <version>0.11</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -168,7 +168,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>0.1</version>
+      <version>0.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
