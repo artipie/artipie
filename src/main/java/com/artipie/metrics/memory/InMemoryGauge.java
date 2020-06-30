@@ -28,18 +28,18 @@ import com.artipie.metrics.Gauge;
 /**
  * {@link Gauge} implementation storing data in memory.
  *
- * @since 0.6
+ * @since 0.8
  */
 final class InMemoryGauge implements Gauge {
 
     /**
      * Current value.
      */
-    private volatile long value;
+    private volatile long current;
 
     @Override
     public void set(final long update) {
-        this.value = update;
+        this.current = update;
     }
 
     /**
@@ -47,7 +47,7 @@ final class InMemoryGauge implements Gauge {
      *
      * @return Gauge value.
      */
-    public long get() {
-        return this.value;
+    public long value() {
+        return this.current;
     }
 }

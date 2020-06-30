@@ -25,6 +25,6 @@
 /**
  * Tests for Artipie metrics implementation storing data in memory.
  *
- * @since 0.6
+ * @since 0.8
  */
 package com.artipie.metrics.memory;

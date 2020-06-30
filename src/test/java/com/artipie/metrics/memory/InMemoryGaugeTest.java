@@ -30,13 +30,13 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link InMemoryGauge}.
  *
- * @since 0.6
+ * @since 0.8
  */
 class InMemoryGaugeTest {
 
     @Test
     void shouldBeInitializedWithZero() {
-        MatcherAssert.assertThat(new InMemoryGauge().get(), new IsEqual<>(0L));
+        MatcherAssert.assertThat(new InMemoryGauge().value(), new IsEqual<>(0L));
     }
 
     @Test
@@ -44,6 +44,6 @@ class InMemoryGaugeTest {
         final InMemoryGauge gauge = new InMemoryGauge();
         final long value = 123L;
         gauge.set(value);
-        MatcherAssert.assertThat(gauge.get(), new IsEqual<>(value));
+        MatcherAssert.assertThat(gauge.value(), new IsEqual<>(value));
     }
 }
