@@ -21,24 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics;
+package com.artipie.metrics.memory;
+
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Test;
 
 /**
- * Monotonically increasing cumulative counter.
+ * Tests for {@link InMemoryGauge}.
  *
- * @since 0.6
+ * @since 0.8
  */
-public interface Counter {
+class InMemoryGaugeTest {
 
-    /**
-     * Add amount to counter value.
-     *
-     * @param amount Amount to be added to counter.
-     */
-    void add(long amount);
+    @Test
+    void shouldBeInitializedWithZero() {
+        MatcherAssert.assertThat(new InMemoryGauge().value(), new IsEqual<>(0L));
+    }
 
-    /**
-     * Increment counter value. Shortcut for <code>add(1)</code>.
-     */
-    void inc();
+    @Test
+    void shouldStoreValue() {
+        final InMemoryGauge gauge = new InMemoryGauge();
+        final long value = 123L;
+        gauge.set(value);
+        MatcherAssert.assertThat(gauge.value(), new IsEqual<>(value));
+    }
 }

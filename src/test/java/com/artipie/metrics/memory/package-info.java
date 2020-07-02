@@ -21,24 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics;
 
 /**
- * Monotonically increasing cumulative counter.
+ * Tests for Artipie metrics implementation storing data in memory.
  *
- * @since 0.6
+ * @since 0.8
  */
-public interface Counter {
-
-    /**
-     * Add amount to counter value.
-     *
-     * @param amount Amount to be added to counter.
-     */
-    void add(long amount);
-
-    /**
-     * Increment counter value. Shortcut for <code>add(1)</code>.
-     */
-    void inc();
-}
+package com.artipie.metrics.memory;
