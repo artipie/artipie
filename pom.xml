@@ -113,7 +113,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.22</version>
+      <version>0.23.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -138,7 +138,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>rpm-adapter</artifactId>
-      <version>0.9</version>
+      <version>0.10</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>

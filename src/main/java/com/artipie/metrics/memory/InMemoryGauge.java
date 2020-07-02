@@ -21,24 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics;
+package com.artipie.metrics.memory;
+
+import com.artipie.metrics.Gauge;
 
 /**
- * Monotonically increasing cumulative counter.
+ * {@link Gauge} implementation storing data in memory.
  *
- * @since 0.6
+ * @since 0.8
  */
-public interface Counter {
+final class InMemoryGauge implements Gauge {
 
     /**
-     * Add amount to counter value.
+     * Current value.
+     */
+    private volatile long current;
+
+    @Override
+    public void set(final long update) {
+        this.current = update;
+    }
+
+    /**
+     * Get gauge value.
      *
-     * @param amount Amount to be added to counter.
+     * @return Gauge value.
      */
-    void add(long amount);
-
-    /**
-     * Increment counter value. Shortcut for <code>add(1)</code>.
-     */
-    void inc();
+    public long value() {
+        return this.current;
+    }
 }
