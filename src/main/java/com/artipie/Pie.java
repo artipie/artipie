@@ -33,6 +33,8 @@ import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.LoggingSlice;
+import com.artipie.repo.FlatLayout;
+import com.artipie.repo.OrgLayout;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
@@ -108,6 +110,7 @@ public final class Pie implements Slice {
      * @return Slice
      * @throws IOException On error
      */
+    @SuppressWarnings("PMD.OnlyOneReturn")
     private Slice slice(final String line) throws IOException {
         final URI uri = new RequestLineFrom(line).uri();
         final String path = uri.getPath();
@@ -115,7 +118,15 @@ public final class Pie implements Slice {
         if (path.startsWith("/api")) {
             res = new ArtipieApi(this.settings);
         } else {
-            res = this.settings.layout(this.vertx).resolve(path);
+            final String layout = this.settings.layout();
+            if (layout == null || "flat".equals(layout)) {
+                res = new FlatLayout(this.settings, this.vertx).resolve(path);
+            } else if ("org".equals(layout)) {
+                res = new OrgLayout(this.settings, this.vertx).resolve(path);
+            } else {
+                throw new IOException(String.format("Unsupported layout kind: %s", layout));
+            }
+            return res;
         }
         return new LoggingSlice(Level.INFO, new TrimSlice(res));
     }
