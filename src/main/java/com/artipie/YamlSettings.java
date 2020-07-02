@@ -31,13 +31,9 @@ import com.artipie.auth.AuthFromEnv;
 import com.artipie.auth.AuthFromYaml;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
-import com.artipie.repo.FlatLayout;
-import com.artipie.repo.OrgLayout;
-import com.artipie.repo.RepoLayout;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
-import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -49,6 +45,7 @@ import org.reactivestreams.Publisher;
  * Settings built from YAML.
  *
  * @since 0.1
+ * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class YamlSettings implements Settings {
 
@@ -81,16 +78,27 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public CompletionStage<Authentication> auth() throws IOException {
-        final YamlMapping cred = Yaml.createYamlInput(this.content)
-            .readYamlMapping()
-            .yamlMapping(YamlSettings.KEY_META)
-            .yamlMapping("credentials");
+    @SuppressWarnings("PMD.OnlyOneReturn")
+    public CompletionStage<Authentication> auth() {
+        final YamlMapping cred;
+        try {
+            cred = Yaml.createYamlInput(this.content)
+                .readYamlMapping()
+                .yamlMapping(YamlSettings.KEY_META)
+                .yamlMapping("credentials");
+        } catch (final IOException err) {
+            return CompletableFuture.failedFuture(err);
+        }
         final CompletionStage<Authentication> res;
         final String path = "path";
         if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
+            final Storage strg;
+            try {
+                strg = this.storage();
+            } catch (final IOException err) {
+                return CompletableFuture.failedFuture(err);
+            }
             final KeyFromPath key = new KeyFromPath(cred.string(path));
-            final Storage strg = this.storage();
             res = strg.exists(key).thenCompose(
                 exists -> {
                     final CompletionStage<Authentication> auth;
@@ -117,20 +125,11 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public RepoLayout layout(final Vertx vertx) throws IOException {
-        final String layout = Yaml.createYamlInput(this.content)
+    public String layout() throws IOException {
+        return Yaml.createYamlInput(this.content)
             .readYamlMapping()
             .yamlMapping(YamlSettings.KEY_META)
             .string("layout");
-        final RepoLayout res;
-        if (layout == null || "flat".equals(layout)) {
-            res = new FlatLayout(this, vertx);
-        } else if ("org".equals(layout)) {
-            res = new OrgLayout(this, vertx);
-        } else {
-            throw new IOException(String.format("Unsupported layout kind: %s", layout));
-        }
-        return res;
     }
 
     @Override
