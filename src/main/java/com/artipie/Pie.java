@@ -33,6 +33,8 @@ import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.LoggingSlice;
+import com.artipie.repo.FlatLayout;
+import com.artipie.repo.OrgLayout;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
@@ -85,15 +87,11 @@ public final class Pie implements Slice {
         if (path.equals("/") || parts.length == 0) {
             return new RsWithStatus(RsStatus.NO_CONTENT);
         }
-        if (path.startsWith("/api")) {
-            return new ArtipieApi(this.settings).response(line, headers, body);
-        }
         if (path.startsWith("/css") || path.startsWith("/js")) {
             return StandardRs.NOT_FOUND;
         }
         try {
-            return new LoggingSlice(Level.INFO, this.settings.layout(this.vertx).resolve(path))
-                .response(line, headers, body);
+            return this.slice(line).response(line, headers, body);
         } catch (final IOException err) {
             Logger.error(this, "Failed to read settings layout: %[exception]s", err);
             return new RsWithStatus(
@@ -104,5 +102,32 @@ public final class Pie implements Slice {
                 RsStatus.INTERNAL_ERROR
             );
         }
+    }
+
+    /**
+     * Find slice for request.
+     * @param line Request line
+     * @return Slice
+     * @throws IOException On error
+     */
+    @SuppressWarnings("PMD.OnlyOneReturn")
+    private Slice slice(final String line) throws IOException {
+        final URI uri = new RequestLineFrom(line).uri();
+        final String path = uri.getPath();
+        final Slice res;
+        if (path.startsWith("/api")) {
+            res = new ArtipieApi(this.settings);
+        } else {
+            final String layout = this.settings.layout();
+            if (layout == null || "flat".equals(layout)) {
+                res = new FlatLayout(this.settings, this.vertx).resolve(path);
+            } else if ("org".equals(layout)) {
+                res = new OrgLayout(this.settings, this.vertx).resolve(path);
+            } else {
+                throw new IOException(String.format("Unsupported layout kind: %s", layout));
+            }
+            return res;
+        }
+        return new LoggingSlice(Level.INFO, new TrimSlice(res));
     }
 }

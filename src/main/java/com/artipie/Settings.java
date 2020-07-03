@@ -23,12 +23,10 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
-import com.artipie.repo.FlatLayout;
-import com.artipie.repo.RepoLayout;
-import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.util.concurrent.CompletionStage;
 
@@ -51,17 +49,22 @@ public interface Settings {
      * Provides authorization.
      *
      * @return Authentication instance
-     * @throws IOException On Error
      */
-    CompletionStage<Authentication> auth() throws IOException;
+    CompletionStage<Authentication> auth();
 
     /**
      * Repository layout.
-     * @param vertx Vertx instance
      * @return Repository layout
      * @throws IOException If failet to parse settings
      */
-    RepoLayout layout(Vertx vertx) throws IOException;
+    String layout() throws IOException;
+
+    /**
+     * Artipie meta configuration.
+     * @return Yaml mapping
+     * @throws IOException On error
+     */
+    YamlMapping meta() throws IOException;
 
     /**
      * Fake {@link Settings} using a file storage.
@@ -102,8 +105,13 @@ public interface Settings {
         }
 
         @Override
-        public RepoLayout layout(final Vertx vertx) {
-            return new FlatLayout(this, vertx);
+        public String layout() {
+            return "flat";
+        }
+
+        @Override
+        public YamlMapping meta() {
+            throw new UnsupportedOperationException();
         }
     }
 }

@@ -3,9 +3,6 @@ on:
   create:
     tags:
       - .*
-  push:
-    branches:
-      - .*
 jobs:
   docker-publish:
     runs-on: ubuntu-latest

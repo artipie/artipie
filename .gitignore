@@ -15,4 +15,4 @@ target/
 .project
 .vscode/
 .settings/
-example/storage/data/**
+example/storage/

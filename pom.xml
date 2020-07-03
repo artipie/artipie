@@ -83,7 +83,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.amihaiemil.web</groupId>
       <artifactId>eo-yaml</artifactId>
-      <version>5.0.2</version>
+      <version>5.1.1</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -108,12 +108,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>0.9.7</version>
+      <version>0.11</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.22</version>
+      <version>0.23.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -133,12 +133,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.4.1</version>
+      <version>0.4.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>rpm-adapter</artifactId>
-      <version>0.7</version>
+      <version>0.10.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -168,7 +168,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>0.1</version>
+      <version>0.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -178,7 +178,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>0.2.5</version>
+      <version>0.2.6</version>
     </dependency>
     <dependency>
       <groupId>com.github.jknack</groupId>

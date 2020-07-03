@@ -45,8 +45,7 @@ For example `foo.yaml`:
 
 ```yaml
 repo:
-  type:
-    maven
+  type: maven
   storage:
     type: fs
     path: /var/artipie
@@ -94,6 +93,15 @@ repo:
   storage:
     type: fs
     path: /var/artipie/maven
+  permissions:
+    admin:
+      - upload
+      - download
+    jeff:
+      - upload
+      - download
+    "*":
+      - download
 ```
 
 Add [`<distributionManagement>`](https://maven.apache.org/pom.html#Distribution_Management)
@@ -188,6 +196,11 @@ repo:
   storage:
     type: fs
     path: /var/artipie/centos
+  settings:
+    digest: sha256 # Digest algorithm for rpm packages checksum calculation, sha256 (default) and sha1 are supported
+    naming-policy: sha1 # Naming policy for metadata files: plain, sha1 or sha256 (default) prefixed
+    filelists: true # Calculate metadata filelists.xml, true by default
+      
 ```
 
 Put all RPM packages to repository directory: `/var/artipie/centos/centos`.
@@ -456,6 +469,48 @@ To pull the image use the following command:
 
 ```bash
 $ docker pull my-docker.my-company.com/my-image
+```
+
+### Docker Proxy Repo
+
+Try this `docker-proxy.yaml` file to host a proxy to `mcr.microsoft.com` registry:
+
+```yaml
+repo:
+  type: docker-proxy
+  settings:
+    host: mcr.microsoft.com
+```
+
+Artipie will redirect all pull requests to specified registry.
+
+### Python repo
+
+Try this `pypi.yaml` file:
+
+```yaml
+repo:
+  type: pypi
+  storage:
+    type: fs
+    path: /tmp/artipie/data/python-repo
+```
+
+Publish a package(whl or tar.gz):
+  * Install twine utility, if you don't do it already [docs](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives).
+```bash
+$ python3 -m pip install --user --upgrade twine
+```
+  * build the package, as described in python docs
+  * upload to server with a command
+```bash
+$ python3 -m twine upload --repository-url http://localhost:8080/pypi/ -u user.name -p pass testpkg/dist/*
+```
+
+Install a package:
+
+```bash
+$ pip install --index-url http://localhost:8080/pypi/ testpkg
 ```
 
 ## Additional configuration
