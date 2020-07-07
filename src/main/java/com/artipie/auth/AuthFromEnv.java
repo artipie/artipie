@@ -24,6 +24,7 @@
 package com.artipie.auth;
 
 import com.artipie.http.auth.Authentication;
+import com.jcabi.log.Logger;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -71,8 +72,10 @@ public final class AuthFromEnv implements Authentication {
         // @checkstyle LineLengthCheck (5 lines)
         if (Objects.equals(Objects.requireNonNull(username), this.env.get(AuthFromEnv.ENV_NAME))
             && Objects.equals(Objects.requireNonNull(password), this.env.get(AuthFromEnv.ENV_PASS))) {
+            Logger.info(this, "Successfully authenticated '%s' user", username);
             result = Optional.of(username);
         } else {
+            Logger.info(this, "Failed to authenticate '%s' user", username);
             result = Optional.of("anonymous");
         }
         return result;

@@ -28,6 +28,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.http.auth.Permissions;
+import com.jcabi.log.Logger;
 import java.io.File;
 import java.io.IOException;
 
@@ -36,7 +37,7 @@ import java.io.IOException;
  * on repository yaml configuration file.
  * @since 0.2
  */
-public final class RpPermissions implements Permissions {
+public final class PermissionsYaml implements Permissions {
 
     /**
      * Asterisk wildcard.
@@ -52,7 +53,7 @@ public final class RpPermissions implements Permissions {
      * Ctor.
      * @param conf Config file
      */
-    public RpPermissions(final File conf) {
+    public PermissionsYaml(final File conf) {
         this(readYaml(conf));
     }
 
@@ -60,15 +61,21 @@ public final class RpPermissions implements Permissions {
      * Ctor.
      * @param yaml Configuration yaml
      */
-    public RpPermissions(final YamlMapping yaml) {
+    public PermissionsYaml(final YamlMapping yaml) {
         this.yaml = yaml;
     }
 
     @Override
     public boolean allowed(final String name, final String action) {
         final YamlMapping all = this.yaml.yamlMapping("permissions");
-        return check(all.yamlSequence(name), action)
-            || check(all.yamlSequence(RpPermissions.WILDCARD), action);
+        final boolean res = check(all.yamlSequence(name), action)
+            || check(all.yamlSequence(PermissionsYaml.WILDCARD), action);
+        if (res) {
+            Logger.info(this, "Operation '%s' allowed for '%s'", action, name);
+        } else {
+            Logger.info(this, "Operation '%s' denied for '%s'", action, name);
+        }
+        return res;
     }
 
     /**
@@ -92,7 +99,7 @@ public final class RpPermissions implements Permissions {
      */
     private static boolean check(final YamlSequence seq, final String action) {
         return seq != null && seq.values().stream().map(node -> Scalar.class.cast(node).value())
-            .anyMatch(item -> item.equals(action) || item.equals(RpPermissions.WILDCARD));
+            .anyMatch(item -> item.equals(action) || item.equals(PermissionsYaml.WILDCARD));
     }
 
 }

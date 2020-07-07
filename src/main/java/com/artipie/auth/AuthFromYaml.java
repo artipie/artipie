@@ -25,6 +25,7 @@ package com.artipie.auth;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.auth.Authentication;
+import com.jcabi.log.Logger;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,6 +85,11 @@ public final class AuthFromYaml implements Authentication {
                 }
             }
         }
+        if (res.isEmpty()) {
+            Logger.info(this, "Failed to authenticate '%s' user", user);
+        } else {
+            Logger.info(this, "Successfully authenticated '%s' user", user);
+        }
         return res;
     }
 
@@ -95,8 +101,8 @@ public final class AuthFromYaml implements Authentication {
      * @return True if passwords are the same
      */
     private static boolean check(final String stored, final String type, final String given) {
-        return type.equals("sha256") && DigestUtils.sha256Hex(given).equals(stored)
-            || given.equals(stored);
+        return type.equals("sha256") && DigestUtils.sha256Hex(given)
+            .equals(stored) || given.equals(stored);
     }
 
     /**
