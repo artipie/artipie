@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @since 0.8
  */
-final class InMemoryCounter implements Counter {
+public final class InMemoryCounter implements Counter {
 
     /**
      * Current counter value.

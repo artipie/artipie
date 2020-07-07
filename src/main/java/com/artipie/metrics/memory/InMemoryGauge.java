@@ -30,7 +30,7 @@ import com.artipie.metrics.Gauge;
  *
  * @since 0.8
  */
-final class InMemoryGauge implements Gauge {
+public final class InMemoryGauge implements Gauge {
 
     /**
      * Current value.

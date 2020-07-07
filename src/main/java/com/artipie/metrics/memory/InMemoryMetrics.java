@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentMap;
  *  and store it. `InMemoryMetrics.gauges()` method should be added
  *  to create snapshot of existing gauges. Implementations are expected to be similar to counters.
  */
-final class InMemoryMetrics implements Metrics {
+public final class InMemoryMetrics implements Metrics {
 
     /**
      * Counters by name.
