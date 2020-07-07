@@ -286,8 +286,8 @@ repo:
     path: /tmp/artipie/data/go
   permissions:
     admin:
-      - \*
-    \*:
+      - "*"
+    "*":
       - download
 ```
 
