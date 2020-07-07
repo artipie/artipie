@@ -28,7 +28,6 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.http.auth.Permissions;
-import com.jcabi.log.Logger;
 import java.io.File;
 import java.io.IOException;
 
@@ -68,14 +67,8 @@ public final class YamlPermissions implements Permissions {
     @Override
     public boolean allowed(final String name, final String action) {
         final YamlMapping all = this.yaml.yamlMapping("permissions");
-        final boolean res = check(all.yamlSequence(name), action)
+        return check(all.yamlSequence(name), action)
             || check(all.yamlSequence(YamlPermissions.WILDCARD), action);
-        if (res) {
-            Logger.info(this, "Operation '%s' allowed for '%s'", action, name);
-        } else {
-            Logger.info(this, "Operation '%s' denied for '%s'", action, name);
-        }
-        return res;
     }
 
     /**
