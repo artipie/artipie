@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.llorllale.cactoos.matchers.MatcherOf;
 
 /**
- * Test for {@link PermissionsYaml}.
+ * Test for {@link YamlPermissions}.
  * @since 0.2
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -48,9 +48,9 @@ class RpPermissionsTest {
     void johnCanDownloadDeployAndDelete() {
         final String uname = "John";
         MatcherAssert.assertThat(
-            new PermissionsYaml(new File(RpPermissionsTest.CONF_YAML)),
-            new AllOf<PermissionsYaml>(
-                new ListOf<org.hamcrest.Matcher<? super PermissionsYaml>>(
+            new YamlPermissions(new File(RpPermissionsTest.CONF_YAML)),
+            new AllOf<YamlPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
                     new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "delete"))),
                     new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "deploy"))),
                     new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "download"))),
@@ -64,9 +64,9 @@ class RpPermissionsTest {
     void janeCanDownloadAndDeploy() {
         final String uname = "Jane";
         MatcherAssert.assertThat(
-            new PermissionsYaml(new File(RpPermissionsTest.CONF_YAML)),
-            new AllOf<PermissionsYaml>(
-                new ListOf<org.hamcrest.Matcher<? super PermissionsYaml>>(
+            new YamlPermissions(new File(RpPermissionsTest.CONF_YAML)),
+            new AllOf<YamlPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
                     new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "deploy"))),
                     new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "download"))),
                     new MatcherOf<>(new ProcOf<>(perm -> !perm.allowed(uname, "install"))),
@@ -79,7 +79,7 @@ class RpPermissionsTest {
     @Test
     void anyoneCanDownload() {
         MatcherAssert.assertThat(
-            new PermissionsYaml(new File(RpPermissionsTest.CONF_YAML))
+            new YamlPermissions(new File(RpPermissionsTest.CONF_YAML))
                 .allowed("anyone", "download"),
             new IsEqual<>(true)
         );
@@ -89,9 +89,9 @@ class RpPermissionsTest {
     void adminCanDoAnything() {
         final String uname = "admin";
         MatcherAssert.assertThat(
-            new PermissionsYaml(new File(RpPermissionsTest.CONF_YAML)),
-            new AllOf<PermissionsYaml>(
-                new ListOf<org.hamcrest.Matcher<? super PermissionsYaml>>(
+            new YamlPermissions(new File(RpPermissionsTest.CONF_YAML)),
+            new AllOf<YamlPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
                     new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "delete"))),
                     new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "deploy"))),
                     new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "download"))),

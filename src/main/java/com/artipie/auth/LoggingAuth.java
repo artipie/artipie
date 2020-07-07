@@ -21,60 +21,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package com.artipie.auth;
 
 import com.artipie.http.auth.Authentication;
-import java.util.Map;
-import java.util.Objects;
+import com.jcabi.log.Logger;
 import java.util.Optional;
+import java.util.logging.Level;
 
 /**
- * Authentication based on environment variables.
- * @since 0.3
+ * Loggin implementation of {@link LoggingAuth}.
+ * @since 0.9
  */
-public final class AuthFromEnv implements Authentication {
+public final class LoggingAuth implements Authentication {
 
     /**
-     * Environment name for user.
+     * Origin authentication.
      */
-    private static final String ENV_NAME = "ARTIPIE_USER_NAME";
+    private final Authentication origin;
 
     /**
-     * Environment name for password.
+     * Log level.
      */
-    private static final String ENV_PASS = "ARTIPIE_USER_PASS";
+    private final Level level;
 
     /**
-     * Environment variables.
+     * Decorates {@link Authentication} with {@code INFO} logger.
+     * @param origin Authentication
      */
-    private final Map<String, String> env;
-
-    /**
-     * Default ctor with system environment.
-     */
-    public AuthFromEnv() {
-        this(System.getenv());
+    public LoggingAuth(final Authentication origin) {
+        this(origin, Level.INFO);
     }
 
     /**
-     * Primary ctor.
-     * @param env Environment
+     * Decorates {@link Authentication} with logger.
+     * @param origin Origin auth
+     * @param level Log level
      */
-    public AuthFromEnv(final Map<String, String> env) {
-        this.env = env;
+    public LoggingAuth(final Authentication origin, final Level level) {
+        this.origin = origin;
+        this.level = level;
     }
 
     @Override
-    @SuppressWarnings("PMD.OnlyOneReturn")
     public Optional<String> user(final String username, final String password) {
-        final Optional<String> result;
-        // @checkstyle LineLengthCheck (5 lines)
-        if (Objects.equals(Objects.requireNonNull(username), this.env.get(AuthFromEnv.ENV_NAME))
-            && Objects.equals(Objects.requireNonNull(password), this.env.get(AuthFromEnv.ENV_PASS))) {
-            result = Optional.of(username);
+        final Optional<String> res = this.origin.user(username, password);
+        if (res.isEmpty()) {
+            Logger.log(this.level, this.origin, "Failed to authenticate '%s' user", username);
         } else {
-            result = Optional.of("anonymous");
+            Logger.log(this.level, this.origin, "Successfully authenticated '%s' user", username);
         }
-        return result;
+        return res;
     }
 }
+

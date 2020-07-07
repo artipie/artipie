@@ -37,7 +37,7 @@ import java.io.IOException;
  * on repository yaml configuration file.
  * @since 0.2
  */
-public final class PermissionsYaml implements Permissions {
+public final class YamlPermissions implements Permissions {
 
     /**
      * Asterisk wildcard.
@@ -53,7 +53,7 @@ public final class PermissionsYaml implements Permissions {
      * Ctor.
      * @param conf Config file
      */
-    public PermissionsYaml(final File conf) {
+    public YamlPermissions(final File conf) {
         this(readYaml(conf));
     }
 
@@ -61,7 +61,7 @@ public final class PermissionsYaml implements Permissions {
      * Ctor.
      * @param yaml Configuration yaml
      */
-    public PermissionsYaml(final YamlMapping yaml) {
+    public YamlPermissions(final YamlMapping yaml) {
         this.yaml = yaml;
     }
 
@@ -69,7 +69,7 @@ public final class PermissionsYaml implements Permissions {
     public boolean allowed(final String name, final String action) {
         final YamlMapping all = this.yaml.yamlMapping("permissions");
         final boolean res = check(all.yamlSequence(name), action)
-            || check(all.yamlSequence(PermissionsYaml.WILDCARD), action);
+            || check(all.yamlSequence(YamlPermissions.WILDCARD), action);
         if (res) {
             Logger.info(this, "Operation '%s' allowed for '%s'", action, name);
         } else {
@@ -99,7 +99,7 @@ public final class PermissionsYaml implements Permissions {
      */
     private static boolean check(final YamlSequence seq, final String action) {
         return seq != null && seq.values().stream().map(node -> Scalar.class.cast(node).value())
-            .anyMatch(item -> item.equals(action) || item.equals(PermissionsYaml.WILDCARD));
+            .anyMatch(item -> item.equals(action) || item.equals(YamlPermissions.WILDCARD));
     }
 
 }

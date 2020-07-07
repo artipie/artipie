@@ -25,7 +25,6 @@ package com.artipie.auth;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.auth.Authentication;
-import com.jcabi.log.Logger;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,11 +83,6 @@ public final class AuthFromYaml implements Authentication {
                     }
                 }
             }
-        }
-        if (res.isEmpty()) {
-            Logger.info(this, "Failed to authenticate '%s' user", user);
-        } else {
-            Logger.info(this, "Successfully authenticated '%s' user", user);
         }
         return res;
     }
