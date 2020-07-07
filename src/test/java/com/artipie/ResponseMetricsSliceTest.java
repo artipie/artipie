@@ -57,18 +57,30 @@ class ResponseMetricsSliceTest {
     @Test
     public void shouldReportSuccessResponse() {
         this.send(RqMethod.GET, new RsWithStatus(RsStatus.OK));
+        this.send(RqMethod.GET, new RsWithStatus(RsStatus.OK));
         MatcherAssert.assertThat(
-            this.metrics.counter("get.success").value(),
-            new IsEqual<>(1L)
+            this.metrics.counter("http.response.get.success").value(),
+            new IsEqual<>(2L)
         );
     }
 
     @Test
-    public void shouldReportErrorResponse() {
+    public void shouldReportInternalErrorResponse() {
+        this.send(RqMethod.POST, new RsWithStatus(RsStatus.INTERNAL_ERROR));
         this.send(RqMethod.POST, new RsWithStatus(RsStatus.INTERNAL_ERROR));
         MatcherAssert.assertThat(
-            this.metrics.counter("post.error").value(),
-            new IsEqual<>(1L)
+            this.metrics.counter("http.response.post.error").value(),
+            new IsEqual<>(2L)
+        );
+    }
+
+    @Test
+    public void shouldReportNotFoundResponse() {
+        this.send(RqMethod.HEAD, new RsWithStatus(RsStatus.NOT_FOUND));
+        this.send(RqMethod.HEAD, new RsWithStatus(RsStatus.NOT_FOUND));
+        MatcherAssert.assertThat(
+            this.metrics.counter("http.response.head.error").value(),
+            new IsEqual<>(2L)
         );
     }
 
