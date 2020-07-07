@@ -25,7 +25,9 @@ package com.artipie;
 
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.headers.Authorization;
 import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.metrics.Metrics;
 import java.nio.ByteBuffer;
@@ -77,7 +79,7 @@ public final class ResponseMetricsSlice implements Slice {
         final Publisher<ByteBuffer> rqbody) {
         return connection -> this.origin.response(rqline, rqheaders, rqbody).send(
             (rsstatus, rsheaders, rsbody) -> {
-                this.report(rqline, rsstatus);
+                this.report(rqline, rqheaders, rsstatus);
                 return connection.accept(rsstatus, rsheaders, rsbody);
             }
         );
@@ -87,13 +89,38 @@ public final class ResponseMetricsSlice implements Slice {
      * Report response to metrics.
      *
      * @param rqline Request line.
+     * @param rqheaders Request headers.
      * @param rsstatus Response status.
      */
-    private void report(final String rqline, final RsStatus rsstatus) {
+    private void report(
+        final String rqline,
+        final Iterable<Map.Entry<String, String>> rqheaders,
+        final RsStatus rsstatus
+    ) {
         if (rsstatus.code().matches("^[45].+$")) {
             this.report(rqline, "error");
+            if (rsstatus.equals(RsStatus.UNAUTHORIZED)) {
+                this.reportUnauthorized(rqline, rqheaders);
+            }
         } else {
             this.report(rqline, "success");
+        }
+    }
+
+    /**
+     * Report unauthorized response to metrics.
+     *
+     * @param rqline Request line.
+     * @param rqheaders Request headers.
+     */
+    private void reportUnauthorized(
+        final String rqline,
+        final Iterable<Map.Entry<String, String>> rqheaders
+    ) {
+        if (new RqHeaders(rqheaders, Authorization.NAME).isEmpty()) {
+            this.report(rqline, "error.no-auth");
+        } else {
+            this.report(rqline, "error.bad-auth");
         }
     }
 
