@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link InMemoryMetrics}.
  *
- * @since 0.8
+ * @since 0.9
  */
 class InMemoryMetricsTest {
 
