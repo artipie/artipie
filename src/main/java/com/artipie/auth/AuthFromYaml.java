@@ -40,6 +40,10 @@ import org.apache.commons.codec.digest.DigestUtils;
  *  This configuration would mean that Joe should use his email to login instead of username. Do not
  *  forget to validate credentials, logins should be unique.
  */
+@SuppressWarnings({
+    "PMD.AvoidDeeplyNestedIfStmts",
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.ConfusingTernary"})
 public final class AuthFromYaml implements Authentication {
 
     /**
@@ -64,13 +68,35 @@ public final class AuthFromYaml implements Authentication {
     public Optional<String> user(final String user, final String pass) {
         final YamlMapping users = this.cred.yamlMapping("credentials");
         Optional<String> res = Optional.empty();
+        //@checkstyle NestedIfDepthCheck (10 lines)
         if (users != null && users.yamlMapping(user) != null) {
             final String stored = users.yamlMapping(user).string("pass");
-            if (stored != null && check(stored, pass)) {
-                res = Optional.of(user);
+            if (stored != null) {
+                final String type = users.yamlMapping(user).string("type");
+                if (type != null) {
+                    if (check(stored, type, pass)) {
+                        res = Optional.of(user);
+                    }
+                } else {
+                    if (check(stored, pass)) {
+                        res = Optional.of(user);
+                    }
+                }
             }
         }
         return res;
+    }
+
+    /**
+     * Checks stored password against the given one with type.
+     * @param stored Password from settings
+     * @param type Type of Password from settings
+     * @param given Password to check
+     * @return True if passwords are the same
+     */
+    private static boolean check(final String stored, final String type, final String given) {
+        return type.equals("sha256") && DigestUtils.sha256Hex(given).equals(stored)
+            || given.equals(stored);
     }
 
     /**
@@ -89,5 +115,4 @@ public final class AuthFromYaml implements Authentication {
         }
         return res;
     }
-
 }

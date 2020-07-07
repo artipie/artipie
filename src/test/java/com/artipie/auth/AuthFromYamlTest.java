@@ -35,8 +35,11 @@ import org.junit.jupiter.api.Test;
  * Test for {@link AuthFromYaml}.
  * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class AuthFromYamlTest {
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.TooManyMethods",
+    "PMD.UseObjectForClearerAPI"})
+final class AuthFromYamlTest {
 
     @Test
     void authorisesByPlainPassword() {
@@ -131,6 +134,152 @@ class AuthFromYamlTest {
             ).user(user, pass).isEmpty(),
             new IsEqual<>(true)
         );
+    }
+
+    @Test
+    void authorisesByPlainPasswordWithSimplerSettings() {
+        final String user = "john";
+        final String pass = "qwerty";
+        MatcherAssert.assertThat(
+            new AuthFromYaml(
+                AuthFromYamlTest.simpleSettings(
+                    user,
+                    "plain",
+                    pass
+                )
+            ).user(user, pass).get(),
+            new IsEqual<>(user)
+        );
+    }
+
+    @Test
+    void authorisesByHashedPasswordWithSimplerSettings() {
+        final String user = "bob";
+        final String pass = "123";
+        MatcherAssert.assertThat(
+            new AuthFromYaml(
+                AuthFromYamlTest.simpleSettings(
+                    user,
+                    "sha256",
+                    DigestUtils.sha256Hex(pass)
+                )
+            ).user(user, pass).get(),
+            new IsEqual<>(user)
+        );
+    }
+
+    @Test
+    void doesNotAuthoriseByWrongPasswordWithSimplerSettings() {
+        final String user = "mark";
+        MatcherAssert.assertThat(
+            new AuthFromYaml(
+                AuthFromYamlTest.simpleSettings(
+                    user,
+                    "plain",
+                    "123"
+                )
+            ).user(user, "456").isEmpty(),
+            new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    void doesNotAuthoriseByWrongLoginWithSimplerSettings() {
+        final String pass = "abc";
+        MatcherAssert.assertThat(
+            new AuthFromYaml(
+                AuthFromYamlTest.simpleSettings(
+                    "ann",
+                    "sha256",
+                    DigestUtils.sha256Hex(pass)
+                )
+            ).user("anna", pass).isEmpty(),
+            new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    @Disabled
+    void authorisesByAlternativeLoginWithSimplerSettings() {
+        final String user = "mary";
+        final String pass = "def";
+        final String login = "mary@example.com";
+        MatcherAssert.assertThat(
+            new AuthFromYaml(
+                AuthFromYamlTest.simpleSettings(
+                    user,
+                    "sha256",
+                    DigestUtils.sha256Hex(pass),
+                    login
+                )
+            ).user(login, pass).get(),
+            new IsEqual<>(user)
+        );
+    }
+
+    @Test
+    @Disabled
+    void doesNotAuthoriseByMainLoginWithSimplerSettings() {
+        final String user = "sasha";
+        final String pass = "999";
+        MatcherAssert.assertThat(
+            new AuthFromYaml(
+                AuthFromYamlTest.simpleSettings(
+                    user,
+                    "sha256",
+                    DigestUtils.sha256Hex(pass),
+                    "sasha@example.com"
+                )
+            ).user(user, pass).isEmpty(),
+            new IsEqual<>(true)
+        );
+    }
+
+    /**
+     * Composes yaml settings.
+     * @param user User
+     * @param type Password type
+     * @param pass Password
+     * @return Settings
+     */
+    private static YamlMapping simpleSettings(
+        final String user,
+        final String type,
+        final String pass) {
+        return Yaml.createYamlMappingBuilder().add(
+            "credentials",
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    user,
+                    Yaml.createYamlMappingBuilder()
+                    .add("type", type)
+                    .add("pass", pass).build()
+                ).build()
+        ).build();
+    }
+
+    /**
+     * Composes yaml settings.
+     * @param user User
+     * @param type Password type
+     * @param pass Password
+     * @param login Alternative login
+     * @return Settings
+     * @checkstyle ParameterNumberCheck (3 lines)
+     */
+    private static YamlMapping simpleSettings(final String user, final String type,
+        final String pass, final String login) {
+        return Yaml.createYamlMappingBuilder().add(
+            "credentials",
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    user,
+                    Yaml.createYamlMappingBuilder()
+                    .add("type", type)
+                    .add("pass", pass)
+                    .add("login", login).build()
+                ).build()
+        ).build();
     }
 
     /**

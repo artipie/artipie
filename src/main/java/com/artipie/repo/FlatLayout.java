@@ -38,7 +38,6 @@ import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
 import org.cactoos.scalar.Unchecked;
 
 /**
@@ -54,11 +53,6 @@ import org.cactoos.scalar.Unchecked;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class FlatLayout implements RepoLayout {
-
-    /**
-     * Repository path prefix.
-     */
-    private static final Pattern REPO_PREF = Pattern.compile("/(?:[^/.]+)(/.*)");
 
     /**
      * Artipie settings.
@@ -104,18 +98,18 @@ public final class FlatLayout implements RepoLayout {
                         final Slice slice;
                         if (exist) {
                             slice = new AsyncSlice(
-                                StorageAliases.find(storage, key.parent().get()).thenCompose(
-                                    aliases -> storage.value(key).thenCompose(
-                                        config -> RepoConfig.fromPublisher(
-                                            aliases, new Key.From(repo), config
+                                StorageAliases.find(storage, key.parent().orElseThrow())
+                                    .thenCompose(
+                                        aliases -> storage.value(key).thenCompose(
+                                            config -> RepoConfig.fromPublisher(
+                                                aliases, new Key.From(repo), config
+                                            ).thenApply(
+                                                cfg -> new SliceFromConfig(
+                                                    this.settings, cfg, this.vertx, aliases
+                                                )
+                                            )
                                         )
                                     )
-                                ).thenCombine(
-                                    new Unchecked<>(this.settings::auth).value(),
-                                    (config, auth) -> new SliceFromConfig(
-                                        config, this.vertx, auth, FlatLayout.REPO_PREF
-                                    )
-                                )
                             );
                         } else {
                             slice = new SliceSimple(

@@ -113,7 +113,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.22</version>
+      <version>0.23.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -123,7 +123,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>files-adapter</artifactId>
-      <version>0.3</version>
+      <version>0.3.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -133,12 +133,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.4.4</version>
+      <version>0.4.5</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>rpm-adapter</artifactId>
-      <version>0.10</version>
+      <version>0.10.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
