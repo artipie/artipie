@@ -90,14 +90,6 @@ public final class RepoConfig {
     }
 
     /**
-     * Repository path.
-     * @return Async string of path
-     */
-    public String path() {
-        return this.string("path");
-    }
-
-    /**
      * Repository URL.
      *
      * @return Async string of URL

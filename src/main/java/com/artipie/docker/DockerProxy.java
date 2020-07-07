@@ -124,6 +124,6 @@ public final class DockerProxy implements Slice {
                 }
             )
             .orElse(proxy);
-        return new DockerSlice(this.cfg.path(), docker);
+        return new DockerSlice("", docker);
     }
 }

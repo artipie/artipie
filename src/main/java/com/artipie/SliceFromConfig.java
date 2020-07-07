@@ -63,7 +63,6 @@ import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
@@ -161,30 +160,27 @@ public final class SliceFromConfig extends Slice.Wrap {
         final Slice slice;
         final Storage storage = cfg.storage();
         final Permissions permissions = new LoggingPermissions(cfg.permissions());
-        final Pattern prefix = new PathPattern(settings).pattern();
         switch (cfg.type()) {
             case "file":
-                slice = new TrimPathSlice(new FilesSlice(storage, permissions, auth), prefix);
+                slice = new FilesSlice(storage, permissions, auth);
                 break;
             case "file-proxy":
-                slice = new TrimPathSlice(
-                    new FileProxySlice(
-                        new RpRemote(
-                            SliceFromConfig.HTTP,
-                            URI.create(
-                                cfg.settings()
-                                    .orElseThrow(
-                                        () -> new IllegalStateException("Repo settings missed")
-                                    ).string("remote_uri")
-                            ),
-                            new com.artipie.files.StorageCache(storage)
-                        )
-                    ), prefix
+                slice = new FileProxySlice(
+                    new RpRemote(
+                        SliceFromConfig.HTTP,
+                        URI.create(
+                            cfg.settings()
+                                .orElseThrow(
+                                    () -> new IllegalStateException("Repo settings missed")
+                                ).string("remote_uri")
+                        ),
+                        new com.artipie.files.StorageCache(storage)
+                    )
                 );
                 break;
             case "npm":
                 slice = new NpmSlice(
-                    cfg.path(),
+                    "",
                     new Npm(storage),
                     storage,
                     permissions,
@@ -195,67 +191,56 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new GemSlice(storage, null);
                 break;
             case "helm":
-                slice = new TrimPathSlice(
-                    new HelmSlice(
-                        storage,
-                        cfg.path(),
-                        permissions,
-                        new BasicIdentities(auth)
-                    ),
-                    prefix
+                slice = new HelmSlice(
+                    storage,
+                    "",
+                    permissions,
+                    new BasicIdentities(auth)
                 );
                 break;
             case "rpm":
-                slice = new TrimPathSlice(
-                    new RpmSlice(
-                        storage, permissions, new BasicIdentities(auth),
-                        new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings())
-                    ), prefix
+                slice = new RpmSlice(
+                    storage, permissions, new BasicIdentities(auth),
+                    new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings())
                 );
                 break;
             case "php":
-                slice = new PhpComposer(cfg.path(), storage);
+                slice = new PhpComposer("/php", storage);
                 break;
             case "nuget":
-                slice = new NuGet(cfg.url(), cfg.path(), storage, permissions, auth);
+                slice = new NuGet(cfg.url(), "/nuget", storage, permissions, auth);
                 break;
             case "maven":
-                slice = new TrimPathSlice(new MavenSlice(storage, permissions, auth), prefix);
+                slice = new MavenSlice(storage, permissions, auth);
                 break;
             case "maven-proxy":
-                slice = new TrimPathSlice(
-                    new MavenProxySlice(
-                        SliceFromConfig.HTTP,
-                        URI.create(
-                            cfg.settings()
-                                .orElseThrow(() -> new IllegalStateException("Repo settings missed"))
-                                .string("remote_uri")
-                        ),
-                        new StorageCache(storage)
+                slice = new MavenProxySlice(
+                    SliceFromConfig.HTTP,
+                    URI.create(
+                        cfg.settings()
+                            .orElseThrow(() -> new IllegalStateException("Repo settings missed"))
+                            .string("remote_uri")
                     ),
-                    prefix
+                    new StorageCache(storage)
                 );
                 break;
             case "maven-group":
-                slice = new TrimPathSlice(
-                    new GroupSlice(
-                        cfg.settings().orElseThrow().yamlSequence("repositories").values()
-                            .stream().map(node -> node.asScalar().value())
-                            .map(
-                                name -> {
-                                    try {
-                                        return new AsyncSlice(
-                                            settings.storage().value(new Key.From(String.format("%s.yaml", name)))
-                                                .thenCompose(data -> RepoConfig.fromPublisher(aliases, new KeyFromPath(name), data))
-                                                .thenApply(sub -> new SliceFromConfig(settings, sub, aliases))
-                                        );
-                                    } catch (final IOException err) {
-                                        throw new UncheckedIOException(err);
-                                    }
+                slice = new GroupSlice(
+                    cfg.settings().orElseThrow().yamlSequence("repositories").values()
+                        .stream().map(node -> node.asScalar().value())
+                        .map(
+                            name -> {
+                                try {
+                                    return new AsyncSlice(
+                                        settings.storage().value(new Key.From(String.format("%s.yaml", name)))
+                                            .thenCompose(data -> RepoConfig.fromPublisher(aliases, new KeyFromPath(name), data))
+                                            .thenApply(sub -> new SliceFromConfig(settings, sub, aliases))
+                                    );
+                                } catch (final IOException err) {
+                                    throw new UncheckedIOException(err);
                                 }
-                            ).collect(Collectors.toList())
-                    ),
-                    prefix
+                            }
+                        ).collect(Collectors.toList())
                 );
                 break;
             case "go":
@@ -263,14 +248,14 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "npm-proxy":
                 slice = new NpmProxySlice(
-                    cfg.path(),
+                    "",
                     new NpmProxy(
                         new NpmProxyConfig(cfg.settings().orElseThrow()), Vertx.vertx(), storage
                     )
                 );
                 break;
             case "pypi":
-                slice = new TrimPathSlice(new PySlice(storage, permissions, auth), prefix);
+                slice = new PySlice(storage, permissions, auth);
                 break;
             case "docker":
                 slice = new DockerRoutingSlice.Reverted(
@@ -285,8 +270,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                     String.format("Unsupported repository type '%s", cfg.type())
                 );
         }
+        final Slice trimmed = new TrimPathSlice(
+            slice,
+            new PathPattern(settings).pattern()
+        );
         return cfg.contentLengthMax()
-            .<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
-            .orElse(slice);
+            .<Slice>map(limit -> new ContentLengthRestriction(trimmed, limit))
+            .orElse(trimmed);
     }
 }

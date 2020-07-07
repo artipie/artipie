@@ -1,6 +1,5 @@
 repo:
   type: maven
-  path: mvn
   content-length-max: 123
   storage:
     type: fs
