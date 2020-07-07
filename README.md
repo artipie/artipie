@@ -73,7 +73,7 @@ Try this `repo.yaml` file:
 
 ```yaml
 repo:
-  type: rpm
+  type: file
   storage:
     type: fs
     path: /var/artipie/storage
