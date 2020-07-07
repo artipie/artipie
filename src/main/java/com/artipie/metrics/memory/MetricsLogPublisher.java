@@ -23,12 +23,12 @@
  */
 package com.artipie.metrics.memory;
 
-import com.jcabi.log.Logger;
 import java.time.Duration;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
 
 /**
  * Periodic publisher of {@link InMemoryMetrics} to log.
@@ -38,8 +38,17 @@ import java.util.concurrent.TimeUnit;
  *  `InMemoryMetrics` contain gauges along counters.
  *  Gauges should be published the same way as counters.
  *  Should be done after https://github.com/artipie/artipie/issues/267
+ * @todo #231:30min Add tests for `MetricsLogPublisher`.
+ *  It should be tested that the publisher runs periodically, collects fresh metrics data
+ *  and logs the data as expected.
  */
 public class MetricsLogPublisher {
+
+    /**
+     * Logger to use for publishing.
+     */
+    @SuppressWarnings("PMD.LoggerIsNotStaticFinal")
+    private final Logger logger;
 
     /**
      * Metrics for publishing.
@@ -54,10 +63,16 @@ public class MetricsLogPublisher {
     /**
      * Ctor.
      *
+     * @param logger Logger to use for publishing.
      * @param metrics Metrics for publishing.
      * @param period Period.
      */
-    public MetricsLogPublisher(final InMemoryMetrics metrics, final Duration period) {
+    public MetricsLogPublisher(
+        final Logger logger,
+        final InMemoryMetrics metrics,
+        final Duration period
+    ) {
+        this.logger = logger;
         this.metrics = metrics;
         this.period = period;
     }
@@ -87,6 +102,6 @@ public class MetricsLogPublisher {
                 .append(": ")
                 .append(entry.getValue().value());
         }
-        Logger.info(this.metrics, message.toString());
+        this.logger.info(message.toString());
     }
 }
