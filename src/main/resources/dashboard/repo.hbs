@@ -10,7 +10,7 @@
 
 <form id="config-form" action="/api/repos/{{user}}" method="POST">
   <fieldset>
-    <textarea id="repo-config" name="config" type="textarea" style="width: 100%; height: 12em;"
+    <textarea id="repo-config" name="config" class="monospace" type="textarea" style="width: 100%; height: 12em;"
 >{{#if config}}
 {{config}}
 {{else}}
