@@ -11,14 +11,14 @@ repo:
     # jane can only deploy
     # any user can download
     admin:
-      - \*
+      - "*"
     john:
       - deploy
       - delete
     jane:
       - ~
       - deploy
-    \*:
+    "*":
       - download
   settings:
     custom-property: custom-value
