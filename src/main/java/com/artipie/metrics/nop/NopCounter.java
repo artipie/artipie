@@ -21,33 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics.memory;
+package com.artipie.metrics.nop;
 
-import com.artipie.metrics.Gauge;
+import com.artipie.metrics.Counter;
 
 /**
- * {@link Gauge} implementation storing data in memory.
+ * {@link Counter} implementation that do no operations and store no data.
  *
- * @since 0.8
+ * @since 0.9
  */
-public final class InMemoryGauge implements Gauge {
+public final class NopCounter implements Counter {
 
     /**
-     * Current value.
+     * Only instance of {@link NopCounter}.
      */
-    private volatile long current;
+    public static final NopCounter INSTANCE = new NopCounter();
 
-    @Override
-    public void set(final long update) {
-        this.current = update;
+    /**
+     * Ctor.
+     */
+    private NopCounter() {
     }
 
-    /**
-     * Get gauge value.
-     *
-     * @return Gauge value.
-     */
-    public long value() {
-        return this.current;
+    @Override
+    public void add(final long amount) {
+        // do nothing
+    }
+
+    @Override
+    public void inc() {
+        // do nothing
     }
 }

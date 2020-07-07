@@ -24,7 +24,6 @@
 package com.artipie;
 
 import java.io.File;
-import org.cactoos.func.ProcOf;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
@@ -35,6 +34,7 @@ import org.llorllale.cactoos.matchers.MatcherOf;
 /**
  * Test for {@link YamlPermissions}.
  * @since 0.2
+ * @checkstyle LeftCurlyCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RpPermissionsTest {
@@ -46,15 +46,15 @@ class RpPermissionsTest {
 
     @Test
     void johnCanDownloadDeployAndDelete() {
-        final String uname = "John";
+        final String uname = "john";
         MatcherAssert.assertThat(
             new YamlPermissions(new File(RpPermissionsTest.CONF_YAML)),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
-                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "delete"))),
-                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "deploy"))),
-                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "download"))),
-                    new MatcherOf<>(new ProcOf<>(perm -> !perm.allowed(uname, "install")))
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "delete"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
+                    new MatcherOf<>(perm -> !perm.allowed(uname, "install"))
                 )
             )
         );
@@ -62,15 +62,15 @@ class RpPermissionsTest {
 
     @Test
     void janeCanDownloadAndDeploy() {
-        final String uname = "Jane";
+        final String uname = "jane";
         MatcherAssert.assertThat(
             new YamlPermissions(new File(RpPermissionsTest.CONF_YAML)),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
-                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "deploy"))),
-                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "download"))),
-                    new MatcherOf<>(new ProcOf<>(perm -> !perm.allowed(uname, "install"))),
-                    new MatcherOf<>(new ProcOf<>(perm -> !perm.allowed(uname, "update")))
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
+                    new MatcherOf<>(perm -> !perm.allowed(uname, "install")),
+                    new MatcherOf<>(perm -> !perm.allowed(uname, "update"))
                 )
             )
         );
@@ -92,10 +92,10 @@ class RpPermissionsTest {
             new YamlPermissions(new File(RpPermissionsTest.CONF_YAML)),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
-                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "delete"))),
-                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "deploy"))),
-                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "download"))),
-                    new MatcherOf<>(new ProcOf<>(perm -> perm.allowed(uname, "install")))
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "delete"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "install"); })
                 )
             )
         );

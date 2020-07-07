@@ -23,31 +23,44 @@
  */
 package com.artipie.metrics.memory;
 
-import com.artipie.metrics.Gauge;
+import com.artipie.metrics.Metrics;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * {@link Gauge} implementation storing data in memory.
+ * {@link Metrics} implementation storing data in memory.
  *
- * @since 0.8
+ * @since 0.9
+ * @todo #231:30min Support gauges in InMemoryMetrics.
+ *  `InMemoryMetrics.gauge()` method implementation should get or create an `InMemoryGauge` by name
+ *  and store it. `InMemoryMetrics.gauges()` method should be added
+ *  to create snapshot of existing gauges. Implementations are expected to be similar to counters.
  */
-public final class InMemoryGauge implements Gauge {
+public final class InMemoryMetrics implements Metrics {
 
     /**
-     * Current value.
+     * Counters by name.
      */
-    private volatile long current;
+    private final ConcurrentMap<String, InMemoryCounter> cnts = new ConcurrentHashMap<>();
 
     @Override
-    public void set(final long update) {
-        this.current = update;
+    public InMemoryCounter counter(final String name) {
+        return this.cnts.computeIfAbsent(name, ignored -> new InMemoryCounter());
+    }
+
+    @Override
+    public InMemoryGauge gauge(final String name) {
+        throw new UnsupportedOperationException();
     }
 
     /**
-     * Get gauge value.
+     * Get counters snapshot.
      *
-     * @return Gauge value.
+     * @return Counters snapshot.
      */
-    public long value() {
-        return this.current;
+    public Map<String, InMemoryCounter> counters() {
+        return new HashMap<>(this.cnts);
     }
 }
