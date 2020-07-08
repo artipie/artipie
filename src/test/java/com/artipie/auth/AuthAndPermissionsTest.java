@@ -25,7 +25,7 @@ package com.artipie.auth;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.RpPermissions;
+import com.artipie.YamlPermissions;
 import com.artipie.http.auth.BasicIdentities;
 import com.artipie.http.auth.Permission;
 import com.artipie.http.auth.SliceAuth;
@@ -51,7 +51,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Test for basic authorisation and permissions settings,
- * {@link SliceAuth}, {@link RpPermissions} and {@link AuthFromYaml} are involved.
+ * {@link SliceAuth}, {@link YamlPermissions} and {@link AuthFromYaml} are involved.
  * @since 0.9
  * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
@@ -71,7 +71,7 @@ public class AuthAndPermissionsTest {
             new SliceAuth(
                 new SliceSimple(StandardRs.EMPTY),
                 new Permission.ByName(
-                    "download", new RpPermissions(this.repoWithPermissions().toFile())
+                    "download", new YamlPermissions(this.repoWithPermissions().toFile())
                 ),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
@@ -89,7 +89,7 @@ public class AuthAndPermissionsTest {
             new SliceAuth(
                 new SliceSimple(StandardRs.EMPTY),
                 new Permission.ByName(
-                    "download", new RpPermissions(this.repoWithPermissions().toFile())
+                    "download", new YamlPermissions(this.repoWithPermissions().toFile())
                 ),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
@@ -111,7 +111,7 @@ public class AuthAndPermissionsTest {
             new SliceAuth(
                 new SliceSimple(StandardRs.EMPTY),
                 new Permission.ByName(
-                    "deploy", new RpPermissions(this.repoWithPermissions().toFile())
+                    "deploy", new YamlPermissions(this.repoWithPermissions().toFile())
                 ),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
@@ -133,7 +133,7 @@ public class AuthAndPermissionsTest {
             new SliceAuth(
                 new SliceSimple(StandardRs.EMPTY),
                 new Permission.ByName(
-                    "download", new RpPermissions(this.repoWithPermissions().toFile())
+                    "download", new YamlPermissions(this.repoWithPermissions().toFile())
                 ),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
@@ -156,7 +156,7 @@ public class AuthAndPermissionsTest {
             new SliceAuth(
                 new SliceSimple(new RsWithStatus(status)),
                 new Permission.ByName(
-                    "delete", new RpPermissions(this.repoWithPermissions().toFile())
+                    "delete", new YamlPermissions(this.repoWithPermissions().toFile())
                 ),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
@@ -179,7 +179,7 @@ public class AuthAndPermissionsTest {
             new SliceAuth(
                 new SliceSimple(new RsWithStatus(status)),
                 new Permission.ByName(
-                    "deploy", new RpPermissions(this.repoWithPermissions().toFile())
+                    "deploy", new YamlPermissions(this.repoWithPermissions().toFile())
                 ),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
@@ -201,7 +201,7 @@ public class AuthAndPermissionsTest {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(new RsWithStatus(status)),
-                new Permission.ByName("install", new RpPermissions(this.publicRepo().toFile())),
+                new Permission.ByName("install", new YamlPermissions(this.publicRepo().toFile())),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
@@ -218,7 +218,7 @@ public class AuthAndPermissionsTest {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(new RsWithStatus(status)),
-                new Permission.ByName("delete", new RpPermissions(this.publicRepo().toFile())),
+                new Permission.ByName("delete", new YamlPermissions(this.publicRepo().toFile())),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
