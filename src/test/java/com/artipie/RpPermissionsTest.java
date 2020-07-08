@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.llorllale.cactoos.matchers.MatcherOf;
 
 /**
- * Test for {@link RpPermissions}.
+ * Test for {@link YamlPermissions}.
  * @since 0.2
  * @checkstyle LeftCurlyCheck (500 lines)
  */
@@ -48,9 +48,9 @@ class RpPermissionsTest {
     void johnCanDownloadDeployAndDelete() {
         final String uname = "john";
         MatcherAssert.assertThat(
-            new RpPermissions(new File(RpPermissionsTest.CONF_YAML)),
-            new AllOf<RpPermissions>(
-                new ListOf<org.hamcrest.Matcher<? super RpPermissions>>(
+            new YamlPermissions(new File(RpPermissionsTest.CONF_YAML)),
+            new AllOf<YamlPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "delete"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
@@ -64,9 +64,9 @@ class RpPermissionsTest {
     void janeCanDownloadAndDeploy() {
         final String uname = "jane";
         MatcherAssert.assertThat(
-            new RpPermissions(new File(RpPermissionsTest.CONF_YAML)),
-            new AllOf<RpPermissions>(
-                new ListOf<org.hamcrest.Matcher<? super RpPermissions>>(
+            new YamlPermissions(new File(RpPermissionsTest.CONF_YAML)),
+            new AllOf<YamlPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
                     new MatcherOf<>(perm -> !perm.allowed(uname, "install")),
@@ -79,7 +79,8 @@ class RpPermissionsTest {
     @Test
     void anyoneCanDownload() {
         MatcherAssert.assertThat(
-            new RpPermissions(new File(RpPermissionsTest.CONF_YAML)).allowed("anyone", "download"),
+            new YamlPermissions(new File(RpPermissionsTest.CONF_YAML))
+                .allowed("anyone", "download"),
             new IsEqual<>(true)
         );
     }
@@ -88,9 +89,9 @@ class RpPermissionsTest {
     void adminCanDoAnything() {
         final String uname = "admin";
         MatcherAssert.assertThat(
-            new RpPermissions(new File(RpPermissionsTest.CONF_YAML)),
-            new AllOf<RpPermissions>(
-                new ListOf<org.hamcrest.Matcher<? super RpPermissions>>(
+            new YamlPermissions(new File(RpPermissionsTest.CONF_YAML)),
+            new AllOf<YamlPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "delete"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),

@@ -26,6 +26,7 @@ package com.artipie;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.http.DockerSlice;
@@ -123,7 +124,10 @@ public final class SliceFromConfig extends Slice.Wrap {
         super(
             new AsyncSlice(
                 settings.auth().thenApply(
-                    auth -> SliceFromConfig.build(settings, auth, config, vertx, aliases)
+                    auth -> SliceFromConfig.build(
+                        settings, new LoggingAuth(auth),
+                        config, vertx, aliases
+                    )
                 )
             )
         );
@@ -150,7 +154,7 @@ public final class SliceFromConfig extends Slice.Wrap {
         final RepoConfig cfg, final Vertx vertx, final StorageAliases aliases) {
         final Slice slice;
         final Storage storage = cfg.storage();
-        final Permissions permissions = cfg.permissions();
+        final Permissions permissions = new LoggingPermissions(cfg.permissions());
         final Pattern prefix = new PathPattern(settings).pattern();
         switch (cfg.type()) {
             case "file":

@@ -154,7 +154,7 @@ public final class RepoConfig {
      * @return Async permissions
      */
     public Permissions permissions() {
-        return new RpPermissions(this.repoConfig());
+        return new YamlPermissions(this.repoConfig());
     }
 
     /**

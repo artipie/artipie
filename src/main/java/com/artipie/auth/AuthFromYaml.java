@@ -95,8 +95,8 @@ public final class AuthFromYaml implements Authentication {
      * @return True if passwords are the same
      */
     private static boolean check(final String stored, final String type, final String given) {
-        return type.equals("sha256") && DigestUtils.sha256Hex(given).equals(stored)
-            || given.equals(stored);
+        return type.equals("sha256") && DigestUtils.sha256Hex(given)
+            .equals(stored) || given.equals(stored);
     }
 
     /**
