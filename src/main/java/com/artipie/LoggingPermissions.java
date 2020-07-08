@@ -21,46 +21,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics.memory;
 
-import com.artipie.metrics.Metrics;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+package com.artipie;
+
+import com.artipie.http.auth.Permissions;
+import com.jcabi.log.Logger;
+import java.util.logging.Level;
 
 /**
- * {@link Metrics} implementation storing data in memory.
- *
+ * Permissions decorator with logging.
  * @since 0.9
- * @todo #231:30min Support gauges in InMemoryMetrics.
- *  `InMemoryMetrics.gauge()` method implementation should get or create an `InMemoryGauge` by name
- *  and store it. `InMemoryMetrics.gauges()` method should be added
- *  to create snapshot of existing gauges. Implementations are expected to be similar to counters.
  */
-public final class InMemoryMetrics implements Metrics {
+public final class LoggingPermissions implements Permissions {
 
     /**
-     * Counters by name.
+     * Origin permissions.
      */
-    private final ConcurrentMap<String, InMemoryCounter> cnts = new ConcurrentHashMap<>();
+    private final Permissions origin;
 
-    @Override
-    public InMemoryCounter counter(final String name) {
-        return this.cnts.computeIfAbsent(name, ignored -> new InMemoryCounter());
+    /**
+     * Log level.
+     */
+    private final Level level;
+
+    /**
+     * Decorates {@link Permissions} with info logging.
+     * @param origin Permissions
+     */
+    public LoggingPermissions(final Permissions origin) {
+        this(origin, Level.INFO);
+    }
+
+    /**
+     * Decorates {@link Permissions} with logging.
+     * @param origin Permissions
+     * @param level Log level
+     */
+    public LoggingPermissions(final Permissions origin, final Level level) {
+        this.origin = origin;
+        this.level = level;
     }
 
     @Override
-    public InMemoryGauge gauge(final String name) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Get counters snapshot.
-     *
-     * @return Counters snapshot.
-     */
-    public Map<String, InMemoryCounter> counters() {
-        return new HashMap<>(this.cnts);
+    public boolean allowed(final String name, final String action) {
+        final boolean res = this.origin.allowed(name, action);
+        if (res) {
+            Logger.log(this.level, this.origin, "Operation '%s' allowed for '%s'", action, name);
+        } else {
+            Logger.log(this.level, this.origin, "Operation '%s' denied for '%s'", action, name);
+        }
+        return res;
     }
 }

@@ -21,33 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics.memory;
-
-import com.artipie.metrics.Gauge;
 
 /**
- * {@link Gauge} implementation storing data in memory.
+ * Tests for Artipie metrics.
  *
  * @since 0.8
  */
-public final class InMemoryGauge implements Gauge {
-
-    /**
-     * Current value.
-     */
-    private volatile long current;
-
-    @Override
-    public void set(final long update) {
-        this.current = update;
-    }
-
-    /**
-     * Get gauge value.
-     *
-     * @return Gauge value.
-     */
-    public long value() {
-        return this.current;
-    }
-}
+package com.artipie.metrics;

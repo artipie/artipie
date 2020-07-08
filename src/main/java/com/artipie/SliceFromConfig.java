@@ -26,8 +26,11 @@ package com.artipie;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
+import com.artipie.docker.Docker;
 import com.artipie.docker.asto.AstoDocker;
+import com.artipie.docker.cache.CacheDocker;
 import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.proxy.ClientSlice;
 import com.artipie.docker.proxy.ProxyDocker;
@@ -122,7 +125,10 @@ public final class SliceFromConfig extends Slice.Wrap {
         super(
             new AsyncSlice(
                 settings.auth().thenApply(
-                    auth -> SliceFromConfig.build(settings, auth, config, aliases)
+                    auth -> SliceFromConfig.build(
+                        settings, new LoggingAuth(auth),
+                        config, aliases
+                    )
                 )
             )
         );
@@ -148,7 +154,7 @@ public final class SliceFromConfig extends Slice.Wrap {
         final RepoConfig cfg, final StorageAliases aliases) {
         final Slice slice;
         final Storage storage = cfg.storage();
-        final Permissions permissions = cfg.permissions();
+        final Permissions permissions = new LoggingPermissions(cfg.permissions());
         final Pattern prefix = new PathPattern(settings).pattern();
         switch (cfg.type()) {
             case "file":
@@ -241,10 +247,11 @@ public final class SliceFromConfig extends Slice.Wrap {
                 final String host = cfg.settings()
                     .orElseThrow(() -> new IllegalStateException("Repo settings not found"))
                     .string("host");
-                slice = new DockerSlice(
-                    cfg.path(),
-                    new ProxyDocker(new ClientSlice(SliceFromConfig.HTTP, host))
-                );
+                final Docker proxy = new ProxyDocker(new ClientSlice(SliceFromConfig.HTTP, host));
+                final Docker docker = cfg.storageOpt()
+                    .<Docker>map(cache -> new CacheDocker(proxy, new AstoDocker(cache)))
+                    .orElse(proxy);
+                slice = new DockerSlice(cfg.path(), docker);
                 break;
             default:
                 throw new IllegalStateException(

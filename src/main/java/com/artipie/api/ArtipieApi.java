@@ -24,8 +24,8 @@
 package com.artipie.api;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.RpPermissions;
 import com.artipie.Settings;
+import com.artipie.YamlPermissions;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
@@ -72,7 +72,7 @@ public final class ArtipieApi extends Slice.Wrap {
                         .flatMap(storage -> storage.value(new Key.From("_permissions.yaml")).flatMap(data -> new Concatenation(data).single()))
                         .map(buf -> new Remaining(buf).bytes())
                         .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
-                        .map(RpPermissions::new),
+                        .map(YamlPermissions::new),
                     (auth, perm) -> new SliceAuth(
                         new SliceRoute(
                             new RtRulePath(

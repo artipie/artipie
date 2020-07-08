@@ -21,33 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics.memory;
-
-import com.artipie.metrics.Gauge;
+package com.artipie.metrics;
 
 /**
- * {@link Gauge} implementation storing data in memory.
+ * Metrics that adds prefix to names.
  *
- * @since 0.8
+ * @since 0.9
  */
-public final class InMemoryGauge implements Gauge {
+public final class PrefixedMetrics implements Metrics {
 
     /**
-     * Current value.
+     * Origin metrics.
      */
-    private volatile long current;
+    private final Metrics origin;
 
-    @Override
-    public void set(final long update) {
-        this.current = update;
+    /**
+     * Prefix.
+     */
+    private final String prefix;
+
+    /**
+     * Ctor.
+     *
+     * @param origin Origin metrics.
+     * @param prefix Prefix.
+     */
+    public PrefixedMetrics(final Metrics origin, final String prefix) {
+        this.origin = origin;
+        this.prefix = prefix;
     }
 
-    /**
-     * Get gauge value.
-     *
-     * @return Gauge value.
-     */
-    public long value() {
-        return this.current;
+    @Override
+    public Counter counter(final String name) {
+        return this.origin.counter(this.prefix + name);
+    }
+
+    @Override
+    public Gauge gauge(final String name) {
+        return this.origin.gauge(this.prefix + name);
     }
 }
