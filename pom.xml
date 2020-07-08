@@ -108,7 +108,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>0.13</version>
+      <version>0.13.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -133,7 +133,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.4.5</version>
+      <version>0.4.6</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
