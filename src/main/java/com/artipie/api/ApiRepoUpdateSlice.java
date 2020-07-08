@@ -55,6 +55,7 @@ import org.reactivestreams.Publisher;
  * @since 0.6
  * @checkstyle ExecutableStatementCountCheck (500 lines)
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle CyclomaticComplexityCheck (500 lines)
  */
 final class ApiRepoUpdateSlice implements Slice {
 
@@ -124,6 +125,13 @@ final class ApiRepoUpdateSlice implements Slice {
                                             repo = repo.add("storage", patch.value("storage"));
                                         }
                                         repo = repo.add("permissions", source.yamlMapping("repo").value("permissions"));
+                                        if (patch.value("permissions") != null) {
+                                            repo = repo.add("permissions", patch.value("permissions"));
+                                        }
+                                        repo = repo.add("settings", source.yamlMapping("repo").value("settings"));
+                                        if (patch.value("permissions") != null) {
+                                            repo = repo.add("settings", patch.value("settings"));
+                                        }
                                         return Yaml.createYamlMappingBuilder()
                                             .add("repo", repo.build())
                                             .build();
