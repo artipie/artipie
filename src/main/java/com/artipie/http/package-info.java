@@ -21,33 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
-
-import com.artipie.http.Headers;
-import com.artipie.http.Pie;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.Test;
-
 /**
- * Test for {@link Pie}.
- * @since 0.2
+ * Artipie http layer.
+ *
+ * @since 0.9
  */
-public final class PieTest {
-
-    @Test
-    public void unexistingRepoReturnNotFound() {
-        MatcherAssert.assertThat(
-            "Must return 404 HTTP status",
-            new Pie(new Settings.Fake()).response(
-                new RequestLine("GET", "/repo/foo", "HTTP/1.1").toString(),
-                Headers.EMPTY,
-                Flowable.empty()
-            ),
-            new RsHasStatus(RsStatus.NOT_FOUND)
-        );
-    }
-}
+package com.artipie.http;

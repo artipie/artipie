@@ -118,17 +118,16 @@ public final class SliceFromConfig extends Slice.Wrap {
      * Ctor.
      * @param settings Artipie settings
      * @param config Repo config
-     * @param vertx Vertx instance
      * @param aliases Storage aliases
      */
     public SliceFromConfig(final Settings settings, final RepoConfig config,
-        final Vertx vertx, final StorageAliases aliases) {
+        final StorageAliases aliases) {
         super(
             new AsyncSlice(
                 settings.auth().thenApply(
                     auth -> SliceFromConfig.build(
                         settings, new LoggingAuth(auth),
-                        config, vertx, aliases
+                        config, aliases
                     )
                 )
             )
@@ -141,7 +140,6 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param settings Artipie settings
      * @param auth Authentication
      * @param cfg Repository config
-     * @param vertx Vertx instance
      * @param aliases Storage aliases
      * @return Slice completionStage
      * @todo #90:30min This method still needs more refactoring.
@@ -153,7 +151,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      */
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength"})
     static Slice build(final Settings settings, final Authentication auth,
-        final RepoConfig cfg, final Vertx vertx, final StorageAliases aliases) {
+        final RepoConfig cfg, final StorageAliases aliases) {
         final Slice slice;
         final Storage storage = cfg.storage();
         final Permissions permissions = new LoggingPermissions(cfg.permissions());
@@ -172,7 +170,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "gem":
-                slice = new GemSlice(storage, vertx.fileSystem());
+                slice = new GemSlice(storage, null);
                 break;
             case "helm":
                 slice = new HelmSlice(storage);
@@ -219,7 +217,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                                         return new AsyncSlice(
                                             settings.storage().value(new Key.From(String.format("%s.yaml", name)))
                                                 .thenCompose(data -> RepoConfig.fromPublisher(aliases, new KeyFromPath(name), data))
-                                                .thenApply(sub -> new SliceFromConfig(settings, sub, vertx, aliases))
+                                                .thenApply(sub -> new SliceFromConfig(settings, sub, aliases))
                                         );
                                     } catch (final IOException err) {
                                         throw new UncheckedIOException(err);
@@ -236,7 +234,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "npm-proxy":
                 slice = new NpmProxySlice(
                     cfg.path(),
-                    new NpmProxy(new NpmProxyConfig(cfg.settings().orElseThrow()), vertx, storage)
+                    new NpmProxy(new NpmProxyConfig(cfg.settings().orElseThrow()), Vertx.vertx(), storage)
                 );
                 break;
             case "pypi":

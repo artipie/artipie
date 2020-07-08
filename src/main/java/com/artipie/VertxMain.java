@@ -24,6 +24,7 @@
 
 package com.artipie;
 
+import com.artipie.http.Pie;
 import com.artipie.http.Slice;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
@@ -110,8 +111,7 @@ public final class VertxMain implements Runnable {
             new Pie(
                 new YamlSettings(
                     Files.readString(Path.of(storage), Charset.defaultCharset())
-                ),
-                vertx
+                )
             ),
             vertx,
             port
