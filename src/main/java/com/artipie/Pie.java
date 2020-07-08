@@ -77,7 +77,7 @@ public final class Pie implements Slice {
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        Logger.info(this, "Request: %s", line);
+        Logger.info(this, "Request: %s", line.replace("\r\n", ""));
         final URI uri = new RequestLineFrom(line).uri();
         final String path = uri.getPath();
         if (path.equals("*")) {
