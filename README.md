@@ -484,6 +484,20 @@ repo:
 
 Artipie will redirect all pull requests to specified registry.
 
+Proxy repository supports caching in local storage.
+To enable it and make previously accessed images available when source repository is down 
+add `storage` section to config:
+
+```yaml
+repo:
+  type: docker-proxy
+  settings:
+    host: mcr.microsoft.com
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-docker-cache
+```
+
 ### Python repo
 
 Try this `pypi.yaml` file:

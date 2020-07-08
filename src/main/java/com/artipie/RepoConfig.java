@@ -27,7 +27,6 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.LoggingStorage;
@@ -51,6 +50,7 @@ import org.reactivestreams.Publisher;
  * Repository config.
  * @since 0.2
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class RepoConfig {
 
     /**
@@ -128,17 +128,32 @@ public final class RepoConfig {
      * @return Async storage for repo
      */
     public Storage storage() {
-        final YamlMapping repo = this.repoConfig();
-        final Storage storage;
-        final YamlNode node = repo.value("storage");
-        if (node instanceof Scalar) {
-            storage = this.storages.storage(((Scalar) node).value());
-        } else if (node instanceof YamlMapping) {
-            storage = new YamlStorage((YamlMapping) node).storage();
-        } else {
-            throw new IllegalStateException(String.format("Invalid storage config: %s", node));
-        }
-        return new SubStorage(this.prefix, new LoggingStorage(Level.INFO, storage));
+        return this.storageOpt().orElseThrow(
+            () -> new IllegalStateException("Storage is not configured")
+        );
+    }
+
+    /**
+     * Create storage if configured.
+     *
+     * @return Async storage for repo
+     */
+    public Optional<Storage> storageOpt() {
+        return Optional.ofNullable(this.repoConfig().value("storage")).map(
+            node -> {
+                final Storage storage;
+                if (node instanceof Scalar) {
+                    storage = this.storages.storage(((Scalar) node).value());
+                } else if (node instanceof YamlMapping) {
+                    storage = new YamlStorage((YamlMapping) node).storage();
+                } else {
+                    throw new IllegalStateException(
+                        String.format("Invalid storage config: %s", node)
+                    );
+                }
+                return new SubStorage(this.prefix, new LoggingStorage(Level.INFO, storage));
+            }
+        );
     }
 
     /**
