@@ -25,6 +25,7 @@ package com.artipie;
 
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.headers.Authorization;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
@@ -84,13 +85,45 @@ class ResponseMetricsSliceTest {
         );
     }
 
+    @Test
+    public void shouldReportNoAuthResponse() {
+        this.send(RqMethod.PUT, new RsWithStatus(RsStatus.UNAUTHORIZED));
+        this.send(RqMethod.PUT, new RsWithStatus(RsStatus.UNAUTHORIZED));
+        MatcherAssert.assertThat(
+            this.metrics.counter("http.response.put.error.no-auth").value(),
+            new IsEqual<>(2L)
+        );
+    }
+
+    @Test
+    public void shouldReportBadAuthResponse() {
+        this.send(
+            RqMethod.DELETE,
+            new Headers.From(new Authorization("some value")),
+            new RsWithStatus(RsStatus.UNAUTHORIZED)
+        );
+        this.send(
+            RqMethod.DELETE,
+            new Headers.From(new Authorization("another value")),
+            new RsWithStatus(RsStatus.UNAUTHORIZED)
+        );
+        MatcherAssert.assertThat(
+            this.metrics.counter("http.response.delete.error.bad-auth").value(),
+            new IsEqual<>(2L)
+        );
+    }
+
     private void send(final RqMethod method, final Response response) {
+        this.send(method, Headers.EMPTY, response);
+    }
+
+    private void send(final RqMethod method, final Headers headers, final Response response) {
         new ResponseMetricsSlice(
             (rqline, rqheaders, rqbody) -> response,
             this.metrics
         ).response(
             new RequestLine(method.value(), "/file.txt").toString(),
-            Headers.EMPTY,
+            headers,
             Flowable.empty()
         ).send(
             (rsstatus, rsheaders, rsbody) -> CompletableFuture.allOf()
