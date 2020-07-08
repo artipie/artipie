@@ -79,8 +79,14 @@ final class SliceByPath implements Slice {
             final String[] split = new RequestLineFrom(line).uri().getPath()
                 .replaceAll("^/+", "").split("/");
             if (this.settings.layout().equals("org")) {
+                if (split.length < 2) {
+                    throw new IllegalStateException("Expected at least 2 path segments");
+                }
                 key = new Key.From(split[0], split[1]);
             } else {
+                if (split.length < 1) {
+                    throw new IllegalStateException("Expected at least 1 path segment");
+                }
                 key = new Key.From(split[0]);
             }
             return this.repositories.slice(key).response(line, headers, body);

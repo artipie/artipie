@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 
 /**
  * Pie of slices.
- * @since 1.0
+ * @since 0.1
  * @checkstyle ReturnCountCheck (500 lines)
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
@@ -66,7 +66,7 @@ public final class Pie extends Slice.Wrap {
      */
     public Pie(final Settings settings) {
         super(
-            new SliceSafe(
+            new SafeSlice(
                 new SliceRoute(
                     Pie.EMPTY_PATH,
                     new RtRulePath(

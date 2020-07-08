@@ -40,7 +40,7 @@ import org.reactivestreams.Publisher;
  * @checkstyle ReturnCountCheck (500 lines)
  */
 @SuppressWarnings({"PMD.OnlyOneReturn", "PMD.AvoidCatchingGenericException"})
-final class SliceSafe implements Slice {
+final class SafeSlice implements Slice {
 
     /**
      * Origin slice.
@@ -51,7 +51,7 @@ final class SliceSafe implements Slice {
      * Wraps slice with safe decorator.
      * @param origin Origin slice
      */
-    SliceSafe(final Slice origin) {
+    SafeSlice(final Slice origin) {
         this.origin = origin;
     }
 

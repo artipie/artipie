@@ -33,6 +33,8 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
+import io.reactivex.Single;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
@@ -66,27 +68,53 @@ final class ArtipieRepositories implements Repositories {
                 exists -> {
                     final CompletionStage<Slice> res;
                     if (exists) {
-                        res = storage.value(key).thenCompose(
-                            pub -> StorageAliases.find(storage, name).thenCompose(
-                                aliases -> RepoConfig.fromPublisher(aliases, name, pub).thenApply(
-                                    cfg -> new SliceFromConfig(this.settings, cfg, aliases)
-                                )
-                            )
-                        );
+                        res = this.resolve(storage, name, key);
                     } else {
                         res = CompletableFuture.completedFuture(
-                            new SliceSimple(
-                                new RsWithBody(
-                                    StandardRs.NOT_FOUND,
-                                    String.format("Repository '%s' not found", name.string()),
-                                    StandardCharsets.UTF_8
-                                )
-                            )
+                            new SliceSimple(new RsRepoNotFound(name))
                         );
                     }
                     return res;
                 }
             )
         );
+    }
+
+    /**
+     * Resolve async {@link Slice} by provided configuration.
+     * @param storage Artipie config storage
+     * @param name Repository name
+     * @param key Config key
+     * @return Async slice for repo
+     */
+    private CompletionStage<Slice> resolve(final Storage storage, final Key name, final Key key) {
+        return Single.zip(
+            SingleInterop.fromFuture(storage.value(key)),
+            SingleInterop.fromFuture(StorageAliases.find(storage, name)),
+            (data, aliases) -> SingleInterop.fromFuture(
+                RepoConfig.fromPublisher(aliases, name, data)
+            ).map(config -> new SliceFromConfig(this.settings, config, aliases))
+        ).<Slice>flatMap(self -> self).to(SingleInterop.get());
+    }
+
+    /**
+     * Repo not found response.
+     * @since 0.9
+     */
+    private static final class RsRepoNotFound extends Response.Wrap {
+
+        /**
+         * New repo not found response.
+         * @param repo Repo name
+         */
+        RsRepoNotFound(final Key repo) {
+            super(
+                new RsWithBody(
+                    StandardRs.NOT_FOUND,
+                    String.format("Repository '%s' not found", repo.string()),
+                    StandardCharsets.UTF_8
+                )
+            );
+        }
     }
 }
