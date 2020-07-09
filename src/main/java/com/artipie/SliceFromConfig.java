@@ -173,7 +173,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new GemSlice(storage, null);
                 break;
             case "helm":
-                slice = new HelmSlice(storage);
+                slice = new TrimPathSlice(
+                    new HelmSlice(
+                        storage,
+                        cfg.path(),
+                        permissions,
+                        new BasicIdentities(auth)
+                    ),
+                    prefix
+                );
                 break;
             case "rpm":
                 slice = new TrimPathSlice(
