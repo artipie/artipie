@@ -79,7 +79,9 @@ public final class Pie extends Slice.Wrap {
                         new RtRulePath(
                             new RtIsDashboard(settings), new DashboardSlice(settings)
                         ),
-                        new RtRulePath(RtRule.FALLBACK, new SliceByPath(settings))
+                        new RtRulePath(
+                            RtRule.FALLBACK, new DockerRoutingSlice(new SliceByPath(settings))
+                        )
                     )
                 )
             )
