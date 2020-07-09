@@ -24,8 +24,14 @@
 
 package com.artipie;
 
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.Pie;
 import com.artipie.http.Slice;
+import com.artipie.metrics.Metrics;
+import com.artipie.metrics.PrefixedMetrics;
+import com.artipie.metrics.memory.InMemoryMetrics;
+import com.artipie.metrics.memory.MetricsLogPublisher;
+import com.artipie.metrics.nop.NopMetrics;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
@@ -33,15 +39,19 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.util.Optional;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.LoggerFactory;
 
 /**
  * Vertx server entry point.
  * @since 1.0
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.PrematureDeclaration")
 public final class VertxMain implements Runnable {
@@ -107,15 +117,44 @@ public final class VertxMain implements Runnable {
         } else {
             throw new IllegalStateException("Storage is not configured");
         }
+        final Settings settings = new YamlSettings(
+            Files.readString(Path.of(storage), Charset.defaultCharset())
+        );
         new VertxMain(
-            new Pie(
-                new YamlSettings(
-                    Files.readString(Path.of(storage), Charset.defaultCharset())
-                )
+            new ResponseMetricsSlice(
+                new Pie(settings), new PrefixedMetrics(metrics(settings), "http.response.")
             ),
             vertx,
             port
         ).run();
         Logger.info(VertxMain.class, "Artipie was started on port %d", port);
+    }
+
+    /**
+     * Creates and initialize metrics from settings.
+     *
+     * @param settings Settings.
+     * @return Metrics.
+     * @throws IOException In case of I/O error reading settings.
+     */
+    private static Metrics metrics(final Settings settings) throws IOException {
+        final YamlMapping root = settings.meta().yamlMapping("metrics");
+        return Optional.ofNullable(root.string("type")).<Metrics>map(
+            type -> {
+                if (!type.equals("log")) {
+                    throw new IllegalArgumentException(
+                        String.format("Unsupported metrics type: %s", type)
+                    );
+                }
+                final InMemoryMetrics metrics = new InMemoryMetrics();
+                final int period = 5;
+                new MetricsLogPublisher(
+                    LoggerFactory.getLogger(Metrics.class),
+                    metrics,
+                    Duration.ofSeconds(period)
+                ).start();
+                return metrics;
+            }
+        ).orElse(NopMetrics.INSTANCE);
     }
 }

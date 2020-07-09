@@ -60,7 +60,7 @@ class ResponseMetricsSliceTest {
         this.send(RqMethod.GET, new RsWithStatus(RsStatus.OK));
         this.send(RqMethod.GET, new RsWithStatus(RsStatus.OK));
         MatcherAssert.assertThat(
-            this.metrics.counter("http.response.get.success").value(),
+            this.metrics.counter("get.success").value(),
             new IsEqual<>(2L)
         );
     }
@@ -70,7 +70,7 @@ class ResponseMetricsSliceTest {
         this.send(RqMethod.POST, new RsWithStatus(RsStatus.INTERNAL_ERROR));
         this.send(RqMethod.POST, new RsWithStatus(RsStatus.INTERNAL_ERROR));
         MatcherAssert.assertThat(
-            this.metrics.counter("http.response.post.error").value(),
+            this.metrics.counter("post.error").value(),
             new IsEqual<>(2L)
         );
     }
@@ -80,7 +80,7 @@ class ResponseMetricsSliceTest {
         this.send(RqMethod.HEAD, new RsWithStatus(RsStatus.NOT_FOUND));
         this.send(RqMethod.HEAD, new RsWithStatus(RsStatus.NOT_FOUND));
         MatcherAssert.assertThat(
-            this.metrics.counter("http.response.head.error").value(),
+            this.metrics.counter("head.error").value(),
             new IsEqual<>(2L)
         );
     }
@@ -90,7 +90,7 @@ class ResponseMetricsSliceTest {
         this.send(RqMethod.PUT, new RsWithStatus(RsStatus.UNAUTHORIZED));
         this.send(RqMethod.PUT, new RsWithStatus(RsStatus.UNAUTHORIZED));
         MatcherAssert.assertThat(
-            this.metrics.counter("http.response.put.error.no-auth").value(),
+            this.metrics.counter("put.error.no-auth").value(),
             new IsEqual<>(2L)
         );
     }
@@ -108,7 +108,7 @@ class ResponseMetricsSliceTest {
             new RsWithStatus(RsStatus.UNAUTHORIZED)
         );
         MatcherAssert.assertThat(
-            this.metrics.counter("http.response.delete.error.bad-auth").value(),
+            this.metrics.counter("delete.error.bad-auth").value(),
             new IsEqual<>(2L)
         );
     }
