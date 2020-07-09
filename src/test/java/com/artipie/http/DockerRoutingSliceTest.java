@@ -76,7 +76,8 @@ final class DockerRoutingSliceTest {
         verify(
             new DockerRoutingSlice(
                 new DockerRoutingSlice.Reverted(
-                    new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath(path)))
+                    new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/one/v2/two"))),
+                    "/one"
                 )
             ),
             path

@@ -6,3 +6,5 @@ meta:
     type: file
     path: _credentials.yaml
   layout: org
+  metrics:
+    type: log

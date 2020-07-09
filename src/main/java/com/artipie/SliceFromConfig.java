@@ -37,6 +37,7 @@ import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
+import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
@@ -249,7 +250,10 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new PySlice(storage, permissions, auth);
                 break;
             case "docker":
-                slice = new DockerSlice(cfg.path(), new AstoDocker(storage));
+                slice = new DockerRoutingSlice.Reverted(
+                    new DockerSlice(cfg.path(), new AstoDocker(storage)),
+                    cfg.path()
+                );
                 break;
             case "docker-proxy":
                 final String host = cfg.settings()

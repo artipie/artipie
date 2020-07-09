@@ -71,16 +71,19 @@ public final class Pie extends Slice.Wrap {
             new SafeSlice(
                 new LoggingSlice(
                     Level.INFO,
-                    new SliceRoute(
-                        Pie.EMPTY_PATH,
-                        new RtRulePath(
-                            new RtRule.ByPath(Pattern.compile("/api/?.*")), new ArtipieApi(settings)
-                        ),
-                        new RtRulePath(
-                            new RtIsDashboard(settings), new DashboardSlice(settings)
-                        ),
-                        new RtRulePath(
-                            RtRule.FALLBACK, new DockerRoutingSlice(new SliceByPath(settings))
+                    new DockerRoutingSlice(
+                        new SliceRoute(
+                            Pie.EMPTY_PATH,
+                            new RtRulePath(
+                                new RtRule.ByPath(Pattern.compile("/api/?.*")),
+                                new ArtipieApi(settings)
+                            ),
+                            new RtRulePath(
+                                new RtIsDashboard(settings), new DashboardSlice(settings)
+                            ),
+                            new RtRulePath(
+                                RtRule.FALLBACK, new SliceByPath(settings)
+                            )
                         )
                     )
                 )

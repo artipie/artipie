@@ -89,8 +89,7 @@ final class SliceByPath implements Slice {
                 }
                 key = new Key.From(split[0]);
             }
-            return new DockerRoutingSlice.Reverted(this.repositories.slice(key))
-                .response(line, headers, body);
+            return this.repositories.slice(key).response(line, headers, body);
         } catch (final IOException err) {
             return new RsWithBody(
                 new RsWithStatus(RsStatus.INTERNAL_ERROR),

@@ -25,7 +25,7 @@ package com.artipie.http;
 
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLineFrom;
-import com.artipie.http.rq.RqHeaders;
+import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -37,7 +37,7 @@ import org.reactivestreams.Publisher;
  * Slice decorator which redirects all Docker V2 API requests to Artipie format paths.
  * @since 0.9
  */
-final class DockerRoutingSlice implements Slice {
+public final class DockerRoutingSlice implements Slice {
 
     /**
      * Real path header name.
@@ -70,15 +70,20 @@ final class DockerRoutingSlice implements Slice {
         final Matcher matcher = PTN_PATH.matcher(path);
         final Response rsp;
         if (matcher.matches()) {
-            rsp = this.origin.response(
-                new RequestLine(
-                    req.method().toString(),
-                    new URIBuilder(req.uri()).setPath(matcher.group(1)).toString(),
-                    req.version()
-                ).toString(),
-                new Headers.From(headers, DockerRoutingSlice.HDR_REAL_PATH, path),
-                body
-            );
+            final String group = matcher.group(1);
+            if (group.isEmpty() || group.equals("/")) {
+                rsp = StandardRs.EMPTY;
+            } else {
+                rsp = this.origin.response(
+                    new RequestLine(
+                        req.method().toString(),
+                        new URIBuilder(req.uri()).setPath(matcher.group(1)).toString(),
+                        req.version()
+                    ).toString(),
+                    new Headers.From(headers, DockerRoutingSlice.HDR_REAL_PATH, path),
+                    body
+                );
+            }
         } else {
             rsp = this.origin.response(line, headers, body);
         }
@@ -97,29 +102,35 @@ final class DockerRoutingSlice implements Slice {
         private final Slice origin;
 
         /**
+         * Docker base path.
+         */
+        private final String path;
+
+        /**
          * New {@link Slice} decorator to revert real path.
          * @param origin Origin slice
+         * @param path Docker base path
          */
-        Reverted(final Slice origin) {
+        public Reverted(final Slice origin, final String path) {
             this.origin = origin;
+            this.path = path;
         }
 
         @Override
         public Response response(final String line,
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body) {
-            final String path;
-            final RqHeaders hdr = new RqHeaders(headers, DockerRoutingSlice.HDR_REAL_PATH);
             final RequestLineFrom req = new RequestLineFrom(line);
-            if (hdr.isEmpty()) {
-                path = req.uri().getPath();
-            } else {
-                path = hdr.get(0);
-            }
             return this.origin.response(
                 new RequestLine(
                     req.method().toString(),
-                    new URIBuilder(req.uri()).setPath(path).toString(),
+                    new URIBuilder(req.uri())
+                        .setPath(
+                            Pattern.compile(String.format("^(?:%s)", this.path))
+                                .matcher(req.uri().getPath())
+                                .replaceFirst(String.format("%s/v2", this.path))
+                        )
+                        .toString(),
                     req.version()
                 ).toString(),
                 headers,
