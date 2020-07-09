@@ -210,7 +210,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new TrimPathSlice(
                     new GroupSlice(
                         cfg.settings().orElseThrow().yamlSequence("repositories").values()
-                            .stream().map(Object::toString)
+                            .stream().map(node -> node.asScalar().value())
                             .map(
                                 name -> {
                                     try {
