@@ -572,6 +572,17 @@ docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
   artipie/artipie:latest
 ```
 
+## Metrics
+
+You may enable some basic metrics collecting and periodic publishing to application log
+by adding `metrics` to `meta` section of global configuration file `/etc/artipie.yml`:
+
+```yaml
+meta:
+  metrics:
+    type: log
+```
+
 ## How to contribute
 
 Fork the repository, make changes, and send us a

@@ -135,7 +135,7 @@ public final class ResponseMetricsSlice implements Slice {
      */
     private void report(final String rqline, final String result) {
         final String name = String.format(
-            "http.response.%s.%s",
+            "%s.%s",
             new RequestLineFrom(rqline).method().value().toLowerCase(Locale.getDefault()),
             result
         );
