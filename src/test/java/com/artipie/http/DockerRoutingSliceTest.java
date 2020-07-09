@@ -70,6 +70,19 @@ final class DockerRoutingSliceTest {
         );
     }
 
+    @Test
+    void revertsDockerRequest() throws Exception {
+        final String path = "/v2/one/two";
+        verify(
+            new DockerRoutingSlice(
+                new DockerRoutingSlice.Reverted(
+                    new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath(path)))
+                )
+            ),
+            path
+        );
+    }
+
     private static void verify(final Slice slice, final String path) throws Exception {
         slice.response(
             new RequestLine(RqMethod.GET, path).toString(),
