@@ -30,3 +30,34 @@ java -jar target/artipie-jar-with-dependencies.jar --config=example/artipie.yaml
 Example configuration uses `org` layout of Artipie with two level hierarchy,
 user `test` with password `123`, and `default` storage in `./example/storage` direcotry.
 To access the dashboard open `http://localhost/test` in your browser and enter user credentials.
+
+## Code style
+
+Code style is encofrce by "qulice" Maven plugin which aggregates multiple rules for "checkstyle" and "PMD".
+
+There are some additional recommendation for code style which are not covered by automatic checks:
+
+1. Prefer Hamcrest matchers objects instead of static methods in unit tests:
+```java
+// use
+MatcherAssert.assertThat(target, new IsEquals<>(expected));
+
+// don't use
+MatcherAssert.assertThat(target, Matchers.isEquals(expected));
+```
+
+2. Avoid adding reason to assertions in unit tests with single assertion:
+```java
+// use
+MatcherAssert.assertThat(target, matcher);
+
+// don't use
+MatcherAssert.assertThat("Some reason", target, matcher);
+```
+
+
+3. Add reason to assertions in unit tests with multiple assertion. Prefer single assertion styles for unit tests where possible:
+```java
+MatcherAssert.assertThat("Reasone one", target1, matcher1);
+MatcherAssert.assertThat("Reason two", target2, matcher2);
+```
