@@ -24,7 +24,6 @@
 
 package com.artipie;
 
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.Pie;
 import com.artipie.http.Slice;
 import com.artipie.metrics.Metrics;
@@ -138,23 +137,28 @@ public final class VertxMain implements Runnable {
      * @throws IOException In case of I/O error reading settings.
      */
     private static Metrics metrics(final Settings settings) throws IOException {
-        final YamlMapping root = settings.meta().yamlMapping("metrics");
-        return Optional.ofNullable(root.string("type")).<Metrics>map(
-            type -> {
-                if (!type.equals("log")) {
-                    throw new IllegalArgumentException(
-                        String.format("Unsupported metrics type: %s", type)
-                    );
+        return Optional.ofNullable(settings.meta())
+            .map(meta -> meta.yamlMapping("metrics"))
+            .<Metrics>map(
+                root -> {
+                    final String type = root.string("type");
+                    if (type == null) {
+                        throw new IllegalArgumentException("Metrics type is not specified");
+                    }
+                    if (!type.equals("log")) {
+                        throw new IllegalArgumentException(
+                            String.format("Unsupported metrics type: %s", type)
+                        );
+                    }
+                    final InMemoryMetrics metrics = new InMemoryMetrics();
+                    final int period = 5;
+                    new MetricsLogPublisher(
+                        LoggerFactory.getLogger(Metrics.class),
+                        metrics,
+                        Duration.ofSeconds(period)
+                    ).start();
+                    return metrics;
                 }
-                final InMemoryMetrics metrics = new InMemoryMetrics();
-                final int period = 5;
-                new MetricsLogPublisher(
-                    LoggerFactory.getLogger(Metrics.class),
-                    metrics,
-                    Duration.ofSeconds(period)
-                ).start();
-                return metrics;
-            }
-        ).orElse(NopMetrics.INSTANCE);
+            ).orElse(NopMetrics.INSTANCE);
     }
 }
