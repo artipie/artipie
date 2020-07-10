@@ -448,7 +448,6 @@ Try this `docker.yaml` file:
 ```yaml
 repo:
   type: docker
-  path: my-docker
   storage:
     type: fs
     path: /tmp/artipie/data/my-docker

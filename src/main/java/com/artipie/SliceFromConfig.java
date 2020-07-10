@@ -251,8 +251,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "docker":
                 slice = new DockerRoutingSlice.Reverted(
-                    new DockerSlice(cfg.path(), new AstoDocker(storage)),
-                    cfg.path()
+                    new DockerSlice("", new AstoDocker(storage))
                 );
                 break;
             case "docker-proxy":
