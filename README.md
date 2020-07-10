@@ -448,7 +448,6 @@ Try this `docker.yaml` file:
 ```yaml
 repo:
   type: docker
-  path: my-docker
   storage:
     type: fs
     path: /tmp/artipie/data/my-docker
@@ -570,6 +569,17 @@ Docker container with the `-e` option:
 docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
   -e ARTIPIE_USER_NAME=artipie -e ARTIPIE_USER_PASS=qwerty \
   artipie/artipie:latest
+```
+
+## Metrics
+
+You may enable some basic metrics collecting and periodic publishing to application log
+by adding `metrics` to `meta` section of global configuration file `/etc/artipie.yml`:
+
+```yaml
+meta:
+  metrics:
+    type: log
 ```
 
 ## How to contribute

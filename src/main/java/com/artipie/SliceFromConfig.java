@@ -37,6 +37,7 @@ import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
+import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
@@ -173,7 +174,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new GemSlice(storage, null);
                 break;
             case "helm":
-                slice = new HelmSlice(storage);
+                slice = new TrimPathSlice(
+                    new HelmSlice(
+                        storage,
+                        cfg.path(),
+                        permissions,
+                        new BasicIdentities(auth)
+                    ),
+                    prefix
+                );
                 break;
             case "rpm":
                 slice = new TrimPathSlice(
@@ -210,7 +219,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new TrimPathSlice(
                     new GroupSlice(
                         cfg.settings().orElseThrow().yamlSequence("repositories").values()
-                            .stream().map(Object::toString)
+                            .stream().map(node -> node.asScalar().value())
                             .map(
                                 name -> {
                                     try {
@@ -241,7 +250,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new PySlice(storage, permissions, auth);
                 break;
             case "docker":
-                slice = new DockerSlice(cfg.path(), new AstoDocker(storage));
+                slice = new DockerRoutingSlice.Reverted(
+                    new DockerSlice("", new AstoDocker(storage))
+                );
                 break;
             case "docker-proxy":
                 final String host = cfg.settings()
