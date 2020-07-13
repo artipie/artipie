@@ -6,10 +6,13 @@ jobs:
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
+      - name: Build docker image
+        run: |
+          docker build . -t artipie
       - name: Start artipie with binary example configuration
         run: |
           cd examples/binary
-          docker run -d -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:0.8.9
+          docker run -d -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie
           # wait for a container to start
           sleep 5
       - name: Check if file upload/download works correctly
