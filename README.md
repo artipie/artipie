@@ -69,6 +69,8 @@ understand how Artipie is designed.
 
 ### Binary Repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::binary/badge.svg)
+
 Try this `repo.yaml` file:
 
 ```yaml
@@ -76,7 +78,10 @@ repo:
   type: file
   storage:
     type: fs
-    path: /var/artipie/storage
+    path: /var/artipie/data
+  permissions:
+    "*":
+      - "*"
 ```
 
 You can send HTTP PUT/GET requests

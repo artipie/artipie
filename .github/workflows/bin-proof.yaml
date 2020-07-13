@@ -1,4 +1,4 @@
-name: "Proof: binary repository example works"
+name: "Proof::binary"
 "on": [push, pull_request]
 jobs:
   check:
