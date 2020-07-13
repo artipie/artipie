@@ -491,7 +491,9 @@ add `storage` section to config:
 repo:
   type: docker-proxy
   settings:
-    host: mcr.microsoft.com
+    host: registry-1.docker.io
+    username: Aladdin # optional
+    password: OpenSesame # optional
   storage:
     type: fs
     path: /tmp/artipie/data/my-docker-cache
