@@ -61,7 +61,7 @@ final class SafeSlice implements Slice {
         try {
             return new RsSafe(this.origin.response(line, headers, body));
         } catch (final Exception err) {
-            Logger.error(this, "Failed to respond to request: %[exception]", err);
+            Logger.error(this, "Failed to respond to request: %[exception]s", err);
             return new RsWithBody(
                 new RsWithStatus(RsStatus.INTERNAL_ERROR),
                 String.format(
