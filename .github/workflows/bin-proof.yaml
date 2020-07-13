@@ -6,12 +6,18 @@ jobs:
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
-      - name: Binary repository example works
+      - name: Start artipie with binary example configuration
         run: |
-          cd examples/binary
-          docker run -d -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:0.8.9
+        cd examples/binary
+        docker run -d -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:0.8.9
+        # wait for a container to start
+        sleep 5
+      - name: Check if file upload/download works correctly
+        run: |
           echo "hello world" >> text.txt
-          sleep 5
-          curl -s -i -X PUT --data-binary "@text.txt" http://127.0.0.1:8080/repo/text.txt
-          curl -s -i -X GET http://127.0.0.1:8080/repo/text.txt
+          curl --silent -X PUT --data-binary "@text.txt" http://localhost:8080/repo/text.txt
+          STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" -X GET http://localhost:8080/repo/text.txt)
+          if test $STATUSCODE -ne 200; then
+            exit 1
+          fi
 
