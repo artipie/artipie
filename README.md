@@ -579,7 +579,8 @@ by adding `metrics` to `meta` section of global configuration file `/etc/artipie
 ```yaml
 meta:
   metrics:
-    type: log
+    type: log # Metrics type, for now only `log` type is supported
+    interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
 ## How to contribute
