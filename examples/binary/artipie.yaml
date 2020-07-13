@@ -1,0 +1,7 @@
+meta:
+  storage:
+    type: fs
+    path: /var/artipie/configs
+  metrics:
+    type: log
+  layout: flat

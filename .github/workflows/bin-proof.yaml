@@ -1,0 +1,17 @@
+name: "Proof: binary repository example works"
+"on": [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+      - name: Binary repository example works
+        run: |
+          cd examples/binary
+          docker run -d -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:0.8.9
+          echo "hello world" >> text.txt
+          sleep 5
+          curl -s -i -X PUT --data-binary "@text.txt" http://127.0.0.1:8080/repo/text.txt
+          curl -s -i -X GET http://127.0.0.1:8080/repo/text.txt
+
