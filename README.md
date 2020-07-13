@@ -69,7 +69,7 @@ understand how Artipie is designed.
 
 ### Binary Repo
 
-![](https://github.com/artipie/artipie/workflows/Proof::binary/badge.svg)
+[![](https://github.com/artipie/artipie/workflows/Proof::binary/badge.svg)](./examples/binary)
 
 Try this `repo.yaml` file:
 
