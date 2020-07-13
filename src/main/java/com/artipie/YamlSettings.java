@@ -29,6 +29,8 @@ import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.auth.AuthFromEnv;
 import com.artipie.auth.AuthFromYaml;
+import com.artipie.auth.ChainedAuth;
+import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
 import com.jcabi.log.Logger;
@@ -45,6 +47,11 @@ import org.reactivestreams.Publisher;
  * Settings built from YAML.
  *
  * @since 0.1
+ * @todo #285:30min Settings configuration for GitHub auth.
+ *  Add additional settings configuration for GitHub authentication,
+ *  not it's applied by default to auth from yaml using chained authentication.
+ *  We can configure this chain via settings and compose complex authentication providers there.
+ *  E.g. user can use ordered list of env auth, github auth and auth from yaml file.
  * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class YamlSettings implements Settings {
@@ -111,6 +118,8 @@ public final class YamlSettings implements Settings {
                     }
                     return auth;
                 }
+            ).thenApply(
+                auth -> new ChainedAuth(new GithubAuth(), auth)
             );
         } else if (YamlSettings.hasTypeFile(cred)) {
             res = CompletableFuture.failedFuture(
