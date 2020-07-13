@@ -97,7 +97,7 @@ final class SafeSlice implements Slice {
             try {
                 return this.origin.send(connection);
             } catch (final Exception err) {
-                Logger.error(this, "Failed to send request to connection: %[exception]", err);
+                Logger.error(this, "Failed to send request to connection: %[exception]s", err);
                 return new RsWithBody(
                     new RsWithStatus(RsStatus.INTERNAL_ERROR),
                     String.format(
