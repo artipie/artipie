@@ -24,19 +24,13 @@
 
 package com.artipie;
 
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
-import com.artipie.docker.Docker;
+import com.artipie.docker.DockerProxy;
 import com.artipie.docker.asto.AstoDocker;
-import com.artipie.docker.cache.CacheDocker;
 import com.artipie.docker.http.DockerSlice;
-import com.artipie.docker.proxy.AuthClientSlice;
-import com.artipie.docker.proxy.ClientSlices;
-import com.artipie.docker.proxy.Credentials;
-import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
@@ -258,7 +252,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "docker-proxy":
-                slice = dockerProxy(cfg);
+                slice = new DockerProxy(SliceFromConfig.HTTP, cfg);
                 break;
             default:
                 throw new IllegalStateException(
@@ -268,42 +262,5 @@ public final class SliceFromConfig extends Slice.Wrap {
         return cfg.contentLengthMax()
             .<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
             .orElse(slice);
-    }
-
-    /**
-     * Creates Docker proxy repository slice from configuration.
-     *
-     * @param cfg Repository configuration.
-     * @return Docker proxy slice.
-     */
-    private static Slice dockerProxy(final RepoConfig cfg) {
-        final YamlMapping settings = cfg.settings()
-            .orElseThrow(() -> new IllegalStateException("Repo settings not found"));
-        final String host = settings.string("host");
-        if (host == null) {
-            throw new IllegalStateException("`host` is not specified in settings");
-        }
-        final Credentials credentials;
-        final String username = settings.string("username");
-        final String password = settings.string("password");
-        if (username == null && password == null) {
-            credentials = Credentials.ANONYMOUS;
-        } else {
-            if (username == null) {
-                throw new IllegalStateException("`username` is not specified in settings");
-            }
-            if (password == null) {
-                throw new IllegalStateException("`password` is not specified in settings");
-            }
-            credentials = new Credentials.Basic(username, password);
-        }
-        final ClientSlices client = new ClientSlices(SliceFromConfig.HTTP);
-        final Docker proxy = new ProxyDocker(
-            new AuthClientSlice(client, client.slice(host), credentials)
-        );
-        final Docker docker = cfg.storageOpt()
-            .<Docker>map(cache -> new CacheDocker(proxy, new AstoDocker(cache)))
-            .orElse(proxy);
-        return new DockerSlice(cfg.path(), docker);
     }
 }
