@@ -49,9 +49,10 @@ import org.reactivestreams.Publisher;
  * @since 0.1
  * @todo #285:30min Settings configuration for GitHub auth.
  *  Add additional settings configuration for GitHub authentication,
- *  not it's applied by default to auth from yaml using chained authentication.
- *  We can configure this chain via settings and compose complex authentication providers there.
- *  E.g. user can use ordered list of env auth, github auth and auth from yaml file.
+ *  now it's applied by default to auth from yaml using chained authentication, see auth()
+ *  method. We can configure this chain via settings and compose complex authentication
+ *  providers there. E.g. user can use ordered list of env auth, github auth
+ *  and auth from yaml file.
  * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class YamlSettings implements Settings {

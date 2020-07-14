@@ -40,7 +40,8 @@ import org.jruby.util.collections.ConcurrentWeakHashMap;
  * @todo #285:30min Specify expiration time configuration.
  *  Instead of using scheduled executor to clean-up all cache map, use
  *  some configuration to clean-up only expired items, e.g. if token was not accessed for
- *  X minutes, then remove only this token.
+ *  X minutes, then remove only this token. Consider using Guava's time-evicted-cache
+ *  implementation: https://github.com/google/guava/wiki/CachesExplained#eviction
  */
 public final class CachedAuth implements Authentication {
 

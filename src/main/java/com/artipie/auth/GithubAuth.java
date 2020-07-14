@@ -34,8 +34,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * GitHub authentication uses prefixed by provider name username and personal access token
- * as a password.
+ * GitHub authentication uses username prefixed by provider name {@code github.com}
+ * and personal access token as a password.
+ * See <a href="https://developer.github.com/v3/oauth_authorizations/">GitHub docs</a>
+ * for details.
  * @implNote This implementation is not case sensitive.
  * @since 0.10
  */
