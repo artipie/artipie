@@ -7,7 +7,7 @@ sleep 5
 # create a file for subsequent publication
 echo "hello world" > text.txt
 # publish text.txt
-curl --silent -X POST --data-binary "@text.txt" http://localhost:8080/repo/text.txt
+curl --silent -X PUT --data-binary "@text.txt" http://localhost:8080/repo/text.txt
 # download the file
 STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" -X GET http://localhost:8080/repo/text.txt)
 # remove container
