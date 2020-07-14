@@ -9,18 +9,8 @@ jobs:
       - name: Build docker image
         run: |
           docker build . -t artipie
-      - name: Start artipie with binary example configuration
+      - name: Start binrary example and proof it works
         run: |
           cd examples/binary
-          docker run -d -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie
-          # wait for a container to start
-          sleep 5
-      - name: Check if file upload/download works correctly
-        run: |
-          echo "hello world" >> text.txt
-          curl --silent -X PUT --data-binary "@text.txt" http://localhost:8080/repo/text.txt
-          STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" -X GET http://localhost:8080/repo/text.txt)
-          if test $STATUSCODE -ne 200; then
-            exit 1
-          fi
-
+          sed -i 's/artipie\/artipie:latest/artipie/g' run.sh
+          run.sh
