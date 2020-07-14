@@ -4,8 +4,8 @@ jobs:
   proof:
     runs-on: ${{ matrix.os }}
       strategy:
-        matrix:
-          os: [windows-latest, ubuntu-latest, macos-latest]
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
