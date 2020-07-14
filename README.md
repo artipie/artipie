@@ -610,7 +610,7 @@ java -jar target/artipie-jar-with-dependencies.jar --config=example/artipie.yaml
 ```
 Example configuration uses `org` layout of Artipie with two level hierarchy,
 user `test` with password `123`, and `default` storage in `./example/storage` direcotry.
-To access the dashboard open `http://localhost/test` in your browser and enter user credentials.
+To access the dashboard open `http://localhost:8080/test` in your browser and enter user credentials.
 
 
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.
