@@ -35,6 +35,8 @@ import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.proxy.ClientSlice;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.files.FilesSlice;
+import com.artipie.files.ProxySlice;
+import com.artipie.files.RpRemote;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
 import com.artipie.http.DockerRoutingSlice;
@@ -160,6 +162,22 @@ public final class SliceFromConfig extends Slice.Wrap {
         switch (cfg.type()) {
             case "file":
                 slice = new TrimPathSlice(new FilesSlice(storage, permissions, auth), prefix);
+                break;
+            case "file-proxy":
+                slice = new TrimPathSlice(
+                    new ProxySlice(
+                        new RpRemote(
+                            SliceFromConfig.HTTP,
+                            URI.create(
+                                cfg.settings()
+                                    .orElseThrow(
+                                        () -> new IllegalStateException("Repo settings missed")
+                                    ).string("remote_uri")
+                            ),
+                            new com.artipie.files.StorageCache(storage)
+                        )
+                    ), prefix
+                );
                 break;
             case "npm":
                 slice = new NpmSlice(
