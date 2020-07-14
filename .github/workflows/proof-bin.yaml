@@ -1,5 +1,5 @@
 name: "Proof::binary"
-"on": [push, pull_request]
+"on": [push]
 jobs:
   proof:
     runs-on: ubuntu-latest
