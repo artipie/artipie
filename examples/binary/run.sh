@@ -1,7 +1,7 @@
 set -x
 set -e
 # start artipie
-docker run --name artipie -d -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:latest
+docker run --name artipie -d -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie
 # wait for container to be ready for the new connections
 sleep 5
 # create a file for subsequent publication

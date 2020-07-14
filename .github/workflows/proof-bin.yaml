@@ -12,5 +12,5 @@ jobs:
       - name: Start binrary example and proof it works
         run: |
           cd examples/binary
-          sed -i 's/artipie\/artipie:latest/artipie/g' run.sh
-          run.sh
+          sed -i 's+artipie/artipie:latest+artipie+' run.sh
+          ./run.sh
