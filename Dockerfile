@@ -14,11 +14,5 @@ LABEL maintainer="g4s8.public@gmail.com"
 COPY --from=build_jar /jar/target/artipie-jar-with-dependencies.jar /usr/lib/artipie.jar
 COPY _config.yml /etc/artipie.yml
 EXPOSE 80
-ENTRYPOINT [
-                "java",
-                "$JVM_OPTS",
-                "--enable-preview",
-                "-XX:+ShowCodeDetailsInExceptionMessages",
-                "-jar", "/usr/lib/artipie.jar"
-           ]
+ENTRYPOINT ["java", "$JVM_OPTS", "--enable-preview", "-XX:+ShowCodeDetailsInExceptionMessages", "-jar", "/usr/lib/artipie.jar"]
 CMD ["--config-file=/etc/artipie.yml", "--port=80"]
