@@ -85,4 +85,19 @@ class MetricsFromConfigTest {
         );
     }
 
+    @Test
+    void usesDefaultInterval() {
+        MatcherAssert.assertThat(
+            new MetricsFromConfig(
+                Yaml.createYamlMappingBuilder().add("type", "log").build()
+            ),
+            new AllOf<>(
+                new ListOf<Matcher<? super MetricsFromConfig>>(
+                    new MatcherOf<>(metrics -> metrics.metrics() instanceof InMemoryMetrics),
+                    new MatcherOf<>(metrics -> metrics.interval().get(ChronoUnit.SECONDS) == 5)
+                )
+            )
+        );
+    }
+
 }

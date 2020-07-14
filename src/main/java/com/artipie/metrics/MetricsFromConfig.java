@@ -51,9 +51,9 @@ public final class MetricsFromConfig {
      * Returns {@link Metrics} instance according to configuration.
      * @return Instance of {@link Metrics}.
      */
-    public Metrics metrics() {
+    public InMemoryMetrics metrics() {
         return Optional.ofNullable(this.settings.string("type"))
-            .<Metrics>map(
+            .map(
                 type -> {
                     if (!"log".equals(type)) {
                         throw new IllegalArgumentException(
@@ -66,13 +66,13 @@ public final class MetricsFromConfig {
     }
 
     /**
-     * Publishing interval.
+     * Publishing interval, default interval is 5 seconds.
      * @return Interval
+     * @checkstyle MagicNumberCheck (500 lines)
      */
     public Duration interval() {
-        final Duration def = Duration.ofSeconds(5);
         return Optional.ofNullable(this.settings.string("interval"))
             .map(interval -> Duration.ofSeconds(Integer.parseInt(interval)))
-            .orElse(def);
+            .orElse(Duration.ofSeconds(5));
     }
 }

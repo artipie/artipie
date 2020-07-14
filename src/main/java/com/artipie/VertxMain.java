@@ -29,7 +29,6 @@ import com.artipie.http.Slice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.PrefixedMetrics;
-import com.artipie.metrics.memory.InMemoryMetrics;
 import com.artipie.metrics.memory.MetricsLogPublisher;
 import com.artipie.metrics.nop.NopMetrics;
 import com.artipie.vertx.VertxSliceServer;
@@ -144,7 +143,7 @@ public final class VertxMain implements Runnable {
                     final MetricsFromConfig metrics = new MetricsFromConfig(root);
                     new MetricsLogPublisher(
                         LoggerFactory.getLogger(Metrics.class),
-                        (InMemoryMetrics) metrics.metrics(),
+                        metrics.metrics(),
                         metrics.interval()
                     ).start();
                     return metrics.metrics();
