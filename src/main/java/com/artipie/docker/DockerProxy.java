@@ -87,7 +87,7 @@ public class DockerProxy implements Slice {
      */
     private Slice delegate() {
         final YamlMapping settings = this.cfg.settings()
-            .orElseThrow(() -> new IllegalStateException("Repo settings not found"));
+            .orElseThrow(() -> new IllegalStateException("Settings not found for Docker proxy"));
         final String host = settings.string("host");
         if (host == null) {
             throw new IllegalStateException("`host` is not specified in settings for Docker proxy");
