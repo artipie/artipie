@@ -48,7 +48,7 @@ import org.reactivestreams.Publisher;
  *  from configuration (e.g. handles simple response like 'GET /v2/') and fails any request for bad
  *  configuration (some required settings are missing).
  */
-public class DockerProxy implements Slice {
+public final class DockerProxy implements Slice {
 
     /**
      * HTTP client.
@@ -110,13 +110,13 @@ public class DockerProxy implements Slice {
             }
             credentials = new Credentials.Basic(username, password);
         }
-        final ClientSlices client = new ClientSlices(this.client);
+        final ClientSlices slices = new ClientSlices(this.client);
         final Docker proxy = new ProxyDocker(
-            new AuthClientSlice(client, client.slice(host), credentials)
+            new AuthClientSlice(slices, slices.slice(host), credentials)
         );
-        final Docker docker = cfg.storageOpt()
+        final Docker docker = this.cfg.storageOpt()
             .<Docker>map(cache -> new CacheDocker(proxy, new AstoDocker(cache)))
             .orElse(proxy);
-        return new DockerSlice(cfg.path(), docker);
+        return new DockerSlice(this.cfg.path(), docker);
     }
 }
