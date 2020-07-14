@@ -2,7 +2,7 @@ name: "Proof::binary"
 "on": [push, pull_request]
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
