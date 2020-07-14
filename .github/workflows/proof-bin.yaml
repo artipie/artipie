@@ -1,5 +1,8 @@
 name: "Proof::binary"
-"on": [push]
+on:
+  push:
+    branches:
+      - "master"
 jobs:
   proof:
     runs-on: ubuntu-latest
