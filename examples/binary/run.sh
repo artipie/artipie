@@ -12,7 +12,7 @@ curl --silent -X PUT --data-binary "@text.txt" http://localhost:8080/repo/text.t
 STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" -X GET http://localhost:8080/repo/text.txt)
 # remove container
 docker rm -f artipie
-# make sure status code is true
+# make sure status code is 200
 if test $STATUSCODE -ne 200; then
   exit 1
 fi
