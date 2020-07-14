@@ -148,11 +148,16 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @todo #90:30min This method still needs more refactoring.
      *  We should test if the type exist in the constructed map. If the type does not exist,
      *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
-     * @checkstyle LineLengthCheck (100 lines)
+     * @checkstyle LineLengthCheck (150 lines)
      * @checkstyle ExecutableStatementCountCheck (100 lines)
      * @checkstyle JavaNCSSCheck (500 lines)
      */
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength"})
+    @SuppressWarnings(
+        {
+            "PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength",
+            "PMD.AvoidDuplicateLiterals", "PMD.NcssCount"
+        }
+    )
     static Slice build(final Settings settings, final Authentication auth,
         final RepoConfig cfg, final StorageAliases aliases) {
         final Slice slice;
@@ -261,7 +266,9 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "npm-proxy":
                 slice = new NpmProxySlice(
                     cfg.path(),
-                    new NpmProxy(new NpmProxyConfig(cfg.settings().orElseThrow()), Vertx.vertx(), storage)
+                    new NpmProxy(
+                        new NpmProxyConfig(cfg.settings().orElseThrow()), Vertx.vertx(), storage
+                    )
                 );
                 break;
             case "pypi":
