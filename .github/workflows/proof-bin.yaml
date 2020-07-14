@@ -2,10 +2,7 @@ name: "Proof::binary"
 "on": [push, pull_request]
 jobs:
   proof:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
