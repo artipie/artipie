@@ -8,3 +8,4 @@ meta:
   layout: org
   metrics:
     type: log
+    interval: 5
