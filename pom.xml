@@ -240,6 +240,13 @@ SOFTWARE.
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <skip>false</skip>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <profiles>

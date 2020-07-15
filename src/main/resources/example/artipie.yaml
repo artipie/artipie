@@ -1,11 +1,11 @@
 meta:
   storage:
     type: fs
-    path: ./example/storage/repo
+    path: ./repo
   credentials:
     type: file
     path: _credentials.yaml
   layout: org
   metrics:
     type: log
-    interval: 5
+    interval: 60

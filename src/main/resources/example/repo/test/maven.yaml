@@ -1,0 +1,6 @@
+repo:
+  type: maven
+  storage: default
+  permissions:
+    "*":
+      - "*"

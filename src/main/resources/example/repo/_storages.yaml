@@ -1,4 +1,4 @@
 storages:
   default:
     type: fs
-    path: ./example/storage/data
+    path: ./.storage/data
