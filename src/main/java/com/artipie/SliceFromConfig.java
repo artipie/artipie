@@ -34,8 +34,8 @@ import com.artipie.docker.cache.CacheDocker;
 import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.proxy.ClientSlice;
 import com.artipie.docker.proxy.ProxyDocker;
+import com.artipie.files.FileProxySlice;
 import com.artipie.files.FilesSlice;
-import com.artipie.files.ProxySlice;
 import com.artipie.files.RpRemote;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
@@ -170,7 +170,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "file-proxy":
                 slice = new TrimPathSlice(
-                    new ProxySlice(
+                    new FileProxySlice(
                         new RpRemote(
                             SliceFromConfig.HTTP,
                             URI.create(
