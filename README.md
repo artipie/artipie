@@ -67,6 +67,10 @@ We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
 understand how Artipie is designed.
 
+# Examples
+
+Specific artipie configuration examples can be found in the [examples/](./examples) directory.
+
 ## Additional configuration
 
 Environment variables:
