@@ -250,6 +250,19 @@ To publish your npm project use the following command:
 $ npm publish --registry=http://localhost:8080/npm
 ```
 
+### NPM Authentication
+
+- Calculate `base64` of the `user:password` string:
+```
+    $ echo -n 'user:password' | base64
+```
+
+- Edit your `$HOME/.npmrc` file:
+```
+    always-auth=true
+    _auth=<base64 string>
+```
+
 ### NPM Proxy Repo
 
 Try this `npm-proxy.yaml` file:
