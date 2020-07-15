@@ -35,6 +35,8 @@ import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.proxy.ClientSlice;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.files.FilesSlice;
+import com.artipie.files.ProxySlice;
+import com.artipie.files.RpRemote;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
 import com.artipie.http.DockerRoutingSlice;
@@ -146,11 +148,16 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @todo #90:30min This method still needs more refactoring.
      *  We should test if the type exist in the constructed map. If the type does not exist,
      *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
-     * @checkstyle LineLengthCheck (100 lines)
+     * @checkstyle LineLengthCheck (150 lines)
      * @checkstyle ExecutableStatementCountCheck (100 lines)
      * @checkstyle JavaNCSSCheck (500 lines)
      */
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength"})
+    @SuppressWarnings(
+        {
+            "PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength",
+            "PMD.AvoidDuplicateLiterals", "PMD.NcssCount"
+        }
+    )
     static Slice build(final Settings settings, final Authentication auth,
         final RepoConfig cfg, final StorageAliases aliases) {
         final Slice slice;
@@ -160,6 +167,22 @@ public final class SliceFromConfig extends Slice.Wrap {
         switch (cfg.type()) {
             case "file":
                 slice = new TrimPathSlice(new FilesSlice(storage, permissions, auth), prefix);
+                break;
+            case "file-proxy":
+                slice = new TrimPathSlice(
+                    new ProxySlice(
+                        new RpRemote(
+                            SliceFromConfig.HTTP,
+                            URI.create(
+                                cfg.settings()
+                                    .orElseThrow(
+                                        () -> new IllegalStateException("Repo settings missed")
+                                    ).string("remote_uri")
+                            ),
+                            new com.artipie.files.StorageCache(storage)
+                        )
+                    ), prefix
+                );
                 break;
             case "npm":
                 slice = new NpmSlice(
@@ -243,7 +266,9 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "npm-proxy":
                 slice = new NpmProxySlice(
                     cfg.path(),
-                    new NpmProxy(new NpmProxyConfig(cfg.settings().orElseThrow()), Vertx.vertx(), storage)
+                    new NpmProxy(
+                        new NpmProxyConfig(cfg.settings().orElseThrow()), Vertx.vertx(), storage
+                    )
                 );
                 break;
             case "pypi":

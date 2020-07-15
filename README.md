@@ -69,6 +69,8 @@ understand how Artipie is designed.
 
 ### Binary Repo
 
+[![](https://github.com/artipie/artipie/workflows/Proof::binary/badge.svg)](./examples/binary)
+
 Try this `repo.yaml` file:
 
 ```yaml
@@ -76,7 +78,10 @@ repo:
   type: file
   storage:
     type: fs
-    path: /var/artipie/storage
+    path: /var/artipie/data
+  permissions:
+    "*":
+      - "*"
 ```
 
 You can send HTTP PUT/GET requests
@@ -243,6 +248,19 @@ To publish your npm project use the following command:
 
 ```bash
 $ npm publish --registry=http://localhost:8080/npm
+```
+
+### NPM Authentication
+
+- Calculate `base64` of the `user:password` string:
+```
+    $ echo -n 'user:password' | base64
+```
+
+- Edit your `$HOME/.npmrc` file:
+```
+    always-auth=true
+    _auth=<base64 string>
 ```
 
 ### NPM Proxy Repo
@@ -579,33 +597,9 @@ by adding `metrics` to `meta` section of global configuration file `/etc/artipie
 ```yaml
 meta:
   metrics:
-    type: log
+    type: log # Metrics type, for now only `log` type is supported
+    interval: 5 # Publishing interval in seconds, default value is 5
 ```
-
-## How to contribute
-
-Fork the repository, make changes, and send us a
-[pull request](https://www.yegor256.com/2014/04/15/github-guidelines.html). We will review
-your changes and apply them to the `master` branch shortly, provided
-they don't violate our quality standards. To avoid frustration, before
-sending us your pull request please run full Maven build:
-
-```
-$ mvn clean install -Pqulice
-```
-
-To avoid build errors use Maven 3.2+.
-
-## How to run it locally
-
-To run Artipie server locally, build it with `mvn clean package -Passembly`
-and run with *(change port if needed)*:
-```java
-java -jar target/artipie-jar-with-dependencies.jar --config=example/artipie.yaml --port=8080
-```
-Example configuration uses `org` layout of Artipie with two level hierarchy,
-user `test` with password `123`, and `default` storage in `./example/storage` direcotry.
-To access the dashboard open `http://localhost/test` in your browser and enter user credentials.
 
 
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.

@@ -27,8 +27,8 @@ package com.artipie;
 import com.artipie.http.Pie;
 import com.artipie.http.Slice;
 import com.artipie.metrics.Metrics;
+import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.PrefixedMetrics;
-import com.artipie.metrics.memory.InMemoryMetrics;
 import com.artipie.metrics.memory.MetricsLogPublisher;
 import com.artipie.metrics.nop.NopMetrics;
 import com.artipie.vertx.VertxSliceServer;
@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Optional;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -141,23 +140,13 @@ public final class VertxMain implements Runnable {
             .map(meta -> meta.yamlMapping("metrics"))
             .<Metrics>map(
                 root -> {
-                    final String type = root.string("type");
-                    if (type == null) {
-                        throw new IllegalArgumentException("Metrics type is not specified");
-                    }
-                    if (!type.equals("log")) {
-                        throw new IllegalArgumentException(
-                            String.format("Unsupported metrics type: %s", type)
-                        );
-                    }
-                    final InMemoryMetrics metrics = new InMemoryMetrics();
-                    final int period = 5;
+                    final MetricsFromConfig metrics = new MetricsFromConfig(root);
                     new MetricsLogPublisher(
                         LoggerFactory.getLogger(Metrics.class),
-                        metrics,
-                        Duration.ofSeconds(period)
+                        metrics.metrics(),
+                        metrics.interval()
                     ).start();
-                    return metrics;
+                    return metrics.metrics();
                 }
             ).orElse(NopMetrics.INSTANCE);
     }
