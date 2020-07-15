@@ -7,7 +7,7 @@ RUN mvn versions:set -DnewVersion=${version} && \
   mvn package -P assembly
 
 FROM adoptopenjdk/openjdk14:alpine-jre
-ENV JAVA_OPTS=""
+ENV JVM_OPTS=""
 LABEL description="Artipie binary repository managment tool"
 LABEL maintainer="titantins@gmail.com"
 LABEL maintainer="g4s8.public@gmail.com"
