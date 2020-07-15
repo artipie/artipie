@@ -24,12 +24,11 @@
 
 package com.artipie;
 
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.Pie;
 import com.artipie.http.Slice;
 import com.artipie.metrics.Metrics;
+import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.PrefixedMetrics;
-import com.artipie.metrics.memory.InMemoryMetrics;
 import com.artipie.metrics.memory.MetricsLogPublisher;
 import com.artipie.metrics.nop.NopMetrics;
 import com.artipie.vertx.VertxSliceServer;
@@ -39,7 +38,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Optional;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -138,23 +136,18 @@ public final class VertxMain implements Runnable {
      * @throws IOException In case of I/O error reading settings.
      */
     private static Metrics metrics(final Settings settings) throws IOException {
-        final YamlMapping root = settings.meta().yamlMapping("metrics");
-        return Optional.ofNullable(root.string("type")).<Metrics>map(
-            type -> {
-                if (!type.equals("log")) {
-                    throw new IllegalArgumentException(
-                        String.format("Unsupported metrics type: %s", type)
-                    );
+        return Optional.ofNullable(settings.meta())
+            .map(meta -> meta.yamlMapping("metrics"))
+            .<Metrics>map(
+                root -> {
+                    final MetricsFromConfig metrics = new MetricsFromConfig(root);
+                    new MetricsLogPublisher(
+                        LoggerFactory.getLogger(Metrics.class),
+                        metrics.metrics(),
+                        metrics.interval()
+                    ).start();
+                    return metrics.metrics();
                 }
-                final InMemoryMetrics metrics = new InMemoryMetrics();
-                final int period = 5;
-                new MetricsLogPublisher(
-                    LoggerFactory.getLogger(Metrics.class),
-                    metrics,
-                    Duration.ofSeconds(period)
-                ).start();
-                return metrics;
-            }
-        ).orElse(NopMetrics.INSTANCE);
+            ).orElse(NopMetrics.INSTANCE);
     }
 }

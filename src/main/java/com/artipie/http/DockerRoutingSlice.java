@@ -102,18 +102,11 @@ public final class DockerRoutingSlice implements Slice {
         private final Slice origin;
 
         /**
-         * Docker base path.
-         */
-        private final String path;
-
-        /**
          * New {@link Slice} decorator to revert real path.
          * @param origin Origin slice
-         * @param path Docker base path
          */
-        public Reverted(final Slice origin, final String path) {
+        public Reverted(final Slice origin) {
             this.origin = origin;
-            this.path = path;
         }
 
         @Override
@@ -125,11 +118,7 @@ public final class DockerRoutingSlice implements Slice {
                 new RequestLine(
                     req.method().toString(),
                     new URIBuilder(req.uri())
-                        .setPath(
-                            Pattern.compile(String.format("^(?:%s)", this.path))
-                                .matcher(req.uri().getPath())
-                                .replaceFirst(String.format("%s/v2", this.path))
-                        )
+                        .setPath(String.format("/v2%s", req.uri().getPath()))
                         .toString(),
                     req.version()
                 ).toString(),
