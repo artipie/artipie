@@ -94,6 +94,7 @@ public final class SliceFromConfig extends Slice.Wrap {
     static {
         final boolean trustall = "true".equals(System.getenv("SSL_TRUSTALL"));
         HTTP = new HttpClient(new SslContextFactory.Client(trustall));
+
         Logger.info(SliceFromConfig.class, "Created HTTP client, trustall=%b", trustall);
         try {
             SliceFromConfig.HTTP.start();

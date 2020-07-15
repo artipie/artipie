@@ -54,7 +54,7 @@ repo:
 Now, go back to `artipie` and start the container:
 
 ```bash
-$ docker run -v "$(pwd):/var/artipie" -p 8080:80 artipie/artipie
+$ docker run -p 8080:80 artipie/artipie:latest
 ```
 
 You should be able to use it with [Maven](https://maven.apache.org/)
