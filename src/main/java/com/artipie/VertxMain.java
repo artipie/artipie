@@ -134,6 +134,8 @@ public final class VertxMain implements Runnable {
      * @param path Settings path
      * @return Settings instance
      * @throws IOException On read error
+     * @todo #284:30min Extract this method to separate class and write proper unit tests
+     *  for that. Also add tests for `JavaResource` class which is used to copy resources.
      */
     private static Settings settings(final Path path) throws IOException {
         if (!Files.exists(path)) {
@@ -150,7 +152,7 @@ public final class VertxMain implements Runnable {
                 VertxMain.class,
                 String.join(
                     " ",
-                "Settings were not found, creating default.",
+                    "Settings were not found, creating default.",
                     "Default username/password: `artipie`/`artipie`. ",
                     "Check the dashboard at http://localhost/artipie"
                 )

@@ -1,6 +1,6 @@
 repo:
-  type: "maven"
+  type: maven
   storage: default
   permissions:
-    \*:
-      - \*
+    "*":
+      - "*"

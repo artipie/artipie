@@ -1,6 +1,6 @@
 repo:
-  type: "docker"
+  type: docker
   storage: default
   permissions:
-    \*:
-      - \*
+    "*":
+      - "*"

@@ -2,6 +2,6 @@ repo:
   type: file
   storage: default
   permissions:
-    "test":
+    artipie:
       - upload
       - download
