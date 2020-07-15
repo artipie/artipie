@@ -71,12 +71,6 @@ We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
 understand how Artipie is designed.
 
-## Additional configuration
-
-You may want configure it via environment variables:
-
-  - `SSL_TRUSTALL` - trust all unkown certificates
-
 ## Multitenancy
 
 You may want to run Artipie for your company, which has a few teams.
@@ -129,4 +123,11 @@ meta:
     interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
+## Additional configuration
+
+You may want configure it via environment variables:
+
+  - `SSL_TRUSTALL` - trust all unkown certificates
+
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.
+
