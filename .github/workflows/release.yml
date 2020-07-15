@@ -1,4 +1,4 @@
-name: Docker Release and Run Benchmarks
+name: Docker Release
 on:
   create:
     tags:

@@ -1,15 +1,13 @@
-<img src="https://www.artipie.com/logo.svg" width="64px" height="64px"/>
+<p align="center">
+  <a href="https://www.artipie.com/">
+    <img src="https://www.artipie.com/logo.svg"/>
+  </a>
+</p>
 
-[![EO principles respected here](https://www.elegantobjects.org/badge.svg)](https://www.elegantobjects.org)
-[![DevOps By Rultor.com](http://www.rultor.com/b/artipie/artipie)](http://www.rultor.com/p/artipie/artipie)
-[![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
-
-[![Build Status](https://img.shields.io/travis/artipie/artipie/master.svg)](https://travis-ci.org/artipie/artipie)
-[![Javadoc](http://www.javadoc.io/badge/com.artipie/artipie.svg)](http://www.javadoc.io/doc/com.artipie/artipie)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
-[![Hits-of-Code](https://hitsofcode.com/github/artipie/artipie)](https://hitsofcode.com/view/github/artipie/artipie)
-[![Maven Central](https://img.shields.io/maven-central/v/com.artipie/artipie.svg)](https://maven-badges.herokuapp.com/maven-central/com.artipie/artipie)
-[![PDD status](http://www.0pdd.com/svg?name=artipie/artipie)](http://www.0pdd.com/p?name=artipie/artipie)
+<h1 align="center">Artipie</h1>
+<p align="center">
+  <strong>A database-free artifact management tool</strong>
+</p>
 
 Artipie is an experimental binary artifact management tool, similar to
 [Artifactory](https://jfrog.com/artifactory/),
@@ -36,7 +34,27 @@ The following set of features makes Artipie unique among all others:
     [HuaweiCloud OBS](https://www.huaweicloud.com/en-us/product/obs.html) etc.
   * Its quality of Java code is extraordinary high :)
 
-The fastest way to start using Artipie is via
+<div align="center">
+  <h2>
+    <a href="http://artipie.com/docs">Documentation</a>
+    <span> | </span>
+    <a href="./examples">Examples</a>
+  </h2>
+</div>
+
+<p align="center">
+  <a href="https://github.com/artipie/artipie/blob/master/LICENSE.txt">
+    <img src="https://img.shields.io/badge/license-MIT-green.svg" />
+  </a>
+  <a href="https://hub.docker.com/r/artipie/artipie">
+    <img src="https://github.com/artipie/artipie/workflows/Docker%20Release/badge.svg" />
+  </a> 
+  <a href="https://hub.docker.com/r/artipie/artipie">
+    <img src="https://img.shields.io/docker/v/artipie/artipie?sort=date" />
+  </a>  
+</p>
+
+<!-- The fastest way to start using Artipie is via
 [Docker](https://docs.docker.com/get-docker/). First,
 create a new directory `artipie` and `repo` sub-directory inside it. Then, put your
 YAML config file into the `repo` sub-dir. Make sure that the name of your config file
@@ -613,4 +631,4 @@ user `test` with password `123`, and `default` storage in `./example/storage` di
 To access the dashboard open `http://localhost/test` in your browser and enter user credentials.
 
 
-Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.
+Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo. -->
