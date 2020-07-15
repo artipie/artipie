@@ -52,4 +52,7 @@ The following set of features makes Artipie unique among all others:
   <a href="https://hub.docker.com/r/artipie/artipie">
     <img src="https://img.shields.io/docker/v/artipie/artipie?sort=date" />
   </a>  
+  <a href="https://t.me/artipie">
+    <img src="https://patrolavia.github.io/telegram-badge/chat.png" />
+  </a>  
 </p>
