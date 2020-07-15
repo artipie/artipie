@@ -72,7 +72,7 @@ public final class GithubAuth implements Authentication {
 
     /**
      * Primary constructor.
-     * @param github Github username resolver
+     * @param github Resolves GitHub token to username
      */
     GithubAuth(final Function<String, String> github) {
         this.github = github;

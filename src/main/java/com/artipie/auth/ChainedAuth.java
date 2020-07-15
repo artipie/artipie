@@ -32,6 +32,16 @@ import java.util.Optional;
 /**
  * Chained authentication provider, composed by multiple
  * authentication providers invoked by user specified order.
+ * <p>
+ * Example, this code will check authentication using {@code GithubAuth} provider first,
+ * and {@code EnvAuth} then, if first provider didn't resolve the user:
+ * <pre><code>
+ * new ChainedAuth(
+ *   new GithubAuth(),
+ *   new EnvAuth()
+ * )
+ * </code></pre>
+ * </p>
  * @since 0.10
  */
 public final class ChainedAuth implements Authentication {
