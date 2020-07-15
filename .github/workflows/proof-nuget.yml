@@ -1,0 +1,19 @@
+name: "Proof::nuget"
+on:
+  push:
+    branches:
+      - "master"
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+      - name: Build docker image
+        run: |
+          docker build . -t artipie
+      - name: Start nuget example and proof it works
+        run: |
+          cd examples/nuget
+          sed -i 's+artipie/artipie:latest+artipie+' run.sh
+          ./run.sh

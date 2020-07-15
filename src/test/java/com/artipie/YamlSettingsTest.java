@@ -27,7 +27,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.s3.S3Storage;
 import com.artipie.auth.AuthFromEnv;
-import com.artipie.auth.AuthFromYaml;
+import com.artipie.http.auth.Authentication;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -143,7 +143,7 @@ class YamlSettingsTest {
         );
         MatcherAssert.assertThat(
             settings.auth().toCompletableFuture().get(),
-            new IsInstanceOf(AuthFromYaml.class)
+            new IsInstanceOf(Authentication.class)
         );
     }
 
