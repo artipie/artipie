@@ -1,5 +1,7 @@
 ### Go Repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::go/badge.svg)
+
 Try this `go.yaml` file:
 
 ```yaml

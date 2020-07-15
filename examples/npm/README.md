@@ -1,5 +1,7 @@
 ### NPM Repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::npm/badge.svg)
+
 Try this `npm.yaml` file:
 
 ```yaml

@@ -1,5 +1,7 @@
 ### Maven Repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::maven/badge.svg)
+
 Try this `maven.yaml` file to host a [Maven](https://maven.apache.org/) repo:
 
 ```yaml

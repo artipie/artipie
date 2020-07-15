@@ -1,5 +1,7 @@
 ### NuGet Repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::nuget/badge.svg)
+
 Try this `nuget.yaml` file:
 
 ```yaml

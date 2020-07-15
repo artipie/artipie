@@ -1,5 +1,7 @@
 ### Docker Repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::docker/badge.svg)
+
 Try this `docker.yaml` file:
 
 ```yaml

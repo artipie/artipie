@@ -1,5 +1,7 @@
 ### RPM Repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::rpm/badge.svg)
+
 Create new directory `/var/artipie`, directory for configuration files
 `/var/artipie/repo` and directory for RPM repository `/var/artipie/centos`.
 Put repository config file to `/var/artipie/repo/centos.yaml`:

@@ -1,5 +1,7 @@
 ### PHP Composer Repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::php/badge.svg)
+
 Try this `my-php.yaml` file:
 
 ```yaml

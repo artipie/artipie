@@ -1,5 +1,7 @@
 ### Gem Repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::gem/badge.svg)
+
 Try this `gem.yaml` file:
 
 ```yaml

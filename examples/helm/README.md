@@ -1,5 +1,7 @@
 ### Helm chart repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::helm/badge.svg)
+
 Try this `helm.yaml` file:
 
 ```yaml

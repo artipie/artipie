@@ -1,5 +1,7 @@
 ### Python repo
 
+![](https://github.com/artipie/artipie/workflows/Proof::python/badge.svg)
+
 Try this `pypi.yaml` file:
 
 ```yaml
