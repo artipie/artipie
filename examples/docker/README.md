@@ -31,13 +31,15 @@ $ docker pull my-docker.my-company.com/my-image
 
 ### Docker Proxy Repo
 
-Try this `docker-proxy.yaml` file to host a proxy to `mcr.microsoft.com` registry:
+Try this `docker-proxy.yaml` file to host a proxy to `registry-1.docker.io` registry:
 
 ```yaml
 repo:
   type: docker-proxy
   settings:
-    host: mcr.microsoft.com
+    host: registry-1.docker.io
+    username: Aladdin # optional
+    password: OpenSesame # optional
 ```
 
 Artipie will redirect all pull requests to specified registry.
