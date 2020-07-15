@@ -95,13 +95,15 @@ public class MetricsLogPublisher {
      */
     private void publish() {
         final Map<String, InMemoryCounter> counters = new TreeMap<>(this.metrics.counters());
-        final StringBuilder message = new StringBuilder("Counters:");
-        for (final Map.Entry<String, InMemoryCounter> entry : counters.entrySet()) {
-            message.append('\n')
-                .append(entry.getKey())
-                .append(": ")
-                .append(entry.getValue().value());
+        if (!counters.isEmpty()) {
+            final StringBuilder message = new StringBuilder("Counters:");
+            for (final Map.Entry<String, InMemoryCounter> entry : counters.entrySet()) {
+                message.append('\n')
+                    .append(entry.getKey())
+                    .append(": ")
+                    .append(entry.getValue().value());
+            }
+            this.logger.info(message.toString());
         }
-        this.logger.info(message.toString());
     }
 }
