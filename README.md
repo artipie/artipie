@@ -60,21 +60,28 @@ $ docker run -p 8080:80 artipie/artipie:latest
 You should be able to use it with [Maven](https://maven.apache.org/)
 at `http://localhost:8080`.
 
-In the sections below you can see how to configure Artipie
-to use it with different package managers.
+Here is how you can use it to host
+  [Maven](./examples/maven),
+  [Docker](./examples/docker),
+  [Rubygems](./examples/gem),
+  [Go](./examples/go),
+  [Helm](./examples/helm),
+  [Npm](./examples/npm),
+  [NuGet](./examples/nuget),
+  [Composer](./examples/php),
+  [Pip](./examples/python),
+  [Rpm](./examples/rpm),
+  and [others](./examples).
 
 We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
 understand how Artipie is designed.
 
-# Examples
-
-Specific artipie configuration examples can be found in the [examples/](./examples) directory.
-
 ## Additional configuration
 
-Environment variables:
- - `SSL_TRUSTALL` - trust all unkown certificates
+You may want configure it via environment variables:
+
+  - `SSL_TRUSTALL` - trust all unkown certificates
 
 ## Multitenancy
 
@@ -127,6 +134,5 @@ meta:
     type: log # Metrics type, for now only `log` type is supported
     interval: 5 # Publishing interval in seconds, default value is 5
 ```
-
 
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.
