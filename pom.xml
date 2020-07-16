@@ -116,6 +116,11 @@ SOFTWARE.
       <version>0.23.1</version>
     </dependency>
     <dependency>
+      <groupId>com.jcabi</groupId>
+      <artifactId>jcabi-github</artifactId>
+      <version>1.1.2</version>
+    </dependency>
+    <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>vertx-server</artifactId>
       <version>0.3</version>
@@ -178,7 +183,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>0.2.8</version>
+      <version>0.2.9</version>
     </dependency>
     <dependency>
       <groupId>com.github.jknack</groupId>
@@ -234,6 +239,13 @@ SOFTWARE.
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration>
+          <skip>false</skip>
+        </configuration>
       </plugin>
     </plugins>
   </build>
