@@ -33,11 +33,15 @@ import com.artipie.asto.Key;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.rq.RequestLineFrom;
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import io.reactivex.Single;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 
@@ -81,6 +85,7 @@ final class RepoPage implements Page {
             throw new IllegalStateException("Should match");
         }
         final String name = matcher.group("key");
+        this.handlebars.registerHelper("eq", ConditionalHelpers.eq);
         final String[] parts = name.split("/");
         final Key.From key = new Key.From(String.format("%s.yaml", name));
         // @checkstyle LineLengthCheck (30 lines)
@@ -108,7 +113,8 @@ final class RepoPage implements Page {
                             new MapEntry<>("user", parts[0]),
                             new MapEntry<>("name", parts[1]),
                             new MapEntry<>("config", yaml.toString()),
-                            new MapEntry<>("found", true)
+                            new MapEntry<>("found", true),
+                            new MapEntry<>("type", yaml.yamlMapping("repo").value("type").asScalar().value())
                         )
                     )
                 )
@@ -119,7 +125,17 @@ final class RepoPage implements Page {
                             new MapEntry<>("title", name),
                             new MapEntry<>("user", parts[0]),
                             new MapEntry<>("name", parts[1]),
-                            new MapEntry<>("found", false)
+                            new MapEntry<>("found", false),
+                            new MapEntry<>(
+                                "type",
+                                URLEncodedUtils.parse(
+                                    new RequestLineFrom(line).uri(),
+                                    StandardCharsets.UTF_8.displayName()
+                                ).stream()
+                                    .filter(pair -> "type".equals(pair.getName()))
+                                    .findFirst().map(NameValuePair::getValue)
+                                    .orElse("maven")
+                            )
                         )
                     )
                 )
