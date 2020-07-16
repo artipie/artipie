@@ -70,9 +70,8 @@ will be able to publish Maven artifacts and all other users will be able to down
 and you download with
 <a href="https://maven.apache.org/plugins/maven-compiler-plugin/index.html"><code>mvn compile</code></a>.
 {{/eq}}{{#eq type "maven-proxy"}}
-<p>It's maven proxy repository, it proxies all request to remote Maven repository apply authentication
-and save artifacts in Artipie storage cache.</p>
-
+<p>Maven proxy repository proxies all request to remote Maven repository appling authentication
+and saves artifacts in Artipie storage cache.</p>
 <p>To use it as a mirror for Apache central, add this configuration to your
 <code>~/.m2/settings.xml</code>:
 <pre>
@@ -100,14 +99,14 @@ docker push central.artipie.com/{{user}}/{{repo}}alpine:3.11
 </p>
 {{/eq}}
 {{#eq type "maven-group"}}
-To use Maven groupped (virtual) repository, you have to create at least two Maven repositories before,
-it can be either just a Maven repository or Maven proxy (mirror) repository. Then specify
+<p>To use Maven grouped (virtual) repository first create at least two Maven or Maven proxy repositories.
+It can be either just a Maven repository or Maven proxy (mirror) repository. Then specify
 <code>https://central.artipie.com/{{user}}/{{repo}}</code> as distribution management, or
 repositories in <code>pom.xml</code> or as a mirror in <code>settings.xml</code> (see
 more details in concrete repositories documentation). Then group repositories under
 group-settings, pay attention that order does matter: first repository in the list will be
-accessed first, then second, etc. Repository name should be full formatted, include your username
-prefix, e.g. <code>{{user}}/maven</code>.
+accessed first, then second, etc. Repository name should be fully formatted, include your username
+prefix, e.g. <code>{{user}}/maven</code>.</p>
 {{/eq}}{{#eq type "file"}}
 <p>It's just a binary files repository. Use <code>PUT</code> HTTP request to upload a file,
 and <code>GET</code> for downloading.</p>
