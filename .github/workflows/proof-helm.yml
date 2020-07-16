@@ -9,6 +9,10 @@ jobs:
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
+      - uses: azure/setup-helm@v1
+        with:
+          version: 'v3.2.1'
+        id: install  
       - name: Build docker image
         run: |
           docker build . -t artipie
