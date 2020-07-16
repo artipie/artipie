@@ -48,6 +48,7 @@ import io.reactivex.Single;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 
 /**
@@ -95,14 +96,21 @@ public final class ArtipieApi extends Slice.Wrap {
                                         new Header(
                                             "Location",
                                             String.format(
-                                                "/%s/%s",
+                                                "/%s/%s?type=%s",
                                                 matcher.group("user"),
                                                 URLEncodedUtils.parse(
                                                     new RequestLineFrom(line).uri(),
                                                     StandardCharsets.UTF_8.displayName()
                                                 ).stream()
                                                     .filter(pair -> "repo".equals(pair.getName()))
-                                                    .findFirst().orElseThrow().getValue()
+                                                    .findFirst().orElseThrow().getValue(),
+                                                URLEncodedUtils.parse(
+                                                    new RequestLineFrom(line).uri(),
+                                                    StandardCharsets.UTF_8.displayName()
+                                                ).stream()
+                                                    .filter(pair -> "type".equals(pair.getName()))
+                                                    .findFirst().map(NameValuePair::getValue)
+                                                    .orElse("maven")
                                             )
                                         )
                                     );

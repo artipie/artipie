@@ -1,22 +1,35 @@
 {{#partial "content"}}
 
-<p>
-  You may reset your password to be used in
-  authentication through package managers, like Maven:
-</p>
+<p>Obtain
+GitHub <a href="https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token">personal access token</a>
+and use it as a password in authentication through package managers,
+your username is <code>github.com/{{user}}</code>.</p>
 
+<!--
 <form action="/api/users/{{user}}/password" method="POST">
   <input id="new-password" name="password" type="password" placeholder="Your password..." size="35" required="true"/>
   <input id="new-repo-submit" type="submit" value="Change"/>
 </form>
+-->
 
 <p>
   Your repositories:
 </p>
 
 <form action="/api/repos/{{user}}" method="GET">
-  <label>New repository:</label>
+  <label>Create new repository:</label>
   <input id="new-repo-name" name="repo" type="text" size="25" required="true" pattern="[a-z0-9]{3,16}"/>
+  <label>Type:</label>
+  <select name="type">
+    <option value="maven">Maven</option>
+    <option value="file">Binary</option>
+    <option value="docker">Docker</option>
+    <option value="npm">NPM</option>
+    <option value="rpm">RPM</option>
+    <option value="maven-proxy">Maven proxy (mirror)</option>
+    <option value="file-proxy">Binary proxy (mirror)</option>
+    <option value="maven-group">Maven group (virtual)</option>
+  </select>
   <input id="new-repo-submit" type="submit" value="Add"/>
 </form>
 
