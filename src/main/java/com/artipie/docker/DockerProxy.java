@@ -27,6 +27,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.RepoConfig;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.cache.CacheDocker;
+import com.artipie.docker.composite.ReadWriteDocker;
 import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.proxy.AuthClientSlice;
 import com.artipie.docker.proxy.ClientSlices;
@@ -47,6 +48,7 @@ import org.reactivestreams.Publisher;
  *  `DockerProxy` class lacks unit test coverage. It should be tested that slice is built properly
  *  from configuration (e.g. handles simple response like 'GET /v2/') and fails any request for bad
  *  configuration (some required settings are missing).
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class DockerProxy implements Slice {
 
@@ -115,7 +117,12 @@ public final class DockerProxy implements Slice {
             new AuthClientSlice(slices, slices.slice(host), credentials)
         );
         final Docker docker = this.cfg.storageOpt()
-            .<Docker>map(cache -> new CacheDocker(proxy, new AstoDocker(cache)))
+            .<Docker>map(
+                storage -> {
+                    final AstoDocker local = new AstoDocker(storage);
+                    return new ReadWriteDocker(new CacheDocker(proxy, local), local);
+                }
+            )
             .orElse(proxy);
         return new DockerSlice(this.cfg.path(), docker);
     }

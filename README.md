@@ -20,13 +20,18 @@ The following set of features makes Artipie unique among all others:
   * It is open source ([MIT license](https://github.com/artipie/artipie/blob/master/LICENSE.txt))
   * It is horizontally scalable, you can add servers easily
   * It is written in reactive Java (using [Vert.x](https://vertx.io/))
-  * It supports 10+ package managers, incl.
-    [Maven](https://maven.apache.org/),
-    [NuGet](https://www.nuget.org/),
-    [Pip](https://pypi.org/project/pip/),
-    [Gem](https://guides.rubygems.org/what-is-a-gem/),
-    [Go](https://golang.org/),
-    [Docker](https://www.docker.com/), etc.
+  * It supports
+    [Maven](./examples/maven),
+    [Docker](./examples/docker),
+    [Rubygems](./examples/gem),
+    [Go](./examples/go),
+    [Helm](./examples/helm),
+    [Npm](./examples/npm),
+    [NuGet](./examples/nuget),
+    [Composer](./examples/php),
+    [Pip](./examples/python),
+    [Rpm](./examples/rpm),
+    and [others](./examples)
   * It is database-free
   * It can host the data in the file system,
     [Amazon S3](https://aws.amazon.com/s3/),
