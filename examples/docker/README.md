@@ -50,4 +50,8 @@ repo:
   storage:
     type: fs
     path: /tmp/artipie/data/my-docker-cache
+<<<<<<< HEAD
 </pre>
+
+With `storage` specified it is also possible to push images into this repository
+using `docker push` command.
