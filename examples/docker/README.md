@@ -12,22 +12,16 @@ repo:
     path: /tmp/artipie/data/my-docker
 ```
 
-Docker registry has to be protected by HTTPS and should have no prefix in path.
-In order to access this Docker repository it is required to run a reverse proxy such as
-[nginx](https://nginx.org/) or [lighttpd](https://www.lighttpd.net/) to protect Artipie
-with HTTPS and add forwarding of requests from `my-docker.my-company.com/<path>` to
-`my-artipie.my-company.com/my-docker/<path>`.
-Then to push your Docker image use the following command:
+Docker registry has to be protected by HTTPS.
 
-```bash
-$ docker push my-docker.my-company.com/my-image
-```
+Tag your image with `central.artipie.com/{{user}}/{{name}}` image prefix,
+and push it to central.artipie.com then. E.g.
+for `alpine:3.11` use:
+<pre>
+docker tag alpine:3.11 central.artipie.com/{{user}}/{{name}}/alpine:3.11
+docker push central.artipie.com/{{user}}/{{name}}/alpine:3.11
+</pre>
 
-To pull the image use the following command:
-
-```bash
-$ docker pull my-docker.my-company.com/my-image
-```
 
 ### Docker Proxy Repo
 

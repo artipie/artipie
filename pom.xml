@@ -225,7 +225,85 @@ SOFTWARE.
         <filtering>true</filtering>
       </testResource>
     </testResources>
+    <resources>
+      <resource>
+        <directory>${project.basedir}/src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+      <resource>
+        <directory>${project.build.directory}/generated-resources</directory>
+        <filtering>false</filtering>
+      </resource>
+    </resources>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <id>copy-markdown-documentation</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy file="${basedir}/examples/binary/README.md" tofile="${project.build.directory}/examples-md/file.md"/>
+                <copy file="${basedir}/examples/docker/README.md" tofile="${project.build.directory}/examples-md/docker.md"/>
+                <copy file="${basedir}/examples/gem/README.md" tofile="${project.build.directory}/examples-md/gem.md"/>
+                <copy file="${basedir}/examples/go/README.md" tofile="${project.build.directory}/examples-md/go.md"/>
+                <copy file="${basedir}/examples/helm/README.md" tofile="${project.build.directory}/examples-md/helm.md"/>
+                <copy file="${basedir}/examples/maven/README.md" tofile="${project.build.directory}/examples-md/maven.md"/>
+                <copy file="${basedir}/examples/npm/README.md" tofile="${project.build.directory}/examples-md/npm.md"/>
+                <copy file="${basedir}/examples/nuget/README.md" tofile="${project.build.directory}/examples-md/nuget.md"/>
+                <copy file="${basedir}/examples/php/README.md" tofile="${project.build.directory}/examples-md/php.md"/>
+                <copy file="${basedir}/examples/python/README.md" tofile="${project.build.directory}/examples-md/pypi.md"/>
+                <copy file="${basedir}/examples/rpm/README.md" tofile="${project.build.directory}/examples-md/rpm.md"/>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-rename-html-documentation</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy file="${project.build.directory}/examples-html/file.html" toFile="${project.build.directory}/classes/dashboard/file.hbs"/>
+                <copy file="${project.build.directory}/examples-html/docker.html" toFile="${project.build.directory}/classes/dashboard/docker.hbs"/>
+                <copy file="${project.build.directory}/examples-html/gem.html" toFile="${project.build.directory}/classes/dashboard/gem.hbs"/>
+                <copy file="${project.build.directory}/examples-html/go.html" toFile="${project.build.directory}/classes/dashboard/go.hbs"/>
+                <copy file="${project.build.directory}/examples-html/helm.html" toFile="${project.build.directory}/classes/dashboard/helm.hbs"/>
+                <copy file="${project.build.directory}/examples-html/maven.html" toFile="${project.build.directory}/classes/dashboard/maven.hbs"/>
+                <copy file="${project.build.directory}/examples-html/npm.html" toFile="${project.build.directory}/classes/dashboard/npm.hbs"/>
+                <copy file="${project.build.directory}/examples-html/nuget.html" toFile="${project.build.directory}/classes/dashboard/nuget.hbs"/>
+                <copy file="${project.build.directory}/examples-html/php.html" toFile="${project.build.directory}/classes/dashboard/php.hbs"/>
+                <copy file="${project.build.directory}/examples-html/pypi.html" toFile="${project.build.directory}/classes/dashboard/pypi.hbs"/>
+                <copy file="${project.build.directory}/examples-html/rpm.html" toFile="${project.build.directory}/classes/dashboard/rpm.hbs"/>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.ruleoftech</groupId>
+        <artifactId>markdown-page-generator-plugin</artifactId>
+        <version>2.2.0</version>
+        <executions>
+          <execution>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <inputDirectory>${project.build.directory}/examples-md/</inputDirectory>
+          <outputDirectory>${project.build.directory}/examples-html</outputDirectory>
+        </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>

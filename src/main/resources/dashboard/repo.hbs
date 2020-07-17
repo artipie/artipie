@@ -89,14 +89,7 @@ and saves artifacts in Artipie storage cache.</p>
 </pre>
 </p>
 {{/eq}}{{#eq type "docker"}}
-<p>Tag your image with <code>central.artipie.com/{{user}}/{{repo}}</code> image prefix,
-and push it to central.artipie.com then. E.g.
-for <code>alpine:3.11</code> use:
-<pre>
-docker tag alpine:3.11 central.artipie.com/{{user}}/{{repo}}alpine:3.11
-docker push central.artipie.com/{{user}}/{{repo}}alpine:3.11
-</pre>
-</p>
+{{>docker}}
 {{/eq}}
 {{#eq type "maven-group"}}
 <p>To use Maven grouped (virtual) repository first create at least two Maven or Maven proxy repositories.
@@ -108,14 +101,7 @@ group-settings, pay attention that order does matter: first repository in the li
 accessed first, then second, etc. Repository name should be fully formatted, include your username
 prefix, e.g. <code>{{user}}/maven</code>.</p>
 {{/eq}}{{#eq type "file"}}
-<p>It's just a binary files repository. Use <code>PUT</code> HTTP request to upload a file,
-and <code>GET</code> for downloading.</p>
-<p>E.g. using <a href="https://httpie.org/">HTTPie</a> CLI tool:
-<pre>
-# uploading file.bin
-http -a {{user}}:password PUT https://central.artipie.com/{{user}}/{{repo}}file.bin @file.bin
-# downloading file.bin
-http GET https://central.artipie.com/{{user}}/{{repo}}file.bin --output=./file.bin
+{{> file}}
 {{/eq}}
 
 {{/partial}}

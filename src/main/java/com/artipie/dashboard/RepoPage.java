@@ -111,7 +111,7 @@ final class RepoPage implements Page {
                         new MapOf<>(
                             new MapEntry<>("title", name),
                             new MapEntry<>("user", parts[0]),
-                            new MapEntry<>("name", parts[1]),
+                            new MapEntry<>("name", parts[1].replaceAll("/$", "")),
                             new MapEntry<>("config", yaml.toString()),
                             new MapEntry<>("found", true),
                             new MapEntry<>("type", yaml.yamlMapping("repo").value("type").asScalar().value())
@@ -124,7 +124,7 @@ final class RepoPage implements Page {
                         new MapOf<>(
                             new MapEntry<>("title", name),
                             new MapEntry<>("user", parts[0]),
-                            new MapEntry<>("name", parts[1]),
+                            new MapEntry<>("name", parts[1].replaceAll("/$", "")),
                             new MapEntry<>("found", false),
                             new MapEntry<>(
                                 "type",
