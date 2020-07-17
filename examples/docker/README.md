@@ -4,13 +4,13 @@
 
 Try this `docker.yaml` file:
 
-```yaml
+<pre>
 repo:
   type: docker
   storage:
     type: fs
     path: /tmp/artipie/data/my-docker
-```
+</pre>
 
 Docker registry has to be protected by HTTPS.
 
@@ -27,14 +27,14 @@ docker push central.artipie.com/{{user}}/{{name}}/alpine:3.11
 
 Try this `docker-proxy.yaml` file to host a proxy to `registry-1.docker.io` registry:
 
-```yaml
+<pre>
 repo:
   type: docker-proxy
   settings:
     host: registry-1.docker.io
     username: Aladdin # optional
     password: OpenSesame # optional
-```
+</pre>
 
 Artipie will redirect all pull requests to specified registry.
 
@@ -42,7 +42,7 @@ Proxy repository supports caching in local storage.
 To enable it and make previously accessed images available when source repository is down 
 add `storage` section to config:
 
-```yaml
+<pre>
 repo:
   type: docker-proxy
   settings:
@@ -50,4 +50,4 @@ repo:
   storage:
     type: fs
     path: /tmp/artipie/data/my-docker-cache
-```
+</pre>

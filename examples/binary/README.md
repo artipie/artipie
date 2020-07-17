@@ -4,7 +4,7 @@
 
 Try this `repo.yaml` file:
 
-<code>
+<pre>
 repo:
   type: file
   storage:
@@ -13,14 +13,14 @@ repo:
   permissions:
     "*":
       - "*"
-</code>
+</pre>
 
 Use `PUT` HTTP request to upload a file, and `GET` for downloading.</p>
 
 Example using [HTTPie](https://httpie.org/) CLI tool for uploading and downloading:
-<code>
+<pre>
 http -a {{user}}:password PUT https://central.artipie.com/{{user}}/{{name}}/file.bin @file.bin
 http GET https://central.artipie.com/{{user}}/{{name}}/file.bin --output=./file.bin
-</code>
+</pre>
 
 // TODO: add curl example
