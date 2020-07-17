@@ -27,18 +27,20 @@ package com.artipie;
 import com.artipie.http.Pie;
 import com.artipie.http.Slice;
 import com.artipie.metrics.Metrics;
+import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.PrefixedMetrics;
-import com.artipie.metrics.memory.InMemoryMetrics;
 import com.artipie.metrics.memory.MetricsLogPublisher;
 import com.artipie.metrics.nop.NopMetrics;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -116,9 +118,7 @@ public final class VertxMain implements Runnable {
         } else {
             throw new IllegalStateException("Storage is not configured");
         }
-        final Settings settings = new YamlSettings(
-            Files.readString(Path.of(storage), Charset.defaultCharset())
-        );
+        final Settings settings = settings(Path.of(storage));
         new VertxMain(
             new ResponseMetricsSlice(
                 new Pie(settings), new PrefixedMetrics(metrics(settings), "http.response.")
@@ -127,6 +127,38 @@ public final class VertxMain implements Runnable {
             port
         ).run();
         Logger.info(VertxMain.class, "Artipie was started on port %d", port);
+    }
+
+    /**
+     * Find artipie settings.
+     * @param path Settings path
+     * @return Settings instance
+     * @throws IOException On read error
+     * @todo #284:30min Extract this method to separate class and write proper unit tests
+     *  for that. Also add tests for `JavaResource` class which is used to copy resources.
+     */
+    private static Settings settings(final Path path) throws IOException {
+        if (!Files.exists(path)) {
+            new JavaResource("example/artipie.yaml").copy(path);
+            Files.createDirectory(Paths.get("./repo"));
+            final List<String> resources = Arrays.asList(
+                "_credentials.yaml", "_storages.yaml", "_permissions.yaml"
+            );
+            for (final String res : resources) {
+                new JavaResource(String.format("example/repo/%s", res))
+                    .copy(Paths.get(String.format("./repo/%s", res)));
+            }
+            Logger.info(
+                VertxMain.class,
+                String.join(
+                    " ",
+                    "Settings were not found, creating default.",
+                    "Default username/password: `artipie`/`artipie`. ",
+                    "Check the dashboard at http://localhost/artipie"
+                )
+            );
+        }
+        return new YamlSettings(Files.readString(path, StandardCharsets.UTF_8));
     }
 
     /**
@@ -141,23 +173,13 @@ public final class VertxMain implements Runnable {
             .map(meta -> meta.yamlMapping("metrics"))
             .<Metrics>map(
                 root -> {
-                    final String type = root.string("type");
-                    if (type == null) {
-                        throw new IllegalArgumentException("Metrics type is not specified");
-                    }
-                    if (!type.equals("log")) {
-                        throw new IllegalArgumentException(
-                            String.format("Unsupported metrics type: %s", type)
-                        );
-                    }
-                    final InMemoryMetrics metrics = new InMemoryMetrics();
-                    final int period = 5;
+                    final MetricsFromConfig metrics = new MetricsFromConfig(root);
                     new MetricsLogPublisher(
                         LoggerFactory.getLogger(Metrics.class),
-                        metrics,
-                        Duration.ofSeconds(period)
+                        metrics.metrics(),
+                        metrics.interval()
                     ).start();
-                    return metrics;
+                    return metrics.metrics();
                 }
             ).orElse(NopMetrics.INSTANCE);
     }

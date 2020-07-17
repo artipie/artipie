@@ -1,0 +1,7 @@
+repo:
+  type: maven-group
+  storage: default
+  settings:
+    repositories:
+      - test/maven
+      - test/maven-proxy

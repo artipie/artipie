@@ -1,0 +1,3 @@
+permissions:
+  artipie:
+    - api

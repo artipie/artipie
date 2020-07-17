@@ -1,0 +1,7 @@
+repo:
+  type: file
+  storage: default
+  permissions:
+    artipie:
+      - upload
+      - download

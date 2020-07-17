@@ -1,0 +1,6 @@
+repo:
+  type: docker
+  storage: default
+  permissions:
+    "*":
+      - "*"

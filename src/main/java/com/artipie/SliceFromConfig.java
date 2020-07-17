@@ -28,14 +28,11 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
-import com.artipie.docker.Docker;
+import com.artipie.docker.DockerProxy;
 import com.artipie.docker.asto.AstoDocker;
-import com.artipie.docker.cache.CacheDocker;
 import com.artipie.docker.http.DockerSlice;
-import com.artipie.docker.proxy.ClientSlice;
-import com.artipie.docker.proxy.ProxyDocker;
+import com.artipie.files.FileProxySlice;
 import com.artipie.files.FilesSlice;
-import com.artipie.files.ProxySlice;
 import com.artipie.files.RpRemote;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
@@ -94,6 +91,7 @@ public final class SliceFromConfig extends Slice.Wrap {
     static {
         final boolean trustall = "true".equals(System.getenv("SSL_TRUSTALL"));
         HTTP = new HttpClient(new SslContextFactory.Client(trustall));
+
         Logger.info(SliceFromConfig.class, "Created HTTP client, trustall=%b", trustall);
         try {
             SliceFromConfig.HTTP.start();
@@ -170,7 +168,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "file-proxy":
                 slice = new TrimPathSlice(
-                    new ProxySlice(
+                    new FileProxySlice(
                         new RpRemote(
                             SliceFromConfig.HTTP,
                             URI.create(
@@ -280,14 +278,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "docker-proxy":
-                final String host = cfg.settings()
-                    .orElseThrow(() -> new IllegalStateException("Repo settings not found"))
-                    .string("host");
-                final Docker proxy = new ProxyDocker(new ClientSlice(SliceFromConfig.HTTP, host));
-                final Docker docker = cfg.storageOpt()
-                    .<Docker>map(cache -> new CacheDocker(proxy, new AstoDocker(cache)))
-                    .orElse(proxy);
-                slice = new DockerSlice(cfg.path(), docker);
+                slice = new DockerProxy(SliceFromConfig.HTTP, cfg);
                 break;
             default:
                 throw new IllegalStateException(
