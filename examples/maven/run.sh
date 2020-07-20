@@ -16,6 +16,5 @@ cd sample-consumer
 mvn -U clean install
 cd ..
 
-
 # Remove container.
 docker rm -f artipie
