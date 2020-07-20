@@ -2,7 +2,7 @@ set -x
 set -e
 
 # Start artipie.
-docker run -d --name artipie -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:latest
+docker run --rm -d --name artipie -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:latest
 
 # Wait for container to be ready for new connections.
 sleep 5
@@ -14,4 +14,4 @@ mvn -f sample-for-deployment deploy -Dmaven.install.skip=true
 mvn -f sample-consumer -U clean install
 
 # Remove container.
-docker rm -f artipie
+docker stop artipie
