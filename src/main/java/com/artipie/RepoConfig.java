@@ -217,7 +217,7 @@ public final class RepoConfig {
      * @return Async YAML mapping
      */
     public YamlMapping repoConfig() {
-        return Objects.requireNonNull(this.yaml.yamlMapping("repo"), "yaml repo is null");
+        return Objects.requireNonNull(this.yaml.yamlMapping("repo"), "yaml repo config is absent");
     }
 
     /**

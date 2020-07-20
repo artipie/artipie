@@ -129,12 +129,6 @@ public final class DockerProxy implements Slice {
      * @return Docker proxy.
      */
     private Docker proxy(final ClientSlices slices, final YamlMapping mapping) {
-        final String url = mapping.string("url");
-        if (url == null) {
-            throw new IllegalStateException(
-                "`url` is not specified in settings for Docker proxy"
-            );
-        }
         final Credentials credentials;
         final String username = mapping.string("username");
         final String password = mapping.string("password");
@@ -154,7 +148,17 @@ public final class DockerProxy implements Slice {
             credentials = new Credentials.Basic(username, password);
         }
         final Docker proxy = new ProxyDocker(
-            new AuthClientSlice(slices, slices.slice(url), credentials)
+            new AuthClientSlice(
+                slices,
+                slices.slice(
+                    Optional.ofNullable(mapping.string("url")).orElseThrow(
+                        () -> new IllegalStateException(
+                            "`url` is not specified in settings for Docker proxy"
+                        )
+                    )
+                ),
+                credentials
+            )
         );
         return Optional.ofNullable(mapping.yamlMapping("cache")).<Docker>map(
             node -> new CacheDocker(
