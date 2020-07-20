@@ -27,7 +27,7 @@ SOFTWARE.
   <parent>
     <groupId>com.artipie</groupId>
     <artifactId>ppom</artifactId>
-    <version>0.3.3</version>
+    <version>0.3.6</version>
   </parent>
   <artifactId>artipie</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -108,7 +108,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>0.14.2</version>
+      <version>0.15.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
