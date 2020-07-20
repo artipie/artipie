@@ -8,13 +8,10 @@ docker run -d --name artipie -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pw
 sleep 5
 
 # Upload a maven project
-cd sample-for-deployment
-mvn clean deploy -Dmaven.install.skip=true
-cd ..
+mvn -f sample-for-deployment deploy -Dmaven.install.skip=true
 
-cd sample-consumer
-mvn -U clean install
-cd ..
+# Upload the sample-for-deployment
+mvn -f sample-consumer -U clean install
 
 # Remove container.
 docker rm -f artipie
