@@ -8,13 +8,14 @@ docker run --rm -d --name artipie -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v
 sleep 5
 
 # Push a gem into artipie.
+export GEM_HOST_API_KEY=1
 cd sample-project
 gem build sample-project.gemspec
-GEM_HOST_API_KEY=1 gem push sample-project-1.0.0.gem --host http://localhost:8080/my-gem
+gem push sample-project-1.0.0.gem --host http://localhost:8080/my-gem
 cd ..
 
 # Fetch the uploaded earlier gem from artipie.
-GEM_HOST_API_KEY=1 gem fetch sample-project --source http://localhost:8080/my-gem
+gem fetch sample-project --source http://localhost:8080/my-gem
 
 # Remove container.
 docker stop artipie
