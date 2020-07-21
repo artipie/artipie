@@ -47,7 +47,7 @@ final class UserPage implements Page {
     /**
      * URI path pattern.
      */
-    private static final Pattern PTN = Pattern.compile("/(?<user>[^/.]+)/?");
+    private static final Pattern PTN = Pattern.compile("/dashboard/(?<user>[^/.]+)/?");
 
     /**
      * Template engine.

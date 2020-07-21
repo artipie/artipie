@@ -72,11 +72,12 @@ final class RtIsDashboard implements RtRule {
     }
 
     /**
-     * Check if request path is for dashboard.
+     * Check if request path is for dashboard: it starts with /dashboard and has maximum 3 parts.
      * @param path Request path
      * @return True if dashboard
+     * @checkstyle MagicNumberCheck (10 lines)
      */
     private static boolean isDashboardPath(final String path) {
-        return path.replaceAll("^/+", "").split("/").length <= 2;
+        return path.startsWith("/dashboard") && path.replaceAll("^/+", "").split("/").length <= 3;
     }
 }
