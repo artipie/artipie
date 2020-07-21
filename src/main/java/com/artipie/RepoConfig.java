@@ -128,7 +128,17 @@ public final class RepoConfig {
      * @return Async storage for repo
      */
     public Storage storage() {
-        return this.storageOpt().orElseThrow(
+        return this.storage(this.repoConfig());
+    }
+
+    /**
+     * Storage configured in givent YAML.
+     *
+     * @param config YAML config to create storage from.
+     * @return Async storage for repo
+     */
+    public Storage storage(final YamlMapping config) {
+        return this.storageOpt(config).orElseThrow(
             () -> new IllegalStateException("Storage is not configured")
         );
     }
@@ -139,7 +149,17 @@ public final class RepoConfig {
      * @return Async storage for repo
      */
     public Optional<Storage> storageOpt() {
-        return Optional.ofNullable(this.repoConfig().value("storage")).map(
+        return this.storageOpt(this.repoConfig());
+    }
+
+    /**
+     * Create storage if configured in given YAML.
+     *
+     * @param config YAML config to create storage from.
+     * @return Async storage for repo
+     */
+    public Optional<Storage> storageOpt(final YamlMapping config) {
+        return Optional.ofNullable(config.value("storage")).map(
             node -> {
                 final Storage storage;
                 if (node instanceof Scalar) {
@@ -192,6 +212,15 @@ public final class RepoConfig {
     }
 
     /**
+     * Repo part of YAML.
+     *
+     * @return Async YAML mapping
+     */
+    public YamlMapping repoConfig() {
+        return Objects.requireNonNull(this.yaml.yamlMapping("repo"), "yaml repo config is absent");
+    }
+
+    /**
      * Reads string by key from repo part of YAML.
      *
      * @param key String key.
@@ -211,14 +240,5 @@ public final class RepoConfig {
      */
     private Optional<String> stringOpt(final String key) {
         return Optional.ofNullable(this.repoConfig().string(key));
-    }
-
-    /**
-     * Repo part of YAML.
-     *
-     * @return Async YAML mapping
-     */
-    private YamlMapping repoConfig() {
-        return Objects.requireNonNull(this.yaml.yamlMapping("repo"), "yaml repo is null");
     }
 }
