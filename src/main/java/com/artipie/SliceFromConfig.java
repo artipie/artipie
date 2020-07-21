@@ -270,7 +270,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "pypi":
-                slice = new PySlice(storage, permissions, auth);
+                slice = new TrimPathSlice(new PySlice(storage, permissions, auth), prefix);
                 break;
             case "docker":
                 slice = new DockerRoutingSlice.Reverted(
