@@ -36,10 +36,10 @@ Try this `docker-proxy.yaml` file to host a proxy to `registry-1.docker.io` regi
 ```yaml
 repo:
   type: docker-proxy
-  settings:
-    host: registry-1.docker.io
-    username: Aladdin # optional
-    password: OpenSesame # optional
+  remotes:
+    - url: registry-1.docker.io
+      username: Aladdin # optional
+      password: OpenSesame # optional
 ```
 
 Artipie will redirect all pull requests to specified registry.
@@ -51,12 +51,24 @@ add `storage` section to config:
 ```yaml
 repo:
   type: docker-proxy
-  settings:
-    host: mcr.microsoft.com
-  storage:
-    type: fs
-    path: /tmp/artipie/data/my-docker-cache
+  remotes:
+    - url: mcr.microsoft.com
+      cache:
+        storage:
+          type: fs
+          path: /tmp/artipie/data/my-docker-cache
 ```
 
-With `storage` specified it is also possible to push images into this repository
-using `docker push` command.
+It is possible to push images using `docker push` command to proxy storage
+and store them locally if `storage` is specified as follows:
+
+```yaml
+repo:
+  type: docker-proxy
+  remotes:
+    - url: registry-1.docker.io
+    - url: mcr.microsoft.com
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-docker
+```

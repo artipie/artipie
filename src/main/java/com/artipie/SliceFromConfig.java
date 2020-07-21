@@ -192,7 +192,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "gem":
-                slice = new GemSlice(storage, null);
+                slice = new TrimPathSlice(new GemSlice(storage), prefix);
                 break;
             case "helm":
                 slice = new TrimPathSlice(
