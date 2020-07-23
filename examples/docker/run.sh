@@ -10,9 +10,13 @@ sleep 5
 # Pull an image from docker hub.
 docker pull ubuntu
 
-# Push the pulled image to artipie
+# Push the pulled image to artipie.
 docker image tag ubuntu localhost:8080/my-docker/myfirstimage
 docker push localhost:8080/my-docker/myfirstimage
+
+# Pull the pushed imagage from artipie.
+docker image rm localhost:8080/my-docker/myfirstimage
+docker pull localhost:8080/my-docker/myfirstimage
 
 # Remove container.
 docker stop artipie
