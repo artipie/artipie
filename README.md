@@ -31,7 +31,7 @@ The following set of features makes Artipie unique among all others:
     [Npm](./examples/npm),
     [NuGet](./examples/nuget),
     [Composer](./examples/php),
-    [Pip](./examples/python),
+    [Pip](./examples/pypi),
     [Rpm](./examples/rpm),
     and [others](./examples)
   * It is database-free
