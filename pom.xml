@@ -173,7 +173,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>0.5</version>
+      <version>0.5.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
