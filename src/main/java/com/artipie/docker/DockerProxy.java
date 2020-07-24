@@ -31,10 +31,12 @@ import com.artipie.docker.cache.CacheDocker;
 import com.artipie.docker.composite.MultiReadDocker;
 import com.artipie.docker.composite.ReadWriteDocker;
 import com.artipie.docker.http.DockerSlice;
+import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.docker.proxy.AuthClientSlice;
 import com.artipie.docker.proxy.ClientSlices;
 import com.artipie.docker.proxy.Credentials;
 import com.artipie.docker.proxy.ProxyDocker;
+import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import java.nio.ByteBuffer;
@@ -110,15 +112,18 @@ public final class DockerProxy implements Slice {
                 }
             ).collect(Collectors.toList())
         );
-        final Docker docker = this.cfg.storageOpt()
-            .<Docker>map(
-                storage -> {
-                    final AstoDocker local = new AstoDocker(storage);
-                    return new ReadWriteDocker(new MultiReadDocker(local, proxies), local);
-                }
-            )
-            .orElse(proxies);
-        return new DockerSlice(docker);
+        final Docker docker = new TrimmedDocker(
+            this.cfg.storageOpt()
+                .<Docker>map(
+                    storage -> {
+                        final AstoDocker local = new AstoDocker(storage);
+                        return new ReadWriteDocker(new MultiReadDocker(local, proxies), local);
+                    }
+                )
+                .orElse(proxies),
+            this.cfg.name()
+        );
+        return new DockerRoutingSlice.Reverted(new DockerSlice(docker));
     }
 
     /**
