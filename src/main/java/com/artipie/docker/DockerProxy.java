@@ -39,6 +39,8 @@ import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.Permissions;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
@@ -70,14 +72,33 @@ public final class DockerProxy implements Slice {
     private final RepoConfig cfg;
 
     /**
+     * Access permissions.
+     */
+    private final Permissions perms;
+
+    /**
+     * Authentication mechanism.
+     */
+    private final Authentication auth;
+
+    /**
      * Ctor.
      *
      * @param client HTTP client.
      * @param cfg Repository configuration.
+     * @param perms Access permissions.
+     * @param auth Authentication mechanism.
+     * @checkstyle ParameterNumberCheck (2 lines)
      */
-    public DockerProxy(final HttpClient client, final RepoConfig cfg) {
+    public DockerProxy(
+        final HttpClient client,
+        final RepoConfig cfg,
+        final Permissions perms,
+        final Authentication auth) {
         this.client = client;
         this.cfg = cfg;
+        this.perms = perms;
+        this.auth = auth;
     }
 
     @Override
@@ -123,7 +144,9 @@ public final class DockerProxy implements Slice {
                 .orElse(proxies),
             this.cfg.name()
         );
-        return new DockerRoutingSlice.Reverted(new DockerSlice(docker));
+        return new DockerRoutingSlice.Reverted(
+            new DockerSlice(docker, this.perms, this.auth)
+        );
     }
 
     /**
