@@ -275,11 +275,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "docker":
                 slice = new DockerRoutingSlice.Reverted(
-                    new DockerSlice(new TrimmedDocker(new AstoDocker(storage), cfg.name()))
+                    new DockerSlice(
+                        new TrimmedDocker(new AstoDocker(storage), cfg.name()),
+                        permissions,
+                        auth
+                    )
                 );
                 break;
             case "docker-proxy":
-                slice = new DockerProxy(SliceFromConfig.HTTP, cfg);
+                slice = new DockerProxy(SliceFromConfig.HTTP, cfg, permissions, auth);
                 break;
             default:
                 throw new IllegalStateException(
