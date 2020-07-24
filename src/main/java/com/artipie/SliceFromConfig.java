@@ -218,7 +218,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new PhpComposer(cfg.path(), storage);
                 break;
             case "nuget":
-                slice = new NuGet(cfg.url(), cfg.path(), storage, permissions, auth);
+                slice = new TrimPathSlice(new NuGet(cfg.url(), storage, permissions, auth), prefix);
                 break;
             case "maven":
                 slice = new TrimPathSlice(new MavenSlice(storage, permissions, auth), prefix);
