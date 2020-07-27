@@ -81,4 +81,12 @@ public final class CachedAuth implements Authentication {
     public Optional<String> user(final String username, final String password) {
         return this.cache.computeIfAbsent(username, key -> this.origin.user(key, password));
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "%s(origin=%s, size=%d)",
+            this.getClass().getSimpleName(), this.origin, this.cache.size()
+        );
+    }
 }

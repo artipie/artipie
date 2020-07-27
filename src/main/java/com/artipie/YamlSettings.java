@@ -120,7 +120,7 @@ public final class YamlSettings implements Settings {
                     return auth;
                 }
             ).thenApply(
-                auth -> new ChainedAuth(new GithubAuth(), auth)
+                auth -> new ChainedAuth(new ChainedAuth(new GithubAuth()), auth)
             );
         } else if (YamlSettings.hasTypeFile(cred)) {
             res = CompletableFuture.failedFuture(
