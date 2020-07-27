@@ -44,8 +44,8 @@ public final class PathPattern {
      */
     private static final Map<String, Pattern> PATTERNS = Collections.unmodifiableMap(
         new MapOf<>(
-            new MapEntry<>("flat", Pattern.compile("/(?:[^/.]+)(/.*)")),
-            new MapEntry<>("org", Pattern.compile("/(?:[^/.]+)/(?:[^/.]+)(/.*)"))
+            new MapEntry<>("flat", Pattern.compile("/(?:[^/.]+)(/.*)?")),
+            new MapEntry<>("org", Pattern.compile("/(?:[^/.]+)/(?:[^/.]+)(/.*)?"))
         )
     );
 

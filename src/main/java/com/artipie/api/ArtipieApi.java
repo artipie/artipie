@@ -96,7 +96,7 @@ public final class ArtipieApi extends Slice.Wrap {
                                         new Header(
                                             "Location",
                                             String.format(
-                                                "/%s/%s?type=%s",
+                                                "/dashboard/%s/%s?type=%s",
                                                 matcher.group("user"),
                                                 URLEncodedUtils.parse(
                                                     new RequestLineFrom(line).uri(),

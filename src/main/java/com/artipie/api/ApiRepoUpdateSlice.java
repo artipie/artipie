@@ -167,7 +167,7 @@ final class ApiRepoUpdateSlice implements Slice {
                     ).toSingle(
                         () -> new RsWithHeaders(
                             new RsWithStatus(RsStatus.FOUND),
-                            new Headers.From("Location", String.format("/%s/%s", user, name))
+                            new Headers.From("Location", String.format("/dashboard/%s/%s", user, name))
                         )
                     );
                 }
