@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Chained authentication provider, composed by multiple
@@ -78,5 +79,14 @@ public final class ChainedAuth implements Authentication {
             }
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "%s([%s])",
+            this.getClass().getSimpleName(),
+            this.list.stream().map(Object::toString).collect(Collectors.joining(","))
+        );
     }
 }

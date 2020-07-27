@@ -29,6 +29,7 @@ import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.auth.AuthFromEnv;
 import com.artipie.auth.AuthFromYaml;
+import com.artipie.auth.CachedAuth;
 import com.artipie.auth.ChainedAuth;
 import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
@@ -120,7 +121,7 @@ public final class YamlSettings implements Settings {
                     return auth;
                 }
             ).thenApply(
-                auth -> new ChainedAuth(new GithubAuth(), auth)
+                auth -> new ChainedAuth(new CachedAuth(new GithubAuth()), auth)
             );
         } else if (YamlSettings.hasTypeFile(cred)) {
             res = CompletableFuture.failedFuture(

@@ -67,9 +67,17 @@ public final class LoggingAuth implements Authentication {
     public Optional<String> user(final String username, final String password) {
         final Optional<String> res = this.origin.user(username, password);
         if (res.isEmpty()) {
-            Logger.log(this.level, this.origin, "Failed to authenticate '%s' user", username);
+            Logger.log(
+                this.level, this.origin,
+                "Failed to authenticate '%s' user via %s",
+                username, this.origin
+            );
         } else {
-            Logger.log(this.level, this.origin, "Successfully authenticated '%s' user", username);
+            Logger.log(
+                this.level, this.origin,
+                "Successfully authenticated '%s' user via %s",
+                username, this.origin
+            );
         }
         return res;
     }
