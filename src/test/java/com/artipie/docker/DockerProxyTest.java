@@ -28,18 +28,19 @@ import com.artipie.RepoConfig;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
+import com.artipie.http.auth.Permissions;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import org.eclipse.jetty.client.HttpClient;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -51,9 +52,55 @@ import org.junit.jupiter.params.provider.MethodSource;
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DockerProxyTest {
 
-    @Test
-    void shouldBuildFromConfig() throws Exception {
-        final Slice slice = dockerProxy(
+    @ParameterizedTest
+    @MethodSource("goodConfigs")
+    void shouldBuildFromConfig(final String yaml) throws Exception {
+        final Slice slice = dockerProxy(yaml);
+        MatcherAssert.assertThat(
+            slice.response(
+                new RequestLine(RqMethod.GET, "/").toString(),
+                Headers.EMPTY,
+                Flowable.empty()
+            ),
+            new RsHasStatus(RsStatus.OK)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("badConfigs")
+    void shouldFailBuildFromBadConfig(final String yaml) throws Exception {
+        final Slice slice = dockerProxy(yaml);
+        Assertions.assertThrows(
+            RuntimeException.class,
+            () -> slice.response(
+                new RequestLine(RqMethod.GET, "/").toString(),
+                Headers.EMPTY,
+                Flowable.empty()
+            ).send(
+                (status, headers, body) -> CompletableFuture.allOf()
+            ).toCompletableFuture().join()
+        );
+    }
+
+    private static DockerProxy dockerProxy(final String yaml) throws IOException {
+        return new DockerProxy(
+            new HttpClient(),
+            new RepoConfig(
+                alias -> {
+                    throw new UnsupportedOperationException();
+                },
+                Key.ROOT,
+                Yaml.createYamlInput(yaml).readYamlMapping()
+            ),
+            Permissions.FREE,
+            (username, password) -> Optional.empty()
+        );
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private static Stream<String> goodConfigs() {
+        return Stream.of(
+            "repo:\n  remotes:\n    - url: registry-1.docker.io",
             String.join(
                 "\n",
                 "repo:",
@@ -73,43 +120,6 @@ class DockerProxyTest {
                 "  storage:",
                 "    type: fs",
                 "    path: /var/artipie/data/local"
-            )
-        );
-        MatcherAssert.assertThat(
-            slice.response(
-                new RequestLine(RqMethod.GET, "/v2/").toString(),
-                Headers.EMPTY,
-                Flowable.empty()
-            ),
-            new RsHasStatus(RsStatus.OK)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("badConfigs")
-    void shouldFailBuildFromBadConfig(final String yaml) throws Exception {
-        final Slice slice = dockerProxy(yaml);
-        Assertions.assertThrows(
-            RuntimeException.class,
-            () -> slice.response(
-                new RequestLine(RqMethod.GET, "/v2/").toString(),
-                Headers.EMPTY,
-                Flowable.empty()
-            ).send(
-                (status, headers, body) -> CompletableFuture.allOf()
-            ).toCompletableFuture().join()
-        );
-    }
-
-    private static DockerProxy dockerProxy(final String yaml) throws IOException {
-        return new DockerProxy(
-            new HttpClient(),
-            new RepoConfig(
-                alias -> {
-                    throw new UnsupportedOperationException();
-                },
-                Key.ROOT,
-                Yaml.createYamlInput(yaml).readYamlMapping()
             )
         );
     }
