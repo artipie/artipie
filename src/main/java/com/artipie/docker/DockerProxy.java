@@ -53,10 +53,6 @@ import org.reactivestreams.Publisher;
  * Docker proxy slice created from config.
  *
  * @since 0.9
- * @todo #313:30min Unit test coverage for `DockerProxy` class
- *  `DockerProxy` class lacks unit test coverage. It should be tested that slice is built properly
- *  from configuration (e.g. handles simple response like 'GET /v2/') and fails any request for bad
- *  configuration (some required settings are missing).
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class DockerProxy implements Slice {
