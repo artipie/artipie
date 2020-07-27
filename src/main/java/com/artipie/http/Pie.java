@@ -24,6 +24,7 @@
 
 package com.artipie.http;
 
+import com.artipie.MeasuredSlice;
 import com.artipie.Settings;
 import com.artipie.api.ArtipieApi;
 import com.artipie.dashboard.DashboardSlice;
@@ -69,20 +70,22 @@ public final class Pie extends Slice.Wrap {
     public Pie(final Settings settings) {
         super(
             new SafeSlice(
-                new DockerRoutingSlice(
-                    new LoggingSlice(
-                        Level.INFO,
-                        new SliceRoute(
-                            Pie.EMPTY_PATH,
-                            new RtRulePath(
-                                new RtRule.ByPath(Pattern.compile("/api/?.*")),
-                                new ArtipieApi(settings)
-                            ),
-                            new RtRulePath(
-                                new RtIsDashboard(settings), new DashboardSlice(settings)
-                            ),
-                            new RtRulePath(
-                                RtRule.FALLBACK, new SliceByPath(settings)
+                new MeasuredSlice(
+                    new DockerRoutingSlice(
+                        new LoggingSlice(
+                            Level.INFO,
+                            new SliceRoute(
+                                Pie.EMPTY_PATH,
+                                new RtRulePath(
+                                    new RtRule.ByPath(Pattern.compile("/api/?.*")),
+                                    new ArtipieApi(settings)
+                                ),
+                                new RtRulePath(
+                                    new RtIsDashboard(settings), new DashboardSlice(settings)
+                                ),
+                                new RtRulePath(
+                                    RtRule.FALLBACK, new SliceByPath(settings)
+                                )
                             )
                         )
                     )

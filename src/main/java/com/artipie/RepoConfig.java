@@ -147,7 +147,7 @@ public final class RepoConfig {
      * @return Async storage for repo
      */
     public Storage storage(final YamlMapping config) {
-        return this.storageOpt(config).orElseThrow(
+        return this.storageOpt(config).map(MeasuredStorage::new).orElseThrow(
             () -> new IllegalStateException("Storage is not configured")
         );
     }

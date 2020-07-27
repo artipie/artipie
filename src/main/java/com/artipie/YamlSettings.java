@@ -55,6 +55,7 @@ import org.reactivestreams.Publisher;
  *  providers there. E.g. user can use ordered list of env auth, github auth
  *  and auth from yaml file.
  * @checkstyle ReturnCountCheck (500 lines)
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class YamlSettings implements Settings {
 
@@ -78,12 +79,14 @@ public final class YamlSettings implements Settings {
 
     @Override
     public Storage storage() throws IOException {
-        return new YamlStorage(
-            Yaml.createYamlInput(this.content)
-                .readYamlMapping()
-                .yamlMapping(YamlSettings.KEY_META)
-                .yamlMapping("storage")
-        ).storage();
+        return new MeasuredStorage(
+            new YamlStorage(
+                Yaml.createYamlInput(this.content)
+                    .readYamlMapping()
+                    .yamlMapping(YamlSettings.KEY_META)
+                    .yamlMapping("storage")
+            ).storage()
+        );
     }
 
     @Override
