@@ -31,6 +31,7 @@ import com.artipie.composer.http.PhpComposer;
 import com.artipie.docker.DockerProxy;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.http.DockerSlice;
+import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.files.FileProxySlice;
 import com.artipie.files.FilesSlice;
 import com.artipie.files.RpRemote;
@@ -217,7 +218,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new PhpComposer(cfg.path(), storage);
                 break;
             case "nuget":
-                slice = new NuGet(cfg.url(), cfg.path(), storage, permissions, auth);
+                slice = new TrimPathSlice(new NuGet(cfg.url(), storage, permissions, auth), prefix);
                 break;
             case "maven":
                 slice = new TrimPathSlice(new MavenSlice(storage, permissions, auth), prefix);
@@ -274,11 +275,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "docker":
                 slice = new DockerRoutingSlice.Reverted(
-                    new DockerSlice("", new AstoDocker(storage))
+                    new DockerSlice(
+                        new TrimmedDocker(new AstoDocker(storage), cfg.name()),
+                        permissions,
+                        auth
+                    )
                 );
                 break;
             case "docker-proxy":
-                slice = new DockerProxy(SliceFromConfig.HTTP, cfg);
+                slice = new DockerProxy(SliceFromConfig.HTTP, cfg, permissions, auth);
                 break;
             default:
                 throw new IllegalStateException(

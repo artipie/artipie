@@ -79,11 +79,11 @@ public final class DashboardSlice extends Slice.Wrap {
                     (auth, perm) -> new SliceAuth(
                         new SliceRoute(
                             new RtRulePath(
-                                new RtRule.ByPath(Pattern.compile("/(?:[^/.]+)/?")),
+                                new RtRule.ByPath(Pattern.compile("/dashboard/(?:[^/.]+)/?")),
                                 new PageSlice(new UserPage(tpl, settings))
                             ),
                             new RtRulePath(
-                                new RtRule.ByPath(Pattern.compile("/(?:[^/.]+)/(?:[^/.]+)/?")),
+                                new RtRule.ByPath(Pattern.compile("/dashboard/(?:[^/.]+)/(?:[^/.]+)/?")),
                                 new PageSlice(new RepoPage(tpl, settings))
                             )
                         ),

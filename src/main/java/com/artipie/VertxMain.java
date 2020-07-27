@@ -154,7 +154,7 @@ public final class VertxMain implements Runnable {
                     " ",
                     "Settings were not found, creating default.",
                     "Default username/password: `artipie`/`artipie`. ",
-                    "Check the dashboard at http://localhost/artipie"
+                    "Check the dashboard at http://localhost/dashboard/artipie"
                 )
             );
         }

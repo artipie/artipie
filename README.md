@@ -5,10 +5,10 @@
 [![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
 
 [![Build Status](https://img.shields.io/travis/artipie/artipie/master.svg)](https://travis-ci.org/artipie/artipie)
-[![Javadoc](http://www.javadoc.io/badge/com.artipie/artipie.svg)](http://www.javadoc.io/doc/com.artipie/artipie)
+![Docker Pulls](https://img.shields.io/docker/pulls/artipie/artipie)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
 [![Hits-of-Code](https://hitsofcode.com/github/artipie/artipie)](https://hitsofcode.com/view/github/artipie/artipie)
-[![Maven Central](https://img.shields.io/maven-central/v/com.artipie/artipie.svg)](https://maven-badges.herokuapp.com/maven-central/com.artipie/artipie)
+![Docker Image Version (latest by date)](https://img.shields.io/docker/v/artipie/artipie?label=DockerHub&sort=date)
 [![PDD status](http://www.0pdd.com/svg?name=artipie/artipie)](http://www.0pdd.com/p?name=artipie/artipie)
 
 Artipie is an experimental binary artifact management tool, similar to
@@ -31,7 +31,7 @@ The following set of features makes Artipie unique among all others:
     [Npm](./examples/npm),
     [NuGet](./examples/nuget),
     [Composer](./examples/php),
-    [Pip](./examples/python),
+    [Pip](./examples/pypi),
     [Rpm](./examples/rpm),
     and [others](./examples)
   * It is database-free
