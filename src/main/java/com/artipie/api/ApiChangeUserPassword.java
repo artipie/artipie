@@ -128,7 +128,7 @@ final class ApiChangeUserPassword implements Slice {
                 .toSingleDefault(
                     new RsWithHeaders(
                         new RsWithStatus(RsStatus.FOUND),
-                        new Header("Location", String.format("/%s", user))
+                        new Header("Location", String.format("/dashboard/%s", user))
                     )
                 ).to(SingleInterop.get())
         );

@@ -69,9 +69,9 @@ public final class Pie extends Slice.Wrap {
     public Pie(final Settings settings) {
         super(
             new SafeSlice(
-                new LoggingSlice(
-                    Level.INFO,
-                    new DockerRoutingSlice(
+                new DockerRoutingSlice(
+                    new LoggingSlice(
+                        Level.INFO,
                         new SliceRoute(
                             Pie.EMPTY_PATH,
                             new RtRulePath(

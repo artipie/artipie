@@ -31,12 +31,16 @@ import com.artipie.docker.cache.CacheDocker;
 import com.artipie.docker.composite.MultiReadDocker;
 import com.artipie.docker.composite.ReadWriteDocker;
 import com.artipie.docker.http.DockerSlice;
+import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.docker.proxy.AuthClientSlice;
 import com.artipie.docker.proxy.ClientSlices;
 import com.artipie.docker.proxy.Credentials;
 import com.artipie.docker.proxy.ProxyDocker;
+import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.Permissions;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
@@ -64,14 +68,33 @@ public final class DockerProxy implements Slice {
     private final RepoConfig cfg;
 
     /**
+     * Access permissions.
+     */
+    private final Permissions perms;
+
+    /**
+     * Authentication mechanism.
+     */
+    private final Authentication auth;
+
+    /**
      * Ctor.
      *
      * @param client HTTP client.
      * @param cfg Repository configuration.
+     * @param perms Access permissions.
+     * @param auth Authentication mechanism.
+     * @checkstyle ParameterNumberCheck (2 lines)
      */
-    public DockerProxy(final HttpClient client, final RepoConfig cfg) {
+    public DockerProxy(
+        final HttpClient client,
+        final RepoConfig cfg,
+        final Permissions perms,
+        final Authentication auth) {
         this.client = client;
         this.cfg = cfg;
+        this.perms = perms;
+        this.auth = auth;
     }
 
     @Override
@@ -106,15 +129,20 @@ public final class DockerProxy implements Slice {
                 }
             ).collect(Collectors.toList())
         );
-        final Docker docker = this.cfg.storageOpt()
-            .<Docker>map(
-                storage -> {
-                    final AstoDocker local = new AstoDocker(storage);
-                    return new ReadWriteDocker(new MultiReadDocker(local, proxies), local);
-                }
-            )
-            .orElse(proxies);
-        return new DockerSlice(docker);
+        final Docker docker = new TrimmedDocker(
+            this.cfg.storageOpt()
+                .<Docker>map(
+                    storage -> {
+                        final AstoDocker local = new AstoDocker(storage);
+                        return new ReadWriteDocker(new MultiReadDocker(local, proxies), local);
+                    }
+                )
+                .orElse(proxies),
+            this.cfg.name()
+        );
+        return new DockerRoutingSlice.Reverted(
+            new DockerSlice(docker, this.perms, this.auth)
+        );
     }
 
     /**

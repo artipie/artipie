@@ -55,7 +55,7 @@ final class RepoPage implements Page {
     /**
      * URI path pattern.
      */
-    private static final Pattern PTN = Pattern.compile("/(?<key>[^/.]+/[^/.]+)/?");
+    private static final Pattern PTN = Pattern.compile("/dashboard/(?<key>[^/.]+/[^/.]+)/?");
 
     /**
      * Template engine.

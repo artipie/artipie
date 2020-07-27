@@ -82,6 +82,15 @@ public final class RepoConfig {
     }
 
     /**
+     * Repository name.
+     *
+     * @return Name string.
+     */
+    public String name() {
+        return this.prefix.string();
+    }
+
+    /**
      * Repository type.
      * @return Async string of type
      */
