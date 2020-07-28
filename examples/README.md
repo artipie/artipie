@@ -16,4 +16,4 @@ Repository examples:
 | [NuGet](./nuget) | [![](https://github.com/artipie/artipie/workflows/Proof::nuget/badge.svg)](./nuget) |
 | [Gem](./gem) | [![](https://github.com/artipie/artipie/workflows/Proof::gem/badge.svg)](./gem) |
 | [PyPi](./pypi) | [![](https://github.com/artipie/artipie/workflows/Proof::pypi/badge.svg)](./pypi) |
-| [Docker](./go) | [![](https://github.com/artipie/artipie/workflows/Proof::go/badge.svg)](./go) |
+| [Go](./go) | [![](https://github.com/artipie/artipie/workflows/Proof::go/badge.svg)](./go) |
