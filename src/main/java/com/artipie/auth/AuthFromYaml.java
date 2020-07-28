@@ -87,6 +87,11 @@ public final class AuthFromYaml implements Authentication {
         return res;
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s()", this.getClass().getSimpleName());
+    }
+
     /**
      * Checks stored password against the given one with type.
      * @param stored Password from settings

@@ -92,4 +92,9 @@ public final class GithubAuth implements Authentication {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s()", this.getClass().getSimpleName());
+    }
 }
