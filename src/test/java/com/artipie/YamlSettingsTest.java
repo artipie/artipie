@@ -24,8 +24,6 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.asto.fs.FileStorage;
-import com.artipie.asto.s3.S3Storage;
 import com.artipie.auth.AuthFromEnv;
 import com.artipie.http.auth.Authentication;
 import java.nio.file.Files;
@@ -58,7 +56,7 @@ class YamlSettingsTest {
         );
         MatcherAssert.assertThat(
             settings.storage(),
-            Matchers.instanceOf(FileStorage.class)
+            Matchers.notNullValue()
         );
     }
 
@@ -81,7 +79,7 @@ class YamlSettingsTest {
         );
         MatcherAssert.assertThat(
             settings.storage(),
-            Matchers.instanceOf(S3Storage.class)
+            Matchers.notNullValue()
         );
     }
 
