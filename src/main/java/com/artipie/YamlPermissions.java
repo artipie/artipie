@@ -67,7 +67,8 @@ public final class YamlPermissions implements Permissions {
     @Override
     public boolean allowed(final String name, final String action) {
         final YamlMapping all = this.yaml.yamlMapping("permissions");
-        return check(all.yamlSequence(name), action)
+        return all == null
+            || check(all.yamlSequence(name), action)
             || check(all.yamlSequence(YamlPermissions.WILDCARD), action);
     }
 
