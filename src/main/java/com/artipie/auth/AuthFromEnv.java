@@ -77,4 +77,9 @@ public final class AuthFromEnv implements Authentication {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s()", this.getClass().getSimpleName());
+    }
 }
