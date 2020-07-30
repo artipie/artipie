@@ -12,13 +12,11 @@ cd sample-project
 python3 -m pip install --user --upgrade setuptools wheel
 python3 setup.py sdist bdist_wheel
 python3 -m pip install --user --upgrade twine
-python3 -m twine upload --repository-url http://localhost:8080/my-pypi -u username -p 123 --verbose dist/*
+python3 -m twine upload --repository-url http://localhost:8080/my-pypi -u username -p 123 dist/*
 cd ..
 
-curl -v http://localhost:8080/my-pypi/
-
 # Install earlier uploaded python package from artipie.
-python3 -m pip install -v --index-url http://localhost:8080/my-pypi --no-deps sample_project
+python3 -m pip install --index-url http://localhost:8080/my-pypi --no-deps sample_project
 
 # Remove container.
 docker stop artipie
