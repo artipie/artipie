@@ -6,7 +6,7 @@ Try this `pypi.yaml` file:
 
 ```yaml
 repo:
-  type: my-pypi.yaml
+  type: pypi
   storage:
     type: fs
     path: /var/artipie/data
