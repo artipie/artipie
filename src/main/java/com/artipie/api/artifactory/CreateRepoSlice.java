@@ -113,7 +113,7 @@ public final class CreateRepoSlice implements Slice {
         final String key = json.getString("key", "");
         if (!key.isEmpty() && "local".equals(json.getString("rclass", ""))
             && "docker".equals(json.getString("packageType", ""))
-            && "v2".equals(json.getString("dockerApiVersion", ""))) {
+            && "V2".equals(json.getString("dockerApiVersion", ""))) {
             res = Optional.of(key);
         } else {
             res = Optional.empty();
