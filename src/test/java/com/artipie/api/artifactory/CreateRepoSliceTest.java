@@ -96,7 +96,7 @@ class CreateRepoSliceTest {
                     .add("key", "my_repo")
                     .add("rclass", "local")
                     .add("packageType", "docker")
-                    .add("dockerApiVersion", "v2")
+                    .add("dockerApiVersion", "V2")
                     .build().toString().getBytes()
             )
         );
