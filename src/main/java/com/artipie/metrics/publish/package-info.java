@@ -23,8 +23,8 @@
  */
 
 /**
- * Artipie metrics implementation storing data in ASTO {@link com.artipie.asto.Storage}.
+ * Artipie metrics publishing.
  *
  * @since 0.19
  */
-package com.artipie.metrics.asto;
+package com.artipie.metrics.publish;

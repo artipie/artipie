@@ -24,6 +24,7 @@
 package com.artipie.metrics.nop;
 
 import com.artipie.metrics.Metrics;
+import com.artipie.metrics.publish.MetricsOutput;
 
 /**
  * {@link Metrics} implementation that do no operations and store no data.
@@ -51,5 +52,10 @@ public final class NopMetrics implements Metrics {
     @Override
     public NopGauge gauge(final String name) {
         return NopGauge.INSTANCE;
+    }
+
+    @Override
+    public void publish(final MetricsOutput out) {
+        // nothing to publish
     }
 }

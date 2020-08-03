@@ -27,9 +27,11 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.YamlStorage;
 import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
-import com.artipie.metrics.asto.StorageMetrics;
 import com.artipie.metrics.memory.InMemoryMetrics;
-import com.artipie.metrics.memory.MetricsLogPublisher;
+import com.artipie.metrics.publish.MetricsLogOutput;
+import com.artipie.metrics.publish.MetricsOutput;
+import com.artipie.metrics.publish.MetricsPublisher;
+import com.artipie.metrics.publish.StorageMetricsOutput;
 import java.time.Duration;
 import java.util.Optional;
 import org.slf4j.LoggerFactory;
@@ -61,18 +63,13 @@ public final class MetricsFromConfig {
         return Optional.ofNullable(this.settings.string("type"))
             .map(
                 type -> {
-                    final Metrics metrics;
+                    final MetricsOutput output;
                     switch (type) {
                         case "log":
-                            final InMemoryMetrics mem = new InMemoryMetrics();
-                            new MetricsLogPublisher(
-                                LoggerFactory.getLogger(Metrics.class),
-                                mem, this.interval()
-                            ).start();
-                            metrics = mem;
+                            output = new MetricsLogOutput(LoggerFactory.getLogger(Metrics.class));
                             break;
                         case "asto":
-                            metrics = new StorageMetrics(
+                            output = new StorageMetricsOutput(
                                 new SubStorage(
                                     new Key.From(".meta", "metrics"),
                                     new YamlStorage(this.settings.yamlMapping("storage")).storage()
@@ -84,6 +81,8 @@ public final class MetricsFromConfig {
                                 String.format("Unsupported metrics type: %s", type)
                             );
                     }
+                    final Metrics metrics = new InMemoryMetrics();
+                    new MetricsPublisher(metrics, this.interval()).start(output);
                     return metrics;
                 }
             ).orElseThrow(() -> new IllegalArgumentException("Metrics type is not specified"));
