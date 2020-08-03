@@ -23,6 +23,9 @@
  */
 package com.artipie.metrics.memory;
 
+import com.artipie.metrics.publish.MetricsOutput;
+import java.util.HashMap;
+import java.util.Map;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyCollection;
@@ -67,8 +70,10 @@ class InMemoryMetricsTest {
 
     @Test
     void shouldHaveNoCountersOnCreation() {
+        final TestOutput out = new TestOutput();
+        new InMemoryMetrics().publish(out);
         MatcherAssert.assertThat(
-            new InMemoryMetrics().counters().entrySet(),
+            out.counters().entrySet(),
             new IsEmptyCollection<>()
         );
     }
@@ -80,9 +85,65 @@ class InMemoryMetricsTest {
         final String two = "2";
         metrics.counter(one);
         metrics.counter(two);
+        final TestOutput out = new TestOutput();
+        metrics.publish(out);
         MatcherAssert.assertThat(
-            metrics.counters().keySet(),
+            out.counters().keySet(),
             Matchers.containsInAnyOrder(one, two)
         );
+    }
+
+    /**
+     * Test metrics output.
+     * @since 0.19
+     */
+    private static final class TestOutput implements MetricsOutput {
+
+        /**
+         * Counters.
+         */
+        private final Map<String, Long> cnt;
+
+        /**
+         * Gauges.
+         */
+        private final Map<String, Long> ggs;
+
+        /**
+         * Ctor.
+         */
+        TestOutput() {
+            this.cnt = new HashMap<>();
+            this.ggs = new HashMap<>();
+        }
+
+        @Override
+        public void counters(final Map<String, Long> data) {
+            for (final Map.Entry<String, Long> entry : data.entrySet()) {
+                final String key = entry.getKey();
+                this.cnt.put(key, this.cnt.getOrDefault(key, 0L) + entry.getValue());
+            }
+        }
+
+        @Override
+        public void gauges(final Map<String, Long> data) {
+            this.ggs.putAll(data);
+        }
+
+        /**
+         * Counters.
+         * @return Map copy
+         */
+        Map<String, Long> counters() {
+            return new HashMap<>(this.cnt);
+        }
+
+        /**
+         * Gauges.
+         * @return Map copy
+         */
+        Map<String, Long> gauges() {
+            return new HashMap<>(this.ggs);
+        }
     }
 }

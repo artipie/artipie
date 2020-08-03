@@ -42,7 +42,7 @@ import software.amazon.awssdk.services.s3.S3AsyncClientBuilder;
  * @since 0.2
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-final class YamlStorage {
+public final class YamlStorage {
 
     /**
      * YAML storage settings.
@@ -53,7 +53,7 @@ final class YamlStorage {
      * Ctor.
      * @param yaml YAML storage settings.
      */
-    YamlStorage(final YamlMapping yaml) {
+    public YamlStorage(final YamlMapping yaml) {
         this.yaml = yaml;
     }
 

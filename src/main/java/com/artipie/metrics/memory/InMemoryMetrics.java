@@ -24,6 +24,7 @@
 package com.artipie.metrics.memory;
 
 import com.artipie.metrics.Metrics;
+import com.artipie.metrics.publish.MetricsOutput;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,10 +34,6 @@ import java.util.concurrent.ConcurrentMap;
  * {@link Metrics} implementation storing data in memory.
  *
  * @since 0.9
- * @todo #231:30min Support gauges in InMemoryMetrics.
- *  `InMemoryMetrics.gauge()` method implementation should get or create an `InMemoryGauge` by name
- *  and store it. `InMemoryMetrics.gauges()` method should be added
- *  to create snapshot of existing gauges. Implementations are expected to be similar to counters.
  */
 public final class InMemoryMetrics implements Metrics {
 
@@ -45,6 +42,11 @@ public final class InMemoryMetrics implements Metrics {
      */
     private final ConcurrentMap<String, InMemoryCounter> cnts = new ConcurrentHashMap<>();
 
+    /**
+     * Gauges by name.
+     */
+    private final ConcurrentMap<String, InMemoryGauge> ggs = new ConcurrentHashMap<>();
+
     @Override
     public InMemoryCounter counter(final String name) {
         return this.cnts.computeIfAbsent(name, ignored -> new InMemoryCounter());
@@ -52,15 +54,20 @@ public final class InMemoryMetrics implements Metrics {
 
     @Override
     public InMemoryGauge gauge(final String name) {
-        throw new UnsupportedOperationException();
+        return this.ggs.computeIfAbsent(name, ignored -> new InMemoryGauge());
     }
 
-    /**
-     * Get counters snapshot.
-     *
-     * @return Counters snapshot.
-     */
-    public Map<String, InMemoryCounter> counters() {
-        return new HashMap<>(this.cnts);
+    @Override
+    public void publish(final MetricsOutput out) {
+        final Map<String, Long> counters = new HashMap<>(this.cnts.size());
+        for (final Map.Entry<String, InMemoryCounter> entry : this.cnts.entrySet()) {
+            counters.put(entry.getKey(), entry.getValue().value());
+        }
+        out.counters(counters);
+        final Map<String, Long> gauges = new HashMap<>(this.ggs.size());
+        for (final Map.Entry<String, InMemoryGauge> entry : this.ggs.entrySet()) {
+            counters.put(entry.getKey(), entry.getValue().value());
+        }
+        out.gauges(gauges);
     }
 }
