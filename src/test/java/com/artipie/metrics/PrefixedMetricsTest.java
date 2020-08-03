@@ -25,6 +25,7 @@ package com.artipie.metrics;
 
 import com.artipie.metrics.memory.InMemoryCounter;
 import com.artipie.metrics.memory.InMemoryGauge;
+import com.artipie.metrics.publish.MetricsOutput;
 import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link PrefixedMetrics}.
  *
  * @since 0.9
+ * @checkstyle MethodBodyCommentsCheck (500 lines)
  */
 public class PrefixedMetricsTest {
 
@@ -51,6 +53,11 @@ public class PrefixedMetricsTest {
                 @Override
                 public Gauge gauge(final String name) {
                     throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public void publish(final MetricsOutput out) {
+                    // do nothing
                 }
             },
             "prefix."
@@ -75,6 +82,11 @@ public class PrefixedMetricsTest {
                 public Gauge gauge(final String name) {
                     captured.set(name);
                     return new InMemoryGauge();
+                }
+
+                @Override
+                public void publish(final MetricsOutput out) {
+                    // do nothing
                 }
             },
             "gau"

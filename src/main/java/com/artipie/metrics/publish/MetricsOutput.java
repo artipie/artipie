@@ -21,36 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics;
+package com.artipie.metrics.publish;
 
-import com.artipie.metrics.publish.MetricsOutput;
+import java.util.Map;
 
 /**
- * Registry of metrics by name.
- *
- * @since 0.6
+ * Metrics output to accepts published data.
+ * @since 0.19
  */
-public interface Metrics {
+public interface MetricsOutput {
 
     /**
-     * Get counter metric by name.
-     *
-     * @param name Name of metric.
-     * @return Counter metric instance.
+     * Accepts counters data to increment existing data.
+     * @param data Counters by name
      */
-    Counter counter(String name);
+    void counters(Map<String, Long> data);
 
     /**
-     * Get gauge metric by name.
-     *
-     * @param name Name of metric.
-     * @return Gauge metric instance.
+     * Accepts gauge data to change existing data.
+     * @param data Gauges by name
      */
-    Gauge gauge(String name);
-
-    /**
-     * Publish metrics to output.
-     * @param out Metrics output
-     */
-    void publish(MetricsOutput out);
+    void gauges(Map<String, Long> data);
 }

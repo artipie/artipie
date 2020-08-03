@@ -23,6 +23,8 @@
  */
 package com.artipie.metrics;
 
+import com.artipie.metrics.publish.MetricsOutput;
+
 /**
  * Metrics that adds prefix to names.
  *
@@ -59,5 +61,10 @@ public final class PrefixedMetrics implements Metrics {
     @Override
     public Gauge gauge(final String name) {
         return this.origin.gauge(this.prefix + name);
+    }
+
+    @Override
+    public void publish(final MetricsOutput out) {
+        this.origin.publish(out);
     }
 }
