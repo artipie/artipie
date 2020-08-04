@@ -36,24 +36,52 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 import javax.json.Json;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link CreateRepoSlice}.
  * @since 0.9
+ * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class CreateRepoSliceTest {
 
     @Test
-    void returnsOkIfJsonIsValid() {
+    void returnsOkAndSavesYamlIfJsonIsValidWithUser() {
+        final Storage storage = new InMemoryStorage();
         MatcherAssert.assertThat(
-            new CreateRepoSlice(new Settings.Fake()).response(
+            "Returns 200 OK",
+            new CreateRepoSlice(new Settings.Fake(storage)).response(
+                new RequestLine("PUT", "/api/repositories/username/my_repo").toString(),
+                Collections.emptyList(),
+                this.jsonBody()
+            ),
+            new RsHasStatus(RsStatus.OK)
+        );
+        MatcherAssert.assertThat(
+            "Saves yaml to storage",
+            storage.exists(new Key.From("username/my_repo.yaml")).join(),
+            new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    void returnsOkAndSavesYamlIfJsonIsValid() {
+        final Storage storage = new InMemoryStorage();
+        MatcherAssert.assertThat(
+            "Returns 200 OK",
+            new CreateRepoSlice(new Settings.Fake(storage)).response(
                 new RequestLine("PUT", "/api/repositories/my_repo").toString(),
                 Collections.emptyList(),
                 this.jsonBody()
             ),
             new RsHasStatus(RsStatus.OK)
+        );
+        MatcherAssert.assertThat(
+            "Saves yaml to storage",
+            storage.exists(new Key.From("my_repo.yaml")).join(),
+            new IsEqual<>(true)
         );
     }
 

@@ -23,22 +23,30 @@
  */
 package com.artipie.api.artifactory;
 
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.Settings;
 import com.artipie.api.ContentAs;
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import com.jcabi.log.Logger;
 import io.reactivex.Single;
-import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.json.JsonObject;
+import org.cactoos.scalar.Unchecked;
 import org.reactivestreams.Publisher;
 
 /**
@@ -46,7 +54,14 @@ import org.reactivestreams.Publisher;
  * creating corresponding YAML configuration.
  * @since 0.9
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class CreateRepoSlice implements Slice {
+
+    /**
+     * URI path pattern.
+     */
+    private static final Pattern PTN =
+        Pattern.compile("/api/repositories/(?<first>[^/.]+)(?<second>/[^/.]+)?/?");
 
     /**
      * Artipie settings.
@@ -73,26 +88,27 @@ public final class CreateRepoSlice implements Slice {
                 json -> Single.fromFuture(
                     valid(json).map(
                         name -> {
-                            try {
-                                return this.settings.storage().exists(
-                                    new Key.From(String.format("%s.yaml", name))
-                                ).thenApply(
+                            final Key key = CreateRepoSlice.yamlKey(line, name);
+                            return this.getStorage().exists(key)
+                                .thenCompose(
                                     exists -> {
-                                        final Response res;
+                                        final CompletionStage<Response> res;
                                         if (exists) {
-                                            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+                                            res = CompletableFuture.completedStage(
+                                                new RsWithStatus(RsStatus.BAD_REQUEST)
+                                            );
                                         } else {
-                                            res = new RsWithStatus(RsStatus.OK);
+                                            res = this.getStorage().save(
+                                                key,
+                                                new Content.From(
+                                                    CreateRepoSlice.yaml().toString()
+                                                        .getBytes(StandardCharsets.UTF_8)
+                                                )
+                                            ).thenApply(ignored -> new RsWithStatus(RsStatus.OK));
                                         }
                                         return res;
                                     }
                                 );
-                            } catch (final IOException ex) {
-                                Logger.error(this, ex.toString());
-                                return CompletableFuture.completedFuture(
-                                    new RsWithStatus(RsStatus.INTERNAL_ERROR)
-                                );
-                            }
                         }
                     ).orElse(
                         CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST))
@@ -100,6 +116,15 @@ public final class CreateRepoSlice implements Slice {
                 )
             )
         );
+    }
+
+    /**
+     * Obtain storage from settings.
+     * @return Storage
+     * @throws java.io.UncheckedIOException on Error
+     */
+    private Storage getStorage() {
+        return new Unchecked<>(this.settings::storage).value();
     }
 
     /**
@@ -119,6 +144,47 @@ public final class CreateRepoSlice implements Slice {
             res = Optional.empty();
         }
         return res;
+    }
+
+    /**
+     * User from request line.
+     * @param line Line
+     * @param repo Repo name
+     * @return Username if present
+     */
+    private static Key yamlKey(final String line, final String repo) {
+        final Matcher matcher = PTN.matcher(new RequestLineFrom(line).uri().getPath());
+        if (!matcher.matches()) {
+            throw new UnsupportedOperationException("Unsupported request");
+        }
+        return new Key.From(
+            String.format(
+                "%s%s.yaml",
+                Optional.ofNullable(
+                    matcher.group("second")
+                ).map(present -> String.format("%s/", matcher.group("first"))).orElse(""),
+                repo
+            )
+        );
+    }
+
+    /**
+     * Creates yaml mapping for the new repository.
+     * @return Yaml configuration
+     */
+    private static YamlMapping yaml() {
+        return Yaml.createYamlMappingBuilder().add(
+            "repo",
+            Yaml.createYamlMappingBuilder()
+                .add("type", "docker")
+                .add("storage", "default")
+                .add(
+                    "permissions",
+                    Yaml.createYamlMappingBuilder()
+                        .add("*", Yaml.createYamlSequenceBuilder().add("*").build())
+                        .build()
+                ).build()
+        ).build();
     }
 
 }
