@@ -1,0 +1,14 @@
+{
+  "name": "sample-consumer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "sample-npm-project": "^1.0.0"
+  }
+}
