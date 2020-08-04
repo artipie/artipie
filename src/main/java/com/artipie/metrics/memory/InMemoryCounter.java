@@ -59,6 +59,6 @@ public final class InMemoryCounter implements Counter {
      * @return Counter value.
      */
     public long value() {
-        return this.counter.get();
+        return this.counter.getAndSet(0L);
     }
 }

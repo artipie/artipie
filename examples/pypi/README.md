@@ -9,22 +9,20 @@ repo:
   type: pypi
   storage:
     type: fs
-    path: /tmp/artipie/data/python-repo
+    path: /var/artipie/data
+  permissions:
+    "*":
+      - "*"
 ```
 
-Publish a package(whl or tar.gz):
-  * Install twine utility, if you don't do it already [docs](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives).
+To publish your packages with [twine](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives) 
+specify Artipie repository url with `--repository-url` option
 ```bash
-$ python3 -m pip install --user --upgrade twine
-```
-  * build the package, as described in python docs
-  * upload to server with a command
-```bash
-$ python3 -m twine upload --repository-url http://localhost:8080/pypi/ -u user.name -p pass testpkg/dist/*
+$ twine upload --repository-url http://localhost:8080/pypi/ -u username -p password myproject/dist/*
 ```
 
-Install a package:
+To install package with `pip install` specify Artipie repository url with `--index-url` option:
 
 ```bash
-$ pip install --index-url http://localhost:8080/pypi/ testpkg
+$ pip install --index-url http://username:password@localhost:8080/pypi/ myproject
 ```

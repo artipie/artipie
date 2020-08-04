@@ -29,7 +29,6 @@ import com.artipie.http.Slice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.PrefixedMetrics;
-import com.artipie.metrics.memory.MetricsLogPublisher;
 import com.artipie.metrics.nop.NopMetrics;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
@@ -47,7 +46,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.slf4j.LoggerFactory;
 
 /**
  * Vertx server entry point.
@@ -171,16 +169,7 @@ public final class VertxMain implements Runnable {
     private static Metrics metrics(final Settings settings) throws IOException {
         return Optional.ofNullable(settings.meta())
             .map(meta -> meta.yamlMapping("metrics"))
-            .<Metrics>map(
-                root -> {
-                    final MetricsFromConfig metrics = new MetricsFromConfig(root);
-                    new MetricsLogPublisher(
-                        LoggerFactory.getLogger(Metrics.class),
-                        metrics.metrics(),
-                        metrics.interval()
-                    ).start();
-                    return metrics.metrics();
-                }
-            ).orElse(NopMetrics.INSTANCE);
+            .<Metrics>map(root -> new MetricsFromConfig(root).metrics())
+            .orElse(NopMetrics.INSTANCE);
     }
 }
