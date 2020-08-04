@@ -205,7 +205,7 @@ public final class TimeoutSlice implements Slice {
                         future.complete(null);
                     }
                 },
-                duration.getSeconds(), TimeUnit.SECONDS
+                duration.toMillis(), TimeUnit.MILLISECONDS
             );
             return future;
         }
