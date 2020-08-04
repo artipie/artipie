@@ -1,0 +1,1 @@
+console.log("Welcome to the sample npm project.");
