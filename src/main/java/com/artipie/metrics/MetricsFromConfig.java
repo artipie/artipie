@@ -24,9 +24,17 @@
 package com.artipie.metrics;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.YamlStorage;
+import com.artipie.asto.Key;
+import com.artipie.asto.SubStorage;
 import com.artipie.metrics.memory.InMemoryMetrics;
+import com.artipie.metrics.publish.MetricsLogOutput;
+import com.artipie.metrics.publish.MetricsOutput;
+import com.artipie.metrics.publish.MetricsPublisher;
+import com.artipie.metrics.publish.StorageMetricsOutput;
 import java.time.Duration;
 import java.util.Optional;
+import org.slf4j.LoggerFactory;
 
 /**
  * Metrics from config.
@@ -51,16 +59,31 @@ public final class MetricsFromConfig {
      * Returns {@link Metrics} instance according to configuration.
      * @return Instance of {@link Metrics}.
      */
-    public InMemoryMetrics metrics() {
+    public Metrics metrics() {
         return Optional.ofNullable(this.settings.string("type"))
             .map(
                 type -> {
-                    if (!"log".equals(type)) {
-                        throw new IllegalArgumentException(
-                            String.format("Unsupported metrics type: %s", type)
-                        );
+                    final MetricsOutput output;
+                    switch (type) {
+                        case "log":
+                            output = new MetricsLogOutput(LoggerFactory.getLogger(Metrics.class));
+                            break;
+                        case "asto":
+                            output = new StorageMetricsOutput(
+                                new SubStorage(
+                                    new Key.From(".meta", "metrics"),
+                                    new YamlStorage(this.settings.yamlMapping("storage")).storage()
+                                )
+                            );
+                            break;
+                        default:
+                            throw new IllegalArgumentException(
+                                String.format("Unsupported metrics type: %s", type)
+                            );
                     }
-                    return new InMemoryMetrics();
+                    final Metrics metrics = new InMemoryMetrics();
+                    new MetricsPublisher(metrics, this.interval()).start(output);
+                    return metrics;
                 }
             ).orElseThrow(() -> new IllegalArgumentException("Metrics type is not specified"));
     }
@@ -70,7 +93,7 @@ public final class MetricsFromConfig {
      * @return Interval
      * @checkstyle MagicNumberCheck (500 lines)
      */
-    public Duration interval() {
+    Duration interval() {
         return Optional.ofNullable(this.settings.string("interval"))
             .map(interval -> Duration.ofSeconds(Integer.parseInt(interval)))
             .orElse(Duration.ofSeconds(5));

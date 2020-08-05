@@ -21,28 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics.memory;
+package com.artipie.metrics.publish;
 
-import java.time.Duration;
+import com.artipie.metrics.memory.InMemoryMetrics;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 
 /**
  * Periodic publisher of {@link InMemoryMetrics} to log.
  *
  * @since 0.9
- * @todo #231:30min Support gauge publishing in `MetricsLogPublisher`.
- *  `InMemoryMetrics` contain gauges along counters.
- *  Gauges should be published the same way as counters.
- *  Should be done after https://github.com/artipie/artipie/issues/267
  * @todo #231:30min Add tests for `MetricsLogPublisher`.
  *  It should be tested that the publisher runs periodically, collects fresh metrics data
  *  and logs the data as expected.
  */
-public class MetricsLogPublisher {
+public final class MetricsLogOutput implements MetricsOutput {
 
     /**
      * Logger to use for publishing.
@@ -51,57 +45,49 @@ public class MetricsLogPublisher {
     private final Logger logger;
 
     /**
-     * Metrics for publishing.
+     * Counters map.
      */
-    private final InMemoryMetrics metrics;
-
-    /**
-     * Period.
-     */
-    private final Duration period;
+    private final Map<String, Long> metrics;
 
     /**
      * Ctor.
      *
      * @param logger Logger to use for publishing.
-     * @param metrics Metrics for publishing.
-     * @param period Period.
      */
-    public MetricsLogPublisher(
-        final Logger logger,
-        final InMemoryMetrics metrics,
-        final Duration period
-    ) {
+    public MetricsLogOutput(final Logger logger) {
         this.logger = logger;
-        this.metrics = metrics;
-        this.period = period;
+        this.metrics = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public void counters(final Map<String, Long> data) {
+        for (final Map.Entry<String, Long> entries : data.entrySet()) {
+            final String key = entries.getKey();
+            this.metrics.put(key, this.metrics.getOrDefault(key, 0L) + entries.getValue());
+        }
+        this.print();
+    }
+
+    @Override
+    public void gauges(final Map<String, Long> data) {
+        for (final Map.Entry<String, Long> entries : data.entrySet()) {
+            final String key = entries.getKey();
+            this.metrics.put(key, entries.getValue());
+        }
+        this.print();
     }
 
     /**
-     * Start periodic publishing.
+     * Print metrics to log.
      */
-    public void start() {
-        final long millis = this.period.toMillis();
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
-            this::publish,
-            millis,
-            millis,
-            TimeUnit.MILLISECONDS
-        );
-    }
-
-    /**
-     * Publish metrics to log.
-     */
-    private void publish() {
-        final Map<String, InMemoryCounter> counters = new TreeMap<>(this.metrics.counters());
-        if (!counters.isEmpty()) {
+    private void print() {
+        if (!this.metrics.isEmpty()) {
             final StringBuilder message = new StringBuilder("Counters:");
-            for (final Map.Entry<String, InMemoryCounter> entry : counters.entrySet()) {
+            for (final Map.Entry<String, Long> entry : this.metrics.entrySet()) {
                 message.append('\n')
                     .append(entry.getKey())
                     .append(": ")
-                    .append(entry.getValue().value());
+                    .append(entry.getValue());
             }
             this.logger.info(message.toString());
         }

@@ -1,0 +1,24 @@
+{
+  "name": "sample-npm-project",
+  "version": "1.0.0",
+  "description": "A sample project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artipie/artipie.git"
+  },
+  "keywords": [
+    "sample",
+    "npm",
+    "project"
+  ],
+  "author": "Pavel Drankou",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/artipie/artipie/issues"
+  },
+  "homepage": "https://github.com/artipie/artipie#readme"
+}
