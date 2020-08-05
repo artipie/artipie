@@ -26,6 +26,7 @@ package com.artipie.api;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.Settings;
 import com.artipie.YamlPermissions;
+import com.artipie.api.artifactory.CreateRepoSlice;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
@@ -143,6 +144,13 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByMethod(RqMethod.POST)
                                 ),
                                 new ApiChangeUserPassword(settings)
+                            ),
+                            new RtRulePath(
+                                new RtRule.All(
+                                    new RtRule.ByPath(Pattern.compile("/api/repositories/.*")),
+                                    new RtRule.ByMethod(RqMethod.PUT)
+                                ),
+                                new CreateRepoSlice(settings)
                             )
                         ),
                         new Permission.ByName("api", perm),

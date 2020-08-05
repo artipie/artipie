@@ -29,8 +29,12 @@ import com.artipie.asto.Concatenation;
 import com.artipie.asto.Remaining;
 import io.reactivex.Single;
 import io.reactivex.functions.Function;
+import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import org.reactivestreams.Publisher;
 
 /**
@@ -54,6 +58,17 @@ public final class ContentAs<T>
     public static final ContentAs<YamlMapping> YAML = new ContentAs<>(
         bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8))
             .readYamlMapping()
+    );
+
+    /**
+     * Content as JSON.
+     */
+    public static final ContentAs<JsonObject> JSON = new ContentAs<>(
+        bytes -> {
+            try (JsonReader reader = Json.createReader(new ByteArrayInputStream(bytes))) {
+                return reader.readObject();
+            }
+        }
     );
 
     /**
