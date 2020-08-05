@@ -2,7 +2,7 @@ set -x
 set -e
 
 # Start artipie.
-docker run --rm -d --name artipie -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie-local:latest
+docker run --rm -d --name artipie -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:latest
 
 # Wait for container to be ready for new connections.
 sleep 5
