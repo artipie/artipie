@@ -4,7 +4,7 @@ WORKDIR /jar
 
 # Download dependencies
 COPY pom.xml ./
-RUN mvn verify clean --fail-never
+RUN mvn dependency:resolve dependency:resolve-plugins clean --fail-never
 
 # Preapare fat jar
 COPY src ./src
