@@ -1,7 +1,12 @@
 FROM g4s8/artipie-base:latest as build_jar
 ARG version="1.0-SNAPSHOT"
 WORKDIR /jar
+
+# Download dependencies
 COPY pom.xml ./
+RUN mvn dependency:resolve dependency:resolve-plugins clean --fail-never
+
+# Preapare fat jar
 COPY src ./src
 RUN mvn versions:set -DnewVersion=${version} && \
   mvn package -P assembly
