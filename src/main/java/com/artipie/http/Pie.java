@@ -36,6 +36,7 @@ import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.http.slice.LoggingSlice;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -70,25 +71,28 @@ public final class Pie extends Slice.Wrap {
     public Pie(final Settings settings) {
         super(
             new SafeSlice(
-                new MeasuredSlice(
-                    new DockerRoutingSlice(
-                        new LoggingSlice(
-                            Level.INFO,
-                            new SliceRoute(
-                                Pie.EMPTY_PATH,
-                                new RtRulePath(
-                                    new RtRule.ByPath(Pattern.compile("/api/?.*")),
-                                    new ArtipieApi(settings)
-                                ),
-                                new RtRulePath(
-                                    new RtIsDashboard(settings), new DashboardSlice(settings)
-                                ),
-                                new RtRulePath(
-                                    RtRule.FALLBACK, new SliceByPath(settings)
+                new TimeoutSlice(
+                    new MeasuredSlice(
+                        new DockerRoutingSlice(
+                            new LoggingSlice(
+                                Level.INFO,
+                                new SliceRoute(
+                                    Pie.EMPTY_PATH,
+                                    new RtRulePath(
+                                        new RtRule.ByPath(Pattern.compile("/api/?.*")),
+                                        new ArtipieApi(settings)
+                                    ),
+                                    new RtRulePath(
+                                        new RtIsDashboard(settings), new DashboardSlice(settings)
+                                    ),
+                                    new RtRulePath(
+                                        RtRule.FALLBACK, new SliceByPath(settings)
+                                    )
                                 )
                             )
                         )
-                    )
+                    ),
+                    Duration.ofMinutes(1)
                 )
             )
         );
