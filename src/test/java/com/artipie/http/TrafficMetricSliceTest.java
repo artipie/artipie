@@ -28,13 +28,11 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.memory.InMemoryMetrics;
-import com.artipie.metrics.publish.MetricsOutput;
+import com.artipie.metrics.memory.TestMetricsOutput;
 import hu.akarnokd.rxjava2.interop.CompletableInterop;
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
 import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -46,63 +44,34 @@ import org.junit.jupiter.api.Test;
  */
 final class TrafficMetricSliceTest {
 
-    /**
-     * Request metrics key.
-     */
-    private static final String KEY_REQ = "request.body.size";
-
-    /**
-     * Response metrics key.
-     */
-    private static final String KEY_RSP = "response.body.size";
-
     @Test
     void updatesMetrics() throws Exception {
         final Metrics metrics = new InMemoryMetrics();
-        final int size = 100;
-        new TrafficMetricSlice((line, head, body) -> new RsWithBody(body), metrics)
-            .response(
-                new RequestLine(RqMethod.GET, "/foo").toString(),
-                Collections.emptyList(),
-                Flowable.just(ByteBuffer.wrap(new byte[size]))
-            )
-            .send(
-                (status, headers, body) ->
-                    Flowable.fromPublisher(body).ignoreElements().to(CompletableInterop.await())
-            ).toCompletableFuture().get();
-        final AtomicLong request = new AtomicLong();
-        final AtomicLong response = new AtomicLong();
-        metrics.publish(
-            // @checkstyle AnonInnerLengthCheck (22 lines)
-            new MetricsOutput() {
-                @Override
-                public void counters(final Map<String, Long> data) {
-                    if (data.containsKey(TrafficMetricSliceTest.KEY_REQ)) {
-                        request.addAndGet(data.get(TrafficMetricSliceTest.KEY_REQ));
-                    }
-                    if (data.containsKey(TrafficMetricSliceTest.KEY_RSP)) {
-                        response.addAndGet(data.get(TrafficMetricSliceTest.KEY_RSP));
-                    }
-                }
-
-                @Override
-                public void gauges(final Map<String, Long> data) {
-                    if (data.containsKey(TrafficMetricSliceTest.KEY_REQ)) {
-                        request.set(data.get(TrafficMetricSliceTest.KEY_REQ));
-                    }
-                    if (data.containsKey(TrafficMetricSliceTest.KEY_RSP)) {
-                        response.set(data.get(TrafficMetricSliceTest.KEY_RSP));
-                    }
-                }
-            }
-        );
+        final int req = 100;
+        final int res = 50;
+        new TrafficMetricSlice(
+            (line, head, body) -> new RsWithBody(
+                Flowable.fromPublisher(body).ignoreElements()
+                    .andThen(Flowable.just(ByteBuffer.wrap(new byte[res])))
+            ),
+            metrics
+        ).response(
+            new RequestLine(RqMethod.GET, "/foo").toString(),
+            Collections.emptyList(),
+            Flowable.just(ByteBuffer.wrap(new byte[req]))
+        ).send(
+            (status, headers, body) ->
+                Flowable.fromPublisher(body).ignoreElements().to(CompletableInterop.await())
+        ).toCompletableFuture().get();
+        final TestMetricsOutput out = new TestMetricsOutput();
+        metrics.publish(out);
         MatcherAssert.assertThat(
             "request body size wasn't updated",
-            request.get(), Matchers.equalTo((long) size)
+            out.counters().get("request.body.size"), Matchers.equalTo((long) req)
         );
         MatcherAssert.assertThat(
             "response body size wasn't updated",
-            response.get(), Matchers.equalTo((long) size)
+            out.counters().get("response.body.size"), Matchers.equalTo((long) res)
         );
     }
 }

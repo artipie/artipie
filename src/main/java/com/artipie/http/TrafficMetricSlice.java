@@ -24,6 +24,7 @@
 package com.artipie.http;
 
 import com.artipie.http.rs.RsStatus;
+import com.artipie.metrics.Counter;
 import com.artipie.metrics.Metrics;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -64,7 +65,7 @@ public final class TrafficMetricSlice implements Slice {
         return new MetricsResponse(
             this.origin.response(
                 line, head,
-                new MetricsPublisher(body, this.metrics, "request.body.size")
+                new MetricsPublisher(body, this.metrics.counter("request.body.size"))
             ),
             this.metrics
         );
@@ -132,7 +133,7 @@ public final class TrafficMetricSlice implements Slice {
                 final Publisher<ByteBuffer> body) {
                 return this.origin.accept(
                     status, headers,
-                    new MetricsPublisher(body, this.metrics, "response.body.size")
+                    new MetricsPublisher(body, this.metrics.counter("response.body.size"))
                 );
             }
         }
@@ -151,31 +152,23 @@ public final class TrafficMetricSlice implements Slice {
         private final Publisher<ByteBuffer> origin;
 
         /**
-         * Metrics to update.
+         * Metrics counter to update.
          */
-        private final Metrics metrics;
-
-        /**
-         * Metrics name to update.
-         */
-        private final String name;
+        private final Counter counter;
 
         /**
          * Wrap publisher.
          * @param origin Origin publisher
-         * @param metrics Metrics to update
-         * @param name Metrics name to update
+         * @param counter Counter to update
          */
-        MetricsPublisher(final Publisher<ByteBuffer> origin, final Metrics metrics,
-            final String name) {
+        MetricsPublisher(final Publisher<ByteBuffer> origin, final Counter counter) {
             this.origin = origin;
-            this.metrics = metrics;
-            this.name = name;
+            this.counter = counter;
         }
 
         @Override
         public void subscribe(final Subscriber<? super ByteBuffer> subscriber) {
-            this.origin.subscribe(new MetricsSubscriber(subscriber, this.metrics, this.name));
+            this.origin.subscribe(new MetricsSubscriber(subscriber, this.counter));
         }
 
         /**
@@ -191,26 +184,18 @@ public final class TrafficMetricSlice implements Slice {
             private final Subscriber<? super ByteBuffer> origin;
 
             /**
-             * Metrics to update.
+             * Counter to update.
              */
-            private final Metrics metrics;
-
-            /**
-             * Metrics name to update.
-             */
-            private final String name;
+            private final Counter counter;
 
             /**
              * Wrap subscriber.
              * @param origin Origin subscriber
-             * @param metrics Metrics to update
-             * @param name Metric name to update
+             * @param counter Counter to update
              */
-            MetricsSubscriber(final Subscriber<? super ByteBuffer> origin,
-                final Metrics metrics, final String name) {
+            MetricsSubscriber(final Subscriber<? super ByteBuffer> origin, final Counter counter) {
                 this.origin = origin;
-                this.metrics = metrics;
-                this.name = name;
+                this.counter = counter;
             }
 
             @Override
@@ -220,7 +205,7 @@ public final class TrafficMetricSlice implements Slice {
 
             @Override
             public void onNext(final ByteBuffer buffer) {
-                this.metrics.counter(this.name).add(buffer.remaining());
+                this.counter.add(buffer.remaining());
                 this.origin.onNext(buffer);
             }
 
