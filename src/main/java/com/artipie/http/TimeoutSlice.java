@@ -178,7 +178,7 @@ public final class TimeoutSlice implements Slice {
         public CompletionStage<Void> accept(final RsStatus status, final Headers headers,
             final Publisher<ByteBuffer> body) {
             final CompletionStage<Void> res;
-            if (this.completed.compareAndSet(false, true)) {
+            if (status == RsStatus.CONTINUE || this.completed.compareAndSet(false, true)) {
                 res = this.origin.accept(status, headers, body);
             } else {
                 res = CompletableFuture.completedFuture(null);
