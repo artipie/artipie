@@ -108,12 +108,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>0.15.3</version>
+      <version>0.15.5</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.23.3</version>
+      <version>0.23.4</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
