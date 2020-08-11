@@ -23,6 +23,7 @@
  */
 package com.artipie;
 
+import com.google.common.base.Strings;
 import java.util.Optional;
 
 /**
@@ -30,7 +31,7 @@ import java.util.Optional;
  *
  * @since 0.9
  */
-final class SystemSettings implements com.artipie.http.client.Settings {
+final class HttpClientSettings implements com.artipie.http.client.Settings {
 
     /**
      * Proxy host system property key.
@@ -45,9 +46,9 @@ final class SystemSettings implements com.artipie.http.client.Settings {
     @Override
     public Optional<Proxy> proxy() {
         final Optional<Proxy> result;
-        final String host = System.getProperty(SystemSettings.PROXY_HOST);
-        final String port = System.getProperty(SystemSettings.PROXY_PORT);
-        if (host == null || port == null) {
+        final String host = System.getProperty(HttpClientSettings.PROXY_HOST);
+        final String port = System.getProperty(HttpClientSettings.PROXY_PORT);
+        if (Strings.isNullOrEmpty(host) || Strings.isNullOrEmpty(port)) {
             result = Optional.empty();
         } else {
             result = Optional.of(new Proxy.Simple(false, host, Integer.parseInt(port)));

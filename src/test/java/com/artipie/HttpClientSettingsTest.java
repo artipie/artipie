@@ -30,7 +30,7 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link SystemSettings}.
+ * Test for {@link HttpClientSettings}.
  *
  * @since 0.9
  * @todo #429:30min Test `SystemSettings.trustAll` method.
@@ -39,14 +39,14 @@ import org.junit.jupiter.api.Test;
  *  This could be done with Powermock library, however it is tricky at the moment to use it with
  *  JUnit5 as it is not directly supported.
  */
-class SystemSettingsTest {
+class HttpClientSettingsTest {
 
     @Test
     public void shouldNotHaveProxy() {
-        System.getProperties().remove(SystemSettings.PROXY_HOST);
-        System.getProperties().remove(SystemSettings.PROXY_PORT);
+        System.getProperties().remove(HttpClientSettings.PROXY_HOST);
+        System.getProperties().remove(HttpClientSettings.PROXY_PORT);
         MatcherAssert.assertThat(
-            new SystemSettings().proxy().isPresent(),
+            new HttpClientSettings().proxy().isPresent(),
             new IsEqual<>(false)
         );
     }
@@ -55,9 +55,9 @@ class SystemSettingsTest {
     public void shouldHaveProxyWhenSpecified() {
         final String host = "artipie.com";
         final int port = 1234;
-        System.getProperties().put(SystemSettings.PROXY_HOST, host);
-        System.getProperties().put(SystemSettings.PROXY_PORT, String.valueOf(port));
-        final Optional<Settings.Proxy> proxy = new SystemSettings().proxy();
+        System.setProperty(HttpClientSettings.PROXY_HOST, host);
+        System.setProperty(HttpClientSettings.PROXY_PORT, String.valueOf(port));
+        final Optional<Settings.Proxy> proxy = new HttpClientSettings().proxy();
         MatcherAssert.assertThat(
             "Proxy enabled",
             proxy.isPresent(),
@@ -83,7 +83,7 @@ class SystemSettingsTest {
     @Test
     public void shouldNotTrustAll() {
         MatcherAssert.assertThat(
-            new SystemSettings().trustAll(),
+            new HttpClientSettings().trustAll(),
             new IsEqual<>(false)
         );
     }
@@ -91,7 +91,7 @@ class SystemSettingsTest {
     @Test
     public void shouldFollowRedirects() {
         MatcherAssert.assertThat(
-            new SystemSettings().followRedirects(),
+            new HttpClientSettings().followRedirects(),
             new IsEqual<>(true)
         );
     }

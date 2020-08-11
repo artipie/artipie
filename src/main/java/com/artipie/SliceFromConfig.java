@@ -85,7 +85,7 @@ public final class SliceFromConfig extends Slice.Wrap {
     private static final JettyClientSlices HTTP;
 
     static {
-        HTTP = new JettyClientSlices(new SystemSettings());
+        HTTP = new JettyClientSlices(new HttpClientSettings());
         try {
             SliceFromConfig.HTTP.start();
             // @checkstyle IllegalCatchCheck (1 line)
