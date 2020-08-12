@@ -261,7 +261,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "docker-proxy":
-                slice = new DockerProxy(SliceFromConfig.HTTP.client(), cfg, permissions, auth);
+                slice = new DockerProxy(SliceFromConfig.HTTP, cfg, permissions, auth);
                 break;
             default:
                 throw new IllegalStateException(
