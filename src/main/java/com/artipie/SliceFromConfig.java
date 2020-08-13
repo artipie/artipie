@@ -34,7 +34,6 @@ import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.files.FileProxySlice;
 import com.artipie.files.FilesSlice;
-import com.artipie.files.RpRemote;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
 import com.artipie.http.DockerRoutingSlice;
@@ -148,15 +147,12 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "file-proxy":
                 slice = new TrimPathSlice(
                     new FileProxySlice(
-                        new RpRemote(
-                            SliceFromConfig.HTTP.client(),
-                            URI.create(
-                                cfg.settings()
-                                    .orElseThrow(
-                                        () -> new IllegalStateException("Repo settings missed")
-                                    ).string("remote_uri")
-                            ),
-                            new com.artipie.files.StorageCache(storage)
+                        SliceFromConfig.HTTP,
+                        URI.create(
+                            cfg.settings()
+                                .orElseThrow(
+                                    () -> new IllegalStateException("Repo settings missed")
+                                ).string("remote_uri")
                         )
                     ), prefix
                 );
@@ -272,5 +268,4 @@ public final class SliceFromConfig extends Slice.Wrap {
             .<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
             .orElse(slice);
     }
-
 }
