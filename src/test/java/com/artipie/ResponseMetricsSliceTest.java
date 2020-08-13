@@ -23,7 +23,6 @@
  */
 package com.artipie;
 
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.headers.Authorization;
@@ -34,13 +33,11 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.metrics.memory.InMemoryMetrics;
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -124,34 +121,23 @@ class ResponseMetricsSliceTest {
 
     @Test
     void shouldForwardRequestUnmodified() {
-        final String line = new RequestLine(RqMethod.POST, "/some_upload.war").toString();
         final Header header = new Header("header1", "value1");
         final byte[] body = "some code".getBytes();
-        new ResponseMetricsSlice(
-            (rqline, rqheaders, rqbody) -> {
-                MatcherAssert.assertThat(
-                    "Request line is forwarded as is",
-                    rqline,
-                    new IsEqual<>(line)
-                );
-                MatcherAssert.assertThat(
-                    "Headers are forwarded unmodified",
-                    rqheaders,
-                    Matchers.containsInAnyOrder(header)
-                );
-                MatcherAssert.assertThat(
-                    "Body is forwarded unmodified",
-                    new PublisherAs(rqbody).bytes().toCompletableFuture().join(),
-                    new IsEqual<>(body)
-                );
-                return StandardRs.OK;
-            },
-            this.metrics
-        ).response(
-            line, new Headers.From(header), Flowable.just(ByteBuffer.wrap(body))
-        ).send(
-            (status, rsheaders, rsbody) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        final RsStatus status = RsStatus.CREATED;
+        MatcherAssert.assertThat(
+            new ResponseMetricsSlice(
+                (rsline, rsheaders, rsbody) -> new RsFull(
+                    status,
+                    rsheaders,
+                    rsbody
+                ),
+                this.metrics
+            ).response(
+                new RequestLine(RqMethod.POST, "/some_upload.war").toString(),
+                new Headers.From(header), Flowable.just(ByteBuffer.wrap(body))
+            ),
+            new ResponseMatcher(status, body, header)
+        );
     }
 
     @Test
