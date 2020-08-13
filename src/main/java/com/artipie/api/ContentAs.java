@@ -53,6 +53,13 @@ public final class ContentAs<T>
     );
 
     /**
+     * Content as {@code long} number.
+     */
+    public static final ContentAs<Long> LONG = new ContentAs<>(
+        bytes -> Long.valueOf(new String(bytes, StandardCharsets.US_ASCII))
+    );
+
+    /**
      * Content as YAML mapping.
      */
     public static final ContentAs<YamlMapping> YAML = new ContentAs<>(
