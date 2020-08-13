@@ -29,6 +29,7 @@ import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Permissions;
+import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
@@ -38,7 +39,6 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
-import org.eclipse.jetty.client.HttpClient;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -84,7 +84,7 @@ class DockerProxyTest {
 
     private static DockerProxy dockerProxy(final String yaml) throws IOException {
         return new DockerProxy(
-            new HttpClient(),
+            new JettyClientSlices(),
             new RepoConfig(
                 alias -> {
                     throw new UnsupportedOperationException();
