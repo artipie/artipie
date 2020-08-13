@@ -38,7 +38,6 @@ import com.artipie.http.rs.StandardRs;
 import com.artipie.metrics.memory.InMemoryMetrics;
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
