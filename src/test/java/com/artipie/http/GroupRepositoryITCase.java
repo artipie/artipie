@@ -24,9 +24,8 @@
 package com.artipie.http;
 
 import com.artipie.files.FileProxySlice;
-import com.artipie.files.RpRemote;
+import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.group.GroupSlice;
-import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
@@ -34,12 +33,8 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import org.apache.http.client.utils.URIBuilder;
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,18 +52,18 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 final class GroupRepositoryITCase {
 
     /**
-     * Http client for proxy slice.
+     * Http clients for proxy slice.
      */
-    private final HttpClient http = new HttpClient(new SslContextFactory.Client());
+    private final JettyClientSlices clients = new JettyClientSlices();
 
     @BeforeEach
     void setUp() throws Exception {
-        this.http.start();
+        this.clients.start();
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        this.http.stop();
+        this.clients.stop();
     }
 
     @Test
@@ -80,10 +75,7 @@ final class GroupRepositoryITCase {
                 this.proxy("/artipie/none-1/")
             ),
             new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasBody("one\n", StandardCharsets.UTF_8)
-                ),
+                new RsHasStatus(RsStatus.OK),
                 new RequestLine(
                     RqMethod.GET, URI.create("/GroupRepositoryITCase-one.txt").toString()
                 )
@@ -93,12 +85,10 @@ final class GroupRepositoryITCase {
 
     private Slice proxy(final String path) throws URISyntaxException {
         return new FileProxySlice(
-            new RpRemote(
-                this.http,
-                new URIBuilder(URI.create("https://central.artipie.com"))
-                    .setPath(path)
-                    .build()
-            )
+            this.clients,
+            new URIBuilder(URI.create("https://central.artipie.com"))
+                .setPath(path)
+                .build()
         );
     }
 }
