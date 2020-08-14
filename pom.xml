@@ -108,12 +108,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>0.15.3</version>
+      <version>0.15.5</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.23.3</version>
+      <version>0.23.4</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -124,6 +124,11 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>vertx-server</artifactId>
       <version>0.3.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>http-client</artifactId>
+      <version>0.1.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -178,7 +183,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>0.5.4</version>
+      <version>0.6.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -188,7 +193,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>0.4</version>
+      <version>0.4.2</version>
     </dependency>
     <dependency>
       <groupId>com.github.jknack</groupId>
@@ -225,6 +230,12 @@ SOFTWARE.
       <groupId>io.vertx</groupId>
       <artifactId>vertx-junit5</artifactId>
       <version>${vertx.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-mockito2</artifactId>
+      <version>2.0.7</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -1,8 +1,8 @@
 name: "Proof::gem"
 on:
   push:
-    branches:
-      - "master"
+    branches-ignore:
+      - "**"
 jobs:
   proof:
     runs-on: ubuntu-latest
