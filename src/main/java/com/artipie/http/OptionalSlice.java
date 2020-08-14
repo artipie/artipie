@@ -37,6 +37,9 @@ import org.reactivestreams.Publisher;
  * if this source matches specified predicate.
  * @param <T> Type of target to test
  * @since 0.10
+ * @todo #425:30min Create a test for this slice.
+ *  The test should verify that slice returns response from origin slice if
+ *  condition matches, and returns 404 if it doesn't match.
  */
 public final class OptionalSlice<T> implements Slice {
 
