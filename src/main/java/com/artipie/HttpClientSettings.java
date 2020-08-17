@@ -25,6 +25,7 @@ package com.artipie;
 
 import com.google.common.base.Strings;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * HTTP client settings from system environment.
@@ -64,5 +65,17 @@ final class HttpClientSettings implements com.artipie.http.client.Settings {
     @Override
     public boolean followRedirects() {
         return true;
+    }
+
+    @Override
+    public long connectTimeout() {
+        final int seconds = 15;
+        return TimeUnit.SECONDS.toMillis(seconds);
+    }
+
+    @Override
+    public long idleTimeout() {
+        final int seconds = 30;
+        return TimeUnit.SECONDS.toMillis(seconds);
     }
 }
