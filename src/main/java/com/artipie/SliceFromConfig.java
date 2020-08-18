@@ -34,7 +34,6 @@ import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.files.FileProxySlice;
 import com.artipie.files.FilesSlice;
-import com.artipie.files.RpRemote;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
 import com.artipie.http.DockerRoutingSlice;
@@ -44,6 +43,7 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicIdentities;
 import com.artipie.http.auth.Permissions;
+import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.group.GroupSlice;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.http.slice.TrimPathSlice;
@@ -59,18 +59,12 @@ import com.artipie.nuget.http.NuGet;
 import com.artipie.pypi.http.PySlice;
 import com.artipie.repo.PathPattern;
 import com.artipie.rpm.http.RpmSlice;
-import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.HttpProxy;
-import org.eclipse.jetty.client.Origin;
-import org.eclipse.jetty.client.ProxyConfiguration;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 /**
  * Slice from repo config.
@@ -87,31 +81,15 @@ public final class SliceFromConfig extends Slice.Wrap {
     /**
      * Http client.
      */
-    private static final HttpClient HTTP;
+    private static final JettyClientSlices HTTP;
 
     static {
-        final boolean trustall = "true".equals(System.getenv("SSL_TRUSTALL"));
-        HTTP = new HttpClient(new SslContextFactory.Client(trustall));
-        Logger.info(SliceFromConfig.class, "Created HTTP client, trustall=%b", trustall);
+        HTTP = new JettyClientSlices(new HttpClientSettings());
         try {
             SliceFromConfig.HTTP.start();
             // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Exception err) {
             throw new IllegalStateException(err);
-        }
-        final ProxyConfiguration config = SliceFromConfig.HTTP.getProxyConfiguration();
-        final String phost = System.getProperty("http.proxyHost");
-        final String pport = System.getProperty("http.proxyPort");
-        if (phost != null && pport != null) {
-            final HttpProxy proxy = new HttpProxy(
-                new Origin.Address(
-                    phost,
-                    Integer.parseInt(pport)
-                ),
-                false
-            );
-            config.getProxies().add(proxy);
-            Logger.info(SliceFromConfig.class, "Added HTTP client proxy: %s", proxy);
         }
     }
 
@@ -169,15 +147,12 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "file-proxy":
                 slice = new TrimPathSlice(
                     new FileProxySlice(
-                        new RpRemote(
-                            SliceFromConfig.HTTP,
-                            URI.create(
-                                cfg.settings()
-                                    .orElseThrow(
-                                        () -> new IllegalStateException("Repo settings missed")
-                                    ).string("remote_uri")
-                            ),
-                            new com.artipie.files.StorageCache(storage)
+                        SliceFromConfig.HTTP,
+                        URI.create(
+                            cfg.settings()
+                                .orElseThrow(
+                                    () -> new IllegalStateException("Repo settings missed")
+                                ).string("remote_uri")
                         )
                     ), prefix
                 );
@@ -225,7 +200,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "maven-proxy":
                 slice = new TrimPathSlice(
                     new MavenProxySlice(
-                        SliceFromConfig.HTTP,
+                        SliceFromConfig.HTTP.client(),
                         URI.create(
                             cfg.settings()
                                 .orElseThrow(() -> new IllegalStateException("Repo settings missed"))

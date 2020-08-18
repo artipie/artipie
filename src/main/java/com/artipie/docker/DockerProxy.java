@@ -33,7 +33,6 @@ import com.artipie.docker.composite.ReadWriteDocker;
 import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.docker.proxy.AuthClientSlice;
-import com.artipie.docker.proxy.ClientSlices;
 import com.artipie.docker.proxy.Credentials;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.DockerRoutingSlice;
@@ -41,12 +40,12 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Permissions;
+import com.artipie.http.client.ClientSlices;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.eclipse.jetty.client.HttpClient;
 import org.reactivestreams.Publisher;
 
 /**
@@ -60,7 +59,7 @@ public final class DockerProxy implements Slice {
     /**
      * HTTP client.
      */
-    private final HttpClient client;
+    private final ClientSlices client;
 
     /**
      * Repository configuration.
@@ -87,7 +86,7 @@ public final class DockerProxy implements Slice {
      * @checkstyle ParameterNumberCheck (2 lines)
      */
     public DockerProxy(
-        final HttpClient client,
+        final ClientSlices client,
         final RepoConfig cfg,
         final Permissions perms,
         final Authentication auth) {
@@ -115,7 +114,6 @@ public final class DockerProxy implements Slice {
         final YamlSequence remotes = Optional.ofNullable(
             this.cfg.repoConfig().yamlSequence("remotes")
         ).orElseThrow(() -> new IllegalStateException("`remotes` not found for Docker proxy"));
-        final ClientSlices slices = new ClientSlices(this.client);
         final Docker proxies = new MultiReadDocker(
             StreamSupport.stream(remotes.spliterator(), false).map(
                 remote -> {
@@ -125,7 +123,7 @@ public final class DockerProxy implements Slice {
                         );
                     }
                     final YamlMapping mapping = (YamlMapping) remote;
-                    return this.proxy(slices, mapping);
+                    return this.proxy(this.client, mapping);
                 }
             ).collect(Collectors.toList())
         );
@@ -174,7 +172,7 @@ public final class DockerProxy implements Slice {
         final Docker proxy = new ProxyDocker(
             new AuthClientSlice(
                 slices,
-                slices.slice(
+                slices.https(
                     Optional.ofNullable(mapping.string("url")).orElseThrow(
                         () -> new IllegalStateException(
                             "`url` is not specified in settings for Docker proxy"

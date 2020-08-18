@@ -41,6 +41,7 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -80,7 +81,7 @@ public final class ArtipieApi extends Slice.Wrap {
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)")),
-                                    new RtRule.ByMethod(RqMethod.GET),
+                                    new ByMethodsRule(RqMethod.GET),
                                     (line, headers) -> URLEncodedUtils.parse(
                                         new RequestLineFrom(line).uri(),
                                         StandardCharsets.UTF_8.displayName()
@@ -120,35 +121,35 @@ public final class ArtipieApi extends Slice.Wrap {
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)")),
-                                    new RtRule.ByMethod(RqMethod.GET)
+                                    new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new ApiRepoListSlice(settings)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)/(?:[^/.]+)")),
-                                    new RtRule.ByMethod(RqMethod.GET)
+                                    new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new ApiRepoGetSlice(settings)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)")),
-                                    new RtRule.ByMethod(RqMethod.POST)
+                                    new ByMethodsRule(RqMethod.POST)
                                 ),
                                 new ApiRepoUpdateSlice(settings)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/users/(?:[^/.]+)/password")),
-                                    new RtRule.ByMethod(RqMethod.POST)
+                                    new ByMethodsRule(RqMethod.POST)
                                 ),
                                 new ApiChangeUserPassword(settings)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repositories/.*")),
-                                    new RtRule.ByMethod(RqMethod.PUT)
+                                    new ByMethodsRule(RqMethod.PUT)
                                 ),
                                 new CreateRepoSlice(settings)
                             )

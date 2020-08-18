@@ -26,6 +26,7 @@ package com.artipie;
 
 import com.artipie.http.Pie;
 import com.artipie.http.Slice;
+import com.artipie.http.TrafficMetricSlice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.PrefixedMetrics;
@@ -51,6 +52,7 @@ import org.apache.commons.cli.ParseException;
  * Vertx server entry point.
  * @since 1.0
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.PrematureDeclaration")
 public final class VertxMain implements Runnable {
@@ -117,9 +119,14 @@ public final class VertxMain implements Runnable {
             throw new IllegalStateException("Storage is not configured");
         }
         final Settings settings = settings(Path.of(storage));
+        final Metrics metrics = metrics(settings);
         new VertxMain(
-            new ResponseMetricsSlice(
-                new Pie(settings), new PrefixedMetrics(metrics(settings), "http.response.")
+            new TrafficMetricSlice(
+                new ResponseMetricsSlice(
+                    new Pie(settings),
+                    new PrefixedMetrics(metrics, "http.response.")
+                ),
+                new PrefixedMetrics(metrics, "http.")
             ),
             vertx,
             port
