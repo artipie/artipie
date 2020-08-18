@@ -40,6 +40,7 @@ import io.reactivex.Flowable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.reactivestreams.Publisher;
@@ -90,52 +91,12 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    @SuppressWarnings("PMD.OnlyOneReturn")
     public CompletionStage<Authentication> auth() {
-        final YamlMapping cred;
-        try {
-            cred = Yaml.createYamlInput(this.content)
-                .readYamlMapping()
-                .yamlMapping(YamlSettings.KEY_META)
-                .yamlMapping("credentials");
-        } catch (final IOException err) {
-            return CompletableFuture.failedFuture(err);
-        }
-        final CompletionStage<Authentication> res;
-        final String path = "path";
-        if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
-            final Storage strg;
-            try {
-                strg = this.storage();
-            } catch (final IOException err) {
-                return CompletableFuture.failedFuture(err);
-            }
-            final KeyFromPath key = new KeyFromPath(cred.string(path));
-            res = strg.exists(key).thenCompose(
-                exists -> {
-                    final CompletionStage<Authentication> auth;
-                    if (exists) {
-                        auth = strg.value(key).thenCompose(
-                            file -> yamlFromPublisher(file).thenApply(AuthFromYaml::new)
-                        );
-                    } else {
-                        auth = CompletableFuture.completedStage(new AuthFromEnv());
-                    }
-                    return auth;
-                }
-            ).thenApply(
-                auth -> new ChainedAuth(new CachedAuth(new GithubAuth()), auth)
-            );
-        } else if (YamlSettings.hasTypeFile(cred)) {
-            res = CompletableFuture.failedFuture(
-                new RuntimeException(
-                    "Invalid credentials configuration: type `file` requires `path`!"
-                )
-            );
-        } else {
-            res = CompletableFuture.completedStage(new AuthFromEnv());
-        }
-        return res;
+        return this.credentials().thenApply(
+            file -> file.<Authentication>map(AuthFromYaml::new).orElse(new AuthFromEnv())
+        ).thenApply(
+            auth -> new ChainedAuth(new CachedAuth(new GithubAuth()), auth)
+        );
     }
 
     @Override
@@ -151,6 +112,52 @@ public final class YamlSettings implements Settings {
         return Yaml.createYamlInput(this.content)
             .readYamlMapping()
             .yamlMapping(YamlSettings.KEY_META);
+    }
+
+    @Override
+    @SuppressWarnings("PMD.OnlyOneReturn")
+    public CompletionStage<Optional<YamlMapping>> credentials() {
+        final YamlMapping cred;
+        try {
+            cred = Yaml.createYamlInput(this.content)
+                .readYamlMapping()
+                .yamlMapping(YamlSettings.KEY_META)
+                .yamlMapping("credentials");
+        } catch (final IOException err) {
+            return CompletableFuture.failedFuture(err);
+        }
+        final CompletionStage<Optional<YamlMapping>> res;
+        final String path = "path";
+        if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
+            final Storage strg;
+            try {
+                strg = this.storage();
+            } catch (final IOException err) {
+                return CompletableFuture.failedFuture(err);
+            }
+            final KeyFromPath key = new KeyFromPath(cred.string(path));
+            res = strg.exists(key).thenCompose(
+                exists -> {
+                    final CompletionStage<Optional<YamlMapping>> auth;
+                    if (exists) {
+                        auth = strg.value(key).thenCompose(YamlSettings::yamlFromPublisher)
+                            .thenApply(Optional::of);
+                    } else {
+                        auth = CompletableFuture.completedStage(Optional.empty());
+                    }
+                    return auth;
+                }
+            );
+        } else if (YamlSettings.hasTypeFile(cred)) {
+            res = CompletableFuture.failedFuture(
+                new RuntimeException(
+                    "Invalid credentials configuration: type `file` requires `path`!"
+                )
+            );
+        } else {
+            res = CompletableFuture.completedStage(Optional.empty());
+        }
+        return res;
     }
 
     /**
