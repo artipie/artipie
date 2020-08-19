@@ -88,10 +88,15 @@ public interface Settings {
         private final Storage storage;
 
         /**
+         * Credentials.
+         */
+        private final Optional<YamlMapping> cred;
+
+        /**
          * Ctor.
          */
         public Fake() {
-            this(new InMemoryStorage());
+            this(new InMemoryStorage(), Optional.empty());
         }
 
         /**
@@ -100,7 +105,27 @@ public interface Settings {
          * @param storage Storage
          */
         public Fake(final Storage storage) {
+            this(storage, Optional.empty());
+        }
+
+        /**
+         * Ctor.
+         *
+         * @param cred Credentials yaml
+         */
+        public Fake(final YamlMapping cred) {
+            this(new InMemoryStorage(), Optional.of(cred));
+        }
+
+        /**
+         * Primary ctor.
+         *
+         * @param storage Storage
+         * @param cred Credentials
+         */
+        public Fake(final Storage storage, final Optional<YamlMapping> cred) {
             this.storage = storage;
+            this.cred = cred;
         }
 
         @Override
@@ -125,7 +150,7 @@ public interface Settings {
 
         @Override
         public CompletionStage<Optional<YamlMapping>> credentials() {
-            return CompletableFuture.completedFuture(Optional.empty());
+            return CompletableFuture.completedFuture(this.cred);
         }
     }
 }
