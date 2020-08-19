@@ -88,6 +88,10 @@ public final class Pie extends Slice.Wrap {
                                 new SliceRoute(
                                     Pie.EMPTY_PATH,
                                     new RtRulePath(
+                                        new RtRule.ByPath(Pattern.compile("/\\.health")),
+                                        new HealthSlice(settings)
+                                    ),
+                                    new RtRulePath(
                                         new RtRule.ByPath(Pattern.compile("/api/?.*")),
                                         new ArtipieApi(settings)
                                     ),
