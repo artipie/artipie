@@ -66,7 +66,7 @@ final class HealthSliceTest {
     @Test
     void returnsBadRequestForBrokenStorage() {
         MatcherAssert.assertThat(
-            new HealthSlice(new Settings.Fake(new FileStorage(Paths.get("/proc")))),
+            new HealthSlice(new Settings.Fake(new FileStorage(Paths.get("/")))),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.UNAVAILABLE),
