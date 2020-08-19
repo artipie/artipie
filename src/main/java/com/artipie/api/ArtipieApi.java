@@ -65,6 +65,9 @@ public final class ArtipieApi extends Slice.Wrap {
     /**
      * New Artipie API.
      * @param settings Artipie settings
+     * @todo #444:30min Constructor decomposition
+     *  This constructor is very huge, difficult to read and understand: extract some methods,
+     *  wrappers, classes, etc from it to make it more elegant.
      */
     public ArtipieApi(final Settings settings) {
         // @checkstyle LineLengthCheck (500 lines)
