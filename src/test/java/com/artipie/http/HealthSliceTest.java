@@ -69,7 +69,7 @@ final class HealthSliceTest {
             new HealthSlice(new Settings.Fake(new FileStorage(Paths.get("/proc")))),
             new SliceHasResponse(
                 Matchers.allOf(
-                    new RsHasStatus(RsStatus.BAD_REQUEST),
+                    new RsHasStatus(RsStatus.UNAVAILABLE),
                     new RsHasBody("[{\"storage\":\"failure\"}]", StandardCharsets.UTF_8)
                 ),
                 HealthSliceTest.REQ_LINE

@@ -43,7 +43,7 @@ import org.reactivestreams.Publisher;
  * Health check slice.
  * <p>
  * Returns JSON with verbose status checks,
- * response status is {@code OK} if all status passed and {@code BAD_REQUEST} if any failed.
+ * response status is {@code OK} if all status passed and {@code UNAVAILABLE} if any failed.
  * </p>
  * @since 0.10
  * @checkstyle AvoidInlineConditionalsCheck (500 lines)
@@ -75,7 +75,7 @@ public final class HealthSlice implements Slice {
                                 Json.createObjectBuilder().add("storage", ok ? "ok" : "failure")
                             ).build()
                         ),
-                        ok ? RsStatus.OK : RsStatus.BAD_REQUEST
+                        ok ? RsStatus.OK : RsStatus.UNAVAILABLE
                     )
             )
         );
