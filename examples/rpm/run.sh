@@ -16,7 +16,7 @@ curl -i  -X PUT  --data-binary "@wget-1.19.5-8.el8_1.1.x86_64.rpm" http://localh
 
 # Start centos container and install wget from artipie.
 docker run --network artipie-rpm-demo --rm --name centos -it centos:8 \
- /bin/bash -c "\
+ /bin/bash -e -c "\
   yum install -y yum-utils ; \
   yum-config-manager --add-repo http://artipie:80/my-rpm/; \
   yum --skip-broken --disablerepo='*' --enablerepo='80_my-rpm_' install wget"
