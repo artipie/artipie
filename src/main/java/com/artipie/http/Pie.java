@@ -36,6 +36,7 @@ import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtPath;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -95,7 +96,7 @@ public final class Pie extends Slice.Wrap {
                                     ),
                                     new RtRulePath(
                                         new RtRule.All(
-                                            new RtRule.ByMethod(RqMethod.GET),
+                                            new ByMethodsRule(RqMethod.GET),
                                             new RtRule.ByPath("/.metrics")
                                         ),
                                         new OptionalSlice<>(
