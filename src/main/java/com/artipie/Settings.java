@@ -29,6 +29,8 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -66,6 +68,12 @@ public interface Settings {
      * @throws IOException On error
      */
     YamlMapping meta() throws IOException;
+
+    /**
+     * Artipie credentials yaml mapping.
+     * @return Yaml credentials
+     */
+    CompletionStage<Optional<YamlMapping>> credentials();
 
     /**
      * Fake {@link Settings} using a file storage.
@@ -113,6 +121,11 @@ public interface Settings {
         @Override
         public YamlMapping meta() {
             return Yaml.createYamlMappingBuilder().build();
+        }
+
+        @Override
+        public CompletionStage<Optional<YamlMapping>> credentials() {
+            return CompletableFuture.completedFuture(Optional.empty());
         }
     }
 }
