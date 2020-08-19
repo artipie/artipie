@@ -23,6 +23,7 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
@@ -111,7 +112,7 @@ public interface Settings {
 
         @Override
         public YamlMapping meta() {
-            throw new UnsupportedOperationException();
+            return Yaml.createYamlMappingBuilder().build();
         }
     }
 }

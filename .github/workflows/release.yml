@@ -32,20 +32,29 @@ jobs:
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
+        with:
+          ref: gh-pages
       - name: Set env
         run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
       - name: Run benchmarks
+        id: run_benchmarks
         uses: artipie/benchmarks@master
         with:
           aws-access-key: '${{ secrets.PERF_AWS_ACCESS_KEY }}'
           aws-secret-key: '${{ secrets.PERF_AWS_SECRET_KEY }}'
-          adapter: 'files'
-          scenario: 'upload-files.jmx'
           version: '${{ env.RELEASE_VERSION }}'
-      - name: Publish reports
-        uses: JamesIves/github-pages-deploy-action@releases/v3
+      - name: Commit benchmark results
+        run: |
+          export REPORT=${{ steps.run_benchmarks.outputs.report }}
+          export VERSION=${{ env.RELEASE_VERSION }}
+          mkdir -p benchmarks/$VERSION
+          mv $REPORT benchmarks/$VERSION/
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add benchmarks/$VERSION/$REPORT
+          git commit -m "Add benchmark results for version=$VERSION"
+      - name: Push benchmark results
+        uses: ad-m/github-push-action@master
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: report
-          TARGET_FOLDER: benchmarks/${{ env.RELEASE_VERSION }}/files/upload
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: 'gh-pages'
