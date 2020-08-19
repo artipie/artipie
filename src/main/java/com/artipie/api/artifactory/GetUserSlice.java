@@ -24,13 +24,11 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.Settings;
+import com.artipie.api.RsJson;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLineFrom;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -81,17 +79,17 @@ public final class GetUserSlice implements Slice {
                             yaml -> Optional.ofNullable(yaml.yamlMapping(username))
                             .<Response>map(
                                 ignored ->
-                                    new RsWithBody(
-                                        new RsWithStatus(RsStatus.OK),
-                                        ByteBuffer.wrap(
-                                            Json.createObjectBuilder()
-                                                .add("name", username)
-                                                .add(
-                                                    "email",
-                                                    String.format("%s@artipie.com", username)
-                                                )
-                                                .build().toString().getBytes(StandardCharsets.UTF_8)
-                                        )
+                                    new RsJson(
+                                        () -> Json.createObjectBuilder()
+                                            .add("name", username)
+                                            .add(
+                                                "email",
+                                                String.format("%s@artipie.com", username)
+                                            )
+                                            .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
+                                            .add("realm", "Internal")
+                                            .build(),
+                                        StandardCharsets.UTF_8
                                     )
                                 ).orElse(StandardRs.NOT_FOUND)
                         ).orElse(StandardRs.NOT_FOUND)
