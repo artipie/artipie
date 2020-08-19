@@ -24,10 +24,7 @@
 package com.artipie.auth;
 
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -40,25 +37,11 @@ import org.junit.jupiter.api.Test;
 final class CachedAuthTest {
 
     @Test
-    void usesCache() {
-        final String username = "test/user";
-        final String user = "user";
-        MatcherAssert.assertThat(
-            new CachedAuth(
-                (usr, pass) -> Optional.empty(),
-                new ConcurrentHashMap<>(new MapOf<>(new MapEntry<>(username, Optional.of(user))))
-            ).user(username, "any").orElseThrow(),
-            new IsEqual<>(user)
-        );
-    }
-
-    @Test
     void callsOriginOnlyOnce() {
         final String username = "usr";
         final AtomicInteger counter = new AtomicInteger();
         final CachedAuth target = new CachedAuth(
-            (usr, pass) -> Optional.of(String.format("%s-%d", usr, counter.incrementAndGet())),
-            new ConcurrentHashMap<>()
+            (usr, pass) -> Optional.of(String.format("%s-%d", usr, counter.incrementAndGet()))
         );
         final String expected = "usr-1";
         MatcherAssert.assertThat(
