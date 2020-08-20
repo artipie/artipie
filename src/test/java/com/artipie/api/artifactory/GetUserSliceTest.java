@@ -77,7 +77,7 @@ class GetUserSliceTest {
         final Key key = new Key.From("_credentials.yaml");
         this.creds("john", storage, key);
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake(new Credentials.FromConfig(storage, key))),
+            new GetUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(RqMethod.GET, "/api/security/users/josh")
@@ -92,7 +92,7 @@ class GetUserSliceTest {
         final Key key = new Key.From("_cred.yaml");
         this.creds(username, storage, key);
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake(new Credentials.FromConfig(storage, key))),
+            new GetUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),

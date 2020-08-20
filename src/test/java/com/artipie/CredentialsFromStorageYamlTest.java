@@ -23,37 +23,37 @@
  */
 package com.artipie;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link Credentials.FromConfig}.
+ * Test for {@link Credentials.FromStorageYaml}.
  * @since 0.9
  */
-class CredentialsFromConfigTest {
+class CredentialsFromStorageYamlTest {
 
     @Test
-    void readsYamlFromStorage() throws InterruptedException, IOException {
+    void readsYamlFromStorage() throws InterruptedException {
         final Storage storage = new InMemoryStorage();
         final Key key = new Key.From("_cred.yaml");
         final String yaml = String.join(
             "\n",
             "credentials:",
             "  jane:",
-            "    pass: plain:123"
+            "    pass: plain:123",
+            "  john:",
+            "    pass: plain:abc"
         );
         new BlockingStorage(storage).save(key, yaml.getBytes(StandardCharsets.UTF_8));
         MatcherAssert.assertThat(
-            new Credentials.FromConfig(storage, key).yaml().toCompletableFuture().join(),
-            new IsEqual<>(Yaml.createYamlInput(yaml).readYamlMapping())
+            new Credentials.FromStorageYaml(storage, key).users().toCompletableFuture().join(),
+            Matchers.containsInAnyOrder("jane", "john")
         );
     }
 

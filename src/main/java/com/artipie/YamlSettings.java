@@ -86,7 +86,7 @@ public final class YamlSettings implements Settings {
     public CompletionStage<Authentication> auth() {
         return this.credentials().thenCompose(
             opt -> opt.<CompletionStage<Authentication>>map(
-                creds -> creds.yaml().thenApply(AuthFromYaml::new)
+                creds -> ((Credentials.FromStorageYaml) creds).yaml().thenApply(AuthFromYaml::new)
             ).orElse(CompletableFuture.completedFuture(new AuthFromEnv()))
         ).thenApply(
             auth -> new Authentication.Joined(new CachedAuth(new GithubAuth()), auth)
@@ -134,7 +134,7 @@ public final class YamlSettings implements Settings {
                 exists -> {
                     final Optional<Credentials> auth;
                     if (exists) {
-                        auth = Optional.of(new Credentials.FromConfig(strg, key));
+                        auth = Optional.of(new Credentials.FromStorageYaml(strg, key));
                     } else {
                         auth = Optional.empty();
                     }

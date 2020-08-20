@@ -122,7 +122,7 @@ class YamlSettingsTest {
         Files.writeString(yaml, this.credentials());
         MatcherAssert.assertThat(
             settings.credentials().toCompletableFuture().join().get(),
-            new IsInstanceOf(Credentials.FromConfig.class)
+            new IsInstanceOf(Credentials.FromStorageYaml.class)
         );
     }
 
