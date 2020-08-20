@@ -88,16 +88,13 @@ public final class ResponseMetricsSlice implements Slice {
      * @param rqline Request line.
      * @param rqheaders Request headers.
      * @param rsstatus Response status.
-     * @todo #231:30min Remove ad-hoc error detection from `ResponseMetricsSlice.report()`.
-     *  As soon as issue https://github.com/artipie/http/issues/196 is complete and we have
-     *  method in `RsStatus` to detect errors we may use this method instead of RegEx usage.
      */
     private void report(
         final String rqline,
         final Iterable<Map.Entry<String, String>> rqheaders,
         final RsStatus rsstatus
     ) {
-        if (rsstatus.code().matches("^[45].+$")) {
+        if (rsstatus.error()) {
             this.report(rqline, "error");
             if (rsstatus.equals(RsStatus.UNAUTHORIZED)) {
                 this.reportUnauthorized(rqline, rqheaders);
