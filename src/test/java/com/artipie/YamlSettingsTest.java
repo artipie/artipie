@@ -24,14 +24,14 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.http.auth.Authentication;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
@@ -54,7 +54,7 @@ class YamlSettingsTest {
     @Test
     public void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            "meta:\n  storage:\n    type: fs\n    path: /artipie/storage\n"
+            this.config("some/path", "env", Optional.empty())
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -88,19 +88,7 @@ class YamlSettingsTest {
     @Test
     public void shouldCreateAuthFromEnv() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlMappingBuilder()
-                .add(
-                    "meta",
-                    Yaml.createYamlMappingBuilder().add(
-                        "storage",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "fs")
-                            .add("path", "some/path").build()
-                    ).add(
-                        "credentials",
-                        Yaml.createYamlMappingBuilder().add("type", "env").build()
-                    ).build()
-                ).build().toString()
+            this.config("some/path", "env", Optional.empty())
         );
         MatcherAssert.assertThat(
             settings.auth().toCompletableFuture().get().toString(),
@@ -113,27 +101,13 @@ class YamlSettingsTest {
         throws Exception {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlMappingBuilder()
-                .add(
-                    "meta",
-                    Yaml.createYamlMappingBuilder().add(
-                        "storage",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "fs")
-                            .add("path", tmp.toString()).build()
-                    ).add(
-                        "credentials",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "file")
-                            .add("path", fname).build()
-                    ).build()
-                ).build().toString()
+            this.config(tmp.toString(), "file", Optional.of(fname))
         );
         final Path yaml = tmp.resolve(fname);
         Files.writeString(yaml, this.credentials());
         MatcherAssert.assertThat(
-            settings.auth().toCompletableFuture().get(),
-            new IsInstanceOf(Authentication.class)
+            settings.auth().toCompletableFuture().get().toString(),
+            new StringContains("AuthFromYaml")
         );
     }
 
@@ -141,46 +115,20 @@ class YamlSettingsTest {
     public void returnsCredentials(@TempDir final Path tmp) throws IOException {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlMappingBuilder()
-                .add(
-                    "meta",
-                    Yaml.createYamlMappingBuilder().add(
-                        "storage",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "fs")
-                            .add("path", tmp.toString()).build()
-                    ).add(
-                        "credentials",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "file")
-                            .add("path", fname).build()
-                    ).build()
-                ).build().toString()
+            this.config(tmp.toString(), "file", Optional.of(fname))
         );
         final Path yaml = tmp.resolve(fname);
         Files.writeString(yaml, this.credentials());
         MatcherAssert.assertThat(
-            settings.credentials().toCompletableFuture().join().get().toString(),
-            new IsEqual<>(this.credentials())
+            settings.credentials().toCompletableFuture().join().get(),
+            new IsInstanceOf(Credentials.FromConfig.class)
         );
     }
 
     @Test
     public void shouldThrowExceptionWhenPathIsNotSet() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlMappingBuilder()
-                .add(
-                    "meta",
-                    Yaml.createYamlMappingBuilder().add(
-                        "storage",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "fs")
-                            .add("path", "some/path").build()
-                    ).add(
-                        "credentials",
-                        Yaml.createYamlMappingBuilder().add("type", "file").build()
-                    ).build()
-                ).toString()
+            this.config("some/path", "file", Optional.empty())
         );
         Assertions.assertThrows(
             RuntimeException.class,
@@ -227,5 +175,20 @@ class YamlSettingsTest {
                 "      type: unknown\n"
             )
         );
+    }
+
+    private String config(final String stpath, final String type, final Optional<String> path) {
+        final YamlMappingBuilder creds = Yaml.createYamlMappingBuilder().add("type", type);
+        path.ifPresent(val -> creds.add("path", val));
+        return Yaml.createYamlMappingBuilder()
+            .add(
+                "meta",
+                Yaml.createYamlMappingBuilder().add(
+                    "storage",
+                    Yaml.createYamlMappingBuilder()
+                        .add("type", "fs")
+                        .add("path", stpath).build()
+                ).add("credentials", creds.build()).build()
+            ).toString();
     }
 }

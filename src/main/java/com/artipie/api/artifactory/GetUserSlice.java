@@ -34,6 +34,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.json.Json;
@@ -74,27 +76,31 @@ public final class GetUserSlice implements Slice {
             final String username = matcher.group("username");
             res =
                 new AsyncResponse(
-                    this.settings.credentials().thenApply(
-                        cred -> cred.map(
-                            yaml -> Optional.ofNullable(
-                                yaml.yamlMapping("credentials").yamlMapping(username)
-                            )
-                            .<Response>map(
-                                ignored ->
-                                    new RsJson(
-                                        () -> Json.createObjectBuilder()
-                                            .add("name", username)
-                                            .add(
-                                                "email",
-                                                String.format("%s@artipie.com", username)
+                    this.settings.credentials().thenCompose(
+                        cred -> cred.<CompletionStage<Response>>map(
+                            present -> present.yaml()
+                                .thenApply(
+                                    yaml -> Optional.ofNullable(
+                                        yaml.yamlMapping("credentials").yamlMapping(username)
+                                    ).<Response>map(
+                                        ignored ->
+                                            new RsJson(
+                                                () -> Json.createObjectBuilder()
+                                                    .add("name", username)
+                                                    .add(
+                                                        "email",
+                                                        String.format("%s@artipie.com", username)
+                                                    )
+                                                    .add(
+                                                        "lastLoggedIn",
+                                                        "2020-01-01T01:01:01.000+01:00"
+                                                    )
+                                                    .add("realm", "Internal")
+                                                    .build(),
+                                                StandardCharsets.UTF_8
                                             )
-                                            .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
-                                            .add("realm", "Internal")
-                                            .build(),
-                                        StandardCharsets.UTF_8
-                                    )
-                                ).orElse(StandardRs.NOT_FOUND)
-                        ).orElse(StandardRs.NOT_FOUND)
+                                    ).orElse(StandardRs.NOT_FOUND)
+                        )).orElse(CompletableFuture.completedFuture(StandardRs.NOT_FOUND))
                     )
                 );
         } else {

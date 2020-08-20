@@ -70,10 +70,10 @@ public interface Settings {
     YamlMapping meta() throws IOException;
 
     /**
-     * Artipie credentials yaml mapping.
-     * @return Yaml credentials
+     * Artipie credentials.
+     * @return Completion action with credentials
      */
-    CompletionStage<Optional<YamlMapping>> credentials();
+    CompletionStage<Optional<Credentials>> credentials();
 
     /**
      * Fake {@link Settings} using a file storage.
@@ -90,7 +90,7 @@ public interface Settings {
         /**
          * Credentials.
          */
-        private final Optional<YamlMapping> cred;
+        private final Optional<Credentials> cred;
 
         /**
          * Ctor.
@@ -113,7 +113,7 @@ public interface Settings {
          *
          * @param cred Credentials yaml
          */
-        public Fake(final YamlMapping cred) {
+        public Fake(final Credentials cred) {
             this(new InMemoryStorage(), Optional.of(cred));
         }
 
@@ -123,7 +123,7 @@ public interface Settings {
          * @param storage Storage
          * @param cred Credentials
          */
-        public Fake(final Storage storage, final Optional<YamlMapping> cred) {
+        public Fake(final Storage storage, final Optional<Credentials> cred) {
             this.storage = storage;
             this.cred = cred;
         }
@@ -149,7 +149,7 @@ public interface Settings {
         }
 
         @Override
-        public CompletionStage<Optional<YamlMapping>> credentials() {
+        public CompletionStage<Optional<Credentials>> credentials() {
             return CompletableFuture.completedFuture(this.cred);
         }
     }
