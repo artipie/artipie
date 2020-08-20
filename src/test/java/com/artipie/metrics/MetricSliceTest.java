@@ -49,17 +49,19 @@ final class MetricSliceTest {
     void test() {
         final byte[] dataone = "1".getBytes();
         final byte[] datatwo = "2".getBytes();
+        final String dirorder = "[{\"key\":\"one\",\"value\":1},{\"key\":\"two\",\"value\":2}]";
+        final String revorder = "[{\"key\":\"two\",\"value\":2},{\"key\":\"one\",\"value\":1}]";
         final Storage storage = new InMemoryStorage();
-        storage.save(new Key.From("two"), new Content.From(datatwo));
         storage.save(new Key.From("one"), new Content.From(dataone));
+        storage.save(new Key.From("two"), new Content.From(datatwo));
         MatcherAssert.assertThat(
             new MetricSlice(storage),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
-                    new RsHasBody(
-                        "[{\"key\":\"two\",\"value\":2},{\"key\":\"one\",\"value\":1}]",
-                        StandardCharsets.UTF_8
+                    Matchers.anyOf(
+                        new RsHasBody(dirorder, StandardCharsets.UTF_8),
+                        new RsHasBody(revorder, StandardCharsets.UTF_8)
                     )
                 ),
                 new RequestLine(RqMethod.GET, "/api/repositories/")
