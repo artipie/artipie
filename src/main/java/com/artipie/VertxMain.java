@@ -25,7 +25,6 @@
 package com.artipie;
 
 import com.artipie.http.Pie;
-import com.artipie.http.Slice;
 import com.artipie.http.TrafficMetricSlice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
@@ -55,7 +54,7 @@ import org.apache.commons.cli.ParseException;
  * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.PrematureDeclaration")
-public final class VertxMain implements Runnable {
+public final class VertxMain {
 
     /**
      * The Vert.x instance.
@@ -63,9 +62,9 @@ public final class VertxMain implements Runnable {
     private final Vertx vertx;
 
     /**
-     * Slice to serve.
+     * Config file path.
      */
-    private final Slice slice;
+    private final Path config;
 
     /**
      * Server port.
@@ -73,20 +72,52 @@ public final class VertxMain implements Runnable {
     private final int port;
 
     /**
+     * Server.
+     */
+    private VertxSliceServer server;
+
+    /**
      * Ctor.
-     * @param slice To server
+     * @param config Config file path.
      * @param vertx The Vert.x instance.
      * @param port HTTP port
      */
-    private VertxMain(final Slice slice, final Vertx vertx, final int port) {
-        this.slice = slice;
+    public VertxMain(final Path config, final Vertx vertx, final int port) {
+        this.config = config;
         this.vertx = vertx;
         this.port = port;
     }
 
-    @Override
-    public void run() {
-        new VertxSliceServer(this.vertx, this.slice, this.port).start();
+    /**
+     * Starts the server.
+     *
+     * @return Port the servers listening on.
+     * @throws IOException In case of error reading settings.
+     */
+    public int start() throws IOException {
+        final Settings settings = settings(this.config);
+        final Metrics metrics = metrics(settings);
+        this.server = new VertxSliceServer(
+            this.vertx,
+            new TrafficMetricSlice(
+                new ResponseMetricsSlice(
+                    new Pie(settings),
+                    new PrefixedMetrics(metrics, "http.response.")
+                ),
+                new PrefixedMetrics(metrics, "http.")
+            ),
+            this.port
+        );
+        final int prt = this.server.start();
+        Logger.info(VertxMain.class, "Artipie was started on port %d", prt);
+        return prt;
+    }
+
+    /**
+     * Stops server releasing all resources.
+     */
+    public void stop() {
+        Optional.ofNullable(this.server).ifPresent(VertxSliceServer::stop);
     }
 
     /**
@@ -97,7 +128,7 @@ public final class VertxMain implements Runnable {
      */
     public static void main(final String... args) throws IOException, ParseException {
         final Vertx vertx = Vertx.vertx();
-        final String storage;
+        final Path config;
         final int port;
         final int defp = 80;
         final Options options = new Options();
@@ -114,24 +145,11 @@ public final class VertxMain implements Runnable {
             port = defp;
         }
         if (cmd.hasOption(fopt)) {
-            storage = cmd.getOptionValue(fopt);
+            config = Path.of(cmd.getOptionValue(fopt));
         } else {
             throw new IllegalStateException("Storage is not configured");
         }
-        final Settings settings = settings(Path.of(storage));
-        final Metrics metrics = metrics(settings);
-        new VertxMain(
-            new TrafficMetricSlice(
-                new ResponseMetricsSlice(
-                    new Pie(settings),
-                    new PrefixedMetrics(metrics, "http.response.")
-                ),
-                new PrefixedMetrics(metrics, "http.")
-            ),
-            vertx,
-            port
-        ).run();
-        Logger.info(VertxMain.class, "Artipie was started on port %d", port);
+        new VertxMain(config, vertx, port).start();
     }
 
     /**

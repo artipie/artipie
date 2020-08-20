@@ -29,6 +29,8 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -68,6 +70,12 @@ public interface Settings {
     YamlMapping meta() throws IOException;
 
     /**
+     * Artipie credentials yaml mapping.
+     * @return Yaml credentials
+     */
+    CompletionStage<Optional<YamlMapping>> credentials();
+
+    /**
      * Fake {@link Settings} using a file storage.
      *
      * @since 0.2
@@ -80,10 +88,15 @@ public interface Settings {
         private final Storage storage;
 
         /**
+         * Credentials.
+         */
+        private final Optional<YamlMapping> cred;
+
+        /**
          * Ctor.
          */
         public Fake() {
-            this(new InMemoryStorage());
+            this(new InMemoryStorage(), Optional.empty());
         }
 
         /**
@@ -92,7 +105,27 @@ public interface Settings {
          * @param storage Storage
          */
         public Fake(final Storage storage) {
+            this(storage, Optional.empty());
+        }
+
+        /**
+         * Ctor.
+         *
+         * @param cred Credentials yaml
+         */
+        public Fake(final YamlMapping cred) {
+            this(new InMemoryStorage(), Optional.of(cred));
+        }
+
+        /**
+         * Primary ctor.
+         *
+         * @param storage Storage
+         * @param cred Credentials
+         */
+        public Fake(final Storage storage, final Optional<YamlMapping> cred) {
             this.storage = storage;
+            this.cred = cred;
         }
 
         @Override
@@ -113,6 +146,11 @@ public interface Settings {
         @Override
         public YamlMapping meta() {
             return Yaml.createYamlMappingBuilder().build();
+        }
+
+        @Override
+        public CompletionStage<Optional<YamlMapping>> credentials() {
+            return CompletableFuture.completedFuture(this.cred);
         }
     }
 }
