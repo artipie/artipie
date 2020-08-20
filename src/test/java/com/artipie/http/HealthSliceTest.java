@@ -24,6 +24,10 @@
 package com.artipie.http;
 
 import com.artipie.Settings;
+import com.artipie.asto.Content;
+import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
+import com.artipie.asto.Transaction;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
@@ -32,7 +36,11 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -43,7 +51,6 @@ import org.junit.jupiter.api.Test;
  * @since 0.10
  */
 final class HealthSliceTest {
-
     /**
      * Request line for health endpoint.
      */
@@ -66,7 +73,7 @@ final class HealthSliceTest {
     @Test
     void returnsBadRequestForBrokenStorage() {
         MatcherAssert.assertThat(
-            new HealthSlice(new Settings.Fake(new FileStorage(Paths.get("/")))),
+            new HealthSlice(new Settings.Fake(new FileStorage(null))),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.UNAVAILABLE),
