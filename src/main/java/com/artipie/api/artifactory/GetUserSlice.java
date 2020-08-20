@@ -48,7 +48,7 @@ public final class GetUserSlice implements Slice {
     /**
      * Request line pattern to get username.
      */
-    private static final Pattern PTRN = Pattern.compile("/api/security/users/(?<username>[^/.]+)");
+    public static final Pattern PTRN = Pattern.compile("/api/security/users/(?<username>[^/.]+)");
 
     /**
      * Artipie settings.
@@ -76,7 +76,9 @@ public final class GetUserSlice implements Slice {
                 new AsyncResponse(
                     this.settings.credentials().thenApply(
                         cred -> cred.map(
-                            yaml -> Optional.ofNullable(yaml.yamlMapping(username))
+                            yaml -> Optional.ofNullable(
+                                yaml.yamlMapping("credentials").yamlMapping(username)
+                            )
                             .<Response>map(
                                 ignored ->
                                     new RsJson(
