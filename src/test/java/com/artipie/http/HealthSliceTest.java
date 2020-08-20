@@ -24,7 +24,10 @@
 package com.artipie.http;
 
 import com.artipie.Settings;
-import com.artipie.asto.fs.FileStorage;
+import com.artipie.asto.Content;
+import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
+import com.artipie.asto.Transaction;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
@@ -32,7 +35,9 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -43,7 +48,6 @@ import org.junit.jupiter.api.Test;
  * @since 0.10
  */
 final class HealthSliceTest {
-
     /**
      * Request line for health endpoint.
      */
@@ -66,7 +70,7 @@ final class HealthSliceTest {
     @Test
     void returnsBadRequestForBrokenStorage() {
         MatcherAssert.assertThat(
-            new HealthSlice(new Settings.Fake(new FileStorage(Paths.get("/")))),
+            new HealthSlice(new Settings.Fake(new FakeStorage())),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.UNAVAILABLE),
@@ -75,5 +79,53 @@ final class HealthSliceTest {
                 HealthSliceTest.REQ_LINE
             )
         );
+    }
+
+    /**
+     * Implementation of broken storage.
+     * All methods throw exception.
+     *
+     * @since 0.10
+     */
+    private static class FakeStorage implements Storage {
+        @Override
+        public CompletableFuture<Boolean> exists(final Key key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CompletableFuture<Collection<Key>> list(final Key prefix) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CompletableFuture<Void> save(final Key key, final Content content) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CompletableFuture<Void> move(final Key source, final Key destination) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CompletableFuture<Long> size(final Key key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CompletableFuture<Content> value(final Key key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CompletableFuture<Void> delete(final Key key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CompletableFuture<Transaction> transaction(final List<Key> keys) {
+            throw new UnsupportedOperationException();
+        }
     }
 }
