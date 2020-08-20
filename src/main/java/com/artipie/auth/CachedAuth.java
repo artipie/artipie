@@ -25,10 +25,10 @@ package com.artipie.auth;
 
 import com.artipie.http.auth.Authentication;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.jruby.util.collections.ConcurrentWeakHashMap;
 
 /**
  * Cached authentication decorator.
@@ -42,8 +42,23 @@ import org.jruby.util.collections.ConcurrentWeakHashMap;
  *  some configuration to clean-up only expired items, e.g. if token was not accessed for
  *  X minutes, then remove only this token. Consider using Guava's time-evicted-cache
  *  implementation: https://github.com/google/guava/wiki/CachesExplained#eviction
+ * @todo #442:30min Refactor this class to move cache field to instance field
+ *  and make sure the instance is not created on each request. Right now we're using
+ *  a hotfix - CachedAuth created from settings on each request but uses static hash map
+ *  field for caching.
  */
 public final class CachedAuth implements Authentication {
+
+    /**
+     * Static cache hash map.
+     */
+    private static final ConcurrentMap<String, Optional<String>> CACHE = new ConcurrentHashMap<>();
+
+    static {
+        Executors.newSingleThreadScheduledExecutor()
+            // @checkstyle MagicNumberCheck (1 line)
+            .schedule(CachedAuth.CACHE::clear, 5, TimeUnit.MINUTES);
+    }
 
     /**
      * Decorated auth provider.
@@ -51,42 +66,23 @@ public final class CachedAuth implements Authentication {
     private final Authentication origin;
 
     /**
-     * Cache map.
-     */
-    private final ConcurrentMap<String, Optional<String>> cache;
-
-    /**
-     * Decorates origin auth provider with caching.
+     * Primary constructor.
      * @param origin Origin auth provider
      */
     public CachedAuth(final Authentication origin) {
-        this(origin, new ConcurrentWeakHashMap<>());
-    }
-
-    /**
-     * Primary constructor.
-     * @param origin Origin auth provider
-     * @param cache Cache map
-     */
-    @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
-    CachedAuth(final Authentication origin, final ConcurrentMap<String, Optional<String>> cache) {
         this.origin = origin;
-        this.cache = cache;
-        Executors.newSingleThreadScheduledExecutor()
-            // @checkstyle MagicNumberCheck (1 line)
-            .schedule(this.cache::clear, 5, TimeUnit.MINUTES);
     }
 
     @Override
     public Optional<String> user(final String username, final String password) {
-        return this.cache.computeIfAbsent(username, key -> this.origin.user(key, password));
+        return CachedAuth.CACHE.computeIfAbsent(username, key -> this.origin.user(key, password));
     }
 
     @Override
     public String toString() {
         return String.format(
             "%s(origin=%s, size=%d)",
-            this.getClass().getSimpleName(), this.origin, this.cache.size()
+            this.getClass().getSimpleName(), this.origin, CachedAuth.CACHE.size()
         );
     }
 }

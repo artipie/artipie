@@ -27,6 +27,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.Settings;
 import com.artipie.YamlPermissions;
 import com.artipie.api.artifactory.CreateRepoSlice;
+import com.artipie.api.artifactory.GetUserSlice;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
@@ -58,12 +59,15 @@ import org.apache.http.client.utils.URLEncodedUtils;
  * @since 0.6
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class ArtipieApi extends Slice.Wrap {
 
     /**
      * New Artipie API.
      * @param settings Artipie settings
+     * @todo #444:30min Constructor decomposition
+     *  This constructor is very huge, difficult to read and understand: extract some methods,
+     *  wrappers, classes, etc from it to make it more elegant.
      */
     public ArtipieApi(final Settings settings) {
         // @checkstyle LineLengthCheck (500 lines)
@@ -152,6 +156,13 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
                                 new CreateRepoSlice(settings)
+                            ),
+                            new RtRulePath(
+                                new RtRule.All(
+                                    new RtRule.ByPath(GetUserSlice.PTRN),
+                                    new ByMethodsRule(RqMethod.GET)
+                                ),
+                                new GetUserSlice(settings)
                             )
                         ),
                         new Permission.ByName("api", perm),

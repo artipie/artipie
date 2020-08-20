@@ -24,14 +24,16 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.auth.AuthFromEnv;
 import com.artipie.http.auth.Authentication;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
+import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -101,8 +103,8 @@ class YamlSettingsTest {
                 ).build().toString()
         );
         MatcherAssert.assertThat(
-            settings.auth().toCompletableFuture().get(),
-            new IsInstanceOf(AuthFromEnv.class)
+            settings.auth().toCompletableFuture().get().toString(),
+            new StringContains("AuthFromEnv")
         );
     }
 
@@ -128,20 +130,38 @@ class YamlSettingsTest {
                 ).build().toString()
         );
         final Path yaml = tmp.resolve(fname);
-        Files.writeString(
-            yaml,
-            Yaml.createYamlMappingBuilder().add(
-                "credentials",
-                Yaml.createYamlMappingBuilder()
-                    .add(
-                        "john",
-                        Yaml.createYamlMappingBuilder().add("password", "plain:123").build()
-                    ).build()
-            ).build().toString()
-        );
+        Files.writeString(yaml, this.credentials());
         MatcherAssert.assertThat(
             settings.auth().toCompletableFuture().get(),
             new IsInstanceOf(Authentication.class)
+        );
+    }
+
+    @Test
+    public void returnsCredentials(@TempDir final Path tmp) throws IOException {
+        final String fname = "_cred.yml";
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    "meta",
+                    Yaml.createYamlMappingBuilder().add(
+                        "storage",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "fs")
+                            .add("path", tmp.toString()).build()
+                    ).add(
+                        "credentials",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "file")
+                            .add("path", fname).build()
+                    ).build()
+                ).build().toString()
+        );
+        final Path yaml = tmp.resolve(fname);
+        Files.writeString(yaml, this.credentials());
+        MatcherAssert.assertThat(
+            settings.credentials().toCompletableFuture().join().get().toString(),
+            new IsEqual<>(this.credentials())
         );
     }
 
@@ -173,6 +193,17 @@ class YamlSettingsTest {
     public void shouldFailProvideStorageFromBadYaml(final String yaml) {
         final YamlSettings settings = new YamlSettings(yaml);
         Assertions.assertThrows(RuntimeException.class, settings::storage);
+    }
+
+    private String credentials() {
+        return Yaml.createYamlMappingBuilder().add(
+            "credentials",
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    "john",
+                    Yaml.createYamlMappingBuilder().add("password", "plain:123").build()
+                ).build()
+        ).build().toString();
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
