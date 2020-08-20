@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -130,9 +131,12 @@ class YamlSettingsTest {
         final YamlSettings settings = new YamlSettings(
             this.config("some/path", "file", Optional.empty())
         );
-        Assertions.assertThrows(
-            RuntimeException.class,
-            () -> settings.auth().toCompletableFuture().get()
+        MatcherAssert.assertThat(
+            Assertions.assertThrows(
+                ExecutionException.class,
+                () -> settings.auth().toCompletableFuture().get()
+            ).getCause(),
+            new IsInstanceOf(RuntimeException.class)
         );
     }
 
@@ -178,8 +182,9 @@ class YamlSettingsTest {
     }
 
     private String config(final String stpath, final String type, final Optional<String> path) {
-        final YamlMappingBuilder creds = Yaml.createYamlMappingBuilder().add("type", type);
-        path.ifPresent(val -> creds.add("path", val));
+        final YamlMappingBuilder creds = path.map(
+            val -> Yaml.createYamlMappingBuilder().add("type", type).add("path", val)
+        ).orElse(Yaml.createYamlMappingBuilder().add("type", type));
         return Yaml.createYamlMappingBuilder()
             .add(
                 "meta",
@@ -189,6 +194,6 @@ class YamlSettingsTest {
                         .add("type", "fs")
                         .add("path", stpath).build()
                 ).add("credentials", creds.build()).build()
-            ).toString();
+            ).build().toString();
     }
 }
