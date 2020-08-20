@@ -24,8 +24,12 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.Credentials;
 import com.artipie.Settings;
+import com.artipie.asto.Content;
+import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
+import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
@@ -41,6 +45,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link GetUserSlice}.
  * @since 0.9
+ * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 class GetUserSliceTest {
 
@@ -68,8 +73,11 @@ class GetUserSliceTest {
 
     @Test
     void returnsNotFoundIfUserIsNotFoundInCredentials() {
+        final Storage storage = new InMemoryStorage();
+        final Key key = new Key.From("_credentials.yaml");
+        this.creds("john", storage, key);
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake(this.creds("john"))),
+            new GetUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(RqMethod.GET, "/api/security/users/josh")
@@ -80,8 +88,11 @@ class GetUserSliceTest {
     @Test
     void returnsJsonFoundIfUserFound() {
         final String username = "jerry";
+        final Storage storage = new InMemoryStorage();
+        final Key key = new Key.From("_cred.yaml");
+        this.creds(username, storage, key);
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake(this.creds(username))),
+            new GetUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
@@ -103,15 +114,19 @@ class GetUserSliceTest {
         );
     }
 
-    private YamlMapping creds(final String username) {
-        return Yaml.createYamlMappingBuilder()
-            .add(
-                "credentials",
-                Yaml.createYamlMappingBuilder().add(
-                    username,
-                    Yaml.createYamlMappingBuilder().add("pass", "pain:123").build()
-                ).build()
-            ).build();
+    private void creds(final String username, final Storage storage, final Key key) {
+        storage.save(
+            key,
+                new Content.From(Yaml.createYamlMappingBuilder()
+                .add(
+                    "credentials",
+                    Yaml.createYamlMappingBuilder().add(
+                        username,
+                        Yaml.createYamlMappingBuilder().add("pass", "pain:123").build()
+                    ).build()
+                ).build().toString().getBytes(StandardCharsets.UTF_8)
+            )
+        );
     }
 
 }
