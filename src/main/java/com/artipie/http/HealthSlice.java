@@ -31,6 +31,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -93,7 +94,7 @@ public final class HealthSlice implements Slice {
                 new Key.From(".system", "test"),
                 new Content.From("OK".getBytes(StandardCharsets.US_ASCII))
             ).thenApply(none -> true).exceptionally(ignore -> false);
-        } catch (final IOException ignore) {
+        } catch (final IOException | UncheckedIOException ignore) {
             return CompletableFuture.completedFuture(false);
         }
     }
