@@ -47,6 +47,11 @@ import java.util.concurrent.CompletionStage;
  *  method. We can configure this chain via settings and compose complex authentication
  *  providers there. E.g. user can use ordered list of env auth, github auth
  *  and auth from yaml file.
+ * @todo #444:30min Move `auth()` method to Credentials interface
+ *  Casting in `auth()` may cause problems in runtime, it would be better to move this method to
+ *  Credentials interface. Credentials.FromStorageYaml implementation should create
+ *  AuthFromYaml instance in `auth()`, and as we have env credentials, let's introduce
+ *  Credentials.FromEnv class to create proper Authentication implementation in `auth()`.
  * @checkstyle ReturnCountCheck (500 lines)
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
