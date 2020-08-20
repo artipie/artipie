@@ -9,7 +9,7 @@ RUN mvn dependency:resolve dependency:resolve-plugins clean --fail-never
 # Preapare fat jar
 COPY src ./src
 RUN mvn versions:set -DnewVersion=${version} && \
-  mvn package -P assembly
+  mvn package -P assembly -DskipTests
 
 FROM adoptopenjdk/openjdk14:alpine-jre
 ENV JVM_OPTS=""
