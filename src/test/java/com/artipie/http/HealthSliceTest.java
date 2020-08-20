@@ -34,8 +34,6 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
@@ -102,7 +100,7 @@ final class HealthSliceTest {
 
         @Override
         public CompletableFuture<Void> save(final Key key, final Content content) {
-            throw new UncheckedIOException(new IOException());
+            throw new UnsupportedOperationException();
         }
 
         @Override
