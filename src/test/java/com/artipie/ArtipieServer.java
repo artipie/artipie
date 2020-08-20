@@ -80,6 +80,13 @@ public class ArtipieServer {
      *
      * @return Port the servers listening on.
      * @throws IOException In case of error creating configs or running the server.
+     * @todo #449:30min Extract class for building settings in YAML format.
+     *  Building of settings YAML for usage in tests occurs more the once.
+     *  It is used to build setting in `ArtipieServer`
+     *  and in `YamlSettingsTest` to create settings examples in unit tests.
+     *  Some examples in `YamlSettingsTest` are just string constants.
+     *  It would be nice to extract a class for building settings in YAML format
+     *  for usage in all these places.
      */
     public int start() throws IOException {
         final Path repos = this.root.resolve("repos");
