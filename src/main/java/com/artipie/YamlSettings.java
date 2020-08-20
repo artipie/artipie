@@ -25,7 +25,6 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.auth.AuthFromEnv;
 import com.artipie.auth.AuthFromYaml;
@@ -33,16 +32,10 @@ import com.artipie.auth.CachedAuth;
 import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
-import com.jcabi.log.Logger;
-import hu.akarnokd.rxjava2.interop.SingleInterop;
-import io.reactivex.Flowable;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Settings built from YAML.
@@ -54,6 +47,11 @@ import org.reactivestreams.Publisher;
  *  method. We can configure this chain via settings and compose complex authentication
  *  providers there. E.g. user can use ordered list of env auth, github auth
  *  and auth from yaml file.
+ * @todo #444:30min Move `auth()` method to Credentials interface
+ *  Casting in `auth()` may cause problems in runtime, it would be better to move this method to
+ *  Credentials interface. Credentials.FromStorageYaml implementation should create
+ *  AuthFromYaml instance in `auth()`, and as we have env credentials, let's introduce
+ *  Credentials.FromEnv class to create proper Authentication implementation in `auth()`.
  * @checkstyle ReturnCountCheck (500 lines)
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
@@ -91,8 +89,10 @@ public final class YamlSettings implements Settings {
 
     @Override
     public CompletionStage<Authentication> auth() {
-        return this.credentials().thenApply(
-            file -> file.<Authentication>map(AuthFromYaml::new).orElse(new AuthFromEnv())
+        return this.credentials().thenCompose(
+            opt -> opt.<CompletionStage<Authentication>>map(
+                creds -> ((Credentials.FromStorageYaml) creds).yaml().thenApply(AuthFromYaml::new)
+            ).orElse(CompletableFuture.completedFuture(new AuthFromEnv()))
         ).thenApply(
             auth -> new Authentication.Joined(new CachedAuth(new GithubAuth()), auth)
         );
@@ -115,7 +115,7 @@ public final class YamlSettings implements Settings {
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
-    public CompletionStage<Optional<YamlMapping>> credentials() {
+    public CompletionStage<Optional<Credentials>> credentials() {
         final YamlMapping cred;
         try {
             cred = Yaml.createYamlInput(this.content)
@@ -125,7 +125,7 @@ public final class YamlSettings implements Settings {
         } catch (final IOException err) {
             return CompletableFuture.failedFuture(err);
         }
-        final CompletionStage<Optional<YamlMapping>> res;
+        final CompletionStage<Optional<Credentials>> res;
         final String path = "path";
         if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
             final Storage strg;
@@ -135,14 +135,13 @@ public final class YamlSettings implements Settings {
                 return CompletableFuture.failedFuture(err);
             }
             final KeyFromPath key = new KeyFromPath(cred.string(path));
-            res = strg.exists(key).thenCompose(
+            res = strg.exists(key).thenApply(
                 exists -> {
-                    final CompletionStage<Optional<YamlMapping>> auth;
+                    final Optional<Credentials> auth;
                     if (exists) {
-                        auth = strg.value(key).thenCompose(YamlSettings::yamlFromPublisher)
-                            .thenApply(Optional::of);
+                        auth = Optional.of(new Credentials.FromStorageYaml(strg, key));
                     } else {
-                        auth = CompletableFuture.completedStage(Optional.empty());
+                        auth = Optional.empty();
                     }
                     return auth;
                 }
@@ -166,28 +165,5 @@ public final class YamlSettings implements Settings {
      */
     private static boolean hasTypeFile(final YamlMapping cred) {
         return cred != null && "file".equals(cred.string("type"));
-    }
-
-    /**
-     * Create async yaml config from content publisher.
-     * @param pub Flow publisher
-     * @return Completion stage of yaml
-     * @todo #146:30min Extract this method to a class: we have the same method in RepoConfig. After
-     *  extracting use this new class here and in RepoConfig. Do not forget about test.
-     */
-    private static CompletionStage<YamlMapping> yamlFromPublisher(
-        final Publisher<ByteBuffer> pub
-    ) {
-        return Flowable.fromPublisher(pub)
-            .reduce(
-                new StringBuilder(),
-                (acc, buf) -> acc.append(
-                    new String(new Remaining(buf).bytes(), StandardCharsets.UTF_8)
-                )
-            )
-            .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config: %s", yaml))
-            .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
-            .to(SingleInterop.get())
-            .toCompletableFuture();
     }
 }
