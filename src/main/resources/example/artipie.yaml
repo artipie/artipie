@@ -6,6 +6,7 @@ meta:
     type: file
     path: _credentials.yaml
   layout: org
+  base_url: http://central.artipie.com/
   metrics:
     type: log
     interval: 60

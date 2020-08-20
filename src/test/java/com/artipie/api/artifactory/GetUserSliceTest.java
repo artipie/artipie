@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link GetUserSlice}.
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class GetUserSliceTest {
 

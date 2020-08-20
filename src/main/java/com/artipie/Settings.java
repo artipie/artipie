@@ -93,10 +93,15 @@ public interface Settings {
         private final Optional<Credentials> cred;
 
         /**
+         * Yaml `meta` mapping.
+         */
+        private final YamlMapping meta;
+
+        /**
          * Ctor.
          */
         public Fake() {
-            this(new InMemoryStorage(), Optional.empty());
+            this(new InMemoryStorage(), Optional.empty(), Yaml.createYamlMappingBuilder().build());
         }
 
         /**
@@ -105,27 +110,39 @@ public interface Settings {
          * @param storage Storage
          */
         public Fake(final Storage storage) {
-            this(storage, Optional.empty());
+            this(storage, Optional.empty(), Yaml.createYamlMappingBuilder().build());
         }
 
         /**
          * Ctor.
          *
-         * @param cred Credentials yaml
+         * @param cred Credentials
          */
         public Fake(final Credentials cred) {
-            this(new InMemoryStorage(), Optional.of(cred));
+            this(new InMemoryStorage(), Optional.of(cred), Yaml.createYamlMappingBuilder().build());
+        }
+
+        /**
+         * Ctor.
+         *
+         * @param cred Credentials
+         * @param meta Yaml `meta` mapping
+         */
+        public Fake(final Optional<Credentials> cred, final YamlMapping meta) {
+            this(new InMemoryStorage(), cred, meta);
         }
 
         /**
          * Primary ctor.
-         *
-         * @param storage Storage
+         *  @param storage Storage
          * @param cred Credentials
+         * @param meta Yaml `meta` mapping
          */
-        public Fake(final Storage storage, final Optional<Credentials> cred) {
+        public Fake(final Storage storage, final Optional<Credentials> cred,
+            final YamlMapping meta) {
             this.storage = storage;
             this.cred = cred;
+            this.meta = meta;
         }
 
         @Override
@@ -145,7 +162,7 @@ public interface Settings {
 
         @Override
         public YamlMapping meta() {
-            return Yaml.createYamlMappingBuilder().build();
+            return this.meta;
         }
 
         @Override
