@@ -24,19 +24,25 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.Credentials;
 import com.artipie.Settings;
+import com.artipie.api.ContentAs;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletionStage;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -89,12 +95,35 @@ final class DeleteUserSliceTest {
         final Key key = new Key.From("_credentials.yaml");
         this.creds("jane", storage, key);
         MatcherAssert.assertThat(
+            "DeleteUserSlice response",
             new DeleteUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.OK),
                 new RequestLine(RqMethod.DELETE, "/api/security/users/jane")
             )
         );
+        MatcherAssert.assertThat(
+            "User should be deleted from storage",
+            storage.value(key)
+                .thenCompose(cred -> this.yaml(storage, key))
+                .toCompletableFuture().join()
+                .string("credentials"),
+            new IsNull<>()
+        );
+    }
+
+    /**
+     * Credentials as yaml.
+     * @param storage Storage
+     * @param key Key for storage
+     * @return Completion action with yaml
+     */
+    private CompletionStage<YamlMapping> yaml(final Storage storage, final Key key) {
+        return new RxStorageWrapper(storage)
+            .value(key)
+            .to(ContentAs.YAML)
+            .to(SingleInterop.get())
+            .thenApply(yaml -> (YamlMapping) yaml);
     }
 
     private void creds(final String username, final Storage storage, final Key key) {
