@@ -23,38 +23,145 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import java.nio.charset.StandardCharsets;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link Credentials.FromStorageYaml}.
  * @since 0.9
  */
+@SuppressWarnings("unchecked")
 class CredentialsFromStorageYamlTest {
 
+    /**
+     * Test storage.
+     */
+    private Storage storage;
+
+    /**
+     * Test key.
+     */
+    private Key key;
+
+    @BeforeEach
+    void init() {
+        this.storage = new InMemoryStorage();
+        this.key = new Key.From("_cred.yaml");
+    }
+
     @Test
-    void readsYamlFromStorage() throws InterruptedException {
-        final Storage storage = new InMemoryStorage();
-        final Key key = new Key.From("_cred.yaml");
-        final String yaml = String.join(
-            "\n",
-            "credentials:",
-            "  jane:",
-            "    pass: plain:123",
-            "  john:",
-            "    pass: plain:abc"
-        );
-        new BlockingStorage(storage).save(key, yaml.getBytes(StandardCharsets.UTF_8));
+    void readsYamlFromStorage() {
+        final String jane = "jane";
+        final String john = "john";
+        final String pass = "111";
+        this.creds(new ImmutablePair<>(jane, pass), new ImmutablePair<>(john, pass));
         MatcherAssert.assertThat(
-            new Credentials.FromStorageYaml(storage, key).users().toCompletableFuture().join(),
-            Matchers.containsInAnyOrder("jane", "john")
+            new Credentials.FromStorageYaml(this.storage, this.key).users()
+                .toCompletableFuture().join(),
+            Matchers.containsInAnyOrder(jane, john)
         );
+    }
+
+    @Test
+    void addsUser() {
+        final String maria = "maria";
+        final String olga = "olga";
+        final String pass = "abc";
+        this.creds(new ImmutablePair<>(maria, pass));
+        new Credentials.FromStorageYaml(this.storage, this.key).add(olga, pass)
+            .toCompletableFuture().join();
+        MatcherAssert.assertThat(
+            new PublisherAs(this.storage.value(this.key).join())
+                .asciiString().toCompletableFuture().join(),
+            new IsEqual<>(
+                this.getYaml(new ImmutablePair<>(maria, pass), new ImmutablePair<>(olga, pass))
+            )
+        );
+    }
+
+    @Test
+    void updatesUser() {
+        final String jack = "jack";
+        final String silvia = "silvia";
+        final String old = "345";
+        final String newpass = "000";
+        this.creds(new ImmutablePair<>(jack, old), new ImmutablePair<>(silvia, old));
+        new Credentials.FromStorageYaml(this.storage, this.key).add(silvia, newpass)
+            .toCompletableFuture().join();
+        MatcherAssert.assertThat(
+            new PublisherAs(this.storage.value(this.key).join())
+                .asciiString().toCompletableFuture().join(),
+            new IsEqual<>(
+                this.getYaml(new ImmutablePair<>(jack, old), new ImmutablePair<>(silvia, newpass))
+            )
+        );
+    }
+
+    @Test
+    void removesUser() {
+        final String mark = "mark";
+        final String ann = "ann";
+        final String pass = "123";
+        this.creds(new ImmutablePair<>(mark, pass), new ImmutablePair<>(ann, pass));
+        new Credentials.FromStorageYaml(this.storage, this.key).remove(ann)
+            .toCompletableFuture().join();
+        MatcherAssert.assertThat(
+            new PublisherAs(this.storage.value(this.key).join())
+                .asciiString().toCompletableFuture().join(),
+            new IsEqual<>(this.getYaml(new ImmutablePair<>(mark, pass)))
+        );
+    }
+
+    @Test
+    void doNotChangeYamlOnRemoveIfUserNotFound() {
+        final String ted = "ted";
+        final String alex = "alex";
+        final String pass = "098";
+        this.creds(new ImmutablePair<>(ted, pass), new ImmutablePair<>(alex, pass));
+        new Credentials.FromStorageYaml(this.storage, this.key).remove("alice")
+            .toCompletableFuture().join();
+        MatcherAssert.assertThat(
+            new PublisherAs(this.storage.value(this.key).join())
+                .asciiString().toCompletableFuture().join(),
+            new IsEqual<>(
+                this.getYaml(new ImmutablePair<>(ted, pass), new ImmutablePair<>(alex, pass))
+            )
+        );
+    }
+
+    private void creds(final Pair<String, String>... users) {
+        this.storage.save(
+            this.key,
+            new Content.From(this.getYaml(users).getBytes(StandardCharsets.UTF_8))
+        ).join();
+    }
+
+    private String getYaml(final Pair<String, String>... users) {
+        YamlMappingBuilder mapping = Yaml.createYamlMappingBuilder();
+        for (final Pair<String, String> user : users) {
+            mapping = mapping.add(
+                user.getKey(),
+                Yaml.createYamlMappingBuilder()
+                    .add("pass", String.format("plain:%s", user.getValue())).build()
+            );
+        }
+        return Yaml.createYamlMappingBuilder().add(
+            "credentials",
+            mapping.build()
+        ).build().toString();
     }
 
 }
