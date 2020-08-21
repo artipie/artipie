@@ -14,8 +14,6 @@ curl -i -X PUT --data-binary "@sample-for-deployment.zip" http://localhost:8080/
 # Post the package to php-composer-repository.
 curl -i -X POST  http://localhost:8080/my-php \
 --request PUT \
--H "Expect:" \
--H 'Content-Type: application/json; charset=utf-8' \
 --data-binary @- << EOF
 {
   "name": "artipie/sample_composer_package",
