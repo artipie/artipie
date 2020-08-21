@@ -7,9 +7,8 @@ docker run --rm --name artipie -d -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v
 # Wait for container to be ready for new connections.
 sleep 5
 
+# Make a zip package and post it to artipie binary storage.
 zip -r sample-for-deployment.zip sample-for-deployment
-
-# Post the zip package into artipie binary storage.
 curl -i -X PUT --data-binary "@sample-for-deployment.zip" http://localhost:8080/bin/sample-for-deployment.zip
 
 # Post the package to php-composer-repository.
