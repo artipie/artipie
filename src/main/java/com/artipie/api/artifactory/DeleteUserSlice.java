@@ -43,11 +43,11 @@ import org.reactivestreams.Publisher;
  *
  * @since 0.10
  * @todo #444:30min Create class `UserFromRqLine`.
- * Logic for getting username from request line is the same in 3 classes: here,
- * `GetUserSlice` and in `AddUpdateUserSlice`. It would be nice to introduce
- * class to obtain username from request line and move GetUserSlice.PTRN
- * there. Class can be created in this package, accept line from request in ctor
- * and have one Optional{String} get() method to get username.
+ *  Logic for getting username from request line is the same in 3 classes: here,
+ *  `GetUserSlice` and in `AddUpdateUserSlice`. It would be nice to introduce
+ *  class to obtain username from request line and move GetUserSlice.PTRN
+ *  there. Class can be created in this package, accept line from request in ctor
+ *  and have one Optional{String} get() method to get username.
  */
 public final class DeleteUserSlice implements Slice {
     /**
