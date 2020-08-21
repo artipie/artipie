@@ -42,9 +42,6 @@ import org.reactivestreams.Publisher;
 /**
  * Slice with metrics JSON.
  * @since 0.10
- * @todo #425:30min Create a test to verify this slice.
- *  The test should generate some metrics and checks that this slice correctly respond with
- *  JSON array with these metrics.
  */
 public final class MetricSlice implements Slice {
 
