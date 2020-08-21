@@ -34,8 +34,10 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
+import org.hamcrest.core.AllOf;
+import org.hamcrest.core.AnyOf;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -46,26 +48,43 @@ import org.junit.jupiter.api.Test;
  */
 final class MetricSliceTest {
     @Test
-    void test() {
-        final byte[] dataone = "1".getBytes();
-        final byte[] datatwo = "2".getBytes();
-        final String dirorder = "[{\"key\":\"one\",\"value\":1},{\"key\":\"two\",\"value\":2}]";
-        final String revorder = "[{\"key\":\"two\",\"value\":2},{\"key\":\"one\",\"value\":1}]";
+    void shouldReturnMetricsInJsonArray() {
+        final String keyone = "one";
+        final String keytwo = "two";
+        final String json = "[{\"key\":\"%s\",\"value\":%s},{\"key\":\"%s\",\"value\":%s}]";
+        final long valone = 1;
+        final long valtwo = 2;
+        final String dirorder = String.format(json, keyone, valone, keytwo, valtwo);
+        final String revorder = String.format(json, keytwo, valtwo, keyone, valone);
         final Storage storage = new InMemoryStorage();
-        storage.save(new Key.From("one"), new Content.From(dataone));
-        storage.save(new Key.From("two"), new Content.From(datatwo));
+        storage.save(new Key.From(keyone), new Content.From(this.getBytes(valone)));
+        storage.save(new Key.From(keytwo), new Content.From(this.getBytes(valtwo)));
         MatcherAssert.assertThat(
             new MetricSlice(storage),
             new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasStatus(RsStatus.OK),
-                    Matchers.anyOf(
-                        new RsHasBody(dirorder, StandardCharsets.UTF_8),
-                        new RsHasBody(revorder, StandardCharsets.UTF_8)
+                new AllOf<>(
+                    Arrays.asList(
+                        new RsHasStatus(RsStatus.OK),
+                        new AnyOf<>(
+                            Arrays.asList(
+                                new RsHasBody(dirorder, StandardCharsets.UTF_8),
+                                new RsHasBody(revorder, StandardCharsets.UTF_8)
+                            )
+                        )
                     )
                 ),
                 new RequestLine(RqMethod.GET, "/api/repositories/")
             )
         );
+    }
+
+    /**
+     * Get array of bytes of the string.
+     *
+     * @param number Number The number to get an array of bytes
+     * @return Array of bytes.
+     */
+    private byte[] getBytes(final long number) {
+        return String.valueOf(number).getBytes(StandardCharsets.UTF_8);
     }
 }
