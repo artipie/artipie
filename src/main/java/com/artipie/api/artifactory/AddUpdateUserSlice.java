@@ -23,11 +23,21 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.Settings;
+import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rs.RsStatus;
+import com.artipie.http.rs.RsWithStatus;
+import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.regex.Matcher;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import org.reactivestreams.Publisher;
 
 /**
@@ -43,10 +53,55 @@ import org.reactivestreams.Publisher;
  */
 public final class AddUpdateUserSlice implements Slice {
 
+    /**
+     * Artipie settings.
+     */
+    private final Settings settings;
+
+    /**
+     * Ctor.
+     * @param settings Artipie setting
+     */
+    public AddUpdateUserSlice(final Settings settings) {
+        this.settings = settings;
+    }
+
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        throw new NotImplementedException("Not implemented yet");
+        final Response res;
+        final Matcher matcher = GetUserSlice.PTRN.matcher(
+            new RequestLineFrom(line).uri().toString()
+        );
+        if (matcher.matches()) {
+            final String pswd = AddUpdateUserSlice.password(body);
+            final String username = matcher.group("username");
+            res = new AsyncResponse(
+                this.settings.credentials().thenApply(
+                    cred -> cred.add(username, pswd)
+                        .thenApply(ok -> new RsWithStatus(RsStatus.OK))
+                        .toCompletableFuture()
+                        .join()
+                    )
+                );
+        } else {
+            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+        }
+        return res;
     }
 
+    /**
+     * Extracts password string from the response body.
+     * @param body Response body
+     * @return Password string.
+     */
+    private static String password(final Publisher<ByteBuffer> body) {
+        final JsonObject root;
+        final byte[] bytes = new PublisherAs(body)
+            .bytes().toCompletableFuture().join();
+        try (JsonReader reader = Json.createReader(new ByteArrayInputStream(bytes))) {
+            root = reader.readObject();
+            return root.getString("password");
+        }
+    }
 }
