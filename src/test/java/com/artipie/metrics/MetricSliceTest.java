@@ -57,8 +57,8 @@ final class MetricSliceTest {
         final String dirorder = String.format(json, keyone, valone, keytwo, valtwo);
         final String revorder = String.format(json, keytwo, valtwo, keyone, valone);
         final Storage storage = new InMemoryStorage();
-        storage.save(new Key.From(keyone), new Content.From(this.getBytes(valone)));
-        storage.save(new Key.From(keytwo), new Content.From(this.getBytes(valtwo)));
+        storage.save(new Key.From(keyone), this.getContent(valone));
+        storage.save(new Key.From(keytwo), this.getContent(valtwo));
         MatcherAssert.assertThat(
             new MetricSlice(storage),
             new SliceHasResponse(
@@ -79,12 +79,12 @@ final class MetricSliceTest {
     }
 
     /**
-     * Get array of bytes of the string.
+     * Get content from the number.
      *
-     * @param number Number The number to get an array of bytes
-     * @return Array of bytes.
+     * @param number The number to get content
+     * @return Content.
      */
-    private byte[] getBytes(final long number) {
-        return String.valueOf(number).getBytes(StandardCharsets.UTF_8);
+    private Content getContent(final long number) {
+        return new Content.From(String.valueOf(number).getBytes(StandardCharsets.UTF_8));
     }
 }
