@@ -44,12 +44,6 @@ import org.reactivestreams.Publisher;
  * Artifactory `PUSH/PUT /api/security/users/{userName}` endpoint,
  * adds/updates user record in credentials.
  * @since 0.10
- * @todo #444:30min Implement this slice to add/update user from credentials by user name
- *  obtained from request line, path format is `/api/security/users/{userName}`. Password should
- *  be obtain from `password` field from json request body.
- *  Use Credentials#add(java.lang.String, java.lang.String) method to perform the operation and
- *  return 200 OK status. Do not forget to test this class and add it to ArtipieApi,
- *  check GetUserSlice as an example.
  */
 public final class AddUpdateUserSlice implements Slice {
 
