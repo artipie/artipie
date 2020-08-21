@@ -61,17 +61,6 @@ class GetUserSliceTest {
     }
 
     @Test
-    void returnsNotFoundIfCredentialsAreEmpty() {
-        MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake()),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.NOT_FOUND),
-                new RequestLine(RqMethod.GET, "/api/security/users/mark")
-            )
-        );
-    }
-
-    @Test
     void returnsNotFoundIfUserIsNotFoundInCredentials() {
         final Storage storage = new InMemoryStorage();
         final Key key = new Key.From("_credentials.yaml");

@@ -37,7 +37,7 @@ public final class AuthFromEnv implements Authentication {
     /**
      * Environment name for user.
      */
-    private static final String ENV_NAME = "ARTIPIE_USER_NAME";
+    public static final String ENV_NAME = "ARTIPIE_USER_NAME";
 
     /**
      * Environment name for password.
