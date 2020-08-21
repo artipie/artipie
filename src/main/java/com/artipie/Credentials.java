@@ -106,7 +106,7 @@ public interface Credentials {
 
         @Override
         public CompletionStage<Void> add(final String username, final String pswd) {
-            return this.yaml().thenApply(
+            return this.yaml().thenCompose(
                 yaml -> {
                     YamlMappingBuilder result = FromStorageYaml.removeUserRecord(username, yaml);
                     result = result.add(
@@ -115,24 +115,16 @@ public interface Credentials {
                             .add("pass", String.format("plain:%s", pswd))
                             .build()
                     );
-                    return FromStorageYaml.buildCredentials(result);
+                    return this.buildAndSaveCredentials(result);
                 }
-            ).thenCompose(
-                updated -> this.storage.save(
-                    this.key, new Content.From(updated.getBytes(StandardCharsets.UTF_8))
-                )
             );
         }
 
         @Override
         public CompletionStage<Void> remove(final String username) {
-            return this.yaml().thenApply(
-                yaml -> FromStorageYaml.buildCredentials(
+            return this.yaml().thenCompose(
+                yaml -> this.buildAndSaveCredentials(
                     FromStorageYaml.removeUserRecord(username, yaml)
-                )
-            ).thenCompose(
-                updated -> this.storage.save(
-                    this.key, new Content.From(updated.getBytes(StandardCharsets.UTF_8))
                 )
             );
         }
@@ -147,6 +139,22 @@ public interface Credentials {
                 .to(ContentAs.YAML)
                 .to(SingleInterop.get())
                 .thenApply(yaml -> (YamlMapping) yaml);
+        }
+
+        /**
+         * Build credentials yaml from users yaml mapping and saves it to storage.
+         * @param users Users mapping
+         * @return Credentials yaml string representation
+         */
+        private CompletionStage<Void> buildAndSaveCredentials(final YamlMappingBuilder users) {
+            return this.storage.save(
+                this.key,
+                new Content.From(
+                    Yaml.createYamlMappingBuilder()
+                        .add(FromStorageYaml.CREDENTIALS, users.build()).build()
+                        .toString().getBytes(StandardCharsets.UTF_8)
+                )
+            );
         }
 
         /**
@@ -166,17 +174,6 @@ public interface Credentials {
                 result = result.add(node, credentials.value(node));
             }
             return result;
-        }
-
-        /**
-         * Build credentials yaml from users yaml mapping.
-         * @param users Users mapping
-         * @return Credentials yaml string representation
-         */
-        private static String buildCredentials(final YamlMappingBuilder users) {
-            return Yaml.createYamlMappingBuilder()
-                .add(FromStorageYaml.CREDENTIALS, users.build()).build()
-                .toString();
         }
     }
 }

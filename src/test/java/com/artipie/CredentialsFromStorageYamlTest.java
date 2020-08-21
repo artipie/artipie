@@ -126,7 +126,7 @@ class CredentialsFromStorageYamlTest {
     }
 
     @Test
-    void doNotChangeYamlIfUserNotFound() {
+    void doNotChangeYamlOnRemoveIfUserNotFound() {
         final String ted = "ted";
         final String alex = "alex";
         final String pass = "098";
