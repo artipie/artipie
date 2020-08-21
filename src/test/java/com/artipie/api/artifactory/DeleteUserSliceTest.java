@@ -24,23 +24,20 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.Credentials;
 import com.artipie.Settings;
-import com.artipie.api.ContentAs;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import hu.akarnokd.rxjava2.interop.SingleInterop;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletionStage;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.Test;
@@ -90,7 +87,7 @@ final class DeleteUserSliceTest {
     }
 
     @Test
-    void returnsOkAndDeleteIfUserIsFoundInCredentials() {
+    void returnsOkAndDeleteIfUserIsFoundInCredentials() throws IOException {
         final Storage storage = new InMemoryStorage();
         final Key key = new Key.From("_credentials.yaml");
         this.creds("jane", storage, key);
@@ -104,26 +101,12 @@ final class DeleteUserSliceTest {
         );
         MatcherAssert.assertThat(
             "User should be deleted from storage",
-            storage.value(key)
-                .thenCompose(cred -> this.yaml(storage, key))
-                .toCompletableFuture().join()
-                .string("credentials"),
+            Yaml.createYamlInput(
+                new PublisherAs(storage.value(key).join())
+                    .asciiString().toCompletableFuture().join()
+            ).readYamlMapping().string("credentials"),
             new IsNull<>()
         );
-    }
-
-    /**
-     * Credentials as yaml.
-     * @param storage Storage
-     * @param key Key for storage
-     * @return Completion action with yaml
-     */
-    private CompletionStage<YamlMapping> yaml(final Storage storage, final Key key) {
-        return new RxStorageWrapper(storage)
-            .value(key)
-            .to(ContentAs.YAML)
-            .to(SingleInterop.get())
-            .thenApply(yaml -> (YamlMapping) yaml);
     }
 
     private void creds(final String username, final Storage storage, final Key key) {
