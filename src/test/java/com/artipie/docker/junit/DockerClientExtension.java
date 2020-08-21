@@ -52,9 +52,8 @@ public final class DockerClientExtension
     @Override
     public void beforeAll(final ExtensionContext context) throws Exception {
         final Path temp = Files.createTempDirectory("junit-docker-");
-        final DockerClient client = new DockerClient(temp);
         store(context).put(DockerClientExtension.TEMP_DIR, temp);
-        store(context).put(DockerClientExtension.CLIENT, client);
+        store(context).put(DockerClientExtension.CLIENT, new DockerClient(temp));
     }
 
     @Override
@@ -67,8 +66,7 @@ public final class DockerClientExtension
 
     @Override
     public void afterAll(final ExtensionContext context) {
-        final Path temp = store(context).remove(DockerClientExtension.TEMP_DIR, Path.class);
-        temp.toFile().delete();
+        store(context).remove(DockerClientExtension.TEMP_DIR, Path.class).toFile().delete();
         store(context).remove(DockerClientExtension.CLIENT);
     }
 
