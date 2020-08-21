@@ -198,7 +198,7 @@ public interface Credentials {
 
     /**
      * Credentials from env.
-     * @since 0.9
+     * @since 0.10
      */
     final class FromEnv implements Credentials {
 

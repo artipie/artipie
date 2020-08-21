@@ -31,11 +31,10 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link Credentials.FromStorageYaml}.
- * @since 0.9
+ * Test for {@link Credentials.FromEnv}.
+ * @since 0.10
  */
 class CredentialsFromEnvTest {
-
     @Test
     void returnsUserFromEnv() {
         final String user = "john";
