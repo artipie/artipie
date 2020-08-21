@@ -28,6 +28,7 @@ import com.artipie.Settings;
 import com.artipie.YamlPermissions;
 import com.artipie.api.artifactory.CreateRepoSlice;
 import com.artipie.api.artifactory.GetUserSlice;
+import com.artipie.api.artifactory.GetUsersSlice;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
@@ -163,6 +164,13 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new GetUserSlice(settings)
+                            ),
+                            new RtRulePath(
+                                new RtRule.All(
+                                    new RtRule.ByPath(GetUsersSlice.PATH),
+                                    new ByMethodsRule(RqMethod.GET)
+                                ),
+                                new GetUsersSlice(settings)
                             )
                         ),
                         new Permission.ByName("api", perm),
