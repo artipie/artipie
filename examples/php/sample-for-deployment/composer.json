@@ -1,0 +1,13 @@
+{
+  "name": "artipie/sample_composer_package",
+  "version": "1.0",
+  "description": "Sample package that is installable via composer",
+  "type": "concrete5-package",
+  "license": "MIT",
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "Custom\\Space\\": "src"
+    }
+  }
+}
