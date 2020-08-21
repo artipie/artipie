@@ -158,7 +158,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>gem-adapter</artifactId>
-      <version>0.2.2</version>
+      <version>0.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -183,7 +183,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>0.6.1</version>
+      <version>0.6.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -193,7 +193,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>0.4.2</version>
+      <version>0.4.3</version>
     </dependency>
     <dependency>
       <groupId>com.github.jknack</groupId>
