@@ -77,7 +77,7 @@ public final class GetUsersSlice implements Slice {
                             list -> {
                                 final JsonArrayBuilder json = Json.createArrayBuilder();
                                 list.forEach(
-                                    user -> json.add(GetUsersSlice.getUserJson(user, base))
+                                    user -> json.add(GetUsersSlice.getUserJson(base, user))
                                 );
                                 return new RsJson(json);
                             }
