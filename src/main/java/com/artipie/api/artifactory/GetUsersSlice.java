@@ -27,12 +27,11 @@ import com.artipie.Settings;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.rs.common.RsJson;
 import com.jcabi.log.Logger;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -69,10 +68,9 @@ public final class GetUsersSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        Response res;
         try {
             final String base = this.settings.meta().string("base_url").replaceAll("/$", "");
-            res = new AsyncResponse(
+            return new AsyncResponse(
                 this.settings.credentials().thenCompose(
                     opt -> opt.map(
                         cred -> cred.users().<Response>thenApply(
@@ -89,18 +87,17 @@ public final class GetUsersSlice implements Slice {
             );
         } catch (final IOException err) {
             Logger.error(this, err.getMessage());
-            res = new RsWithStatus(RsStatus.INTERNAL_ERROR);
+            throw new UncheckedIOException(err);
         }
-        return res;
     }
 
     /**
      * Returns json for user.
-     * @param name Username
      * @param base Base url
+     * @param name Username
      * @return User json object
      */
-    private static JsonObject getUserJson(final String name, final String base) {
+    private static JsonObject getUserJson(final String base, final String name) {
         return Json.createObjectBuilder()
             .add("name", name)
             .add("uri", String.format("%s/api/security/users/%s", base, name))
