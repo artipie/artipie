@@ -34,6 +34,7 @@ import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import org.reactivestreams.Publisher;
 
@@ -74,25 +75,20 @@ public final class DeleteUserSlice implements Slice {
             final String username = matcher.group("username");
             res = new AsyncResponse(
                 this.settings.credentials().thenCompose(
-                    cred -> cred.map(
-                        present -> present.users()
-                            .thenApply(
-                                users -> users.contains(username)
-                            ).thenApply(
-                                has -> {
-                                    final Response resp;
-                                    if (has) {
-                                        resp = cred.get().remove(username)
-                                            .thenApply(ok -> new RsWithStatus(RsStatus.OK))
-                                            .toCompletableFuture()
-                                            .join();
-                                    } else {
-                                        resp = StandardRs.NOT_FOUND;
-                                    }
-                                    return resp;
-                                }
-                            )
-                    ).orElse(CompletableFuture.completedFuture(StandardRs.NOT_FOUND))
+                    cred -> cred.users().thenApply(
+                        users -> users.contains(username)
+                    ).thenCompose(
+                        has -> {
+                            final CompletionStage<Response> resp;
+                            if (has) {
+                                resp = cred.remove(username)
+                                    .thenApply(ok -> new RsWithStatus(RsStatus.OK));
+                            } else {
+                                resp = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
+                            }
+                            return resp;
+                        }
+                    )
                 )
             );
         } else {

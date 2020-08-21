@@ -26,14 +26,11 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
-import com.artipie.auth.AuthFromEnv;
-import com.artipie.auth.AuthFromYaml;
 import com.artipie.auth.CachedAuth;
 import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -47,11 +44,6 @@ import java.util.concurrent.CompletionStage;
  *  method. We can configure this chain via settings and compose complex authentication
  *  providers there. E.g. user can use ordered list of env auth, github auth
  *  and auth from yaml file.
- * @todo #444:30min Move `auth()` method to Credentials interface
- *  Casting in `auth()` may cause problems in runtime, it would be better to move this method to
- *  Credentials interface. Credentials.FromStorageYaml implementation should create
- *  AuthFromYaml instance in `auth()`, and as we have env credentials, let's introduce
- *  Credentials.FromEnv class to create proper Authentication implementation in `auth()`.
  * @checkstyle ReturnCountCheck (500 lines)
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
@@ -90,9 +82,7 @@ public final class YamlSettings implements Settings {
     @Override
     public CompletionStage<Authentication> auth() {
         return this.credentials().thenCompose(
-            opt -> opt.<CompletionStage<Authentication>>map(
-                creds -> ((Credentials.FromStorageYaml) creds).yaml().thenApply(AuthFromYaml::new)
-            ).orElse(CompletableFuture.completedFuture(new AuthFromEnv()))
+            Credentials::auth
         ).thenApply(
             auth -> new Authentication.Joined(new CachedAuth(new GithubAuth()), auth)
         );
@@ -115,7 +105,7 @@ public final class YamlSettings implements Settings {
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
-    public CompletionStage<Optional<Credentials>> credentials() {
+    public CompletionStage<Credentials> credentials() {
         final YamlMapping cred;
         try {
             cred = Yaml.createYamlInput(this.content)
@@ -125,7 +115,7 @@ public final class YamlSettings implements Settings {
         } catch (final IOException err) {
             return CompletableFuture.failedFuture(err);
         }
-        final CompletionStage<Optional<Credentials>> res;
+        final CompletionStage<Credentials> res;
         final String path = "path";
         if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
             final Storage strg;
@@ -137,13 +127,13 @@ public final class YamlSettings implements Settings {
             final KeyFromPath key = new KeyFromPath(cred.string(path));
             res = strg.exists(key).thenApply(
                 exists -> {
-                    final Optional<Credentials> auth;
+                    final Credentials creds;
                     if (exists) {
-                        auth = Optional.of(new Credentials.FromStorageYaml(strg, key));
+                        creds = new Credentials.FromStorageYaml(strg, key);
                     } else {
-                        auth = Optional.empty();
+                        creds = new Credentials.FromEnv();
                     }
-                    return auth;
+                    return creds;
                 }
             );
         } else if (YamlSettings.hasTypeFile(cred)) {
@@ -153,7 +143,7 @@ public final class YamlSettings implements Settings {
                 )
             );
         } else {
-            res = CompletableFuture.completedStage(Optional.empty());
+            res = CompletableFuture.completedStage(new Credentials.FromEnv());
         }
         return res;
     }

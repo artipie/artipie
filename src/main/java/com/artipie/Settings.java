@@ -29,7 +29,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -73,7 +72,7 @@ public interface Settings {
      * Artipie credentials.
      * @return Completion action with credentials
      */
-    CompletionStage<Optional<Credentials>> credentials();
+    CompletionStage<Credentials> credentials();
 
     /**
      * Fake {@link Settings} using a file storage.
@@ -90,7 +89,7 @@ public interface Settings {
         /**
          * Credentials.
          */
-        private final Optional<Credentials> cred;
+        private final Credentials cred;
 
         /**
          * Yaml `meta` mapping.
@@ -101,7 +100,10 @@ public interface Settings {
          * Ctor.
          */
         public Fake() {
-            this(new InMemoryStorage(), Optional.empty(), Yaml.createYamlMappingBuilder().build());
+            this(
+                new InMemoryStorage(), new Credentials.FromEnv(),
+                Yaml.createYamlMappingBuilder().build()
+            );
         }
 
         /**
@@ -110,7 +112,7 @@ public interface Settings {
          * @param storage Storage
          */
         public Fake(final Storage storage) {
-            this(storage, Optional.empty(), Yaml.createYamlMappingBuilder().build());
+            this(storage, new Credentials.FromEnv(), Yaml.createYamlMappingBuilder().build());
         }
 
         /**
@@ -119,7 +121,7 @@ public interface Settings {
          * @param cred Credentials
          */
         public Fake(final Credentials cred) {
-            this(new InMemoryStorage(), Optional.of(cred), Yaml.createYamlMappingBuilder().build());
+            this(new InMemoryStorage(), cred, Yaml.createYamlMappingBuilder().build());
         }
 
         /**
@@ -128,7 +130,7 @@ public interface Settings {
          * @param cred Credentials
          * @param meta Yaml `meta` mapping
          */
-        public Fake(final Optional<Credentials> cred, final YamlMapping meta) {
+        public Fake(final Credentials cred, final YamlMapping meta) {
             this(new InMemoryStorage(), cred, meta);
         }
 
@@ -138,8 +140,7 @@ public interface Settings {
          * @param cred Credentials
          * @param meta Yaml `meta` mapping
          */
-        public Fake(final Storage storage, final Optional<Credentials> cred,
-            final YamlMapping meta) {
+        public Fake(final Storage storage, final Credentials cred, final YamlMapping meta) {
             this.storage = storage;
             this.cred = cred;
             this.meta = meta;
@@ -166,7 +167,7 @@ public interface Settings {
         }
 
         @Override
-        public CompletionStage<Optional<Credentials>> credentials() {
+        public CompletionStage<Credentials> credentials() {
             return CompletableFuture.completedFuture(this.cred);
         }
     }

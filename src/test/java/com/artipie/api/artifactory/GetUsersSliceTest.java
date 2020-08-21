@@ -32,14 +32,11 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.json.Json;
@@ -66,19 +63,6 @@ class GetUsersSliceTest {
         .add("base_url", GetUsersSliceTest.BASE).build();
 
     @Test
-    void returnsNotFoundIfNoCredentialsFound() {
-        MatcherAssert.assertThat(
-            new GetUsersSlice(
-                new Settings.Fake(Optional.empty(), GetUsersSliceTest.META)
-            ),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.NOT_FOUND),
-                new RequestLine(RqMethod.GET, "/")
-            )
-        );
-    }
-
-    @Test
     void returnsUsersList() throws IOException {
         final String jane = "jane";
         final String john = "john";
@@ -88,7 +72,7 @@ class GetUsersSliceTest {
         MatcherAssert.assertThat(
             new GetUsersSlice(
                 new Settings.Fake(
-                    Optional.of(new Credentials.FromStorageYaml(storage, key)),
+                    new Credentials.FromStorageYaml(storage, key),
                     GetUsersSliceTest.META
                 )
             ),

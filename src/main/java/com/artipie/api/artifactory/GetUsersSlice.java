@@ -27,14 +27,12 @@ import com.artipie.Settings;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.rs.common.RsJson;
 import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -72,17 +70,15 @@ public final class GetUsersSlice implements Slice {
             final String base = this.settings.meta().string("base_url").replaceAll("/$", "");
             return new AsyncResponse(
                 this.settings.credentials().thenCompose(
-                    opt -> opt.map(
-                        cred -> cred.users().<Response>thenApply(
-                            list -> {
-                                final JsonArrayBuilder json = Json.createArrayBuilder();
-                                list.forEach(
-                                    user -> json.add(GetUsersSlice.getUserJson(base, user))
-                                );
-                                return new RsJson(json);
-                            }
-                        )
-                    ).orElse(CompletableFuture.completedFuture(StandardRs.NOT_FOUND))
+                    cred -> cred.users().<Response>thenApply(
+                        list -> {
+                            final JsonArrayBuilder json = Json.createArrayBuilder();
+                            list.forEach(
+                                user -> json.add(GetUsersSlice.getUserJson(base, user))
+                            );
+                            return new RsJson(json);
+                        }
+                    )
                 )
             );
         } catch (final IOException err) {
