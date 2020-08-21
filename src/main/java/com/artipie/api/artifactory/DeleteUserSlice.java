@@ -23,27 +23,81 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.Settings;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rs.RsStatus;
+import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
 import org.reactivestreams.Publisher;
 
 /**
  * Artifactory `DELETE /api/security/users/{userName}` endpoint,
  * deletes user record from credentials.
+ *
  * @since 0.10
- * @todo #444:30min Implement this slice to delete user from credentials by user name
- *  obtained from request line, path format is `/api/security/users/{userName}`. Use
- *  Credentials#remove(java.lang.String) method to perform the operation and return 200 OK status.
- *  Do not forget to test this class and add it to ArtipieApi, check GetUserSlice as an example.
+ * @todo #444:30min Create class `UserFromRqLine`.
+ *  Logic for getting username from request line is the same in 3 classes: here,
+ *  `GetUserSlice` and in `AddUpdateUserSlice`. It would be nice to introduce
+ *  class to obtain username from request line and move GetUserSlice.PTRN
+ *  there. Class can be created in this package, accept line from request in ctor
+ *  and have one Optional{String} get() method to get username.
  */
 public final class DeleteUserSlice implements Slice {
+    /**
+     * Artipie settings.
+     */
+    private final Settings settings;
+
+    /**
+     * Ctor.
+     * @param settings Setting
+     */
+    public DeleteUserSlice(final Settings settings) {
+        this.settings = settings;
+    }
 
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        throw new NotImplementedException("Not implemented yet");
+        final Response res;
+        final Matcher matcher = GetUserSlice.PTRN.matcher(
+            new RequestLineFrom(line).uri().toString()
+        );
+        if (matcher.matches()) {
+            final String username = matcher.group("username");
+            res = new AsyncResponse(
+                this.settings.credentials().thenCompose(
+                    cred -> cred.map(
+                        present -> present.users()
+                            .thenApply(
+                                users -> users.contains(username)
+                            ).thenApply(
+                                has -> {
+                                    final Response resp;
+                                    if (has) {
+                                        resp = cred.get().remove(username)
+                                            .thenApply(ok -> new RsWithStatus(RsStatus.OK))
+                                            .toCompletableFuture()
+                                            .join();
+                                    } else {
+                                        resp = StandardRs.NOT_FOUND;
+                                    }
+                                    return resp;
+                                }
+                            )
+                    ).orElse(CompletableFuture.completedFuture(StandardRs.NOT_FOUND))
+                )
+            );
+        } else {
+            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+        }
+        return res;
     }
 }
