@@ -12,7 +12,7 @@ zip -r sample-for-deployment.zip sample-for-deployment
 curl -i -X PUT --data-binary "@sample-for-deployment.zip" http://localhost:8080/bin/sample-for-deployment.zip
 
 # Post the package to php-composer-repository.
-curl -0 -v -X POST  http://localhost:8080/my-php \
+curl -i -X POST  http://localhost:8080/my-php \
 --request PUT \
 -H "Expect:" \
 -H 'Content-Type: application/json; charset=utf-8' \
