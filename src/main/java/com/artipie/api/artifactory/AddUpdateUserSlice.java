@@ -28,7 +28,6 @@ import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import java.io.ByteArrayInputStream;
@@ -37,7 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.regex.Matcher;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
@@ -68,26 +66,23 @@ public final class AddUpdateUserSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Response res;
-        final Matcher matcher = GetUserSlice.PTRN.matcher(
-            new RequestLineFrom(line).uri().toString()
-        );
-        if (matcher.matches()) {
-            final CompletionStage<Optional<String>> pswd = AddUpdateUserSlice.password(body);
-            final String username = matcher.group("username");
-            res = new AsyncResponse(
-                pswd.thenCompose(
-                    passw -> passw.map(
-                        haspassw -> this.settings.credentials()
-                            .thenCompose(
-                                cred -> cred.add(username, haspassw)
-                                    .thenApply(ok -> new RsWithStatus(RsStatus.OK)))
+        final Optional<String> user = new UserFromRqLine(line).get();
+        return user.map(
+            username -> new AsyncResponse(
+                AddUpdateUserSlice.password(body)
+                    .thenCompose(
+                        passw -> passw.map(
+                            haspassw -> this.settings.credentials()
+                                .thenCompose(
+                                    cred -> cred.add(username, haspassw)
+                                        .thenApply(ok -> new RsWithStatus(RsStatus.OK)))
                 ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.NOT_FOUND))))
-            );
-        } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
-        }
-        return res;
+            )
+        ).orElse(
+            new AsyncResponse(
+                CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST))
+            )
+        );
     }
 
     /**
