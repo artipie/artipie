@@ -59,7 +59,7 @@ final class AddUpdateUserSliceTest {
     @EnumSource(value = RqMethod.class, names = {"PUT", "POST"})
     void returnsBadRequestOnInvalidRequest(final RqMethod rqmeth) {
         MatcherAssert.assertThat(
-            new DeleteUserSlice(new Settings.Fake()),
+            new AddUpdateUserSlice(new Settings.Fake()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(rqmeth, "/some/api/david")
@@ -71,7 +71,7 @@ final class AddUpdateUserSliceTest {
     @EnumSource(value = RqMethod.class, names = {"PUT", "POST"})
     void returnsNotFoundIfCredentialsAreEmpty(final RqMethod rqmeth) {
         MatcherAssert.assertThat(
-            new DeleteUserSlice(new Settings.Fake()),
+            new AddUpdateUserSlice(new Settings.Fake()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(rqmeth, "/api/security/users/empty")

@@ -34,6 +34,9 @@ import com.artipie.http.rs.RsWithStatus;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -42,7 +45,8 @@ import org.reactivestreams.Publisher;
 
 /**
  * Artifactory `PUSH/PUT /api/security/users/{userName}` endpoint,
- * adds/updates user record in credentials.
+ * updates/adds user record in credentials.
+ *
  * @since 0.10
  */
 public final class AddUpdateUserSlice implements Slice {
@@ -54,6 +58,7 @@ public final class AddUpdateUserSlice implements Slice {
 
     /**
      * Ctor.
+     *
      * @param settings Artipie setting
      */
     public AddUpdateUserSlice(final Settings settings) {
@@ -68,16 +73,17 @@ public final class AddUpdateUserSlice implements Slice {
             new RequestLineFrom(line).uri().toString()
         );
         if (matcher.matches()) {
-            final String pswd = AddUpdateUserSlice.password(body);
+            final CompletionStage<Optional<String>> pswd = AddUpdateUserSlice.password(body);
             final String username = matcher.group("username");
             res = new AsyncResponse(
-                this.settings.credentials().thenApply(
-                    cred -> cred.add(username, pswd)
-                        .thenApply(ok -> new RsWithStatus(RsStatus.OK))
-                        .toCompletableFuture()
-                        .join()
-                    )
-                );
+                pswd.thenCompose(
+                    passw -> passw.map(
+                        haspassw -> this.settings.credentials()
+                            .thenCompose(
+                                cred -> cred.add(username, haspassw)
+                                    .thenApply(ok -> new RsWithStatus(RsStatus.OK)))
+                ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.NOT_FOUND))))
+            );
         } else {
             res = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
@@ -86,16 +92,28 @@ public final class AddUpdateUserSlice implements Slice {
 
     /**
      * Extracts password string from the response body.
+     *
      * @param body Response body
-     * @return Password string.
+     * @return Password string as completion.
      */
-    private static String password(final Publisher<ByteBuffer> body) {
-        final JsonObject root;
-        final byte[] bytes = new PublisherAs(body)
-            .bytes().toCompletableFuture().join();
-        try (JsonReader reader = Json.createReader(new ByteArrayInputStream(bytes))) {
-            root = reader.readObject();
-            return root.getString("password");
-        }
+    private static CompletionStage<Optional<String>> password(final Publisher<ByteBuffer> body) {
+        return new PublisherAs(body)
+            .bytes().thenApply(
+                bytes -> {
+                    final Optional<String> pswd;
+                    if (bytes.length == 0) {
+                        pswd = Optional.empty();
+                    } else {
+                        final JsonObject root;
+                        try (JsonReader reader =
+                            Json.createReader(new ByteArrayInputStream(bytes))
+                        ) {
+                            root = reader.readObject();
+                            pswd = Optional.of(root.getString("password"));
+                        }
+                    }
+                    return pswd;
+                }
+            );
     }
 }
