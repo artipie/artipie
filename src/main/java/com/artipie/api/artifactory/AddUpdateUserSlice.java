@@ -104,13 +104,9 @@ public final class AddUpdateUserSlice implements Slice {
                     if (bytes.length == 0) {
                         pswd = Optional.empty();
                     } else {
-                        final JsonObject root;
-                        try (JsonReader reader =
-                            Json.createReader(new ByteArrayInputStream(bytes))
-                        ) {
-                            root = reader.readObject();
-                            pswd = Optional.of(root.getString("password"));
-                        }
+                        final JsonReader rdr = Json.createReader(new ByteArrayInputStream(bytes));
+                        final JsonObject root = rdr.readObject();
+                        pswd = Optional.of(root.getString("password"));
                     }
                     return pswd;
                 }
