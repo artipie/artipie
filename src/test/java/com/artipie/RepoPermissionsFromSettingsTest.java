@@ -23,32 +23,114 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import org.cactoos.list.ListOf;
+import org.cactoos.map.MapEntry;
+import org.cactoos.map.MapOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link RepoPermissions.FromSettings}.
  * @since 0.10
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RepoPermissionsFromSettingsTest {
+
+    /**
+     * Storage.
+     */
+    private Storage storage;
+
+    @BeforeEach
+    void init() {
+        this.storage = new InMemoryStorage();
+    }
 
     @Test
     void returnsRepoList() {
-        final Storage storage = new InMemoryStorage();
-        storage.save(new Key.From("one.yaml"), Content.EMPTY).join();
-        storage.save(new Key.From("two.yaml"), Content.EMPTY).join();
-        storage.save(new Key.From("abc"), Content.EMPTY).join();
-        storage.save(new Key.From("three.yaml"), Content.EMPTY).join();
+        this.storage.save(new Key.From("one.yaml"), Content.EMPTY).join();
+        this.storage.save(new Key.From("two.yaml"), Content.EMPTY).join();
+        this.storage.save(new Key.From("abc"), Content.EMPTY).join();
+        this.storage.save(new Key.From("three.yaml"), Content.EMPTY).join();
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(new Settings.Fake(storage)).repositories()
+            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).repositories()
                 .toCompletableFuture().join(),
             Matchers.containsInAnyOrder("one", "two", "three")
         );
+    }
+
+    @Test
+    void returnsPermissionsList() {
+        final String john = "john";
+        final String download = "download";
+        final String upload = "upload";
+        this.addSettings(
+            "maven",
+            new MapOf<String, List<String>>(
+                new MapEntry<>(john, new ListOf<String>(download, upload))
+            )
+        );
+        MatcherAssert.assertThat(
+            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions("maven")
+                .toCompletableFuture().join(),
+            Matchers.hasEntry(john, new ListOf<String>(download, upload))
+        );
+    }
+
+    @Test
+    void returnsEmptyMapWhenPermissionsAreNotSet() {
+        this.addEmpty("pypi");
+        MatcherAssert.assertThat(
+            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions("maven")
+                .toCompletableFuture().join().size(),
+            new IsEqual<>(0)
+        );
+    }
+
+    private void addSettings(final String repo, final Map<String, List<String>> permissions) {
+        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
+        for (final Map.Entry<String, List<String>> entry : permissions.entrySet()) {
+            YamlSequenceBuilder perms = Yaml.createYamlSequenceBuilder();
+            for (final String perm : entry.getValue()) {
+                perms = perms.add(perm);
+            }
+            builder = builder.add(entry.getKey(), perms.build());
+        }
+        this.storage.save(
+            new Key.From(String.format("%s.yaml", repo)),
+            new Content.From(
+                Yaml.createYamlMappingBuilder().add(
+                    "repo",
+                    Yaml.createYamlMappingBuilder().add("permissions", builder.build()).build()
+                ).build().toString().getBytes(StandardCharsets.UTF_8)
+            )
+        ).join();
+    }
+
+    private void addEmpty(final String repo) {
+        this.storage.save(
+            new Key.From(String.format("%s.yaml", repo)),
+            new Content.From(
+                Yaml.createYamlMappingBuilder().add(
+                    "repo",
+                    Yaml.createYamlMappingBuilder().build()
+                ).build().toString().getBytes(StandardCharsets.UTF_8)
+            )
+        ).join();
     }
 
 }
