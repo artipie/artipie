@@ -128,7 +128,7 @@ public interface RepoPermissions {
                             node -> res.put(
                                 node.asScalar().value(),
                                 perms.yamlSequence(node.asScalar().value()).values().stream()
-                                .map(item -> Scalar.class.cast(item).value())
+                                .map(item -> item.asScalar().value())
                                     .collect(Collectors.toList())
                             )
                         );
@@ -143,7 +143,7 @@ public interface RepoPermissions {
          * @param key Repo settings key
          * @return Completion action with yaml
          */
-        private CompletionStage<YamlMapping> yaml(final Key key) {
+        private CompletionStage<? extends YamlMapping> yaml(final Key key) {
             return new RxStorageWrapper(this.storage())
                 .value(key)
                 .to(ContentAs.YAML)

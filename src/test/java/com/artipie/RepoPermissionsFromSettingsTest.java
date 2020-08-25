@@ -93,9 +93,10 @@ class RepoPermissionsFromSettingsTest {
 
     @Test
     void returnsEmptyMapWhenPermissionsAreNotSet() {
-        this.addEmpty("pypi");
+        final String repo = "pypi";
+        this.addEmpty(repo);
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions("maven")
+            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
                 .toCompletableFuture().join().size(),
             new IsEqual<>(0)
         );
@@ -127,7 +128,8 @@ class RepoPermissionsFromSettingsTest {
             new Content.From(
                 Yaml.createYamlMappingBuilder().add(
                     "repo",
-                    Yaml.createYamlMappingBuilder().build()
+                    Yaml.createYamlMappingBuilder().add("type", "file")
+                        .add("storage", "default").build()
                 ).build().toString().getBytes(StandardCharsets.UTF_8)
             )
         ).join();
