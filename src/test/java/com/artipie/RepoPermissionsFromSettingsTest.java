@@ -78,14 +78,15 @@ class RepoPermissionsFromSettingsTest {
         final String john = "john";
         final String download = "download";
         final String upload = "upload";
+        final String repo = "maven";
         this.addSettings(
-            "maven",
+            repo,
             new MapOf<String, List<String>>(
                 new MapEntry<>(john, new ListOf<String>(download, upload))
             )
         );
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions("maven")
+            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
                 .toCompletableFuture().join(),
             Matchers.hasEntry(john, new ListOf<String>(download, upload))
         );

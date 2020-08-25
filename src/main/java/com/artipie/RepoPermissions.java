@@ -146,8 +146,7 @@ public interface RepoPermissions {
             return new RxStorageWrapper(this.storage())
                 .value(key)
                 .to(ContentAs.YAML)
-                .to(SingleInterop.get())
-                .thenApply(yaml -> (YamlMapping) yaml);
+                .to(SingleInterop.get());
         }
 
         /**
