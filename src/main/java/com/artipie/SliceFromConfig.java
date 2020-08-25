@@ -25,7 +25,6 @@
 package com.artipie;
 
 import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.docker.DockerProxy;
@@ -137,12 +136,11 @@ public final class SliceFromConfig extends Slice.Wrap {
     static Slice build(final Settings settings, final Authentication auth,
         final RepoConfig cfg, final StorageAliases aliases) {
         final Slice slice;
-        final Storage storage = cfg.storage();
         final Permissions permissions = new LoggingPermissions(cfg.permissions());
         final Pattern prefix = new PathPattern(settings).pattern();
         switch (cfg.type()) {
             case "file":
-                slice = new TrimPathSlice(new FilesSlice(storage, permissions, auth), prefix);
+                slice = new TrimPathSlice(new FilesSlice(cfg.storage(), permissions, auth), prefix);
                 break;
             case "file-proxy":
                 slice = new TrimPathSlice(
@@ -160,19 +158,19 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "npm":
                 slice = new NpmSlice(
                     cfg.path(),
-                    new Npm(storage),
-                    storage,
+                    new Npm(cfg.storage()),
+                    cfg.storage(),
                     permissions,
                     new BasicIdentities(auth)
                 );
                 break;
             case "gem":
-                slice = new TrimPathSlice(new GemSlice(storage), prefix);
+                slice = new TrimPathSlice(new GemSlice(cfg.storage()), prefix);
                 break;
             case "helm":
                 slice = new TrimPathSlice(
                     new HelmSlice(
-                        storage,
+                        cfg.storage(),
                         cfg.path(),
                         permissions,
                         new BasicIdentities(auth)
@@ -183,19 +181,22 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "rpm":
                 slice = new TrimPathSlice(
                     new RpmSlice(
-                        storage, permissions, new BasicIdentities(auth),
+                        cfg.storage(), permissions, new BasicIdentities(auth),
                         new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings())
                     ), prefix
                 );
                 break;
             case "php":
-                slice = new PhpComposer(cfg.path(), storage);
+                slice = new PhpComposer(cfg.path(), cfg.storage());
                 break;
             case "nuget":
-                slice = new TrimPathSlice(new NuGet(cfg.url(), storage, permissions, auth), prefix);
+                slice = new TrimPathSlice(
+                    new NuGet(cfg.url(), cfg.storage(), permissions, auth),
+                    prefix
+                );
                 break;
             case "maven":
-                slice = new TrimPathSlice(new MavenSlice(storage, permissions, auth), prefix);
+                slice = new TrimPathSlice(new MavenSlice(cfg.storage(), permissions, auth), prefix);
                 break;
             case "maven-proxy":
                 slice = new TrimPathSlice(
@@ -206,7 +207,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                                 .orElseThrow(() -> new IllegalStateException("Repo settings missed"))
                                 .string("remote_uri")
                         ),
-                        new StorageCache(storage)
+                        new StorageCache(cfg.storage())
                     ),
                     prefix
                 );
@@ -234,23 +235,25 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "go":
-                slice = new GoSlice(storage);
+                slice = new GoSlice(cfg.storage());
                 break;
             case "npm-proxy":
                 slice = new NpmProxySlice(
                     cfg.path(),
                     new NpmProxy(
-                        new NpmProxyConfig(cfg.settings().orElseThrow()), Vertx.vertx(), storage
+                        new NpmProxyConfig(cfg.settings().orElseThrow()),
+                        Vertx.vertx(),
+                        cfg.storage()
                     )
                 );
                 break;
             case "pypi":
-                slice = new TrimPathSlice(new PySlice(storage, permissions, auth), prefix);
+                slice = new TrimPathSlice(new PySlice(cfg.storage(), permissions, auth), prefix);
                 break;
             case "docker":
                 slice = new DockerRoutingSlice.Reverted(
                     new DockerSlice(
-                        new TrimmedDocker(new AstoDocker(storage), cfg.name()),
+                        new TrimmedDocker(new AstoDocker(cfg.storage()), cfg.name()),
                         permissions,
                         auth
                     )
