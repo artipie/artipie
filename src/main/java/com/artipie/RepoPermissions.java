@@ -23,12 +23,19 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.api.ContentAs;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.rx.RxStorageWrapper;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -61,11 +68,11 @@ public interface RepoPermissions {
     CompletionStage<Void> addUpdate(String repo, String username, String permission);
 
     /**
-     * Get repository permissions settings.
+     * Get repository permissions settings, returns map `username -> permissions list`.
      * @param repo Repository name
      * @return Completion action with map with users and permissions
      */
-    CompletionStage<Map<String, List<String>>> get(String repo);
+    CompletionStage<Map<String, List<String>>> permissions(String repo);
 
     /**
      * {@link RepoPermissions} from Artipie settings.
@@ -110,8 +117,36 @@ public interface RepoPermissions {
         }
 
         @Override
-        public CompletionStage<Map<String, List<String>>> get(final String repo) {
-            throw new UnsupportedOperationException("To implemented later");
+        public CompletionStage<Map<String, List<String>>> permissions(final String repo) {
+            return this.yaml(new Key.From(String.format("%s.yaml", repo))).thenApply(
+                yaml -> Optional.ofNullable(yaml.yamlMapping("repo").yamlMapping("permissions"))
+                .map(
+                    perms -> {
+                        final Map<String, List<String>> res = new HashMap<>();
+                        perms.keys().forEach(
+                            node -> res.put(
+                                node.asScalar().value(),
+                                perms.yamlSequence(node.asScalar().value()).values().stream()
+                                .map(item -> item.asScalar().value())
+                                    .collect(Collectors.toList())
+                            )
+                        );
+                        return res;
+                    }
+                ).orElse(Collections.emptyMap())
+            );
+        }
+
+        /**
+         * Credentials as yaml.
+         * @param key Repo settings key
+         * @return Completion action with yaml
+         */
+        private CompletionStage<? extends YamlMapping> yaml(final Key key) {
+            return new RxStorageWrapper(this.storage())
+                .value(key)
+                .to(ContentAs.YAML)
+                .to(SingleInterop.get());
         }
 
         /**
