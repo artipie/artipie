@@ -61,7 +61,7 @@ public final class DeleteUserSlice implements Slice {
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         final Optional<String> user = new UserFromRqLine(line).get();
-        return user.map(
+        return user.<Response>map(
             username -> new AsyncResponse(
                 this.settings.credentials().thenCompose(
                     cred -> cred.users().thenApply(
@@ -80,10 +80,6 @@ public final class DeleteUserSlice implements Slice {
                     )
                 )
             )
-        ).orElse(
-            new AsyncResponse(
-                CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST))
-            )
-        );
+        ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
     }
 }

@@ -33,7 +33,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import javax.json.Json;
 import org.reactivestreams.Publisher;
@@ -66,7 +65,7 @@ public final class GetUserSlice implements Slice {
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         final Optional<String> user = new UserFromRqLine(line).get();
-        return user.map(
+        return user.<Response>map(
             username -> new AsyncResponse(
                 this.settings.credentials().thenCompose(
                     cred ->  cred.users().thenApply(
@@ -92,6 +91,6 @@ public final class GetUserSlice implements Slice {
                     )
                 )
             )
-        ).orElse(new AsyncResponse(CompletableFuture.completedFuture(StandardRs.NOT_FOUND)));
+        ).orElse(StandardRs.NOT_FOUND);
     }
 }

@@ -67,7 +67,7 @@ public final class AddUpdateUserSlice implements Slice {
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         final Optional<String> user = new UserFromRqLine(line).get();
-        return user.map(
+        return user.<Response>map(
             username -> new AsyncResponse(
                 AddUpdateUserSlice.password(body)
                     .thenCompose(
@@ -78,11 +78,7 @@ public final class AddUpdateUserSlice implements Slice {
                                         .thenApply(ok -> new RsWithStatus(RsStatus.OK)))
                 ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.NOT_FOUND))))
             )
-        ).orElse(
-            new AsyncResponse(
-                CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST))
-            )
-        );
+        ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
     }
 
     /**
