@@ -30,7 +30,7 @@ import java.util.Map;
 import org.reactivestreams.Publisher;
 
 /**
- * Artifactory `GET /api/security/permissions/{target}` endpoint, returns json with
+ * Artifactory `PUT /api/security/permissions/{target}` endpoint, returns json with
  * permissions (= repository) information.
  * @since 0.10
  * @todo #444:30min Implement AddUpdatePermissionSlice to add/update repository permissions.
