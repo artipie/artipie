@@ -110,7 +110,7 @@ public class ArtipieServer {
                     )
                     .add("layout", "flat")
                     .build()
-            ).toString().getBytes()
+            ).build().toString().getBytes()
         );
         this.vertx = Vertx.vertx();
         this.server = new VertxMain(cfg, this.vertx, 0);
