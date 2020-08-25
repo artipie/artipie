@@ -74,7 +74,7 @@ public final class GetPermissionsSlice implements Slice {
                     list -> {
                         final JsonArrayBuilder json = Json.createArrayBuilder();
                         list.forEach(
-                            user -> json.add(GetPermissionsSlice.permJson(base, user))
+                            perm -> json.add(GetPermissionsSlice.permJson(base, perm))
                         );
                         return new RsJson(json);
                     }

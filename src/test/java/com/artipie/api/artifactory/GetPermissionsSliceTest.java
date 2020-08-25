@@ -36,9 +36,9 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import javax.json.Json;
+import javax.json.JsonObject;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.AnyOf;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -46,7 +46,6 @@ import org.junit.jupiter.api.Test;
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class GetPermissionsSliceTest {
     /**
      * Artipie base url.
@@ -62,14 +61,8 @@ final class GetPermissionsSliceTest {
 
     @Test
     void shouldReturnsPermissionsList() {
-        final String uri = String.format(
-            "%sapi/security/permissions/", GetPermissionsSliceTest.BASE
-        );
-        final String jsonobj = "{\"name\":\"%s\",\"uri\":\"%s%s\"}";
         final String read = "readSourceArtifacts";
         final String cache = "populateCaches";
-        final String readobj = String.format(jsonobj, read, uri, read);
-        final String cacheobj = String.format(jsonobj, cache, uri, cache);
         final Storage storage = new InMemoryStorage();
         storage.save(new Key.From(this.nameYaml(read)), Content.EMPTY).join();
         storage.save(new Key.From(this.nameYaml(cache)), Content.EMPTY).join();
@@ -78,19 +71,25 @@ final class GetPermissionsSliceTest {
                 new Settings.Fake(storage, new Credentials.FromEnv(), GetPermissionsSliceTest.META)
             ),
             new SliceHasResponse(
-                new AnyOf<>(
-                    Arrays.asList(
-                        new RsHasBody(
-                            String.format("[%s,%s]", readobj, cacheobj), StandardCharsets.UTF_8
-                        ),
-                        new RsHasBody(
-                            String.format("[%s,%s]", cacheobj, readobj), StandardCharsets.UTF_8
-                        )
-                    )
+                new RsHasBody(
+                    Json.createArrayBuilder()
+                        .add(this.permJson(cache))
+                        .add(this.permJson(read))
+                        .build().toString().getBytes(StandardCharsets.UTF_8)
                 ),
                 new RequestLine(RqMethod.GET, "/")
             )
         );
+    }
+
+    private JsonObject permJson(final String name) {
+        return Json.createObjectBuilder()
+            .add("name", name)
+            .add(
+                "uri", String.format(
+                    "%sapi/security/permissions/%s", GetPermissionsSliceTest.BASE, name
+                )
+            ).build();
     }
 
     private String nameYaml(final String name) {
