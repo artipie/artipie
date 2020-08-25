@@ -23,26 +23,79 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.RepoPermissions;
+import com.artipie.Settings;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rs.common.RsJson;
+import com.jcabi.log.Logger;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import org.reactivestreams.Publisher;
 
 /**
  * Artifactory `GET /api/security/permissions` endpoint, returns
  * permissions ( = repositories) list.
  * @since 0.10
- * @todo #444:30min Implement this slice to return available repositories json list,
- *  format can be found https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api,
- *  Get Permission Targets section. Use RepoPermissions#repositories(), do not ferget about test
- *  and add this slice to ArtipieApi.
  */
 public final class GetPermissionsSlice implements Slice {
+
+    /**
+     * This endpoint path.
+     */
+    public static final String PATH = "/api/security/permissions";
+
+    /**
+     * Artipie settings.
+     */
+    private final Settings settings;
+
+    /**
+     * Ctor.
+     * @param settings Setting
+     */
+    public GetPermissionsSlice(final Settings settings) {
+        this.settings = settings;
+    }
 
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        try {
+            final String base = this.settings.meta().string("base_url").replaceAll("/$", "");
+            return new AsyncResponse(
+                new RepoPermissions.FromSettings(this.settings).repositories().<Response>thenApply(
+                    list -> {
+                        final JsonArrayBuilder json = Json.createArrayBuilder();
+                        list.forEach(
+                            perm -> json.add(GetPermissionsSlice.permJson(base, perm))
+                        );
+                        return new RsJson(json);
+                    }
+                )
+            );
+        } catch (final IOException err) {
+            Logger.error(this, err.getMessage());
+            throw new UncheckedIOException(err);
+        }
+    }
+
+    /**
+     * Returns json for repo permission.
+     * @param base Base url
+     * @param name Repo permission name
+     * @return User json object
+     */
+    private static JsonObject permJson(final String base, final String name) {
+        return Json.createObjectBuilder()
+            .add("name", name)
+            .add("uri", String.format("%s/api/security/permissions/%s", base, name))
+            .build();
     }
 }
