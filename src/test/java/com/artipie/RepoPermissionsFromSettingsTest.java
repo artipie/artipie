@@ -40,10 +40,10 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void returnsRepoList() {
         final Storage storage = new InMemoryStorage();
-        storage.save(new Key.From("one.yaml"), new Content.From(new byte[]{})).join();
-        storage.save(new Key.From("two.yaml"), new Content.From(new byte[]{})).join();
-        storage.save(new Key.From("abc"), new Content.From(new byte[]{})).join();
-        storage.save(new Key.From("three.yaml"), new Content.From(new byte[]{})).join();
+        storage.save(new Key.From("one.yaml"), Content.EMPTY).join();
+        storage.save(new Key.From("two.yaml"), Content.EMPTY).join();
+        storage.save(new Key.From("abc"), Content.EMPTY).join();
+        storage.save(new Key.From("three.yaml"), Content.EMPTY).join();
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(storage)).repositories()
                 .toCompletableFuture().join(),

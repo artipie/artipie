@@ -33,7 +33,7 @@ import org.reactivestreams.Publisher;
  * Artifactory `DELETE /api/security/permissions/{target}` endpoint, deletes all permissions from
  * repository.
  * @since 0.10
- * @todo #444:30min Implement DeletePermissionSlice delete all repository permissions.
+ * @todo #444:30min Implement DeletePermissionSlice to delete all repository permissions.
  *  First, implement and test RepoPermissions.FromSettings#delete(java.lang.String), then use this
  *  method in this slice. Response json format can be found
  *  https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api,
@@ -44,6 +44,6 @@ public final class DeletePermissionSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        return null;
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

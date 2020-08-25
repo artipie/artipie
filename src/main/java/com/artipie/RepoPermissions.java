@@ -100,18 +100,18 @@ public interface RepoPermissions {
 
         @Override
         public CompletionStage<Void> remove(final String repo) {
-            return null;
+            throw new UnsupportedOperationException("To be implemented");
         }
 
         @Override
         public CompletionStage<Void> addUpdate(final String repo, final String username,
             final String permission) {
-            return null;
+            throw new UnsupportedOperationException("Not implemented yet");
         }
 
         @Override
         public CompletionStage<Map<String, List<String>>> get(final String repo) {
-            return null;
+            throw new UnsupportedOperationException("To implemented later");
         }
 
         /**

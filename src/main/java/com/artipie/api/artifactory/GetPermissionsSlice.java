@@ -33,7 +33,7 @@ import org.reactivestreams.Publisher;
  * Artifactory `GET /api/security/permissions` endpoint, returns
  * permissions ( = repositories) list.
  * @since 0.10
- * @todo #444:30min Implement this slice return available repositories json list,
+ * @todo #444:30min Implement this slice to return available repositories json list,
  *  format can be found https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api,
  *  Get Permission Targets section. Use RepoPermissions#repositories(), do not ferget about test
  *  and add this slice to ArtipieApi.
@@ -43,6 +43,6 @@ public final class GetPermissionsSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        return null;
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

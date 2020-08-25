@@ -33,8 +33,8 @@ import org.reactivestreams.Publisher;
  * Artifactory `GET /api/security/permissions/{target}` endpoint, returns json with
  * permissions (= repository) information.
  * @since 0.10
- * @todo #444:30min Implement GetPermissionSlice return repository permissions.
- *  First, implement and test RepoPermissions.FromSettings#addUpdate(java.lang.String), then use
+ * @todo #444:30min Implement AddUpdatePermissionSlice to add/update repository permissions.
+ *  First, implement and test RepoPermissions.FromSettings#addUpdate(...), then use
  *  this method in this slice. Request json format can be found
  *  https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api, we should obtain information
  *  from `repo.actions.users` fields.
@@ -44,6 +44,6 @@ public final class AddUpdatePermissionSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        return null;
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }
