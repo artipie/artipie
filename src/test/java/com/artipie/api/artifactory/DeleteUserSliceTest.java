@@ -29,33 +29,45 @@ import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import javax.json.Json;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
+import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link GetUserSlice}.
- * @since 0.9
+ * Test for {@link DeleteUserSlice}.
+ *
+ * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-class GetUserSliceTest {
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+final class DeleteUserSliceTest {
+    @Test
+    void returnsBadRequestOnInvalidRequest() {
+        MatcherAssert.assertThat(
+            new DeleteUserSlice(new Settings.Fake()),
+            new SliceHasResponse(
+                new RsHasStatus(RsStatus.BAD_REQUEST),
+                new RequestLine(RqMethod.DELETE, "/some/api/david")
+            )
+        );
+    }
 
     @Test
-    void returnsNotFoundOnInvalidRequest() {
+    void returnsNotFoundIfCredentialsAreEmpty() {
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake()),
+            new DeleteUserSlice(new Settings.Fake()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
-                new RequestLine(RqMethod.GET, "/some/api/david")
+                new RequestLine(RqMethod.DELETE, "/api/security/users/empty")
             )
         );
     }
@@ -66,47 +78,41 @@ class GetUserSliceTest {
         final Key key = new Key.From("_credentials.yaml");
         this.creds("john", storage, key);
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
+            new DeleteUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
-                new RequestLine(RqMethod.GET, "/api/security/users/josh")
+                new RequestLine(RqMethod.DELETE, "/api/security/users/notfound")
             )
         );
     }
 
     @Test
-    void returnsJsonFoundIfUserFound() {
-        final String username = "jerry";
+    void returnsOkAndDeleteIfUserIsFoundInCredentials() throws IOException {
         final Storage storage = new InMemoryStorage();
-        final Key key = new Key.From("_cred.yaml");
-        this.creds(username, storage, key);
+        final Key key = new Key.From("_credentials.yaml");
+        this.creds("jane", storage, key);
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
+            "DeleteUserSlice response",
+            new DeleteUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
             new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasBody(
-                        Json.createObjectBuilder()
-                            .add("name", username)
-                            .add(
-                                "email",
-                                String.format("%s@artipie.com", username)
-                            )
-                            .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
-                            .add("realm", "Internal")
-                            .build().toString(),
-                        StandardCharsets.UTF_8
-                    )
-                ),
-                new RequestLine(RqMethod.GET, String.format("/api/security/users/%s", username))
+                new RsHasStatus(RsStatus.OK),
+                new RequestLine(RqMethod.DELETE, "/api/security/users/jane")
             )
+        );
+        MatcherAssert.assertThat(
+            "User should be deleted from storage",
+            Yaml.createYamlInput(
+                new PublisherAs(storage.value(key).join())
+                    .asciiString().toCompletableFuture().join()
+            ).readYamlMapping().string("credentials"),
+            new IsNull<>()
         );
     }
 
     private void creds(final String username, final Storage storage, final Key key) {
         storage.save(
             key,
-                new Content.From(Yaml.createYamlMappingBuilder()
+            new Content.From(Yaml.createYamlMappingBuilder()
                 .add(
                     "credentials",
                     Yaml.createYamlMappingBuilder().add(
@@ -117,5 +123,4 @@ class GetUserSliceTest {
             )
         );
     }
-
 }

@@ -23,30 +23,93 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.Settings;
+import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rs.RsStatus;
+import com.artipie.http.rs.RsWithStatus;
+import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.regex.Matcher;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import org.reactivestreams.Publisher;
 
 /**
  * Artifactory `PUSH/PUT /api/security/users/{userName}` endpoint,
- * adds/updates user record in credentials.
+ * updates/adds user record in credentials.
+ *
  * @since 0.10
- * @todo #444:30min Implement this slice to add/update user from credentials by user name
- *  obtained from request line, path format is `/api/security/users/{userName}`. Password should
- *  be obtain from `password` field from json request body.
- *  Use Credentials#add(java.lang.String, java.lang.String) method to perform the operation and
- *  return 200 OK status. Do not forget to test this class and add it to ArtipieApi,
- *  check GetUserSlice as an example.
  */
 public final class AddUpdateUserSlice implements Slice {
+
+    /**
+     * Artipie settings.
+     */
+    private final Settings settings;
+
+    /**
+     * Ctor.
+     *
+     * @param settings Artipie setting
+     */
+    public AddUpdateUserSlice(final Settings settings) {
+        this.settings = settings;
+    }
 
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        throw new NotImplementedException("Not implemented yet");
+        final Response res;
+        final Matcher matcher = GetUserSlice.PTRN.matcher(
+            new RequestLineFrom(line).uri().toString()
+        );
+        if (matcher.matches()) {
+            final CompletionStage<Optional<String>> pswd = AddUpdateUserSlice.password(body);
+            final String username = matcher.group("username");
+            res = new AsyncResponse(
+                pswd.thenCompose(
+                    passw -> passw.map(
+                        haspassw -> this.settings.credentials()
+                            .thenCompose(
+                                cred -> cred.add(username, haspassw)
+                                    .thenApply(ok -> new RsWithStatus(RsStatus.OK)))
+                ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.NOT_FOUND))))
+            );
+        } else {
+            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+        }
+        return res;
     }
 
+    /**
+     * Extracts password string from the response body.
+     *
+     * @param body Response body
+     * @return Password string as completion.
+     */
+    private static CompletionStage<Optional<String>> password(final Publisher<ByteBuffer> body) {
+        return new PublisherAs(body)
+            .bytes().thenApply(
+                bytes -> {
+                    final Optional<String> pswd;
+                    if (bytes.length == 0) {
+                        pswd = Optional.empty();
+                    } else {
+                        final JsonReader rdr = Json.createReader(new ByteArrayInputStream(bytes));
+                        final JsonObject root = rdr.readObject();
+                        pswd = Optional.of(root.getString("password"));
+                    }
+                    return pswd;
+                }
+            );
+    }
 }

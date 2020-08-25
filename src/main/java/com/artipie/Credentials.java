@@ -32,9 +32,16 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
+import com.artipie.auth.AuthFromEnv;
+import com.artipie.auth.AuthFromYaml;
+import com.artipie.http.auth.Authentication;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -64,6 +71,13 @@ public interface Credentials {
      * @return Completion remove action
      */
     CompletionStage<Void> remove(String username);
+
+    /**
+     * Provides authorization.
+     *
+     * @return Authentication instance
+     */
+    CompletionStage<Authentication> auth();
 
     /**
      * Credentials from main artipie config.
@@ -129,6 +143,11 @@ public interface Credentials {
             );
         }
 
+        @Override
+        public CompletionStage<Authentication> auth() {
+            return this.yaml().thenApply(AuthFromYaml::new);
+        }
+
         /**
          * Credentials as yaml.
          * @return Completion action with yaml
@@ -174,6 +193,61 @@ public interface Credentials {
                 result = result.add(node, credentials.value(node));
             }
             return result;
+        }
+    }
+
+    /**
+     * Credentials from env.
+     * @since 0.10
+     */
+    final class FromEnv implements Credentials {
+
+        /**
+         * Environment variables.
+         */
+        private final Map<String, String> env;
+
+        /**
+         * Ctor.
+         */
+        public FromEnv() {
+            this(System.getenv());
+        }
+
+        /**
+         * Ctor.
+         * @param env Environment variables
+         */
+        public FromEnv(final Map<String, String> env) {
+            this.env = env;
+        }
+
+        @Override
+        public CompletionStage<List<String>> users() {
+            return CompletableFuture.completedFuture(
+                Optional.ofNullable(this.env.get(AuthFromEnv.ENV_NAME))
+                    .map(List::of)
+                    .orElse(Collections.emptyList())
+            );
+        }
+
+        @Override
+        public CompletionStage<Void> add(final String username, final String pswd) {
+            return CompletableFuture.failedFuture(
+                new UnsupportedOperationException("Adding users is not supported")
+            );
+        }
+
+        @Override
+        public CompletionStage<Void> remove(final String username) {
+            return CompletableFuture.failedFuture(
+                new UnsupportedOperationException("Removing users is not supported")
+            );
+        }
+
+        @Override
+        public CompletionStage<Authentication> auth() {
+            return CompletableFuture.completedFuture(new AuthFromEnv());
         }
     }
 }

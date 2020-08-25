@@ -33,7 +33,6 @@ import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.json.Json;
@@ -75,37 +74,27 @@ public final class GetUserSlice implements Slice {
             res =
                 new AsyncResponse(
                     this.settings.credentials().thenCompose(
-                        cred -> cred.map(
-                            present -> present.users()
-                                .thenApply(
-                                    users -> users.contains(username)
-                                    ).thenApply(
-                                        has -> {
-                                            final Response resp;
-                                            if (has) {
-                                                resp = new RsJson(
-                                                    () -> Json.createObjectBuilder()
-                                                        .add("name", username)
-                                                        .add(
-                                                            "email",
-                                                            String.format(
-                                                                "%s@artipie.com", username
-                                                            )
-                                                        )
-                                                        .add(
-                                                            "lastLoggedIn",
-                                                            "2020-01-01T01:01:01.000+01:00"
-                                                        )
-                                                        .add("realm", "Internal")
-                                                        .build(),
-                                                    StandardCharsets.UTF_8
-                                                );
-                                            } else {
-                                                resp = StandardRs.NOT_FOUND;
-                                            }
-                                            return resp;
-                                        }
-                        )).orElse(CompletableFuture.completedFuture(StandardRs.NOT_FOUND))
+                        cred ->  cred.users().thenApply(
+                            users -> users.contains(username)
+                        ).thenApply(
+                            has -> {
+                                final Response resp;
+                                if (has) {
+                                    resp = new RsJson(
+                                        () -> Json.createObjectBuilder()
+                                            .add("name", username)
+                                            .add("email", String.format("%s@artipie.com", username))
+                                            .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
+                                            .add("realm", "Internal")
+                                            .build(),
+                                        StandardCharsets.UTF_8
+                                    );
+                                } else {
+                                    resp = StandardRs.NOT_FOUND;
+                                }
+                                return resp;
+                            }
+                        )
                     )
                 );
         } else {
