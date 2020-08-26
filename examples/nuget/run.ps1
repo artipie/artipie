@@ -20,8 +20,11 @@ nuget pack
 # Push the package to Artipie.
 nuget push SampleForDeployment.1.0.0.nupkg -SkipDuplicate -src http://localhost:8080/my-nuget/index.json
 
-# Gettings out of the deployed package dir
-Set-Location ..
+# Getting to the consumer dir.
+Set-Location ../sample-consumer
+
+# Install just published package from Artipie.
+nuget install SampleForDeployment -Version 1.0.0 -Source http://localhost:8080/my-nuget/index.json
 
 # Remove container.
 docker stop artipie
