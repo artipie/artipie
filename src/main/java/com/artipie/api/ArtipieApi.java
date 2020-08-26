@@ -28,6 +28,7 @@ import com.artipie.Settings;
 import com.artipie.YamlPermissions;
 import com.artipie.api.artifactory.AddUpdateUserSlice;
 import com.artipie.api.artifactory.CreateRepoSlice;
+import com.artipie.api.artifactory.DeletePermissionSlice;
 import com.artipie.api.artifactory.DeleteUserSlice;
 import com.artipie.api.artifactory.GetPermissionSlice;
 import com.artipie.api.artifactory.GetPermissionsSlice;
@@ -198,6 +199,13 @@ public final class ArtipieApi extends Slice.Wrap {
                                 new RtRule.All(
                                     new RtRule.ByPath(GetPermissionsSlice.PATH),
                                     new ByMethodsRule(RqMethod.GET)
+                                ),
+                                new GetPermissionsSlice(settings)
+                            ),
+                            new RtRulePath(
+                                new RtRule.All(
+                                    new RtRule.ByPath(DeletePermissionSlice.PATH),
+                                    new ByMethodsRule(RqMethod.DELETE)
                                 ),
                                 new GetPermissionsSlice(settings)
                             ),
