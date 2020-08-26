@@ -30,6 +30,7 @@ import com.artipie.api.artifactory.AddUpdatePermissionSlice;
 import com.artipie.api.artifactory.AddUpdateUserSlice;
 import com.artipie.api.artifactory.CreateRepoSlice;
 import com.artipie.api.artifactory.DeleteUserSlice;
+import com.artipie.api.artifactory.GetPermissionSlice;
 import com.artipie.api.artifactory.GetPermissionsSlice;
 import com.artipie.api.artifactory.GetUserSlice;
 import com.artipie.api.artifactory.GetUsersSlice;
@@ -63,6 +64,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
  * Artipie API endpoints.
  * @since 0.6
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class ArtipieApi extends Slice.Wrap {
@@ -206,6 +208,13 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
                                 new GetPermissionsSlice(settings)
+                            ),
+                            new RtRulePath(
+                                new RtRule.All(
+                                    new RtRule.ByPath(GetPermissionSlice.PTRN),
+                                    new ByMethodsRule(RqMethod.GET)
+                                ),
+                                new GetPermissionSlice(settings)
                             )
                         ),
                         new Permission.ByName("api", perm),

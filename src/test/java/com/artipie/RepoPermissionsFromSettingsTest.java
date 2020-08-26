@@ -113,10 +113,12 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void updatesUserPermissions() throws IOException {
         final String repo = "rpm";
+        final String david = "david";
+        final String add = "add";
         this.addSettings(
             repo,
             new MapOf<String, List<String>>(
-                new MapEntry<>("david", new ListOf<String>("add", "update"))
+                new MapEntry<>(david, new ListOf<String>(add, "update"))
             )
         );
         final String olga = "olga";
@@ -128,7 +130,8 @@ class RepoPermissionsFromSettingsTest {
                 repo,
                 new ListOf<>(
                     new RepoPermissions.UserPermission(olga, new ListOf<>(download, deploy)),
-                    new RepoPermissions.UserPermission(victor, new ListOf<>(deploy))
+                    new RepoPermissions.UserPermission(victor, new ListOf<>(deploy)),
+                    new RepoPermissions.UserPermission(david, new ListOf<>(download, add))
                 )
             ).toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -140,6 +143,11 @@ class RepoPermissionsFromSettingsTest {
             "Added permissions for victor",
             this.permissionsForUser(repo, victor),
             Matchers.contains(deploy)
+        );
+        MatcherAssert.assertThat(
+            "Updated permissions for david",
+            this.permissionsForUser(repo, david),
+            Matchers.contains(download, add)
         );
     }
 
@@ -173,8 +181,14 @@ class RepoPermissionsFromSettingsTest {
         new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).remove(repo)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
+            "Permissions section are empty",
             this.permissionsSection(repo),
             new IsNull<>()
+        );
+        MatcherAssert.assertThat(
+            "Storage `type` is intact",
+            this.repoSection(repo).string("type"),
+            new IsEqual<>("any")
         );
     }
 
@@ -186,10 +200,14 @@ class RepoPermissionsFromSettingsTest {
     }
 
     private YamlMapping permissionsSection(final String repo) throws IOException {
+        return this.repoSection(repo).yamlMapping("permissions");
+    }
+
+    private YamlMapping repoSection(final String repo) throws IOException {
         return Yaml.createYamlInput(
             new PublisherAs(this.storage.value(new Key.From(String.format("%s.yaml", repo))).join())
                 .asciiString().toCompletableFuture().join()
-        ).readYamlMapping().yamlMapping("repo").yamlMapping("permissions");
+        ).readYamlMapping().yamlMapping("repo");
     }
 
     private void addSettings(final String repo, final Map<String, List<String>> permissions) {
