@@ -37,6 +37,7 @@ import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -70,14 +71,14 @@ public interface RepoPermissions {
      * @param permissions Permissions list
      * @return Completion action
      */
-    CompletionStage<Void> addUpdate(String repo, List<UserPermission> permissions);
+    CompletionStage<Void> addUpdate(String repo, Collection<UserPermission> permissions);
 
     /**
      * Get repository permissions settings, returns users permissions list.
      * @param repo Repository name
      * @return Completion action with map with users and permissions
      */
-    CompletionStage<List<UserPermission>> permissions(String repo);
+    CompletionStage<Collection<UserPermission>> permissions(String repo);
 
     /**
      * {@link RepoPermissions} from Artipie settings.
@@ -133,7 +134,7 @@ public interface RepoPermissions {
 
         @Override
         public CompletionStage<Void> addUpdate(final String repo,
-            final List<UserPermission> permissions) {
+            final Collection<UserPermission> permissions) {
             final Key key = FromSettings.repoSettingsKey(repo);
             return this.repo(key).thenApply(
                 mapping -> {
@@ -154,7 +155,7 @@ public interface RepoPermissions {
         }
 
         @Override
-        public CompletionStage<List<UserPermission>> permissions(final String repo) {
+        public CompletionStage<Collection<UserPermission>> permissions(final String repo) {
             return this.repo(FromSettings.repoSettingsKey(repo)).thenApply(
                 yaml -> Optional.ofNullable(yaml.yamlMapping(FromSettings.PERMISSIONS))
             ).thenApply(
