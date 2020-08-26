@@ -2,7 +2,7 @@
 Set-PSDebug -Trace 1
 
 # Start Artipie.
-docker run --rm -d --name artipie -it -v ${PWD}/artipie.yaml:/etc/artipie.yml -v  ${PWD}:/var/artipie -p 8080:80 al
+docker run --rm -d --name artipie -it -v ${PWD}/artipie.yaml:/etc/artipie.yml -v  ${PWD}:/var/artipie -p 8080:80 artipie/artipie:latest
 
 # Wait for container to be ready for new connections.
 Start-Sleep 5
@@ -11,7 +11,7 @@ Start-Sleep 5
 Set-Location sample-for-deployment
 
 # Clear cache.
-Remove-Item -Force SampleForDeployment.1.0.0.nupkg
+Remove-Item SampleForDeployment.1.0.0.nupkg -ErrorAction Ignore
 nuget locals all -list
 
 # Create a NuGet package.
