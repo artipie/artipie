@@ -33,7 +33,7 @@ import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,13 +93,13 @@ public final class GetPermissionSlice implements Slice {
      * @param repo Repository name
      * @return Response JsonObject
      */
-    private static JsonObject response(final Map<String, List<String>> permissions,
+    private static JsonObject response(final Collection<RepoPermissions.UserPermission> permissions,
         final String repo) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
-        for (final Map.Entry<String, List<String>> entry : permissions.entrySet()) {
+        for (final RepoPermissions.UserPermission perm : permissions) {
             final JsonArrayBuilder array = Json.createArrayBuilder();
-            entry.getValue().forEach(array::add);
-            builder.add(entry.getKey(), array.build());
+            perm.permissions().forEach(array::add);
+            builder.add(perm.username(), array.build());
         }
         return Json.createObjectBuilder()
             .add("repositories", Json.createArrayBuilder().add(repo).build())

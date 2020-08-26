@@ -23,19 +23,26 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.amihaiemil.eoyaml.YamlNode;
+import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.api.ContentAs;
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -61,24 +68,33 @@ public interface RepoPermissions {
     /**
      * Adds or updates repository permission.
      * @param repo Repository name
-     * @param username Username
-     * @param permission Permission name
+     * @param permissions Permissions list
      * @return Completion action
      */
-    CompletionStage<Void> addUpdate(String repo, String username, String permission);
+    CompletionStage<Void> addUpdate(String repo, Collection<UserPermission> permissions);
 
     /**
-     * Get repository permissions settings, returns map `username -> permissions list`.
+     * Get repository permissions settings, returns users permissions list.
      * @param repo Repository name
      * @return Completion action with map with users and permissions
      */
-    CompletionStage<Map<String, List<String>>> permissions(String repo);
+    CompletionStage<Collection<UserPermission>> permissions(String repo);
 
     /**
      * {@link RepoPermissions} from Artipie settings.
      * @since 0.10
      */
     final class FromSettings implements RepoPermissions {
+
+        /**
+         * Permissions section name.
+         */
+        private static final String PERMISSIONS = "permissions";
+
+        /**
+         * Repo section in yaml settings.
+         */
+        private static final String REPO = "repo";
 
         /**
          * Artipie settings.
@@ -107,45 +123,65 @@ public interface RepoPermissions {
 
         @Override
         public CompletionStage<Void> remove(final String repo) {
-            throw new UnsupportedOperationException("To be implemented");
+            final Key key = FromSettings.repoSettingsKey(repo);
+            return this.repo(key).thenApply(
+                mapping -> Yaml.createYamlMappingBuilder()
+                    .add(FromSettings.REPO, FromSettings.copyRepoSection(mapping).build()).build()
+            ).thenCompose(
+                result -> this.saveSettings(key, result)
+            );
         }
 
         @Override
-        public CompletionStage<Void> addUpdate(final String repo, final String username,
-            final String permission) {
-            throw new UnsupportedOperationException("Not implemented yet");
-        }
-
-        @Override
-        public CompletionStage<Map<String, List<String>>> permissions(final String repo) {
-            return this.yaml(new Key.From(String.format("%s.yaml", repo))).thenApply(
-                yaml -> Optional.ofNullable(yaml.yamlMapping("repo").yamlMapping("permissions"))
-                .map(
-                    perms -> {
-                        final Map<String, List<String>> res = new HashMap<>();
-                        perms.keys().forEach(
-                            node -> res.put(
-                                node.asScalar().value(),
-                                perms.yamlSequence(node.asScalar().value()).values().stream()
-                                .map(item -> item.asScalar().value())
-                                    .collect(Collectors.toList())
-                            )
-                        );
-                        return res;
+        public CompletionStage<Void> addUpdate(final String repo,
+            final Collection<UserPermission> permissions) {
+            final Key key = FromSettings.repoSettingsKey(repo);
+            return this.repo(key).thenApply(
+                mapping -> {
+                    YamlMappingBuilder res = FromSettings.copyRepoSection(mapping);
+                    YamlMappingBuilder perms = Yaml.createYamlMappingBuilder();
+                    if (!permissions.isEmpty()) {
+                        for (final UserPermission item : permissions) {
+                            perms = perms.add(item.name, item.yaml().build());
+                        }
+                        res = res.add(FromSettings.PERMISSIONS, perms.build());
                     }
-                ).orElse(Collections.emptyMap())
+                    return Yaml.createYamlMappingBuilder()
+                        .add(FromSettings.REPO, res.build()).build();
+                }
+            ).thenCompose(
+                result -> this.saveSettings(key, result)
+            );
+        }
+
+        @Override
+        public CompletionStage<Collection<UserPermission>> permissions(final String repo) {
+            return this.repo(FromSettings.repoSettingsKey(repo)).thenApply(
+                yaml -> Optional.ofNullable(yaml.yamlMapping(FromSettings.PERMISSIONS))
+            ).thenApply(
+                yaml -> yaml.map(
+                    perms -> perms.keys().stream().map(
+                        node -> new UserPermission(
+                            node.asScalar().value(),
+                            perms.yamlSequence(node.asScalar().value()).values().stream()
+                            .map(item -> item.asScalar().value())
+                                .collect(Collectors.toList())
+                        )
+                    ).collect(Collectors.toList())
+                ).orElse(Collections.emptyList())
             );
         }
 
         /**
-         * Credentials as yaml.
+         * Repo sections from settings.
          * @param key Repo settings key
-         * @return Completion action with yaml
+         * @return Completion action with yaml repo section
          */
-        private CompletionStage<? extends YamlMapping> yaml(final Key key) {
+        private CompletionStage<YamlMapping> repo(final Key key) {
             return new RxStorageWrapper(this.storage())
                 .value(key)
                 .to(ContentAs.YAML)
+                .map(yaml -> yaml.yamlMapping(FromSettings.REPO))
                 .to(SingleInterop.get());
         }
 
@@ -159,6 +195,118 @@ public interface RepoPermissions {
             } catch (final IOException err) {
                 throw new UncheckedIOException(err);
             }
+        }
+
+        /**
+         * Saves changed settings to storage.
+         * @param key Key to save storage item by
+         * @param result Yaml result
+         * @return Completable operation
+         */
+        private CompletableFuture<Void> saveSettings(final Key key, final YamlMapping result) {
+            return this.storage().save(
+                key, new Content.From(result.toString().getBytes(StandardCharsets.UTF_8))
+            );
+        }
+
+        /**
+         * Repo settings key.
+         * @param repo Repo name
+         * @return Settings key
+         */
+        private static Key repoSettingsKey(final String repo) {
+            return new Key.From(String.format("%s.yaml", repo));
+        }
+
+        /**
+         * Copy `repo` section without permissions from existing yaml setting.
+         * @param mapping Repo section mapping
+         * @return Setting without permissions
+         */
+        private static YamlMappingBuilder copyRepoSection(final YamlMapping mapping) {
+            YamlMappingBuilder res = Yaml.createYamlMappingBuilder();
+            final List<YamlNode> keep = mapping.keys().stream()
+                .filter(node -> !node.asScalar().value().equals(FromSettings.PERMISSIONS))
+                .collect(Collectors.toList());
+            for (final YamlNode node : keep) {
+                res = res.add(node, mapping.value(node));
+            }
+            return res;
+        }
+    }
+
+    /**
+     * User permission item.
+     * @since 0.10
+     */
+    final class UserPermission {
+
+        /**
+         * Username.
+         */
+        private final String name;
+
+        /**
+         * Permissions list.
+         */
+        private final List<String> perms;
+
+        /**
+         * Ctor.
+         * @param name Username
+         * @param permissions Permissions
+         */
+        public UserPermission(final String name, final List<String> permissions) {
+            this.name = name;
+            this.perms = permissions;
+        }
+
+        /**
+         * Get username.
+         * @return String username
+         */
+        public String username() {
+            return this.name;
+        }
+
+        /**
+         * Get permissions list.
+         * @return List of permissions
+         */
+        public List<String> permissions() {
+            return this.perms;
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            final boolean res;
+            if (this == other) {
+                res = true;
+            } else if (other == null || getClass() != other.getClass()) {
+                res = false;
+            } else {
+                final UserPermission that = (UserPermission) other;
+                res = Objects.equals(this.name, that.name)
+                    && Objects.equals(this.perms, that.perms);
+            }
+            return res;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.name, this.perms);
+        }
+
+        /**
+         * Permissions yaml sequence.
+         * @return Yaml permissions sequence builder
+         */
+        private YamlSequenceBuilder yaml() {
+            YamlSequenceBuilder res = Yaml.createYamlSequenceBuilder();
+            for (final String item : this.perms) {
+                res = res.add(item);
+            }
+            return res;
         }
     }
 
