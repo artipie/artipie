@@ -23,4 +23,4 @@ jobs:
         run: |
           Set-Location examples/nuget
           .\run.ps1
-        shell: powershell
+        shell: pwsh
