@@ -119,6 +119,12 @@ SOFTWARE.
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-github</artifactId>
       <version>1.1.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.jcabi</groupId>
+          <artifactId>jcabi-xml</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -146,9 +152,20 @@ SOFTWARE.
       <version>0.6.1</version>
     </dependency>
     <dependency>
+      <groupId>com.jcabi</groupId>
+      <artifactId>jcabi-xml</artifactId>
+      <version>0.22.2</version>
+    </dependency>
+    <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
       <version>0.4.10</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.jcabi</groupId>
+          <artifactId>jcabi-xml</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
