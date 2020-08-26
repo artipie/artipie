@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+    <metadata minClientVersion="3.3.0">
+        <id>SampleForDeployment</id>
+        <version>1.0.0</version>
+        <authors>aripie</authors>
+        <owners>aripie</owners>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Sample for a deployment to Artipie</description>
+        <tags>sample artipie</tags>
+        <contentFiles>
+            <files include="data.txt" buildAction="Content" />
+        </contentFiles>
+    </metadata>
+</package>

@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - "master"
+  pull_request:
+    branches:
+      - "master"
 jobs:
   proof:
     runs-on: ubuntu-latest
@@ -12,8 +15,12 @@ jobs:
       - name: Build docker image
         run: |
           docker build . -t artipie
-      - name: Start nuget example and proof it works
+      - name: Repalce docker image with locally built one
         run: |
           cd examples/nuget
-          sed -i 's+artipie/artipie:latest+artipie+' run.sh
-          ./run.sh
+          sed -i 's+artipie/artipie:latest+artipie+' run.ps1
+      - name: Start nuget example and proof it works
+        run: |
+          Set-Location examples/nuget
+          .\run.ps1
+        shell: powershell
