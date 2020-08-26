@@ -66,6 +66,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
  * @since 0.6
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
+ * @checkstyle MethodLengthCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class ArtipieApi extends Slice.Wrap {
@@ -208,14 +209,14 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByPath(AddUpdatePermissionSlice.PATH),
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
-                                new GetPermissionsSlice(settings)
+                                new AddUpdatePermissionSlice(settings)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(DeletePermissionSlice.PATH),
                                     new ByMethodsRule(RqMethod.DELETE)
                                 ),
-                                new GetPermissionsSlice(settings)
+                                new DeletePermissionSlice(settings)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
