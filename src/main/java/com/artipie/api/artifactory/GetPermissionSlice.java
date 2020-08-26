@@ -23,27 +23,86 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.RepoPermissions;
+import com.artipie.Settings;
+import com.artipie.api.RsJson;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rs.RsStatus;
+import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import org.reactivestreams.Publisher;
 
 /**
  * Artifactory `GET /api/security/permissions/{target}` endpoint, returns json with
  * permissions (= repository) information.
  * @since 0.10
- * @todo #444:30min Implement GetPermissionSlice to return repository permissions.
- *  First, implement and test RepoPermissions.FromSettings#get(java.lang.String), then use this
- *  method in this slice. Response json format can be found
- *  https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api, we should support
- *  `repositories` and `principals` fields.
  */
 public final class GetPermissionSlice implements Slice {
+
+    /**
+     * Request line pattern to get username.
+     */
+    public static final Pattern PTRN = Pattern.compile("/api/security/permissions/(?<repo>[^/.]+)");
+
+    /**
+     * Artipie settings.
+     */
+    private final Settings settings;
+
+    /**
+     * Ctor.
+     * @param settings Artipie settings
+     */
+    public GetPermissionSlice(final Settings settings) {
+        this.settings = settings;
+    }
 
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        final Matcher matcher = GetPermissionSlice.PTRN.matcher(
+            new RequestLineFrom(line).uri().toString()
+        );
+        final Response res;
+        if (matcher.matches()) {
+            final String repo = matcher.group("repo");
+            res = new AsyncResponse(
+                new RepoPermissions.FromSettings(this.settings).permissions(repo)
+                    .thenApply(map -> new RsJson(GetPermissionSlice.response(map, repo)))
+            );
+        } else {
+            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+        }
+        return res;
+    }
+
+    /**
+     * Build json response.
+     * @param permissions Users and permissions map
+     * @param repo Repository name
+     * @return Response JsonObject
+     */
+    private static JsonObject response(final Map<String, List<String>> permissions,
+        final String repo) {
+        final JsonObjectBuilder builder = Json.createObjectBuilder();
+        for (final Map.Entry<String, List<String>> entry : permissions.entrySet()) {
+            final JsonArrayBuilder array = Json.createArrayBuilder();
+            entry.getValue().forEach(array::add);
+            builder.add(entry.getKey(), array.build());
+        }
+        return Json.createObjectBuilder()
+            .add("repositories", Json.createArrayBuilder().add(repo).build())
+            .add("principals", Json.createObjectBuilder().add("users", builder.build())).build();
     }
 }
