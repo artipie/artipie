@@ -11,9 +11,6 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
-  permissions:
-    "*":
-      - "*"
 ```
 
 Publish a chart:

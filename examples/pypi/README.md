@@ -10,9 +10,6 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
-  permissions:
-    "*":
-      - "*"
 ```
 
 To publish your packages with [twine](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives) 

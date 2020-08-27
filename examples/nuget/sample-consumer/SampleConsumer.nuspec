@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package>
+    <metadata minClientVersion="3.3.0">
+        <id>SampleConsumer</id>
+        <version>1.0.0</version>
+        <authors>aripie</authors>
+        <owners>aripie</owners>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Sample for a package consumer</description>
+        <tags>sample consumer artipie</tags>
+    </metadata>
+</package>
