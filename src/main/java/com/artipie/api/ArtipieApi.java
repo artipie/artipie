@@ -26,6 +26,7 @@ package com.artipie.api;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.Settings;
 import com.artipie.YamlPermissions;
+import com.artipie.api.artifactory.AddUpdatePermissionSlice;
 import com.artipie.api.artifactory.AddUpdateUserSlice;
 import com.artipie.api.artifactory.CreateRepoSlice;
 import com.artipie.api.artifactory.DeletePermissionSlice;
@@ -65,6 +66,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
  * @since 0.6
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
+ * @checkstyle MethodLengthCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class ArtipieApi extends Slice.Wrap {
@@ -204,10 +206,17 @@ public final class ArtipieApi extends Slice.Wrap {
                             ),
                             new RtRulePath(
                                 new RtRule.All(
+                                    new RtRule.ByPath(AddUpdatePermissionSlice.PATH),
+                                    new ByMethodsRule(RqMethod.PUT)
+                                ),
+                                new AddUpdatePermissionSlice(settings)
+                            ),
+                            new RtRulePath(
+                                new RtRule.All(
                                     new RtRule.ByPath(DeletePermissionSlice.PATH),
                                     new ByMethodsRule(RqMethod.DELETE)
                                 ),
-                                new GetPermissionsSlice(settings)
+                                new DeletePermissionSlice(settings)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
