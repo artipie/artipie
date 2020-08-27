@@ -23,8 +23,8 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.BuildingRepoPermissions;
 import com.artipie.Settings;
-import com.artipie.UtilRepoPermissions;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.hm.RsHasBody;
@@ -76,7 +76,7 @@ class GetPermissionSliceTest {
     @Test
     void returnsEmptyUsersIfNoPermissionsSet() {
         final String repo = "docker";
-        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        final BuildingRepoPermissions perm = new BuildingRepoPermissions(this.storage);
         perm.addEmpty(repo);
         MatcherAssert.assertThat(
             new GetPermissionSlice(new Settings.Fake(this.storage)),
@@ -94,7 +94,7 @@ class GetPermissionSliceTest {
         final String mark = "mark";
         final String download = "download";
         final String upload = "upload";
-        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        final BuildingRepoPermissions perm = new BuildingRepoPermissions(this.storage);
         perm.addSettings(
             repo,
             new MapOf<String, List<String>>(

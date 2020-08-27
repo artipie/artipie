@@ -76,7 +76,7 @@ class RepoPermissionsFromSettingsTest {
         final String download = "download";
         final String upload = "upload";
         final String repo = "maven";
-        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        final BuildingRepoPermissions perm = new BuildingRepoPermissions(this.storage);
         perm.addSettings(
             repo,
             new MapOf<String, List<String>>(
@@ -95,7 +95,7 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void returnsEmptyMapWhenPermissionsAreNotSet() {
         final String repo = "pypi";
-        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        final BuildingRepoPermissions perm = new BuildingRepoPermissions(this.storage);
         perm.addEmpty(repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
@@ -109,7 +109,7 @@ class RepoPermissionsFromSettingsTest {
         final String repo = "rpm";
         final String david = "david";
         final String add = "add";
-        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        final BuildingRepoPermissions perm = new BuildingRepoPermissions(this.storage);
         perm.addSettings(
             repo,
             new MapOf<String, List<String>>(
@@ -149,7 +149,7 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void addsUserPermissionWhenOriginalPermissionsAreNotSet() throws IOException {
         final String repo = "go";
-        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        final BuildingRepoPermissions perm = new BuildingRepoPermissions(this.storage);
         perm.addEmpty(repo);
         final String ann = "ann";
         final String download = "download";
@@ -168,7 +168,7 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void deletesPermissionSection() throws IOException {
         final String repo = "nuget";
-        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        final BuildingRepoPermissions perm = new BuildingRepoPermissions(this.storage);
         perm.addSettings(
             repo,
             new MapOf<String, List<String>>(

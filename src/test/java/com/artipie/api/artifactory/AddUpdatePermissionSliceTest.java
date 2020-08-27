@@ -23,8 +23,8 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.BuildingRepoPermissions;
 import com.artipie.Settings;
-import com.artipie.UtilRepoPermissions;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
@@ -73,7 +73,7 @@ class AddUpdatePermissionSliceTest {
     @Test
     void updatesPermissions() throws IOException {
         final String repo = "maven";
-        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        final BuildingRepoPermissions perm = new BuildingRepoPermissions(this.storage);
         perm.addEmpty(repo);
         MatcherAssert.assertThat(
             "Returns 200 OK",

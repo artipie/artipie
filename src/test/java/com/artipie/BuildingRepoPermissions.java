@@ -39,11 +39,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Class for adding repo permissions to the storage and getting them.
+ * Class for generating repo permissions.
  * @since 0.10
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public final class UtilRepoPermissions {
+public final class BuildingRepoPermissions {
     /**
      * Storage.
      */
@@ -53,7 +53,7 @@ public final class UtilRepoPermissions {
      * Ctor.
      * @param storage Storage
      */
-    public UtilRepoPermissions(final Storage storage) {
+    public BuildingRepoPermissions(final Storage storage) {
         this.storage = storage;
     }
 
