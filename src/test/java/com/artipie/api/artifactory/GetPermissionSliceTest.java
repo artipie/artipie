@@ -47,10 +47,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link GetPermissionSlice}.
  * @since 0.10
- * @todo #495:30min Create class to generate repository permissions settings
- *  Methods addSettings() and addEmpty() are copied from RepoPermissionsFromSettingsTest, let't
- *  extract them into class to avoid code duplication. Class can be introduced in test scope. Also,
- *  let's check other tests for similar functionality and replace all duplications.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
