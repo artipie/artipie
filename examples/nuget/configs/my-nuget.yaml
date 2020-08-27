@@ -1,10 +1,6 @@
 repo:
   type: nuget
-  path: my-nuget
   url: http://localhost:8080/my-nuget
   storage:
     type: fs
     path: /var/artipie/data
-  permissions:
-    "*":
-      - "*"
