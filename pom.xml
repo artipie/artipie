@@ -157,6 +157,11 @@ SOFTWARE.
       <version>0.22.2</version>
     </dependency>
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>28.2-jre</version>
+    </dependency>
+    <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
       <version>0.4.10</version>
@@ -195,7 +200,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>nuget-adapter</artifactId>
-      <version>0.3</version>
+      <version>0.3.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
