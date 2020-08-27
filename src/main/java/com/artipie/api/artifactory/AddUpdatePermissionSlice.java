@@ -23,27 +23,97 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.RepoPermissions;
+import com.artipie.Settings;
+import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rs.RsStatus;
+import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.StandardRs;
+import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import org.reactivestreams.Publisher;
 
 /**
  * Artifactory `PUT /api/security/permissions/{target}` endpoint, returns json with
  * permissions (= repository) information.
  * @since 0.10
- * @todo #444:30min Implement AddUpdatePermissionSlice to add/update repository permissions.
- *  First, implement and test RepoPermissions.FromSettings#addUpdate(...), then use
- *  this method in this slice. Request json format can be found
- *  https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api, we should obtain information
- *  from `repo.actions.users` fields.
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class AddUpdatePermissionSlice implements Slice {
+
+    /**
+     * This endpoint path.
+     */
+    public static final Pattern PATH = Pattern.compile("/api/security/permissions/(?<repo>[^/.]+)");
+
+    /**
+     * Artipie settings.
+     */
+    private final Settings settings;
+
+    /**
+     * Ctor.
+     * @param settings Setting
+     */
+    public AddUpdatePermissionSlice(final Settings settings) {
+        this.settings = settings;
+    }
 
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        final Matcher matcher = AddUpdatePermissionSlice.PATH.matcher(
+            new RequestLineFrom(line).uri().toString()
+        );
+        final Response res;
+        if (matcher.matches()) {
+            res = new AsyncResponse(
+                new PublisherAs(body).bytes().thenApply(
+                    bytes -> Json.createReader(new ByteArrayInputStream(bytes)).readObject()
+                ).thenApply(
+                    AddUpdatePermissionSlice::permissions
+                ).thenCompose(
+                    perms -> new RepoPermissions.FromSettings(this.settings)
+                        .addUpdate(matcher.group("repo"), perms)
+                ).thenApply(
+                    ignored -> StandardRs.EMPTY
+                )
+            );
+        } else {
+            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+        }
+        return res;
+    }
+
+    /**
+     * Converts json permissions into list of {@link RepoPermissions.UserPermission}.
+     * @param json Json body
+     * @return List of {@link RepoPermissions.UserPermission}
+     */
+    private static List<RepoPermissions.UserPermission> permissions(final JsonObject json) {
+        final JsonObject users = json.getJsonObject("repo").getJsonObject("actions")
+            .getJsonObject("users");
+        final List<RepoPermissions.UserPermission> res = new ArrayList<>(users.size());
+        users.forEach(
+            (user, perms) ->
+                res.add(
+                    new RepoPermissions.UserPermission(
+                        user, perms.asJsonArray().getValuesAs(JsonValue::toString)
+                    )
+                )
+        );
+        return res;
     }
 }
