@@ -29,15 +29,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Class for receiving username from the request line.
- * The request line should match pattern to get username.
+ * Class for receiving value from the request line.
+ * The request line should match pattern to get value.
  * @since 0.10
  */
-final class UserFromRqLine {
+public final class FromRqLine {
     /**
      * Request line pattern to get username.
      */
-    private static final Pattern PTRN = Pattern.compile("/api/security/users/(?<username>[^/.]+)");
+    public static final Pattern PTRN_USER = Pattern.compile(
+        "/api/security/users/(?<username>[^/.]+)"
+    );
+
+    /**
+     * Request line pattern to get repo.
+     */
+    public static final Pattern PTRN_REPO = Pattern.compile(
+        "/api/security/permissions/(?<repo>[^/.]+)"
+    );
 
     /**
      * Request line.
@@ -45,11 +54,34 @@ final class UserFromRqLine {
     private final String rqline;
 
     /**
+     * Group name.
+     */
+    private final Group mtchgroup;
+
+    /**
+     * Request line pattern to get value.
+     */
+    private final Pattern ptrn;
+
+    /**
      * Ctor.
      * @param rqline Request line
+     * @param mtchgroup Group name
      */
-    UserFromRqLine(final String rqline) {
+    @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
+    FromRqLine(final String rqline, final Group mtchgroup) {
         this.rqline = rqline;
+        this.mtchgroup = mtchgroup;
+        switch (mtchgroup) {
+            case USER:
+                this.ptrn = FromRqLine.PTRN_USER;
+                break;
+            case REPO:
+                this.ptrn = FromRqLine.PTRN_REPO;
+                break;
+            default:
+                throw new IllegalArgumentException("Couldn't find suitable matcher group.");
+        }
     }
 
     /**
@@ -58,14 +90,53 @@ final class UserFromRqLine {
      */
     Optional<String> get() {
         final Optional<String> username;
-        final Matcher matcher = UserFromRqLine.PTRN.matcher(
+        final Matcher matcher = this.ptrn.matcher(
             new RequestLineFrom(this.rqline).uri().toString()
         );
         if (matcher.matches()) {
-            username = Optional.of(matcher.group("username"));
+            username = Optional.of(matcher.group(this.mtchgroup.group()));
         } else {
             username = Optional.empty();
         }
         return username;
+    }
+
+    /**
+     * Group name for part of the request line.
+     */
+    enum Group {
+        /**
+         * Username group.
+         */
+        USER("username"),
+
+        /**
+         * Repo group.
+         */
+        REPO("repo");
+
+        /**
+         * Group value.
+         */
+        private final String string;
+
+        /**
+         * Ctor.
+         *
+         * @param string Group value.
+         */
+        Group(final String string) {
+            this.string = string;
+        }
+
+        /**
+         * Value as group name.
+         *
+         * @return Group name string.
+         */
+        public String group() {
+            return this.string;
+        }
+
     }
 }

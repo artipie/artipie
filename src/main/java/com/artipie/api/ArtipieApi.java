@@ -31,6 +31,7 @@ import com.artipie.api.artifactory.AddUpdateUserSlice;
 import com.artipie.api.artifactory.CreateRepoSlice;
 import com.artipie.api.artifactory.DeletePermissionSlice;
 import com.artipie.api.artifactory.DeleteUserSlice;
+import com.artipie.api.artifactory.FromRqLine;
 import com.artipie.api.artifactory.GetPermissionSlice;
 import com.artipie.api.artifactory.GetPermissionsSlice;
 import com.artipie.api.artifactory.GetUserSlice;
@@ -168,7 +169,7 @@ public final class ArtipieApi extends Slice.Wrap {
                             ),
                             new RtRulePath(
                                 new RtRule.All(
-                                    new RtRule.ByPath(GetUserSlice.PTRN),
+                                    new RtRule.ByPath(FromRqLine.PTRN_USER),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new GetUserSlice(settings)
@@ -182,14 +183,14 @@ public final class ArtipieApi extends Slice.Wrap {
                             ),
                             new RtRulePath(
                                 new RtRule.All(
-                                    new RtRule.ByPath(GetUserSlice.PTRN),
+                                    new RtRule.ByPath(FromRqLine.PTRN_USER),
                                     new ByMethodsRule(RqMethod.DELETE)
                                 ),
                                 new DeleteUserSlice(settings)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
-                                    new RtRule.ByPath(GetUserSlice.PTRN),
+                                    new RtRule.ByPath(FromRqLine.PTRN_USER),
                                     new RtRule.Any(
                                         new ByMethodsRule(RqMethod.PUT),
                                         new ByMethodsRule(RqMethod.POST)
@@ -206,21 +207,21 @@ public final class ArtipieApi extends Slice.Wrap {
                             ),
                             new RtRulePath(
                                 new RtRule.All(
-                                    new RtRule.ByPath(AddUpdatePermissionSlice.PATH),
+                                    new RtRule.ByPath(FromRqLine.PTRN_REPO),
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
                                 new AddUpdatePermissionSlice(settings)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
-                                    new RtRule.ByPath(DeletePermissionSlice.PATH),
+                                    new RtRule.ByPath(FromRqLine.PTRN_REPO),
                                     new ByMethodsRule(RqMethod.DELETE)
                                 ),
                                 new DeletePermissionSlice(settings)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
-                                    new RtRule.ByPath(GetPermissionSlice.PTRN),
+                                    new RtRule.ByPath(FromRqLine.PTRN_REPO),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new GetPermissionSlice(settings)
