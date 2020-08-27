@@ -10,9 +10,6 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
-  permissions:
-    "*":
-      - "*"
 ```
 
 You can send HTTP PUT/GET requests

@@ -11,11 +11,6 @@ repo:
   storage:
     type: fs
     path: /tmp/artipie/data/go
-  permissions:
-    admin:
-      - "*"
-    "*":
-      - download
 ```
 
 To use it for installing packages add it to `GOPROXY` environment variable:
