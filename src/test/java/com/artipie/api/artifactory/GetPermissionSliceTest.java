@@ -23,12 +23,8 @@
  */
 package com.artipie.api.artifactory;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.Settings;
-import com.artipie.asto.Content;
-import com.artipie.asto.Key;
+import com.artipie.UtilRepoPermissions;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.hm.RsHasBody;
@@ -39,7 +35,6 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonObject;
 import org.cactoos.list.ListOf;
@@ -85,7 +80,8 @@ class GetPermissionSliceTest {
     @Test
     void returnsEmptyUsersIfNoPermissionsSet() {
         final String repo = "docker";
-        this.addEmpty(repo);
+        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        perm.addEmpty(repo);
         MatcherAssert.assertThat(
             new GetPermissionSlice(new Settings.Fake(this.storage)),
             new SliceHasResponse(
@@ -102,7 +98,8 @@ class GetPermissionSliceTest {
         final String mark = "mark";
         final String download = "download";
         final String upload = "upload";
-        this.addSettings(
+        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        perm.addSettings(
             repo,
             new MapOf<String, List<String>>(
                 new MapEntry<>(john, new ListOf<String>(download, upload)),
@@ -134,38 +131,4 @@ class GetPermissionSliceTest {
                 Json.createObjectBuilder().add("users", users)
             ).build().toString().getBytes(StandardCharsets.UTF_8);
     }
-
-    private void addSettings(final String repo, final Map<String, List<String>> permissions) {
-        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
-        for (final Map.Entry<String, List<String>> entry : permissions.entrySet()) {
-            YamlSequenceBuilder perms = Yaml.createYamlSequenceBuilder();
-            for (final String perm : entry.getValue()) {
-                perms = perms.add(perm);
-            }
-            builder = builder.add(entry.getKey(), perms.build());
-        }
-        this.storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    Yaml.createYamlMappingBuilder().add("permissions", builder.build()).build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
-
-    private void addEmpty(final String repo) {
-        this.storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    Yaml.createYamlMappingBuilder().add("type", "file")
-                        .add("storage", "default").build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
-
 }

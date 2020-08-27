@@ -23,20 +23,12 @@
  */
 package com.artipie;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.cactoos.list.ListOf;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
@@ -84,7 +76,8 @@ class RepoPermissionsFromSettingsTest {
         final String download = "download";
         final String upload = "upload";
         final String repo = "maven";
-        this.addSettings(
+        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        perm.addSettings(
             repo,
             new MapOf<String, List<String>>(
                 new MapEntry<>(john, new ListOf<String>(download, upload))
@@ -102,7 +95,8 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void returnsEmptyMapWhenPermissionsAreNotSet() {
         final String repo = "pypi";
-        this.addEmpty(repo);
+        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        perm.addEmpty(repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
                 .toCompletableFuture().join().size(),
@@ -115,7 +109,8 @@ class RepoPermissionsFromSettingsTest {
         final String repo = "rpm";
         final String david = "david";
         final String add = "add";
-        this.addSettings(
+        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        perm.addSettings(
             repo,
             new MapOf<String, List<String>>(
                 new MapEntry<>(david, new ListOf<String>(add, "update"))
@@ -136,17 +131,17 @@ class RepoPermissionsFromSettingsTest {
             ).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Added permissions for olga",
-            this.permissionsForUser(repo, olga),
+            perm.permissionsForUser(repo, olga),
             Matchers.contains(download, deploy)
         );
         MatcherAssert.assertThat(
             "Added permissions for victor",
-            this.permissionsForUser(repo, victor),
+            perm.permissionsForUser(repo, victor),
             Matchers.contains(deploy)
         );
         MatcherAssert.assertThat(
             "Updated permissions for david",
-            this.permissionsForUser(repo, david),
+            perm.permissionsForUser(repo, david),
             Matchers.contains(download, add)
         );
     }
@@ -154,7 +149,8 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void addsUserPermissionWhenOriginalPermissionsAreNotSet() throws IOException {
         final String repo = "go";
-        this.addEmpty(repo);
+        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        perm.addEmpty(repo);
         final String ann = "ann";
         final String download = "download";
         new RepoPermissions.FromSettings(new Settings.Fake(this.storage))
@@ -164,7 +160,7 @@ class RepoPermissionsFromSettingsTest {
             )
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
-            this.permissionsForUser(repo, ann),
+            perm.permissionsForUser(repo, ann),
             Matchers.contains(download)
         );
     }
@@ -172,7 +168,8 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void deletesPermissionSection() throws IOException {
         final String repo = "nuget";
-        this.addSettings(
+        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        perm.addSettings(
             repo,
             new MapOf<String, List<String>>(
                 new MapEntry<>("someone", new ListOf<String>("r", "w"))
@@ -182,67 +179,13 @@ class RepoPermissionsFromSettingsTest {
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Permissions section are empty",
-            this.permissionsSection(repo),
+            perm.permissionsSection(repo),
             new IsNull<>()
         );
         MatcherAssert.assertThat(
             "Storage `type` is intact",
-            this.repoSection(repo).string("type"),
+            perm.repoSection(repo).string("type"),
             new IsEqual<>("any")
         );
     }
-
-    private List<String> permissionsForUser(final String repo, final String user)
-        throws IOException {
-        return this.permissionsSection(repo).yamlSequence(user)
-            .values().stream().map(node -> node.asScalar().value())
-            .collect(Collectors.toList());
-    }
-
-    private YamlMapping permissionsSection(final String repo) throws IOException {
-        return this.repoSection(repo).yamlMapping("permissions");
-    }
-
-    private YamlMapping repoSection(final String repo) throws IOException {
-        return Yaml.createYamlInput(
-            new PublisherAs(this.storage.value(new Key.From(String.format("%s.yaml", repo))).join())
-                .asciiString().toCompletableFuture().join()
-        ).readYamlMapping().yamlMapping("repo");
-    }
-
-    private void addSettings(final String repo, final Map<String, List<String>> permissions) {
-        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
-        for (final Map.Entry<String, List<String>> entry : permissions.entrySet()) {
-            YamlSequenceBuilder perms = Yaml.createYamlSequenceBuilder();
-            for (final String perm : entry.getValue()) {
-                perms = perms.add(perm);
-            }
-            builder = builder.add(entry.getKey(), perms.build());
-        }
-        this.storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "any")
-                        .add("permissions", builder.build()).build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
-
-    private void addEmpty(final String repo) {
-        this.storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    Yaml.createYamlMappingBuilder().add("type", "file")
-                        .add("storage", "default").build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
-
 }

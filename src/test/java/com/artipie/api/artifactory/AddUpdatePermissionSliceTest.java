@@ -23,12 +23,10 @@
  */
 package com.artipie.api.artifactory;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.Settings;
+import com.artipie.UtilRepoPermissions;
 import com.artipie.asto.Content;
-import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.hm.RsHasStatus;
@@ -38,8 +36,6 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +73,8 @@ class AddUpdatePermissionSliceTest {
     @Test
     void updatesPermissions() throws IOException {
         final String repo = "maven";
-        this.addEmpty(repo);
+        final UtilRepoPermissions perm = new UtilRepoPermissions(this.storage);
+        perm.addEmpty(repo);
         MatcherAssert.assertThat(
             "Returns 200 OK",
             new AddUpdatePermissionSlice(new Settings.Fake(this.storage)),
@@ -90,37 +87,14 @@ class AddUpdatePermissionSliceTest {
         );
         MatcherAssert.assertThat(
             "Sets permissions for bob",
-            this.permissionsForUser(repo, "bob"),
+            perm.permissionsForUser(repo, "bob"),
             Matchers.containsInAnyOrder("read", "write", "manage")
         );
         MatcherAssert.assertThat(
             "Sets permissions for alice",
-            this.permissionsForUser(repo, "alice"),
+            perm.permissionsForUser(repo, "alice"),
             Matchers.containsInAnyOrder("write", "annotate", "read")
         );
-    }
-
-    private void addEmpty(final String repo) {
-        this.storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    Yaml.createYamlMappingBuilder().add("type", "file")
-                        .add("storage", "default").build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
-
-    private List<String> permissionsForUser(final String repo, final String user)
-        throws IOException {
-        return Yaml.createYamlInput(
-            new PublisherAs(this.storage.value(new Key.From(String.format("%s.yaml", repo))).join())
-                .asciiString().toCompletableFuture().join()
-        ).readYamlMapping().yamlMapping("repo").yamlMapping("permissions").yamlSequence(user)
-            .values().stream().map(node -> node.asScalar().value())
-            .collect(Collectors.toList());
     }
 
     private String json() {
