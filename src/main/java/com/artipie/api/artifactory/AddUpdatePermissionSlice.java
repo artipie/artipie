@@ -29,7 +29,6 @@ import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
@@ -38,8 +37,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -52,11 +50,6 @@ import org.reactivestreams.Publisher;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class AddUpdatePermissionSlice implements Slice {
-
-    /**
-     * This endpoint path.
-     */
-    public static final Pattern PATH = Pattern.compile("/api/security/permissions/(?<repo>[^/.]+)");
 
     /**
      * Artipie settings.
@@ -74,27 +67,21 @@ public final class AddUpdatePermissionSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Matcher matcher = AddUpdatePermissionSlice.PATH.matcher(
-            new RequestLineFrom(line).uri().toString()
-        );
-        final Response res;
-        if (matcher.matches()) {
-            res = new AsyncResponse(
+        final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
+        return opt.<Response>map(
+            repo -> new AsyncResponse(
                 new PublisherAs(body).bytes().thenApply(
                     bytes -> Json.createReader(new ByteArrayInputStream(bytes)).readObject()
                 ).thenApply(
                     AddUpdatePermissionSlice::permissions
                 ).thenCompose(
                     perms -> new RepoPermissions.FromSettings(this.settings)
-                        .addUpdate(matcher.group("repo"), perms)
+                        .addUpdate(repo, perms)
                 ).thenApply(
                     ignored -> StandardRs.EMPTY
                 )
-            );
-        } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
-        }
-        return res;
+            )
+        ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
     }
 
     /**

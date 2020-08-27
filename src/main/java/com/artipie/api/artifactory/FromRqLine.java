@@ -29,15 +29,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Class for receiving username from the request line.
- * The request line should match pattern to get username.
+ * Class for receiving value from the request line.
+ * The request line should match pattern to get value.
  * @since 0.10
  */
-final class UserFromRqLine {
-    /**
-     * Request line pattern to get username.
-     */
-    private static final Pattern PTRN = Pattern.compile("/api/security/users/(?<username>[^/.]+)");
+public final class FromRqLine {
 
     /**
      * Request line.
@@ -45,11 +41,18 @@ final class UserFromRqLine {
     private final String rqline;
 
     /**
+     * Request line pattern to get value.
+     */
+    private final RqPattern ptrn;
+
+    /**
      * Ctor.
      * @param rqline Request line
+     * @param ptrn Request pattern for receiving value
      */
-    UserFromRqLine(final String rqline) {
+    FromRqLine(final String rqline, final RqPattern ptrn) {
         this.rqline = rqline;
+        this.ptrn = ptrn;
     }
 
     /**
@@ -58,14 +61,51 @@ final class UserFromRqLine {
      */
     Optional<String> get() {
         final Optional<String> username;
-        final Matcher matcher = UserFromRqLine.PTRN.matcher(
+        final Matcher matcher = this.ptrn.pattern.matcher(
             new RequestLineFrom(this.rqline).uri().toString()
         );
         if (matcher.matches()) {
-            username = Optional.of(matcher.group("username"));
+            username = Optional.of(matcher.group(1));
         } else {
             username = Optional.empty();
         }
         return username;
+    }
+
+    /**
+     * Request pattern for receiving value from the
+     * request line.
+     */
+    public enum RqPattern {
+        /**
+         * Username pattern.
+         */
+        USER("/api/security/users/(?<username>[^/.]+)"),
+
+        /**
+         * Repo pattern.
+         */
+        REPO("/api/security/permissions/(?<repo>[^/.]+)");
+
+        /**
+         * Pattern.
+         */
+        private final Pattern pattern;
+
+        /**
+         * Ctor.
+         * @param pattern Request pattern.
+         */
+        RqPattern(final String pattern) {
+            this.pattern = Pattern.compile(pattern);
+        }
+
+        /**
+         * Get request pattern to get value.
+         * @return Request line pattern to get value.
+         */
+        public Pattern pattern() {
+            return this.pattern;
+        }
     }
 }

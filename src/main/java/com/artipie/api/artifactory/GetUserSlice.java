@@ -33,7 +33,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import javax.json.Json;
 import org.reactivestreams.Publisher;
 
@@ -42,11 +41,6 @@ import org.reactivestreams.Publisher;
  * @since 0.10
  */
 public final class GetUserSlice implements Slice {
-
-    /**
-     * Request line pattern to get username.
-     */
-    public static final Pattern PTRN = Pattern.compile("/api/security/users/(?<username>[^/.]+)");
 
     /**
      * Artipie settings.
@@ -64,7 +58,7 @@ public final class GetUserSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Optional<String> user = new UserFromRqLine(line).get();
+        final Optional<String> user = new FromRqLine(line, FromRqLine.RqPattern.USER).get();
         return user.<Response>map(
             username -> new AsyncResponse(
                 this.settings.credentials().thenCompose(

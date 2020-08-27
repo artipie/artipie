@@ -28,15 +28,13 @@ import com.artipie.Settings;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
 import org.reactivestreams.Publisher;
 
 /**
@@ -45,11 +43,6 @@ import org.reactivestreams.Publisher;
  * @since 0.10
  */
 public final class DeletePermissionSlice implements Slice {
-
-    /**
-     * This endpoint path.
-     */
-    public static final Pattern PATH = Pattern.compile("/api/security/permissions/(?<repo>[^/.]+)");
 
     /**
      * Artipie settings.
@@ -67,13 +60,9 @@ public final class DeletePermissionSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Response res;
-        final Matcher matcher = DeletePermissionSlice.PATH.matcher(
-            new RequestLineFrom(line).uri().toString()
-        );
-        if (matcher.matches()) {
-            final String repo = matcher.group("repo");
-            res = new AsyncResponse(
+        final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
+        return opt.<Response>map(
+            repo -> new AsyncResponse(
                 new RepoPermissions.FromSettings(this.settings).remove(repo)
                     .thenApply(
                         ignored -> new RsWithBody(
@@ -83,10 +72,7 @@ public final class DeletePermissionSlice implements Slice {
                             StandardCharsets.UTF_8
                         )
                     )
-            );
-        } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
-        }
-        return res;
+            )
+        ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
     }
 }

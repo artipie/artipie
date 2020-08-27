@@ -60,7 +60,7 @@ public final class DeleteUserSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Optional<String> user = new UserFromRqLine(line).get();
+        final Optional<String> user = new FromRqLine(line, FromRqLine.RqPattern.USER).get();
         return user.<Response>map(
             username -> new AsyncResponse(
                 this.settings.credentials().thenCompose(

@@ -29,14 +29,12 @@ import com.artipie.api.RsJson;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -49,11 +47,6 @@ import org.reactivestreams.Publisher;
  * @since 0.10
  */
 public final class GetPermissionSlice implements Slice {
-
-    /**
-     * Request line pattern to get username.
-     */
-    public static final Pattern PTRN = Pattern.compile("/api/security/permissions/(?<repo>[^/.]+)");
 
     /**
      * Artipie settings.
@@ -71,20 +64,13 @@ public final class GetPermissionSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Matcher matcher = GetPermissionSlice.PTRN.matcher(
-            new RequestLineFrom(line).uri().toString()
-        );
-        final Response res;
-        if (matcher.matches()) {
-            final String repo = matcher.group("repo");
-            res = new AsyncResponse(
+        final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
+        return opt.<Response>map(
+            repo -> new AsyncResponse(
                 new RepoPermissions.FromSettings(this.settings).permissions(repo)
                     .thenApply(map -> new RsJson(GetPermissionSlice.response(map, repo)))
-            );
-        } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
-        }
-        return res;
+            )
+        ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
     }
 
     /**
