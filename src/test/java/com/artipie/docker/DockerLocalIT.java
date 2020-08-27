@@ -25,7 +25,6 @@ package com.artipie.docker;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
-import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.junit.DockerClient;
 import com.artipie.docker.junit.DockerClientSupport;
 import java.nio.file.Path;
@@ -36,23 +35,15 @@ import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Integration test for {@link DockerSlice}.
+ * Integration test for local Docker repositories.
  *
  * @since 0.10
- * @todo #449:30min Support running test on Windows.
- *  Running test on Windows requires using Windows image in tests.
- *  That means that image name and digest should depend on host OS.
- *  Same problem is solved in `docker-adapter` module
- *  using `Image` interface and `Image.ForOs` class.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DockerClientSupport
-@EnabledOnOs(OS.LINUX)
 final class DockerLocalIT {
 
     /**
