@@ -24,10 +24,14 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -35,7 +39,35 @@ import java.util.Optional;
  *
  * @since 0.10
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class ArtipieServer {
+
+    /**
+     * User Alice.
+     */
+    public static final User ALICE = new User("alice", "123");
+
+    /**
+     * User Bob.
+     */
+    public static final User BOB = new User("bob", "qwerty");
+
+    /**
+     * User Carol.
+     */
+    public static final User CAROL = new User("carol", "LetMeIn");
+
+    /**
+     * All users.
+     */
+    private static final Collection<User> USERS = Arrays.asList(
+        ArtipieServer.ALICE, ArtipieServer.BOB, ArtipieServer.CAROL
+    );
+
+    /**
+     * Credentials file name.
+     */
+    private static final String CREDENTIALS_FILE = "_credentials.yml";
 
     /**
      * Root path.
@@ -108,9 +140,20 @@ public class ArtipieServer {
                             .add("path", repos.toString())
                             .build()
                     )
+                    .add(
+                        "credentials",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "file")
+                            .add("path", ArtipieServer.CREDENTIALS_FILE)
+                            .build()
+                    )
                     .add("layout", "flat")
                     .build()
             ).build().toString().getBytes()
+        );
+        Files.write(
+            repos.resolve(ArtipieServer.CREDENTIALS_FILE),
+            credentials().toString().getBytes()
         );
         this.vertx = Vertx.vertx();
         this.server = new VertxMain(cfg, this.vertx, 0);
@@ -123,5 +166,70 @@ public class ArtipieServer {
     public void stop() {
         Optional.ofNullable(this.server).ifPresent(VertxMain::stop);
         Optional.ofNullable(this.vertx).ifPresent(Vertx::close);
+    }
+
+    /**
+     * Create credentials YAML with known users.
+     *
+     * @return Credentials YAML.
+     */
+    private static YamlMapping credentials() {
+        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
+        for (final User user : ArtipieServer.USERS) {
+            builder = builder.add(
+                user.name(),
+                Yaml.createYamlMappingBuilder()
+                    .add("pass", String.format("plain:%s", user.password()))
+                    .build()
+            );
+        }
+        return Yaml.createYamlMappingBuilder().add("credentials", builder.build()).build();
+    }
+
+    /**
+     * User with name and password.
+     *
+     * @since 0.10
+     */
+    public static final class User {
+
+        /**
+         * Username.
+         */
+        private final String username;
+
+        /**
+         * Password.
+         */
+        private final String pwd;
+
+        /**
+         * Ctor.
+         *
+         * @param username Username.
+         * @param pwd Password.
+         */
+        User(final String username, final String pwd) {
+            this.username = username;
+            this.pwd = pwd;
+        }
+
+        /**
+         * Get username.
+         *
+         * @return Username.
+         */
+        public String name() {
+            return this.username;
+        }
+
+        /**
+         * Get password.
+         *
+         * @return Password.
+         */
+        public String password() {
+            return this.pwd;
+        }
     }
 }

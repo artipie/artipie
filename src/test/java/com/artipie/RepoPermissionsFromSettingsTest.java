@@ -24,21 +24,26 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.cactoos.list.ListOf;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +52,7 @@ import org.junit.jupiter.api.Test;
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class RepoPermissionsFromSettingsTest {
 
     /**
@@ -88,7 +93,9 @@ class RepoPermissionsFromSettingsTest {
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
                 .toCompletableFuture().join(),
-            Matchers.hasEntry(john, new ListOf<String>(download, upload))
+            Matchers.contains(
+                new RepoPermissions.UserPermission(john, new ListOf<String>(download, upload))
+            )
         );
     }
 
@@ -101,6 +108,106 @@ class RepoPermissionsFromSettingsTest {
                 .toCompletableFuture().join().size(),
             new IsEqual<>(0)
         );
+    }
+
+    @Test
+    void updatesUserPermissions() throws IOException {
+        final String repo = "rpm";
+        final String david = "david";
+        final String add = "add";
+        this.addSettings(
+            repo,
+            new MapOf<String, List<String>>(
+                new MapEntry<>(david, new ListOf<String>(add, "update"))
+            )
+        );
+        final String olga = "olga";
+        final String victor = "victor";
+        final String download = "download";
+        final String deploy = "deploy";
+        new RepoPermissions.FromSettings(new Settings.Fake(this.storage))
+            .addUpdate(
+                repo,
+                new ListOf<>(
+                    new RepoPermissions.UserPermission(olga, new ListOf<>(download, deploy)),
+                    new RepoPermissions.UserPermission(victor, new ListOf<>(deploy)),
+                    new RepoPermissions.UserPermission(david, new ListOf<>(download, add))
+                )
+            ).toCompletableFuture().join();
+        MatcherAssert.assertThat(
+            "Added permissions for olga",
+            this.permissionsForUser(repo, olga),
+            Matchers.contains(download, deploy)
+        );
+        MatcherAssert.assertThat(
+            "Added permissions for victor",
+            this.permissionsForUser(repo, victor),
+            Matchers.contains(deploy)
+        );
+        MatcherAssert.assertThat(
+            "Updated permissions for david",
+            this.permissionsForUser(repo, david),
+            Matchers.contains(download, add)
+        );
+    }
+
+    @Test
+    void addsUserPermissionWhenOriginalPermissionsAreNotSet() throws IOException {
+        final String repo = "go";
+        this.addEmpty(repo);
+        final String ann = "ann";
+        final String download = "download";
+        new RepoPermissions.FromSettings(new Settings.Fake(this.storage))
+            .addUpdate(
+                repo,
+                new ListOf<>(new RepoPermissions.UserPermission(ann, new ListOf<>(download)))
+            )
+            .toCompletableFuture().join();
+        MatcherAssert.assertThat(
+            this.permissionsForUser(repo, ann),
+            Matchers.contains(download)
+        );
+    }
+
+    @Test
+    void deletesPermissionSection() throws IOException {
+        final String repo = "nuget";
+        this.addSettings(
+            repo,
+            new MapOf<String, List<String>>(
+                new MapEntry<>("someone", new ListOf<String>("r", "w"))
+            )
+        );
+        new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).remove(repo)
+            .toCompletableFuture().join();
+        MatcherAssert.assertThat(
+            "Permissions section are empty",
+            this.permissionsSection(repo),
+            new IsNull<>()
+        );
+        MatcherAssert.assertThat(
+            "Storage `type` is intact",
+            this.repoSection(repo).string("type"),
+            new IsEqual<>("any")
+        );
+    }
+
+    private List<String> permissionsForUser(final String repo, final String user)
+        throws IOException {
+        return this.permissionsSection(repo).yamlSequence(user)
+            .values().stream().map(node -> node.asScalar().value())
+            .collect(Collectors.toList());
+    }
+
+    private YamlMapping permissionsSection(final String repo) throws IOException {
+        return this.repoSection(repo).yamlMapping("permissions");
+    }
+
+    private YamlMapping repoSection(final String repo) throws IOException {
+        return Yaml.createYamlInput(
+            new PublisherAs(this.storage.value(new Key.From(String.format("%s.yaml", repo))).join())
+                .asciiString().toCompletableFuture().join()
+        ).readYamlMapping().yamlMapping("repo");
     }
 
     private void addSettings(final String repo, final Map<String, List<String>> permissions) {
@@ -117,7 +224,9 @@ class RepoPermissionsFromSettingsTest {
             new Content.From(
                 Yaml.createYamlMappingBuilder().add(
                     "repo",
-                    Yaml.createYamlMappingBuilder().add("permissions", builder.build()).build()
+                    Yaml.createYamlMappingBuilder()
+                        .add("type", "any")
+                        .add("permissions", builder.build()).build()
                 ).build().toString().getBytes(StandardCharsets.UTF_8)
             )
         ).join();

@@ -28,12 +28,11 @@ import com.artipie.api.RsJson;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.regex.Matcher;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import javax.json.Json;
 import org.reactivestreams.Publisher;
@@ -65,41 +64,33 @@ public final class GetUserSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Response res;
-        final Matcher matcher = GetUserSlice.PTRN.matcher(
-            new RequestLineFrom(line).uri().toString()
-        );
-        if (matcher.matches()) {
-            final String username = matcher.group("username");
-            res =
-                new AsyncResponse(
-                    this.settings.credentials().thenCompose(
-                        cred ->  cred.users().thenApply(
-                            users -> users.contains(username)
-                        ).thenApply(
-                            has -> {
-                                final Response resp;
-                                if (has) {
-                                    resp = new RsJson(
-                                        () -> Json.createObjectBuilder()
-                                            .add("name", username)
-                                            .add("email", String.format("%s@artipie.com", username))
-                                            .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
-                                            .add("realm", "Internal")
-                                            .build(),
-                                        StandardCharsets.UTF_8
-                                    );
-                                } else {
-                                    resp = StandardRs.NOT_FOUND;
-                                }
-                                return resp;
+        final Optional<String> user = new UserFromRqLine(line).get();
+        return user.<Response>map(
+            username -> new AsyncResponse(
+                this.settings.credentials().thenCompose(
+                    cred ->  cred.users().thenApply(
+                        users -> users.contains(username)
+                    ).thenApply(
+                        has -> {
+                            final Response resp;
+                            if (has) {
+                                resp = new RsJson(
+                                    () -> Json.createObjectBuilder()
+                                        .add("name", username)
+                                        .add("email", String.format("%s@artipie.com", username))
+                                        .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
+                                        .add("realm", "Internal")
+                                        .build(),
+                                    StandardCharsets.UTF_8
+                                );
+                            } else {
+                                resp = StandardRs.NOT_FOUND;
                             }
-                        )
+                            return resp;
+                        }
                     )
-                );
-        } else {
-            res = StandardRs.NOT_FOUND;
-        }
-        return res;
+                )
+            )
+        ).orElse(StandardRs.NOT_FOUND);
     }
 }
