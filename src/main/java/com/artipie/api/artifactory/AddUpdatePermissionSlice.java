@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -51,11 +50,6 @@ import org.reactivestreams.Publisher;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class AddUpdatePermissionSlice implements Slice {
-
-    /**
-     * This endpoint path.
-     */
-    public static final Pattern PATH = Pattern.compile("/api/security/permissions/(?<repo>[^/.]+)");
 
     /**
      * Artipie settings.
