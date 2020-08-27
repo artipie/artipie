@@ -17,7 +17,7 @@ jobs:
       - name: Build docker image
         run: |
           docker build . -t artipie
-      - name: Repalce docker image with locally built one
+      - name: Replace docker image with locally built one
         run: |
           cd examples/nuget
           sed -i 's+artipie/artipie:latest+artipie+' run.ps1
