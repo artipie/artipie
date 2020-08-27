@@ -64,8 +64,8 @@ public final class GetPermissionSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Optional<String> repoopt = new FromRqLine(line, FromRqLine.Group.REPO).get();
-        return repoopt.<Response>map(
+        final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
+        return opt.<Response>map(
             repo -> new AsyncResponse(
                 new RepoPermissions.FromSettings(this.settings).permissions(repo)
                     .thenApply(map -> new RsJson(GetPermissionSlice.response(map, repo)))

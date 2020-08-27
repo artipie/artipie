@@ -35,7 +35,7 @@ final class FromRqLineTest {
     @Test
     void shouldReturnEmptyForBadRqLineUser() {
         final FromRqLine user = new FromRqLine(
-            "GET /bad/api/security/users HTTP/1.1", FromRqLine.Group.USER
+            "GET /bad/api/security/users HTTP/1.1", FromRqLine.RqPattern.USER
         );
         MatcherAssert.assertThat(
             user.get().isEmpty(),
@@ -48,7 +48,7 @@ final class FromRqLineTest {
         final String username = "john";
         final FromRqLine user = new FromRqLine(
             String.format("GET /api/security/users/%s HTTP/1.1", username),
-            FromRqLine.Group.USER
+            FromRqLine.RqPattern.USER
         );
         MatcherAssert.assertThat(
             user.get().get(),
@@ -59,7 +59,7 @@ final class FromRqLineTest {
     @Test
     void shouldReturnEmptyForBadRqLineRepo() {
         final FromRqLine repo = new FromRqLine(
-            "GET /bad/api/security/permissions HTTP/1.1", FromRqLine.Group.REPO
+            "GET /bad/api/security/permissions HTTP/1.1", FromRqLine.RqPattern.REPO
         );
         MatcherAssert.assertThat(
             repo.get().isEmpty(),
@@ -72,7 +72,7 @@ final class FromRqLineTest {
         final String docker = "docker";
         final FromRqLine repo = new FromRqLine(
             String.format("GET /api/security/permissions/%s HTTP/1.1", docker),
-            FromRqLine.Group.REPO
+            FromRqLine.RqPattern.REPO
         );
         MatcherAssert.assertThat(
             repo.get().get(),

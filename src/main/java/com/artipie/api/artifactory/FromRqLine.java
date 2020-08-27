@@ -34,19 +34,6 @@ import java.util.regex.Pattern;
  * @since 0.10
  */
 public final class FromRqLine {
-    /**
-     * Request line pattern to get username.
-     */
-    public static final Pattern PTRN_USER = Pattern.compile(
-        "/api/security/users/(?<username>[^/.]+)"
-    );
-
-    /**
-     * Request line pattern to get repo.
-     */
-    public static final Pattern PTRN_REPO = Pattern.compile(
-        "/api/security/permissions/(?<repo>[^/.]+)"
-    );
 
     /**
      * Request line.
@@ -54,34 +41,18 @@ public final class FromRqLine {
     private final String rqline;
 
     /**
-     * Group name.
-     */
-    private final Group mtchgroup;
-
-    /**
      * Request line pattern to get value.
      */
-    private final Pattern ptrn;
+    private final RqPattern ptrn;
 
     /**
      * Ctor.
      * @param rqline Request line
-     * @param mtchgroup Group name
+     * @param ptrn Request pattern for receiving value
      */
-    @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
-    FromRqLine(final String rqline, final Group mtchgroup) {
+    FromRqLine(final String rqline, final RqPattern ptrn) {
         this.rqline = rqline;
-        this.mtchgroup = mtchgroup;
-        switch (mtchgroup) {
-            case USER:
-                this.ptrn = FromRqLine.PTRN_USER;
-                break;
-            case REPO:
-                this.ptrn = FromRqLine.PTRN_REPO;
-                break;
-            default:
-                throw new IllegalArgumentException("Couldn't find suitable matcher group.");
-        }
+        this.ptrn = ptrn;
     }
 
     /**
@@ -90,11 +61,11 @@ public final class FromRqLine {
      */
     Optional<String> get() {
         final Optional<String> username;
-        final Matcher matcher = this.ptrn.matcher(
+        final Matcher matcher = this.ptrn.pattern.matcher(
             new RequestLineFrom(this.rqline).uri().toString()
         );
         if (matcher.matches()) {
-            username = Optional.of(matcher.group(this.mtchgroup.group()));
+            username = Optional.of(matcher.group(1));
         } else {
             username = Optional.empty();
         }
@@ -102,41 +73,39 @@ public final class FromRqLine {
     }
 
     /**
-     * Group name for part of the request line.
+     * Request pattern for receiving value from the
+     * request line.
      */
-    enum Group {
+    public enum RqPattern {
         /**
-         * Username group.
+         * Username pattern.
          */
-        USER("username"),
+        USER("/api/security/users/(?<username>[^/.]+)"),
 
         /**
-         * Repo group.
+         * Repo pattern.
          */
-        REPO("repo");
+        REPO("/api/security/permissions/(?<repo>[^/.]+)");
 
         /**
-         * Group value.
+         * Pattern.
          */
-        private final String string;
+        private final Pattern pattern;
 
         /**
          * Ctor.
-         *
-         * @param string Group value.
+         * @param pattern Request pattern.
          */
-        Group(final String string) {
-            this.string = string;
+        RqPattern(final String pattern) {
+            this.pattern = Pattern.compile(pattern);
         }
 
         /**
-         * Value as group name.
-         *
-         * @return Group name string.
+         * Get request pattern to get value.
+         * @return Request line pattern to get value.
          */
-        public String group() {
-            return this.string;
+        public Pattern pattern() {
+            return this.pattern;
         }
-
     }
 }
