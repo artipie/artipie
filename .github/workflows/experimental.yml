@@ -4,9 +4,6 @@ name: Experimental CI tools
   push:
     branches:
       - master
-  pull_request:
-    branches:
-      - master
 jobs:
   aibolit:
     runs-on: ubuntu-latest
