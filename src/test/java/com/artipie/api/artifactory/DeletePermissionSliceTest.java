@@ -24,8 +24,9 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.RepoPermissions;
+import com.artipie.RepoPerms;
 import com.artipie.Settings;
-import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
@@ -38,6 +39,8 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNull;
@@ -66,10 +69,14 @@ class DeletePermissionSliceTest {
         final Storage storage = new InMemoryStorage();
         final String repo = "docker";
         final Key.From key = new Key.From(String.format("%s.yaml", repo));
-        storage.save(
-            key,
-            new Content.From(this.yaml().getBytes(StandardCharsets.UTF_8))
-        ).join();
+        final RepoPerms perms = new RepoPerms(
+            List.of(
+                new RepoPermissions.UserPermission("admin", new ListOf<String>("*")),
+                new RepoPermissions.UserPermission("john", new ListOf<String>("delete")),
+                new RepoPermissions.UserPermission("*", new ListOf<String>("download"))
+            )
+        );
+        perms.saveSettings(storage, repo);
         MatcherAssert.assertThat(
             "Returns 200 OK",
             new DeletePermissionSlice(new Settings.Fake(storage)),
@@ -97,19 +104,4 @@ class DeletePermissionSliceTest {
         );
     }
 
-    private String yaml() {
-        return String.join(
-            "\n",
-            "repo:",
-            "  type: some",
-            "  permissions:",
-            "    admin:",
-            "      - \"*\"",
-            "    john:",
-            "      - delete",
-            "      - deploy",
-            "    \"*\":",
-            "      - download"
-        );
-    }
 }

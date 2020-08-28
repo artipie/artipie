@@ -301,7 +301,7 @@ public interface RepoPermissions {
          * Permissions yaml sequence.
          * @return Yaml permissions sequence builder
          */
-        private YamlSequenceBuilder yaml() {
+        public YamlSequenceBuilder yaml() {
             YamlSequenceBuilder res = Yaml.createYamlSequenceBuilder();
             for (final String item : this.perms) {
                 res = res.add(item);

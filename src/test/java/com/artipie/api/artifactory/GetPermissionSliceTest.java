@@ -23,7 +23,8 @@
  */
 package com.artipie.api.artifactory;
 
-import com.artipie.BuildingRepoPermissions;
+import com.artipie.RepoPermissions;
+import com.artipie.RepoPerms;
 import com.artipie.Settings;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
@@ -38,8 +39,6 @@ import java.util.List;
 import javax.json.Json;
 import javax.json.JsonObject;
 import org.cactoos.list.ListOf;
-import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,8 +75,8 @@ class GetPermissionSliceTest {
     @Test
     void returnsEmptyUsersIfNoPermissionsSet() {
         final String repo = "docker";
-        final BuildingRepoPermissions perm = new BuildingRepoPermissions(this.storage);
-        perm.addEmpty(repo);
+        final RepoPerms perm = new RepoPerms();
+        perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
             new GetPermissionSlice(new Settings.Fake(this.storage)),
             new SliceHasResponse(
@@ -94,14 +93,13 @@ class GetPermissionSliceTest {
         final String mark = "mark";
         final String download = "download";
         final String upload = "upload";
-        final BuildingRepoPermissions perm = new BuildingRepoPermissions(this.storage);
-        perm.addSettings(
-            repo,
-            new MapOf<String, List<String>>(
-                new MapEntry<>(john, new ListOf<String>(download, upload)),
-                new MapEntry<>(mark, new ListOf<String>(download))
+        final RepoPerms perm = new RepoPerms(
+            List.of(
+                new RepoPermissions.UserPermission(john, new ListOf<String>(download, upload)),
+                new RepoPermissions.UserPermission(mark, new ListOf<String>(download))
             )
         );
+        perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
             new GetPermissionSlice(new Settings.Fake(this.storage)),
             new SliceHasResponse(
