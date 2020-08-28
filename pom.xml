@@ -113,7 +113,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.25</version>
+      <version>0.26</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -159,7 +159,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>28.2-jre</version>
+      <version>29.0-jre</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
