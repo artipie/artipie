@@ -220,7 +220,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.github.jknack</groupId>
       <artifactId>handlebars</artifactId>
-      <version>4.1.2</version>
+      <version>4.2.0</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>
