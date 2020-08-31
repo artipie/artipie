@@ -53,6 +53,25 @@ public final class DockerClient {
     }
 
     /**
+     * Execute docker login command.
+     *
+     * @param username Username.
+     * @param password Password.
+     * @param repository Repository.
+     * @throws IOException When reading stdout fails or it is impossible to start the process.
+     * @throws InterruptedException When thread interrupted waiting for command to finish.
+     */
+    public void login(final String username, final String password, final String repository)
+        throws IOException, InterruptedException {
+        this.run(
+            "login",
+            "--username", username,
+            "--password", password,
+            repository
+        );
+    }
+
+    /**
      * Execute docker command with args.
      *
      * @param args Arguments that will be passed to docker.

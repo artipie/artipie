@@ -39,7 +39,9 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+import org.hamcrest.CustomMatcher;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsNot;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -62,7 +64,16 @@ class DockerProxyTest {
                 Headers.EMPTY,
                 Flowable.empty()
             ),
-            new RsHasStatus(RsStatus.OK)
+            new RsHasStatus(
+                new IsNot<>(
+                    new CustomMatcher<>("is server error") {
+                        @Override
+                        public boolean matches(final Object item) {
+                            return ((RsStatus) item).serverError();
+                        }
+                    }
+                )
+            )
         );
     }
 

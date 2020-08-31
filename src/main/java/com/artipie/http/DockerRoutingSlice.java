@@ -23,9 +23,12 @@
  */
 package com.artipie.http;
 
+import com.artipie.Settings;
+import com.artipie.docker.http.BaseEntity;
+import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.auth.BasicIdentities;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLineFrom;
-import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -55,10 +58,17 @@ public final class DockerRoutingSlice implements Slice {
     private final Slice origin;
 
     /**
+     * Settings.
+     */
+    private final Settings settings;
+
+    /**
      * Decorates slice with Docker V2 API routing.
+     * @param settings Settings.
      * @param origin Origin slice
      */
-    DockerRoutingSlice(final Slice origin) {
+    DockerRoutingSlice(final Settings settings, final Slice origin) {
+        this.settings = settings;
         this.origin = origin;
     }
 
@@ -72,12 +82,17 @@ public final class DockerRoutingSlice implements Slice {
         if (matcher.matches()) {
             final String group = matcher.group(1);
             if (group.isEmpty() || group.equals("/")) {
-                rsp = StandardRs.EMPTY;
+                rsp = new AsyncResponse(
+                    this.settings.auth().thenApply(
+                        auth -> new BaseEntity(new BasicIdentities(auth))
+                            .response(line, headers, body)
+                    )
+                );
             } else {
                 rsp = this.origin.response(
                     new RequestLine(
                         req.method().toString(),
-                        new URIBuilder(req.uri()).setPath(matcher.group(1)).toString(),
+                        new URIBuilder(req.uri()).setPath(group).toString(),
                         req.version()
                     ).toString(),
                     new Headers.From(headers, DockerRoutingSlice.HDR_REAL_PATH, path),
