@@ -83,7 +83,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.amihaiemil.web</groupId>
       <artifactId>eo-yaml</artifactId>
-      <version>5.1.3</version>
+      <version>5.1.5</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -113,7 +113,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.25</version>
+      <version>0.26</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -159,7 +159,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>28.2-jre</version>
+      <version>29.0-jre</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -220,7 +220,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.github.jknack</groupId>
       <artifactId>handlebars</artifactId>
-      <version>4.1.2</version>
+      <version>4.2.0</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>
