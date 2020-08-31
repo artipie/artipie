@@ -34,6 +34,7 @@ import com.artipie.http.hm.AssertSlice;
 import com.artipie.http.hm.RqLineHasUri;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
@@ -81,25 +82,25 @@ final class DockerRoutingSliceTest {
     void emptyDockerRequest() {
         final String username = "alice";
         final String password = "letmein";
-        final Response response = new DockerRoutingSlice(
-            new SettingsWithAuth(new Authentication.Single(username, password)),
-            (line, headers, body) -> {
-                throw new UnsupportedOperationException();
-            }
-        ).response(
-            new RequestLine(RqMethod.GET, "/v2/").toString(),
-            new Headers.From(new Authorization.Basic(username, password)),
-            Content.EMPTY
-        );
         MatcherAssert.assertThat(
-            response,
-            new AllOf<>(
-                Arrays.asList(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasHeaders(
-                        new Headers.From("Docker-Distribution-API-Version", "registry/2.0")
+            new DockerRoutingSlice(
+                new SettingsWithAuth(new Authentication.Single(username, password)),
+                (line, headers, body) -> {
+                    throw new UnsupportedOperationException();
+                }
+            ),
+            new SliceHasResponse(
+                new AllOf<>(
+                    Arrays.asList(
+                        new RsHasStatus(RsStatus.OK),
+                        new RsHasHeaders(
+                            new Headers.From("Docker-Distribution-API-Version", "registry/2.0")
+                        )
                     )
-                )
+                ),
+                new RequestLine(RqMethod.GET, "/v2/"),
+                new Headers.From(new Authorization.Basic(username, password)),
+                Content.EMPTY
             )
         );
     }
