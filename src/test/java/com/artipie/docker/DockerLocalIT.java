@@ -85,6 +85,8 @@ final class DockerLocalIT {
         final int port = this.server.start();
         this.repository = String.format("localhost:%d", port);
         this.image = this.prepareImage();
+        final ArtipieServer.User user = ArtipieServer.ALICE;
+        this.client.login(user.name(), user.password(), this.repository);
     }
 
     @AfterEach
