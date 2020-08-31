@@ -86,9 +86,10 @@ public final class RepoPerms {
             new Content.From(
                 Yaml.createYamlMappingBuilder().add(
                     "repo",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "any")
-                        .add(RepoPerms.PERMISSIONS, this.permsYaml()).build()
+                    this.addPermissions(
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "any").build()
+                        ).build()
                 ).build().toString().getBytes(StandardCharsets.UTF_8)
             )
         ).join();
@@ -96,26 +97,12 @@ public final class RepoPerms {
 
     /**
      * Add permissions to the repo section.
-     * @param reposection YamlMapping with repo section
-     * @return YamlMapping with repo section and permissions.
+     * @param reposection YamlMappingBuilder with repo section
+     * @return YamlMappingBuilder with repo section and permissions.
      */
-    public YamlMapping addPermissions(final YamlMapping reposection) {
+    public YamlMappingBuilder addPermissions(final YamlMapping reposection) {
         return RepoPerms.repoSectionAsBuilder(reposection)
-            .add(RepoPerms.PERMISSIONS, this.permsYaml())
-            .build();
-    }
-
-    /**
-     * Empty repo section with default values.
-     * @return Empty repo section.
-     */
-    static YamlMappingBuilder emptyRepoSection() {
-        return Yaml.createYamlMappingBuilder().add(
-            "repo",
-            Yaml.createYamlMappingBuilder()
-                .add("type", "file")
-                .add("storage", "default").build()
-        );
+            .add(RepoPerms.PERMISSIONS, this.permsYaml());
     }
 
     /**
