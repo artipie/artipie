@@ -83,6 +83,7 @@ public final class Pie extends Slice.Wrap {
                 new TimeoutSlice(
                     new MeasuredSlice(
                         new DockerRoutingSlice(
+                            settings,
                             new LoggingSlice(
                                 Level.INFO,
                                 new SliceRoute(

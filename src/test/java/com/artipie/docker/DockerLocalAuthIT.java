@@ -34,7 +34,6 @@ import org.hamcrest.core.AllOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -52,7 +51,6 @@ import org.junit.jupiter.api.io.TempDir;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DockerClientSupport
-@Disabled
 final class DockerLocalAuthIT {
 
     /**
@@ -167,11 +165,6 @@ final class DockerLocalAuthIT {
     }
 
     private void login(final ArtipieServer.User user) throws Exception {
-        this.client.run(
-            "login",
-            "--username", user.name(),
-            "--password", user.password(),
-            this.repository
-        );
+        this.client.login(user.name(), user.password(), this.repository);
     }
 }
