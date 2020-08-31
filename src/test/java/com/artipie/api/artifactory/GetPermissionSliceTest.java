@@ -23,12 +23,9 @@
  */
 package com.artipie.api.artifactory;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlSequenceBuilder;
+import com.artipie.RepoPermissions;
+import com.artipie.RepoPerms;
 import com.artipie.Settings;
-import com.artipie.asto.Content;
-import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.hm.RsHasBody;
@@ -39,12 +36,9 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonObject;
 import org.cactoos.list.ListOf;
-import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,10 +46,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link GetPermissionSlice}.
  * @since 0.10
- * @todo #495:30min Create class to generate repository permissions settings
- *  Methods addSettings() and addEmpty() are copied from RepoPermissionsFromSettingsTest, let't
- *  extract them into class to avoid code duplication. Class can be introduced in test scope. Also,
- *  let's check other tests for similar functionality and replace all duplications.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -85,7 +75,8 @@ class GetPermissionSliceTest {
     @Test
     void returnsEmptyUsersIfNoPermissionsSet() {
         final String repo = "docker";
-        this.addEmpty(repo);
+        final RepoPerms perm = new RepoPerms();
+        perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
             new GetPermissionSlice(new Settings.Fake(this.storage)),
             new SliceHasResponse(
@@ -102,13 +93,13 @@ class GetPermissionSliceTest {
         final String mark = "mark";
         final String download = "download";
         final String upload = "upload";
-        this.addSettings(
-            repo,
-            new MapOf<String, List<String>>(
-                new MapEntry<>(john, new ListOf<String>(download, upload)),
-                new MapEntry<>(mark, new ListOf<String>(download))
+        final RepoPerms perm = new RepoPerms(
+            List.of(
+                new RepoPermissions.UserPermission(john, new ListOf<String>(download, upload)),
+                new RepoPermissions.UserPermission(mark, new ListOf<String>(download))
             )
         );
+        perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
             new GetPermissionSlice(new Settings.Fake(this.storage)),
             new SliceHasResponse(
@@ -134,38 +125,4 @@ class GetPermissionSliceTest {
                 Json.createObjectBuilder().add("users", users)
             ).build().toString().getBytes(StandardCharsets.UTF_8);
     }
-
-    private void addSettings(final String repo, final Map<String, List<String>> permissions) {
-        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
-        for (final Map.Entry<String, List<String>> entry : permissions.entrySet()) {
-            YamlSequenceBuilder perms = Yaml.createYamlSequenceBuilder();
-            for (final String perm : entry.getValue()) {
-                perms = perms.add(perm);
-            }
-            builder = builder.add(entry.getKey(), perms.build());
-        }
-        this.storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    Yaml.createYamlMappingBuilder().add("permissions", builder.build()).build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
-
-    private void addEmpty(final String repo) {
-        this.storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    Yaml.createYamlMappingBuilder().add("type", "file")
-                        .add("storage", "default").build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
-
 }

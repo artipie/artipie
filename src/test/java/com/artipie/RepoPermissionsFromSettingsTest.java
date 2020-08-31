@@ -25,21 +25,15 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.cactoos.list.ListOf;
-import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -52,7 +46,7 @@ import org.junit.jupiter.api.Test;
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RepoPermissionsFromSettingsTest {
 
     /**
@@ -84,12 +78,10 @@ class RepoPermissionsFromSettingsTest {
         final String download = "download";
         final String upload = "upload";
         final String repo = "maven";
-        this.addSettings(
-            repo,
-            new MapOf<String, List<String>>(
-                new MapEntry<>(john, new ListOf<String>(download, upload))
-            )
+        final RepoPerms perm = new RepoPerms(
+            new RepoPermissions.UserPermission(john, new ListOf<String>(download, upload))
         );
+        perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
                 .toCompletableFuture().join(),
@@ -102,7 +94,8 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void returnsEmptyMapWhenPermissionsAreNotSet() {
         final String repo = "pypi";
-        this.addEmpty(repo);
+        final RepoPerms perm = new RepoPerms();
+        perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
                 .toCompletableFuture().join().size(),
@@ -115,12 +108,10 @@ class RepoPermissionsFromSettingsTest {
         final String repo = "rpm";
         final String david = "david";
         final String add = "add";
-        this.addSettings(
-            repo,
-            new MapOf<String, List<String>>(
-                new MapEntry<>(david, new ListOf<String>(add, "update"))
-            )
+        final RepoPerms perm = new RepoPerms(
+            new RepoPermissions.UserPermission(david, new ListOf<String>(add, "update"))
         );
+        perm.saveSettings(this.storage, repo);
         final String olga = "olga";
         final String victor = "victor";
         final String download = "download";
@@ -154,7 +145,8 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void addsUserPermissionWhenOriginalPermissionsAreNotSet() throws IOException {
         final String repo = "go";
-        this.addEmpty(repo);
+        final RepoPerms perm = new RepoPerms();
+        perm.saveSettings(this.storage, repo);
         final String ann = "ann";
         final String download = "download";
         new RepoPermissions.FromSettings(new Settings.Fake(this.storage))
@@ -172,12 +164,10 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void deletesPermissionSection() throws IOException {
         final String repo = "nuget";
-        this.addSettings(
-            repo,
-            new MapOf<String, List<String>>(
-                new MapEntry<>("someone", new ListOf<String>("r", "w"))
-            )
+        final RepoPerms perm = new RepoPerms(
+            new RepoPermissions.UserPermission("someone", new ListOf<String>("r", "w"))
         );
+        perm.saveSettings(this.storage, repo);
         new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).remove(repo)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -209,40 +199,4 @@ class RepoPermissionsFromSettingsTest {
                 .asciiString().toCompletableFuture().join()
         ).readYamlMapping().yamlMapping("repo");
     }
-
-    private void addSettings(final String repo, final Map<String, List<String>> permissions) {
-        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
-        for (final Map.Entry<String, List<String>> entry : permissions.entrySet()) {
-            YamlSequenceBuilder perms = Yaml.createYamlSequenceBuilder();
-            for (final String perm : entry.getValue()) {
-                perms = perms.add(perm);
-            }
-            builder = builder.add(entry.getKey(), perms.build());
-        }
-        this.storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "any")
-                        .add("permissions", builder.build()).build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
-
-    private void addEmpty(final String repo) {
-        this.storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    Yaml.createYamlMappingBuilder().add("type", "file")
-                        .add("storage", "default").build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
-
 }

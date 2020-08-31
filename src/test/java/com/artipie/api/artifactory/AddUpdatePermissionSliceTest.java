@@ -24,6 +24,7 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.RepoPerms;
 import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
@@ -77,7 +78,8 @@ class AddUpdatePermissionSliceTest {
     @Test
     void updatesPermissions() throws IOException {
         final String repo = "maven";
-        this.addEmpty(repo);
+        final RepoPerms perm = new RepoPerms();
+        perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
             "Returns 200 OK",
             new AddUpdatePermissionSlice(new Settings.Fake(this.storage)),
@@ -98,19 +100,6 @@ class AddUpdatePermissionSliceTest {
             this.permissionsForUser(repo, "alice"),
             Matchers.containsInAnyOrder("write", "annotate", "read")
         );
-    }
-
-    private void addEmpty(final String repo) {
-        this.storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    Yaml.createYamlMappingBuilder().add("type", "file")
-                        .add("storage", "default").build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
     }
 
     private List<String> permissionsForUser(final String repo, final String user)
