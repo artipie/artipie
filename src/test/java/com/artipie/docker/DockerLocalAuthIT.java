@@ -31,6 +31,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,6 +104,10 @@ final class DockerLocalAuthIT {
                                 .add("read")
                                 .build()
                         )
+                        .add(
+                            ArtipieServer.CAROL.name(),
+                            Yaml.createYamlSequenceBuilder().build()
+                        )
                         .build()
                 )
                 .build()
@@ -133,6 +139,22 @@ final class DockerLocalAuthIT {
     }
 
     @Test
+    void shouldFailPushIfNoWritePermission() throws Exception {
+        this.login(ArtipieServer.BOB);
+        final DockerClient.Result result = this.client.runUnsafe("push", this.image.remote());
+        MatcherAssert.assertThat(
+            "Return code is not 0",
+            result.returnCode(),
+            new IsNot<>(new IsEqual<>(0))
+        );
+        MatcherAssert.assertThat(
+            "Error reported",
+            result.output(),
+            new StringContains("denied")
+        );
+    }
+
+    @Test
     void shouldPullPushed() throws Exception {
         this.login(ArtipieServer.ALICE);
         this.client.run("push", this.image.remote());
@@ -145,6 +167,26 @@ final class DockerLocalAuthIT {
             new StringContains(
                 String.format("Status: Downloaded newer image for %s", this.image.remote())
             )
+        );
+    }
+
+    @Test
+    void shouldFailPullIfNoReadPermission() throws Exception {
+        this.login(ArtipieServer.ALICE);
+        this.client.run("push", this.image.remote());
+        this.client.run("image", "rm", this.image.name());
+        this.client.run("image", "rm", this.image.remote());
+        this.login(ArtipieServer.CAROL);
+        final DockerClient.Result result = this.client.runUnsafe("pull", this.image.remote());
+        MatcherAssert.assertThat(
+            "Return code is not 0",
+            result.returnCode(),
+            new IsNot<>(new IsEqual<>(0))
+        );
+        MatcherAssert.assertThat(
+            "Error reported",
+            result.output(),
+            new StringContains("denied")
         );
     }
 
