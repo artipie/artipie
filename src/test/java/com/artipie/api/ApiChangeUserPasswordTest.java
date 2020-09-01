@@ -40,6 +40,7 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -157,7 +158,7 @@ class ApiChangeUserPasswordTest {
     }
 
     private String pswd(final String pswd) {
-        return String.format("plain:%s", pswd);
+        return String.format("sha256:%s", DigestUtils.sha256Hex(pswd));
     }
 
 }

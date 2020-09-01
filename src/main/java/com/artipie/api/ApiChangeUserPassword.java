@@ -41,6 +41,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.reactivestreams.Publisher;
@@ -89,7 +90,9 @@ final class ApiChangeUserPassword implements Slice {
             ).flatMapCompletable(
                 pass -> Completable.fromFuture(
                     this.settings.credentials().thenCompose(
-                        cred -> cred.add(user, pass, Credentials.PasswordFormat.PLAIN)
+                        cred -> cred.add(
+                            user, DigestUtils.sha256Hex(pass), Credentials.PasswordFormat.SHA256
+                        )
                     ).toCompletableFuture()
                 )
             ).toSingleDefault(
