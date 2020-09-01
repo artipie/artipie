@@ -23,6 +23,7 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.Credentials;
 import com.artipie.Settings;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Response;
@@ -74,8 +75,9 @@ public final class AddUpdateUserSlice implements Slice {
                         passw -> passw.map(
                             haspassw -> this.settings.credentials()
                                 .thenCompose(
-                                    cred -> cred.add(username, haspassw)
-                                        .thenApply(ok -> new RsWithStatus(RsStatus.OK)))
+                                    cred -> cred.add(
+                                        username, haspassw, Credentials.PasswordFormat.PLAIN
+                                    ).thenApply(ok -> new RsWithStatus(RsStatus.OK)))
                 ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.NOT_FOUND))))
             )
         ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
