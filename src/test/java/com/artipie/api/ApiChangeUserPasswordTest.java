@@ -157,7 +157,7 @@ class ApiChangeUserPasswordTest {
     }
 
     private String pswd(final String pswd) {
-        return String.format("sha256:%s", pswd);
+        return String.format("plain:%s", pswd);
     }
 
 }
