@@ -28,7 +28,7 @@ import com.artipie.Settings;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.headers.Header;
+import com.artipie.http.headers.Location;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
@@ -89,13 +89,13 @@ final class ApiChangeUserPassword implements Slice {
             ).flatMapCompletable(
                 pass -> Completable.fromFuture(
                     this.settings.credentials().thenCompose(
-                        cred -> cred.add(user, pass, Credentials.PasswordFormat.SHA256)
+                        cred -> cred.add(user, pass, Credentials.PasswordFormat.PLAIN)
                     ).toCompletableFuture()
                 )
             ).toSingleDefault(
                 new RsWithHeaders(
                     new RsWithStatus(RsStatus.FOUND),
-                    new Header("Location", String.format("/dashboard/%s", user))
+                    new Location(String.format("/dashboard/%s", user))
                 )
             ).to(SingleInterop.get())
         );

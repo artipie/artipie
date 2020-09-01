@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import javax.json.Json;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -106,7 +107,7 @@ final class AddUpdateUserSliceTest {
             ).readYamlMapping().value("credentials")
                 .asMapping().value(username)
                 .asMapping().string("pass"),
-            new IsEqual<>(this.plainPswd(pswd))
+            new IsEqual<>(this.shaPswd(pswd))
         );
     }
 
@@ -137,7 +138,7 @@ final class AddUpdateUserSliceTest {
             ).readYamlMapping().value("credentials")
                 .asMapping().value(username)
                 .asMapping().string("pass"),
-            new IsEqual<>(this.plainPswd(newpswd))
+            new IsEqual<>(this.shaPswd(newpswd))
         );
     }
 
@@ -166,7 +167,7 @@ final class AddUpdateUserSliceTest {
         );
     }
 
-    private String plainPswd(final String pswd) {
-        return String.format("plain:%s", pswd);
+    private String shaPswd(final String pswd) {
+        return String.format("sha256:%s", DigestUtils.sha256Hex(pswd));
     }
 }

@@ -40,6 +40,7 @@ import java.util.concurrent.CompletionStage;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.reactivestreams.Publisher;
 
 /**
@@ -76,7 +77,8 @@ public final class AddUpdateUserSlice implements Slice {
                             haspassw -> this.settings.credentials()
                                 .thenCompose(
                                     cred -> cred.add(
-                                        username, haspassw, Credentials.PasswordFormat.PLAIN
+                                        username, DigestUtils.sha256Hex(haspassw),
+                                        Credentials.PasswordFormat.SHA256
                                     ).thenApply(ok -> new RsWithStatus(RsStatus.OK)))
                 ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.NOT_FOUND))))
             )
