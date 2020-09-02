@@ -23,6 +23,7 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.Credentials;
 import com.artipie.Settings;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Response;
@@ -39,6 +40,7 @@ import java.util.concurrent.CompletionStage;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.reactivestreams.Publisher;
 
 /**
@@ -74,8 +76,10 @@ public final class AddUpdateUserSlice implements Slice {
                         passw -> passw.map(
                             haspassw -> this.settings.credentials()
                                 .thenCompose(
-                                    cred -> cred.add(username, haspassw)
-                                        .thenApply(ok -> new RsWithStatus(RsStatus.OK)))
+                                    cred -> cred.add(
+                                        username, DigestUtils.sha256Hex(haspassw),
+                                        Credentials.PasswordFormat.SHA256
+                                    ).thenApply(ok -> new RsWithStatus(RsStatus.OK)))
                 ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.NOT_FOUND))))
             )
         ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));

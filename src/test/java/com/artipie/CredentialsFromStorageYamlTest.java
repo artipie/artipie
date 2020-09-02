@@ -66,7 +66,7 @@ class CredentialsFromStorageYamlTest {
     void readsYamlFromStorage() {
         final String jane = "jane";
         final String john = "john";
-        final String pass = "111";
+        final String pass = "sha256:111";
         this.creds(new ImmutablePair<>(jane, pass), new ImmutablePair<>(john, pass));
         MatcherAssert.assertThat(
             new Credentials.FromStorageYaml(this.storage, this.key).users()
@@ -80,14 +80,19 @@ class CredentialsFromStorageYamlTest {
         final String maria = "maria";
         final String olga = "olga";
         final String pass = "abc";
-        this.creds(new ImmutablePair<>(maria, pass));
-        new Credentials.FromStorageYaml(this.storage, this.key).add(olga, pass)
-            .toCompletableFuture().join();
+        final String full = String.format("sha256:%s", pass);
+        this.creds(new ImmutablePair<>(maria, full));
+        new Credentials.FromStorageYaml(this.storage, this.key).add(
+            olga, pass, Credentials.PasswordFormat.SHA256
+        ).toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
                 .asciiString().toCompletableFuture().join(),
             new IsEqual<>(
-                this.getYaml(new ImmutablePair<>(maria, pass), new ImmutablePair<>(olga, pass))
+                this.getYaml(
+                    new ImmutablePair<>(maria, full),
+                    new ImmutablePair<>(olga, full)
+                )
             )
         );
     }
@@ -96,16 +101,20 @@ class CredentialsFromStorageYamlTest {
     void updatesUser() {
         final String jack = "jack";
         final String silvia = "silvia";
-        final String old = "345";
+        final String old = "plain:345";
         final String newpass = "000";
         this.creds(new ImmutablePair<>(jack, old), new ImmutablePair<>(silvia, old));
-        new Credentials.FromStorageYaml(this.storage, this.key).add(silvia, newpass)
+        new Credentials.FromStorageYaml(this.storage, this.key)
+            .add(silvia, newpass, Credentials.PasswordFormat.PLAIN)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
                 .asciiString().toCompletableFuture().join(),
             new IsEqual<>(
-                this.getYaml(new ImmutablePair<>(jack, old), new ImmutablePair<>(silvia, newpass))
+                this.getYaml(
+                    new ImmutablePair<>(jack, old),
+                    new ImmutablePair<>(silvia, String.format("plain:%s", newpass))
+                )
             )
         );
     }
@@ -114,7 +123,7 @@ class CredentialsFromStorageYamlTest {
     void removesUser() {
         final String mark = "mark";
         final String ann = "ann";
-        final String pass = "123";
+        final String pass = "plain:123";
         this.creds(new ImmutablePair<>(mark, pass), new ImmutablePair<>(ann, pass));
         new Credentials.FromStorageYaml(this.storage, this.key).remove(ann)
             .toCompletableFuture().join();
@@ -129,7 +138,7 @@ class CredentialsFromStorageYamlTest {
     void doNotChangeYamlOnRemoveIfUserNotFound() {
         final String ted = "ted";
         final String alex = "alex";
-        final String pass = "098";
+        final String pass = "plain:098";
         this.creds(new ImmutablePair<>(ted, pass), new ImmutablePair<>(alex, pass));
         new Credentials.FromStorageYaml(this.storage, this.key).remove("alice")
             .toCompletableFuture().join();
@@ -155,7 +164,7 @@ class CredentialsFromStorageYamlTest {
             mapping = mapping.add(
                 user.getKey(),
                 Yaml.createYamlMappingBuilder()
-                    .add("pass", String.format("plain:%s", user.getValue())).build()
+                    .add("pass", user.getValue()).build()
             );
         }
         return Yaml.createYamlMappingBuilder().add(
