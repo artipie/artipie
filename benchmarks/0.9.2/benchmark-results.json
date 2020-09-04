@@ -1,0 +1,32 @@
+{
+    "docker": {
+        "single-upload": {
+            "artipie": {
+                "images": [
+                    {
+                        "ubuntu": 5.149324417114258
+                    },
+                    {
+                        "graphiteapp/graphite-statsd": 23.911609172821045
+                    },
+                    {
+                        "g4s8/artipie-base": 32.80001950263977
+                    }
+                ]
+            },
+            "docker-registry": {
+                "images": [
+                    {
+                        "ubuntu": 4.545761346817017
+                    },
+                    {
+                        "graphiteapp/graphite-statsd": 24.308050394058228
+                    },
+                    {
+                        "g4s8/artipie-base": 33.25234794616699
+                    }
+                ]
+            }
+        }
+    }
+}
