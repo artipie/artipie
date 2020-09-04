@@ -26,8 +26,8 @@
     }
 
     (async () => {
-        let repository = 'Sammers21/artipie';
-        let branch = 'publish_benchmarks';
+        let repository = 'artipie/artipie';
+        let branch = 'gh-pages';
         const response = await fetch(`https://api.github.com/repos/${repository}/contents/benchmarks?ref=${branch}`);
         const data = await response.json()
 
