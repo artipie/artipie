@@ -3,6 +3,7 @@
 --exclude logo.png
 --exclude target/**/*
 --exclude src/main/resources/images/**/*
+--exclude src/test/resources-binary/*
 --exclude .idea/**/*
 --exclude examples/**/*
 --exclude examples/helm/tomcat-0.4.1.tgz
