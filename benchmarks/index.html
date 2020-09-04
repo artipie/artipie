@@ -54,6 +54,9 @@
             )
         ).filter(el => el !== undefined)
             .sort((one, another) => compareDottedString(one.version, another.version))
+
+
+        // Draw Chart
         let labels = results.map(json => json.version)
         let dt = results.map(json => json.results.docker["single-upload"].artipie.images[0].ubuntu)
         let ctx = document.getElementById('docker_single_upload').getContext('2d');
