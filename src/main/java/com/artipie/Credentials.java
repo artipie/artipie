@@ -39,6 +39,7 @@ import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -61,9 +62,10 @@ public interface Credentials {
      * Adds user to artipie users.
      * @param username User name
      * @param pswd Password
+     * @param format Password format
      * @return Completion add action
      */
-    CompletionStage<Void> add(String username, String pswd);
+    CompletionStage<Void> add(String username, String pswd, PasswordFormat format);
 
     /**
      * Removes user from artipie users.
@@ -78,6 +80,23 @@ public interface Credentials {
      * @return Authentication instance
      */
     CompletionStage<Authentication> auth();
+
+    /**
+     * Password format.
+     * @since 0.11
+     */
+    enum PasswordFormat {
+
+        /**
+         * Plain password format.
+         */
+        PLAIN,
+
+        /**
+         * Sha256 password format.
+         */
+        SHA256
+    }
 
     /**
      * Credentials from main artipie config.
@@ -119,14 +138,18 @@ public interface Credentials {
         }
 
         @Override
-        public CompletionStage<Void> add(final String username, final String pswd) {
+        public CompletionStage<Void> add(final String username, final String pswd,
+            final PasswordFormat format) {
             return this.yaml().thenCompose(
                 yaml -> {
                     YamlMappingBuilder result = FromStorageYaml.removeUserRecord(username, yaml);
                     result = result.add(
                         username,
                         Yaml.createYamlMappingBuilder()
-                            .add("pass", String.format("plain:%s", pswd))
+                            .add(
+                                "pass",
+                                String.format("%s:%s", format.name().toLowerCase(Locale.US), pswd)
+                            )
                             .build()
                     );
                     return this.buildAndSaveCredentials(result);
@@ -232,7 +255,8 @@ public interface Credentials {
         }
 
         @Override
-        public CompletionStage<Void> add(final String username, final String pswd) {
+        public CompletionStage<Void> add(final String username, final String pswd,
+            final PasswordFormat format) {
             return CompletableFuture.failedFuture(
                 new UnsupportedOperationException("Adding users is not supported")
             );

@@ -31,6 +31,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,13 +43,6 @@ import org.junit.jupiter.api.io.TempDir;
  * Integration test for auth in local Docker repositories.
  *
  * @since 0.10
- * @todo #449:30min Check negative auth cases.
- *  `DockerLocalAuthIT` contains tests for authenticated access
- *  when there is enough permissions for certain operations.
- *  However, to ensure that auth works as expected we need to check cases for auth failure:
- *  - attempt to access with unknown user
- *  - attempt to write with user without write permissions
- *  - attempt to read with user without read permissions
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DockerClientSupport
@@ -102,6 +97,10 @@ final class DockerLocalAuthIT {
                                 .add("read")
                                 .build()
                         )
+                        .add(
+                            ArtipieServer.CAROL.name(),
+                            Yaml.createYamlSequenceBuilder().build()
+                        )
                         .build()
                 )
                 .build()
@@ -133,6 +132,38 @@ final class DockerLocalAuthIT {
     }
 
     @Test
+    void shouldFailPushIfNoWritePermission() throws Exception {
+        this.login(ArtipieServer.BOB);
+        final DockerClient.Result result = this.client.runUnsafe("push", this.image.remote());
+        MatcherAssert.assertThat(
+            "Return code is not 0",
+            result.returnCode(),
+            new IsNot<>(new IsEqual<>(0))
+        );
+        MatcherAssert.assertThat(
+            "Error reported",
+            result.output(),
+            new StringContains("denied")
+        );
+    }
+
+    @Test
+    void shouldFailPushIfAnonymous() throws Exception {
+        this.logout();
+        final DockerClient.Result result = this.client.runUnsafe("push", this.image.remote());
+        MatcherAssert.assertThat(
+            "Return code is not 0",
+            result.returnCode(),
+            new IsNot<>(new IsEqual<>(0))
+        );
+        MatcherAssert.assertThat(
+            "Error reported",
+            result.output(),
+            new StringContains("no basic auth credentials")
+        );
+    }
+
+    @Test
     void shouldPullPushed() throws Exception {
         this.login(ArtipieServer.ALICE);
         this.client.run("push", this.image.remote());
@@ -145,6 +176,46 @@ final class DockerLocalAuthIT {
             new StringContains(
                 String.format("Status: Downloaded newer image for %s", this.image.remote())
             )
+        );
+    }
+
+    @Test
+    void shouldFailPullIfNoReadPermission() throws Exception {
+        this.login(ArtipieServer.ALICE);
+        this.client.run("push", this.image.remote());
+        this.client.run("image", "rm", this.image.name());
+        this.client.run("image", "rm", this.image.remote());
+        this.login(ArtipieServer.CAROL);
+        final DockerClient.Result result = this.client.runUnsafe("pull", this.image.remote());
+        MatcherAssert.assertThat(
+            "Return code is not 0",
+            result.returnCode(),
+            new IsNot<>(new IsEqual<>(0))
+        );
+        MatcherAssert.assertThat(
+            "Error reported",
+            result.output(),
+            new StringContains("denied")
+        );
+    }
+
+    @Test
+    void shouldFailPullIfAnonymous() throws Exception {
+        this.login(ArtipieServer.ALICE);
+        this.client.run("push", this.image.remote());
+        this.client.run("image", "rm", this.image.name());
+        this.client.run("image", "rm", this.image.remote());
+        this.logout();
+        final DockerClient.Result result = this.client.runUnsafe("pull", this.image.remote());
+        MatcherAssert.assertThat(
+            "Return code is not 0",
+            result.returnCode(),
+            new IsNot<>(new IsEqual<>(0))
+        );
+        MatcherAssert.assertThat(
+            "Error reported",
+            result.output(),
+            new StringContains("no basic auth credentials")
         );
     }
 
@@ -166,5 +237,9 @@ final class DockerLocalAuthIT {
 
     private void login(final ArtipieServer.User user) throws Exception {
         this.client.login(user.name(), user.password(), this.repository);
+    }
+
+    private void logout() throws Exception {
+        this.client.run("logout", this.repository);
     }
 }
