@@ -24,6 +24,7 @@
         }
         return 0;
     }
+
     (async () => {
         let repository = 'Sammers21/artipie';
         let branch = 'publish_benchmarks';
@@ -68,6 +69,23 @@
                 }]
             },
             options: {
+                responsive: true,
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Artipie version"
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Upload time, seconds"
+                        }
+                    }]
+                },
                 legend: {
                     display: true,
                     labels: {
