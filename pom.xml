@@ -94,6 +94,24 @@ SOFTWARE.
       <artifactId>jcabi-matchers</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>1.14.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>1.14.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mockserver</artifactId>
+      <version>1.14.3</version>
+      <scope>test</scope>
+    </dependency>
     <!-- maven -->
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -285,6 +303,12 @@ SOFTWARE.
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-maven-service-factory</artifactId>
+      <version>3.9.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito2</artifactId>
       <version>2.0.7</version>
@@ -318,6 +342,17 @@ SOFTWARE.
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
           <skip>false</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.qulice</groupId>
+        <artifactId>qulice-maven-plugin</artifactId>
+        <configuration>
+          <excludes combine.children="append">
+            <exclude>checkstyle:.*/src/test/resources-binary/.*</exclude>
+            <exclude>pmd:.*/src/test/resources-binary/.*</exclude>
+          </excludes>
+          <license>file:${basedir}/LICENSE.txt</license>
         </configuration>
       </plugin>
     </plugins>
