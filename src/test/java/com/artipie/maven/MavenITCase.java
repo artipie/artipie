@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.cactoos.list.ListOf;
-import org.cactoos.scalar.Unchecked;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.StringContains;
@@ -99,7 +98,6 @@ final class MavenITCase {
 
     @BeforeEach
     void init() throws IOException, InterruptedException {
-        this.tmp.toFile().setWritable(true);
         this.subdir = Files.createDirectory(Path.of(this.tmp.toString(), "subdir"));
         this.storage = new FileStorage(this.subdir);
         this.server = new ArtipieServer(this.subdir, "my-maven", this.configs());
@@ -158,6 +156,9 @@ final class MavenITCase {
             ).replaceAll("\n", ""),
             new StringContains("BUILD SUCCESS")
         );
+        this.exec(
+            "mvn", "-s", "/home/settings.xml", "-f", "/home/helloworld-src/pom.xml", "clean"
+        );
         MatcherAssert.assertThat(
             "Artifacts weren't added to storage",
             this.storage.list(
@@ -198,7 +199,7 @@ final class MavenITCase {
     }
 
     @AfterEach
-    void stopContainer() {
+    void release() {
         this.server.stop();
         this.cntn.stop();
     }
