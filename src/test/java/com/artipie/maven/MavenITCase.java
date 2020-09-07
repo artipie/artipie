@@ -274,7 +274,7 @@ final class MavenITCase {
         for (final Key item : bsto.list(Key.ROOT)) {
             new BlockingStorage(this.storage).save(
                 new Key.From(key, item),
-                new Unchecked<>(() -> bsto.value(new Key.From(item))).value()
+                bsto.value(new Key.From(item))
             );
         }
     }
