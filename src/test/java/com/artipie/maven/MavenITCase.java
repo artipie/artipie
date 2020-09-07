@@ -47,6 +47,8 @@ import org.hamcrest.text.MatchesPattern;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -60,6 +62,7 @@ import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@EnabledOnOs({OS.LINUX, OS.MAC})
 final class MavenITCase {
 
     /**
@@ -68,6 +71,11 @@ final class MavenITCase {
      */
     @TempDir
     Path tmp;
+
+    /**
+     * Subdirectory in temporary directory.
+     */
+    private Path subdir;
 
     /**
      * Tested Artipie server.
@@ -91,17 +99,18 @@ final class MavenITCase {
 
     @BeforeEach
     void init() throws IOException, InterruptedException {
-        this.storage = new FileStorage(this.tmp);
-        this.server = new ArtipieServer(this.tmp, "my-maven", this.configs());
+        this.subdir = Files.createDirectory(Path.of(this.tmp.toString(), "subdir"));
+        this.storage = new FileStorage(this.subdir);
+        this.server = new ArtipieServer(this.subdir, "my-maven", this.configs());
         this.port = this.server.start();
         Testcontainers.exposeHostPorts(this.port);
-        final Path setting = this.tmp.resolve("settings.xml");
+        final Path setting = this.subdir.resolve("settings.xml");
         setting.toFile().createNewFile();
         Files.write(setting, this.settings());
         this.cntn = new GenericContainer<>("centos:centos8")
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
+            .withFileSystemBind(this.subdir.toString(), "/home");
         this.cntn.start();
         this.cntn.execInContainer("yum", "-y", "install", "maven");
     }
@@ -196,12 +205,12 @@ final class MavenITCase {
     private void prepareDirectory(final String src, final String pom) throws IOException {
         FileUtils.copyDirectory(
             new TestResource(src).asPath().toFile(),
-            this.tmp.resolve(src).toFile()
+            this.subdir.resolve(src).toFile()
         );
         Files.write(
-            this.tmp.resolve(pom),
+            this.subdir.resolve(pom),
             String.format(
-                Files.readString(this.tmp.resolve(pom)),
+                Files.readString(this.subdir.resolve(pom)),
                 this.port
             ).getBytes()
         );
@@ -248,7 +257,7 @@ final class MavenITCase {
                     "storage",
                     Yaml.createYamlMappingBuilder()
                         .add("type", "fs")
-                        .add("path", this.tmp.resolve("repos").toString())
+                        .add("path", this.subdir.resolve("repos").toString())
                         .build()
                 )
                 .build()
