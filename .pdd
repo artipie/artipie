@@ -3,8 +3,8 @@
 --exclude logo.png
 --exclude target/**/*
 --exclude src/main/resources/images/**/*
---exclude src/test/resources-binary/com/artipie/snapshot/1.0-SNAPSHOT/*
---exclude src/test/resources-binary/com/artipie/helloworld/0.1/*
+--exclude src/test/resources/com/artipie/snapshot/1.0-SNAPSHOT/*
+--exclude src/test/resources/com/artipie/helloworld/0.1/*
 --exclude .idea/**/*
 --exclude examples/**/*
 --exclude examples/helm/tomcat-0.4.1.tgz

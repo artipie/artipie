@@ -349,8 +349,8 @@ SOFTWARE.
         <artifactId>qulice-maven-plugin</artifactId>
         <configuration>
           <excludes combine.children="append">
-            <exclude>checkstyle:.*/src/test/resources-binary/.*</exclude>
-            <exclude>pmd:.*/src/test/resources-binary/.*</exclude>
+            <exclude>checkstyle:.*/src/test/resources/.*</exclude>
+            <exclude>pmd:.*/src/test/resources/.*</exclude>
           </excludes>
           <license>file:${basedir}/LICENSE.txt</license>
         </configuration>
