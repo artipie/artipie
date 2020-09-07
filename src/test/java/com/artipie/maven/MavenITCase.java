@@ -99,6 +99,7 @@ final class MavenITCase {
 
     @BeforeEach
     void init() throws IOException, InterruptedException {
+        this.tmp.toFile().setWritable(true);
         this.subdir = Files.createDirectory(Path.of(this.tmp.toString(), "subdir"));
         this.storage = new FileStorage(this.subdir);
         this.server = new ArtipieServer(this.subdir, "my-maven", this.configs());
@@ -270,19 +271,11 @@ final class MavenITCase {
             new TestResource(resource).asPath()
         );
         final BlockingStorage bsto = new BlockingStorage(resources);
-        bsto.list(Key.ROOT).stream()
-            .map(Key::string)
-            .forEach(
-                item -> new Unchecked<>(
-                    () -> {
-                        new BlockingStorage(this.storage).save(
-                            new Key.From(key, item),
-                            new Unchecked<>(() -> bsto.value(new Key.From(item))).value()
-                        );
-                        return true;
-                    }
-                )
-            .value()
-        );
+        for (final Key item : bsto.list(Key.ROOT)) {
+            new BlockingStorage(this.storage).save(
+                new Key.From(key, item),
+                new Unchecked<>(() -> bsto.value(new Key.From(item))).value()
+            );
+        }
     }
 }
