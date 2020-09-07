@@ -157,7 +157,9 @@ final class MavenITCase {
             new StringContains("BUILD SUCCESS")
         );
         this.exec(
-            "mvn", "-s", "/home/settings.xml", "-f", "/home/helloworld-src/pom.xml", "clean"
+            "mvn", "-s", "/home/settings.xml", "-f",
+            String.format("/home/%s-src/pom.xml", type),
+            "clean"
         );
         MatcherAssert.assertThat(
             "Artifacts weren't added to storage",
