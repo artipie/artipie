@@ -220,12 +220,6 @@ final class MavenITCase {
         );
     }
 
-    /**
-     * Executes dnf command in container.
-     * @param command What to do
-     * @return String stdout
-     * @throws Exception On error
-     */
     private String exec(final String... command) throws Exception {
         Logger.debug(this, "Command:\n%s", String.join(" ", command));
         return this.cntn.execInContainer(command).getStdout();
