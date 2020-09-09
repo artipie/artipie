@@ -24,6 +24,7 @@
 package com.artipie.auth;
 
 import com.artipie.http.auth.Permissions;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -38,6 +39,15 @@ public final class JoinedPermissions implements Permissions {
      * Origin permissions.
      */
     private final Collection<Permissions> origins;
+
+    /**
+     * Ctor.
+     *
+     * @param origins Origin permissions.
+     */
+    public JoinedPermissions(final Permissions... origins) {
+        this(Arrays.asList(origins));
+    }
 
     /**
      * Ctor.
