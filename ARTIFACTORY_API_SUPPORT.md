@@ -64,3 +64,32 @@ lastLoggedIn | string | Default `2020-01-01T01:01:01.000+01:00` | Y
 realm | string | User realm, value `Internal` is always returned | Y
 
 If user is not found `404 NOT FOUND` status is returned.
+
+### Create Or Update User
+
+[Creates, replaces](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-CreateorReplaceUser) or [updates](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-UpdateUser) user with {userName} from request URL.
+
+> **PUT**/**POST** /api/security/users/{userName}
+
+Consumes json with the following fields (any other fields are ignored): 
+
+Field name | Type | Meaning | Required
+------ | ------ | ------ | ------
+password | string | User password | Y
+
+Possible responses:
+- `200 OK` when user was successfully created or updated
+- `400 BAD REQUEST` when invalid json was sent
+- `500 INTERNAL ERROR` in the case of unexpected server error
+
+### Delete User
+
+[Removes](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-DeleteUser) an Artipie user. 
+
+> **DELETE** /api/security/users/{userName}
+
+Possible responses:
+- `200 OK User '{userName}' has been removed successfully.` when user {userName} was successfully removed
+- `404 NOT FOUND` when user was not found
+- `500 INTERNAL ERROR` in the case of unexpected server error
+

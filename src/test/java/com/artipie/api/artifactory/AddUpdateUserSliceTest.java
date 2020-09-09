@@ -70,11 +70,11 @@ final class AddUpdateUserSliceTest {
 
     @ParameterizedTest
     @EnumSource(value = RqMethod.class, names = {"PUT", "POST"})
-    void returnsNotFoundIfCredentialsAreEmpty(final RqMethod rqmeth) {
+    void returnsBadRequestIfCredentialsAreEmpty(final RqMethod rqmeth) {
         MatcherAssert.assertThat(
             new AddUpdateUserSlice(new Settings.Fake()),
             new SliceHasResponse(
-                new RsHasStatus(RsStatus.NOT_FOUND),
+                new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(rqmeth, "/api/security/users/empty")
             )
         );
