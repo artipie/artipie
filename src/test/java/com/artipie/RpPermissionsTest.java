@@ -24,7 +24,7 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
-import java.io.File;
+import com.artipie.asto.test.TestResource;
 import java.io.IOException;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
@@ -104,7 +104,7 @@ class RpPermissionsTest {
      */
     private YamlPermissions permissions() throws IOException {
         return new YamlPermissions(
-            Yaml.createYamlInput(new File("src/test/resources/repo-full-config.yml"))
+            Yaml.createYamlInput(new TestResource("repo-full-config.yml").asPath().toFile())
                 .readYamlMapping()
                 .yamlMapping("repo")
                 .yamlMapping("permissions")
