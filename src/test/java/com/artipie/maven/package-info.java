@@ -21,27 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
-
-import com.amihaiemil.eoyaml.Yaml;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link YamlPermissions}.
+ * Tests for Maven repository related classes.
  *
- * @since 0.1
+ * @since 0.11
  */
-class YamlPermissionsTest {
-
-    @Test
-    void shouldAllowEverythingWhenNoPermissions() throws Exception {
-        MatcherAssert.assertThat(
-            new YamlPermissions(
-                Yaml.createYamlInput("").readYamlMapping()
-            ).allowed("anyone", "everything"),
-            new IsEqual<>(true)
-        );
-    }
-}
+package com.artipie.maven;

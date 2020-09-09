@@ -38,16 +38,12 @@ import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import io.reactivex.Flowable;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 import org.cactoos.list.ListOf;
 import org.cactoos.text.Base64Encoded;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Test for basic authorisation and permissions settings,
@@ -58,21 +54,12 @@ import org.junit.jupiter.api.io.TempDir;
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public class AuthAndPermissionsTest {
 
-    /**
-     * Temp dir.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     */
-    @TempDir
-    Path temp;
-
     @Test
     void allowsDownloadWhenAuthHeaderIsNotPresent() throws IOException {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(StandardRs.EMPTY),
-                new Permission.ByName(
-                    "download", new YamlPermissions(this.repoWithPermissions().toFile())
-                ),
+                new Permission.ByName("download", this.permissions()),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
                 new RequestLine("POST", "/bar", "HTTP/1.2").toString(),
@@ -88,9 +75,7 @@ public class AuthAndPermissionsTest {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(StandardRs.EMPTY),
-                new Permission.ByName(
-                    "download", new YamlPermissions(this.repoWithPermissions().toFile())
-                ),
+                new Permission.ByName("download", this.permissions()),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
@@ -110,9 +95,7 @@ public class AuthAndPermissionsTest {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(StandardRs.EMPTY),
-                new Permission.ByName(
-                    "deploy", new YamlPermissions(this.repoWithPermissions().toFile())
-                ),
+                new Permission.ByName("deploy", this.permissions()),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
@@ -132,9 +115,7 @@ public class AuthAndPermissionsTest {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(StandardRs.EMPTY),
-                new Permission.ByName(
-                    "download", new YamlPermissions(this.repoWithPermissions().toFile())
-                ),
+                new Permission.ByName("download", this.permissions()),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
@@ -155,9 +136,7 @@ public class AuthAndPermissionsTest {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(new RsWithStatus(status)),
-                new Permission.ByName(
-                    "delete", new YamlPermissions(this.repoWithPermissions().toFile())
-                ),
+                new Permission.ByName("delete", this.permissions()),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
                 new RequestLine("PUT", "/foo", "HTTP/1.2").toString(),
@@ -178,9 +157,7 @@ public class AuthAndPermissionsTest {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(new RsWithStatus(status)),
-                new Permission.ByName(
-                    "deploy", new YamlPermissions(this.repoWithPermissions().toFile())
-                ),
+                new Permission.ByName("deploy", this.permissions()),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
                 new RequestLine("PUT", "/foo", "HTTP/1.2").toString(),
@@ -201,7 +178,7 @@ public class AuthAndPermissionsTest {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(new RsWithStatus(status)),
-                new Permission.ByName("install", new YamlPermissions(this.publicRepo().toFile())),
+                new Permission.ByName("install", this.allAllowedPermissions()),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
@@ -218,7 +195,7 @@ public class AuthAndPermissionsTest {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(new RsWithStatus(status)),
-                new Permission.ByName("delete", new YamlPermissions(this.publicRepo().toFile())),
+                new Permission.ByName("delete", this.allAllowedPermissions()),
                 new BasicIdentities(new AuthFromYaml(this.credentials()))
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
@@ -249,39 +226,25 @@ public class AuthAndPermissionsTest {
         ).build();
     }
 
-    private Path repoWithPermissions() throws IOException {
-        final Path res = Files.createTempFile(this.temp, "repo", "yml");
-        Files.write(
-            res,
-            String.join(
-                "\n",
-                "repo:",
-                "  permissions:",
-                "    admin:",
-                "      - \"*\"",
-                "    john:",
-                "      - delete",
-                "      - deploy",
-                "    \"*\":",
-                "      - download"
-            ).getBytes(StandardCharsets.UTF_8)
+    private YamlPermissions permissions() throws IOException {
+        return new YamlPermissions(
+            Yaml.createYamlInput(
+                String.join(
+                    "\n",
+                    "admin:",
+                    "  - \"*\"",
+                    "john:",
+                    "  - delete",
+                    "  - deploy",
+                    "\"*\":",
+                    "  - download"
+                )
+            ).readYamlMapping()
         );
-        return res;
     }
 
-    private Path publicRepo() throws IOException {
-        final Path res = Files.createTempFile(this.temp, "repo", "yml");
-        Files.write(
-            res,
-            String.join(
-                "\n",
-                "repo:",
-                "  permissions:",
-                "    \"*\":",
-                "      - \"*\""
-            ).getBytes(StandardCharsets.UTF_8)
-        );
-        return res;
+    private YamlPermissions allAllowedPermissions() throws IOException {
+        return new YamlPermissions(Yaml.createYamlInput("\"*\":\n  - \"*\"").readYamlMapping());
     }
 
 }
