@@ -123,6 +123,11 @@ meta:
     interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
+## External API Support
+
+Artipie partly supports artifactory API to manage repositories and users, API is fully 
+documented [here](./ARTIFACTORY_API_SUPPORT.md).
+
 ## Additional configuration
 
 You may want configure it via environment variables:
