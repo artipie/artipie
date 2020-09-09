@@ -1,4 +1,4 @@
-# Artifactory API support
+# Artifactory API Support
 
 Artipie supports artifactory API to manage repositories, users and repository permissions.
 
@@ -19,14 +19,16 @@ dockerApiVersion | string | Docker API version, we only support `V2` | Y
 
 Possible responses:
 - `200 OK` when new repository was successfully created
-- `400 BAD REQUIEST` in the cases when repository with such name already exists or invalid json was sent
+- `400 BAD REQUEST` in the cases when repository with such name already exists or invalid json was sent
 - `500 INTERNAL ERROR` in the case of unexpected server error
+
+Artifactory documentation can be found [here](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-CreateRepository). 
 
 ## Users
 
-### Get the users list
+### Get Users
 
-Endpoint to obtain list of the existing users.
+Endpoint to obtain [list](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-GetUsers) of the existing users.
 
 > **GET** /api/security/users
 
@@ -36,19 +38,19 @@ Returns json array of the following form:
   {
     "name": "davids",
     "uri" : "http://localhost:8081/artifactory/api/security/users/davids",
-    "realm" : "internal"
+    "realm" : "Internal"
   }, {
     "name": "danl",
     "uri" : "http://localhost:8081/artifactory/api/security/users/danl",
-    "realm" : "internal"
+    "realm" : "Internal"
   }
 ]
 ```
-Where `name` field contains user name, `uri` - URI to obtain user details, user `realm` is always `internal`.
+Where `name` field contains user name, `uri` - URI to obtain user details, user `realm` is always `Internal`.
 
 ### Get User Details
 
-Endpoint to obtain user details.
+Endpoint to obtain [user details](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-GetUserDetails).
 
 > **GET** /api/security/users/{userName}
 
