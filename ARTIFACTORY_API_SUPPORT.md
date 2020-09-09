@@ -67,7 +67,7 @@ If user is not found `404 NOT FOUND` status is returned.
 
 ### Create Or Update User
 
-[Creates, replaces](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-CreateorReplaceUser) or [updates](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-UpdateUser) user with {userName} from request URL.
+[Creates, replaces](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-CreateorReplaceUser) or [updates](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-UpdateUser) user with `{userName}` from request URL.
 
 > **PUT**/**POST** /api/security/users/{userName}
 
@@ -89,7 +89,7 @@ Possible responses:
 > **DELETE** /api/security/users/{userName}
 
 Possible responses:
-- `200 OK User '{userName}' has been removed successfully.` when user {userName} was successfully removed
+- `200 OK User '{userName}' has been removed successfully.` when user `{userName}` was successfully removed
 - `404 NOT FOUND` when user was not found
 - `500 INTERNAL ERROR` in the case of unexpected server error
 
