@@ -147,7 +147,6 @@ public class ArtipieServer {
                             .add("path", ArtipieServer.CREDENTIALS_FILE)
                             .build()
                     )
-                    .add("layout", "flat")
                     .build()
             ).build().toString().getBytes()
         );
