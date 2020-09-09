@@ -48,7 +48,7 @@ Where `name` field contains user name, `uri` - URI to obtain user details, user 
 
 ### Get User Details
 
-Endpoint to obtain user details
+Endpoint to obtain user details.
 
 > **GET** /api/security/users/{userName}
 
