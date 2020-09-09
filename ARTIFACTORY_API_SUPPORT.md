@@ -89,7 +89,7 @@ Possible responses:
 > **DELETE** /api/security/users/{userName}
 
 Possible responses:
-- `200 OK User '{userName}' has been removed successfully.` when user `{userName}` was successfully removed
+- `200 OK User '{userName}' has been removed successfully.` when user with `{userName}` was successfully removed
 - `404 NOT FOUND` when user was not found
 - `500 INTERNAL ERROR` in the case of unexpected server error
 
