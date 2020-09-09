@@ -98,7 +98,7 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.GET),
                                     (line, headers) -> URLEncodedUtils.parse(
                                         new RequestLineFrom(line).uri(),
-                                        StandardCharsets.UTF_8.displayName()
+                                        StandardCharsets.UTF_8
                                     ).stream().anyMatch(pair -> "repo".equals(pair.getName()))
                                 ),
                                 (line, headers, body) -> {
@@ -116,13 +116,13 @@ public final class ArtipieApi extends Slice.Wrap {
                                                 matcher.group("user"),
                                                 URLEncodedUtils.parse(
                                                     new RequestLineFrom(line).uri(),
-                                                    StandardCharsets.UTF_8.displayName()
+                                                    StandardCharsets.UTF_8
                                                 ).stream()
                                                     .filter(pair -> "repo".equals(pair.getName()))
                                                     .findFirst().orElseThrow().getValue(),
                                                 URLEncodedUtils.parse(
                                                     new RequestLineFrom(line).uri(),
-                                                    StandardCharsets.UTF_8.displayName()
+                                                    StandardCharsets.UTF_8
                                                 ).stream()
                                                     .filter(pair -> "type".equals(pair.getName()))
                                                     .findFirst().map(NameValuePair::getValue)
