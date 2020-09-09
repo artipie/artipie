@@ -1,0 +1,60 @@
+name: Docker Release and Run Benchmarks
+on:
+  create:
+    tags:
+      - .*
+jobs:
+  docker-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set env
+        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
+      - name: Publish Image to Docker Registry
+        uses: elgohr/Publish-Docker-Github-Action@2.19
+        with:
+          name: ${{ secrets.DOCKERHUB_REPO }}
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          cache: true
+          tags: "latest,${{ env.RELEASE_VERSION }}"
+      - name: Publish Image to Artipie Registry
+        uses: elgohr/Publish-Docker-Github-Action@2.19
+        with:
+          name: central.artipie.com/artipie/docker
+          username: ${{ secrets.ARTIPIE_USERNAME }}
+          password: ${{ secrets.ARTIPIE_PASSWORD }}
+          cache: true
+          tags: "latest,${{ env.RELEASE_VERSION }}"
+  run-benchmarks:
+    runs-on: ubuntu-latest
+    needs: docker-publish
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+        with:
+          ref: gh-pages
+      - name: Set env
+        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
+      - name: Run benchmarks
+        id: run_benchmarks
+        uses: artipie/benchmarks@master
+        with:
+          aws-access-key: '${{ secrets.PERF_AWS_ACCESS_KEY }}'
+          aws-secret-key: '${{ secrets.PERF_AWS_SECRET_KEY }}'
+          version: '${{ env.RELEASE_VERSION }}'
+      - name: Commit benchmark results
+        run: |
+          export REPORT=${{ steps.run_benchmarks.outputs.report }}
+          export VERSION=${{ env.RELEASE_VERSION }}
+          mkdir -p benchmarks/$VERSION
+          mv $REPORT benchmarks/$VERSION/
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add benchmarks/$VERSION/$REPORT
+          git commit -m "Add benchmark results for version=$VERSION"
+      - name: Push benchmark results
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: 'gh-pages'

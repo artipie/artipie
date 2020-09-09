@@ -1,0 +1,17 @@
+{
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "http://localhost:8080/my-php"
+    },
+    {
+      "packagist": false
+    }
+  ],
+  "require": {
+    "artipie/sample_composer_package": "1.0"
+  },
+  "config": {
+    "secure-http": false
+  }
+}

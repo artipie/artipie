@@ -23,8 +23,14 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
+import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.auth.Authentication;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Application settings.
@@ -32,6 +38,7 @@ import java.io.IOException;
  * @since 0.1
  */
 public interface Settings {
+
     /**
      * Provides a storage.
      *
@@ -39,4 +46,129 @@ public interface Settings {
      * @throws IOException In case of problems with reading settings.
      */
     Storage storage() throws IOException;
+
+    /**
+     * Provides authorization.
+     *
+     * @return Authentication instance
+     */
+    CompletionStage<Authentication> auth();
+
+    /**
+     * Repository layout.
+     * @return Repository layout
+     * @throws IOException If failet to parse settings
+     */
+    String layout() throws IOException;
+
+    /**
+     * Artipie meta configuration.
+     * @return Yaml mapping
+     * @throws IOException On error
+     */
+    YamlMapping meta() throws IOException;
+
+    /**
+     * Artipie credentials.
+     * @return Completion action with credentials
+     */
+    CompletionStage<Credentials> credentials();
+
+    /**
+     * Fake {@link Settings} using a file storage.
+     *
+     * @since 0.2
+     */
+    final class Fake implements Settings {
+
+        /**
+         * Storage.
+         */
+        private final Storage storage;
+
+        /**
+         * Credentials.
+         */
+        private final Credentials cred;
+
+        /**
+         * Yaml `meta` mapping.
+         */
+        private final YamlMapping meta;
+
+        /**
+         * Ctor.
+         */
+        public Fake() {
+            this(
+                new InMemoryStorage(), new Credentials.FromEnv(),
+                Yaml.createYamlMappingBuilder().build()
+            );
+        }
+
+        /**
+         * Ctor.
+         *
+         * @param storage Storage
+         */
+        public Fake(final Storage storage) {
+            this(storage, new Credentials.FromEnv(), Yaml.createYamlMappingBuilder().build());
+        }
+
+        /**
+         * Ctor.
+         *
+         * @param cred Credentials
+         */
+        public Fake(final Credentials cred) {
+            this(new InMemoryStorage(), cred, Yaml.createYamlMappingBuilder().build());
+        }
+
+        /**
+         * Ctor.
+         *
+         * @param cred Credentials
+         * @param meta Yaml `meta` mapping
+         */
+        public Fake(final Credentials cred, final YamlMapping meta) {
+            this(new InMemoryStorage(), cred, meta);
+        }
+
+        /**
+         * Primary ctor.
+         *  @param storage Storage
+         * @param cred Credentials
+         * @param meta Yaml `meta` mapping
+         */
+        public Fake(final Storage storage, final Credentials cred, final YamlMapping meta) {
+            this.storage = storage;
+            this.cred = cred;
+            this.meta = meta;
+        }
+
+        @Override
+        public Storage storage() {
+            return this.storage;
+        }
+
+        @Override
+        public CompletionStage<Authentication> auth() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String layout() {
+            return "flat";
+        }
+
+        @Override
+        public YamlMapping meta() {
+            return this.meta;
+        }
+
+        @Override
+        public CompletionStage<Credentials> credentials() {
+            return CompletableFuture.completedFuture(this.cred);
+        }
+    }
 }

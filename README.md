@@ -1,186 +1,133 @@
 <img src="https://www.artipie.com/logo.svg" width="64px" height="64px"/>
 
 [![EO principles respected here](https://www.elegantobjects.org/badge.svg)](https://www.elegantobjects.org)
-[![DevOps By Rultor.com](http://www.rultor.com/b/yegor256/artipie)](http://www.rultor.com/p/yegor256/artipie)
+[![DevOps By Rultor.com](http://www.rultor.com/b/artipie/artipie)](http://www.rultor.com/p/artipie/artipie)
 [![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
 
-[![Build Status](https://img.shields.io/travis/yegor256/artipie/master.svg)](https://travis-ci.org/yegor256/artipie)
-[![Javadoc](http://www.javadoc.io/badge/com.yegor256/artipie.svg)](http://www.javadoc.io/doc/com.yegor256/artipie)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/yegor256/artipie/blob/master/LICENSE.txt)
-[![Hits-of-Code](https://hitsofcode.com/github/yegor256/artipie)](https://hitsofcode.com/view/github/yegor256/artipie)
-[![Maven Central](https://img.shields.io/maven-central/v/com.yegor256/artipie.svg)](https://maven-badges.herokuapp.com/maven-central/com.yegor256/artipie)
-[![PDD status](http://www.0pdd.com/svg?name=yegor256/artipie)](http://www.0pdd.com/p?name=yegor256/artipie)
+[![Build Status](https://img.shields.io/travis/artipie/artipie/master.svg)](https://travis-ci.org/artipie/artipie)
+![Docker Pulls](https://img.shields.io/docker/pulls/artipie/artipie)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
+[![Hits-of-Code](https://hitsofcode.com/github/artipie/artipie)](https://hitsofcode.com/view/github/artipie/artipie)
+![Docker Image Version (latest by date)](https://img.shields.io/docker/v/artipie/artipie?label=DockerHub&sort=date)
+[![PDD status](http://www.0pdd.com/svg?name=artipie/artipie)](http://www.0pdd.com/p?name=artipie/artipie)
 
-This is a simple experimental binary artifacts manager.
+Artipie is an experimental binary artifact management tool, similar to
+[Artifactory](https://jfrog.com/artifactory/),
+[Nexus](https://www.sonatype.com/product-nexus-repository),
+[Archiva](https://archiva.apache.org/),
+[ProGet](https://inedo.com/proget),
+and many others.
+The following set of features makes Artipie unique among all others:
 
-## How does it work
+  * It is open source ([MIT license](https://github.com/artipie/artipie/blob/master/LICENSE.txt))
+  * It is horizontally scalable, you can add servers easily
+  * It is written in reactive Java (using [Vert.x](https://vertx.io/))
+  * It supports
+    [Maven](./examples/maven),
+    [Docker](./examples/docker),
+    [Rubygems](./examples/gem),
+    [Go](./examples/go),
+    [Helm](./examples/helm),
+    [Npm](./examples/npm),
+    [NuGet](./examples/nuget),
+    [Composer](./examples/php),
+    [Pip](./examples/pypi),
+    [Rpm](./examples/rpm),
+    and [others](./examples)
+  * It is database-free
+  * It can host the data in the file system,
+    [Amazon S3](https://aws.amazon.com/s3/),
+    [Google Cloud](https://cloud.google.com/products/storage/),
+    [HuaweiCloud OBS](https://www.huaweicloud.com/en-us/product/obs.html) etc.
+  * Its quality of Java code is extraordinary high :)
 
-Artipie uses external server implementation to start itself,
-one of possible servers is https://github.com/artipie/vertx-server/
+The fastest way to start using Artipie is via
+[Docker](https://docs.docker.com/get-docker/). First,
+create a new directory `artipie` and `repo` sub-directory inside it. Then, put your
+YAML config file into the `repo` sub-dir. Make sure that the name of your config file
+is the name of repository you are going to host, and its name matches `[a-z0-9_]{3,32}`.
+For example `foo.yaml`:
 
-Server accepts `Slice` interface and serves all requests to encapsulated `Slice`.
-Server can be started with a single adapter module (since all adapters implement `Slice` interface)
-or with Artipie assembly.
-
-Artipie reads server settings from yaml file and constructs
-`Storage` to read repositories configurations.
-
-On each request it reads repository name from request URI path
-and finds related repo configuration in `Storage`. Repo configuration
-knows repo type (e.g. `maven` or `docker`) and storage settings for repo
-(different repos may have different storage back ends).
-After reading repo config it constructs new `Slice` for config
-and proxies current request to this slice.
-
-### Run Artipie as a Docker image
-
-Create new directory for Artipie storage, `cd` into this directory.
-Create subdirectory with `repo` name. Put all repository configuration files to
-`repo` directory, the name of config file is the name of repository.
-Start Docker container with mounting current directory to `/var/artipie`:
-```bash
-docker run -v $PWD:/var/artipie -p 80:80 artipie/artipie:0.1.2
-```
-
-### Setup the server manually
-
-Create primary server configuration file with location to repositories config directory:
-```yaml
-meta:
-  storage:
-    type: fs
-    path: /var/artipie/repositories
-```
-
-Repositories config contains configuration files for each repository, the name of the file is the name of repository:
 ```yaml
 repo:
-  type:
-    maven
+  type: maven
   storage:
     type: fs
-    path: /var/artipie/maven
+    path: /var/artipie
 ```
 
-### Examples
+Now, go back to `artipie` and start the container:
 
-NPM-js registry. First create the directory for repository configs `mkdir /tmp/artipie`,
-actual repository configurations: `mkdir /tmp/artipie/repos` and repository data:
-`mkdir /tmp/artipie/data`.
-Put yaml config for Artipie server into `/tmp/artipie/config.yaml`:
+```bash
+$ docker run -p 8080:80 artipie/artipie:latest
+```
+
+You should be able to use it with [Maven](https://maven.apache.org/)
+at `http://localhost:8080`.
+
+More examples are [here](./examples).
+
+We recommend you read the "Architecture" section in our
+[White Paper](https://github.com/artipie/white-paper) to fully
+understand how Artipie is designed.
+
+## Multitenancy
+
+You may want to run Artipie for your company, which has a few teams.
+Each team may want to have its own repository. To do this, you create
+a global configuration file `/etc/artipie.yml`:
+
 ```yaml
 meta:
+  layout: org
   storage:
     type: fs
-    path: /tmp/artipie/repos
+    path: /tmp/artipie/data/my-docker
+  credentials:
+    type: file
+    path: _credentials.yml
 ```
-Create NPM repository configuration file in `/tmp/artipie/repos/npm.yaml`:
+
+If the `type` is set to `file`, another YAML file is required in the storage, with
+a list of users who will be allowed to create repos
+(each `pass` is combination or either `plain` or `sha256` and a text):
+
+
 ```yaml
-repo:
-  type: npm
-  storage:
-    type: fs
-    path: /tmp/artipie/data
+credentials:
+  jane:
+    pass: "plain:qwerty"
+  john:
+    pass: "sha256:xxxxxxxxxxxxxxxxxxxxxxx"
 ```
 
-Before running the server make sure your java version is >= 11 version: `java -version`.
+If the `type` is set to `env`, the following environment variables are expected:
+`ARTIPIE_USER_NAME` and `ARTIPIE_USER_PASS`. For example, you start
+Docker container with the `-e` option:
 
-Build Artipie server if needed: `mvn clean package` and run it with command:
 ```bash
-java -jar ./target/artipie-jar-with-dependencies.jar --config-file=/tmp/artipie/config.yaml --port=8080
+docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
+  -e ARTIPIE_USER_NAME=artipie -e ARTIPIE_USER_PASS=qwerty \
+  artipie/artipie:latest
 ```
 
-Then go into your npm project and publish it to local registry using command:
-```bash
-npm publish --registry=http://localhost:8080/npm
-```
+## Metrics
 
+You may enable some basic metrics collecting and periodic publishing to application log
+by adding `metrics` to `meta` section of global configuration file `/etc/artipie.yml`:
 
-### Artipie architecture
-
-See the [white-paper](https://github.com/artipie/white-paper) "architecture" section
-for platform design.
-
-Main components of Artipie software are:
- - Adapter: this component works with single binary artifact format, e.g.
- Maven-adapter or Docker-adapter. Adapter usually consist of two logical parts:
- front-end and back-end. The back-end of adapter works with binary artifacts
- and its metadata. It can be used independently as a library to store artifacts
- and generate metadata. It uses `Storage` from `artipie/asto` as a storage.
- Front-end of adapter implements `Slice` interface from `artipie/http` module.
- It handles incoming HTTP requests, process it using back-end objects, and
- generate HTTP responses.
- - Storage: Artipie uses abstract key-value storage `artipie/asto` in all modules.
- Storage support atomic transactional operations and it's thread safe.
- Artipie has multiple storage implementations: in-memory storage,
- file-system storage, AWS S3 storage. Storage can be used to store binary artifacts
- or for configuration files.
- - Artipie: configured assembly of adapters. Artipie can be configured to read
- repository configuration files from the storage. Artipie can find configuration
- file by repository as a key name. Artipie implements `Slice` interface and can
- handle HTTP requests. It reads repository name from request URI path,
- finds configuration for adapter, constructs appropriate storage for adapter,
- and redirects the request to adapter.
- - Web server: any `Slice` implementation (Artipie or single module) can be used
- as a back-end for web server. We require the server to be reactive and to support
- non-blocking network IO operations. One of possible implementations is
- [vertx-server](https://github.com/artipie/vertx-server/).
-
-### Configuration
-
-Artipie should be configured before startup.
-Main meta configuration `yaml` file should contain storage config,
-where adapter configuration files are located. Storage back-end
-can be either `fs` or `s3`. File-system `fs` storage uses local
-file system to store key-value data. AWS `s3` storage uses S3 cloud
-service to store data in blobs.
 ```yaml
 meta:
-  # configuration storage
-  storage:
-    # storage type (either `fs` or `s3`)
-    type: fs
-    path: /artipie/storage
+  metrics:
+    type: log # Metrics type, for now only `log` type is supported
+    interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
-Meta storage contains adapters configuration, where key is a repository name,
-and value is adapter config `yaml` file:
-```text
-config storage
-├── maven-repo
-├── docker-one
-├── hello-npm
-└── rpm
-```
-Each configuration file should specify what type of repository should be used
-(adapter), and storage configuration (each repository may reference to different storage).
-```yaml
-repo:
-  type:
-    maven
-  storage:
-    type: s3
-    url: s3://acme.com/snapshot
-    username: admin
-    password: 123qwe
-```
+## Additional configuration
 
-### Deployment
+You may want configure it via environment variables:
 
-To build Artipie application you need to have JDK 11 version or higher,
-Maven 3.2+. Optionally you may need Docker installed to build container image.
-
-## How to contribute
-
-Fork repository, make changes, send us a pull request. We will review
-your changes and apply them to the `master` branch shortly, provided
-they don't violate our quality standards. To avoid frustration, before
-sending us your pull request please run full Maven build:
-
-```
-$ mvn clean install -Pqulice
-```
-
-To avoid build errors use Maven 3.2+.
+  - `SSL_TRUSTALL` - trust all unkown certificates
 
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.
+

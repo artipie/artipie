@@ -23,13 +23,21 @@
  */
 package com.artipie;
 
-import com.artipie.asto.fs.FileStorage;
-import com.artipie.asto.s3.S3Storage;
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsInstanceOf;
+import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -38,6 +46,8 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * @since 0.1
  * @checkstyle MethodNameCheck (500 lines)
+ * @todo #187:30min Add a test for layout structure, it can be either `flat` or `org`. If it's
+ *  omitted, it should treated as a `flat` layout. See RepoLayout javadocs for more details.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class YamlSettingsTest {
@@ -45,11 +55,11 @@ class YamlSettingsTest {
     @Test
     public void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            "meta:\n  storage:\n    type: fs\n    path: /artipie/storage\n"
+            this.config("some/path", "env", Optional.empty())
         );
         MatcherAssert.assertThat(
             settings.storage(),
-            Matchers.instanceOf(FileStorage.class)
+            Matchers.notNullValue()
         );
     }
 
@@ -72,7 +82,61 @@ class YamlSettingsTest {
         );
         MatcherAssert.assertThat(
             settings.storage(),
-            Matchers.instanceOf(S3Storage.class)
+            Matchers.notNullValue()
+        );
+    }
+
+    @Test
+    public void shouldCreateAuthFromEnv() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            this.config("some/path", "env", Optional.empty())
+        );
+        MatcherAssert.assertThat(
+            settings.auth().toCompletableFuture().get().toString(),
+            new StringContains("AuthFromEnv")
+        );
+    }
+
+    @Test
+    public void shouldCreateAuthFromYaml(@TempDir final Path tmp)
+        throws Exception {
+        final String fname = "_cred.yml";
+        final YamlSettings settings = new YamlSettings(
+            this.config(tmp.toString(), "file", Optional.of(fname))
+        );
+        final Path yaml = tmp.resolve(fname);
+        Files.writeString(yaml, this.credentials());
+        MatcherAssert.assertThat(
+            settings.auth().toCompletableFuture().get().toString(),
+            new StringContains("AuthFromYaml")
+        );
+    }
+
+    @Test
+    public void returnsCredentials(@TempDir final Path tmp) throws IOException {
+        final String fname = "_cred.yml";
+        final YamlSettings settings = new YamlSettings(
+            this.config(tmp.toString(), "file", Optional.of(fname))
+        );
+        final Path yaml = tmp.resolve(fname);
+        Files.writeString(yaml, this.credentials());
+        MatcherAssert.assertThat(
+            settings.credentials().toCompletableFuture().join(),
+            new IsInstanceOf(Credentials.FromStorageYaml.class)
+        );
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenPathIsNotSet() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            this.config("some/path", "file", Optional.empty())
+        );
+        MatcherAssert.assertThat(
+            Assertions.assertThrows(
+                ExecutionException.class,
+                () -> settings.auth().toCompletableFuture().get()
+            ).getCause(),
+            new IsInstanceOf(RuntimeException.class)
         );
     }
 
@@ -81,6 +145,17 @@ class YamlSettingsTest {
     public void shouldFailProvideStorageFromBadYaml(final String yaml) {
         final YamlSettings settings = new YamlSettings(yaml);
         Assertions.assertThrows(RuntimeException.class, settings::storage);
+    }
+
+    private String credentials() {
+        return Yaml.createYamlMappingBuilder().add(
+            "credentials",
+            Yaml.createYamlMappingBuilder()
+                .add(
+                    "john",
+                    Yaml.createYamlMappingBuilder().add("password", "plain:123").build()
+                ).build()
+        ).build().toString();
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
@@ -104,5 +179,21 @@ class YamlSettingsTest {
                 "      type: unknown\n"
             )
         );
+    }
+
+    private String config(final String stpath, final String type, final Optional<String> path) {
+        final YamlMappingBuilder creds = path.map(
+            val -> Yaml.createYamlMappingBuilder().add("type", type).add("path", val)
+        ).orElse(Yaml.createYamlMappingBuilder().add("type", type));
+        return Yaml.createYamlMappingBuilder()
+            .add(
+                "meta",
+                Yaml.createYamlMappingBuilder().add(
+                    "storage",
+                    Yaml.createYamlMappingBuilder()
+                        .add("type", "fs")
+                        .add("path", stpath).build()
+                ).add("credentials", creds.build()).build()
+            ).build().toString();
     }
 }

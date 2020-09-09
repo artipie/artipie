@@ -23,60 +23,71 @@
  */
 package com.artipie;
 
-import java.io.File;
+import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.asto.test.TestResource;
+import java.io.IOException;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.llorllale.cactoos.matchers.MatcherOf;
 
 /**
- * Test for {@link RpPermissions}.
+ * Test for {@link YamlPermissions}.
  * @since 0.2
  * @checkstyle LeftCurlyCheck (500 lines)
  */
-@Disabled
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RpPermissionsTest {
 
-    /**
-     * Test configuration file location.
-     */
-    private static final String CONF_YAML = "src/test/resources/repo_permissions.yml";
-
     @Test
-    void johnCanDownloadDeployAndDelete() {
-        final String uname = "John";
+    void johnCanDownloadDeployAndDelete() throws Exception {
+        final String uname = "john";
         MatcherAssert.assertThat(
-            new RpPermissions(new File(RpPermissionsTest.CONF_YAML)),
-            new AllOf<>(
-                new ListOf<>(
+            this.permissions(),
+            new AllOf<YamlPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "delete"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
-                    new MatcherOf<>(perm -> { return !perm.allowed(uname, "install"); })
+                    new MatcherOf<>(perm -> !perm.allowed(uname, "install"))
                 )
             )
         );
     }
 
     @Test
-    void anyoneCanDownload() {
+    void janeCanDownloadAndDeploy() throws Exception {
+        final String uname = "jane";
         MatcherAssert.assertThat(
-            new RpPermissions(new File(RpPermissionsTest.CONF_YAML)).allowed("anyone", "download"),
+            this.permissions(),
+            new AllOf<YamlPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
+                    new MatcherOf<>(perm -> !perm.allowed(uname, "install")),
+                    new MatcherOf<>(perm -> !perm.allowed(uname, "update"))
+                )
+            )
+        );
+    }
+
+    @Test
+    void anyoneCanDownload() throws Exception {
+        MatcherAssert.assertThat(
+            this.permissions().allowed("anyone", "download"),
             new IsEqual<>(true)
         );
     }
 
     @Test
-    void adminCanDoAnything() {
+    void adminCanDoAnything() throws Exception {
         final String uname = "admin";
         MatcherAssert.assertThat(
-            new RpPermissions(new File(RpPermissionsTest.CONF_YAML)),
-            new AllOf<>(
-                new ListOf<>(
+            this.permissions(),
+            new AllOf<YamlPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "delete"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
@@ -86,4 +97,17 @@ class RpPermissionsTest {
         );
     }
 
+    /**
+     * Permissions from repo-full-config.yml example file.
+     *
+     * @return Permissions parsed from file.
+     */
+    private YamlPermissions permissions() throws IOException {
+        return new YamlPermissions(
+            Yaml.createYamlInput(new TestResource("repo-full-config.yml").asPath().toFile())
+                .readYamlMapping()
+                .yamlMapping("repo")
+                .yamlMapping("permissions")
+        );
+    }
 }

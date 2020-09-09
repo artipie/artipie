@@ -1,0 +1,6 @@
+repo:
+  path: "/npm_repo/"
+  type: npm
+  storage:
+    type: fs
+    path: /var/artipie/data

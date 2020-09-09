@@ -1,0 +1,5 @@
+repo:
+  type: go
+  storage:
+    type: fs
+    path: /var/artipie/data

@@ -1,0 +1,5 @@
+repo:
+  type: gem
+  storage:
+    type: fs
+    path: /var/artipie/data

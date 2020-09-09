@@ -24,13 +24,23 @@
 
 package com.artipie;
 
-import com.artipie.http.Slice;
+import com.artipie.http.Pie;
+import com.artipie.http.TrafficMetricSlice;
+import com.artipie.metrics.Metrics;
+import com.artipie.metrics.MetricsFromConfig;
+import com.artipie.metrics.PrefixedMetrics;
+import com.artipie.metrics.nop.NopMetrics;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
+import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -40,13 +50,21 @@ import org.apache.commons.cli.ParseException;
 /**
  * Vertx server entry point.
  * @since 1.0
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
-public final class VertxMain implements Runnable {
+@SuppressWarnings("PMD.PrematureDeclaration")
+public final class VertxMain {
 
     /**
-     * Slice to serve.
+     * The Vert.x instance.
      */
-    private final Slice slice;
+    private final Vertx vertx;
+
+    /**
+     * Config file path.
+     */
+    private final Path config;
 
     /**
      * Server port.
@@ -54,29 +72,52 @@ public final class VertxMain implements Runnable {
     private final int port;
 
     /**
+     * Server.
+     */
+    private VertxSliceServer server;
+
+    /**
      * Ctor.
-     * @param slice To server
+     * @param config Config file path.
+     * @param vertx The Vert.x instance.
      * @param port HTTP port
      */
-    private VertxMain(final Slice slice, final int port) {
-        this.slice = slice;
+    public VertxMain(final Path config, final Vertx vertx, final int port) {
+        this.config = config;
+        this.vertx = vertx;
         this.port = port;
     }
 
-    @Override
-    public void run() {
-        try (VertxSliceServer srv = new VertxSliceServer(this.slice, this.port)) {
-            srv.start();
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    // @checkstyle MagicNumberCheck (1 line)
-                    Thread.sleep(100);
-                } catch (final InterruptedException iox) {
-                    Logger.info(this, "interrupted: %s", iox);
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
+    /**
+     * Starts the server.
+     *
+     * @return Port the servers listening on.
+     * @throws IOException In case of error reading settings.
+     */
+    public int start() throws IOException {
+        final Settings settings = settings(this.config);
+        final Metrics metrics = metrics(settings);
+        this.server = new VertxSliceServer(
+            this.vertx,
+            new TrafficMetricSlice(
+                new ResponseMetricsSlice(
+                    new Pie(settings),
+                    new PrefixedMetrics(metrics, "http.response.")
+                ),
+                new PrefixedMetrics(metrics, "http.")
+            ),
+            this.port
+        );
+        final int prt = this.server.start();
+        Logger.info(VertxMain.class, "Artipie was started on port %d", prt);
+        return prt;
+    }
+
+    /**
+     * Stops server releasing all resources.
+     */
+    public void stop() {
+        Optional.ofNullable(this.server).ifPresent(VertxSliceServer::stop);
     }
 
     /**
@@ -86,7 +127,8 @@ public final class VertxMain implements Runnable {
      * @throws ParseException If fails
      */
     public static void main(final String... args) throws IOException, ParseException {
-        final String storage;
+        final Vertx vertx = Vertx.vertx();
+        final Path config;
         final int port;
         final int defp = 80;
         final Options options = new Options();
@@ -103,17 +145,56 @@ public final class VertxMain implements Runnable {
             port = defp;
         }
         if (cmd.hasOption(fopt)) {
-            storage = cmd.getOptionValue(fopt);
+            config = Path.of(cmd.getOptionValue(fopt));
         } else {
             throw new IllegalStateException("Storage is not configured");
         }
-        new VertxMain(
-            new Pie(
-                new YamlSettings(
-                    Files.readString(Path.of(storage), Charset.defaultCharset())
+        new VertxMain(config, vertx, port).start();
+    }
+
+    /**
+     * Find artipie settings.
+     * @param path Settings path
+     * @return Settings instance
+     * @throws IOException On read error
+     * @todo #284:30min Extract this method to separate class and write proper unit tests
+     *  for that. Also add tests for `JavaResource` class which is used to copy resources.
+     */
+    private static Settings settings(final Path path) throws IOException {
+        if (!Files.exists(path)) {
+            new JavaResource("example/artipie.yaml").copy(path);
+            Files.createDirectory(Paths.get("./repo"));
+            final List<String> resources = Arrays.asList(
+                "_credentials.yaml", "_storages.yaml", "_permissions.yaml"
+            );
+            for (final String res : resources) {
+                new JavaResource(String.format("example/repo/%s", res))
+                    .copy(Paths.get(String.format("./repo/%s", res)));
+            }
+            Logger.info(
+                VertxMain.class,
+                String.join(
+                    " ",
+                    "Settings were not found, creating default.",
+                    "Default username/password: `artipie`/`artipie`. ",
+                    "Check the dashboard at http://localhost/dashboard/artipie"
                 )
-            ),
-            port
-        ).run();
+            );
+        }
+        return new YamlSettings(Files.readString(path, StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Creates and initialize metrics from settings.
+     *
+     * @param settings Settings.
+     * @return Metrics.
+     * @throws IOException In case of I/O error reading settings.
+     */
+    private static Metrics metrics(final Settings settings) throws IOException {
+        return Optional.ofNullable(settings.meta())
+            .map(meta -> meta.yamlMapping("metrics"))
+            .<Metrics>map(root -> new MetricsFromConfig(root).metrics())
+            .orElse(NopMetrics.INSTANCE);
     }
 }

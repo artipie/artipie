@@ -1,0 +1,173 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 artipie.com
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.artipie.http;
+
+import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.Credentials;
+import com.artipie.Settings;
+import com.artipie.asto.Content;
+import com.artipie.asto.Storage;
+import com.artipie.http.auth.Authentication;
+import com.artipie.http.headers.Authorization;
+import com.artipie.http.hm.AssertSlice;
+import com.artipie.http.hm.RqLineHasUri;
+import com.artipie.http.hm.RsHasHeaders;
+import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.hm.SliceHasResponse;
+import com.artipie.http.rq.RequestLine;
+import com.artipie.http.rq.RqMethod;
+import com.artipie.http.rs.RsStatus;
+import io.reactivex.Flowable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.AllOf;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Test case for {@link DockerRoutingSlice}.
+ *
+ * @since 0.9
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ */
+final class DockerRoutingSliceTest {
+
+    @Test
+    void removesDockerPrefix() throws Exception {
+        verify(
+            new DockerRoutingSlice(
+                new Settings.Fake(),
+                new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/foo/bar")))
+            ),
+            "/v2/foo/bar"
+        );
+    }
+
+    @Test
+    void ignoresNonDockerRequests() throws Exception {
+        final String path = "/repo/name";
+        verify(
+            new DockerRoutingSlice(
+                new Settings.Fake(),
+                new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath(path)))
+            ),
+            path
+        );
+    }
+
+    @Test
+    void emptyDockerRequest() {
+        final String username = "alice";
+        final String password = "letmein";
+        MatcherAssert.assertThat(
+            new DockerRoutingSlice(
+                new SettingsWithAuth(new Authentication.Single(username, password)),
+                (line, headers, body) -> {
+                    throw new UnsupportedOperationException();
+                }
+            ),
+            new SliceHasResponse(
+                new AllOf<>(
+                    Arrays.asList(
+                        new RsHasStatus(RsStatus.OK),
+                        new RsHasHeaders(
+                            new Headers.From("Docker-Distribution-API-Version", "registry/2.0")
+                        )
+                    )
+                ),
+                new RequestLine(RqMethod.GET, "/v2/"),
+                new Headers.From(new Authorization.Basic(username, password)),
+                Content.EMPTY
+            )
+        );
+    }
+
+    @Test
+    void revertsDockerRequest() throws Exception {
+        final String path = "/v2/one/two";
+        verify(
+            new DockerRoutingSlice(
+                new Settings.Fake(),
+                new DockerRoutingSlice.Reverted(
+                    new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath(path)))
+                )
+            ),
+            path
+        );
+    }
+
+    private static void verify(final Slice slice, final String path) throws Exception {
+        slice.response(
+            new RequestLine(RqMethod.GET, path).toString(),
+            Collections.emptyList(), Flowable.empty()
+        ).send(
+            (status, headers, body) -> CompletableFuture.completedFuture(null)
+        ).toCompletableFuture().get();
+    }
+
+    /**
+     * Fake settings with auth.
+     *
+     * @since 0.10
+     */
+    private static class SettingsWithAuth implements Settings {
+
+        /**
+         * Authentication.
+         */
+        @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
+        private final Authentication auth;
+
+        SettingsWithAuth(final Authentication auth) {
+            this.auth = auth;
+        }
+
+        @Override
+        public Storage storage() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CompletionStage<Authentication> auth() {
+            return CompletableFuture.completedFuture(this.auth);
+        }
+
+        @Override
+        public String layout() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public YamlMapping meta() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CompletionStage<Credentials> credentials() {
+            throw new UnsupportedOperationException();
+        }
+    }
+}

@@ -15,3 +15,5 @@ target/
 .project
 .vscode/
 .settings/
+.storage/data/**
+.storage/data/test/**

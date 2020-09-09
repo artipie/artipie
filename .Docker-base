@@ -1,0 +1,7 @@
+FROM maven:3.6.3-jdk-13
+WORKDIR /tmp/build
+RUN yum install git -y
+COPY pom.xml src/ ./
+RUN mvn versions:set -DnewVersion=1.0-SNAPSHOT && \
+  mvn package -Passembly
+RUN rm -fr /tmp/build

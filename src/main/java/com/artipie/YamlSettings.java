@@ -24,15 +24,35 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
+import com.artipie.auth.CachedAuth;
+import com.artipie.auth.GithubAuth;
+import com.artipie.http.auth.Authentication;
+import com.artipie.http.slice.KeyFromPath;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Settings built from YAML.
  *
  * @since 0.1
+ * @todo #285:30min Settings configuration for GitHub auth.
+ *  Add additional settings configuration for GitHub authentication,
+ *  now it's applied by default to auth from yaml using chained authentication, see auth()
+ *  method. We can configure this chain via settings and compose complex authentication
+ *  providers there. E.g. user can use ordered list of env auth, github auth
+ *  and auth from yaml file.
+ * @checkstyle ReturnCountCheck (500 lines)
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class YamlSettings implements Settings {
+
+    /**
+     * Meta section.
+     */
+    private static final String KEY_META = "meta";
 
     /**
      * YAML file content.
@@ -41,7 +61,6 @@ public final class YamlSettings implements Settings {
 
     /**
      * Ctor.
-     *
      * @param content YAML file content.
      */
     public YamlSettings(final String content) {
@@ -50,11 +69,91 @@ public final class YamlSettings implements Settings {
 
     @Override
     public Storage storage() throws IOException {
-        return new YamlStorageSettings(
-            Yaml.createYamlInput(this.content)
+        return new MeasuredStorage(
+            new YamlStorage(
+                Yaml.createYamlInput(this.content)
+                    .readYamlMapping()
+                    .yamlMapping(YamlSettings.KEY_META)
+                    .yamlMapping("storage")
+            ).storage()
+        );
+    }
+
+    @Override
+    public CompletionStage<Authentication> auth() {
+        return this.credentials().thenCompose(
+            Credentials::auth
+        ).thenApply(
+            auth -> new Authentication.Joined(new CachedAuth(new GithubAuth()), auth)
+        );
+    }
+
+    @Override
+    public String layout() throws IOException {
+        return Yaml.createYamlInput(this.content)
+            .readYamlMapping()
+            .yamlMapping(YamlSettings.KEY_META)
+            .string("layout");
+    }
+
+    @Override
+    public YamlMapping meta() throws IOException {
+        return Yaml.createYamlInput(this.content)
+            .readYamlMapping()
+            .yamlMapping(YamlSettings.KEY_META);
+    }
+
+    @Override
+    @SuppressWarnings("PMD.OnlyOneReturn")
+    public CompletionStage<Credentials> credentials() {
+        final YamlMapping cred;
+        try {
+            cred = Yaml.createYamlInput(this.content)
                 .readYamlMapping()
-                .yamlMapping("meta")
-                .yamlMapping("storage")
-        ).storage();
+                .yamlMapping(YamlSettings.KEY_META)
+                .yamlMapping("credentials");
+        } catch (final IOException err) {
+            return CompletableFuture.failedFuture(err);
+        }
+        final CompletionStage<Credentials> res;
+        final String path = "path";
+        if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
+            final Storage strg;
+            try {
+                strg = this.storage();
+            } catch (final IOException err) {
+                return CompletableFuture.failedFuture(err);
+            }
+            final KeyFromPath key = new KeyFromPath(cred.string(path));
+            res = strg.exists(key).thenApply(
+                exists -> {
+                    final Credentials creds;
+                    if (exists) {
+                        creds = new Credentials.FromStorageYaml(strg, key);
+                    } else {
+                        creds = new Credentials.FromEnv();
+                    }
+                    return creds;
+                }
+            );
+        } else if (YamlSettings.hasTypeFile(cred)) {
+            res = CompletableFuture.failedFuture(
+                new RuntimeException(
+                    "Invalid credentials configuration: type `file` requires `path`!"
+                )
+            );
+        } else {
+            res = CompletableFuture.completedStage(new Credentials.FromEnv());
+        }
+        return res;
+    }
+
+    /**
+     * Check that yaml has `type: file` mapping in the credentials setting.
+     * @param cred Credentials yaml section
+     * @return True if setting is present
+     */
+    private static boolean hasTypeFile(final YamlMapping cred) {
+        return cred != null && "file".equals(cred.string("type"));
     }
 }

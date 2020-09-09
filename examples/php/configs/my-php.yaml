@@ -1,0 +1,6 @@
+repo:
+  path: "/my-php"
+  type: php
+  storage:
+    type: fs
+    path: /var/artipie/data
