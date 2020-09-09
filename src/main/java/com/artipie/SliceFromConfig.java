@@ -136,7 +136,9 @@ public final class SliceFromConfig extends Slice.Wrap {
     static Slice build(final Settings settings, final Authentication auth,
         final RepoConfig cfg, final StorageAliases aliases) {
         final Slice slice;
-        final Permissions permissions = new LoggingPermissions(cfg.permissions());
+        final Permissions permissions = new LoggingPermissions(
+            cfg.permissions().orElse(Permissions.FREE)
+        );
         final Pattern prefix = new PathPattern(settings).pattern();
         switch (cfg.type()) {
             case "file":

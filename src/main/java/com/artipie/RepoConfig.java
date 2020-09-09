@@ -195,10 +195,11 @@ public final class RepoConfig {
 
     /**
      * Repository permissions.
-     * @return Async permissions
+     * @return Async permissions, empty if not configured.
      */
-    public Permissions permissions() {
-        return new YamlPermissions(this.repoConfig());
+    public Optional<Permissions> permissions() {
+        return Optional.ofNullable(this.repoConfig().yamlMapping("permissions"))
+            .map(YamlPermissions::new);
     }
 
     /**
