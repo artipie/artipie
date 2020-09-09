@@ -24,12 +24,9 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Scalar;
-import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.http.auth.Permissions;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Repository permissions: this implementation is based on
@@ -50,14 +47,6 @@ public final class YamlPermissions implements Permissions {
 
     /**
      * Ctor.
-     * @param conf Config file
-     */
-    public YamlPermissions(final File conf) {
-        this(readYaml(conf));
-    }
-
-    /**
-     * Ctor.
      * @param yaml Configuration yaml
      */
     public YamlPermissions(final YamlMapping yaml) {
@@ -66,23 +55,8 @@ public final class YamlPermissions implements Permissions {
 
     @Override
     public boolean allowed(final String name, final String action) {
-        final YamlMapping all = this.yaml.yamlMapping("permissions");
-        return all == null
-            || check(all.yamlSequence(name), action)
-            || check(all.yamlSequence(YamlPermissions.WILDCARD), action);
-    }
-
-    /**
-     * Read provided file into Yaml object.
-     * @param conf File
-     * @return Yaml mapping
-     */
-    private static YamlMapping readYaml(final File conf) {
-        try {
-            return Yaml.createYamlInput(conf).readYamlMapping().yamlMapping("repo");
-        } catch (final IOException ex) {
-            throw new IllegalArgumentException("Invalid configuration file", ex);
-        }
+        return check(this.yaml.yamlSequence(name), action)
+            || check(this.yaml.yamlSequence(YamlPermissions.WILDCARD), action);
     }
 
     /**
