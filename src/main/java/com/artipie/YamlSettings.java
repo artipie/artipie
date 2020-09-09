@@ -31,6 +31,7 @@ import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -90,10 +91,14 @@ public final class YamlSettings implements Settings {
 
     @Override
     public String layout() throws IOException {
-        return Yaml.createYamlInput(this.content)
-            .readYamlMapping()
-            .yamlMapping(YamlSettings.KEY_META)
-            .string("layout");
+        String name = Yaml.createYamlInput(this.content)
+                .readYamlMapping()
+                .yamlMapping(YamlSettings.KEY_META)
+                .string("layout");
+        if (name == null) {
+            name = "flat";
+        }
+        return name;
     }
 
     @Override
