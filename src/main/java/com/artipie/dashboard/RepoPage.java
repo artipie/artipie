@@ -130,7 +130,7 @@ final class RepoPage implements Page {
                                 "type",
                                 URLEncodedUtils.parse(
                                     new RequestLineFrom(line).uri(),
-                                    StandardCharsets.UTF_8.displayName()
+                                    StandardCharsets.UTF_8
                                 ).stream()
                                     .filter(pair -> "type".equals(pair.getName()))
                                     .findFirst().map(NameValuePair::getValue)
