@@ -93,3 +93,116 @@ Possible responses:
 - `404 NOT FOUND` when user was not found
 - `500 INTERNAL ERROR` in the case of unexpected server error
 
+## Permission Targets
+
+### Get Permission Targets
+
+Endpoint to obtain the permission targets [list](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-GetPermissionTargets). 
+From the Artipie point of view permission target is a repository, so basically this endpoint returns list of the 
+existing repositories. 
+
+> **GET**  /api/security/permissions
+
+Returns json array of the following form:
+```json
+[
+  {
+    "name": "readSourceArtifacts",
+    "uri" : "http://localhost:8081/artifactory/api/security/permissions/readSourceArtifacts"
+  }, {
+    "name": "populateCaches",
+    "uri" : "http://localhost:8081/artifactory/api/security/permissions/populateCaches"
+  }
+]
+```
+Where `name` is a permission target name and `uri` - URI to obtain permission target details.
+
+### Get Permission Target Details
+
+Endpoint to get the [details](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-GetPermissionTargetDetails) of a Permission Target, Artipie repository permissions details.
+
+> **GET** /api/security/permissions/{permissionTargetName}
+
+Returns json of the following format:
+
+```json
+{
+  "repositories": ["{permissionTargetName}"],
+  "principals": {
+    "users" : {
+      "bob": ["r","w","m"],
+      "alice" : ["d","w","n", "r"]
+    }   
+  }
+}
+```
+
+Fields description:
+
+Field name | Type | Meaning | Required
+------ | ------ | ------ | ------
+repositories | json array | Repository name, always one-element array with the `{permissionTargetName}` item | Y
+principals | json object | Repository permissions details, contains `users` element with user permission details | Y
+
+If requested `{permissionTargetName}` does not exist `404 NOT FOUND` is returned.
+
+### Create or Replace Permission Target 
+
+[Creates](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-CreateorReplacePermissionTarget) or updates repository permissions.
+
+> **PUT** /api/security/permissions/{permissionTargetName}
+
+Consumes json of the following form: 
+
+```json
+{
+   "repo": {
+     "actions": {
+       "users" : {
+          "bob": ["read", "write", "manage"],
+          "alice" : ["write", "annotate", "read"]
+       }
+     }
+   }
+}
+```
+where field `users` contains list of the user names and corresponding permissions, all other fields 
+are ignored. 
+
+Possible responses:
+- `200 OK User` when permissions were added successfully
+- `500 INTERNAL ERROR` in the case of unexpected server error
+
+### Delete Permission Target 
+
+[Deletes](https://www.jfrog.com/confluence/display/JFROG/Artifactory+REST+API#ArtifactoryRESTAPI-DeletePermissionTarget) 
+permission target.
+
+> **DELETE** /api/security/permissions/{permissionTargetName}
+
+Possible responses:
+- `200 OK Permission Target '{permissionTargetName}' has been removed successfully.` when user with `{permissionTargetName}` was successfully removed
+- `404 NOT FOUND` when repository with `{permissionTargetName}` was not found
+- `500 INTERNAL ERROR` in the case of unexpected server error
+
+## File List
+
+[Get](https://www.jfrog.com/confluence/display/JFROG/Artifactory+REST+API#ArtifactoryRESTAPI-FileList) a flat listing of the items within a repository.
+
+> **GET** /api/storage/{repoKey}
+
+Returns json array of the following format:
+
+```json
+[
+  {
+    "uri": "/doc.txt",
+    "folder": "false"
+  },
+  {
+    "uri": "/one",
+    "folder": "true"
+  }
+]
+```
+ where `uri` is a storage item name and `folder` flag indicates whether item is a folder or not.  
