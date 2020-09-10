@@ -2,7 +2,7 @@
 
 [![](https://github.com/artipie/artipie/workflows/Proof::binary/badge.svg)](./examples/binary)
 
-This directory contains an example of how to can use artipie as a storage for binary files.
+This directory contains a basic example of how to can use artipie as a storage for binary files.
 Try this example by running `run.sh` script.
 
 Basic configuration `repo.yaml`:
