@@ -26,19 +26,24 @@ package com.artipie.api.artifactory;
 import com.artipie.RepoPermissions;
 import com.artipie.Settings;
 import com.artipie.api.RsJson;
+import com.artipie.asto.Key;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import org.cactoos.scalar.Unchecked;
 import org.reactivestreams.Publisher;
 
 /**
@@ -65,12 +70,27 @@ public final class GetPermissionSlice implements Slice {
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
-        return opt.<Response>map(
-            repo -> new AsyncResponse(
-                new RepoPermissions.FromSettings(this.settings).permissions(repo)
-                    .thenApply(map -> new RsJson(GetPermissionSlice.response(map, repo)))
-            )
-        ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
+        return new AsyncResponse(
+            opt.map(
+                repo -> new Unchecked<>(this.settings::storage).value()
+                    .exists(new Key.From(String.format("%s.yaml", repo))).thenCompose(
+                        exists -> {
+                            final CompletionStage<Response> res;
+                            if (exists) {
+                                res = new RepoPermissions.FromSettings(this.settings)
+                                    .permissions(repo).thenApply(
+                                        perms -> new RsJson(
+                                            GetPermissionSlice.response(perms, repo)
+                                        )
+                                    );
+                            } else {
+                                res = CompletableFuture.completedStage(StandardRs.NOT_FOUND);
+                            }
+                            return res;
+                        }
+                    )
+            ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST)))
+        );
     }
 
     /**
