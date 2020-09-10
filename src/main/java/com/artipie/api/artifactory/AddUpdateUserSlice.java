@@ -80,7 +80,7 @@ public final class AddUpdateUserSlice implements Slice {
                                         username, DigestUtils.sha256Hex(haspassw),
                                         Credentials.PasswordFormat.SHA256
                                     ).thenApply(ok -> new RsWithStatus(RsStatus.OK)))
-                ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.NOT_FOUND))))
+                ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST))))
             )
         ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
     }

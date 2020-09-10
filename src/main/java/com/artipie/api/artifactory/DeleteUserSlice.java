@@ -28,9 +28,11 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -71,7 +73,15 @@ public final class DeleteUserSlice implements Slice {
                             final CompletionStage<Response> resp;
                             if (has) {
                                 resp = cred.remove(username)
-                                    .thenApply(ok -> new RsWithStatus(RsStatus.OK));
+                                    .thenApply(
+                                        ok -> new RsWithBody(
+                                            new RsWithStatus(RsStatus.OK),
+                                            String.format(
+                                                "User '%s' has been removed successfully.",
+                                                username
+                                            ).getBytes(StandardCharsets.UTF_8)
+                                        )
+                                    );
                             } else {
                                 resp = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
                             }
