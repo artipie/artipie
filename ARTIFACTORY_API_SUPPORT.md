@@ -119,7 +119,8 @@ Where `name` is a permission target name and `uri` - URI to obtain permission ta
 
 ### Get Permission Target Details
 
-Endpoint to get the [details](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-GetPermissionTargetDetails) of a Permission Target, Artipie repository permissions details.
+Endpoint to get the [details](https://www.jfrog.com/confluence/display/rtf/artifactory+rest+api#ArtifactoryRESTAPI-GetPermissionTargetDetails) 
+of a Permission Target, or, if other words, Artipie repository permissions details.
 
 > **GET** /api/security/permissions/{permissionTargetName}
 
@@ -130,8 +131,8 @@ Returns json of the following format:
   "repositories": ["{permissionTargetName}"],
   "principals": {
     "users" : {
-      "bob": ["r","w","m"],
-      "alice" : ["d","w","n", "r"]
+      "bob": ["r", "w", "m"],
+      "alice" : ["d", "w", "n", "r"]
     }   
   }
 }
@@ -144,7 +145,7 @@ Field name | Type | Meaning | Required
 repositories | json array | Repository name, always one-element array with the `{permissionTargetName}` item | Y
 principals | json object | Repository permissions details, contains `users` element with user permission details | Y
 
-If requested `{permissionTargetName}` does not exist `404 NOT FOUND` is returned.
+If requested `{permissionTargetName}` does not exist, `404 NOT FOUND` status is returned.
 
 ### Create or Replace Permission Target 
 
@@ -170,13 +171,13 @@ where field `users` contains list of the user names and corresponding permission
 are ignored. 
 
 Possible responses:
-- `200 OK User` when permissions were added successfully
+- `200 OK` when permissions were added successfully
 - `500 INTERNAL ERROR` in the case of unexpected server error
 
 ### Delete Permission Target 
 
 [Deletes](https://www.jfrog.com/confluence/display/JFROG/Artifactory+REST+API#ArtifactoryRESTAPI-DeletePermissionTarget) 
-permission target.
+permission target, that is removes all permissions for repository leaving repository inaccessible.
 
 > **DELETE** /api/security/permissions/{permissionTargetName}
 
