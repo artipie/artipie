@@ -28,9 +28,11 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.auth.CachedAuth;
 import com.artipie.auth.GithubAuth;
+import com.artipie.auth.GlobalPermissions;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -146,6 +148,11 @@ public final class YamlSettings implements Settings {
             res = CompletableFuture.completedStage(new Credentials.FromEnv());
         }
         return res;
+    }
+
+    @Override
+    public CompletionStage<Optional<GlobalPermissions>> permissions() {
+        return CompletableFuture.completedFuture(Optional.empty());
     }
 
     /**

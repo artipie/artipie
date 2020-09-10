@@ -25,6 +25,7 @@
 package com.artipie;
 
 import com.artipie.asto.Key;
+import com.artipie.auth.JoinedPermissions;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.docker.DockerProxy;
@@ -64,6 +65,7 @@ import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Slice from repo config.
@@ -102,10 +104,21 @@ public final class SliceFromConfig extends Slice.Wrap {
         final StorageAliases aliases) {
         super(
             new AsyncSlice(
-                settings.auth().thenApply(
-                    auth -> SliceFromConfig.build(
-                        settings, new LoggingAuth(auth),
-                        config, aliases
+                settings.permissions().thenCombine(
+                    settings.auth(),
+                    (gpermissions, auth) -> SliceFromConfig.build(
+                        settings,
+                        new LoggingPermissions(
+                            new JoinedPermissions(
+                                Stream.concat(
+                                    gpermissions.stream().map(gp -> gp.permissions(config.name())),
+                                    config.permissions().stream()
+                                ).collect(Collectors.toList())
+                            )
+                        ),
+                        new LoggingAuth(auth),
+                        config,
+                        aliases
                     )
                 )
             )
@@ -116,6 +129,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * Find a slice implementation for config.
      *
      * @param settings Artipie settings
+     * @param permissions Permissions
      * @param auth Authentication
      * @param cfg Repository config
      * @param aliases Storage aliases
@@ -133,12 +147,13 @@ public final class SliceFromConfig extends Slice.Wrap {
             "PMD.AvoidDuplicateLiterals", "PMD.NcssCount"
         }
     )
-    static Slice build(final Settings settings, final Authentication auth,
-        final RepoConfig cfg, final StorageAliases aliases) {
+    static Slice build(
+        final Settings settings,
+        final Permissions permissions,
+        final Authentication auth,
+        final RepoConfig cfg,
+        final StorageAliases aliases) {
         final Slice slice;
-        final Permissions permissions = new LoggingPermissions(
-            cfg.permissions().orElse(Permissions.FREE)
-        );
         final Pattern prefix = new PathPattern(settings).pattern();
         switch (cfg.type()) {
             case "file":

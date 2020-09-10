@@ -28,6 +28,7 @@ import com.artipie.Credentials;
 import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
+import com.artipie.auth.GlobalPermissions;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.hm.AssertSlice;
@@ -41,6 +42,7 @@ import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.hamcrest.MatcherAssert;
@@ -168,6 +170,11 @@ final class DockerRoutingSliceTest {
         @Override
         public CompletionStage<Credentials> credentials() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CompletionStage<Optional<GlobalPermissions>> permissions() {
+            return CompletableFuture.completedFuture(Optional.empty());
         }
     }
 }

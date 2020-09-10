@@ -27,8 +27,10 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.auth.GlobalPermissions;
 import com.artipie.http.auth.Authentication;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -73,6 +75,13 @@ public interface Settings {
      * @return Completion action with credentials
      */
     CompletionStage<Credentials> credentials();
+
+    /**
+     * Artipie global permissions.
+     *
+     * @return Global permissions if configured, empty - otherwise.
+     */
+    CompletionStage<Optional<GlobalPermissions>> permissions();
 
     /**
      * Fake {@link Settings} using a file storage.
@@ -169,6 +178,11 @@ public interface Settings {
         @Override
         public CompletionStage<Credentials> credentials() {
             return CompletableFuture.completedFuture(this.cred);
+        }
+
+        @Override
+        public CompletionStage<Optional<GlobalPermissions>> permissions() {
+            return CompletableFuture.completedFuture(Optional.empty());
         }
     }
 }
