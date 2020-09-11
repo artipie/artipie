@@ -15,7 +15,7 @@ repo:
     path: /var/artipie/data
 ```
 
-After creating the configuration file below, Artipie is ready to server as a Docker registry.
+After creating the configuration file below, the configured Docker registry is ready for use.
 
 Before pushing any images let's pull an existing one from Docker Hub:
 
