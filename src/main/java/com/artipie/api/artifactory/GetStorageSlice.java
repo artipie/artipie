@@ -60,11 +60,12 @@ public final class GetStorageSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
+        final Key root = Key.ROOT;
         return new AsyncResponse(
-            this.storage.list(Key.ROOT)
+            this.storage.list(root)
                 .thenApply(
                     list -> {
-                        final KeyList keys = new KeyList();
+                        final KeyList keys = new KeyList(root);
                         list.forEach(keys::add);
                         return keys.print(new JsonOutput());
                     }
