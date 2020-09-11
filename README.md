@@ -123,10 +123,9 @@ meta:
     interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
-## External API Support
+## Artipie REST API
 
-Artipie partly supports artifactory API to manage repositories and users, API is fully 
-documented [here](./ARTIFACTORY_API_SUPPORT.md).
+Artipie provides a set of APIs to manage repositories and users.  The current APIs are fully documented [here](./ARTIFACTORY_API_SUPPORT.md).
 
 ## Additional configuration
 
