@@ -70,9 +70,9 @@ public final class GetPermissionSlice implements Slice {
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
-        return new AsyncResponse(
-            opt.map(
-                repo -> new Unchecked<>(this.settings::storage).value()
+        return opt.<Response>map(
+            repo -> new AsyncResponse(
+                new Unchecked<>(this.settings::storage).value()
                     .exists(new Key.From(String.format("%s.yaml", repo))).thenCompose(
                         exists -> {
                             final CompletionStage<Response> res;
@@ -89,8 +89,8 @@ public final class GetPermissionSlice implements Slice {
                             return res;
                         }
                     )
-            ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST)))
-        );
+            )
+        ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
     }
 
     /**

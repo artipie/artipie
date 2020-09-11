@@ -74,12 +74,11 @@ class GetPermissionSliceTest {
 
     @Test
     void returnsNotFoundIfRepoDoesNotExists() {
-        final String repo = "pypi";
         MatcherAssert.assertThat(
             new GetPermissionSlice(new Settings.Fake(this.storage)),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
-                new RequestLine(RqMethod.GET, String.format("/api/security/permissions/%s", repo))
+                new RequestLine(RqMethod.GET, "/api/security/permissions/pypi")
             )
         );
     }
