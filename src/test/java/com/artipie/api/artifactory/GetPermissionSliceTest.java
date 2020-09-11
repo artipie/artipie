@@ -73,6 +73,17 @@ class GetPermissionSliceTest {
     }
 
     @Test
+    void returnsNotFoundIfRepoDoesNotExists() {
+        MatcherAssert.assertThat(
+            new GetPermissionSlice(new Settings.Fake(this.storage)),
+            new SliceHasResponse(
+                new RsHasStatus(RsStatus.NOT_FOUND),
+                new RequestLine(RqMethod.GET, "/api/security/permissions/pypi")
+            )
+        );
+    }
+
+    @Test
     void returnsEmptyUsersIfNoPermissionsSet() {
         final String repo = "docker";
         final RepoPerms perm = new RepoPerms();

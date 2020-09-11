@@ -65,6 +65,17 @@ class DeletePermissionSliceTest {
     }
 
     @Test
+    void returnsNotFoundIfRepositoryDoesNotExists() {
+        MatcherAssert.assertThat(
+            new DeletePermissionSlice(new Settings.Fake()),
+            new SliceHasResponse(
+                new RsHasStatus(RsStatus.NOT_FOUND),
+                new RequestLine(RqMethod.DELETE, "/api/security/permissions/pypi")
+            )
+        );
+    }
+
+    @Test
     void deletesRepoPermissions() throws IOException {
         final Storage storage = new InMemoryStorage();
         final String repo = "docker";

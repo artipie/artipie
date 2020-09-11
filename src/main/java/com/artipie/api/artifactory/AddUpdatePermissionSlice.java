@@ -44,8 +44,8 @@ import javax.json.JsonValue;
 import org.reactivestreams.Publisher;
 
 /**
- * Artifactory `PUT /api/security/permissions/{target}` endpoint, returns json with
- * permissions (= repository) information.
+ * Artifactory `PUT /api/security/permissions/{target}` endpoint, updates `permissions` section
+ * in repository section.
  * @since 0.10
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
