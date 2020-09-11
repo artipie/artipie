@@ -25,16 +25,21 @@ package com.artipie.api.artifactory;
 
 import com.artipie.RepoPermissions;
 import com.artipie.Settings;
+import com.artipie.asto.Key;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import org.cactoos.scalar.Unchecked;
 import org.reactivestreams.Publisher;
 
 /**
@@ -63,14 +68,25 @@ public final class DeletePermissionSlice implements Slice {
         final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
         return opt.<Response>map(
             repo -> new AsyncResponse(
-                new RepoPermissions.FromSettings(this.settings).remove(repo)
-                    .thenApply(
-                        ignored -> new RsWithBody(
-                            String.format(
-                                "Permission Target '%s' has been removed successfully.", repo
-                            ),
-                            StandardCharsets.UTF_8
-                        )
+                new Unchecked<>(this.settings::storage).value()
+                    .exists(new Key.From(String.format("%s.yaml", repo)))
+                    .thenCompose(
+                        exists -> {
+                            final CompletionStage<Response> res;
+                            if (exists) {
+                                res = new RepoPermissions.FromSettings(this.settings).remove(repo)
+                                    .thenApply(
+                                        ignored -> new RsWithBody(
+                                            // @checkstyle LineLengthCheck (2 lines)
+                                            String.format("Permission Target '%s' has been removed successfully.", repo),
+                                            StandardCharsets.UTF_8
+                                        )
+                                    );
+                            } else {
+                                res = CompletableFuture.completedStage(StandardRs.NOT_FOUND);
+                            }
+                            return res;
+                        }
                     )
             )
         ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
