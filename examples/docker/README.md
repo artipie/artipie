@@ -36,7 +36,7 @@ Afterwards we have to login, since Artipie Docker registry support only authoriz
 docker login --username alice --password qwerty123 localhost:8080
 ```
 
-And finally, we a ready to push the pulled image:
+And finally, we are ready to push the pulled image:
 
 ```bash
 docker push localhost:8080/my-docker/myfirstimage
