@@ -67,7 +67,7 @@ public final class DeleteUserSlice implements Slice {
             username -> new AsyncResponse(
                 this.settings.credentials().thenCompose(
                     cred -> cred.users().thenApply(
-                        users -> users.contains(username)
+                        users -> users.stream().anyMatch(item -> item.name().equals(username))
                     ).thenCompose(
                         has -> {
                             final CompletionStage<Response> resp;

@@ -45,6 +45,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
+import org.cactoos.list.ListOf;
 
 /**
  * Artipie credentials.
@@ -56,16 +57,16 @@ public interface Credentials {
      * Artipie users list.
      * @return Yaml as completion action
      */
-    CompletionStage<List<String>> users();
+    CompletionStage<List<User>> users();
 
     /**
      * Adds user to artipie users.
-     * @param username User name
+     * @param user User info
      * @param pswd Password
      * @param format Password format
      * @return Completion add action
      */
-    CompletionStage<Void> add(String username, String pswd, PasswordFormat format);
+    CompletionStage<Void> add(User user, String pswd, PasswordFormat format);
 
     /**
      * Removes user from artipie users.
@@ -110,6 +111,11 @@ public interface Credentials {
         private static final String CREDENTIALS = "credentials";
 
         /**
+         * Credentials yaml mapping key.
+         */
+        private static final String EMAIL = "email";
+
+        /**
          * Storage.
          */
         private final Storage storage;
@@ -130,27 +136,37 @@ public interface Credentials {
         }
 
         @Override
-        public CompletionStage<List<String>> users() {
+        public CompletionStage<List<User>> users() {
             return this.yaml().thenApply(
-                yaml -> yaml.yamlMapping(FromStorageYaml.CREDENTIALS).keys()
-                    .stream().map(node -> node.asScalar().value()).collect(Collectors.toList())
+                yaml -> yaml.yamlMapping(FromStorageYaml.CREDENTIALS).keys().stream()
+                    .map(
+                        node -> {
+                            final String name = node.asScalar().value();
+                            return new User(
+                                name,
+                                Optional.ofNullable(
+                                    yaml.yamlMapping(FromStorageYaml.CREDENTIALS)
+                                        .yamlMapping(name).string(FromStorageYaml.EMAIL)
+                                ).orElse(String.format("%s@artipie.com", name))
+                            );
+                        }
+                    ).collect(Collectors.toList())
             );
         }
 
         @Override
-        public CompletionStage<Void> add(final String username, final String pswd,
+        public CompletionStage<Void> add(final User user, final String pswd,
             final PasswordFormat format) {
             return this.yaml().thenCompose(
                 yaml -> {
-                    YamlMappingBuilder result = FromStorageYaml.removeUserRecord(username, yaml);
+                    YamlMappingBuilder result = FromStorageYaml.removeUserRecord(user.uname, yaml);
                     result = result.add(
-                        username,
+                        user.uname,
                         Yaml.createYamlMappingBuilder()
                             .add(
                                 "pass",
                                 String.format("%s:%s", format.name().toLowerCase(Locale.US), pswd)
-                            )
-                            .build()
+                            ).add(FromStorageYaml.EMAIL, user.mail).build()
                     );
                     return this.buildAndSaveCredentials(result);
                 }
@@ -246,16 +262,16 @@ public interface Credentials {
         }
 
         @Override
-        public CompletionStage<List<String>> users() {
+        public CompletionStage<List<User>> users() {
             return CompletableFuture.completedFuture(
                 Optional.ofNullable(this.env.get(AuthFromEnv.ENV_NAME))
-                    .map(List::of)
+                    .<List<User>>map(name -> new ListOf<>(new User(name, "")))
                     .orElse(Collections.emptyList())
             );
         }
 
         @Override
-        public CompletionStage<Void> add(final String username, final String pswd,
+        public CompletionStage<Void> add(final User user, final String pswd,
             final PasswordFormat format) {
             return CompletableFuture.failedFuture(
                 new UnsupportedOperationException("Adding users is not supported")
@@ -272,6 +288,49 @@ public interface Credentials {
         @Override
         public CompletionStage<Authentication> auth() {
             return CompletableFuture.completedFuture(new AuthFromEnv());
+        }
+    }
+
+    /**
+     * User.
+     * @since 0.11
+     */
+    final class User {
+
+        /**
+         * User name.
+         */
+        private final String uname;
+
+        /**
+         * User email.
+         */
+        private final String mail;
+
+        /**
+         * Ctor.
+         * @param name Username
+         * @param email User email
+         */
+        public User(final String name, final String email) {
+            this.uname = name;
+            this.mail = email;
+        }
+
+        /**
+         * Get user name.
+         * @return Name of the user
+         */
+        public String name() {
+            return this.uname;
+        }
+
+        /**
+         * Get user email.
+         * @return Email of the user
+         */
+        public String email() {
+            return this.mail;
         }
     }
 }

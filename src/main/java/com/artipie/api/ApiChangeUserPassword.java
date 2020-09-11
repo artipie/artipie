@@ -91,7 +91,8 @@ final class ApiChangeUserPassword implements Slice {
                 pass -> Completable.fromFuture(
                     this.settings.credentials().thenCompose(
                         cred -> cred.add(
-                            user, DigestUtils.sha256Hex(pass), Credentials.PasswordFormat.SHA256
+                            new Credentials.User(user, ""),
+                            DigestUtils.sha256Hex(pass), Credentials.PasswordFormat.SHA256
                         )
                     ).toCompletableFuture()
                 )
