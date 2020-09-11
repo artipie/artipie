@@ -15,9 +15,9 @@ repo:
     path: /var/artipie/data
 ```
 
-After creating the configuration file below, artipie is ready to server as a storage for binary files.
+After creating the configuration file below, the configured binary storage is ready for use.
 
-In order to upload a binary file to artipie, send a PUT HTTP request with file contents:
+In order to upload a binary file to the storage, send a PUT HTTP request with file contents:
 
 ```bash
 echo "hello world" > text.txt
@@ -32,4 +32,4 @@ curl -X GET http://localhost:8080/repo/text.txt
 
 #### Advanced option
 
-The binary type of repositories does not have any other opinions available.
+Binary repositories does not have any other opinions.
