@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 /**
- * Loggin implementation of {@link LoggingAuth}.
+ * Logging implementation of {@link LoggingAuth}.
  * @since 0.9
  */
 public final class LoggingAuth implements Authentication {
