@@ -1,6 +1,6 @@
-# Artifactory API Support
+# Artipie REST API
 
-Artipie supports artifactory API to manage repositories, users and repository permissions.
+One objective of Artipie is to provide APIs that are compatible with Artifactory APIs so that customers can have an easy and smooth transition from Artifactory to Artipie if they choose to.  The set of APIs are to manage repositories, users, repository permissions and more.
 
 ## Create Repository
 
