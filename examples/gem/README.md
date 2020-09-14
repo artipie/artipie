@@ -24,13 +24,13 @@ login:password would be a valid key:
 export GEM_HOST_API_KEY=$(echo -n "hello:world" | base64)
 ```
 
-In order to upload a `.gem` file into, use `gem push` command:
+In order to upload a `.gem` file into Gem repository, use `gem push` command:
 
 ```bash
 $ gem push my_first_gem-0.0.0.gem --host http://localhost:8080/gem
 ```
 
-In order to install an existing gem , use `gem install` command:
+In order to install an existing gem, use `gem install` command:
 
 ```bash
 $ gem install my_first_gem --source http://localhost:8080/gem
