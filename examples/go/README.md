@@ -1,43 +1,47 @@
 ### Go Repo
 
-![](https://github.com/artipie/artipie/workflows/Proof::go/badge.svg)
+[![](https://github.com/artipie/artipie/workflows/Proof::go/badge.svg)](./examples/go)
 
-Try this `go.yaml` file:
+This directory contains a basic example of how artipie can be used as a GOPROXY. 
+Try this example by running `run.sh` script.
+
+Try this `my-go.yaml` file:
 
 ```yaml
 repo:
   type: go
-  path: go
   storage:
     type: fs
-    path: /tmp/artipie/data/go
+    path: /var/artipie/data
 ```
+
+After creating the configuration file below, the configured GOPROXY is ready for use. First, you have to declare the following environment variables:
+
+```bash
+export GO111MODULE=on
+export GOPROXY=http://localhost:8080/my-go
+```
+
+Or, in case you want to stay connected with central proxy.golang.org, declare it in
+the following way:
 
 To use it for installing packages add it to `GOPROXY` environment variable:
 
 ```bash
-$ export GOPROXY="http://localhost:8080/go,https://proxy.golang.org,direct"
+export GO111MODULE=on
+export GOPROXY=http://localhost:8080/my-go
+export GOPROXY="http://localhost:8080/my-go,https://proxy.golang.org,direct"
 ```
 
-Go packages have to be located in the local repository by their
-names and versions, contain Go module and dependencies information
-in `.mod` and `.info` files. Here is an example for package
-`example.com/foo/bar` versions `0.0.1` and `0.0.2`:
+Now you can install packages directly from Artipie:
 
-```
-/example.com
-  /foo
-    /bar
-      /@v
-        list
-        v0.0.1.zip
-        v0.0.1.mod
-        v0.0.1.info
-        v0.0.2.zip
-        v0.0.2.mod
-        v0.0.2.info
+```bash
+go get -x -insecure golang.org/x/time
 ```
 
-`list` is simple text file with list of the available versions.
-You can use [go-adapter](https://github.com/artipie/go-adapter#how-it-works)
-to generate necessary files and layout for Go source code.
+It worth to be noted that there is no way to deploy packages to GOPROXY repository.
+The required file structure should be generated manually.
+
+#### Advanced option
+
+GOPROXY repositories does not have any other opinions.
