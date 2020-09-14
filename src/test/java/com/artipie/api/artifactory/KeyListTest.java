@@ -45,13 +45,7 @@ final class KeyListTest {
         }
         MatcherAssert.assertThat(
             target.print(new DummyFormat(new StringBuilder())),
-            Matchers.stringContainsInOrder(
-                Arrays.asList(
-                    "aaa/",
-                    "bbb/",
-                    "ccc"
-                )
-            )
+            Matchers.is("aaa/\nbbb/\nccc\n")
         );
     }
 
@@ -65,13 +59,7 @@ final class KeyListTest {
         }
         MatcherAssert.assertThat(
             target.print(new DummyFormat(new StringBuilder())),
-            Matchers.stringContainsInOrder(
-                Arrays.asList(
-                    "aaa/111",
-                    "aaa/222",
-                    "bbb/"
-                )
-            )
+            Matchers.is("aaa/111\naaa/222\naaa/bbb/\n")
         );
     }
 
