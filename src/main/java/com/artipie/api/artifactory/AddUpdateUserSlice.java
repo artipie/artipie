@@ -77,7 +77,9 @@ public final class AddUpdateUserSlice implements Slice {
                             info -> this.settings.credentials()
                                 .thenCompose(
                                     cred -> cred.add(
-                                        new Credentials.User(username, info.getValue()),
+                                        new Credentials.User(
+                                            username, Optional.of(info.getValue())
+                                        ),
                                         DigestUtils.sha256Hex(info.getKey()),
                                         Credentials.PasswordFormat.SHA256
                                     ).thenApply(ok -> new RsWithStatus(RsStatus.OK))

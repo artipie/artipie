@@ -73,7 +73,12 @@ public final class GetUserSlice implements Slice {
                                 resp = new RsJson(
                                     () -> Json.createObjectBuilder()
                                         .add("name", user.get().name())
-                                        .add("email", user.get().email())
+                                        .add(
+                                            "email",
+                                            user.get().email().orElse(
+                                                String.format("%s@artipie.com", user.get().name())
+                                            )
+                                        )
                                         .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
                                         .add("realm", "Internal")
                                         .build(),

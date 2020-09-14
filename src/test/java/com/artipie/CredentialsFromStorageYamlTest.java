@@ -31,6 +31,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.MatcherAssert;
@@ -173,7 +174,7 @@ class CredentialsFromStorageYamlTest {
                 user.getKey(),
                 Yaml.createYamlMappingBuilder()
                     .add("pass", user.getValue())
-                    .add("email", this.email(user.getKey()))
+                    .add("email", this.email(user.getKey()).get())
                     .build()
             );
         }
@@ -183,8 +184,8 @@ class CredentialsFromStorageYamlTest {
         ).build().toString();
     }
 
-    private String email(final String name) {
-        return String.format("%s@example.com", name);
+    private Optional<String> email(final String name) {
+        return Optional.of(String.format("%s@example.com", name));
     }
 
 }

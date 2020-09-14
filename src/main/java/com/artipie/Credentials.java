@@ -147,7 +147,7 @@ public interface Credentials {
                                 Optional.ofNullable(
                                     yaml.yamlMapping(FromStorageYaml.CREDENTIALS)
                                         .yamlMapping(name).string(FromStorageYaml.EMAIL)
-                                ).orElse(String.format("%s@artipie.com", name))
+                                )
                             );
                         }
                     ).collect(Collectors.toList())
@@ -160,14 +160,15 @@ public interface Credentials {
             return this.yaml().thenCompose(
                 yaml -> {
                     YamlMappingBuilder result = FromStorageYaml.removeUserRecord(user.uname, yaml);
-                    result = result.add(
-                        user.uname,
-                        Yaml.createYamlMappingBuilder()
-                            .add(
-                                "pass",
-                                String.format("%s:%s", format.name().toLowerCase(Locale.US), pswd)
-                            ).add(FromStorageYaml.EMAIL, user.mail).build()
-                    );
+                    YamlMappingBuilder info = Yaml.createYamlMappingBuilder()
+                        .add(
+                            "pass",
+                            String.format("%s:%s", format.name().toLowerCase(Locale.US), pswd)
+                        );
+                    if (user.mail.isPresent()) {
+                        info = info.add(FromStorageYaml.EMAIL, user.mail.get());
+                    }
+                    result = result.add(user.uname, info.build());
                     return this.buildAndSaveCredentials(result);
                 }
             );
@@ -265,7 +266,7 @@ public interface Credentials {
         public CompletionStage<List<User>> users() {
             return CompletableFuture.completedFuture(
                 Optional.ofNullable(this.env.get(AuthFromEnv.ENV_NAME))
-                    .<List<User>>map(name -> new ListOf<>(new User(name, "")))
+                    .<List<User>>map(name -> new ListOf<>(new User(name, Optional.empty())))
                     .orElse(Collections.emptyList())
             );
         }
@@ -305,14 +306,14 @@ public interface Credentials {
         /**
          * User email.
          */
-        private final String mail;
+        private final Optional<String> mail;
 
         /**
          * Ctor.
          * @param name Username
          * @param email User email
          */
-        public User(final String name, final String email) {
+        public User(final String name, final Optional<String> email) {
             this.uname = name;
             this.mail = email;
         }
@@ -329,7 +330,7 @@ public interface Credentials {
          * Get user email.
          * @return Email of the user
          */
-        public String email() {
+        public Optional<String> email() {
             return this.mail;
         }
     }
