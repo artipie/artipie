@@ -24,26 +24,26 @@
 package com.artipie;
 
 import com.artipie.auth.AuthFromEnv;
+import java.util.Optional;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link Credentials.FromEnv}.
  * @since 0.10
  */
-@Disabled
 class CredentialsFromEnvTest {
+
     @Test
     void returnsUserFromEnv() {
         final String user = "john";
         MatcherAssert.assertThat(
             new Credentials.FromEnv(new MapOf<>(new MapEntry<>(AuthFromEnv.ENV_NAME, user)))
                 .users().toCompletableFuture().join(),
-            Matchers.containsInAnyOrder(user)
+            Matchers.containsInAnyOrder(new Credentials.User(user, Optional.empty()))
         );
     }
 
