@@ -39,6 +39,7 @@ import io.reactivex.Single;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -91,7 +92,8 @@ final class ApiChangeUserPassword implements Slice {
                 pass -> Completable.fromFuture(
                     this.settings.credentials().thenCompose(
                         cred -> cred.add(
-                            user, DigestUtils.sha256Hex(pass), Credentials.PasswordFormat.SHA256
+                            new Credentials.User(user, Optional.empty()),
+                            DigestUtils.sha256Hex(pass), Credentials.PasswordFormat.SHA256
                         )
                     ).toCompletableFuture()
                 )

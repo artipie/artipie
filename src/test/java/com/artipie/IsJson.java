@@ -23,28 +23,46 @@
  */
 package com.artipie;
 
-import com.artipie.auth.AuthFromEnv;
-import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import java.io.ByteArrayInputStream;
+import javax.json.Json;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 
 /**
- * Test for {@link Credentials.FromEnv}.
- * @since 0.10
+ * Matcher for bytes array representing JSON.
+ *
+ * @since 0.11
  */
-@Disabled
-class CredentialsFromEnvTest {
-    @Test
-    void returnsUserFromEnv() {
-        final String user = "john";
-        MatcherAssert.assertThat(
-            new Credentials.FromEnv(new MapOf<>(new MapEntry<>(AuthFromEnv.ENV_NAME, user)))
-                .users().toCompletableFuture().join(),
-            Matchers.containsInAnyOrder(user)
-        );
+public final class IsJson extends TypeSafeMatcher<byte[]> {
+
+    /**
+     * Matcher for JSON.
+     */
+    private final Matcher<? extends JsonValue> json;
+
+    /**
+     * Ctor.
+     *
+     * @param json Matcher for JSON.
+     */
+    public IsJson(final Matcher<? extends JsonValue> json) {
+        this.json = json;
     }
 
+    @Override
+    public void describeTo(final Description description) {
+        description.appendText("JSON ").appendDescriptionOf(this.json);
+    }
+
+    @Override
+    public boolean matchesSafely(final byte[] bytes) {
+        final JsonValue root;
+        try (JsonReader reader = Json.createReader(new ByteArrayInputStream(bytes))) {
+            root = reader.readValue();
+        }
+        return this.json.matches(root);
+    }
 }
