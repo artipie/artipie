@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
@@ -56,14 +57,12 @@ class YamlSettingsTest {
             String.join(
                 "",
                 "meta:\n",
-                "  storage:\n",
-                "    type: s3\n",
-                "    path: /var/artipie/configs\n"
+                "  storage:\n"
             )
         );
         MatcherAssert.assertThat(
             settings.layout(),
-            Matchers.is("flat")
+            new IsEqual<>("flat")
         );
     }
 
