@@ -47,23 +47,23 @@ import org.junit.jupiter.params.provider.MethodSource;
  * @since 0.1
  * @checkstyle MethodNameCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class YamlSettingsTest {
 
     @Test
     public void shouldSetFlatAsDefaultLayout() throws Exception {
         final YamlSettings settings = new YamlSettings(
-                String.join(
-                        "",
-                        "meta:\n",
-                        "  storage:\n",
-                        "    type: s3\n",
-                        "    path: /var/artipie/configs\n"
-                )
+            String.join(
+                "",
+                "meta:\n",
+                "  storage:\n",
+                "    type: s3\n",
+                "    path: /var/artipie/configs\n"
+            )
         );
         MatcherAssert.assertThat(
-                settings.layout(),
-                Matchers.is("flat")
+            settings.layout(),
+            Matchers.is("flat")
         );
     }
 
