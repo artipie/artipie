@@ -45,6 +45,7 @@ import javax.json.Json;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -55,6 +56,7 @@ import org.junit.jupiter.params.provider.EnumSource;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Disabled
 final class AddUpdateUserSliceTest {
     @ParameterizedTest
     @EnumSource(value = RqMethod.class, names = {"PUT", "POST"})
