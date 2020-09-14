@@ -39,14 +39,22 @@ import java.util.Set;
 public final class KeyList {
 
     /**
+     * Root key.
+     */
+    private final Key root;
+
+    /**
      * Key set.
      */
     private final Set<Key> keys;
 
     /**
      * Ctor.
+     *
+     * @param root Root key.
      */
-    public KeyList() {
+    public KeyList(final Key root) {
+        this.root = root;
         this.keys = new HashSet<>();
     }
 
@@ -69,7 +77,9 @@ public final class KeyList {
         final List<Key> list = new ArrayList<>(this.keys);
         list.sort(Comparator.comparing(Key::string));
         for (final Key key : list) {
-            format.add(key, key.parent().map(this.keys::contains).orElse(false));
+            if (key.parent().map(this.root::equals).orElse(true)) {
+                format.add(key, key.parent().map(this.keys::contains).orElse(false));
+            }
         }
         return format.result();
     }
