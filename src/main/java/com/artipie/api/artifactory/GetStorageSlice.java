@@ -24,7 +24,9 @@
 
 package com.artipie.api.artifactory;
 
+import com.artipie.RepoConfig;
 import com.artipie.Settings;
+import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Response;
@@ -33,13 +35,18 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.common.RsJson;
 import com.artipie.repo.PathPattern;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
+import io.reactivex.Single;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import org.reactivestreams.Publisher;
 
 /**
@@ -50,39 +57,68 @@ import org.reactivestreams.Publisher;
 public final class GetStorageSlice implements Slice {
 
     /**
-     * Storage.
+     * Settings.
      */
-    private final Storage storage;
+    private final Settings settings;
 
     /**
      * New storage list slice.
-     * @param storage Repository storage
+     * @param settings Settings
      */
-    public GetStorageSlice(final Storage storage) {
-        this.storage = storage;
+    public GetStorageSlice(final Settings settings) {
+        this.settings = settings;
     }
 
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Key root = Key.ROOT;
+        final Request request = new Request(this.settings, line);
+        final Key root = request.root();
         return new AsyncResponse(
-            this.storage.list(root)
-                .thenApply(
+            this.storage(request.repo()).thenCompose(
+                storage -> storage.list(root).thenApply(
                     list -> {
                         final KeyList keys = new KeyList(root);
                         list.forEach(keys::add);
                         return keys.print(new JsonOutput());
                     }
                 ).thenApply(RsJson::new)
+            )
         );
+    }
+
+    /**
+     * Get storage by repo name.
+     *
+     * @param name Repo name.
+     * @return Repo storage.
+     * @todo #545:30min Code duplication for creating repo storage.
+     *  Creating repository storage from `Settings`
+     *  is duplicated in `GetStorageSlice#storage(String)` method
+     *  and `ArtipieRepositories#resolve(String)`.
+     *  This code duplication should be resolved by extracting this code to separate class.
+     */
+    private CompletionStage<Storage> storage(final String name) {
+        final Storage storage;
+        try {
+            storage = this.settings.storage();
+        } catch (final IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
+        return Single.zip(
+            SingleInterop.fromFuture(storage.value(new Key.From(String.format("%s.yaml", name)))),
+            SingleInterop.fromFuture(StorageAliases.find(storage, new Key.From(name))),
+            (data, aliases) -> SingleInterop.fromFuture(
+                RepoConfig.fromPublisher(aliases, new Key.From(name), data)
+            ).map(RepoConfig::storage)
+        ).flatMap(self -> self).to(SingleInterop.get());
     }
 
     /**
      * JSON array output for key list.
      * @since 0.10
      */
-    private static final class JsonOutput implements KeyList.KeysFormat<JsonArray> {
+    private static final class JsonOutput implements KeyList.KeysFormat<JsonObject> {
 
         /**
          * Array builder.
@@ -114,8 +150,8 @@ public final class GetStorageSlice implements Slice {
         }
 
         @Override
-        public JsonArray result() {
-            return this.builder.build();
+        public JsonObject result() {
+            return Json.createObjectBuilder().add("files", this.builder).build();
         }
     }
 
