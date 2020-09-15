@@ -104,7 +104,17 @@ public final class GetPermissionSlice implements Slice {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         for (final RepoPermissions.UserPermission perm : permissions) {
             final JsonArrayBuilder array = Json.createArrayBuilder();
-            perm.permissions().forEach(array::add);
+            perm.permissions().stream().map(
+                item -> {
+                    final String mapped;
+                    if (item.equals("*")) {
+                        mapped = "m";
+                    } else {
+                        mapped = item.substring(0, 1);
+                    }
+                    return mapped;
+                }
+            ).forEach(array::add);
             builder.add(perm.username(), array.build());
         }
         return Json.createObjectBuilder()

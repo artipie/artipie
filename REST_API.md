@@ -133,7 +133,7 @@ Returns json of the following format:
   "principals": {
     "users" : {
       "bob": ["r", "w", "m"],
-      "alice" : ["d", "w", "n", "r"]
+      "alice" : ["d", "w", "r"]
     }   
   }
 }
@@ -145,6 +145,13 @@ Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
 repositories | json array | Repository name, always one-element array with the `{permissionTargetName}` item | Y
 principals | json object | Repository permissions details, contains `users` element with user permission details | Y
+
+Here is the set of supported permissions along with shortening convention 
+(`delete` is supported for file storage only):
+
+```text
+w=deploy; m=admin; d=delete; r=read
+```
 
 If requested `{permissionTargetName}` does not exist, `404 NOT FOUND` status is returned.
 
@@ -162,7 +169,7 @@ Consumes json of the following form:
      "actions": {
        "users" : {
           "bob": ["read", "write", "manage"],
-          "alice" : ["write", "annotate", "read"]
+          "alice" : ["write", "read"]
        }
      }
    }
@@ -170,6 +177,12 @@ Consumes json of the following form:
 ```
 where field `users` contains list of the user names and corresponding permissions, all other fields 
 are ignored. 
+
+The following synonyms and shortened values for standard operations are supported:
+- `read` - `r` 
+- `write` - `w`, `deploy`
+- `delete` - `d`
+- `manage` (any operation is allowed) - `m`, `admin`
 
 Possible responses:
 - `200 OK` when permissions were added successfully
