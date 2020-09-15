@@ -1,6 +1,6 @@
-# Artifactory API Support
+# Artipie REST API
 
-Artipie supports artifactory API to manage repositories, users and repository permissions.
+One objective of Artipie is to provide APIs that are compatible with Artifactory APIs so that customers can have an easy and smooth transition from Artifactory to Artipie if they choose to.  The set of APIs are to manage repositories, users, repository permissions and more.
 
 ## Create Repository
 
@@ -59,7 +59,7 @@ Returns json with the following fields:
 Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
 name | string | User name | Y
-email | string | User email, always constructed as {userName}@artipie.com | Y
+email | string | User email | Y
 lastLoggedIn | string | Default `2020-01-01T01:01:01.000+01:00` | Y
 realm | string | User realm, value `Internal` is always returned | Y
 
@@ -76,6 +76,7 @@ Consumes json with the following fields (any other fields are ignored):
 Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
 password | string | User password | Y
+email | string | User email | Y
 
 Possible responses:
 - `200 OK` when user was successfully created or updated

@@ -125,7 +125,7 @@ meta:
 
 ## Artipie REST API
 
-Artipie provides a set of APIs to manage repositories and users.  The current APIs are fully documented [here](./ARTIFACTORY_API_SUPPORT.md).
+Artipie provides a set of APIs to manage repositories and users.  The current APIs are fully documented [here](./REST_API.md).
 
 ## Additional configuration
 
