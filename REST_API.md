@@ -146,11 +146,10 @@ Field name | Type | Meaning | Required
 repositories | json array | Repository name, always one-element array with the `{permissionTargetName}` item | Y
 principals | json object | Repository permissions details, contains `users` element with user permission details | Y
 
-Here is the set of supported permissions along with shortening convention 
-(`delete` is supported for file storage only):
+The set of supported permissions along with the shortening convention:
 
 ```text
-w=deploy; m=admin; d=delete; r=read
+w=deploy; m=admin; r=read; d=delete (`delete` is supported for file storage only)
 ```
 
 If requested `{permissionTargetName}` does not exist, `404 NOT FOUND` status is returned.
