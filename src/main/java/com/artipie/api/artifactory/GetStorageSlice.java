@@ -24,14 +24,19 @@
 
 package com.artipie.api.artifactory;
 
+import com.artipie.Settings;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.common.RsJson;
+import com.artipie.repo.PathPattern;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -111,6 +116,83 @@ public final class GetStorageSlice implements Slice {
         @Override
         public JsonArray result() {
             return this.builder.build();
+        }
+    }
+
+    /**
+     * Request to GetStorageSlice.
+     *
+     * @since 0.11
+     */
+    public static final class Request {
+
+        /**
+         * RegEx pattern for path.
+         */
+        public static final Pattern PATH = Pattern.compile("/api/storage(?<target>/.+)");
+
+        /**
+         * Settings.
+         */
+        private final Settings settings;
+
+        /**
+         * Request line.
+         */
+        private final String line;
+
+        /**
+         * Ctor.
+         *
+         * @param settings Settings.
+         * @param line Request line.
+         */
+        public Request(final Settings settings, final String line) {
+            this.settings = settings;
+            this.line = line;
+        }
+
+        /**
+         * Read repo name for files listing.
+         *
+         * @return Repo name.
+         */
+        public String repo() {
+            final String target = this.target();
+            final Key root = this.root();
+            return target.substring(1, target.length() - root.string().length() - 1);
+        }
+
+        /**
+         * Root key for files listing.
+         *
+         * @return Root key.
+         */
+        public Key root() {
+            final String target = this.target();
+            final Matcher matcher = new PathPattern(this.settings).pattern().matcher(target);
+            if (matcher.matches()) {
+                return new Key.From(matcher.group(1).substring(1));
+            } else {
+                throw new IllegalArgumentException(
+                    String.format("Cannot find repo in path: '%s'", target)
+                );
+            }
+        }
+
+        /**
+         * Reads target part from path.
+         *
+         * @return Target.
+         */
+        private String target() {
+            final String path = new RequestLineFrom(this.line).uri().getPath();
+            final Matcher matcher = PATH.matcher(path);
+            if (matcher.matches()) {
+                return matcher.group("target");
+            } else {
+                throw new IllegalArgumentException(String.format("Invalid path: '%s'", path));
+            }
         }
     }
 }
