@@ -203,20 +203,22 @@ Possible responses:
 
 [Get](https://www.jfrog.com/confluence/display/JFROG/Artifactory+REST+API#ArtifactoryRESTAPI-FileList) a flat listing of the items within a repository.
 
-> **GET** /api/storage/{repoKey}
+> **GET** /api/storage/{repoKey}/{path}
 
 Returns json array of the following format:
 
 ```json
-[
-  {
-    "uri": "/doc.txt",
-    "folder": "false"
-  },
-  {
-    "uri": "/one",
-    "folder": "true"
-  }
-]
+{
+  "files": [
+    {
+      "uri": "/doc.txt",
+      "folder": "false"
+    },
+    {
+      "uri": "/one",
+      "folder": "true"
+    }
+  ]
+}
 ```
  where `uri` is a storage item name and `folder` flag indicates whether item is a folder or not.  
