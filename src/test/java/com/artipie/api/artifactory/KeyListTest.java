@@ -39,23 +39,27 @@ final class KeyListTest {
 
     @Test
     void printsSortedKeys() {
-        final KeyList target = new KeyList();
+        final KeyList target = new KeyList(Key.ROOT);
         for (final String item : Arrays.asList("aaa/111", "bbb/111", "aaa/222", "ccc", "bbb/222")) {
             target.add(new Key.From(item));
         }
         MatcherAssert.assertThat(
             target.print(new DummyFormat(new StringBuilder())),
-            Matchers.stringContainsInOrder(
-                Arrays.asList(
-                    "aaa/",
-                    "aaa/111",
-                    "aaa/222",
-                    "bbb/",
-                    "bbb/111",
-                    "bbb/222",
-                    "ccc"
-                )
-            )
+            Matchers.is("aaa/\nbbb/\nccc\n")
+        );
+    }
+
+    @Test
+    void printsChildrenOnly() {
+        final KeyList target = new KeyList(new Key.From("aaa"));
+        for (final String item : Arrays.asList(
+            "aaa/111", "aaa/bbb/111", "aaa/222", "ccc", "aaa/bbb/222"
+        )) {
+            target.add(new Key.From(item));
+        }
+        MatcherAssert.assertThat(
+            target.print(new DummyFormat(new StringBuilder())),
+            Matchers.is("aaa/111\naaa/222\naaa/bbb/\n")
         );
     }
 

@@ -31,6 +31,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
@@ -39,6 +40,7 @@ import com.artipie.http.rs.RsStatus;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.Test;
 
@@ -95,7 +97,12 @@ final class DeleteUserSliceTest {
             "DeleteUserSlice response",
             new DeleteUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
             new SliceHasResponse(
-                new RsHasStatus(RsStatus.OK),
+                Matchers.allOf(
+                    new RsHasStatus(RsStatus.OK),
+                    new RsHasBody(
+                        "User 'jane' has been removed successfully.", StandardCharsets.UTF_8
+                    )
+                ),
                 new RequestLine(RqMethod.DELETE, "/api/security/users/jane")
             )
         );

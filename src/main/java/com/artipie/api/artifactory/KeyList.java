@@ -25,6 +25,8 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.asto.Key;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -39,14 +41,22 @@ import java.util.Set;
 public final class KeyList {
 
     /**
+     * Root key.
+     */
+    private final Key root;
+
+    /**
      * Key set.
      */
     private final Set<Key> keys;
 
     /**
      * Ctor.
+     *
+     * @param root Root key.
      */
-    public KeyList() {
+    public KeyList(final Key root) {
+        this.root = root;
         this.keys = new HashSet<>();
     }
 
@@ -68,8 +78,16 @@ public final class KeyList {
     public <T> T print(final KeysFormat<T> format) {
         final List<Key> list = new ArrayList<>(this.keys);
         list.sort(Comparator.comparing(Key::string));
-        for (final Key key : list) {
-            format.add(key, key.parent().map(this.keys::contains).orElse(false));
+        final PeekingIterator<Key> iter = Iterators.peekingIterator(list.iterator());
+        while (iter.hasNext()) {
+            final Key key = iter.next();
+            if (key.parent().map(this.root::equals).orElse(false)) {
+                format.add(
+                    key,
+                    iter.hasNext()
+                        && iter.peek().parent().map(parent -> parent.equals(key)).orElse(false)
+                );
+            }
         }
         return format.result();
     }

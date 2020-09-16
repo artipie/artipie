@@ -93,12 +93,17 @@ class AddUpdatePermissionSliceTest {
         MatcherAssert.assertThat(
             "Sets permissions for bob",
             this.permissionsForUser(repo, "bob"),
-            Matchers.containsInAnyOrder("read", "write", "manage")
+            Matchers.containsInAnyOrder("read", "write", "*")
         );
         MatcherAssert.assertThat(
             "Sets permissions for alice",
             this.permissionsForUser(repo, "alice"),
-            Matchers.containsInAnyOrder("write", "annotate", "read")
+            Matchers.containsInAnyOrder("write", "read")
+        );
+        MatcherAssert.assertThat(
+            "Sets permissions for john",
+            this.permissionsForUser(repo, "john"),
+            Matchers.containsInAnyOrder("*")
         );
     }
 
@@ -123,8 +128,9 @@ class AddUpdatePermissionSliceTest {
             "    \"repositories\": [\"local-rep1\", \"remote-rep1\", \"virtual-rep2\"],",
             "    \"actions\": {",
             "          \"users\" : {",
-            "            \"bob\": [\"read\",\"write\",\"manage\"],",
-            "            \"alice\" : [\"write\",\"annotate\", \"read\"]",
+            "            \"bob\": [\"r\",\"write\",\"manage\"],",
+            "            \"alice\" : [\"w\", \"read\"],",
+            "            \"john\" : [\"admin\"]",
             "          },",
             "          \"groups\" : {",
             "            \"dev-leads\" : [\"manage\",\"read\",\"annotate\"],",

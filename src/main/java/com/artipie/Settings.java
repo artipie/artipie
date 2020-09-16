@@ -97,13 +97,15 @@ public interface Settings {
         private final YamlMapping meta;
 
         /**
+         * Layout.
+         */
+        private final String layout;
+
+        /**
          * Ctor.
          */
         public Fake() {
-            this(
-                new InMemoryStorage(), new Credentials.FromEnv(),
-                Yaml.createYamlMappingBuilder().build()
-            );
+            this(new InMemoryStorage());
         }
 
         /**
@@ -112,7 +114,35 @@ public interface Settings {
          * @param storage Storage
          */
         public Fake(final Storage storage) {
-            this(storage, new Credentials.FromEnv(), Yaml.createYamlMappingBuilder().build());
+            this(
+                storage,
+                new Credentials.FromEnv(),
+                Yaml.createYamlMappingBuilder().build()
+            );
+        }
+
+        /**
+         * Ctor.
+         *
+         * @param layout Layout
+         */
+        public Fake(final String layout) {
+            this(new InMemoryStorage(), layout);
+        }
+
+        /**
+         * Ctor.
+         *
+         * @param storage Storage
+         * @param layout Layout
+         */
+        public Fake(final Storage storage, final String layout) {
+            this(
+                storage,
+                new Credentials.FromEnv(),
+                Yaml.createYamlMappingBuilder().build(),
+                layout
+            );
         }
 
         /**
@@ -136,14 +166,35 @@ public interface Settings {
 
         /**
          * Primary ctor.
-         *  @param storage Storage
+         *
+         * @param storage Storage
          * @param cred Credentials
          * @param meta Yaml `meta` mapping
+         * @checkstyle ParameterNumberCheck (2 lines)
          */
         public Fake(final Storage storage, final Credentials cred, final YamlMapping meta) {
+            this(storage, cred, meta, "flat");
+        }
+
+        /**
+         * Primary ctor.
+         *
+         * @param storage Storage
+         * @param cred Credentials
+         * @param meta Yaml `meta` mapping
+         * @param layout Layout
+         * @checkstyle ParameterNumberCheck (2 lines)
+         */
+        public Fake(
+            final Storage storage,
+            final Credentials cred,
+            final YamlMapping meta,
+            final String layout
+        ) {
             this.storage = storage;
             this.cred = cred;
             this.meta = meta;
+            this.layout = layout;
         }
 
         @Override
@@ -158,7 +209,7 @@ public interface Settings {
 
         @Override
         public String layout() {
-            return "flat";
+            return this.layout;
         }
 
         @Override

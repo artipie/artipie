@@ -25,22 +25,22 @@ package com.artipie.api.artifactory;
 
 import com.artipie.Credentials;
 import com.artipie.Settings;
-import com.artipie.asto.ext.PublisherAs;
+import com.artipie.api.ContentAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import java.io.ByteArrayInputStream;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
+import io.reactivex.Single;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.reactivestreams.Publisher;
 
 /**
@@ -71,40 +71,49 @@ public final class AddUpdateUserSlice implements Slice {
         final Optional<String> user = new FromRqLine(line, FromRqLine.RqPattern.USER).get();
         return user.<Response>map(
             username -> new AsyncResponse(
-                AddUpdateUserSlice.password(body)
+                AddUpdateUserSlice.info(body)
                     .thenCompose(
-                        passw -> passw.map(
-                            haspassw -> this.settings.credentials()
+                        json -> json.map(
+                            info -> this.settings.credentials()
                                 .thenCompose(
                                     cred -> cred.add(
-                                        username, DigestUtils.sha256Hex(haspassw),
+                                        new Credentials.User(
+                                            username, Optional.of(info.getValue())
+                                        ),
+                                        DigestUtils.sha256Hex(info.getKey()),
                                         Credentials.PasswordFormat.SHA256
-                                    ).thenApply(ok -> new RsWithStatus(RsStatus.OK)))
-                ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.NOT_FOUND))))
+                                    ).thenApply(ok -> new RsWithStatus(RsStatus.OK))
+                                )
+                ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST))))
             )
         ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
     }
 
     /**
-     * Extracts password string from the response body.
+     * Extracts password and email from the request body.
      *
-     * @param body Response body
-     * @return Password string as completion.
+     * @param body Request body
+     * @return Password and email as completion.
      */
-    private static CompletionStage<Optional<String>> password(final Publisher<ByteBuffer> body) {
-        return new PublisherAs(body)
-            .bytes().thenApply(
-                bytes -> {
-                    final Optional<String> pswd;
-                    if (bytes.length == 0) {
-                        pswd = Optional.empty();
-                    } else {
-                        final JsonReader rdr = Json.createReader(new ByteArrayInputStream(bytes));
-                        final JsonObject root = rdr.readObject();
-                        pswd = Optional.of(root.getString("password"));
-                    }
-                    return pswd;
+    private static CompletionStage<Optional<Pair<String, String>>> info(
+        final Publisher<ByteBuffer> body
+    ) {
+        final String email = "email";
+        final String pswd = "password";
+        return Single.just(body).to(ContentAs.JSON).map(
+            json -> {
+                final Optional<Pair<String, String>> res;
+                if (json.containsKey(pswd) && json.containsKey(email)) {
+                    res = Optional.of(
+                        new ImmutablePair<>(
+                            json.getString(pswd), json.getString(email)
+                        )
+                    );
+                } else {
+                    res = Optional.empty();
                 }
-            );
+                return res;
+            }
+        ).to(SingleInterop.get());
     }
 }

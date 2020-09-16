@@ -123,6 +123,10 @@ meta:
     interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
+## Artipie REST API
+
+Artipie provides a set of APIs to manage repositories and users.  The current APIs are fully documented [here](./REST_API.md).
+
 ## Additional configuration
 
 You may want configure it via environment variables:

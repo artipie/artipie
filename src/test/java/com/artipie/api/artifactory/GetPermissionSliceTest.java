@@ -73,6 +73,17 @@ class GetPermissionSliceTest {
     }
 
     @Test
+    void returnsNotFoundIfRepoDoesNotExists() {
+        MatcherAssert.assertThat(
+            new GetPermissionSlice(new Settings.Fake(this.storage)),
+            new SliceHasResponse(
+                new RsHasStatus(RsStatus.NOT_FOUND),
+                new RequestLine(RqMethod.GET, "/api/security/permissions/pypi")
+            )
+        );
+    }
+
+    @Test
     void returnsEmptyUsersIfNoPermissionsSet() {
         final String repo = "docker";
         final RepoPerms perm = new RepoPerms();
@@ -91,12 +102,10 @@ class GetPermissionSliceTest {
         final String repo = "maven";
         final String john = "john";
         final String mark = "mark";
-        final String download = "download";
-        final String upload = "upload";
         final RepoPerms perm = new RepoPerms(
             List.of(
-                new RepoPermissions.UserPermission(john, new ListOf<String>(download, upload)),
-                new RepoPermissions.UserPermission(mark, new ListOf<String>(download))
+                new RepoPermissions.UserPermission(john, new ListOf<String>("read", "write")),
+                new RepoPermissions.UserPermission(mark, new ListOf<String>("*"))
             )
         );
         perm.saveSettings(this.storage, repo);
@@ -107,8 +116,8 @@ class GetPermissionSliceTest {
                     this.response(
                         repo,
                         Json.createObjectBuilder()
-                            .add(john, Json.createArrayBuilder().add(download).add(upload).build())
-                            .add(mark, Json.createArrayBuilder().add(download).build())
+                            .add(john, Json.createArrayBuilder().add("r").add("w").build())
+                            .add(mark, Json.createArrayBuilder().add("m").build())
                             .build()
                     )
                 ),
