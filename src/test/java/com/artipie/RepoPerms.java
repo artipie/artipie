@@ -55,9 +55,9 @@ public final class RepoPerms {
     private final Collection<RepoPermissions.UserPermission> usersperms;
 
     /**
-     * List of included patterns.
+     * Collection of included patterns.
      */
-    private final List<String> patterns;
+    private final Collection<String> patterns;
 
     /**
      * Ctor.
@@ -85,11 +85,11 @@ public final class RepoPerms {
     /**
      * Primary ctor.
      * @param usersperms Collection with user permissions
-     * @param patterns List of included patterns.
+     * @param patterns Collection of included patterns.
      */
     public RepoPerms(
         final Collection<RepoPermissions.UserPermission> usersperms,
-        final List<String> patterns
+        final Collection<String> patterns
     ) {
         this.usersperms = usersperms;
         this.patterns = patterns;

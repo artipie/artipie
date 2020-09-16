@@ -76,7 +76,7 @@ public interface RepoPermissions {
     CompletionStage<Void> update(
         String repo,
         Collection<UserPermission> permissions,
-        List<String> patterns
+        Collection<String> patterns
     );
 
     /**
@@ -147,7 +147,7 @@ public interface RepoPermissions {
         public CompletionStage<Void> update(
             final String repo,
             final Collection<UserPermission> permissions,
-            final List<String> patterns) {
+            final Collection<String> patterns) {
             final Key key = FromSettings.repoSettingsKey(repo);
             return this.repo(key).thenApply(
                 mapping -> {
