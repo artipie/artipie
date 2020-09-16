@@ -35,6 +35,7 @@ import com.artipie.http.rs.StandardRs;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -96,7 +97,7 @@ public final class AddUpdatePermissionSlice implements Slice {
                     AddUpdatePermissionSlice::permissions
                 ).thenCompose(
                     perms -> new RepoPermissions.FromSettings(this.settings)
-                        .addUpdate(repo, perms)
+                        .update(repo, perms, Collections.emptyList())
                 ).thenApply(
                     ignored -> StandardRs.EMPTY
                 )

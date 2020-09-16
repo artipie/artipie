@@ -45,6 +45,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
+import org.cactoos.set.SetOf;
 
 /**
  * Repository permissions settings.
@@ -66,12 +67,17 @@ public interface RepoPermissions {
     CompletionStage<Void> remove(String repo);
 
     /**
-     * Adds or updates repository permission.
+     * Adds or updates repository permissions.
      * @param repo Repository name
      * @param permissions Permissions list
+     * @param patterns Included path patterns
      * @return Completion action
      */
-    CompletionStage<Void> addUpdate(String repo, Collection<UserPermission> permissions);
+    CompletionStage<Void> update(
+        String repo,
+        Collection<UserPermission> permissions,
+        List<String> patterns
+    );
 
     /**
      * Get repository permissions settings, returns users permissions list.
@@ -90,6 +96,11 @@ public interface RepoPermissions {
          * Permissions section name.
          */
         private static final String PERMISSIONS = "permissions";
+
+        /**
+         * Permissions include patterns section in YAML settings.
+         */
+        private static final String INCLUDE_PATTERNS = "permissions_include_patterns";
 
         /**
          * Repo section in yaml settings.
@@ -133,8 +144,10 @@ public interface RepoPermissions {
         }
 
         @Override
-        public CompletionStage<Void> addUpdate(final String repo,
-            final Collection<UserPermission> permissions) {
+        public CompletionStage<Void> update(
+            final String repo,
+            final Collection<UserPermission> permissions,
+            final List<String> patterns) {
             final Key key = FromSettings.repoSettingsKey(repo);
             return this.repo(key).thenApply(
                 mapping -> {
@@ -145,6 +158,15 @@ public interface RepoPermissions {
                             perms = perms.add(item.name, item.yaml().build());
                         }
                         res = res.add(FromSettings.PERMISSIONS, perms.build());
+                    }
+                    if (!patterns.isEmpty()) {
+                        YamlSequenceBuilder builder = Yaml.createYamlSequenceBuilder();
+                        for (final String pattern : patterns) {
+                            builder = builder.add(pattern);
+                        }
+                        res = res.add(
+                            FromSettings.INCLUDE_PATTERNS, builder.build()
+                        );
                     }
                     return Yaml.createYamlMappingBuilder()
                         .add(FromSettings.REPO, res.build()).build();
@@ -226,7 +248,11 @@ public interface RepoPermissions {
         private static YamlMappingBuilder copyRepoSection(final YamlMapping mapping) {
             YamlMappingBuilder res = Yaml.createYamlMappingBuilder();
             final List<YamlNode> keep = mapping.keys().stream()
-                .filter(node -> !node.asScalar().value().equals(FromSettings.PERMISSIONS))
+                .filter(
+                    node -> !new SetOf<>(
+                        FromSettings.PERMISSIONS, FromSettings.INCLUDE_PATTERNS
+                    ).contains(node.asScalar().value())
+                )
                 .collect(Collectors.toList());
             for (final YamlNode node : keep) {
                 res = res.add(node, mapping.value(node));
