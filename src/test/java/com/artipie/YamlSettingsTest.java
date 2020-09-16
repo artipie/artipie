@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
@@ -46,11 +47,24 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * @since 0.1
  * @checkstyle MethodNameCheck (500 lines)
- * @todo #187:30min Add a test for layout structure, it can be either `flat` or `org`. If it's
- *  omitted, it should treated as a `flat` layout. See RepoLayout javadocs for more details.
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class YamlSettingsTest {
+
+    @Test
+    public void shouldSetFlatAsDefaultLayout() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            String.join(
+                "",
+                "meta:\n",
+                "  storage:\n"
+            )
+        );
+        MatcherAssert.assertThat(
+            settings.layout(),
+            new IsEqual<>("flat")
+        );
+    }
 
     @Test
     public void shouldBuildFileStorageFromSettings() throws Exception {
