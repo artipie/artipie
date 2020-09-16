@@ -1,6 +1,6 @@
-# Artifactory API Support
+# Artipie REST API
 
-Artipie supports artifactory API to manage repositories, users and repository permissions.
+One objective of Artipie is to provide APIs that are compatible with Artifactory APIs so that customers can have an easy and smooth transition from Artifactory to Artipie if they choose to.  The set of APIs are to manage repositories, users, repository permissions and more.
 
 ## Create Repository
 
@@ -59,7 +59,7 @@ Returns json with the following fields:
 Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
 name | string | User name | Y
-email | string | User email, always constructed as {userName}@artipie.com | Y
+email | string | User email | Y
 lastLoggedIn | string | Default `2020-01-01T01:01:01.000+01:00` | Y
 realm | string | User realm, value `Internal` is always returned | Y
 
@@ -76,6 +76,7 @@ Consumes json with the following fields (any other fields are ignored):
 Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
 password | string | User password | Y
+email | string | User email | Y
 
 Possible responses:
 - `200 OK` when user was successfully created or updated
@@ -132,7 +133,7 @@ Returns json of the following format:
   "principals": {
     "users" : {
       "bob": ["r", "w", "m"],
-      "alice" : ["d", "w", "n", "r"]
+      "alice" : ["d", "w", "r"]
     }   
   }
 }
@@ -144,6 +145,12 @@ Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
 repositories | json array | Repository name, always one-element array with the `{permissionTargetName}` item | Y
 principals | json object | Repository permissions details, contains `users` element with user permission details | Y
+
+The set of supported permissions along with the shortening convention:
+
+```text
+w=deploy; m=admin; r=read; d=delete (`delete` is supported for file storage only)
+```
 
 If requested `{permissionTargetName}` does not exist, `404 NOT FOUND` status is returned.
 
@@ -161,7 +168,7 @@ Consumes json of the following form:
      "actions": {
        "users" : {
           "bob": ["read", "write", "manage"],
-          "alice" : ["write", "annotate", "read"]
+          "alice" : ["write", "read"]
        }
      }
    }
@@ -169,6 +176,12 @@ Consumes json of the following form:
 ```
 where field `users` contains list of the user names and corresponding permissions, all other fields 
 are ignored. 
+
+The following synonyms and shortened values for standard operations are supported:
+- `read` - `r` 
+- `write` - `w`, `deploy`
+- `delete` - `d`
+- `manage` (any operation is allowed) - `m`, `admin`
 
 Possible responses:
 - `200 OK` when permissions were added successfully
@@ -190,20 +203,22 @@ Possible responses:
 
 [Get](https://www.jfrog.com/confluence/display/JFROG/Artifactory+REST+API#ArtifactoryRESTAPI-FileList) a flat listing of the items within a repository.
 
-> **GET** /api/storage/{repoKey}
+> **GET** /api/storage/{repoKey}/{path}
 
 Returns json array of the following format:
 
 ```json
-[
-  {
-    "uri": "/doc.txt",
-    "folder": "false"
-  },
-  {
-    "uri": "/one",
-    "folder": "true"
-  }
-]
+{
+  "files": [
+    {
+      "uri": "/doc.txt",
+      "folder": "false"
+    },
+    {
+      "uri": "/one",
+      "folder": "true"
+    }
+  ]
+}
 ```
  where `uri` is a storage item name and `folder` flag indicates whether item is a folder or not.  

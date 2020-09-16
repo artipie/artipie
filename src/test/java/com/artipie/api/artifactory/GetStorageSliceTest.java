@@ -24,7 +24,7 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.IsJson;
-import com.artipie.api.ArtipieApi;
+import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.LoggingStorage;
@@ -44,7 +44,6 @@ import javax.json.JsonValue;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -53,12 +52,11 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 
 /**
- * Test for {@link ArtipieApi}.
+ * Test for {@link GetStorageSlice}.
  *
  * @since 0.11
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-@Disabled
 class GetStorageSliceTest {
 
     /**
@@ -75,8 +73,9 @@ class GetStorageSliceTest {
         "org,my-company/my-lib"
     })
     void shouldReturnExpectedData(final String layout, final String repo) {
+        final Storage storage = this.example(this.tmp, repo);
         MatcherAssert.assertThat(
-            new GetStorageSlice(this.example(this.tmp, repo)),
+            new GetStorageSlice(new Settings.Fake(storage, layout)),
             new SliceHasResponse(
                 new AllOf<>(
                     Arrays.asList(
