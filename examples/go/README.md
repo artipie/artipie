@@ -15,21 +15,11 @@ repo:
     path: /var/artipie/data
 ```
 
-After creating the configuration file below, the configured GOPROXY is ready for use. First, you have to declare the following environment variables:
+After creating the configuration file below, the configured GOPROXY is ready for use. 
+In order to use, declare the following environment variables:
 
 ```bash
 export GO111MODULE=on
-export GOPROXY=http://localhost:8080/my-go
-```
-
-Or, in case you want to stay connected with central proxy.golang.org, declare it in
-the following way:
-
-To use it for installing packages add it to `GOPROXY` environment variable:
-
-```bash
-export GO111MODULE=on
-export GOPROXY=http://localhost:8080/my-go
 export GOPROXY="http://localhost:8080/my-go,https://proxy.golang.org,direct"
 ```
 
