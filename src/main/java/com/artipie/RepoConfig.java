@@ -99,6 +99,14 @@ public final class RepoConfig {
     }
 
     /**
+     * Repo port.
+     * @return Repo port
+     */
+    public Integer port() {
+        return this.repoConfig().integer("port");
+    }
+
+    /**
      * Repository path.
      * @return Async string of path
      */

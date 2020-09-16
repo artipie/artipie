@@ -44,7 +44,7 @@ import java.util.concurrent.CompletionStage;
  * Artipie repositories implementation.
  * @since 0.9
  */
-final class ArtipieRepositories implements Repositories {
+public final class ArtipieRepositories implements Repositories {
 
     /**
      * Artipie settings.
@@ -55,7 +55,7 @@ final class ArtipieRepositories implements Repositories {
      * New Artipie repositories.
      * @param settings Artipie settings
      */
-    ArtipieRepositories(final Settings settings) {
+    public ArtipieRepositories(final Settings settings) {
         this.settings = settings;
     }
 

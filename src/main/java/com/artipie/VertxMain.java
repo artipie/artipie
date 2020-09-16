@@ -24,7 +24,12 @@
 
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.asto.Key;
+import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.Pie;
+import com.artipie.http.Slice;
 import com.artipie.http.TrafficMetricSlice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
@@ -38,6 +43,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -46,14 +52,19 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.javatuples.Pair;
 
 /**
  * Vertx server entry point.
  * @since 1.0
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ExecutableStatementCountCheck (500 lines)
+ * @checkstyle AvoidInlineConditionalsCheck (500 lines)
+ * @since 1.0
  */
-@SuppressWarnings("PMD.PrematureDeclaration")
+@SuppressWarnings({
+    "PMD.PrematureDeclaration", "PMD.SimplifyStartsWith", "PMD.AvoidDuplicateLiterals"
+})
 public final class VertxMain {
 
     /**
@@ -93,8 +104,9 @@ public final class VertxMain {
      *
      * @return Port the servers listening on.
      * @throws IOException In case of error reading settings.
+     * @throws InterruptedException If interrupted.
      */
-    public int start() throws IOException {
+    public int start() throws IOException, InterruptedException {
         final Settings settings = settings(this.config);
         final Metrics metrics = metrics(settings);
         this.server = new VertxSliceServer(
@@ -108,6 +120,7 @@ public final class VertxMain {
             ),
             this.port
         );
+        this.findAndStartOnSpecificPorts(settings);
         final int prt = this.server.start();
         Logger.info(VertxMain.class, "Artipie was started on port %d", prt);
         return prt;
@@ -125,8 +138,10 @@ public final class VertxMain {
      * @param args CLI args
      * @throws IOException If fails
      * @throws ParseException If fails
+     * @throws InterruptedException If interrupted.
      */
-    public static void main(final String... args) throws IOException, ParseException {
+    public static void main(final String... args)
+        throws IOException, ParseException, InterruptedException {
         final Vertx vertx = Vertx.vertx();
         final Path config;
         final int port;
@@ -150,6 +165,65 @@ public final class VertxMain {
             throw new IllegalStateException("Storage is not configured");
         }
         new VertxMain(config, vertx, port).start();
+    }
+
+    /**
+     * Find repos and start them on specific port.
+     * @param settings The settings
+     * @throws IOException In case of error reading settings.
+     * @throws InterruptedException If interrupted.
+     */
+    private void findAndStartOnSpecificPorts(final Settings settings)
+        throws IOException, InterruptedException {
+        final ArtipieRepositories repositories = new ArtipieRepositories(settings);
+        final BlockingStorage blocking = new BlockingStorage(settings.storage());
+        new ArrayList<>(blocking.list(Key.ROOT))
+            .stream()
+            .filter(
+                key -> {
+                    final String full = key.string();
+                    final int index = full.lastIndexOf('/');
+                    final String fname = index == -1 ? full : full.substring(index);
+                    return !fname.startsWith("_")
+                        && (fname.endsWith(".yml") || fname.endsWith(".yaml"));
+                }
+            )
+            .map(
+                key -> {
+                    final int sport;
+                    try {
+                        sport = Yaml.createYamlInput(new String(blocking.value(key)))
+                            .readYamlMapping()
+                            .yamlMapping("repo")
+                            .integer("port");
+                        return new Pair<>(sport, key);
+                    } catch (final InterruptedException | IOException exc) {
+                        throw new IllegalStateException(exc);
+                    }
+                }
+            ).filter(pair -> pair.getValue0() > 0)
+            .forEach(
+                pair -> {
+                    try {
+                        final Integer sport = pair.getValue0();
+                        final Key key = new Key.From(
+                            pair.getValue1().string()
+                                .replaceAll("\\.yaml", "")
+                                .replaceAll("\\.yml", "")
+                        );
+                        final Slice slice = repositories.slice(key);
+                        new VertxSliceServer(this.vertx, slice, sport).start();
+                        Logger.info(
+                            VertxMain.class,
+                            "Slice at %s started at port:%d",
+                            key.string(),
+                            sport
+                        );
+                    } catch (final IOException exc) {
+                        throw new IllegalStateException(exc);
+                    }
+                }
+            );
     }
 
     /**

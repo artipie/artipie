@@ -139,7 +139,12 @@ public final class SliceFromConfig extends Slice.Wrap {
         final Permissions permissions = new LoggingPermissions(
             cfg.permissions().orElse(Permissions.FREE)
         );
-        final Pattern prefix = new PathPattern(settings).pattern();
+        final Pattern prefix;
+        if (cfg.port() == -1) {
+            prefix = new PathPattern(settings).pattern();
+        } else {
+            prefix = Pattern.compile("()(/.*)?");
+        }
         switch (cfg.type()) {
             case "file":
                 slice = new TrimPathSlice(new FilesSlice(cfg.storage(), permissions, auth), prefix);
