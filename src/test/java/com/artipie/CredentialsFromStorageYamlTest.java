@@ -38,7 +38,6 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -46,7 +45,7 @@ import org.junit.jupiter.api.Test;
  * @since 0.9
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "PMD.AvoidDuplicateLiterals"})
 class CredentialsFromStorageYamlTest {
 
     /**
@@ -66,8 +65,7 @@ class CredentialsFromStorageYamlTest {
     }
 
     @Test
-    @Disabled
-    void readsYamlFromStorage() {
+    void readsYamlWithEmailFromStorage() {
         final String jane = "jane";
         final String john = "john";
         final String pass = "sha256:111";
@@ -78,6 +76,29 @@ class CredentialsFromStorageYamlTest {
             Matchers.containsInAnyOrder(
                 new Credentials.User(jane, this.email(jane)),
                 new Credentials.User(john, this.email(john))
+            )
+        );
+    }
+
+    @Test
+    void readsYamlFromStorage() {
+        final String jane = "maria";
+        final String john = "olga";
+        final String pass = "sha256:000";
+        this.creds(new ImmutablePair<>(jane, pass), new ImmutablePair<>(john, pass));
+        this.storage.save(
+            this.key,
+            new Content.From(
+                this.getYaml(new ImmutablePair<>(jane, pass), new ImmutablePair<>(john, pass))
+                    .getBytes(StandardCharsets.UTF_8)
+            )
+        ).join();
+        MatcherAssert.assertThat(
+            new Credentials.FromStorageYaml(this.storage, this.key).users()
+                .toCompletableFuture().join(),
+            Matchers.containsInAnyOrder(
+                new Credentials.User(jane, Optional.empty()),
+                new Credentials.User(john, Optional.empty())
             )
         );
     }
@@ -96,7 +117,7 @@ class CredentialsFromStorageYamlTest {
             new PublisherAs(this.storage.value(this.key).join())
                 .asciiString().toCompletableFuture().join(),
             new IsEqual<>(
-                this.getYaml(
+                this.getYamlWithEmail(
                     new ImmutablePair<>(maria, full),
                     new ImmutablePair<>(olga, full)
                 )
@@ -120,7 +141,7 @@ class CredentialsFromStorageYamlTest {
             new PublisherAs(this.storage.value(this.key).join())
                 .asciiString().toCompletableFuture().join(),
             new IsEqual<>(
-                this.getYaml(
+                this.getYamlWithEmail(
                     new ImmutablePair<>(jack, old),
                     new ImmutablePair<>(silvia, String.format("plain:%s", newpass))
                 )
@@ -139,7 +160,7 @@ class CredentialsFromStorageYamlTest {
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
                 .asciiString().toCompletableFuture().join(),
-            new IsEqual<>(this.getYaml(new ImmutablePair<>(mark, pass)))
+            new IsEqual<>(this.getYamlWithEmail(new ImmutablePair<>(mark, pass)))
         );
     }
 
@@ -155,7 +176,9 @@ class CredentialsFromStorageYamlTest {
             new PublisherAs(this.storage.value(this.key).join())
                 .asciiString().toCompletableFuture().join(),
             new IsEqual<>(
-                this.getYaml(new ImmutablePair<>(ted, pass), new ImmutablePair<>(alex, pass))
+                this.getYamlWithEmail(
+                    new ImmutablePair<>(ted, pass), new ImmutablePair<>(alex, pass)
+                )
             )
         );
     }
@@ -163,11 +186,11 @@ class CredentialsFromStorageYamlTest {
     private void creds(final Pair<String, String>... users) {
         this.storage.save(
             this.key,
-            new Content.From(this.getYaml(users).getBytes(StandardCharsets.UTF_8))
+            new Content.From(this.getYamlWithEmail(users).getBytes(StandardCharsets.UTF_8))
         ).join();
     }
 
-    private String getYaml(final Pair<String, String>... users) {
+    private String getYamlWithEmail(final Pair<String, String>... users) {
         YamlMappingBuilder mapping = Yaml.createYamlMappingBuilder();
         for (final Pair<String, String> user : users) {
             mapping = mapping.add(
@@ -176,6 +199,21 @@ class CredentialsFromStorageYamlTest {
                     .add("pass", user.getValue())
                     .add("email", this.email(user.getKey()).get())
                     .build()
+            );
+        }
+        return Yaml.createYamlMappingBuilder().add(
+            "credentials",
+            mapping.build()
+        ).build().toString();
+    }
+
+    private String getYaml(final Pair<String, String>... users) {
+        YamlMappingBuilder mapping = Yaml.createYamlMappingBuilder();
+        for (final Pair<String, String> user : users) {
+            mapping = mapping.add(
+                user.getKey(),
+                Yaml.createYamlMappingBuilder()
+                    .add("pass", user.getValue()).build()
             );
         }
         return Yaml.createYamlMappingBuilder().add(
