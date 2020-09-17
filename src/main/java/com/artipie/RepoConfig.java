@@ -99,6 +99,19 @@ public final class RepoConfig {
     }
 
     /**
+     * Repo port.
+     * @return Repo port
+     */
+    public Optional<Integer> port() {
+        final int port = this.repoConfig().integer("port");
+        if(port == -1){
+            return Optional.empty();
+        } else {
+            return Optional.of(port);
+        }
+    }
+
+    /**
      * Repository path.
      * @return Async string of path
      */
