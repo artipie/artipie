@@ -110,7 +110,7 @@ class AddUpdatePermissionSliceTest {
         MatcherAssert.assertThat(
             "Sets patterns",
             this.patterns(repo),
-            Matchers.contains("**")
+            Matchers.contains("**", "my-repo/**")
         );
     }
 
@@ -142,7 +142,7 @@ class AddUpdatePermissionSliceTest {
             "{",
             " \"name\": \"java-developers\",",
             " \"repo\": {",
-            "    \"include-patterns\": [\"**\"],",
+            "    \"include-patterns\": [\"**\", \"my-repo/**\"],",
             "    \"exclude-patterns\": [\"\"],",
             "    \"repositories\": [\"local-rep1\", \"remote-rep1\", \"virtual-rep2\"],",
             "    \"actions\": {",
