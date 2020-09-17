@@ -34,6 +34,7 @@ import com.artipie.api.artifactory.DeleteUserSlice;
 import com.artipie.api.artifactory.FromRqLine;
 import com.artipie.api.artifactory.GetPermissionSlice;
 import com.artipie.api.artifactory.GetPermissionsSlice;
+import com.artipie.api.artifactory.GetStorageSlice;
 import com.artipie.api.artifactory.GetUserSlice;
 import com.artipie.api.artifactory.GetUsersSlice;
 import com.artipie.asto.Concatenation;
@@ -225,6 +226,13 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new GetPermissionSlice(settings)
+                            ),
+                            new RtRulePath(
+                                new RtRule.All(
+                                    new RtRule.ByPath(GetStorageSlice.Request.PATH),
+                                    new ByMethodsRule(RqMethod.GET)
+                                ),
+                                new GetStorageSlice(settings)
                             )
                         ),
                         new Permission.ByName("api", perm),

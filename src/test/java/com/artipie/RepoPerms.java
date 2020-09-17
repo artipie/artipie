@@ -27,6 +27,8 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
+import com.amihaiemil.eoyaml.YamlSequence;
+import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -53,10 +55,15 @@ public final class RepoPerms {
     private final Collection<RepoPermissions.UserPermission> usersperms;
 
     /**
+     * Collection of included patterns.
+     */
+    private final Collection<String> patterns;
+
+    /**
      * Ctor.
      */
     public RepoPerms() {
-        this(Collections.emptyList());
+        this(Collections.emptyList(), Collections.emptyList());
     }
 
     /**
@@ -72,7 +79,20 @@ public final class RepoPerms {
      * @param usersperms Collection with user permissions
      */
     public RepoPerms(final Collection<RepoPermissions.UserPermission> usersperms) {
+        this(usersperms, Collections.emptyList());
+    }
+
+    /**
+     * Primary ctor.
+     * @param usersperms Collection with user permissions
+     * @param patterns Collection of included patterns.
+     */
+    public RepoPerms(
+        final Collection<RepoPermissions.UserPermission> usersperms,
+        final Collection<String> patterns
+    ) {
         this.usersperms = usersperms;
+        this.patterns = patterns;
     }
 
     /**
@@ -81,28 +101,35 @@ public final class RepoPerms {
      * @param repo Repo
      */
     public void saveSettings(final Storage storage, final String repo) {
+        final YamlMappingBuilder root = RepoPerms.repoSectionAsBuilder(
+            Yaml.createYamlMappingBuilder().add("type", "any").build()
+        );
         storage.save(
             new Key.From(String.format("%s.yaml", repo)),
             new Content.From(
                 Yaml.createYamlMappingBuilder().add(
                     "repo",
-                    this.addPermissions(
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "any").build()
-                        ).build()
+                    root.add(
+                        RepoPerms.PERMISSIONS, this.permsYaml()
+                    ).add(
+                        "permissions_include_patterns", this.patternsYaml()
+                    ).build()
                 ).build().toString().getBytes(StandardCharsets.UTF_8)
             )
         ).join();
     }
 
     /**
-     * Add permissions to the repo section.
-     * @param reposection YamlMappingBuilder with repo section
-     * @return YamlMappingBuilder with repo section and permissions.
+     * Build YAML sequence of patterns.
+     *
+     * @return YAML sequence of patterns.
      */
-    public YamlMappingBuilder addPermissions(final YamlMapping reposection) {
-        return RepoPerms.repoSectionAsBuilder(reposection)
-            .add(RepoPerms.PERMISSIONS, this.permsYaml());
+    private YamlSequence patternsYaml() {
+        YamlSequenceBuilder builder = Yaml.createYamlSequenceBuilder();
+        for (final String pattern : this.patterns) {
+            builder = builder.add(pattern);
+        }
+        return builder.build();
     }
 
     /**

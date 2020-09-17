@@ -314,6 +314,12 @@ SOFTWARE.
       <version>2.0.7</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>wtf.g4s8</groupId>
+      <artifactId>matchers-json</artifactId>
+      <version>1.0.3</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <testResources>

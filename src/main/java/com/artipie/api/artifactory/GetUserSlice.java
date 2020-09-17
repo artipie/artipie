@@ -58,20 +58,27 @@ public final class GetUserSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Optional<String> user = new FromRqLine(line, FromRqLine.RqPattern.USER).get();
-        return user.<Response>map(
+        final Optional<String> name = new FromRqLine(line, FromRqLine.RqPattern.USER).get();
+        return name.<Response>map(
             username -> new AsyncResponse(
                 this.settings.credentials().thenCompose(
                     cred ->  cred.users().thenApply(
-                        users -> users.contains(username)
+                        users -> users.stream()
+                            .filter(item -> item.name().equals(username))
+                            .findFirst()
                     ).thenApply(
-                        has -> {
+                        user -> {
                             final Response resp;
-                            if (has) {
+                            if (user.isPresent()) {
                                 resp = new RsJson(
                                     () -> Json.createObjectBuilder()
-                                        .add("name", username)
-                                        .add("email", String.format("%s@artipie.com", username))
+                                        .add("name", user.get().name())
+                                        .add(
+                                            "email",
+                                            user.get().email().orElse(
+                                                String.format("%s@artipie.com", user.get().name())
+                                            )
+                                        )
                                         .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
                                         .add("realm", "Internal")
                                         .build(),
