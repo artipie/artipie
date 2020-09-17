@@ -104,11 +104,13 @@ public final class RepoConfig {
      */
     public Optional<Integer> port() {
         final int port = this.repoConfig().integer("port");
-        if(port == -1){
-            return Optional.empty();
+        final Optional<Integer> empty;
+        if (port == -1) {
+            empty = Optional.empty();
         } else {
-            return Optional.of(port);
+            empty = Optional.of(port);
         }
+        return empty;
     }
 
     /**

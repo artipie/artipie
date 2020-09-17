@@ -73,6 +73,7 @@ import java.util.stream.Collectors;
  * @checkstyle ParameterNumberCheck (500 lines)
  * @checkstyle CyclomaticComplexityCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
+ * @checkstyle MethodBodyCommentsCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.StaticAccessToStaticFields"})
 public final class SliceFromConfig extends Slice.Wrap {
@@ -143,6 +144,10 @@ public final class SliceFromConfig extends Slice.Wrap {
         if (cfg.port().isEmpty()) {
             prefix = new PathPattern(settings).pattern();
         } else {
+            // A dirty-hacked patter for not trimming anything.
+            // Since TrimPathSlice keeps only the group number 2
+            // we don't want anything to be removed from the path
+            // in case a repo is served on a different port
             prefix = Pattern.compile("()(/.*)?");
         }
         switch (cfg.type()) {
