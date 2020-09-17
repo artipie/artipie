@@ -103,14 +103,7 @@ public final class RepoConfig {
      * @return Repo port
      */
     public Optional<Integer> port() {
-        final int port = this.repoConfig().integer("port");
-        final Optional<Integer> opt;
-        if (port == -1) {
-            opt = Optional.empty();
-        } else {
-            opt = Optional.of(port);
-        }
-        return opt;
+        return this.stringOpt("port").map(Integer::parseInt);
     }
 
     /**
