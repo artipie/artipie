@@ -24,6 +24,7 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.RepoPerms;
 import com.artipie.Settings;
 import com.artipie.asto.Content;
@@ -39,6 +40,7 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
@@ -76,7 +78,7 @@ class AddUpdatePermissionSliceTest {
     }
 
     @Test
-    void updatesPermissions() throws IOException {
+    void updatesPermissionsAndPatterns() throws IOException {
         final String repo = "maven";
         final RepoPerms perm = new RepoPerms();
         perm.saveSettings(this.storage, repo);
@@ -105,16 +107,33 @@ class AddUpdatePermissionSliceTest {
             this.permissionsForUser(repo, "john"),
             Matchers.containsInAnyOrder("*")
         );
+        MatcherAssert.assertThat(
+            "Sets patterns",
+            this.patterns(repo),
+            Matchers.contains("**", "my-repo/**")
+        );
     }
 
     private List<String> permissionsForUser(final String repo, final String user)
         throws IOException {
+        return this.repo(repo).yamlMapping("permissions").yamlSequence(user)
+            .values().stream().map(node -> node.asScalar().value())
+            .collect(Collectors.toList());
+    }
+
+    private Collection<String> patterns(final String repo)
+        throws IOException {
+        return this.repo(repo)
+            .yamlSequence("permissions_include_patterns")
+            .values().stream().map(node -> node.asScalar().value())
+            .collect(Collectors.toList());
+    }
+
+    private YamlMapping repo(final String repo) throws IOException {
         return Yaml.createYamlInput(
             new PublisherAs(this.storage.value(new Key.From(String.format("%s.yaml", repo))).join())
                 .asciiString().toCompletableFuture().join()
-        ).readYamlMapping().yamlMapping("repo").yamlMapping("permissions").yamlSequence(user)
-            .values().stream().map(node -> node.asScalar().value())
-            .collect(Collectors.toList());
+        ).readYamlMapping().yamlMapping("repo");
     }
 
     private String json() {
@@ -123,7 +142,7 @@ class AddUpdatePermissionSliceTest {
             "{",
             " \"name\": \"java-developers\",",
             " \"repo\": {",
-            "    \"include-patterns\": [\"**\"],",
+            "    \"include-patterns\": [\"**\", \"my-repo/**\"],",
             "    \"exclude-patterns\": [\"\"],",
             "    \"repositories\": [\"local-rep1\", \"remote-rep1\", \"virtual-rep2\"],",
             "    \"actions\": {",
