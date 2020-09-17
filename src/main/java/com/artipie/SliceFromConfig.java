@@ -145,9 +145,11 @@ public final class SliceFromConfig extends Slice.Wrap {
             prefix = new PathPattern(settings).pattern();
         } else {
             // A dirty-hacked patter for not trimming anything.
-            // Since TrimPathSlice keeps only the group number 2
+            // Since TrimPathSlice keeps only the group number 1
             // we don't want anything to be removed from the path
-            // in case a repo is served on a different port
+            // in case a repo is served on a different port;
+            // that is why we need an empty group in the beginning
+            // of the pattern.
             prefix = Pattern.compile("()(/.*)?");
         }
         switch (cfg.type()) {
