@@ -35,21 +35,42 @@ import com.artipie.http.rs.StandardRs;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonValue;
+import org.cactoos.map.MapEntry;
+import org.cactoos.map.MapOf;
 import org.reactivestreams.Publisher;
 
 /**
  * Artifactory `PUT /api/security/permissions/{target}` endpoint, updates `permissions` section
  * in repository section.
  * @since 0.10
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class AddUpdatePermissionSlice implements Slice {
+
+    /**
+     * Permissions mapping: translates artifactory permissions on Artipie language.
+     */
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+    private static final Map<String, String> MAPPING =
+        new MapOf<>(
+            new MapEntry<>("r", "read"),
+            new MapEntry<>("read", "read"),
+            new MapEntry<>("w", "write"),
+            new MapEntry<>("write", "write"),
+            new MapEntry<>("deploy", "write"),
+            new MapEntry<>("m", "*"),
+            new MapEntry<>("admin", "*"),
+            new MapEntry<>("manage", "*"),
+            new MapEntry<>("d", "delete"),
+            new MapEntry<>("delete", "delete")
+        );
 
     /**
      * Artipie settings.
@@ -76,7 +97,7 @@ public final class AddUpdatePermissionSlice implements Slice {
                     AddUpdatePermissionSlice::permissions
                 ).thenCompose(
                     perms -> new RepoPermissions.FromSettings(this.settings)
-                        .addUpdate(repo, perms)
+                        .update(repo, perms, Collections.emptyList())
                 ).thenApply(
                     ignored -> StandardRs.EMPTY
                 )
@@ -97,7 +118,17 @@ public final class AddUpdatePermissionSlice implements Slice {
             (user, perms) ->
                 res.add(
                     new RepoPermissions.UserPermission(
-                        user, perms.asJsonArray().getValuesAs(JsonValue::toString)
+                        user, perms.asJsonArray().stream()
+                        .map(item -> item.toString().replace("\"", ""))
+                        .map(
+                            item -> Optional.ofNullable(
+                                AddUpdatePermissionSlice.MAPPING.get(item)
+                            ).orElseThrow(
+                                () -> new IllegalArgumentException(
+                                    String.format("Unsupported permission '%s'!", item)
+                                )
+                            )
+                        ).distinct().collect(Collectors.toList())
                     )
                 )
         );

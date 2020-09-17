@@ -31,6 +31,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.cactoos.list.ListOf;
@@ -46,7 +47,7 @@ import org.junit.jupiter.api.Test;
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class RepoPermissionsFromSettingsTest {
 
     /**
@@ -104,12 +105,15 @@ class RepoPermissionsFromSettingsTest {
     }
 
     @Test
-    void updatesUserPermissions() throws IOException {
+    void updatesUserPermissionsAndPatterns() throws IOException {
         final String repo = "rpm";
         final String david = "david";
         final String add = "add";
         final RepoPerms perm = new RepoPerms(
-            new RepoPermissions.UserPermission(david, new ListOf<String>(add, "update"))
+            Collections.singleton(
+                new RepoPermissions.UserPermission(david, new ListOf<String>(add, "update"))
+            ),
+            new ListOf<>("**")
         );
         perm.saveSettings(this.storage, repo);
         final String olga = "olga";
@@ -117,13 +121,14 @@ class RepoPermissionsFromSettingsTest {
         final String download = "download";
         final String deploy = "deploy";
         new RepoPermissions.FromSettings(new Settings.Fake(this.storage))
-            .addUpdate(
+            .update(
                 repo,
                 new ListOf<>(
                     new RepoPermissions.UserPermission(olga, new ListOf<>(download, deploy)),
                     new RepoPermissions.UserPermission(victor, new ListOf<>(deploy)),
                     new RepoPermissions.UserPermission(david, new ListOf<>(download, add))
-                )
+                ),
+                new ListOf<>("rpm/*")
             ).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Added permissions for olga",
@@ -140,24 +145,36 @@ class RepoPermissionsFromSettingsTest {
             this.permissionsForUser(repo, david),
             Matchers.contains(download, add)
         );
+        MatcherAssert.assertThat(
+            "Updated patterns",
+            this.patterns(repo),
+            Matchers.contains("rpm/*")
+        );
     }
 
     @Test
-    void addsUserPermissionWhenOriginalPermissionsAreNotSet() throws IOException {
+    void addsUserPermissionsAndPatternsWhenEmpty() throws IOException {
         final String repo = "go";
         final RepoPerms perm = new RepoPerms();
         perm.saveSettings(this.storage, repo);
         final String ann = "ann";
         final String download = "download";
         new RepoPermissions.FromSettings(new Settings.Fake(this.storage))
-            .addUpdate(
+            .update(
                 repo,
-                new ListOf<>(new RepoPermissions.UserPermission(ann, new ListOf<>(download)))
+                new ListOf<>(new RepoPermissions.UserPermission(ann, new ListOf<>(download))),
+                new ListOf<>("**")
             )
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
+            "Updated user permissions for ann",
             this.permissionsForUser(repo, ann),
             Matchers.contains(download)
+        );
+        MatcherAssert.assertThat(
+            "Updated patterns",
+            this.patterns(repo),
+            Matchers.contains("**")
         );
     }
 
@@ -198,5 +215,13 @@ class RepoPermissionsFromSettingsTest {
             new PublisherAs(this.storage.value(new Key.From(String.format("%s.yaml", repo))).join())
                 .asciiString().toCompletableFuture().join()
         ).readYamlMapping().yamlMapping("repo");
+    }
+
+    private List<String> patterns(final String repo)
+        throws IOException {
+        return this.repoSection(repo)
+            .yamlSequence("permissions_include_patterns")
+            .values().stream().map(node -> node.asScalar().value())
+            .collect(Collectors.toList());
     }
 }

@@ -45,7 +45,6 @@ import javax.json.Json;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -56,8 +55,8 @@ import org.junit.jupiter.params.provider.EnumSource;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-@Disabled
 final class AddUpdateUserSliceTest {
+
     @ParameterizedTest
     @EnumSource(value = RqMethod.class, names = {"PUT", "POST"})
     void returnsBadRequestOnInvalidRequest(final RqMethod rqmeth) {
@@ -77,7 +76,12 @@ final class AddUpdateUserSliceTest {
             new AddUpdateUserSlice(new Settings.Fake()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
-                new RequestLine(rqmeth, "/api/security/users/empty")
+                new RequestLine(rqmeth, "/api/security/users/empty"),
+                Headers.EMPTY,
+                new Content.From(
+                    Json.createObjectBuilder().build()
+                    .toString().getBytes(StandardCharsets.UTF_8)
+                )
             )
         );
     }
@@ -98,7 +102,7 @@ final class AddUpdateUserSliceTest {
             "AddUpdateUserSlice response should be OK",
             new AddUpdateUserSlice(
                 new Settings.Fake(new Credentials.FromStorageYaml(storage, key))
-            ).response(rqline.toString(), Headers.EMPTY, this.jsonBody(pswd)),
+            ).response(rqline.toString(), Headers.EMPTY, this.jsonBody(pswd, username)),
             new RsHasStatus(RsStatus.OK)
         );
         MatcherAssert.assertThat(
@@ -129,7 +133,7 @@ final class AddUpdateUserSliceTest {
             "AddUpdateUserSlice response should be OK",
             new AddUpdateUserSlice(
                 new Settings.Fake(new Credentials.FromStorageYaml(storage, key))
-            ).response(rqline.toString(), Headers.EMPTY, this.jsonBody(newpswd)),
+            ).response(rqline.toString(), Headers.EMPTY, this.jsonBody(newpswd, username)),
             new RsHasStatus(RsStatus.OK)
         );
         MatcherAssert.assertThat(
@@ -159,11 +163,12 @@ final class AddUpdateUserSliceTest {
         );
     }
 
-    private Flowable<ByteBuffer> jsonBody(final String pswd) {
+    private Flowable<ByteBuffer> jsonBody(final String pswd, final String name) {
         return Flowable.fromArray(
             ByteBuffer.wrap(
                 Json.createObjectBuilder()
                     .add("password", pswd)
+                    .add("email", String.format("%s@example.com", name))
                     .build().toString().getBytes()
             )
         );
