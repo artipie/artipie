@@ -35,8 +35,11 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
@@ -91,7 +94,13 @@ class GetPermissionSliceTest {
         MatcherAssert.assertThat(
             new GetPermissionSlice(new Settings.Fake(this.storage)),
             new SliceHasResponse(
-                new RsHasBody(this.response(repo, Json.createObjectBuilder().build())),
+                new RsHasBody(
+                    this.response(
+                        repo,
+                        Json.createObjectBuilder().build(),
+                        Collections.emptyList()
+                    )
+                ),
                 new RequestLine(RqMethod.GET, String.format("/api/security/permissions/%s", repo))
             )
         );
@@ -106,7 +115,8 @@ class GetPermissionSliceTest {
             List.of(
                 new RepoPermissions.UserPermission(john, new ListOf<String>("read", "write")),
                 new RepoPermissions.UserPermission(mark, new ListOf<String>("*"))
-            )
+            ),
+            Collections.singletonList("**")
         );
         perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
@@ -118,7 +128,8 @@ class GetPermissionSliceTest {
                         Json.createObjectBuilder()
                             .add(john, Json.createArrayBuilder().add("r").add("w").build())
                             .add(mark, Json.createArrayBuilder().add("m").build())
-                            .build()
+                            .build(),
+                        Collections.singletonList("**")
                     )
                 ),
                 new RequestLine(RqMethod.GET, String.format("/api/security/permissions/%s", repo))
@@ -126,8 +137,17 @@ class GetPermissionSliceTest {
         );
     }
 
-    private byte[] response(final String repo, final JsonObject users) {
+    private byte[] response(
+        final String repo,
+        final JsonObject users,
+        final Collection<String> patterns
+    ) {
+        final JsonArrayBuilder incpatterns = Json.createArrayBuilder();
+        for (final String pattern : patterns) {
+            incpatterns.add(pattern);
+        }
         return Json.createObjectBuilder()
+            .add("include-patterns", incpatterns)
             .add("repositories", Json.createArrayBuilder().add(repo).build())
             .add(
                 "principals",

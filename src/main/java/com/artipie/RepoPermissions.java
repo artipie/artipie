@@ -87,6 +87,14 @@ public interface RepoPermissions {
     CompletionStage<Collection<UserPermission>> permissions(String repo);
 
     /**
+     * Read included path patterns.
+     *
+     * @param repo Repository name
+     * @return Collection of included path patterns
+     */
+    CompletionStage<Collection<String>> patterns(String repo);
+
+    /**
      * {@link RepoPermissions} from Artipie settings.
      * @since 0.10
      */
@@ -190,6 +198,19 @@ public interface RepoPermissions {
                                 .collect(Collectors.toList())
                         )
                     ).collect(Collectors.toList())
+                ).orElse(Collections.emptyList())
+            );
+        }
+
+        @Override
+        public CompletionStage<Collection<String>> patterns(final String repo) {
+            return this.repo(FromSettings.repoSettingsKey(repo)).thenApply(
+                yaml -> Optional.ofNullable(yaml.yamlSequence(FromSettings.INCLUDE_PATTERNS))
+            ).thenApply(
+                yaml -> yaml.map(
+                    seq -> seq.values().stream()
+                        .map(value -> value.asScalar().value())
+                        .collect(Collectors.toList())
                 ).orElse(Collections.emptyList())
             );
         }

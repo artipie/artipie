@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,6 +102,32 @@ class RepoPermissionsFromSettingsTest {
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
                 .toCompletableFuture().join().size(),
             new IsEqual<>(0)
+        );
+    }
+
+    @Test
+    void returnsPatternsList() {
+        final String repo = "docker";
+        final RepoPerms perm = new RepoPerms(
+            Collections.emptyList(), new ListOf<>("**")
+        );
+        perm.saveSettings(this.storage, repo);
+        MatcherAssert.assertThat(
+            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).patterns(repo)
+                .toCompletableFuture().join(),
+            Matchers.contains("**")
+        );
+    }
+
+    @Test
+    void returnsPatternsListWhenEmpty() {
+        final String repo = "gem";
+        final RepoPerms perm = new RepoPerms();
+        perm.saveSettings(this.storage, repo);
+        MatcherAssert.assertThat(
+            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).patterns(repo)
+                .toCompletableFuture().join(),
+            new IsEmptyCollection<>()
         );
     }
 
