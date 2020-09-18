@@ -110,7 +110,34 @@ class AddUpdatePermissionSliceTest {
         MatcherAssert.assertThat(
             "Sets patterns",
             this.patterns(repo),
-            Matchers.contains("**", "my-repo/**")
+            Matchers.contains("**", "maven/**")
+        );
+    }
+
+    @Test
+    void validatesPatterns() {
+        final String repo = "docker";
+        final RepoPerms perm = new RepoPerms();
+        perm.saveSettings(this.storage, repo);
+        MatcherAssert.assertThat(
+            new AddUpdatePermissionSlice(new Settings.Fake(this.storage)),
+            new SliceHasResponse(
+                new RsHasStatus(RsStatus.BAD_REQUEST),
+                new RequestLine(RqMethod.PUT, String.format("/api/security/permissions/%s", repo)),
+                Headers.EMPTY,
+                new Content.From(
+                    String.join(
+                        "\n",
+                        "{",
+                        " \"repo\": {",
+                        "    \"include-patterns\": [\"some/path/**\u002F*.txt\"],",
+                        "    \"repositories\": [\"local-repo\"],",
+                        "    \"actions\": { \"users\" : { \"john\" : [\"admin\"] } }",
+                        "  }",
+                        "}"
+                    ).getBytes(StandardCharsets.UTF_8)
+                )
+            )
         );
     }
 
@@ -142,7 +169,7 @@ class AddUpdatePermissionSliceTest {
             "{",
             " \"name\": \"java-developers\",",
             " \"repo\": {",
-            "    \"include-patterns\": [\"**\", \"my-repo/**\"],",
+            "    \"include-patterns\": [\"**\", \"maven/**\"],",
             "    \"exclude-patterns\": [\"\"],",
             "    \"repositories\": [\"local-rep1\", \"remote-rep1\", \"virtual-rep2\"],",
             "    \"actions\": {",
