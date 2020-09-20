@@ -23,6 +23,7 @@
  */
 package com.artipie.auth;
 
+import com.artipie.http.auth.Authentication;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,7 @@ final class GithubAuthTest {
                     return "";
                 }
             ).user("github.com/UsEr", secret).orElseThrow(),
-            new IsEqual<>("user")
+            new IsEqual<>(new Authentication.User("user"))
         );
     }
 }
