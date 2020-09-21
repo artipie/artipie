@@ -79,15 +79,15 @@ public final class GithubAuth implements Authentication {
     }
 
     @Override
-    public Optional<String> user(final String username, final String password) {
-        Optional<String> result = Optional.empty();
+    public Optional<Authentication.User> user(final String username, final String password) {
+        Optional<Authentication.User> result = Optional.empty();
         final Matcher matcher = GithubAuth.PTN_NAME.matcher(username);
         if (matcher.matches()) {
             final String login = this.github.apply(password).toLowerCase(Locale.US);
             if (
                 Objects.equals(login, matcher.group(1).toLowerCase(Locale.US))
             ) {
-                result = Optional.of(login);
+                result = Optional.of(new Authentication.User(login));
             }
         }
         return result;

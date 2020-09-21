@@ -52,7 +52,8 @@ public final class CachedAuth implements Authentication {
     /**
      * Static cache hash map.
      */
-    private static final ConcurrentMap<String, Optional<String>> CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Optional<Authentication.User>> CACHE =
+        new ConcurrentHashMap<>();
 
     static {
         Executors.newSingleThreadScheduledExecutor()
@@ -74,7 +75,7 @@ public final class CachedAuth implements Authentication {
     }
 
     @Override
-    public Optional<String> user(final String username, final String password) {
+    public Optional<Authentication.User> user(final String username, final String password) {
         return CachedAuth.CACHE.computeIfAbsent(username, key -> this.origin.user(key, password));
     }
 
