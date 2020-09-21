@@ -42,6 +42,9 @@ import org.apache.commons.codec.digest.DigestUtils;
  *  |   pass: "plain:123"
  *  This configuration would mean that Joe should use his email to login instead of username. Do not
  *  forget to validate credentials, logins should be unique.
+ * @todo #572:30min Simplify `user()` method and get rid of nested if expressions: create separate
+ *  method to obtain password type either from separate `type` yaml field or from `pass`, get rid of
+ *  `check(String, String)` method and use `check()` with three params instead.
  */
 @SuppressWarnings({
     "PMD.AvoidDeeplyNestedIfStmts",
@@ -76,10 +79,18 @@ public final class AuthFromYaml implements Authentication {
             final String stored = users.yamlMapping(user).string("pass");
             if (stored != null) {
                 final String type = users.yamlMapping(user).string("type");
-                if (type != null && check(stored, type, pass)) {
-                    res = Optional.of(new User(user, AuthFromYaml.groups(users.yamlMapping(user))));
-                } else if (check(stored, pass)) {
-                    res = Optional.of(new User(user, AuthFromYaml.groups(users.yamlMapping(user))));
+                if (type != null) {
+                    if (check(stored, type, pass)) {
+                        res = Optional.of(
+                            new User(user, AuthFromYaml.groups(users.yamlMapping(user)))
+                        );
+                    }
+                } else {
+                    if (check(stored, pass)) {
+                        res = Optional.of(
+                            new User(user, AuthFromYaml.groups(users.yamlMapping(user)))
+                        );
+                    }
                 }
             }
         }
