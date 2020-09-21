@@ -64,8 +64,8 @@ public final class LoggingAuth implements Authentication {
     }
 
     @Override
-    public Optional<String> user(final String username, final String password) {
-        final Optional<String> res = this.origin.user(username, password);
+    public Optional<Authentication.User> user(final String username, final String password) {
+        final Optional<Authentication.User> res = this.origin.user(username, password);
         if (res.isEmpty()) {
             Logger.log(
                 this.level, this.origin,

@@ -21,34 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.auth;
+package com.artipie;
 
-import com.artipie.http.auth.Authentication;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
- * Test case for {@link GithubAuth}.
+ * Test for {@link RepoPermissions.PathPattern}.
  *
  * @since 0.10
  */
-final class GithubAuthTest {
+class RepoPermissionsPathPatternTest {
 
-    @Test
-    void resolveUserByToken() {
-        final String secret = "secret";
+    @ParameterizedTest
+    @CsvSource({
+        "**,true",
+        "**\u002F*,true",
+        "repo/**,true",
+        "repo/**\u002F*,true",
+        "*,false",
+        "some/path/file.txt,false",
+        "some/path/**\u002Ffile.txt,false"
+    })
+    void shouldValidate(final String expr, final boolean valid) {
         MatcherAssert.assertThat(
-            new GithubAuth(
-                // @checkstyle ReturnCountCheck (5 lines)
-                token -> {
-                    if (token.equals(secret)) {
-                        return "User";
-                    }
-                    return "";
-                }
-            ).user("github.com/UsEr", secret).orElseThrow(),
-            new IsEqual<>(new Authentication.User("user"))
+            new RepoPermissions.PathPattern(expr).valid("repo"),
+            new IsEqual<>(valid)
         );
     }
 }

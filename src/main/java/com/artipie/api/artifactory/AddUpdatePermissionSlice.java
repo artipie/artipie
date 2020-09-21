@@ -132,11 +132,14 @@ public final class AddUpdatePermissionSlice implements Slice {
                     )
                 )
         );
-        final List<String> patterns = Optional.ofNullable(repo.getJsonArray("include-patterns"))
+        final List<RepoPermissions.PathPattern> patterns = Optional.ofNullable(
+            repo.getJsonArray("include-patterns")
+        )
             .map(array -> array.getValuesAs(JsonString.class))
             .orElse(Collections.emptyList())
             .stream()
             .map(JsonString::getString)
+            .map(RepoPermissions.PathPattern::new)
             .collect(Collectors.toList());
         return new RepoPermissions.FromSettings(this.settings).update(name, res, patterns);
     }
