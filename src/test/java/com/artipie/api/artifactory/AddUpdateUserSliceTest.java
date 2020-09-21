@@ -24,8 +24,8 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.Credentials;
 import com.artipie.Settings;
+import com.artipie.Users;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -101,7 +101,7 @@ final class AddUpdateUserSliceTest {
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
             new AddUpdateUserSlice(
-                new Settings.Fake(new Credentials.FromStorageYaml(storage, key))
+                new Settings.Fake(new Users.FromStorageYaml(storage, key))
             ).response(rqline.toString(), Headers.EMPTY, this.jsonBody(pswd, username)),
             new RsHasStatus(RsStatus.OK)
         );
@@ -132,7 +132,7 @@ final class AddUpdateUserSliceTest {
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
             new AddUpdateUserSlice(
-                new Settings.Fake(new Credentials.FromStorageYaml(storage, key))
+                new Settings.Fake(new Users.FromStorageYaml(storage, key))
             ).response(rqline.toString(), Headers.EMPTY, this.jsonBody(newpswd, username)),
             new RsHasStatus(RsStatus.OK)
         );

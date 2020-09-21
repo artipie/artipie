@@ -23,8 +23,8 @@
  */
 package com.artipie.api;
 
-import com.artipie.Credentials;
 import com.artipie.Settings;
+import com.artipie.Users;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -92,8 +92,8 @@ final class ApiChangeUserPassword implements Slice {
                 pass -> Completable.fromFuture(
                     this.settings.credentials().thenCompose(
                         cred -> cred.add(
-                            new Credentials.User(user, Optional.empty()),
-                            DigestUtils.sha256Hex(pass), Credentials.PasswordFormat.SHA256
+                            new Users.User(user, Optional.empty()),
+                            DigestUtils.sha256Hex(pass), Users.PasswordFormat.SHA256
                         )
                     ).toCompletableFuture()
                 )
