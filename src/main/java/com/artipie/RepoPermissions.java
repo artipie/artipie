@@ -76,7 +76,7 @@ public interface RepoPermissions {
     CompletionStage<Void> update(
         String repo,
         Collection<UserPermission> permissions,
-        Collection<String> patterns
+        Collection<PathPattern> patterns
     );
 
     /**
@@ -85,6 +85,14 @@ public interface RepoPermissions {
      * @return Completion action with map with users and permissions
      */
     CompletionStage<Collection<UserPermission>> permissions(String repo);
+
+    /**
+     * Read included path patterns.
+     *
+     * @param repo Repository name
+     * @return Collection of included path patterns
+     */
+    CompletionStage<Collection<PathPattern>> patterns(String repo);
 
     /**
      * {@link RepoPermissions} from Artipie settings.
@@ -147,7 +155,7 @@ public interface RepoPermissions {
         public CompletionStage<Void> update(
             final String repo,
             final Collection<UserPermission> permissions,
-            final Collection<String> patterns) {
+            final Collection<PathPattern> patterns) {
             final Key key = FromSettings.repoSettingsKey(repo);
             return this.repo(key).thenApply(
                 mapping -> {
@@ -161,8 +169,8 @@ public interface RepoPermissions {
                     }
                     if (!patterns.isEmpty()) {
                         YamlSequenceBuilder builder = Yaml.createYamlSequenceBuilder();
-                        for (final String pattern : patterns) {
-                            builder = builder.add(pattern);
+                        for (final PathPattern pattern : patterns) {
+                            builder = builder.add(pattern.string());
                         }
                         res = res.add(
                             FromSettings.INCLUDE_PATTERNS, builder.build()
@@ -190,6 +198,20 @@ public interface RepoPermissions {
                                 .collect(Collectors.toList())
                         )
                     ).collect(Collectors.toList())
+                ).orElse(Collections.emptyList())
+            );
+        }
+
+        @Override
+        public CompletionStage<Collection<PathPattern>> patterns(final String repo) {
+            return this.repo(FromSettings.repoSettingsKey(repo)).thenApply(
+                yaml -> Optional.ofNullable(yaml.yamlSequence(FromSettings.INCLUDE_PATTERNS))
+            ).thenApply(
+                yaml -> yaml.map(
+                    seq -> seq.values().stream()
+                        .map(value -> value.asScalar().value())
+                        .map(PathPattern::new)
+                        .collect(Collectors.toList())
                 ).orElse(Collections.emptyList())
             );
         }
@@ -336,4 +358,45 @@ public interface RepoPermissions {
         }
     }
 
+    /**
+     * Represents path pattern used to check permissions inside repository.
+     * Specified by expression in Ant-like syntax, example: "/path/**&#47;*.txt"
+     *
+     * @since 0.10
+     */
+    final class PathPattern {
+
+        /**
+         * Pattern expression.
+         */
+        private final String expr;
+
+        /**
+         * Ctor.
+         *
+         * @param expr Pattern expression.
+         */
+        public PathPattern(final String expr) {
+            this.expr = expr;
+        }
+
+        /**
+         * Get pattern expression.
+         *
+         * @return Pattern expression string.
+         */
+        public String string() {
+            return this.expr;
+        }
+
+        /**
+         * Check that pattern is valid.
+         *
+         * @param repo Repository name.
+         * @return True if valid, false - otherwise
+         */
+        public boolean valid(final String repo) {
+            return this.expr.matches(String.format("(%s/)?(\\*\\*)*(/\\*)?", repo));
+        }
+    }
 }

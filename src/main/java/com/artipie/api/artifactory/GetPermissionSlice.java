@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -77,12 +78,15 @@ public final class GetPermissionSlice implements Slice {
                         exists -> {
                             final CompletionStage<Response> res;
                             if (exists) {
-                                res = new RepoPermissions.FromSettings(this.settings)
-                                    .permissions(repo).thenApply(
-                                        perms -> new RsJson(
-                                            GetPermissionSlice.response(perms, repo)
-                                        )
-                                    );
+                                final RepoPermissions source = new RepoPermissions.FromSettings(
+                                    this.settings
+                                );
+                                res = source.permissions(repo).thenCombine(
+                                    source.patterns(repo),
+                                    (perms, patterns) -> new RsJson(
+                                        GetPermissionSlice.response(patterns, perms, repo)
+                                    )
+                                );
                             } else {
                                 res = CompletableFuture.completedStage(StandardRs.NOT_FOUND);
                             }
@@ -95,12 +99,32 @@ public final class GetPermissionSlice implements Slice {
 
     /**
      * Build json response.
+     * @param patterns Patterns
      * @param permissions Users and permissions map
      * @param repo Repository name
      * @return Response JsonObject
      */
-    private static JsonObject response(final Collection<RepoPermissions.UserPermission> permissions,
-        final String repo) {
+    private static JsonObject response(
+        final Collection<RepoPermissions.PathPattern> patterns,
+        final Collection<RepoPermissions.UserPermission> permissions,
+        final String repo
+    ) {
+        return Json.createObjectBuilder()
+            .add("include-patterns", includePatterns(patterns))
+            .add("repositories", Json.createArrayBuilder().add(repo).build())
+            .add("principals", Json.createObjectBuilder().add("users", users(permissions)))
+            .build();
+    }
+
+    /**
+     * Creates users section of response.
+     *
+     * @param permissions User permissions.
+     * @return Users section JSON.
+     */
+    private static JsonObject users(
+        final Collection<RepoPermissions.UserPermission> permissions
+    ) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         for (final RepoPermissions.UserPermission perm : permissions) {
             final JsonArrayBuilder array = Json.createArrayBuilder();
@@ -117,8 +141,22 @@ public final class GetPermissionSlice implements Slice {
             ).forEach(array::add);
             builder.add(perm.username(), array.build());
         }
-        return Json.createObjectBuilder()
-            .add("repositories", Json.createArrayBuilder().add(repo).build())
-            .add("principals", Json.createObjectBuilder().add("users", builder.build())).build();
+        return builder.build();
+    }
+
+    /**
+     * Create patterns JSON array.
+     *
+     * @param patterns Patterns.
+     * @return JSON array with all patterns.
+     */
+    private static JsonArray includePatterns(
+        final Collection<RepoPermissions.PathPattern> patterns
+    ) {
+        final JsonArrayBuilder builder = Json.createArrayBuilder();
+        for (final RepoPermissions.PathPattern pattern : patterns) {
+            builder.add(pattern.string());
+        }
+        return builder.build();
     }
 }

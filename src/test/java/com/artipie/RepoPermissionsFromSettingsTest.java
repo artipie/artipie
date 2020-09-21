@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -105,6 +106,34 @@ class RepoPermissionsFromSettingsTest {
     }
 
     @Test
+    void returnsPatternsList() {
+        final String repo = "docker";
+        final RepoPerms perm = new RepoPerms(
+            Collections.emptyList(), new ListOf<>("**")
+        );
+        perm.saveSettings(this.storage, repo);
+        MatcherAssert.assertThat(
+            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).patterns(repo)
+                .toCompletableFuture().join()
+                .stream().map(RepoPermissions.PathPattern::string).collect(Collectors.toList()),
+            Matchers.contains("**")
+        );
+    }
+
+    @Test
+    void returnsPatternsListWhenEmpty() {
+        final String repo = "gem";
+        final RepoPerms perm = new RepoPerms();
+        perm.saveSettings(this.storage, repo);
+        MatcherAssert.assertThat(
+            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).patterns(repo)
+                .toCompletableFuture().join()
+                .stream().map(RepoPermissions.PathPattern::string).collect(Collectors.toList()),
+            new IsEmptyCollection<>()
+        );
+    }
+
+    @Test
     void updatesUserPermissionsAndPatterns() throws IOException {
         final String repo = "rpm";
         final String david = "david";
@@ -128,7 +157,7 @@ class RepoPermissionsFromSettingsTest {
                     new RepoPermissions.UserPermission(victor, new ListOf<>(deploy)),
                     new RepoPermissions.UserPermission(david, new ListOf<>(download, add))
                 ),
-                new ListOf<>("rpm/*")
+                new ListOf<>(new RepoPermissions.PathPattern("rpm/*"))
             ).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Added permissions for olga",
@@ -163,7 +192,7 @@ class RepoPermissionsFromSettingsTest {
             .update(
                 repo,
                 new ListOf<>(new RepoPermissions.UserPermission(ann, new ListOf<>(download))),
-                new ListOf<>("**")
+                new ListOf<>(new RepoPermissions.PathPattern("**"))
             )
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
