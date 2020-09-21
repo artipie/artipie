@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import javax.json.Json;
@@ -96,9 +97,17 @@ public final class AddUpdatePermissionSlice implements Slice {
                 new PublisherAs(body).bytes().thenApply(
                     bytes -> Json.createReader(new ByteArrayInputStream(bytes)).readObject()
                 ).thenCompose(
-                    json -> this.update(json, repo)
-                ).thenApply(
-                    ignored -> StandardRs.EMPTY
+                    json -> this.update(json, repo).thenApply(
+                        success -> {
+                            final Response result;
+                            if (success) {
+                                result = StandardRs.EMPTY;
+                            } else {
+                                result = new RsWithStatus(RsStatus.BAD_REQUEST);
+                            }
+                            return result;
+                        }
+                    )
                 )
             )
         ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
@@ -108,9 +117,10 @@ public final class AddUpdatePermissionSlice implements Slice {
      * Converts json permissions into list of {@link RepoPermissions.UserPermission}.
      * @param json Json body
      * @param name Repository name
-     * @return List of {@link RepoPermissions.UserPermission}
+     * @return True - if JSON is valid and update performed,
+     *  false - in case JSON is invalid and update was aborted
      */
-    private CompletionStage<Void> update(final JsonObject json, final String name) {
+    private CompletionStage<Boolean> update(final JsonObject json, final String name) {
         final JsonObject repo = json.getJsonObject("repo");
         final JsonObject users = repo.getJsonObject("actions").getJsonObject("users");
         final List<RepoPermissions.UserPermission> res = new ArrayList<>(users.size());
@@ -141,6 +151,14 @@ public final class AddUpdatePermissionSlice implements Slice {
             .map(JsonString::getString)
             .map(RepoPermissions.PathPattern::new)
             .collect(Collectors.toList());
-        return new RepoPermissions.FromSettings(this.settings).update(name, res, patterns);
+        final CompletionStage<Boolean> result;
+        if (patterns.stream().allMatch(ptrn -> ptrn.valid(name))) {
+            result = new RepoPermissions.FromSettings(this.settings)
+                .update(name, res, patterns)
+                .thenApply(nothing -> true);
+        } else {
+            result = CompletableFuture.completedFuture(false);
+        }
+        return result;
     }
 }
