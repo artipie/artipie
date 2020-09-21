@@ -105,7 +105,7 @@ public final class GetPermissionSlice implements Slice {
      * @return Response JsonObject
      */
     private static JsonObject response(
-        final Collection<String> patterns,
+        final Collection<RepoPermissions.PathPattern> patterns,
         final Collection<RepoPermissions.UserPermission> permissions,
         final String repo
     ) {
@@ -150,10 +150,12 @@ public final class GetPermissionSlice implements Slice {
      * @param patterns Patterns.
      * @return JSON array with all patterns.
      */
-    private static JsonArray includePatterns(final Collection<String> patterns) {
+    private static JsonArray includePatterns(
+        final Collection<RepoPermissions.PathPattern> patterns
+    ) {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
-        for (final String pattern : patterns) {
-            builder.add(pattern);
+        for (final RepoPermissions.PathPattern pattern : patterns) {
+            builder.add(pattern.string());
         }
         return builder.build();
     }

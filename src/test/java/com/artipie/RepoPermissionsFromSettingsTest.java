@@ -114,7 +114,8 @@ class RepoPermissionsFromSettingsTest {
         perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).patterns(repo)
-                .toCompletableFuture().join(),
+                .toCompletableFuture().join()
+                .stream().map(RepoPermissions.PathPattern::string).collect(Collectors.toList()),
             Matchers.contains("**")
         );
     }
@@ -126,7 +127,8 @@ class RepoPermissionsFromSettingsTest {
         perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).patterns(repo)
-                .toCompletableFuture().join(),
+                .toCompletableFuture().join()
+                .stream().map(RepoPermissions.PathPattern::string).collect(Collectors.toList()),
             new IsEmptyCollection<>()
         );
     }
@@ -155,7 +157,7 @@ class RepoPermissionsFromSettingsTest {
                     new RepoPermissions.UserPermission(victor, new ListOf<>(deploy)),
                     new RepoPermissions.UserPermission(david, new ListOf<>(download, add))
                 ),
-                new ListOf<>("rpm/*")
+                new ListOf<>(new RepoPermissions.PathPattern("rpm/*"))
             ).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Added permissions for olga",
@@ -190,7 +192,7 @@ class RepoPermissionsFromSettingsTest {
             .update(
                 repo,
                 new ListOf<>(new RepoPermissions.UserPermission(ann, new ListOf<>(download))),
-                new ListOf<>("**")
+                new ListOf<>(new RepoPermissions.PathPattern("**"))
             )
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
