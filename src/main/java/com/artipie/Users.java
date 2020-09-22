@@ -188,7 +188,7 @@ public interface Users {
                         for (final String group : user.ugroups) {
                             seq = seq.add(group);
                         }
-                        info.add(FromStorageYaml.GROUPS, seq.build());
+                        info = info.add(FromStorageYaml.GROUPS, seq.build());
                     }
                     result = result.add(user.uname, info.build());
                     return this.buildAndSaveCredentials(result);
