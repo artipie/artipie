@@ -39,9 +39,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonString;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.reactivestreams.Publisher;
@@ -93,13 +96,18 @@ public final class AddUpdatePermissionSlice implements Slice {
             repo -> new AsyncResponse(
                 new PublisherAs(body).bytes().thenApply(
                     bytes -> Json.createReader(new ByteArrayInputStream(bytes)).readObject()
-                ).thenApply(
-                    AddUpdatePermissionSlice::permissions
                 ).thenCompose(
-                    perms -> new RepoPermissions.FromSettings(this.settings)
-                        .update(repo, perms, Collections.emptyList())
-                ).thenApply(
-                    ignored -> StandardRs.EMPTY
+                    json -> this.update(json, repo).thenApply(
+                        success -> {
+                            final Response result;
+                            if (success) {
+                                result = StandardRs.EMPTY;
+                            } else {
+                                result = new RsWithStatus(RsStatus.BAD_REQUEST);
+                            }
+                            return result;
+                        }
+                    )
                 )
             )
         ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
@@ -108,11 +116,13 @@ public final class AddUpdatePermissionSlice implements Slice {
     /**
      * Converts json permissions into list of {@link RepoPermissions.UserPermission}.
      * @param json Json body
-     * @return List of {@link RepoPermissions.UserPermission}
+     * @param name Repository name
+     * @return True - if JSON is valid and update performed,
+     *  false - in case JSON is invalid and update was aborted
      */
-    private static List<RepoPermissions.UserPermission> permissions(final JsonObject json) {
-        final JsonObject users = json.getJsonObject("repo").getJsonObject("actions")
-            .getJsonObject("users");
+    private CompletionStage<Boolean> update(final JsonObject json, final String name) {
+        final JsonObject repo = json.getJsonObject("repo");
+        final JsonObject users = repo.getJsonObject("actions").getJsonObject("users");
         final List<RepoPermissions.UserPermission> res = new ArrayList<>(users.size());
         users.forEach(
             (user, perms) ->
@@ -132,6 +142,23 @@ public final class AddUpdatePermissionSlice implements Slice {
                     )
                 )
         );
-        return res;
+        final List<RepoPermissions.PathPattern> patterns = Optional.ofNullable(
+            repo.getJsonArray("include-patterns")
+        )
+            .map(array -> array.getValuesAs(JsonString.class))
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(JsonString::getString)
+            .map(RepoPermissions.PathPattern::new)
+            .collect(Collectors.toList());
+        final CompletionStage<Boolean> result;
+        if (patterns.stream().allMatch(ptrn -> ptrn.valid(name))) {
+            result = new RepoPermissions.FromSettings(this.settings)
+                .update(name, res, patterns)
+                .thenApply(nothing -> true);
+        } else {
+            result = CompletableFuture.completedFuture(false);
+        }
+        return result;
     }
 }

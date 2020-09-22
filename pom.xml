@@ -156,7 +156,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>0.15.7</version>
+      <version>0.16.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -192,11 +192,6 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>npm-adapter</artifactId>
-      <version>0.6.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>npm-proxy-adapter</artifactId>
       <version>0.6.1</version>
     </dependency>
     <dependency>
@@ -238,7 +233,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>go-adapter</artifactId>
-      <version>0.3.1</version>
+      <version>0.4.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>

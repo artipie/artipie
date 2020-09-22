@@ -25,9 +25,12 @@ package com.artipie.auth;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.auth.Authentication;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.codec.digest.DigestUtils;
 
 /**
@@ -39,6 +42,9 @@ import org.apache.commons.codec.digest.DigestUtils;
  *  |   pass: "plain:123"
  *  This configuration would mean that Joe should use his email to login instead of username. Do not
  *  forget to validate credentials, logins should be unique.
+ * @todo #572:30min Simplify `user()` method and get rid of nested if expressions: create separate
+ *  method to obtain password type either from separate `type` yaml field or from `pass`, get rid of
+ *  `check(String, String)` method and use `check()` with three params instead.
  */
 @SuppressWarnings({
     "PMD.AvoidDeeplyNestedIfStmts",
@@ -65,9 +71,9 @@ public final class AuthFromYaml implements Authentication {
     }
 
     @Override
-    public Optional<String> user(final String user, final String pass) {
+    public Optional<Authentication.User> user(final String user, final String pass) {
         final YamlMapping users = this.cred.yamlMapping("credentials");
-        Optional<String> res = Optional.empty();
+        Optional<Authentication.User> res = Optional.empty();
         //@checkstyle NestedIfDepthCheck (10 lines)
         if (users != null && users.yamlMapping(user) != null) {
             final String stored = users.yamlMapping(user).string("pass");
@@ -75,11 +81,15 @@ public final class AuthFromYaml implements Authentication {
                 final String type = users.yamlMapping(user).string("type");
                 if (type != null) {
                     if (check(stored, type, pass)) {
-                        res = Optional.of(user);
+                        res = Optional.of(
+                            new User(user, AuthFromYaml.groups(users.yamlMapping(user)))
+                        );
                     }
                 } else {
                     if (check(stored, pass)) {
-                        res = Optional.of(user);
+                        res = Optional.of(
+                            new User(user, AuthFromYaml.groups(users.yamlMapping(user)))
+                        );
                     }
                 }
             }
@@ -119,5 +129,17 @@ public final class AuthFromYaml implements Authentication {
                 || given.equals(pswd);
         }
         return res;
+    }
+
+    /**
+     * Get groups from yaml.
+     * @param users Users yaml
+     * @return Groups list
+     */
+    private static List<String> groups(final YamlMapping users) {
+        return Optional.ofNullable(users.yamlSequence("groups")).map(
+            yaml -> yaml.values().stream().map(node -> node.asScalar().value())
+                .collect(Collectors.toList())
+        ).orElse(Collections.emptyList());
     }
 }
