@@ -237,7 +237,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "go":
-                slice = new TrimPathSlice(new GoSlice(cfg.storage()), prefix);
+                slice = new TrimPathSlice(new GoSlice(cfg.storage(), permissions, auth), prefix);
                 break;
             case "npm-proxy":
                 slice = new NpmProxySlice(
