@@ -25,7 +25,9 @@ package com.artipie.maven;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
-import com.artipie.docker.junit.DockerClientSupport;
+import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
+import com.artipie.asto.fs.FileStorage;
 import com.jcabi.log.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,10 +36,12 @@ import java.util.List;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -53,7 +57,7 @@ import org.testcontainers.containers.GenericContainer;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs(OS.LINUX)
-@DockerClientSupport
+@Disabled
 final class MavenProxyIT {
 
     /**
@@ -79,6 +83,11 @@ final class MavenProxyIT {
     private GenericContainer<?> cntn;
 
     /**
+     * Storage.
+     */
+    private Storage storage;
+
+    /**
      * Proxy Artipie server port.
      */
     private int port;
@@ -86,6 +95,7 @@ final class MavenProxyIT {
     @BeforeEach
     void setUp() throws Exception {
         this.subdir = Files.createDirectory(Path.of(this.tmp.toString(), "subdir"));
+        this.storage = new FileStorage(this.subdir);
         this.server = new ArtipieServer(this.subdir, "my-maven", this.configsProxy());
         this.port = this.server.start();
         final Path setting = this.subdir.resolve("settings.xml");
@@ -111,6 +121,7 @@ final class MavenProxyIT {
         final String artifact = "-Dartifact=aspectj:aspectj-ant:1.0.6:jar";
         this.exec("mvn", "-s", "/home/settings.xml", "dependency:get", artifact);
         MatcherAssert.assertThat(
+            "Artifact wasn't downloaded",
             this.exec(
                 "mvn", "-s", "/home/settings.xml", "dependency:get", artifact
             ).replaceAll("\n", ""),
@@ -120,6 +131,12 @@ final class MavenProxyIT {
                     new IsNot<>(new StringContains("Downloaded"))
                 )
             )
+        );
+        MatcherAssert.assertThat(
+            "Artifact wasn't saved in cache",
+            this.storage.exists(new Key.From("args4j", "args4j", "2.32", "args4j-2.32"))
+                .toCompletableFuture().join(),
+            new IsEqual<>(true)
         );
     }
 
