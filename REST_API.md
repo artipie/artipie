@@ -144,7 +144,7 @@ Fields description:
 
 Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
-includesPattern | string | Path pattern to which permissions are applied | Y
+includesPattern | string | Path patterns to apply permissions to | Y
 repositories | json array | Repository name, always one-element array with the `{permissionTargetName}` item | Y
 principals | json object | Repository permissions details, contains `users` element with user permission details | Y
 
@@ -186,15 +186,15 @@ The following synonyms and shortened values for standard operations are supporte
 - `delete` - `d`
 - `manage` (any operation is allowed) - `m`, `admin`
 
-`include-patterns` is an optional argument (effectively is `["**"]` by default) 
-which allows specifying path patterns to which permissions are applied.
+`include-patterns` is an optional argument (value `["**"]` is set by default)
+which allows specifying path patterns to apply permissions to.
 Path patterns are specified by Ant-like expressions.
 
 Possible responses:
 - `200 OK` when permissions were added successfully
 - `500 INTERNAL ERROR` in the case of unexpected server error
 - `400 BAD REQUEST` in the cases when repository name does not exist 
- or `include-patterns` format is invalid.
+ or `include-patterns` format is invalid
 
 ### Delete Permission Target 
 
