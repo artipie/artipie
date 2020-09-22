@@ -82,7 +82,7 @@ public final class YamlSettings implements Settings {
     @Override
     public CompletionStage<Authentication> auth() {
         return this.credentials().thenCompose(
-            Credentials::auth
+            Users::auth
         ).thenApply(
             auth -> new Authentication.Joined(new CachedAuth(new GithubAuth()), auth)
         );
@@ -109,7 +109,7 @@ public final class YamlSettings implements Settings {
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
-    public CompletionStage<Credentials> credentials() {
+    public CompletionStage<Users> credentials() {
         final YamlMapping cred;
         try {
             cred = Yaml.createYamlInput(this.content)
@@ -119,7 +119,7 @@ public final class YamlSettings implements Settings {
         } catch (final IOException err) {
             return CompletableFuture.failedFuture(err);
         }
-        final CompletionStage<Credentials> res;
+        final CompletionStage<Users> res;
         final String path = "path";
         if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
             final Storage strg;
@@ -131,11 +131,11 @@ public final class YamlSettings implements Settings {
             final KeyFromPath key = new KeyFromPath(cred.string(path));
             res = strg.exists(key).thenApply(
                 exists -> {
-                    final Credentials creds;
+                    final Users creds;
                     if (exists) {
-                        creds = new Credentials.FromStorageYaml(strg, key);
+                        creds = new Users.FromStorageYaml(strg, key);
                     } else {
-                        creds = new Credentials.FromEnv();
+                        creds = new Users.FromEnv();
                     }
                     return creds;
                 }
@@ -147,7 +147,7 @@ public final class YamlSettings implements Settings {
                 )
             );
         } else {
-            res = CompletableFuture.completedStage(new Credentials.FromEnv());
+            res = CompletableFuture.completedStage(new Users.FromEnv());
         }
         return res;
     }

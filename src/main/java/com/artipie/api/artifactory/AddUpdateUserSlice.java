@@ -23,8 +23,8 @@
  */
 package com.artipie.api.artifactory;
 
-import com.artipie.Credentials;
 import com.artipie.Settings;
+import com.artipie.Users;
 import com.artipie.api.ContentAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -77,11 +77,11 @@ public final class AddUpdateUserSlice implements Slice {
                             info -> this.settings.credentials()
                                 .thenCompose(
                                     cred -> cred.add(
-                                        new Credentials.User(
+                                        new Users.User(
                                             username, Optional.of(info.getValue())
                                         ),
                                         DigestUtils.sha256Hex(info.getKey()),
-                                        Credentials.PasswordFormat.SHA256
+                                        Users.PasswordFormat.SHA256
                                     ).thenApply(ok -> new RsWithStatus(RsStatus.OK))
                                 )
                 ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST))))

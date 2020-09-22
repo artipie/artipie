@@ -25,8 +25,8 @@ package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.Credentials;
 import com.artipie.Settings;
+import com.artipie.Users;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -68,7 +68,7 @@ final class GetPermissionsSliceTest {
         storage.save(new Key.From(this.nameYaml(cache)), Content.EMPTY).join();
         MatcherAssert.assertThat(
             new GetPermissionsSlice(
-                new Settings.Fake(storage, new Credentials.FromEnv(), GetPermissionsSliceTest.META)
+                new Settings.Fake(storage, new Users.FromEnv(), GetPermissionsSliceTest.META)
             ),
             new SliceHasResponse(
                 new RsHasBody(
