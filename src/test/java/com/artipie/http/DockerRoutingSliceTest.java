@@ -24,8 +24,8 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.Credentials;
 import com.artipie.Settings;
+import com.artipie.Users;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.http.auth.Authentication;
@@ -166,7 +166,7 @@ final class DockerRoutingSliceTest {
         }
 
         @Override
-        public CompletionStage<Credentials> credentials() {
+        public CompletionStage<Users> credentials() {
             throw new UnsupportedOperationException();
         }
     }

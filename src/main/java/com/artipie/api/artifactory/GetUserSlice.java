@@ -62,7 +62,7 @@ public final class GetUserSlice implements Slice {
         return name.<Response>map(
             username -> new AsyncResponse(
                 this.settings.credentials().thenCompose(
-                    cred ->  cred.users().thenApply(
+                    cred ->  cred.list().thenApply(
                         users -> users.stream()
                             .filter(item -> item.name().equals(username))
                             .findFirst()
