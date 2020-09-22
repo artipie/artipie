@@ -42,14 +42,8 @@ import org.apache.commons.codec.digest.DigestUtils;
  *  |   pass: "plain:123"
  *  This configuration would mean that Joe should use his email to login instead of username. Do not
  *  forget to validate credentials, logins should be unique.
- * @todo #572:30min Simplify `user()` method and get rid of nested if expressions: create separate
- *  method to obtain password type either from separate `type` yaml field or from `pass`, get rid of
- *  `check(String, String)` method and use `check()` with three params instead.
  */
-@SuppressWarnings({
-    "PMD.AvoidDeeplyNestedIfStmts",
-    "PMD.AvoidDuplicateLiterals",
-    "PMD.ConfusingTernary"})
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class AuthFromYaml implements Authentication {
 
     /**
@@ -74,24 +68,13 @@ public final class AuthFromYaml implements Authentication {
     public Optional<Authentication.User> user(final String user, final String pass) {
         final YamlMapping users = this.cred.yamlMapping("credentials");
         Optional<Authentication.User> res = Optional.empty();
-        //@checkstyle NestedIfDepthCheck (10 lines)
         if (users != null && users.yamlMapping(user) != null) {
             final String stored = users.yamlMapping(user).string("pass");
-            if (stored != null) {
-                final String type = users.yamlMapping(user).string("type");
-                if (type != null) {
-                    if (check(stored, type, pass)) {
-                        res = Optional.of(
-                            new User(user, AuthFromYaml.groups(users.yamlMapping(user)))
-                        );
-                    }
-                } else {
-                    if (check(stored, pass)) {
-                        res = Optional.of(
-                            new User(user, AuthFromYaml.groups(users.yamlMapping(user)))
-                        );
-                    }
-                }
+            final String type = users.yamlMapping(user).string("type");
+            if (stored != null && check(stored, type, pass)) {
+                res = Optional.of(
+                    new User(user, AuthFromYaml.groups(users.yamlMapping(user)))
+                );
             }
         }
         return res;
@@ -110,24 +93,19 @@ public final class AuthFromYaml implements Authentication {
      * @return True if passwords are the same
      */
     private static boolean check(final String stored, final String type, final String given) {
-        return type.equals("sha256") && DigestUtils.sha256Hex(given)
-            .equals(stored) || given.equals(stored);
-    }
-
-    /**
-     * Checks stored password against the given one.
-     * @param stored Password from settings
-     * @param given Password to check
-     * @return True if passwords are the same
-     */
-    private static boolean check(final String stored, final String given) {
         boolean res = false;
-        final Matcher matcher = AuthFromYaml.PSWD_FORMAT.matcher(stored);
-        if (matcher.matches()) {
-            final String pswd = matcher.group(2);
-            res = stored.startsWith("sha256") && DigestUtils.sha256Hex(given).equals(pswd)
-                || given.equals(pswd);
+        String checkpswd = String.format("madewrong%s", given);
+        if (type == null) {
+            final Matcher matcher = AuthFromYaml.PSWD_FORMAT.matcher(stored);
+            if (matcher.matches()) {
+                checkpswd = matcher.group(2);
+                res = stored.startsWith("sha256");
+            }
+        } else {
+            checkpswd = stored;
+            res = type.equals("sha256");
         }
+        res = res && DigestUtils.sha256Hex(given).equals(checkpswd) || given.equals(checkpswd);
         return res;
     }
 
