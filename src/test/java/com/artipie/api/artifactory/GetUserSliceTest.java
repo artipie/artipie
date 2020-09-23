@@ -101,6 +101,7 @@ class GetUserSliceTest {
                             )
                             .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
                             .add("realm", "Internal")
+                            .add("groups", Json.createArrayBuilder(Collections.emptyList()).build())
                             .build().toString(),
                         StandardCharsets.UTF_8
                     )

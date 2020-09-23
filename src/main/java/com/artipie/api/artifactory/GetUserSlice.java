@@ -34,7 +34,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 import org.reactivestreams.Publisher;
 
 /**
@@ -71,23 +70,23 @@ public final class GetUserSlice implements Slice {
                         user -> {
                             final Response resp;
                             if (user.isPresent()) {
-                                final JsonObjectBuilder json = Json.createObjectBuilder()
+                                resp = new RsJson(
+                                    Json.createObjectBuilder()
                                     .add("name", user.get().name())
-                                    .add(
-                                        "email",
-                                        user.get().email().orElse(
-                                            String.format("%s@artipie.com", user.get().name())
+                                        .add(
+                                            "email",
+                                            user.get().email().orElse(
+                                                String.format("%s@artipie.com", user.get().name())
+                                            )
                                         )
-                                    )
-                                    .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
-                                    .add("realm", "Internal");
-                                if (!user.get().groups().isEmpty()) {
-                                    json.add(
-                                        "groups",
-                                        Json.createArrayBuilder(user.get().groups()).build()
-                                    );
-                                }
-                                resp = new RsJson(json::build, StandardCharsets.UTF_8);
+                                        .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
+                                        .add("realm", "Internal")
+                                        .add(
+                                            "groups",
+                                            Json.createArrayBuilder(user.get().groups()).build()
+                                        )::build,
+                                    StandardCharsets.UTF_8
+                                );
                             } else {
                                 resp = StandardRs.NOT_FOUND;
                             }
