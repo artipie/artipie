@@ -71,8 +71,8 @@ public final class GetUserSlice implements Slice {
                             final Response resp;
                             if (user.isPresent()) {
                                 resp = new RsJson(
-                                    () -> Json.createObjectBuilder()
-                                        .add("name", user.get().name())
+                                    Json.createObjectBuilder()
+                                    .add("name", user.get().name())
                                         .add(
                                             "email",
                                             user.get().email().orElse(
@@ -81,7 +81,10 @@ public final class GetUserSlice implements Slice {
                                         )
                                         .add("lastLoggedIn", "2020-01-01T01:01:01.000+01:00")
                                         .add("realm", "Internal")
-                                        .build(),
+                                        .add(
+                                            "groups",
+                                            Json.createArrayBuilder(user.get().groups()).build()
+                                        )::build,
                                     StandardCharsets.UTF_8
                                 );
                             } else {
