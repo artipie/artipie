@@ -42,8 +42,10 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.concurrent.CompletionStage;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 import org.reactivestreams.Publisher;
 
 /**
@@ -96,6 +98,17 @@ public final class RepoConfig {
      */
     public String type() {
         return this.string("type");
+    }
+
+    /**
+     * Repository port.
+     *
+     * @return Repository port.
+     */
+    public OptionalInt port() {
+        return Stream.ofNullable(this.repoConfig().string("port"))
+            .mapToInt(Integer::parseInt)
+            .findFirst();
     }
 
     /**
