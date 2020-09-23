@@ -40,7 +40,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -110,7 +109,7 @@ public final class GetPermissionSlice implements Slice {
         final String repo
     ) {
         return Json.createObjectBuilder()
-            .add("include-patterns", includePatterns(patterns))
+            .add("includesPattern", includesPattern(patterns))
             .add("repositories", Json.createArrayBuilder().add(repo).build())
             .add("principals", Json.createObjectBuilder().add("users", users(permissions)))
             .build();
@@ -145,18 +144,14 @@ public final class GetPermissionSlice implements Slice {
     }
 
     /**
-     * Create patterns JSON array.
+     * Create `includesPattern` JSON value.
      *
      * @param patterns Patterns.
-     * @return JSON array with all patterns.
+     * @return JSON value for `includesPattern` field.
      */
-    private static JsonArray includePatterns(
+    private static String includesPattern(
         final Collection<RepoPermissions.PathPattern> patterns
     ) {
-        final JsonArrayBuilder builder = Json.createArrayBuilder();
-        for (final RepoPermissions.PathPattern pattern : patterns) {
-            builder.add(pattern.string());
-        }
-        return builder.build();
+        return patterns.stream().map(RepoPermissions.PathPattern::string).findFirst().orElse("**");
     }
 }
