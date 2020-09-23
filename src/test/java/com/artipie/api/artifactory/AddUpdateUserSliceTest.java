@@ -24,6 +24,9 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.Settings;
 import com.artipie.Users;
 import com.artipie.asto.Content;
@@ -41,10 +44,17 @@ import io.reactivex.Flowable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -56,6 +66,16 @@ import org.junit.jupiter.params.provider.EnumSource;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class AddUpdateUserSliceTest {
+
+    /**
+     * Test storage.
+     */
+    private Storage storage;
+
+    @BeforeEach
+    void setUp() {
+        this.storage = new InMemoryStorage();
+    }
 
     @ParameterizedTest
     @EnumSource(value = RqMethod.class, names = {"PUT", "POST"})
@@ -89,31 +109,37 @@ final class AddUpdateUserSliceTest {
     @ParameterizedTest
     @EnumSource(value = RqMethod.class, names = {"PUT", "POST"})
     void returnsOkIfUserWasAddedToCredentials(final RqMethod rqmeth) throws IOException {
-        final String username = "mike";
-        final String pswd = "qwerty123";
-        final Storage storage = new InMemoryStorage();
+        final String username = "mark";
+        final String pswd = "abc123";
         final RequestLine rqline = new RequestLine(
             rqmeth,
             String.format("/api/security/users/%s", username)
         );
-        final Key key = new Key.From("_credentials.yaml");
-        this.creds("person", storage, key);
+        final List<String> groups = new ListOf<>("readers", "a-team");
+        this.creds("person", Collections.emptyList());
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
             new AddUpdateUserSlice(
-                new Settings.Fake(new Users.FromStorageYaml(storage, key))
-            ).response(rqline.toString(), Headers.EMPTY, this.jsonBody(pswd, username)),
+                new Settings.Fake(
+                    new Users.FromStorageYaml(this.storage, new Key.From("_credentials.yaml"))
+                )
+            ).response(
+                rqline.toString(), Headers.EMPTY,
+                this.jsonBody(pswd, username, groups)
+            ),
             new RsHasStatus(RsStatus.OK)
         );
         MatcherAssert.assertThat(
             "User with correct password should be added",
-            Yaml.createYamlInput(
-                new PublisherAs(storage.value(key).join())
-                    .asciiString().toCompletableFuture().join()
-            ).readYamlMapping().value("credentials")
-                .asMapping().value(username)
-                .asMapping().string("pass"),
+            this.readCreds(username).string("pass"),
             new IsEqual<>(this.shaPswd(pswd))
+        );
+        MatcherAssert.assertThat(
+            "User has groups",
+            this.readCreds(username).yamlSequence("groups")
+                .values().stream().map(node -> node.asScalar().value())
+                .collect(Collectors.toList()),
+            new IsEqual<>(groups)
         );
     }
 
@@ -122,59 +148,77 @@ final class AddUpdateUserSliceTest {
     void returnsOkIfUserWasUpdated(final RqMethod rqmeth) throws IOException {
         final String username = "mike";
         final String newpswd = "qwerty123";
-        final Storage storage = new InMemoryStorage();
         final RequestLine rqline = new RequestLine(
             rqmeth,
             String.format("/api/security/users/%s", username)
         );
-        final Key key = new Key.From("_credentials.yaml");
-        this.creds(username, storage, key);
+        this.creds(username, Collections.emptyList());
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
             new AddUpdateUserSlice(
-                new Settings.Fake(new Users.FromStorageYaml(storage, key))
-            ).response(rqline.toString(), Headers.EMPTY, this.jsonBody(newpswd, username)),
+                new Settings.Fake(
+                    new Users.FromStorageYaml(this.storage, new Key.From("_credentials.yaml"))
+                )
+            ).response(
+                rqline.toString(), Headers.EMPTY,
+                this.jsonBody(newpswd, username, Collections.emptyList())
+            ),
             new RsHasStatus(RsStatus.OK)
         );
         MatcherAssert.assertThat(
             "User with updated password should return",
-            Yaml.createYamlInput(
-                new PublisherAs(storage.value(key).join())
-                    .asciiString().toCompletableFuture().join()
-            ).readYamlMapping().value("credentials")
-                .asMapping().value(username)
-                .asMapping().string("pass"),
+            this.readCreds(username).string("pass"),
             new IsEqual<>(this.shaPswd(newpswd))
+        );
+        MatcherAssert.assertThat(
+            "Yaml has no groups",
+            this.readCreds(username).yamlSequence("groups"),
+            new IsNull<>()
         );
     }
 
-    private void creds(final String username, final Storage storage, final Key key) {
-        storage.save(
-            key,
+    private void creds(final String username, final List<String> groups) {
+        YamlMappingBuilder user = Yaml.createYamlMappingBuilder().add("pass", "pain:123");
+        if (!groups.isEmpty()) {
+            YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
+            for (final String group : groups) {
+                seq = seq.add(group);
+            }
+            user = user.add("groups", seq.build());
+        }
+        this.storage.save(
+            new Key.From("_credentials.yaml"),
             new Content.From(Yaml.createYamlMappingBuilder()
                 .add(
                     "credentials",
                     Yaml.createYamlMappingBuilder().add(
                         username,
-                        Yaml.createYamlMappingBuilder().add("pass", "pain:123").build()
+                        user.build()
                     ).build()
                 ).build().toString().getBytes(StandardCharsets.UTF_8)
             )
         );
     }
 
-    private Flowable<ByteBuffer> jsonBody(final String pswd, final String name) {
-        return Flowable.fromArray(
-            ByteBuffer.wrap(
-                Json.createObjectBuilder()
-                    .add("password", pswd)
-                    .add("email", String.format("%s@example.com", name))
-                    .build().toString().getBytes()
-            )
-        );
+    private Flowable<ByteBuffer> jsonBody(final String pswd, final String name,
+        final List<String> groups) {
+        final JsonObjectBuilder json = Json.createObjectBuilder()
+            .add("password", pswd)
+            .add("email", String.format("%s@example.com", name));
+        if (!groups.isEmpty()) {
+            json.add("groups", Json.createArrayBuilder(groups).build());
+        }
+        return Flowable.fromArray(ByteBuffer.wrap(json.build().toString().getBytes()));
     }
 
     private String shaPswd(final String pswd) {
         return String.format("sha256:%s", DigestUtils.sha256Hex(pswd));
+    }
+
+    private YamlMapping readCreds(final String username) throws IOException {
+        return Yaml.createYamlInput(
+            new PublisherAs(this.storage.value(new Key.From("_credentials.yaml")).join())
+                .asciiString().toCompletableFuture().join()
+        ).readYamlMapping().yamlMapping("credentials").yamlMapping(username);
     }
 }

@@ -108,14 +108,16 @@ class UsersFromStorageYamlTest {
     @Test
     void addsUser() {
         final Users.User maria = new Users.User(
-            "maria", this.email("maria"), new ListOf<String>("newbies", "tester")
+            "maria", this.email("maria"), new ListOf<>("newbies", "tester")
         );
-        final Users.User olga = new Users.User("olga");
+        final Users.User olga = new Users.User(
+            "olga", this.email("olga"), new ListOf<>("readers", "a-team")
+        );
         final String pass = "abc";
         final String full = String.format("sha256:%s", pass);
         this.creds(new ImmutablePair<>(maria, full));
         new Users.FromStorageYaml(this.storage, this.key).add(
-            new Users.User(olga.name(), this.email(olga.name())), pass, Users.PasswordFormat.SHA256
+            olga, pass, Users.PasswordFormat.SHA256
         ).toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
@@ -132,15 +134,14 @@ class UsersFromStorageYamlTest {
     @Test
     void updatesUser() {
         final Users.User jack = new Users.User("jack");
-        final Users.User silvia = new Users.User("silvia");
+        final Users.User silvia = new Users.User(
+            "silvia", this.email("silvia"), new ListOf<>("readers")
+        );
         final String old = "plain:345";
         final String newpass = "000";
         this.creds(new ImmutablePair<>(jack, old), new ImmutablePair<>(silvia, old));
         new Users.FromStorageYaml(this.storage, this.key)
-            .add(
-                new Users.User(silvia.name(), this.email(silvia.name())),
-                newpass, Users.PasswordFormat.PLAIN
-            ).toCompletableFuture().join();
+            .add(silvia, newpass, Users.PasswordFormat.PLAIN).toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
                 .asciiString().toCompletableFuture().join(),
