@@ -158,12 +158,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "npm":
-                slice = new NpmSlice(
-                    cfg.path(),
-                    new Npm(cfg.storage()),
-                    cfg.storage(),
-                    permissions,
-                    new BasicIdentities(auth)
+                slice = new TrimPathSlice(
+                    new NpmSlice(
+                        "/",
+                        new Npm(cfg.storage()),
+                        cfg.storage(),
+                        permissions,
+                        new BasicIdentities(auth)
+                    ),
+                    prefix
                 );
                 break;
             case "gem":
@@ -189,7 +192,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "php":
-                slice = new PhpComposer(cfg.path(), cfg.storage());
+                slice = new TrimPathSlice(new PhpComposer("", cfg.storage()), prefix);
                 break;
             case "nuget":
                 slice = new TrimPathSlice(
@@ -240,13 +243,16 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new TrimPathSlice(new GoSlice(cfg.storage(), permissions, auth), prefix);
                 break;
             case "npm-proxy":
-                slice = new NpmProxySlice(
-                    cfg.path(),
-                    new NpmProxy(
-                        new NpmProxyConfig(cfg.settings().orElseThrow()),
-                        Vertx.vertx(),
-                        cfg.storage()
-                    )
+                slice = new TrimPathSlice(
+                    new NpmProxySlice(
+                        "",
+                        new NpmProxy(
+                            new NpmProxyConfig(cfg.settings().orElseThrow()),
+                            Vertx.vertx(),
+                            cfg.storage()
+                        )
+                    ),
+                    prefix
                 );
                 break;
             case "pypi":
