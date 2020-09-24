@@ -118,7 +118,7 @@ final class MavenProxyIT {
 
     @Test
     void shouldGetArtifactFromLocalAndSaveInCache() throws Exception {
-        final String artifact = "-Dartifact=aspectj:aspectj-ant:1.0.6:jar";
+        final String artifact = "-Dartifact=args4j:args4j:2.32:jar";
         this.exec("mvn", "-s", "/home/settings.xml", "dependency:get", artifact);
         MatcherAssert.assertThat(
             "Artifact wasn't downloaded",
@@ -134,7 +134,7 @@ final class MavenProxyIT {
         );
         MatcherAssert.assertThat(
             "Artifact wasn't saved in cache",
-            this.storage.exists(new Key.From("args4j", "args4j", "2.32", "args4j-2.32"))
+            this.storage.exists(new Key.From("args4j/args4j/2.32/args4j-2.32.jar"))
                 .toCompletableFuture().join(),
             new IsEqual<>(true)
         );
@@ -160,7 +160,7 @@ final class MavenProxyIT {
                 .add(
                     "settings",
                     Yaml.createYamlMappingBuilder()
-                        .add("remote_uri", "https://repo.maven.apache.org/")
+                        .add("remote_uri", "https://repo.maven.apache.org/maven2")
                         .build()
                 ).build()
         ).build().toString();
