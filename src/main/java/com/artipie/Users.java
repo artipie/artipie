@@ -27,6 +27,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
+import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.api.ContentAs;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
@@ -52,13 +53,13 @@ import org.cactoos.list.ListOf;
  * Artipie credentials.
  * @since 0.9
  */
-public interface Credentials {
+public interface Users {
 
     /**
      * Artipie users list.
      * @return Yaml as completion action
      */
-    CompletionStage<List<User>> users();
+    CompletionStage<List<User>> list();
 
     /**
      * Adds user to artipie users.
@@ -104,7 +105,7 @@ public interface Credentials {
      * Credentials from main artipie config.
      * @since 0.9
      */
-    final class FromStorageYaml implements Credentials {
+    final class FromStorageYaml implements Users {
 
         /**
          * Credentials yaml mapping key.
@@ -115,6 +116,11 @@ public interface Credentials {
          * Credentials yaml mapping key.
          */
         private static final String EMAIL = "email";
+
+        /**
+         * Groups yaml mapping key.
+         */
+        private static final String GROUPS = "groups";
 
         /**
          * Storage.
@@ -137,7 +143,7 @@ public interface Credentials {
         }
 
         @Override
-        public CompletionStage<List<User>> users() {
+        public CompletionStage<List<User>> list() {
             return this.yaml().thenApply(
                 yaml -> yaml.yamlMapping(FromStorageYaml.CREDENTIALS).keys().stream()
                     .map(
@@ -148,7 +154,15 @@ public interface Credentials {
                                 Optional.ofNullable(
                                     yaml.yamlMapping(FromStorageYaml.CREDENTIALS)
                                         .yamlMapping(name).string(FromStorageYaml.EMAIL)
-                                )
+                                ),
+                                Optional.ofNullable(
+                                    yaml.yamlMapping(FromStorageYaml.CREDENTIALS).yamlMapping(name)
+                                    .yamlSequence(FromStorageYaml.GROUPS)
+                                ).map(
+                                    groups -> groups.values().stream()
+                                        .map(item -> item.asScalar().value())
+                                        .collect(Collectors.toList())
+                                ).orElse(Collections.emptyList())
                             );
                         }
                     ).collect(Collectors.toList())
@@ -168,6 +182,13 @@ public interface Credentials {
                         );
                     if (user.mail.isPresent()) {
                         info = info.add(FromStorageYaml.EMAIL, user.mail.get());
+                    }
+                    if (!user.ugroups.isEmpty()) {
+                        YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
+                        for (final String group : user.ugroups) {
+                            seq = seq.add(group);
+                        }
+                        info = info.add(FromStorageYaml.GROUPS, seq.build());
                     }
                     result = result.add(user.uname, info.build());
                     return this.buildAndSaveCredentials(result);
@@ -241,7 +262,7 @@ public interface Credentials {
      * Credentials from env.
      * @since 0.10
      */
-    final class FromEnv implements Credentials {
+    final class FromEnv implements Users {
 
         /**
          * Environment variables.
@@ -264,7 +285,7 @@ public interface Credentials {
         }
 
         @Override
-        public CompletionStage<List<User>> users() {
+        public CompletionStage<List<User>> list() {
             return CompletableFuture.completedFuture(
                 Optional.ofNullable(this.env.get(AuthFromEnv.ENV_NAME))
                     .<List<User>>map(name -> new ListOf<>(new User(name, Optional.empty())))
@@ -312,13 +333,37 @@ public interface Credentials {
         private final Optional<String> mail;
 
         /**
+         * User groups.
+         */
+        private final List<String> ugroups;
+
+        /**
+         * Ctor.
+         * @param name Name of the user
+         * @param mail User email
+         * @param groups User groups
+         */
+        public User(final String name, final Optional<String> mail, final List<String> groups) {
+            this.uname = name;
+            this.mail = mail;
+            this.ugroups = groups;
+        }
+
+        /**
          * Ctor.
          * @param name Username
          * @param email User email
          */
         public User(final String name, final Optional<String> email) {
-            this.uname = name;
-            this.mail = email;
+            this(name, email, Collections.emptyList());
+        }
+
+        /**
+         * Ctor.
+         * @param name Username
+         */
+        public User(final String name) {
+            this(name, Optional.empty(), Collections.emptyList());
         }
 
         /**
@@ -337,6 +382,14 @@ public interface Credentials {
             return this.mail;
         }
 
+        /**
+         * Get user groups.
+         * @return List of the user groups
+         */
+        public List<String> groups() {
+            return this.ugroups;
+        }
+
         @Override
         public boolean equals(final Object other) {
             final boolean res;
@@ -347,14 +400,15 @@ public interface Credentials {
             } else {
                 final User user = (User) other;
                 res = Objects.equals(this.uname, user.uname)
-                    && Objects.equals(this.mail, user.mail);
+                    && Objects.equals(this.mail, user.mail)
+                    && Objects.equals(this.ugroups, user.ugroups);
             }
             return res;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.uname, this.mail);
+            return Objects.hash(this.uname, this.mail, this.ugroups);
         }
     }
 }

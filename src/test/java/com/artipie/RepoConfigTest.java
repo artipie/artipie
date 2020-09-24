@@ -30,6 +30,7 @@ import io.vertx.reactivex.core.Vertx;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.concurrent.ExecutionException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -83,6 +84,25 @@ public final class RepoConfigTest {
         MatcherAssert.assertThat(
             config.contentLengthMax().isEmpty(),
             new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    public void readsPortWhenSpecified() throws Exception {
+        final RepoConfig config = this.readFull();
+        final int expected = 1234;
+        MatcherAssert.assertThat(
+            config.port(),
+            new IsEqual<>(OptionalInt.of(expected))
+        );
+    }
+
+    @Test
+    public void readsEmptyPortWhenNotSpecified() throws Exception {
+        final RepoConfig config = this.readMin();
+        MatcherAssert.assertThat(
+            config.port(),
+            new IsEqual<>(OptionalInt.empty())
         );
     }
 

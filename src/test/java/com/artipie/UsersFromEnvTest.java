@@ -32,18 +32,18 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link Credentials.FromEnv}.
+ * Test for {@link Users.FromEnv}.
  * @since 0.10
  */
-class CredentialsFromEnvTest {
+class UsersFromEnvTest {
 
     @Test
     void returnsUserFromEnv() {
         final String user = "john";
         MatcherAssert.assertThat(
-            new Credentials.FromEnv(new MapOf<>(new MapEntry<>(AuthFromEnv.ENV_NAME, user)))
-                .users().toCompletableFuture().join(),
-            Matchers.containsInAnyOrder(new Credentials.User(user, Optional.empty()))
+            new Users.FromEnv(new MapOf<>(new MapEntry<>(AuthFromEnv.ENV_NAME, user)))
+                .list().toCompletableFuture().join(),
+            Matchers.containsInAnyOrder(new Users.User(user, Optional.empty()))
         );
     }
 
