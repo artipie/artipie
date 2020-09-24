@@ -21,33 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
+package com.artipie.http;
 
-import com.artipie.http.Headers;
-import com.artipie.http.Pie;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.Test;
+import com.artipie.Settings;
 
 /**
- * Test for {@link Pie}.
- * @since 0.2
+ * Slice handles repository requests extracting repository name from URI path.
+ *
+ * @since 0.11
  */
-public final class PieTest {
+public final class AllRepositoriesSlice extends Slice.Wrap {
 
-    @Test
-    public void unexistingRepoReturnNotFound() {
-        MatcherAssert.assertThat(
-            "Must return 404 HTTP status",
-            new Pie(new Settings.Fake()).response(
-                new RequestLine("GET", "/repo/foo", "HTTP/1.1").toString(),
-                Headers.EMPTY,
-                Flowable.empty()
-            ),
-            new RsHasStatus(RsStatus.NOT_FOUND)
-        );
+    /**
+     * Ctor.
+     *
+     * @param settings Artipie settings.
+     */
+    public AllRepositoriesSlice(final Settings settings) {
+        super(new DockerRoutingSlice(settings, new SliceByPath(settings)));
     }
 }

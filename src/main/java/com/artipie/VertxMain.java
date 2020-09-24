@@ -26,11 +26,10 @@ package com.artipie;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.Pie;
-import com.artipie.http.TrafficMetricSlice;
+import com.artipie.http.BaseSlice;
+import com.artipie.http.MainSlice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
-import com.artipie.metrics.PrefixedMetrics;
 import com.artipie.metrics.nop.NopMetrics;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
@@ -223,13 +222,7 @@ public final class VertxMain {
     ) {
         final VertxSliceServer server = new VertxSliceServer(
             this.vertx,
-            new TrafficMetricSlice(
-                new ResponseMetricsSlice(
-                    new Pie(settings),
-                    new PrefixedMetrics(metrics, "http.response.")
-                ),
-                new PrefixedMetrics(metrics, "http.")
-            ),
+            new BaseSlice(metrics, new MainSlice(settings)),
             sport
         );
         this.servers.add(server);
