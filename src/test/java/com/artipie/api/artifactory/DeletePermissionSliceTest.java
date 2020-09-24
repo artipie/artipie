@@ -82,9 +82,9 @@ class DeletePermissionSliceTest {
         final Key.From key = new Key.From(String.format("%s.yaml", repo));
         final RepoPerms perms = new RepoPerms(
             List.of(
-                new RepoPermissions.UserPermission("admin", new ListOf<String>("*")),
-                new RepoPermissions.UserPermission("john", new ListOf<String>("delete")),
-                new RepoPermissions.UserPermission("*", new ListOf<String>("download"))
+                new RepoPermissions.PermissionItem("admin", new ListOf<String>("*")),
+                new RepoPermissions.PermissionItem("john", new ListOf<String>("delete")),
+                new RepoPermissions.PermissionItem("*", new ListOf<String>("download"))
             )
         );
         perms.saveSettings(storage, repo);

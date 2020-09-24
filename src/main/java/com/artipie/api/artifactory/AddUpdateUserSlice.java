@@ -34,7 +34,7 @@ import com.artipie.http.rs.RsWithStatus;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.ByteBuffer;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -108,11 +108,12 @@ public final class AddUpdateUserSlice implements Slice {
             json -> {
                 final Optional<Pair<Users.User, String>> res;
                 if (json.containsKey(pswd) && json.containsKey(email)) {
-                    List<String> list = Collections.emptyList();
+                    List<String> list = new ArrayList<>(1);
                     if (json.containsKey(groups)) {
                         list = json.getJsonArray(groups).getValuesAs(JsonString.class)
                             .stream().map(JsonString::getString).collect(Collectors.toList());
                     }
+                    list.add("readers");
                     res = Optional.of(
                         new ImmutablePair<>(
                             new Users.User(name, Optional.of(json.getString(email)), list),

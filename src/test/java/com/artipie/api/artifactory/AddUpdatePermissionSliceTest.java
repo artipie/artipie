@@ -94,23 +94,28 @@ class AddUpdatePermissionSliceTest {
         );
         MatcherAssert.assertThat(
             "Sets permissions for bob",
-            this.permissionsForUser(repo, "bob"),
+            this.permissionsFor(repo, "bob"),
             Matchers.containsInAnyOrder("read", "write", "*")
         );
         MatcherAssert.assertThat(
             "Sets permissions for alice",
-            this.permissionsForUser(repo, "alice"),
+            this.permissionsFor(repo, "alice"),
             Matchers.containsInAnyOrder("write", "read")
         );
         MatcherAssert.assertThat(
             "Sets permissions for john",
-            this.permissionsForUser(repo, "john"),
+            this.permissionsFor(repo, "john"),
             Matchers.containsInAnyOrder("*")
         );
         MatcherAssert.assertThat(
             "Sets patterns",
             this.patterns(repo),
             Matchers.contains("**", "maven/**")
+        );
+        MatcherAssert.assertThat(
+            "Sets readers group",
+            this.permissionsFor(repo, "/readers"),
+            Matchers.contains("read")
         );
     }
 
@@ -141,7 +146,7 @@ class AddUpdatePermissionSliceTest {
         );
     }
 
-    private List<String> permissionsForUser(final String repo, final String user)
+    private List<String> permissionsFor(final String repo, final String user)
         throws IOException {
         return this.repo(repo).yamlMapping("permissions").yamlSequence(user)
             .values().stream().map(node -> node.asScalar().value())

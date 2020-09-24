@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonString;
+import org.cactoos.list.ListOf;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.reactivestreams.Publisher;
@@ -114,7 +115,7 @@ public final class AddUpdatePermissionSlice implements Slice {
     }
 
     /**
-     * Converts json permissions into list of {@link RepoPermissions.UserPermission}.
+     * Update repo permissions.
      * @param json Json body
      * @param name Repository name
      * @return True - if JSON is valid and update performed,
@@ -123,11 +124,11 @@ public final class AddUpdatePermissionSlice implements Slice {
     private CompletionStage<Boolean> update(final JsonObject json, final String name) {
         final JsonObject repo = json.getJsonObject("repo");
         final JsonObject users = repo.getJsonObject("actions").getJsonObject("users");
-        final List<RepoPermissions.UserPermission> res = new ArrayList<>(users.size());
+        final List<RepoPermissions.PermissionItem> res = new ArrayList<>(users.size() + 1);
         users.forEach(
             (user, perms) ->
                 res.add(
-                    new RepoPermissions.UserPermission(
+                    new RepoPermissions.PermissionItem(
                         user, perms.asJsonArray().stream()
                         .map(item -> item.toString().replace("\"", ""))
                         .map(
@@ -142,6 +143,7 @@ public final class AddUpdatePermissionSlice implements Slice {
                     )
                 )
         );
+        res.add(new RepoPermissions.PermissionItem("/readers", new ListOf<String>("read")));
         final List<RepoPermissions.PathPattern> patterns = Optional.ofNullable(
             repo.getJsonArray("include-patterns")
         )

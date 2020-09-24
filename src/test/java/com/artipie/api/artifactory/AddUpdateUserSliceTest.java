@@ -47,13 +47,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -115,7 +116,7 @@ final class AddUpdateUserSliceTest {
             rqmeth,
             String.format("/api/security/users/%s", username)
         );
-        final List<String> groups = new ListOf<>("readers", "a-team");
+        final List<String> groups = new ListOf<>("a-team", "b-team");
         this.creds("person", Collections.emptyList());
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
@@ -139,7 +140,9 @@ final class AddUpdateUserSliceTest {
             this.readCreds(username).yamlSequence("groups")
                 .values().stream().map(node -> node.asScalar().value())
                 .collect(Collectors.toList()),
-            new IsEqual<>(groups)
+            new IsEqual<>(
+                Stream.concat(groups.stream(), Stream.of("readers")).collect(Collectors.toList())
+            )
         );
     }
 
@@ -171,9 +174,11 @@ final class AddUpdateUserSliceTest {
             new IsEqual<>(this.shaPswd(newpswd))
         );
         MatcherAssert.assertThat(
-            "Yaml has no groups",
-            this.readCreds(username).yamlSequence("groups"),
-            new IsNull<>()
+            "Yaml has readers group only",
+            this.readCreds(username).yamlSequence("groups")
+                .values().stream().map(node -> node.asScalar().value())
+                .collect(Collectors.toList()),
+            Matchers.contains("readers")
         );
     }
 
