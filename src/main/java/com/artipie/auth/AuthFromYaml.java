@@ -70,8 +70,10 @@ public final class AuthFromYaml implements Authentication {
         Optional<Authentication.User> res = Optional.empty();
         if (users != null && users.yamlMapping(user) != null) {
             final String stored = users.yamlMapping(user).string("pass");
-            final String type = users.yamlMapping(user).string("type");
-            if (stored != null && check(stored, type, pass)) {
+            final Optional<String> type = Optional.ofNullable(
+                users.yamlMapping(user).string("type")
+            );
+            if (stored != null && checkPswdByType(stored, type, pass)) {
                 res = Optional.of(
                     new User(user, AuthFromYaml.groups(users.yamlMapping(user)))
                 );
@@ -92,21 +94,21 @@ public final class AuthFromYaml implements Authentication {
      * @param given Password to check
      * @return True if passwords are the same
      */
-    private static boolean check(final String stored, final String type, final String given) {
-        boolean res = false;
+    private static boolean checkPswdByType(final String stored, final Optional<String> type,
+        final String given) {
+        boolean sha = false;
         String checkpswd = String.format("madewrong%s", given);
-        if (type == null) {
+        if (type.isEmpty()) {
             final Matcher matcher = AuthFromYaml.PSWD_FORMAT.matcher(stored);
             if (matcher.matches()) {
                 checkpswd = matcher.group(2);
-                res = stored.startsWith("sha256");
+                sha = stored.startsWith("sha256");
             }
         } else {
             checkpswd = stored;
-            res = type.equals("sha256");
+            sha = type.get().equals("sha256");
         }
-        res = res && DigestUtils.sha256Hex(given).equals(checkpswd) || given.equals(checkpswd);
-        return res;
+        return sha && DigestUtils.sha256Hex(given).equals(checkpswd) || given.equals(checkpswd);
     }
 
     /**
