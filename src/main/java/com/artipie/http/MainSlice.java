@@ -21,11 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.MeasuredSlice;
 import com.artipie.Settings;
 import com.artipie.YamlStorage;
 import com.artipie.api.ArtipieApi;
@@ -41,22 +39,21 @@ import com.artipie.http.rt.RtPath;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
-import com.artipie.http.slice.LoggingSlice;
 import com.artipie.metrics.MetricSlice;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 /**
- * Pie of slices.
- * @since 0.1
- * @checkstyle ReturnCountCheck (500 lines)
+ * Slice Artipie serves on it's main port.
+ * The slice handles `/.health`, `/.metrics`, `/.meta/metrics`, `/api`, `/dashboard`
+ * and repository requests extracting repository name from URI path.
+ *
+ * @since 0.11
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public final class Pie extends Slice.Wrap {
+public final class MainSlice extends Slice.Wrap {
 
     /**
      * Route path returns {@code NO_CONTENT} status if path is empty.
@@ -77,52 +74,41 @@ public final class Pie extends Slice.Wrap {
      * Artipie entry point.
      * @param settings Artipie settings
      */
-    public Pie(final Settings settings) {
+    public MainSlice(final Settings settings) {
         super(
-            new SafeSlice(
-                new TimeoutSlice(
-                    new MeasuredSlice(
-                        new DockerRoutingSlice(
-                            settings,
-                            new LoggingSlice(
-                                Level.INFO,
-                                new SliceRoute(
-                                    Pie.EMPTY_PATH,
-                                    new RtRulePath(
-                                        new RtRule.ByPath(Pattern.compile("/\\.health")),
-                                        new HealthSlice(settings)
-                                    ),
-                                    new RtRulePath(
-                                        new RtRule.ByPath(Pattern.compile("/api/?.*")),
-                                        new ArtipieApi(settings)
-                                    ),
-                                    new RtRulePath(
-                                        new RtIsDashboard(settings), new DashboardSlice(settings)
-                                    ),
-                                    new RtRulePath(
-                                        new RtRule.All(
-                                            new ByMethodsRule(RqMethod.GET),
-                                            new RtRule.ByPath("/.metrics")
-                                        ),
-                                        new OptionalSlice<>(
-                                            metricsStorage(settings), Optional::isPresent,
-                                            yaml -> new MetricSlice(
-                                                new SubStorage(
-                                                    new Key.From(".meta", "metrics"),
-                                                    new YamlStorage(yaml.orElseThrow())
-                                                        .storage()
-                                                )
-                                            )
-                                        )
-                                    ),
-                                    new RtRulePath(
-                                        RtRule.FALLBACK, new SliceByPath(settings)
-                                    )
-                                )
+            new SliceRoute(
+                MainSlice.EMPTY_PATH,
+                new RtRulePath(
+                    new RtRule.ByPath(Pattern.compile("/\\.health")),
+                    new HealthSlice(settings)
+                ),
+                new RtRulePath(
+                    new RtRule.All(
+                        new ByMethodsRule(RqMethod.GET),
+                        new RtRule.ByPath("/.metrics")
+                    ),
+                    new OptionalSlice<>(
+                        metricsStorage(settings),
+                        Optional::isPresent,
+                        yaml -> new MetricSlice(
+                            new SubStorage(
+                                new Key.From(".meta", "metrics"),
+                                new YamlStorage(yaml.orElseThrow()).storage()
                             )
                         )
-                    ),
-                    Duration.ofMinutes(1)
+                    )
+                ),
+                new RtRulePath(
+                    new RtRule.ByPath(Pattern.compile("/api/?.*")),
+                    new ArtipieApi(settings)
+                ),
+                new RtRulePath(
+                    new RtIsDashboard(settings),
+                    new DashboardSlice(settings)
+                ),
+                new RtRulePath(
+                    RtRule.FALLBACK,
+                    new AllRepositoriesSlice(settings)
                 )
             )
         );
