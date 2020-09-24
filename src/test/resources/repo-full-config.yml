@@ -1,6 +1,7 @@
 repo:
   type: maven
   path: mvn
+  port: 1234
   content-length-max: 123
   storage:
     type: fs

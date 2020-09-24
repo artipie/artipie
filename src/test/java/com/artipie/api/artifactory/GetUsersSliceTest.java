@@ -25,8 +25,8 @@ package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.Credentials;
 import com.artipie.Settings;
+import com.artipie.Users;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -72,7 +72,7 @@ class GetUsersSliceTest {
         MatcherAssert.assertThat(
             new GetUsersSlice(
                 new Settings.Fake(
-                    new Credentials.FromStorageYaml(storage, key),
+                    new Users.FromStorageYaml(storage, key),
                     GetUsersSliceTest.META
                 )
             ),
