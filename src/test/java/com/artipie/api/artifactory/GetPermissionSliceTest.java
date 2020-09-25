@@ -111,8 +111,8 @@ class GetPermissionSliceTest {
         final String mark = "mark";
         final RepoPerms perm = new RepoPerms(
             List.of(
-                new RepoPermissions.UserPermission(john, new ListOf<String>("read", "write")),
-                new RepoPermissions.UserPermission(mark, new ListOf<String>("*"))
+                new RepoPermissions.PermissionItem(john, new ListOf<String>("read", "write")),
+                new RepoPermissions.PermissionItem(mark, new ListOf<String>("*"))
             ),
             Collections.singletonList("**/*")
         );

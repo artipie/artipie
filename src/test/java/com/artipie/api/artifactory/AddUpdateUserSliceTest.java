@@ -52,8 +52,8 @@ import javax.json.JsonObjectBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -115,7 +115,8 @@ final class AddUpdateUserSliceTest {
             rqmeth,
             String.format("/api/security/users/%s", username)
         );
-        final List<String> groups = new ListOf<>("readers", "a-team");
+        final String ateam = "a-team";
+        final String bteam = "b-team";
         this.creds("person", Collections.emptyList());
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
@@ -125,7 +126,7 @@ final class AddUpdateUserSliceTest {
                 )
             ).response(
                 rqline.toString(), Headers.EMPTY,
-                this.jsonBody(pswd, username, groups)
+                this.jsonBody(pswd, username, new ListOf<String>(ateam, bteam))
             ),
             new RsHasStatus(RsStatus.OK)
         );
@@ -139,7 +140,9 @@ final class AddUpdateUserSliceTest {
             this.readCreds(username).yamlSequence("groups")
                 .values().stream().map(node -> node.asScalar().value())
                 .collect(Collectors.toList()),
-            new IsEqual<>(groups)
+            Matchers.containsInAnyOrder(
+                ateam, bteam, "readers"
+            )
         );
     }
 
@@ -171,9 +174,11 @@ final class AddUpdateUserSliceTest {
             new IsEqual<>(this.shaPswd(newpswd))
         );
         MatcherAssert.assertThat(
-            "Yaml has no groups",
-            this.readCreds(username).yamlSequence("groups"),
-            new IsNull<>()
+            "Yaml has readers group only",
+            this.readCreds(username).yamlSequence("groups")
+                .values().stream().map(node -> node.asScalar().value())
+                .collect(Collectors.toList()),
+            Matchers.contains("readers")
         );
     }
 
