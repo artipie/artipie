@@ -44,7 +44,7 @@ import java.util.concurrent.CompletionStage;
  * Artipie repositories implementation.
  * @since 0.9
  */
-final class ArtipieRepositories implements Repositories {
+public final class ArtipieRepositories implements Repositories {
 
     /**
      * Artipie settings.
@@ -55,12 +55,12 @@ final class ArtipieRepositories implements Repositories {
      * New Artipie repositories.
      * @param settings Artipie settings
      */
-    ArtipieRepositories(final Settings settings) {
+    public ArtipieRepositories(final Settings settings) {
         this.settings = settings;
     }
 
     @Override
-    public Slice slice(final Key name) throws IOException {
+    public Slice slice(final Key name, final boolean standalone) throws IOException {
         final Storage storage = this.settings.storage();
         final Key.From key = new Key.From(String.format("%s.yaml", name.string()));
         return new AsyncSlice(
@@ -68,7 +68,7 @@ final class ArtipieRepositories implements Repositories {
                 exists -> {
                     final CompletionStage<Slice> res;
                     if (exists) {
-                        res = this.resolve(storage, name, key);
+                        res = this.resolve(storage, name, key, standalone);
                     } else {
                         res = CompletableFuture.completedFuture(
                             new SliceSimple(new RsRepoNotFound(name))
@@ -85,15 +85,22 @@ final class ArtipieRepositories implements Repositories {
      * @param storage Artipie config storage
      * @param name Repository name
      * @param key Config key
+     * @param standalone Standalone flag
      * @return Async slice for repo
+     * @checkstyle ParameterNumberCheck (2 lines)
      */
-    private CompletionStage<Slice> resolve(final Storage storage, final Key name, final Key key) {
+    private CompletionStage<Slice> resolve(
+        final Storage storage,
+        final Key name,
+        final Key key,
+        final boolean standalone
+    ) {
         return Single.zip(
             SingleInterop.fromFuture(storage.value(key)),
             SingleInterop.fromFuture(StorageAliases.find(storage, name)),
             (data, aliases) -> SingleInterop.fromFuture(
                 RepoConfig.fromPublisher(aliases, name, data)
-            ).map(config -> new SliceFromConfig(this.settings, config, aliases))
+            ).map(config -> new SliceFromConfig(this.settings, config, aliases, standalone))
         ).<Slice>flatMap(self -> self).to(SingleInterop.get());
     }
 

@@ -23,7 +23,6 @@
  */
 package com.artipie.http;
 
-import com.artipie.ContinueSlice;
 import com.artipie.Settings;
 import com.artipie.asto.Key;
 import com.artipie.http.rq.RequestLineFrom;
@@ -90,7 +89,7 @@ final class SliceByPath implements Slice {
                 }
                 key = new Key.From(split[0]);
             }
-            return new ContinueSlice(this.repositories.slice(key)).response(line, headers, body);
+            return this.repositories.slice(key, false).response(line, headers, body);
         } catch (final IOException err) {
             return new RsWithBody(
                 new RsWithStatus(RsStatus.INTERNAL_ERROR),

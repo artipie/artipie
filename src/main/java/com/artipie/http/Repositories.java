@@ -35,8 +35,9 @@ public interface Repositories {
     /**
      * Find slice by name.
      * @param prefix Repository name
+     * @param standalone Standalone flag
      * @return Repository slice
      * @throws IOException On error
      */
-    Slice slice(Key prefix) throws IOException;
+    Slice slice(Key prefix, boolean standalone) throws IOException;
 }

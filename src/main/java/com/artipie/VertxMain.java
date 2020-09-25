@@ -26,8 +26,10 @@ package com.artipie;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
+import com.artipie.http.Slice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.nop.NopMetrics;
@@ -35,6 +37,7 @@ import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -102,7 +105,7 @@ public final class VertxMain {
     public int start() throws IOException {
         final Settings settings = settings(this.config);
         final Metrics metrics = metrics(settings);
-        final int main = this.listenOn(settings, metrics, this.port);
+        final int main = this.listenOn(new MainSlice(settings), metrics, this.port);
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
         this.startRepos(settings, metrics);
         return main;
@@ -190,8 +193,9 @@ public final class VertxMain {
      */
     private void startRepos(final Settings settings, final Metrics metrics) throws IOException {
         final Storage storage = settings.storage();
+        final String yaml = ".yaml";
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
-            keys -> keys.stream().filter(key -> key.string().endsWith(".yaml")).map(
+            keys -> keys.stream().filter(key -> key.string().endsWith(yaml)).map(
                 key -> storage.value(key).thenCompose(
                     content -> RepoConfig.fromPublisher(StorageAliases.EMPTY, key, content)
                 ).toCompletableFuture().join()
@@ -200,8 +204,18 @@ public final class VertxMain {
         for (final RepoConfig repo : configs) {
             repo.port().ifPresent(
                 prt -> {
-                    this.listenOn(settings, metrics, prt);
-                    Logger.info(VertxMain.class, "Artipie repo was started on port %d", prt);
+                    final String name = repo.name().replace(yaml, "");
+                    final Slice slice;
+                    try {
+                        slice = new ArtipieRepositories(settings).slice(new Key.From(name), true);
+                    } catch (final IOException ex) {
+                        throw new UncheckedIOException(ex);
+                    }
+                    this.listenOn(slice, metrics, prt);
+                    Logger.info(
+                        VertxMain.class,
+                        "Artipie repo '%s' was started on port %d", name, prt
+                    );
                 }
             );
         }
@@ -210,19 +224,15 @@ public final class VertxMain {
     /**
      * Starts HTTP server listening on specified port.
      *
-     * @param settings Settings.
+     * @param slice Slice.
      * @param metrics Metrics.
      * @param sport Server port.
      * @return Port server started to listen on.
      */
-    private int listenOn(
-        final Settings settings,
-        final Metrics metrics,
-        final int sport
-    ) {
+    private int listenOn(final Slice slice, final Metrics metrics, final int sport) {
         final VertxSliceServer server = new VertxSliceServer(
             this.vertx,
-            new BaseSlice(metrics, new MainSlice(settings)),
+            new BaseSlice(metrics, slice),
             sport
         );
         this.servers.add(server);
