@@ -169,7 +169,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "npm":
                 slice = new NpmSlice(
-                    new Unchecked<>(() -> new URL(cfg.path())).value(),
+                    cfg.url(),
                     new Npm(cfg.storage()),
                     cfg.storage(),
                     permissions,
