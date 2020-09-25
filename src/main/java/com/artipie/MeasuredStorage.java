@@ -26,13 +26,13 @@ package com.artipie;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.Transaction;
 import com.jcabi.log.Logger;
 import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -283,8 +283,10 @@ public final class MeasuredStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Transaction> transaction(final List<Key> list) {
-        return this.origin.transaction(list);
+    public <T> CompletionStage<T> exclusively(
+        final Key key,
+        final Function<Storage, CompletionStage<T>> function) {
+        return this.origin.exclusively(key, function);
     }
 
     /**
