@@ -62,8 +62,11 @@ import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.net.URL;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.http.client.utils.URIBuilder;
+import org.cactoos.scalar.Unchecked;
 
 /**
  * Slice from repo config.
@@ -159,7 +162,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "npm":
                 slice = new NpmSlice(
-                    cfg.path(),
+                    new Unchecked<>(() -> new URL(cfg.path())).value(),
                     new Npm(cfg.storage()),
                     cfg.storage(),
                     permissions,
@@ -189,7 +192,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "php":
-                slice = new PhpComposer(cfg.path(), cfg.storage());
+                slice = new PhpComposer(cfg.storage());
                 break;
             case "nuget":
                 slice = new TrimPathSlice(
