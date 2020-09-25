@@ -166,12 +166,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "npm":
-                slice = new NpmSlice(
-                    cfg.url(),
-                    new Npm(cfg.storage()),
-                    cfg.storage(),
-                    permissions,
-                    new BasicIdentities(auth)
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new NpmSlice(
+                        cfg.url(),
+                        new Npm(cfg.storage()),
+                        cfg.storage(),
+                        permissions,
+                        new BasicIdentities(auth)
+                    )
                 );
                 break;
             case "gem":
