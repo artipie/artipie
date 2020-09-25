@@ -62,7 +62,6 @@ import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -97,15 +96,18 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param settings Artipie settings
      * @param config Repo config
      * @param aliases Storage aliases
+     * @param standalone Standalone flag
      */
-    public SliceFromConfig(final Settings settings, final RepoConfig config,
-        final StorageAliases aliases) {
+    public SliceFromConfig(
+        final Settings settings, final RepoConfig config,
+        final StorageAliases aliases,
+        final boolean standalone) {
         super(
             new AsyncSlice(
                 settings.auth().thenApply(
                     auth -> SliceFromConfig.build(
                         settings, new LoggingAuth(auth),
-                        config, aliases
+                        config, aliases, standalone
                     )
                 )
             )
@@ -119,6 +121,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param auth Authentication
      * @param cfg Repository config
      * @param aliases Storage aliases
+     * @param standalone Standalone flag
      * @return Slice completionStage
      * @todo #90:30min This method still needs more refactoring.
      *  We should test if the type exist in the constructed map. If the type does not exist,
@@ -126,6 +129,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @checkstyle LineLengthCheck (150 lines)
      * @checkstyle ExecutableStatementCountCheck (100 lines)
      * @checkstyle JavaNCSSCheck (500 lines)
+     * @checkstyle MethodLengthCheck (500 lines)
      */
     @SuppressWarnings(
         {
@@ -133,19 +137,23 @@ public final class SliceFromConfig extends Slice.Wrap {
             "PMD.AvoidDuplicateLiterals", "PMD.NcssCount"
         }
     )
-    static Slice build(final Settings settings, final Authentication auth,
-        final RepoConfig cfg, final StorageAliases aliases) {
+    static Slice build(
+        final Settings settings, final Authentication auth,
+        final RepoConfig cfg, final StorageAliases aliases, final boolean standalone) {
         final Slice slice;
         final Permissions permissions = new LoggingPermissions(
             cfg.permissions().orElse(Permissions.FREE)
         );
-        final Pattern prefix = new PathPattern(settings).pattern();
         switch (cfg.type()) {
             case "file":
-                slice = new TrimPathSlice(new FilesSlice(cfg.storage(), permissions, auth), prefix);
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new FilesSlice(cfg.storage(), permissions, auth)
+                );
                 break;
             case "file-proxy":
-                slice = new TrimPathSlice(
+                slice = trimIfNotStandalone(
+                    settings, standalone,
                     new FileProxySlice(
                         SliceFromConfig.HTTP,
                         URI.create(
@@ -154,7 +162,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                                     () -> new IllegalStateException("Repo settings missed")
                                 ).string("remote_uri")
                         )
-                    ), prefix
+                    )
                 );
                 break;
             case "npm":
@@ -167,41 +175,49 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "gem":
-                slice = new TrimPathSlice(new GemSlice(cfg.storage()), prefix);
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new GemSlice(cfg.storage())
+                );
                 break;
             case "helm":
-                slice = new TrimPathSlice(
+                slice = trimIfNotStandalone(
+                    settings, standalone,
                     new HelmSlice(
                         cfg.storage(),
                         cfg.path(),
                         permissions,
                         new BasicIdentities(auth)
-                    ),
-                    prefix
+                    )
                 );
                 break;
             case "rpm":
-                slice = new TrimPathSlice(
+                slice = trimIfNotStandalone(
+                    settings, standalone,
                     new RpmSlice(
                         cfg.storage(), permissions, new BasicIdentities(auth),
                         new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings())
-                    ), prefix
+                    )
                 );
                 break;
             case "php":
                 slice = new PhpComposer(cfg.path(), cfg.storage());
                 break;
             case "nuget":
-                slice = new TrimPathSlice(
-                    new NuGet(cfg.url(), cfg.storage(), permissions, auth),
-                    prefix
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new NuGet(cfg.url(), cfg.storage(), permissions, auth)
                 );
                 break;
             case "maven":
-                slice = new TrimPathSlice(new MavenSlice(cfg.storage(), permissions, auth), prefix);
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new MavenSlice(cfg.storage(), permissions, auth)
+                );
                 break;
             case "maven-proxy":
-                slice = new TrimPathSlice(
+                slice = trimIfNotStandalone(
+                    settings, standalone,
                     new MavenProxySlice(
                         SliceFromConfig.HTTP.client(),
                         URI.create(
@@ -210,12 +226,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                                 .string("remote_uri")
                         ),
                         new StorageCache(cfg.storage())
-                    ),
-                    prefix
+                    )
                 );
                 break;
             case "maven-group":
-                slice = new TrimPathSlice(
+                slice = trimIfNotStandalone(
+                    settings, standalone,
                     new GroupSlice(
                         cfg.settings().orElseThrow().yamlSequence("repositories").values()
                             .stream().map(node -> node.asScalar().value())
@@ -225,19 +241,21 @@ public final class SliceFromConfig extends Slice.Wrap {
                                         return new AsyncSlice(
                                             settings.storage().value(new Key.From(String.format("%s.yaml", name)))
                                                 .thenCompose(data -> RepoConfig.fromPublisher(aliases, new KeyFromPath(name), data))
-                                                .thenApply(sub -> new SliceFromConfig(settings, sub, aliases))
+                                                .thenApply(sub -> new SliceFromConfig(settings, sub, aliases, standalone))
                                         );
                                     } catch (final IOException err) {
                                         throw new UncheckedIOException(err);
                                     }
                                 }
                             ).collect(Collectors.toList())
-                    ),
-                    prefix
+                    )
                 );
                 break;
             case "go":
-                slice = new TrimPathSlice(new GoSlice(cfg.storage(), permissions, auth), prefix);
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new GoSlice(cfg.storage(), permissions, auth)
+                );
                 break;
             case "npm-proxy":
                 slice = new NpmProxySlice(
@@ -250,27 +268,60 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "pypi":
-                slice = new TrimPathSlice(new PySlice(cfg.storage(), permissions, auth), prefix);
-                break;
-            case "docker":
-                slice = new DockerRoutingSlice.Reverted(
-                    new DockerSlice(
-                        new TrimmedDocker(new AstoDocker(cfg.storage()), cfg.name()),
-                        permissions,
-                        auth
-                    )
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new PySlice(cfg.storage(), permissions, auth)
                 );
                 break;
+            case "docker":
+                if (standalone) {
+                    slice = new DockerSlice(
+                        new AstoDocker(cfg.storage()),
+                        permissions,
+                        auth
+                    );
+                } else {
+                    slice = new DockerRoutingSlice.Reverted(
+                        new DockerSlice(
+                            new TrimmedDocker(new AstoDocker(cfg.storage()), cfg.name()),
+                            permissions,
+                            auth
+                        )
+                    );
+                }
+                break;
             case "docker-proxy":
-                slice = new DockerProxy(SliceFromConfig.HTTP, cfg, permissions, auth);
+                slice = new DockerProxy(SliceFromConfig.HTTP, standalone, cfg, permissions, auth);
                 break;
             default:
                 throw new IllegalStateException(
                     String.format("Unsupported repository type '%s", cfg.type())
                 );
         }
-        return cfg.contentLengthMax()
-            .<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
-            .orElse(slice);
+        return new ContinueSlice(
+            cfg.contentLengthMax()
+                .<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
+                .orElse(slice)
+        );
+    }
+
+    /**
+     * Wraps origin slice if into TrimPathSlice if it is not standalone.
+     *
+     * @param settings Artipie settings
+     * @param standalone Standalone flag
+     * @param origin Origin slice
+     * @return Origin slice wrapped if needed
+     */
+    private static Slice trimIfNotStandalone(
+        final Settings settings, final boolean standalone, final Slice origin
+    ) {
+        final Slice result;
+        if (standalone) {
+            result = origin;
+        } else {
+            result = new TrimPathSlice(origin, new PathPattern(settings).pattern());
+        }
+        return result;
     }
 }
