@@ -34,7 +34,6 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,9 +41,11 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonString;
+import org.cactoos.list.ListOf;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.reactivestreams.Publisher;
@@ -114,7 +115,7 @@ public final class AddUpdatePermissionSlice implements Slice {
     }
 
     /**
-     * Converts json permissions into list of {@link RepoPermissions.UserPermission}.
+     * Update repo permissions.
      * @param json Json body
      * @param name Repository name
      * @return True - if JSON is valid and update performed,
@@ -122,26 +123,21 @@ public final class AddUpdatePermissionSlice implements Slice {
      */
     private CompletionStage<Boolean> update(final JsonObject json, final String name) {
         final JsonObject repo = json.getJsonObject("repo");
-        final JsonObject users = repo.getJsonObject("actions").getJsonObject("users");
-        final List<RepoPermissions.UserPermission> res = new ArrayList<>(users.size());
-        users.forEach(
-            (user, perms) ->
-                res.add(
-                    new RepoPermissions.UserPermission(
-                        user, perms.asJsonArray().stream()
-                        .map(item -> item.toString().replace("\"", ""))
-                        .map(
-                            item -> Optional.ofNullable(
-                                AddUpdatePermissionSlice.MAPPING.get(item)
-                            ).orElseThrow(
-                                () -> new IllegalArgumentException(
-                                    String.format("Unsupported permission '%s'!", item)
-                                )
-                            )
-                        ).distinct().collect(Collectors.toList())
+        final String actions = "actions";
+        final List<RepoPermissions.PermissionItem> res =
+            Stream.concat(
+                Stream.of(new RepoPermissions.PermissionItem("/readers", new ListOf<>("read"))),
+                Stream.concat(
+                    AddUpdatePermissionSlice.permsFromJson(
+                        Optional.ofNullable(repo.getJsonObject(actions).getJsonObject("users")),
+                        ""
+                    ),
+                    AddUpdatePermissionSlice.permsFromJson(
+                        Optional.ofNullable(repo.getJsonObject(actions).getJsonObject("groups")),
+                        "/"
                     )
                 )
-        );
+            ).distinct().collect(Collectors.toList());
         final List<RepoPermissions.PathPattern> patterns = Optional.ofNullable(
             repo.getJsonArray("include-patterns")
         )
@@ -160,5 +156,33 @@ public final class AddUpdatePermissionSlice implements Slice {
             result = CompletableFuture.completedFuture(false);
         }
         return result;
+    }
+
+    /**
+     * Permission items from json.
+     * @param perms Json permissions
+     * @param prefix Prefix for permission name
+     * @return List of {@link RepoPermissions.PermissionItem}
+     */
+    private static Stream<RepoPermissions.PermissionItem> permsFromJson(
+        final Optional<JsonObject> perms, final String prefix
+    ) {
+        return perms.map(items -> items.entrySet().stream()).map(
+            items -> items.map(
+                json -> new RepoPermissions.PermissionItem(
+                    String.format("%s%s", prefix, json.getKey()), json.getValue()
+                    .asJsonArray().stream().map(item -> item.toString().replace("\"", ""))
+                    .map(
+                        item -> Optional.ofNullable(
+                            AddUpdatePermissionSlice.MAPPING.get(item)
+                        ).orElseThrow(
+                            () -> new IllegalArgumentException(
+                                String.format("Unsupported permission '%s'!", item)
+                            )
+                        )
+                    ).distinct().collect(Collectors.toList())
+                )
+            )
+        ).orElse(Stream.empty());
     }
 }

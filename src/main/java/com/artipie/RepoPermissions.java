@@ -75,7 +75,7 @@ public interface RepoPermissions {
      */
     CompletionStage<Void> update(
         String repo,
-        Collection<UserPermission> permissions,
+        Collection<PermissionItem> permissions,
         Collection<PathPattern> patterns
     );
 
@@ -84,7 +84,7 @@ public interface RepoPermissions {
      * @param repo Repository name
      * @return Completion action with map with users and permissions
      */
-    CompletionStage<Collection<UserPermission>> permissions(String repo);
+    CompletionStage<Collection<PermissionItem>> permissions(String repo);
 
     /**
      * Read included path patterns.
@@ -154,7 +154,7 @@ public interface RepoPermissions {
         @Override
         public CompletionStage<Void> update(
             final String repo,
-            final Collection<UserPermission> permissions,
+            final Collection<PermissionItem> permissions,
             final Collection<PathPattern> patterns) {
             final Key key = FromSettings.repoSettingsKey(repo);
             return this.repo(key).thenApply(
@@ -162,7 +162,7 @@ public interface RepoPermissions {
                     YamlMappingBuilder res = FromSettings.copyRepoSection(mapping);
                     YamlMappingBuilder perms = Yaml.createYamlMappingBuilder();
                     if (!permissions.isEmpty()) {
-                        for (final UserPermission item : permissions) {
+                        for (final PermissionItem item : permissions) {
                             perms = perms.add(item.name, item.yaml().build());
                         }
                         res = res.add(FromSettings.PERMISSIONS, perms.build());
@@ -185,13 +185,13 @@ public interface RepoPermissions {
         }
 
         @Override
-        public CompletionStage<Collection<UserPermission>> permissions(final String repo) {
+        public CompletionStage<Collection<PermissionItem>> permissions(final String repo) {
             return this.repo(FromSettings.repoSettingsKey(repo)).thenApply(
                 yaml -> Optional.ofNullable(yaml.yamlMapping(FromSettings.PERMISSIONS))
             ).thenApply(
                 yaml -> yaml.map(
                     perms -> perms.keys().stream().map(
-                        node -> new UserPermission(
+                        node -> new PermissionItem(
                             node.asScalar().value(),
                             perms.yamlSequence(node.asScalar().value()).values().stream()
                             .map(item -> item.asScalar().value())
@@ -287,7 +287,7 @@ public interface RepoPermissions {
      * User permission item.
      * @since 0.10
      */
-    final class UserPermission {
+    final class PermissionItem {
 
         /**
          * Username.
@@ -304,7 +304,7 @@ public interface RepoPermissions {
          * @param name Username
          * @param permissions Permissions
          */
-        public UserPermission(final String name, final List<String> permissions) {
+        public PermissionItem(final String name, final List<String> permissions) {
             this.name = name;
             this.perms = permissions;
         }
@@ -333,7 +333,7 @@ public interface RepoPermissions {
             } else if (other == null || getClass() != other.getClass()) {
                 res = false;
             } else {
-                final UserPermission that = (UserPermission) other;
+                final PermissionItem that = (PermissionItem) other;
                 res = Objects.equals(this.name, that.name)
                     && Objects.equals(this.perms, that.perms);
             }

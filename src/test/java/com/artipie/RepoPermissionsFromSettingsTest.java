@@ -81,14 +81,14 @@ class RepoPermissionsFromSettingsTest {
         final String upload = "upload";
         final String repo = "maven";
         final RepoPerms perm = new RepoPerms(
-            new RepoPermissions.UserPermission(john, new ListOf<String>(download, upload))
+            new RepoPermissions.PermissionItem(john, new ListOf<String>(download, upload))
         );
         perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
                 .toCompletableFuture().join(),
             Matchers.contains(
-                new RepoPermissions.UserPermission(john, new ListOf<String>(download, upload))
+                new RepoPermissions.PermissionItem(john, new ListOf<String>(download, upload))
             )
         );
     }
@@ -140,7 +140,7 @@ class RepoPermissionsFromSettingsTest {
         final String add = "add";
         final RepoPerms perm = new RepoPerms(
             Collections.singleton(
-                new RepoPermissions.UserPermission(david, new ListOf<String>(add, "update"))
+                new RepoPermissions.PermissionItem(david, new ListOf<String>(add, "update"))
             ),
             new ListOf<>("**")
         );
@@ -153,9 +153,9 @@ class RepoPermissionsFromSettingsTest {
             .update(
                 repo,
                 new ListOf<>(
-                    new RepoPermissions.UserPermission(olga, new ListOf<>(download, deploy)),
-                    new RepoPermissions.UserPermission(victor, new ListOf<>(deploy)),
-                    new RepoPermissions.UserPermission(david, new ListOf<>(download, add))
+                    new RepoPermissions.PermissionItem(olga, new ListOf<>(download, deploy)),
+                    new RepoPermissions.PermissionItem(victor, new ListOf<>(deploy)),
+                    new RepoPermissions.PermissionItem(david, new ListOf<>(download, add))
                 ),
                 new ListOf<>(new RepoPermissions.PathPattern("rpm/*"))
             ).toCompletableFuture().join();
@@ -191,7 +191,7 @@ class RepoPermissionsFromSettingsTest {
         new RepoPermissions.FromSettings(new Settings.Fake(this.storage))
             .update(
                 repo,
-                new ListOf<>(new RepoPermissions.UserPermission(ann, new ListOf<>(download))),
+                new ListOf<>(new RepoPermissions.PermissionItem(ann, new ListOf<>(download))),
                 new ListOf<>(new RepoPermissions.PathPattern("**"))
             )
             .toCompletableFuture().join();
@@ -211,7 +211,7 @@ class RepoPermissionsFromSettingsTest {
     void deletesPermissionSection() throws IOException {
         final String repo = "nuget";
         final RepoPerms perm = new RepoPerms(
-            new RepoPermissions.UserPermission("someone", new ListOf<String>("r", "w"))
+            new RepoPermissions.PermissionItem("someone", new ListOf<String>("r", "w"))
         );
         perm.saveSettings(this.storage, repo);
         new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).remove(repo)
