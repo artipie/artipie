@@ -129,7 +129,7 @@ final class DockerOnPortIT {
     private Image prepareImage() throws Exception {
         final Image source = new Image.ForOs();
         this.client.run("pull", source.remoteByDigest());
-        final String local = "my-docker/my-test";
+        final String local = "my-test";
         this.client.run("tag", source.remoteByDigest(), String.format("%s:latest", local));
         final Image img = new Image.From(
             this.repository,
