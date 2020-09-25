@@ -33,6 +33,7 @@ import com.jcabi.log.Logger;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.MatchesPattern;
 import org.junit.jupiter.api.AfterEach;
@@ -83,7 +84,7 @@ final class FilesRepoITCase {
     @BeforeEach
     void init() throws Exception {
         this.storage = new FileStorage(this.tmp);
-        this.server = new ArtipieServer(this.tmp, "my-file", this.configs());
+        this.server = new ArtipieServer(this.tmp, "my-file", this.config());
         this.port = this.server.start();
         this.server.start();
         Testcontainers.exposeHostPorts(this.port);
@@ -93,22 +94,15 @@ final class FilesRepoITCase {
             .withFileSystemBind(this.tmp.toString(), "/home");
         this.cntn.start();
         this.exec("yum", "-y", "install", "curl");
-        this.exec("yum", "-y", "install", "maven");
     }
 
     @Test
-    void downloadsArtifact() throws Exception {
-        final String url = "http://host.testcontainers.internal:%d/my-file/helloworld-src/pom.xml";
+    void curlGetShouldReceiveFile() throws Exception {
+        final String url = "http://host.testcontainers.internal:%d/my-file/file-repo/curl.txt";
         this.addFilesToStorage(
-            "helloworld-src", new Key.From("my-file", "helloworld-src")
+            "file-repo", new Key.From("repos", "my-file", "file-repo")
         );
         MatcherAssert.assertThat(
-            "curl PUT doesn't work properly",
-            this.exec("curl", "-i", "-X", "PUT", String.format(url, this.port)),
-            new StringContains("HTTP/1.1 201 Created")
-        );
-        MatcherAssert.assertThat(
-            "curl GET doesn't work properly",
             this.exec("curl", "-i", "-X", "GET", String.format(url, this.port)),
             new MatchesPattern(
                 Pattern.compile(
@@ -117,7 +111,23 @@ final class FilesRepoITCase {
                 )
             )
         );
-        this.exec("mvn", "clean");
+    }
+
+    @Test
+    void curlPutShouldSaveFile() throws Exception {
+        final String url = "http://host.testcontainers.internal:%d/my-file/file-repo/curl.txt";
+        MatcherAssert.assertThat(
+            "curl PUT does work properly",
+            this.exec("curl", "-i", "-X", "PUT", String.format(url, this.port)),
+            new StringContains("HTTP/1.1 201 Created")
+        );
+        MatcherAssert.assertThat(
+            "File should be saved in storage",
+            this.storage.exists(
+                new Key.From("repos", "my-file", "file-repo", "curl.txt")
+            ).toCompletableFuture().join(),
+            new IsEqual<>(true)
+        );
     }
 
     @AfterEach
@@ -131,7 +141,7 @@ final class FilesRepoITCase {
         return this.cntn.execInContainer(command).getStdout();
     }
 
-    private String configs() {
+    private String config() {
         return Yaml.createYamlMappingBuilder().add(
             "repo",
             Yaml.createYamlMappingBuilder()
