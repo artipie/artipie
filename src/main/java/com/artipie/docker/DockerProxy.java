@@ -67,6 +67,11 @@ public final class DockerProxy implements Slice {
     private final RepoConfig cfg;
 
     /**
+     * Standalone flag.
+     */
+    private final boolean standalone;
+
+    /**
      * Access permissions.
      */
     private final Permissions perms;
@@ -80,6 +85,7 @@ public final class DockerProxy implements Slice {
      * Ctor.
      *
      * @param client HTTP client.
+     * @param standalone Standalone flag.
      * @param cfg Repository configuration.
      * @param perms Access permissions.
      * @param auth Authentication mechanism.
@@ -87,11 +93,13 @@ public final class DockerProxy implements Slice {
      */
     public DockerProxy(
         final ClientSlices client,
+        final boolean standalone,
         final RepoConfig cfg,
         final Permissions perms,
         final Authentication auth) {
         this.client = client;
         this.cfg = cfg;
+        this.standalone = standalone;
         this.perms = perms;
         this.auth = auth;
     }
@@ -127,20 +135,22 @@ public final class DockerProxy implements Slice {
                 }
             ).collect(Collectors.toList())
         );
-        final Docker docker = new TrimmedDocker(
-            this.cfg.storageOpt()
-                .<Docker>map(
-                    storage -> {
-                        final AstoDocker local = new AstoDocker(storage);
-                        return new ReadWriteDocker(new MultiReadDocker(local, proxies), local);
-                    }
-                )
-                .orElse(proxies),
-            this.cfg.name()
-        );
-        return new DockerRoutingSlice.Reverted(
-            new DockerSlice(docker, this.perms, this.auth)
-        );
+        Docker docker = this.cfg.storageOpt()
+            .<Docker>map(
+                storage -> {
+                    final AstoDocker local = new AstoDocker(storage);
+                    return new ReadWriteDocker(new MultiReadDocker(local, proxies), local);
+                }
+            )
+            .orElse(proxies);
+        if (!this.standalone) {
+            docker = new TrimmedDocker(docker, this.cfg.name());
+        }
+        Slice slice = new DockerSlice(docker, this.perms, this.auth);
+        if (!this.standalone) {
+            slice = new DockerRoutingSlice.Reverted(slice);
+        }
+        return slice;
     }
 
     /**

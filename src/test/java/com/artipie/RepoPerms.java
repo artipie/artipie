@@ -52,7 +52,7 @@ public final class RepoPerms {
     /**
      * Collection with user permissions.
      */
-    private final Collection<RepoPermissions.UserPermission> usersperms;
+    private final Collection<RepoPermissions.PermissionItem> usersperms;
 
     /**
      * Collection of included patterns.
@@ -70,7 +70,7 @@ public final class RepoPerms {
      * Ctor.
      * @param userperm Permission for a single user
      */
-    public RepoPerms(final RepoPermissions.UserPermission userperm) {
+    public RepoPerms(final RepoPermissions.PermissionItem userperm) {
         this(Collections.singleton(userperm));
     }
 
@@ -78,7 +78,7 @@ public final class RepoPerms {
      * Primary ctor.
      * @param usersperms Collection with user permissions
      */
-    public RepoPerms(final Collection<RepoPermissions.UserPermission> usersperms) {
+    public RepoPerms(final Collection<RepoPermissions.PermissionItem> usersperms) {
         this(usersperms, Collections.emptyList());
     }
 
@@ -88,7 +88,7 @@ public final class RepoPerms {
      * @param patterns Collection of included patterns.
      */
     public RepoPerms(
-        final Collection<RepoPermissions.UserPermission> usersperms,
+        final Collection<RepoPermissions.PermissionItem> usersperms,
         final Collection<String> patterns
     ) {
         this.usersperms = usersperms;
@@ -153,7 +153,7 @@ public final class RepoPerms {
     private YamlMapping permsYaml() {
         YamlMappingBuilder perms = Yaml.createYamlMappingBuilder();
         if (!this.usersperms.isEmpty()) {
-            for (final RepoPermissions.UserPermission user : this.usersperms) {
+            for (final RepoPermissions.PermissionItem user : this.usersperms) {
                 perms = perms.add(user.username(), user.yaml().build());
             }
         }

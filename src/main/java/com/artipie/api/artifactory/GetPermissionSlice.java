@@ -105,7 +105,7 @@ public final class GetPermissionSlice implements Slice {
      */
     private static JsonObject response(
         final Collection<RepoPermissions.PathPattern> patterns,
-        final Collection<RepoPermissions.UserPermission> permissions,
+        final Collection<RepoPermissions.PermissionItem> permissions,
         final String repo
     ) {
         return Json.createObjectBuilder()
@@ -122,10 +122,10 @@ public final class GetPermissionSlice implements Slice {
      * @return Users section JSON.
      */
     private static JsonObject users(
-        final Collection<RepoPermissions.UserPermission> permissions
+        final Collection<RepoPermissions.PermissionItem> permissions
     ) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
-        for (final RepoPermissions.UserPermission perm : permissions) {
+        for (final RepoPermissions.PermissionItem perm : permissions) {
             final JsonArrayBuilder array = Json.createArrayBuilder();
             perm.permissions().stream().map(
                 item -> {

@@ -96,6 +96,7 @@ class DockerProxyTest {
     private static DockerProxy dockerProxy(final String yaml) throws IOException {
         return new DockerProxy(
             new JettyClientSlices(),
+            false,
             new RepoConfig(
                 alias -> {
                     throw new UnsupportedOperationException();
