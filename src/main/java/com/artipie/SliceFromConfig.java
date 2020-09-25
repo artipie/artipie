@@ -203,7 +203,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "php":
-                slice = new PhpComposer(cfg.storage());
+                slice = trimIfNotStandalone(settings, standalone, new PhpComposer(cfg.storage()));
                 break;
             case "nuget":
                 slice = trimIfNotStandalone(
@@ -260,12 +260,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "npm-proxy":
-                slice = new NpmProxySlice(
-                    cfg.path(),
-                    new NpmProxy(
-                        new NpmProxyConfig(cfg.settings().orElseThrow()),
-                        Vertx.vertx(),
-                        cfg.storage()
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new NpmProxySlice(
+                        cfg.path(),
+                        new NpmProxy(
+                            new NpmProxyConfig(cfg.settings().orElseThrow()),
+                            Vertx.vertx(),
+                            cfg.storage()
+                        )
                     )
                 );
                 break;
