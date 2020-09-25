@@ -47,7 +47,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -116,7 +115,8 @@ final class AddUpdateUserSliceTest {
             rqmeth,
             String.format("/api/security/users/%s", username)
         );
-        final List<String> groups = new ListOf<>("a-team", "b-team");
+        final String ateam = "a-team";
+        final String bteam = "b-team";
         this.creds("person", Collections.emptyList());
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
@@ -126,7 +126,7 @@ final class AddUpdateUserSliceTest {
                 )
             ).response(
                 rqline.toString(), Headers.EMPTY,
-                this.jsonBody(pswd, username, groups)
+                this.jsonBody(pswd, username, new ListOf<String>(ateam, bteam))
             ),
             new RsHasStatus(RsStatus.OK)
         );
@@ -140,8 +140,8 @@ final class AddUpdateUserSliceTest {
             this.readCreds(username).yamlSequence("groups")
                 .values().stream().map(node -> node.asScalar().value())
                 .collect(Collectors.toList()),
-            new IsEqual<>(
-                Stream.concat(groups.stream(), Stream.of("readers")).collect(Collectors.toList())
+            Matchers.containsInAnyOrder(
+                ateam, bteam, "readers"
             )
         );
     }
