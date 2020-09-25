@@ -34,10 +34,10 @@ import com.artipie.http.rs.RsWithStatus;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
@@ -45,6 +45,7 @@ import javax.json.JsonString;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.cactoos.list.ListOf;
 import org.reactivestreams.Publisher;
 
 /**
@@ -108,15 +109,17 @@ public final class AddUpdateUserSlice implements Slice {
             json -> {
                 final Optional<Pair<Users.User, String>> res;
                 if (json.containsKey(pswd) && json.containsKey(email)) {
-                    List<String> list = new ArrayList<>(1);
+                    Set<String> set = new HashSet<>(1);
                     if (json.containsKey(groups)) {
-                        list = json.getJsonArray(groups).getValuesAs(JsonString.class)
-                            .stream().map(JsonString::getString).collect(Collectors.toList());
+                        set = json.getJsonArray(groups).getValuesAs(JsonString.class)
+                            .stream().map(JsonString::getString).collect(Collectors.toSet());
                     }
-                    list.add("readers");
+                    set.add("readers");
                     res = Optional.of(
                         new ImmutablePair<>(
-                            new Users.User(name, Optional.of(json.getString(email)), list),
+                            new Users.User(
+                                name, Optional.of(json.getString(email)), new ListOf<>(set)
+                            ),
                             json.getString(pswd)
                         )
                     );

@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -89,7 +90,7 @@ class AddUpdatePermissionSliceTest {
                 new RsHasStatus(RsStatus.OK),
                 new RequestLine(RqMethod.PUT, String.format("/api/security/permissions/%s", repo)),
                 Headers.EMPTY,
-                new Content.From(this.json().getBytes(StandardCharsets.UTF_8))
+                new Content.From(this.json(false).getBytes(StandardCharsets.UTF_8))
             )
         );
         MatcherAssert.assertThat(
@@ -116,6 +117,11 @@ class AddUpdatePermissionSliceTest {
             "Sets readers group",
             this.permissionsFor(repo, "/readers"),
             Matchers.contains("read")
+        );
+        MatcherAssert.assertThat(
+            "Sets dev-leads group",
+            this.permissionsFor(repo, "/dev-leads"),
+            Matchers.contains("read", "write")
         );
     }
 
@@ -146,6 +152,30 @@ class AddUpdatePermissionSliceTest {
         );
     }
 
+    @Test
+    void doesNotAddReadersGroupTwice() {
+        final String repo = "maven";
+        final RepoPerms perm = new RepoPerms();
+        perm.saveSettings(this.storage, repo);
+        MatcherAssert.assertThat(
+            "Returns 200 OK",
+            new AddUpdatePermissionSlice(new Settings.Fake(this.storage)),
+            new SliceHasResponse(
+                new RsHasStatus(RsStatus.OK),
+                new RequestLine(RqMethod.PUT, String.format("/api/security/permissions/%s", repo)),
+                Headers.EMPTY,
+                new Content.From(this.json(true).getBytes(StandardCharsets.UTF_8))
+            )
+        );
+        final String yaml = new PublisherAs(
+            this.storage.value(new Key.From(String.format("%s.yaml", repo))).join()
+        ).asciiString().toCompletableFuture().join();
+        MatcherAssert.assertThat(
+            yaml.indexOf("/readers"),
+            new IsEqual<>(yaml.lastIndexOf("/readers"))
+        );
+    }
+
     private List<String> permissionsFor(final String repo, final String user)
         throws IOException {
         return this.repo(repo).yamlMapping("permissions").yamlSequence(user)
@@ -168,7 +198,7 @@ class AddUpdatePermissionSliceTest {
         ).readYamlMapping().yamlMapping("repo");
     }
 
-    private String json() {
+    private String json(final boolean readers) {
         return String.join(
             "\n",
             "{",
@@ -184,8 +214,9 @@ class AddUpdatePermissionSliceTest {
             "            \"john\" : [\"admin\"]",
             "          },",
             "          \"groups\" : {",
-            "            \"dev-leads\" : [\"manage\",\"read\",\"annotate\"],",
-            "            \"readers\" : [\"read\"]",
+            // @checkstyle AvoidInlineConditionalsCheck (1 line)
+            readers ? "            \"readers\" : [\"read\"]," : "",
+            "            \"dev-leads\" : [\"r\",\"write\"]",
             "          }",
             "    }",
             "  },",
