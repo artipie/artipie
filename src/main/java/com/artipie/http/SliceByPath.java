@@ -92,6 +92,13 @@ final class SliceByPath implements Slice {
             }
             return new ContinueSlice(this.repositories.slice(key)).response(line, headers, body);
         } catch (final IOException err) {
+            if (err.getMessage().contains("Bad credentials")) {
+                return new RsWithBody(
+                    new RsWithStatus(RsStatus.UNAUTHORIZED),
+                    err.getMessage(),
+                    StandardCharsets.UTF_8
+                );
+            }
             return new RsWithBody(
                 new RsWithStatus(RsStatus.INTERNAL_ERROR),
                 "Failed to parse repository config",
