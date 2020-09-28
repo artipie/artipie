@@ -166,12 +166,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "npm":
-                slice = new NpmSlice(
-                    cfg.path(),
-                    new Npm(cfg.storage()),
-                    cfg.storage(),
-                    permissions,
-                    new BasicIdentities(auth)
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new NpmSlice(
+                        cfg.url(),
+                        new Npm(cfg.storage()),
+                        cfg.storage(),
+                        permissions,
+                        new BasicIdentities(auth)
+                    )
                 );
                 break;
             case "gem":
@@ -201,7 +204,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "php":
-                slice = new PhpComposer(cfg.path(), cfg.storage());
+                slice = trimIfNotStandalone(settings, standalone, new PhpComposer(cfg.storage()));
                 break;
             case "nuget":
                 slice = trimIfNotStandalone(
@@ -258,12 +261,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "npm-proxy":
-                slice = new NpmProxySlice(
-                    cfg.path(),
-                    new NpmProxy(
-                        new NpmProxyConfig(cfg.settings().orElseThrow()),
-                        Vertx.vertx(),
-                        cfg.storage()
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new NpmProxySlice(
+                        cfg.path(),
+                        new NpmProxy(
+                            new NpmProxyConfig(cfg.settings().orElseThrow()),
+                            Vertx.vertx(),
+                            cfg.storage()
+                        )
                     )
                 );
                 break;
