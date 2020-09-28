@@ -33,13 +33,15 @@ import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.jcabi.log.Logger;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.MatchesPattern;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
@@ -59,12 +61,6 @@ import org.testcontainers.containers.GenericContainer;
 })
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class FilesRepoITCase {
-
-    /**
-     * Url for request.
-     */
-    private static final String URL =
-        "http://host.testcontainers.internal:%d/my-file/file-repo/curl.txt";
 
     /**
      * Temporary directory for all tests.
@@ -97,14 +93,9 @@ final class FilesRepoITCase {
     @ValueSource(booleans = {true, false})
     void curlGetShouldReceiveFile(final boolean anonymous) throws Exception {
         this.init(this.config(anonymous));
-        this.addFilesToStorage(
-            "file-repo", new Key.From("repos", "my-file", "file-repo")
-        );
+        this.addFilesToStorage("file-repo", new Key.From("repos", "my-file", "file-repo"));
         MatcherAssert.assertThat(
-            this.exec(
-                "curl", "-i", "-X", "GET", String.format(FilesRepoITCase.URL, this.port),
-                this.flag(anonymous), this.user(anonymous, ArtipieServer.ALICE)
-            ),
+            this.curl(anonymous, "GET", ArtipieServer.ALICE),
             new MatchesPattern(
                 Pattern.compile(
                     // @checkstyle LineLengthCheck (1 line)
@@ -120,10 +111,7 @@ final class FilesRepoITCase {
         this.init(this.config(anonymous));
         MatcherAssert.assertThat(
             "curl PUT does work properly",
-            this.exec(
-                "curl", "-i", "-X", "PUT", String.format(FilesRepoITCase.URL, this.port),
-                this.flag(anonymous), this.user(anonymous, ArtipieServer.ALICE)
-            ),
+            this.curl(anonymous, "PUT", ArtipieServer.ALICE),
             new StringContains("HTTP/1.1 201 Created")
         );
         MatcherAssert.assertThat(
@@ -140,24 +128,22 @@ final class FilesRepoITCase {
     void curlPutAndGetShouldFailWithUnauthorized(final String req) throws Exception {
         this.init(this.config(false));
         MatcherAssert.assertThat(
-            this.exec(
-                "curl", "-i", "-X", req, String.format(FilesRepoITCase.URL, this.port),
-                "--user", String.format(
-                    "%s:bad%s", ArtipieServer.ALICE.name(), ArtipieServer.ALICE.password()
+            this.curl(
+                false, req, new ArtipieServer.User(
+                    ArtipieServer.ALICE.name(),
+                    String.format("bad%s", ArtipieServer.ALICE.password())
                 )
             ),
             new StringContains("HTTP/1.1 401 Unauthorized")
         );
     }
 
-    @Test
-    void curlPutShouldFailWithForbidden() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"PUT", "GET"})
+    void curlPutAndGetShouldFailWithForbidden(final String req) throws Exception {
         this.init(this.config(false));
         MatcherAssert.assertThat(
-            this.exec(
-                "curl", "-i", "-X", "PUT", String.format(FilesRepoITCase.URL, this.port),
-                this.flag(false), this.user(false, ArtipieServer.BOB)
-            ),
+            this.curl(false, req, ArtipieServer.BOB),
             new StringContains("HTTP/1.1 403 Forbidden")
         );
     }
@@ -168,9 +154,20 @@ final class FilesRepoITCase {
         this.cntn.stop();
     }
 
-    private String exec(final String... command) throws Exception {
-        Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command).getStdout();
+    private String curl(final boolean anonymous, final String action,
+        final ArtipieServer.User usr) throws Exception {
+        final String url = "http://host.testcontainers.internal:%d/my-file/file-repo/curl.txt";
+        final List<String> cmdlst = new ArrayList<>(
+            Arrays.asList(
+                "curl", "-i", "-X", action, String.format(url, this.port)
+            )
+        );
+        cmdlst.add(this.flag(anonymous));
+        cmdlst.add(this.user(anonymous, usr));
+        String[] cmdarr = new String[cmdlst.size()];
+        cmdarr = cmdlst.toArray(cmdarr);
+        Logger.debug(this, "Command:\n%s", String.join(" ", cmdlst));
+        return this.cntn.execInContainer(cmdarr).getStdout();
     }
 
     private void init(final String config) throws Exception {
@@ -184,7 +181,8 @@ final class FilesRepoITCase {
             .withWorkingDirectory("/home/")
             .withFileSystemBind(this.tmp.toString(), "/home");
         this.cntn.start();
-        this.exec("yum", "-y", "install", "curl");
+        Logger.debug(this, "Command:\nyum -y install curl");
+        this.cntn.execInContainer("yum", "-y", "install", "curl");
     }
 
     private String config(final boolean anonymous) {
@@ -227,9 +225,7 @@ final class FilesRepoITCase {
             )
             .add(
                 ArtipieServer.BOB.name(),
-                Yaml.createYamlSequenceBuilder()
-                    .add("download")
-                    .build()
+                Yaml.createYamlSequenceBuilder().build()
             ).build();
     }
 
