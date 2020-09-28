@@ -25,6 +25,7 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.test.TestResource;
+import com.artipie.http.auth.Authentication;
 import java.io.IOException;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
@@ -48,10 +49,10 @@ class RpPermissionsTest {
             this.permissions(),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
-                    new MatcherOf<>(perm -> { return perm.allowed(uname, "delete"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
-                    new MatcherOf<>(perm -> !perm.allowed(uname, "install"))
+                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "delete"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "download"); }),
+                    new MatcherOf<>(perm -> !perm.allowed(new Authentication.User(uname), "install"))
                 )
             )
         );
@@ -64,10 +65,10 @@ class RpPermissionsTest {
             this.permissions(),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
-                    new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
-                    new MatcherOf<>(perm -> !perm.allowed(uname, "install")),
-                    new MatcherOf<>(perm -> !perm.allowed(uname, "update"))
+                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "download"); }),
+                    new MatcherOf<>(perm -> !perm.allowed(new Authentication.User(uname), "install")),
+                    new MatcherOf<>(perm -> !perm.allowed(new Authentication.User(uname), "update"))
                 )
             )
         );
@@ -76,7 +77,7 @@ class RpPermissionsTest {
     @Test
     void anyoneCanDownload() throws Exception {
         MatcherAssert.assertThat(
-            this.permissions().allowed("anyone", "download"),
+            this.permissions().allowed(new Authentication.User("anyone"), "download"),
             new IsEqual<>(true)
         );
     }
@@ -88,10 +89,10 @@ class RpPermissionsTest {
             this.permissions(),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
-                    new MatcherOf<>(perm -> { return perm.allowed(uname, "delete"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(uname, "deploy"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(uname, "download"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(uname, "install"); })
+                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "delete"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "download"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "install"); })
                 )
             )
         );

@@ -26,6 +26,7 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlSequence;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Permissions;
 
 /**
@@ -54,8 +55,8 @@ public final class YamlPermissions implements Permissions {
     }
 
     @Override
-    public boolean allowed(final String name, final String action) {
-        return check(this.yaml.yamlSequence(name), action)
+    public boolean allowed(final Authentication.User user, final String action) {
+        return check(this.yaml.yamlSequence(user.name()), action)
             || check(this.yaml.yamlSequence(YamlPermissions.WILDCARD), action);
     }
 

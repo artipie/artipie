@@ -156,7 +156,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>0.16.1</version>
+      <version>0.16.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
