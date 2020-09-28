@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
@@ -159,16 +158,19 @@ final class FilesRepoITCase {
     }
 
     private String curl(final String action,
-        final Optional<ArtipieServer.User> usr) throws Exception {
+        final Optional<ArtipieServer.User> user) throws Exception {
         final String url = "http://host.testcontainers.internal:%d/my-file/file-repo/curl.txt";
         final List<String> cmdlst = new ArrayList<>(
             Arrays.asList(
                 "curl", "-i", "-X", action, String.format(url, this.port)
             )
         );
-        final Pair<String, String> pair = this.flagAndUser(usr);
-        cmdlst.add(pair.getLeft());
-        cmdlst.add(pair.getRight());
+        user.ifPresent(
+            usr -> {
+                cmdlst.add("--user");
+                cmdlst.add(String.format("%s:%s", usr.name(), usr.password()));
+            }
+        );
         final String[] cmdarr = cmdlst.toArray(new String[0]);
         Logger.debug(this, "Command:\n%s", String.join(" ", cmdlst));
         return this.cntn.execInContainer(cmdarr).getStdout();
@@ -244,20 +246,6 @@ final class FilesRepoITCase {
                 bsto.value(new Key.From(item))
             );
         }
-    }
-
-    private Pair<String, String> flagAndUser(final Optional<ArtipieServer.User> user) {
-        final Pair<String, String> res;
-        if (user.isEmpty()) {
-            res = Pair.of("", "");
-        } else {
-            res = Pair.of(
-                "--user", String.format(
-                    "%s:%s", user.get().name(), user.get().password()
-                )
-            );
-        }
-        return res;
     }
 
     private Optional<ArtipieServer.User> userOpt(final boolean anonymous) {
