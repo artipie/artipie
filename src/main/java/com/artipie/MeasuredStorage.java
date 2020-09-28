@@ -26,13 +26,14 @@ package com.artipie;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.Transaction;
 import com.jcabi.log.Logger;
 import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
+import java.util.logging.Level;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -49,11 +50,26 @@ public final class MeasuredStorage implements Storage {
     private final Storage origin;
 
     /**
+     * Log level.
+     */
+    private final Level level;
+
+    /**
      * Wraps storage with measured decorator.
      * @param storage Origin storage to measure
      */
     public MeasuredStorage(final Storage storage) {
+        this(storage, Level.FINEST);
+    }
+
+    /**
+     * Wraps storage with measured decorator.
+     * @param storage Origin storage to measure
+     * @param level Log level
+     */
+    public MeasuredStorage(final Storage storage, final Level level) {
         this.origin = storage;
+        this.level = level;
     }
 
     @Override
@@ -61,9 +77,7 @@ public final class MeasuredStorage implements Storage {
         final long start = System.nanoTime();
         return this.origin.exists(key).thenApply(
             res -> {
-                Logger.debug(
-                    MeasuredStorage.class, "exists(%s): %s", key.string(), millisMessage(start)
-                );
+                this.log("exists(%s): %s", key.string(), millisMessage(start));
                 return res;
             }
         );
@@ -74,9 +88,7 @@ public final class MeasuredStorage implements Storage {
         final long start = System.nanoTime();
         return this.origin.list(key).thenApply(
             res -> {
-                Logger.debug(
-                    MeasuredStorage.class, "list(%s): %s", key.string(), millisMessage(start)
-                );
+                this.log("list(%s): %s", key.string(), millisMessage(start));
                 return res;
             }
         );
@@ -99,8 +111,7 @@ public final class MeasuredStorage implements Storage {
                         new Subscriber<>() {
                             @Override
                             public void onSubscribe(final Subscription subscription) {
-                                Logger.debug(
-                                    MeasuredStorage.class,
+                                MeasuredStorage.this.log(
                                     "save(%s): onSubscribe(subscription=%s) %s",
                                     key.string(), subscription, millisMessage(start)
                                 );
@@ -108,8 +119,7 @@ public final class MeasuredStorage implements Storage {
                                     new Subscription() {
                                         @Override
                                         public void request(final long num) {
-                                            Logger.debug(
-                                                MeasuredStorage.class,
+                                            MeasuredStorage.this.log(
                                                 "save(%s): request(n=%d) %s",
                                                 key.string(), num, millisMessage(start)
                                             );
@@ -118,8 +128,7 @@ public final class MeasuredStorage implements Storage {
 
                                         @Override
                                         public void cancel() {
-                                            Logger.debug(
-                                                MeasuredStorage.class,
+                                            MeasuredStorage.this.log(
                                                 "save(%s): cancel() %s",
                                                 key.string(), millisMessage(start)
                                             );
@@ -131,8 +140,7 @@ public final class MeasuredStorage implements Storage {
 
                             @Override
                             public void onNext(final ByteBuffer buffer) {
-                                Logger.debug(
-                                    MeasuredStorage.class,
+                                MeasuredStorage.this.log(
                                     "save(%s): next(buffer=%s) %s",
                                     key.string(), buffer, millisMessage(start)
                                 );
@@ -141,8 +149,7 @@ public final class MeasuredStorage implements Storage {
 
                             @Override
                             public void onError(final Throwable err) {
-                                Logger.debug(
-                                    MeasuredStorage.class,
+                                MeasuredStorage.this.log(
                                     "save(%s): onError(subscription=%s) %s",
                                     key.string(), err, millisMessage(start)
                                 );
@@ -151,8 +158,7 @@ public final class MeasuredStorage implements Storage {
 
                             @Override
                             public void onComplete() {
-                                Logger.debug(
-                                    MeasuredStorage.class,
+                                MeasuredStorage.this.log(
                                     "save(%s): onComplete() %s",
                                     key.string(), millisMessage(start)
                                 );
@@ -164,11 +170,7 @@ public final class MeasuredStorage implements Storage {
             }
         ).thenApply(
             res -> {
-                Logger.debug(
-                    MeasuredStorage.class,
-                    "save(%s): %s",
-                    key.string(), millisMessage(start)
-                );
+                this.log("save(%s): %s", key.string(), millisMessage(start));
                 return res;
             }
         );
@@ -179,11 +181,7 @@ public final class MeasuredStorage implements Storage {
         final long start = System.nanoTime();
         return this.origin.move(src, dst).thenApply(
             res -> {
-                Logger.debug(
-                    MeasuredStorage.class,
-                    "move(%s, %s): %s",
-                    src.string(), dst.string(), millisMessage(start)
-                );
+                this.log("move(%s, %s): %s", src.string(), dst.string(), millisMessage(start));
                 return res;
             }
         );
@@ -194,9 +192,7 @@ public final class MeasuredStorage implements Storage {
         final long start = System.nanoTime();
         return this.origin.size(key).thenApply(
             res -> {
-                Logger.debug(
-                    MeasuredStorage.class, "size(%s): %s", key.string(), millisMessage(start)
-                );
+                this.log("size(%s): %s", key.string(), millisMessage(start));
                 return res;
             }
         );
@@ -207,10 +203,7 @@ public final class MeasuredStorage implements Storage {
         final long start = System.nanoTime();
         return this.origin.value(key).thenApply(
             res -> {
-                Logger.debug(
-                    MeasuredStorage.class,
-                    "value(%s): %s", key.string(), millisMessage(start)
-                );
+                this.log("value(%s): %s", key.string(), millisMessage(start));
                 return new Content() {
                     @Override
                     public Optional<Long> size() {
@@ -223,8 +216,7 @@ public final class MeasuredStorage implements Storage {
                             new Subscriber<>() {
                                 @Override
                                 public void onSubscribe(final Subscription subscription) {
-                                    Logger.debug(
-                                        MeasuredStorage.class,
+                                    MeasuredStorage.this.log(
                                         "value(%s): onSubscribe(%s) %s",
                                         key.string(), subscription, millisMessage(start)
                                     );
@@ -233,8 +225,7 @@ public final class MeasuredStorage implements Storage {
 
                                 @Override
                                 public void onNext(final ByteBuffer buffer) {
-                                    Logger.debug(
-                                        MeasuredStorage.class,
+                                    MeasuredStorage.this.log(
                                         "value(%s): onNext(%s) %s",
                                         key.string(), buffer, millisMessage(start)
                                     );
@@ -243,8 +234,7 @@ public final class MeasuredStorage implements Storage {
 
                                 @Override
                                 public void onError(final Throwable err) {
-                                    Logger.debug(
-                                        MeasuredStorage.class,
+                                    MeasuredStorage.this.log(
                                         "value(%s): error(%s) %s",
                                         key.string(), err, millisMessage(start)
                                     );
@@ -253,8 +243,7 @@ public final class MeasuredStorage implements Storage {
 
                                 @Override
                                 public void onComplete() {
-                                    Logger.debug(
-                                        MeasuredStorage.class,
+                                    MeasuredStorage.this.log(
                                         "value(%s): complete() %s",
                                         key.string(), millisMessage(start)
                                     );
@@ -273,18 +262,27 @@ public final class MeasuredStorage implements Storage {
         final long start = System.nanoTime();
         return this.origin.delete(key).thenApply(
             res -> {
-                Logger.debug(
-                    MeasuredStorage.class,
-                    "delete(%s): %s", key.string(), millisMessage(start)
-                );
+                this.log("delete(%s): %s", key.string(), millisMessage(start));
                 return res;
             }
         );
     }
 
     @Override
-    public CompletableFuture<Transaction> transaction(final List<Key> list) {
-        return this.origin.transaction(list);
+    public <T> CompletionStage<T> exclusively(
+        final Key key,
+        final Function<Storage, CompletionStage<T>> function) {
+        return this.origin.exclusively(key, function);
+    }
+
+    /**
+     * Log message.
+     *
+     * @param msg The text message to be logged
+     * @param args List of arguments
+     */
+    private void log(final String msg, final Object... args) {
+        Logger.log(this.level, MeasuredStorage.class, msg, args);
     }
 
     /**
