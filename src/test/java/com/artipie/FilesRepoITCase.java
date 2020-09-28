@@ -36,7 +36,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
@@ -95,7 +97,7 @@ final class FilesRepoITCase {
         this.init(this.config(anonymous));
         this.addFilesToStorage("file-repo", new Key.From("repos", "my-file", "file-repo"));
         MatcherAssert.assertThat(
-            this.curl(anonymous, "GET", ArtipieServer.ALICE),
+            this.curl("GET", this.userOpt(anonymous)),
             new MatchesPattern(
                 Pattern.compile(
                     // @checkstyle LineLengthCheck (1 line)
@@ -111,7 +113,7 @@ final class FilesRepoITCase {
         this.init(this.config(anonymous));
         MatcherAssert.assertThat(
             "curl PUT does work properly",
-            this.curl(anonymous, "PUT", ArtipieServer.ALICE),
+            this.curl("PUT", this.userOpt(anonymous)),
             new StringContains("HTTP/1.1 201 Created")
         );
         MatcherAssert.assertThat(
@@ -129,9 +131,11 @@ final class FilesRepoITCase {
         this.init(this.config(false));
         MatcherAssert.assertThat(
             this.curl(
-                false, req, new ArtipieServer.User(
-                    ArtipieServer.ALICE.name(),
-                    String.format("bad%s", ArtipieServer.ALICE.password())
+                req, Optional.of(
+                    new ArtipieServer.User(
+                        ArtipieServer.ALICE.name(),
+                        String.format("bad%s", ArtipieServer.ALICE.password())
+                    )
                 )
             ),
             new StringContains("HTTP/1.1 401 Unauthorized")
@@ -143,7 +147,7 @@ final class FilesRepoITCase {
     void curlPutAndGetShouldFailWithForbidden(final String req) throws Exception {
         this.init(this.config(false));
         MatcherAssert.assertThat(
-            this.curl(false, req, ArtipieServer.BOB),
+            this.curl(req, Optional.of(ArtipieServer.BOB)),
             new StringContains("HTTP/1.1 403 Forbidden")
         );
     }
@@ -154,18 +158,18 @@ final class FilesRepoITCase {
         this.cntn.stop();
     }
 
-    private String curl(final boolean anonymous, final String action,
-        final ArtipieServer.User usr) throws Exception {
+    private String curl(final String action,
+        final Optional<ArtipieServer.User> usr) throws Exception {
         final String url = "http://host.testcontainers.internal:%d/my-file/file-repo/curl.txt";
         final List<String> cmdlst = new ArrayList<>(
             Arrays.asList(
                 "curl", "-i", "-X", action, String.format(url, this.port)
             )
         );
-        cmdlst.add(this.flag(anonymous));
-        cmdlst.add(this.user(anonymous, usr));
-        String[] cmdarr = new String[cmdlst.size()];
-        cmdarr = cmdlst.toArray(cmdarr);
+        final Pair<String, String> pair = this.flagAndUser(usr);
+        cmdlst.add(pair.getLeft());
+        cmdlst.add(pair.getRight());
+        final String[] cmdarr = cmdlst.toArray(new String[0]);
         Logger.debug(this, "Command:\n%s", String.join(" ", cmdlst));
         return this.cntn.execInContainer(cmdarr).getStdout();
     }
@@ -242,23 +246,27 @@ final class FilesRepoITCase {
         }
     }
 
-    private String user(final boolean anonymous, final ArtipieServer.User user) {
-        final String res;
-        if (anonymous) {
-            res = "";
+    private Pair<String, String> flagAndUser(final Optional<ArtipieServer.User> user) {
+        final Pair<String, String> res;
+        if (user.isEmpty()) {
+            res = Pair.of("", "");
         } else {
-            res = String.format("%s:%s", user.name(), user.password());
+            res = Pair.of(
+                "--user", String.format(
+                    "%s:%s", user.get().name(), user.get().password()
+                )
+            );
         }
         return res;
     }
 
-    private String flag(final boolean anonymous) {
-        final String res;
+    private Optional<ArtipieServer.User> userOpt(final boolean anonymous) {
+        final Optional<ArtipieServer.User> user;
         if (anonymous) {
-            res = "";
+            user = Optional.empty();
         } else {
-            res = "--user";
+            user = Optional.of(ArtipieServer.ALICE);
         }
-        return res;
+        return user;
     }
 }
