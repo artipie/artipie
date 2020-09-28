@@ -62,6 +62,7 @@ name | string | User name | Y
 email | string | User email | Y
 lastLoggedIn | string | Default `2020-01-01T01:01:01.000+01:00` | Y
 realm | string | User realm, value `Internal` is always returned | Y
+groups | json array | User groups | Y
 
 If user is not found `404 NOT FOUND` status is returned.
 
@@ -77,6 +78,7 @@ Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
 password | string | User password | Y
 email | string | User email | Y
+groups | json array | User groups | N
 
 Possible responses:
 - `200 OK` when user was successfully created or updated
