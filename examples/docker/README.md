@@ -52,6 +52,28 @@ docker pull localhost:8080/my-docker/myfirstimage
 
 #### Advanced options
 
+##### Docker on port
+
+We may also assign a port for the repository 
+to access the image by name without using `my-docker` prefix. 
+To do that we add `host: 8081` parameter to existing `my-docker.yaml`:
+
+```yaml
+repo:
+  host: 8081
+  type: docker
+  storage:
+    type: fs
+    path: /var/artipie/data
+```
+
+Now we may pull image `localhost:8080/my-docker/myfirstimage` 
+we pushed before as `localhost:8081/myfirstimage`:
+
+```bash
+docker pull localhost:8081/myfirstimage
+```
+
 ##### Security
 
 Docker registry has to be protected by HTTPS and should have no prefix in path.
