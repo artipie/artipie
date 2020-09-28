@@ -1,5 +1,5 @@
 repo:
-  path: "/npm_repo/"
+  url: "http://localhost:8080/npm_repo"
   type: npm
   storage:
     type: fs
