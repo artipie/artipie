@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -51,6 +52,7 @@ import org.reactivestreams.Publisher;
  * Artifactory `GET /api/security/permissions/{target}` endpoint, returns json with
  * permissions (= repository) information.
  * @since 0.10
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class GetPermissionSlice implements Slice {
 
@@ -117,15 +119,11 @@ public final class GetPermissionSlice implements Slice {
                 Json.createObjectBuilder()
                     .add(
                         "users",
-                        permissions(
-                            permissions.stream().filter(item -> item.username().charAt(0) != '/')
-                        )
+                        permissionsJson(permissions.stream().filter(new UsersFilter()))
                     )
                     .add(
                         "groups",
-                        permissions(
-                            permissions.stream().filter(item -> item.username().charAt(0) == '/')
-                        )
+                        permissionsJson(permissions.stream().filter(new UsersFilter().negate()))
                     )
             )
             .build();
@@ -137,7 +135,7 @@ public final class GetPermissionSlice implements Slice {
      * @param permissions User permissions.
      * @return Users section JSON.
      */
-    private static JsonObject permissions(
+    private static JsonObject permissionsJson(
         final Stream<RepoPermissions.PermissionItem> permissions
     ) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
@@ -171,5 +169,18 @@ public final class GetPermissionSlice implements Slice {
         final Collection<RepoPermissions.PathPattern> patterns
     ) {
         return patterns.stream().map(RepoPermissions.PathPattern::string).findFirst().orElse("**");
+    }
+
+    /**
+     * Users filter: in repo config permissions for groups starts with `/` char, user names are
+     * written as is.
+     * @since 0.9
+     */
+    private static final class UsersFilter implements Predicate<RepoPermissions.PermissionItem> {
+
+        @Override
+        public boolean test(final RepoPermissions.PermissionItem item) {
+            return item.username().charAt(0) != '/';
+        }
     }
 }
