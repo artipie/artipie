@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -111,7 +112,22 @@ public final class GetPermissionSlice implements Slice {
         return Json.createObjectBuilder()
             .add("includesPattern", includesPattern(patterns))
             .add("repositories", Json.createArrayBuilder().add(repo).build())
-            .add("principals", Json.createObjectBuilder().add("users", users(permissions)))
+            .add(
+                "principals",
+                Json.createObjectBuilder()
+                    .add(
+                        "users",
+                        permissions(
+                            permissions.stream().filter(item -> item.username().charAt(0) != '/')
+                        )
+                    )
+                    .add(
+                        "groups",
+                        permissions(
+                            permissions.stream().filter(item -> item.username().charAt(0) == '/')
+                        )
+                    )
+            )
             .build();
     }
 
@@ -121,25 +137,27 @@ public final class GetPermissionSlice implements Slice {
      * @param permissions User permissions.
      * @return Users section JSON.
      */
-    private static JsonObject users(
-        final Collection<RepoPermissions.PermissionItem> permissions
+    private static JsonObject permissions(
+        final Stream<RepoPermissions.PermissionItem> permissions
     ) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
-        for (final RepoPermissions.PermissionItem perm : permissions) {
-            final JsonArrayBuilder array = Json.createArrayBuilder();
-            perm.permissions().stream().map(
-                item -> {
-                    final String mapped;
-                    if (item.equals("*")) {
-                        mapped = "m";
-                    } else {
-                        mapped = item.substring(0, 1);
+        permissions.forEach(
+            perm -> {
+                final JsonArrayBuilder array = Json.createArrayBuilder();
+                perm.permissions().stream().map(
+                    item -> {
+                        final String mapped;
+                        if (item.equals("*")) {
+                            mapped = "m";
+                        } else {
+                            mapped = item.substring(0, 1);
+                        }
+                        return mapped;
                     }
-                    return mapped;
-                }
-            ).forEach(array::add);
-            builder.add(perm.username(), array.build());
-        }
+                ).forEach(array::add);
+                builder.add(perm.username().replaceAll("^/", ""), array.build());
+            }
+        );
         return builder.build();
     }
 
