@@ -24,6 +24,7 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.auth.Authentication;
 import java.io.IOException;
@@ -32,15 +33,18 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.llorllale.cactoos.matchers.MatcherOf;
 
 /**
  * Test for {@link YamlPermissions}.
  * @since 0.2
  * @checkstyle LeftCurlyCheck (500 lines)
+ * @checkstyle ParameterNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class RpPermissionsTest {
+class YamlPermissionsTest {
 
     @Test
     void johnCanDownloadDeployAndDelete() throws Exception {
@@ -49,6 +53,7 @@ class RpPermissionsTest {
             this.permissions(),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
+                    // @checkstyle LineLengthCheck (4 lines)
                     new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "delete"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "deploy"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "download"); }),
@@ -65,6 +70,7 @@ class RpPermissionsTest {
             this.permissions(),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
+                    // @checkstyle LineLengthCheck (4 lines)
                     new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "deploy"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "download"); }),
                     new MatcherOf<>(perm -> !perm.allowed(new Authentication.User(uname), "install")),
@@ -89,12 +95,32 @@ class RpPermissionsTest {
             this.permissions(),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
+                    // @checkstyle LineLengthCheck (4 lines)
                     new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "delete"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "deploy"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "download"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "install"); })
                 )
             )
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "mark,read,readers,true",
+        "olga,write,group-a;group-b,true",
+        "john,read,abc;def,false",
+        "jane,manage,readers;leaders,false",
+        "ann,read,'',false"
+        }, nullValues = "''"
+    )
+    void checksGroups(final String name, final String action,
+        final String groups, final boolean res) {
+        MatcherAssert.assertThat(
+            new YamlPermissions(this.yamlPermissions(name)).allowed(
+                new Authentication.User(name, new ListOf<String>(groups.split(";"))), action
+            ),
+            new IsEqual<>(res)
         );
     }
 
@@ -111,4 +137,17 @@ class RpPermissionsTest {
                 .yamlMapping("permissions")
         );
     }
+
+    /**
+     * Permissions yaml mapping.
+     * @param name User name
+     * @return Permissions yaml
+     */
+    private YamlMapping yamlPermissions(final String name) {
+        return Yaml.createYamlMappingBuilder()
+            .add(name, Yaml.createYamlSequenceBuilder().add("write").build())
+            .add("/readers", Yaml.createYamlSequenceBuilder().add("read").build())
+            .build();
+    }
+
 }

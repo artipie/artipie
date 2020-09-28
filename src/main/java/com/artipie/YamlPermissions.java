@@ -28,6 +28,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Permissions;
+import java.util.Collection;
 
 /**
  * Repository permissions: this implementation is based on
@@ -57,7 +58,20 @@ public final class YamlPermissions implements Permissions {
     @Override
     public boolean allowed(final Authentication.User user, final String action) {
         return check(this.yaml.yamlSequence(user.name()), action)
-            || check(this.yaml.yamlSequence(YamlPermissions.WILDCARD), action);
+            || check(this.yaml.yamlSequence(YamlPermissions.WILDCARD), action)
+            || this.checkGroups(user.groups(), action);
+    }
+
+    /**
+     * Checks whether action is allowed for any group user has.
+     * @param groups User groups
+     * @param action Action
+     * @return True if action is allowed for group
+     */
+    private boolean checkGroups(final Collection<String> groups, final String action) {
+        return groups.stream()
+            .map(group -> this.yaml.yamlSequence(String.format("/%s", group)))
+            .anyMatch(seq -> YamlPermissions.check(seq, action));
     }
 
     /**
