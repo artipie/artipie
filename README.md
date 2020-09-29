@@ -92,14 +92,18 @@ If the `type` is set to `file`, another YAML file is required in the storage, wi
 a list of users who will be allowed to create repos
 (each `pass` is combination or either `plain` or `sha256` and a text):
 
-
 ```yaml
 credentials:
   jane:
     pass: "plain:qwerty"
   john:
     pass: "sha256:xxxxxxxxxxxxxxxxxxxxxxx"
+    groups:
+      - readers
+      - dev-leads
 ```
+Users can be assigned to some groups, all repository permissions granted to the group are applied 
+to the users participating in this group.
 
 If the `type` is set to `env`, the following environment variables are expected:
 `ARTIPIE_USER_NAME` and `ARTIPIE_USER_PASS`. For example, you start
@@ -150,7 +154,7 @@ Artipie provides a set of APIs to manage repositories and users.  The current AP
 
 You may want configure it via environment variables:
 
-  - `SSL_TRUSTALL` - trust all unkown certificates
+  - `SSL_TRUSTALL` - trust all unknown certificates
 
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.
 
