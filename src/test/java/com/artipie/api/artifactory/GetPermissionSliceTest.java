@@ -48,6 +48,7 @@ import org.junit.jupiter.api.Test;
  * Test for {@link GetPermissionSlice}.
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ParameterNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class GetPermissionSliceTest {
@@ -96,6 +97,7 @@ class GetPermissionSliceTest {
                     this.response(
                         repo,
                         Json.createObjectBuilder().build(),
+                        Json.createObjectBuilder().build(),
                         "**"
                     )
                 ),
@@ -108,11 +110,19 @@ class GetPermissionSliceTest {
     void returnsUsersAndPermissionsList() {
         final String repo = "maven";
         final String john = "john";
+        final String readers = "readers";
+        final String team = "team";
         final String mark = "mark";
         final RepoPerms perm = new RepoPerms(
             List.of(
-                new RepoPermissions.PermissionItem(john, new ListOf<String>("read", "write")),
-                new RepoPermissions.PermissionItem(mark, new ListOf<String>("*"))
+                new RepoPermissions.PermissionItem(john, new ListOf<>("read", "write")),
+                new RepoPermissions.PermissionItem(mark, new ListOf<>("*")),
+                new RepoPermissions.PermissionItem(
+                    String.format("/%s", readers), new ListOf<>("read")
+                ),
+                new RepoPermissions.PermissionItem(
+                    String.format("/%s", team), new ListOf<>("write", "delete")
+                )
             ),
             Collections.singletonList("**/*")
         );
@@ -127,6 +137,10 @@ class GetPermissionSliceTest {
                             .add(john, Json.createArrayBuilder().add("r").add("w").build())
                             .add(mark, Json.createArrayBuilder().add("m").build())
                             .build(),
+                        Json.createObjectBuilder()
+                            .add(readers, Json.createArrayBuilder().add("r").build())
+                            .add(team, Json.createArrayBuilder().add("w").add("d").build())
+                            .build(),
                         "**/*"
                     )
                 ),
@@ -135,13 +149,14 @@ class GetPermissionSliceTest {
         );
     }
 
-    private byte[] response(final String repo, final JsonObject users, final String pattern) {
+    private byte[] response(final String repo, final JsonObject users, final JsonObject groups,
+        final String pattern) {
         return Json.createObjectBuilder()
             .add("includesPattern", pattern)
             .add("repositories", Json.createArrayBuilder().add(repo).build())
             .add(
                 "principals",
-                Json.createObjectBuilder().add("users", users)
+                Json.createObjectBuilder().add("users", users).add("groups", groups)
             ).build().toString().getBytes(StandardCharsets.UTF_8);
     }
 }
