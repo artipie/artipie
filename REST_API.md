@@ -137,6 +137,10 @@ Returns json of the following format:
     "users" : {
       "bob": ["r", "w", "m"],
       "alice" : ["d", "w", "r"]
+    },
+    "groups" : {
+      "readers": ["r"],
+      "a-team" : ["w", "r"]
     }   
   }
 }
@@ -148,7 +152,7 @@ Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
 includesPattern | string | Path patterns to apply permissions to | Y
 repositories | json array | Repository name, always one-element array with the `{permissionTargetName}` item | Y
-principals | json object | Repository permissions details, contains `users` element with user permission details | Y
+principals | json object | Repository permissions details, contains `users` element with user permission details and `groups` element with group permission details | Y
 
 The set of supported permissions along with the shortening convention:
 
@@ -174,13 +178,17 @@ Consumes json of the following form:
        "users" : {
           "bob": ["read", "write", "manage"],
           "alice" : ["write", "read"]
+       },
+      "groups" : {
+          "readers": ["read"],
+          "a-team" : ["write", "read"]
        }
      }
    }
 }
 ```
-where field `users` contains list of the user names and corresponding permissions, all other fields 
-are ignored. 
+where fields `users` and `groups` contain list of the user or group names and corresponding permissions, 
+all other fields are ignored. 
 
 The following synonyms and shortened values for standard operations are supported:
 - `read` - `r` 
