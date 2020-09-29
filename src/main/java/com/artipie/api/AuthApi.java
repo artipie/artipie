@@ -73,16 +73,20 @@ public final class AuthApi implements Identities {
     }
 
     @Override
-    public Optional<String> user(final String line,
+    public Optional<Authentication.User> user(final String line,
         final Iterable<Map.Entry<String, String>> headers) {
         final Matcher matcher = PTN_PATH.matcher(new RequestLineFrom(line).uri().getPath());
-        final Optional<String> res;
+        final Optional<Authentication.User> res;
         if (matcher.matches()) {
             res = Optional.ofNullable(
                 AuthApi.cookies(new RqHeaders(headers, "Cookie")).get("session")
             ).map(AuthApi::session)
-                .orElse(new BasicIdentities(this.auth).user(line, headers))
-                .filter(user -> user.equals(matcher.group("user")));
+                .orElse(
+                    new BasicIdentities(this.auth).user(line, headers)
+                        .map(Authentication.User::name)
+                )
+                .filter(name -> name.equals(matcher.group("user")))
+                .map(Authentication.User::new);
         } else {
             res = Optional.empty();
         }

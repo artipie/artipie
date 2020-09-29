@@ -24,6 +24,7 @@
 
 package com.artipie;
 
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Permissions;
 import com.jcabi.log.Logger;
 import java.util.logging.Level;
@@ -63,12 +64,16 @@ public final class LoggingPermissions implements Permissions {
     }
 
     @Override
-    public boolean allowed(final String name, final String action) {
-        final boolean res = this.origin.allowed(name, action);
+    public boolean allowed(final Authentication.User user, final String action) {
+        final boolean res = this.origin.allowed(user, action);
         if (res) {
-            Logger.log(this.level, this.origin, "Operation '%s' allowed for '%s'", action, name);
+            Logger.log(
+                this.level, this.origin, "Operation '%s' allowed for '%s'", action, user.name()
+            );
         } else {
-            Logger.log(this.level, this.origin, "Operation '%s' denied for '%s'", action, name);
+            Logger.log(
+                this.level, this.origin, "Operation '%s' denied for '%s'", action, user.name()
+            );
         }
         return res;
     }
