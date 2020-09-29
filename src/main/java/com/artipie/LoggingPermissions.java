@@ -67,9 +67,13 @@ public final class LoggingPermissions implements Permissions {
     public boolean allowed(final Authentication.User user, final String action) {
         final boolean res = this.origin.allowed(user, action);
         if (res) {
-            Logger.log(this.level, this.origin, "Operation '%s' allowed for '%s'", action, user);
+            Logger.log(
+                this.level, this.origin, "Operation '%s' allowed for '%s'", action, user.name()
+            );
         } else {
-            Logger.log(this.level, this.origin, "Operation '%s' denied for '%s'", action, user);
+            Logger.log(
+                this.level, this.origin, "Operation '%s' denied for '%s'", action, user.name()
+            );
         }
         return res;
     }

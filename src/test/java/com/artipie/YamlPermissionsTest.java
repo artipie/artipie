@@ -48,16 +48,15 @@ class YamlPermissionsTest {
 
     @Test
     void johnCanDownloadDeployAndDelete() throws Exception {
-        final String uname = "john";
+        final Authentication.User user = new Authentication.User("john");
         MatcherAssert.assertThat(
             this.permissions(),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
-                    // @checkstyle LineLengthCheck (4 lines)
-                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "delete"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "deploy"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "download"); }),
-                    new MatcherOf<>(perm -> !perm.allowed(new Authentication.User(uname), "install"))
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "delete"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "download"); }),
+                    new MatcherOf<>(perm -> !perm.allowed(user, "install"))
                 )
             )
         );
@@ -65,16 +64,15 @@ class YamlPermissionsTest {
 
     @Test
     void janeCanDownloadAndDeploy() throws Exception {
-        final String uname = "jane";
+        final Authentication.User user = new Authentication.User("jane");
         MatcherAssert.assertThat(
             this.permissions(),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
-                    // @checkstyle LineLengthCheck (4 lines)
-                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "deploy"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "download"); }),
-                    new MatcherOf<>(perm -> !perm.allowed(new Authentication.User(uname), "install")),
-                    new MatcherOf<>(perm -> !perm.allowed(new Authentication.User(uname), "update"))
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "download"); }),
+                    new MatcherOf<>(perm -> !perm.allowed(user, "install")),
+                    new MatcherOf<>(perm -> !perm.allowed(user, "update"))
                 )
             )
         );
@@ -90,16 +88,15 @@ class YamlPermissionsTest {
 
     @Test
     void adminCanDoAnything() throws Exception {
-        final String uname = "admin";
+        final Authentication.User user = new Authentication.User("admin");
         MatcherAssert.assertThat(
             this.permissions(),
             new AllOf<YamlPermissions>(
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
-                    // @checkstyle LineLengthCheck (4 lines)
-                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "delete"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "deploy"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "download"); }),
-                    new MatcherOf<>(perm -> { return perm.allowed(new Authentication.User(uname), "install"); })
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "delete"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "download"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "install"); })
                 )
             )
         );
