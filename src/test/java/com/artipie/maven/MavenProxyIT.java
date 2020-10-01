@@ -108,7 +108,6 @@ final class MavenProxyIT {
     @Test
     void shouldGetArtifactFromCentralAndSaveInCache() throws Exception {
         final String artifact = "-Dartifact=args4j:args4j:2.32:jar";
-        this.exec("mvn", "-s", "/home/settings.xml", "dependency:get", artifact);
         MatcherAssert.assertThat(
             "Artifact wasn't downloaded",
             this.exec(
