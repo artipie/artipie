@@ -27,7 +27,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.asto.fs.FileStorage;
 import com.jcabi.log.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -84,7 +84,7 @@ final class MavenProxyIT {
 
     @BeforeEach
     void setUp() throws Exception {
-        this.storage = new InMemoryStorage();
+        this.storage = new FileStorage(this.tmp);
         this.server = new ArtipieServer(this.tmp, "my-maven", this.configsProxy());
         this.port = this.server.start();
         final Path setting = this.tmp.resolve("settings.xml");
