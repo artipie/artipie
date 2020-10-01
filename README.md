@@ -71,6 +71,45 @@ We recommend you read the "Architecture" section in our
 [White Paper](https://github.com/artipie/white-paper) to fully
 understand how Artipie is designed.
 
+## Contents
+
+- [Storage configuration](#storage-configuration)
+- [Repository permissions](#repository-permissions)
+- [Multitenancy](#multitenancy)
+- [Metrics](#metrics)
+- [Artipie REST API](#artipie-rest-api)
+
+## Storage configuration
+
+TBW
+
+## Repository permissions
+
+Permissions for repository operations can be granted in the repo configuration file:
+```yaml
+repo:
+  ...
+  permissions:
+    jane:
+      - read
+      - write
+    admin:
+      - "*"
+    /readers:
+      - read
+```
+
+All repositories support `read` and `write` operations, other specific permissions may be supported 
+in certain repository types.
+
+Group names should start with `/`, is the example above `read` operation is granted for `readers` group 
+and every user within the group can read from the repository, user named `jane` is allowed to `read` and `write`.
+We also support asterisk wildcard for "any operation" or "any user", user `admin` in the example 
+can perform any operation in the repository.
+
+If `permissions` section is absent in repo config, then any supported operation is allowed for everyone,
+empty `permissions` section restricts any operations for anyone.
+
 ## Multitenancy
 
 You may want to run Artipie for your company, which has a few teams.
@@ -115,18 +154,6 @@ docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
   artipie/artipie:latest
 ```
 
-## Metrics
-
-You may enable some basic metrics collecting and periodic publishing to application log
-by adding `metrics` to `meta` section of global configuration file `/etc/artipie.yml`:
-
-```yaml
-meta:
-  metrics:
-    type: log # Metrics type, for now only `log` type is supported
-    interval: 5 # Publishing interval in seconds, default value is 5
-```
-
 ## Single repository on port
 
 Artipie repositories may run on separate ports if configured.
@@ -145,6 +172,18 @@ repo:
 
 *NOTE: Artipie scans repositories for port configuration only on start, 
 so server requires restart in order to apply changes made in runtime.* 
+
+## Metrics
+
+You may enable some basic metrics collecting and periodic publishing to application log
+by adding `metrics` to `meta` section of global configuration file `/etc/artipie.yml`:
+
+```yaml
+meta:
+  metrics:
+    type: log # Metrics type, for now only `log` type is supported
+    interval: 5 # Publishing interval in seconds, default value is 5
+```
 
 ## Artipie REST API
 
