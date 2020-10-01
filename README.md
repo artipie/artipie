@@ -125,7 +125,7 @@ docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
 
 ## Repository permissions
 
-Permissions for repository operations can granted in the repo configuration file:
+Permissions for repository operations can be granted in the repo configuration file:
 ```yaml
 repo:
   ...
@@ -142,7 +142,7 @@ repo:
 All repositories support `read` and `write` operations, files repository also supports `delete` operation.
 
 Group names should start with `/`, is the example above `read` operation is granted for `readers` group 
-and every user within the group can read from the repository, `read` and `write` operations are granted to user named `jane`.
+and every user within the group can read from the repository, `jane` is allowed to `read` and `write`.
 We also support asterisk wildcard for "any operation" or "any user", user `admin` in the example above 
 can perform any operation in the repository.
 
