@@ -27,21 +27,17 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.fs.FileStorage;
+import com.artipie.asto.memory.InMemoryStorage;
 import com.jcabi.log.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -56,8 +52,7 @@ import org.testcontainers.containers.GenericContainer;
  * @since 0.11
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-@EnabledOnOs(OS.LINUX)
-@Disabled
+@EnabledOnOs({OS.LINUX, OS.MAC})
 final class MavenProxyIT {
 
     /**
@@ -66,11 +61,6 @@ final class MavenProxyIT {
      */
     @TempDir
     Path tmp;
-
-    /**
-     * Subdirectory in temporary directory.
-     */
-    private Path subdir;
 
     /**
      * Local Artipie server that stores artifacts.
@@ -94,20 +84,19 @@ final class MavenProxyIT {
 
     @BeforeEach
     void setUp() throws Exception {
-        this.subdir = Files.createDirectory(Path.of(this.tmp.toString(), "subdir"));
-        this.storage = new FileStorage(this.subdir);
-        this.server = new ArtipieServer(this.subdir, "my-maven", this.configsProxy());
+        this.storage = new InMemoryStorage();
+        this.server = new ArtipieServer(this.tmp, "my-maven", this.configsProxy());
         this.port = this.server.start();
-        final Path setting = this.subdir.resolve("settings.xml");
+        final Path setting = this.tmp.resolve("settings.xml");
         setting.toFile().createNewFile();
         Files.write(setting, this.settings());
         this.cntn = new GenericContainer<>("centos:centos8")
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.subdir.toString(), "/home");
+            .withFileSystemBind(this.tmp.toString(), "/home");
         Testcontainers.exposeHostPorts(this.port);
         this.cntn.start();
-        this.cntn.execInContainer("yum", "-y", "install", "maven");
+        this.exec("yum", "-y", "install", "maven");
     }
 
     @AfterEach
@@ -117,7 +106,7 @@ final class MavenProxyIT {
     }
 
     @Test
-    void shouldGetArtifactFromLocalAndSaveInCache() throws Exception {
+    void shouldGetArtifactFromCentralAndSaveInCache() throws Exception {
         final String artifact = "-Dartifact=args4j:args4j:2.32:jar";
         this.exec("mvn", "-s", "/home/settings.xml", "dependency:get", artifact);
         MatcherAssert.assertThat(
@@ -125,16 +114,11 @@ final class MavenProxyIT {
             this.exec(
                 "mvn", "-s", "/home/settings.xml", "dependency:get", artifact
             ).replaceAll("\n", ""),
-            new AllOf<>(
-                Arrays.asList(
-                    new StringContains("BUILD SUCCESS"),
-                    new IsNot<>(new StringContains("Downloaded"))
-                )
-            )
+            new StringContains("BUILD SUCCESS")
         );
         MatcherAssert.assertThat(
             "Artifact wasn't saved in cache",
-            this.storage.exists(new Key.From("args4j/args4j/2.32/args4j-2.32.jar"))
+            this.storage.exists(new Key.From("repos/my-maven/args4j/args4j/2.32/args4j-2.32.jar"))
                 .toCompletableFuture().join(),
             new IsEqual<>(true)
         );
@@ -154,7 +138,7 @@ final class MavenProxyIT {
                     "storage",
                     Yaml.createYamlMappingBuilder()
                         .add("type", "fs")
-                        .add("path", this.subdir.resolve("repos").toString())
+                        .add("path", this.tmp.resolve("repos").toString())
                         .build()
                 )
                 .add(
