@@ -73,11 +73,42 @@ understand how Artipie is designed.
 
 ## Contents
 
-- [Multitenancy](#multitenancy)
-- [Repository permissions](#repository-permissions)
 - [Storage configuration](#storage-configuration)
+- [Repository permissions](#repository-permissions)
+- [Multitenancy](#multitenancy)
 - [Metrics](#metrics)
 - [Artipie REST API](#artipie-rest-api)
+
+## Storage configuration
+
+TBW
+
+## Repository permissions
+
+Permissions for repository operations can be granted in the repo configuration file:
+```yaml
+repo:
+  ...
+  permissions:
+    jane:
+      - read
+      - write
+    admin:
+      - "*"
+    /readers:
+      - read
+```
+
+All repositories support `read` and `write` operations, other specific permissions may be supported 
+in certain repository types.
+
+Group names should start with `/`, is the example above `read` operation is granted for `readers` group 
+and every user within the group can read from the repository, `jane` is allowed to `read` and `write`.
+We also support asterisk wildcard for "any operation" or "any user", user `admin` in the example above 
+can perform any operation in the repository.
+
+If `permissions` section is absent in repo config then any supported operation is allowed for everyone,
+empty `permissions` section restricts any operations for anyone.
 
 ## Multitenancy
 
@@ -122,33 +153,6 @@ docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
   -e ARTIPIE_USER_NAME=artipie -e ARTIPIE_USER_PASS=qwerty \
   artipie/artipie:latest
 ```
-
-## Repository permissions
-
-Permissions for repository operations can be granted in the repo configuration file:
-```yaml
-repo:
-  ...
-  permissions:
-    jane:
-      - read
-      - write
-    admin:
-      - "*"
-    /readers:
-      - read
-```
-
-All repositories support `read` and `write` operations, files repository also supports `delete` operation.
-
-Group names should start with `/`, is the example above `read` operation is granted for `readers` group 
-and every user within the group can read from the repository, `jane` is allowed to `read` and `write`.
-We also support asterisk wildcard for "any operation" or "any user", user `admin` in the example above 
-can perform any operation in the repository.
-
-## Storage configuration
-
-TBW
 
 ## Single repository on port
 
