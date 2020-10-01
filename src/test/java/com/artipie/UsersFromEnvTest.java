@@ -23,31 +23,28 @@
  */
 package com.artipie;
 
-import com.artipie.http.Headers;
-import com.artipie.http.Pie;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
+import com.artipie.auth.AuthFromEnv;
+import java.util.Optional;
+import org.cactoos.map.MapEntry;
+import org.cactoos.map.MapOf;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link Pie}.
- * @since 0.2
+ * Test for {@link Users.FromEnv}.
+ * @since 0.10
  */
-public final class PieTest {
+class UsersFromEnvTest {
 
     @Test
-    public void unexistingRepoReturnNotFound() {
+    void returnsUserFromEnv() {
+        final String user = "john";
         MatcherAssert.assertThat(
-            "Must return 404 HTTP status",
-            new Pie(new Settings.Fake()).response(
-                new RequestLine("GET", "/repo/foo", "HTTP/1.1").toString(),
-                Headers.EMPTY,
-                Flowable.empty()
-            ),
-            new RsHasStatus(RsStatus.NOT_FOUND)
+            new Users.FromEnv(new MapOf<>(new MapEntry<>(AuthFromEnv.ENV_NAME, user)))
+                .list().toCompletableFuture().join(),
+            Matchers.containsInAnyOrder(new Users.User(user, Optional.empty()))
         );
     }
+
 }

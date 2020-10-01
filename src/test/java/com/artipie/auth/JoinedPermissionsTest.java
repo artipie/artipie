@@ -23,6 +23,7 @@
  */
 package com.artipie.auth;
 
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Permissions;
 import com.google.common.collect.Streams;
 import java.util.stream.Collectors;
@@ -52,7 +53,7 @@ final class JoinedPermissionsTest {
         MatcherAssert.assertThat(
             new JoinedPermissions(
                 Streams.concat(fake(one), fake(two)).collect(Collectors.toList())
-            ).allowed("some name", "some action"),
+            ).allowed(new Authentication.User("some name"), "some action"),
             new IsEqual<>(allow)
         );
     }

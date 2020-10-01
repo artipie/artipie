@@ -24,8 +24,8 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.Credentials;
 import com.artipie.Settings;
+import com.artipie.Users;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -80,7 +80,7 @@ final class DeleteUserSliceTest {
         final Key key = new Key.From("_credentials.yaml");
         this.creds("john", storage, key);
         MatcherAssert.assertThat(
-            new DeleteUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
+            new DeleteUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(RqMethod.DELETE, "/api/security/users/notfound")
@@ -95,7 +95,7 @@ final class DeleteUserSliceTest {
         this.creds("jane", storage, key);
         MatcherAssert.assertThat(
             "DeleteUserSlice response",
-            new DeleteUserSlice(new Settings.Fake(new Credentials.FromStorageYaml(storage, key))),
+            new DeleteUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),

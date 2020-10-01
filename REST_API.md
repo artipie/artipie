@@ -62,6 +62,7 @@ name | string | User name | Y
 email | string | User email | Y
 lastLoggedIn | string | Default `2020-01-01T01:01:01.000+01:00` | Y
 realm | string | User realm, value `Internal` is always returned | Y
+groups | json array | User groups | Y
 
 If user is not found `404 NOT FOUND` status is returned.
 
@@ -77,6 +78,7 @@ Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
 password | string | User password | Y
 email | string | User email | Y
+groups | json array | User groups | N
 
 Possible responses:
 - `200 OK` when user was successfully created or updated
@@ -129,11 +131,16 @@ Returns json of the following format:
 
 ```json
 {
+  "includesPattern": "**",
   "repositories": ["{permissionTargetName}"],
   "principals": {
     "users" : {
       "bob": ["r", "w", "m"],
       "alice" : ["d", "w", "r"]
+    },
+    "groups" : {
+      "readers": ["r"],
+      "a-team" : ["w", "r"]
     }   
   }
 }
@@ -143,8 +150,9 @@ Fields description:
 
 Field name | Type | Meaning | Required
 ------ | ------ | ------ | ------
+includesPattern | string | Path patterns to apply permissions to | Y
 repositories | json array | Repository name, always one-element array with the `{permissionTargetName}` item | Y
-principals | json object | Repository permissions details, contains `users` element with user permission details | Y
+principals | json object | Repository permissions details, contains `users` element with user permission details and `groups` element with group permission details | Y
 
 The set of supported permissions along with the shortening convention:
 
@@ -165,17 +173,22 @@ Consumes json of the following form:
 ```json
 {
    "repo": {
+     "include-patterns": ["**"],
      "actions": {
        "users" : {
           "bob": ["read", "write", "manage"],
           "alice" : ["write", "read"]
+       },
+      "groups" : {
+          "readers": ["read"],
+          "a-team" : ["write", "read"]
        }
      }
    }
 }
 ```
-where field `users` contains list of the user names and corresponding permissions, all other fields 
-are ignored. 
+where fields `users` and `groups` contain list of the user or group names and corresponding permissions, 
+all other fields are ignored. 
 
 The following synonyms and shortened values for standard operations are supported:
 - `read` - `r` 
@@ -183,9 +196,15 @@ The following synonyms and shortened values for standard operations are supporte
 - `delete` - `d`
 - `manage` (any operation is allowed) - `m`, `admin`
 
+`include-patterns` is an optional argument (value `["**"]` is set by default)
+which allows specifying path patterns to apply permissions to.
+Path patterns are specified by Ant-like expressions.
+
 Possible responses:
 - `200 OK` when permissions were added successfully
 - `500 INTERNAL ERROR` in the case of unexpected server error
+- `400 BAD REQUEST` in the cases when repository name does not exist 
+ or `include-patterns` format is invalid
 
 ### Delete Permission Target 
 

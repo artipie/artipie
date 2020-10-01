@@ -21,23 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.http;
+package com.artipie;
 
-import com.artipie.asto.Key;
-import java.io.IOException;
+import com.artipie.asto.Content;
+import com.artipie.http.AllRepositoriesSlice;
+import com.artipie.http.Headers;
+import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.rq.RequestLine;
+import com.artipie.http.rq.RqMethod;
+import com.artipie.http.rs.RsStatus;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 
 /**
- * Repositories HTTP endpoints.
- * @since 0.9
+ * Tests for {@link AllRepositoriesSlice}.
+ *
+ * @since 0.11
  */
-public interface Repositories {
+public final class AllRepositoriesSliceTest {
 
-    /**
-     * Find slice by name.
-     * @param prefix Repository name
-     * @param standalone Standalone flag
-     * @return Repository slice
-     * @throws IOException On error
-     */
-    Slice slice(Key prefix, boolean standalone) throws IOException;
+    @Test
+    public void unexistingRepoReturnNotFound() {
+        MatcherAssert.assertThat(
+            "Must return 404 HTTP status",
+            new AllRepositoriesSlice(new Settings.Fake()).response(
+                new RequestLine(RqMethod.GET, "/repo/foo").toString(),
+                Headers.EMPTY,
+                Content.EMPTY
+            ),
+            new RsHasStatus(RsStatus.NOT_FOUND)
+        );
+    }
 }

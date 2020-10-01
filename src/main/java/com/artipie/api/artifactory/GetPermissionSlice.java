@@ -39,8 +39,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -51,6 +52,7 @@ import org.reactivestreams.Publisher;
  * Artifactory `GET /api/security/permissions/{target}` endpoint, returns json with
  * permissions (= repository) information.
  * @since 0.10
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class GetPermissionSlice implements Slice {
 
@@ -106,13 +108,24 @@ public final class GetPermissionSlice implements Slice {
      */
     private static JsonObject response(
         final Collection<RepoPermissions.PathPattern> patterns,
-        final Collection<RepoPermissions.UserPermission> permissions,
+        final Collection<RepoPermissions.PermissionItem> permissions,
         final String repo
     ) {
         return Json.createObjectBuilder()
-            .add("include-patterns", includePatterns(patterns))
+            .add("includesPattern", includesPattern(patterns))
             .add("repositories", Json.createArrayBuilder().add(repo).build())
-            .add("principals", Json.createObjectBuilder().add("users", users(permissions)))
+            .add(
+                "principals",
+                Json.createObjectBuilder()
+                    .add(
+                        "users",
+                        permissionsJson(permissions.stream().filter(new UsersFilter()))
+                    )
+                    .add(
+                        "groups",
+                        permissionsJson(permissions.stream().filter(new UsersFilter().negate()))
+                    )
+            )
             .build();
     }
 
@@ -122,41 +135,52 @@ public final class GetPermissionSlice implements Slice {
      * @param permissions User permissions.
      * @return Users section JSON.
      */
-    private static JsonObject users(
-        final Collection<RepoPermissions.UserPermission> permissions
+    private static JsonObject permissionsJson(
+        final Stream<RepoPermissions.PermissionItem> permissions
     ) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
-        for (final RepoPermissions.UserPermission perm : permissions) {
-            final JsonArrayBuilder array = Json.createArrayBuilder();
-            perm.permissions().stream().map(
-                item -> {
-                    final String mapped;
-                    if (item.equals("*")) {
-                        mapped = "m";
-                    } else {
-                        mapped = item.substring(0, 1);
+        permissions.forEach(
+            perm -> {
+                final JsonArrayBuilder array = Json.createArrayBuilder();
+                perm.permissions().stream().map(
+                    item -> {
+                        final String mapped;
+                        if (item.equals("*")) {
+                            mapped = "m";
+                        } else {
+                            mapped = item.substring(0, 1);
+                        }
+                        return mapped;
                     }
-                    return mapped;
-                }
-            ).forEach(array::add);
-            builder.add(perm.username(), array.build());
-        }
+                ).forEach(array::add);
+                builder.add(perm.username().replaceAll("^/", ""), array.build());
+            }
+        );
         return builder.build();
     }
 
     /**
-     * Create patterns JSON array.
+     * Create `includesPattern` JSON value.
      *
      * @param patterns Patterns.
-     * @return JSON array with all patterns.
+     * @return JSON value for `includesPattern` field.
      */
-    private static JsonArray includePatterns(
+    private static String includesPattern(
         final Collection<RepoPermissions.PathPattern> patterns
     ) {
-        final JsonArrayBuilder builder = Json.createArrayBuilder();
-        for (final RepoPermissions.PathPattern pattern : patterns) {
-            builder.add(pattern.string());
+        return patterns.stream().map(RepoPermissions.PathPattern::string).findFirst().orElse("**");
+    }
+
+    /**
+     * Users filter: in repo config permissions for groups starts with `/` char, user names are
+     * written as is.
+     * @since 0.9
+     */
+    private static final class UsersFilter implements Predicate<RepoPermissions.PermissionItem> {
+
+        @Override
+        public boolean test(final RepoPermissions.PermissionItem item) {
+            return item.username().charAt(0) != '/';
         }
-        return builder.build();
     }
 }

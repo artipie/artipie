@@ -92,14 +92,18 @@ If the `type` is set to `file`, another YAML file is required in the storage, wi
 a list of users who will be allowed to create repos
 (each `pass` is combination or either `plain` or `sha256` and a text):
 
-
 ```yaml
 credentials:
   jane:
     pass: "plain:qwerty"
   john:
     pass: "sha256:xxxxxxxxxxxxxxxxxxxxxxx"
+    groups:
+      - readers
+      - dev-leads
 ```
+Users can be assigned to some groups, all repository permissions granted to the group are applied 
+to the users participating in this group.
 
 If the `type` is set to `env`, the following environment variables are expected:
 `ARTIPIE_USER_NAME` and `ARTIPIE_USER_PASS`. For example, you start
@@ -123,6 +127,25 @@ meta:
     interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
+## Single repository on port
+
+Artipie repositories may run on separate ports if configured.
+This feature may be especially useful for Docker repository,
+as it's API is not well suited to serve multiple repositories on single port.
+
+To run repository on its own port 
+`port` parameter should be specified in repository configuration YAML as follows:
+
+```yaml
+repo:
+  type: <repository type>
+  port: 54321
+  ...
+```
+
+*NOTE: Artipie scans repositories for port configuration only on start, 
+so server requires restart in order to apply changes made in runtime.* 
+
 ## Artipie REST API
 
 Artipie provides a set of APIs to manage repositories and users.  The current APIs are fully documented [here](./REST_API.md).
@@ -131,7 +154,7 @@ Artipie provides a set of APIs to manage repositories and users.  The current AP
 
 You may want configure it via environment variables:
 
-  - `SSL_TRUSTALL` - trust all unkown certificates
+  - `SSL_TRUSTALL` - trust all unknown certificates
 
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.
 

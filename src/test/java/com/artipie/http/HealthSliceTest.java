@@ -27,7 +27,6 @@ import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.Transaction;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
@@ -36,8 +35,9 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -124,7 +124,9 @@ final class HealthSliceTest {
         }
 
         @Override
-        public CompletableFuture<Transaction> transaction(final List<Key> keys) {
+        public <T> CompletionStage<T> exclusively(
+            final Key key,
+            final Function<Storage, CompletionStage<T>> function) {
             throw new UnsupportedOperationException();
         }
     }

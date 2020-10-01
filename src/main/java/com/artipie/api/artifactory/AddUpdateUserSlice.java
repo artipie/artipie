@@ -23,8 +23,8 @@
  */
 package com.artipie.api.artifactory;
 
-import com.artipie.Credentials;
 import com.artipie.Settings;
+import com.artipie.Users;
 import com.artipie.api.ContentAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -34,13 +34,18 @@ import com.artipie.http.rs.RsWithStatus;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.ByteBuffer;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
+import javax.json.JsonString;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.cactoos.list.ListOf;
 import org.reactivestreams.Publisher;
 
 /**
@@ -71,17 +76,15 @@ public final class AddUpdateUserSlice implements Slice {
         final Optional<String> user = new FromRqLine(line, FromRqLine.RqPattern.USER).get();
         return user.<Response>map(
             username -> new AsyncResponse(
-                AddUpdateUserSlice.info(body)
+                AddUpdateUserSlice.info(body, username)
                     .thenCompose(
                         json -> json.map(
                             info -> this.settings.credentials()
                                 .thenCompose(
                                     cred -> cred.add(
-                                        new Credentials.User(
-                                            username, Optional.of(info.getValue())
-                                        ),
-                                        DigestUtils.sha256Hex(info.getKey()),
-                                        Credentials.PasswordFormat.SHA256
+                                        info.getKey(),
+                                        DigestUtils.sha256Hex(info.getValue()),
+                                        Users.PasswordFormat.SHA256
                                     ).thenApply(ok -> new RsWithStatus(RsStatus.OK))
                                 )
                 ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST))))
@@ -93,20 +96,31 @@ public final class AddUpdateUserSlice implements Slice {
      * Extracts password and email from the request body.
      *
      * @param body Request body
+     * @param name Username
      * @return Password and email as completion.
      */
-    private static CompletionStage<Optional<Pair<String, String>>> info(
-        final Publisher<ByteBuffer> body
+    private static CompletionStage<Optional<Pair<Users.User, String>>> info(
+        final Publisher<ByteBuffer> body, final String name
     ) {
         final String email = "email";
         final String pswd = "password";
+        final String groups = "groups";
         return Single.just(body).to(ContentAs.JSON).map(
             json -> {
-                final Optional<Pair<String, String>> res;
+                final Optional<Pair<Users.User, String>> res;
                 if (json.containsKey(pswd) && json.containsKey(email)) {
+                    Set<String> set = new HashSet<>(1);
+                    if (json.containsKey(groups)) {
+                        set = json.getJsonArray(groups).getValuesAs(JsonString.class)
+                            .stream().map(JsonString::getString).collect(Collectors.toSet());
+                    }
+                    set.add("readers");
                     res = Optional.of(
                         new ImmutablePair<>(
-                            json.getString(pswd), json.getString(email)
+                            new Users.User(
+                                name, Optional.of(json.getString(email)), new ListOf<>(set)
+                            ),
+                            json.getString(pswd)
                         )
                     );
                 } else {

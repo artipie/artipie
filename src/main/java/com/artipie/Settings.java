@@ -72,7 +72,7 @@ public interface Settings {
      * Artipie credentials.
      * @return Completion action with credentials
      */
-    CompletionStage<Credentials> credentials();
+    CompletionStage<Users> credentials();
 
     /**
      * Fake {@link Settings} using a file storage.
@@ -89,7 +89,7 @@ public interface Settings {
         /**
          * Credentials.
          */
-        private final Credentials cred;
+        private final Users cred;
 
         /**
          * Yaml `meta` mapping.
@@ -116,7 +116,7 @@ public interface Settings {
         public Fake(final Storage storage) {
             this(
                 storage,
-                new Credentials.FromEnv(),
+                new Users.FromEnv(),
                 Yaml.createYamlMappingBuilder().build()
             );
         }
@@ -139,7 +139,7 @@ public interface Settings {
         public Fake(final Storage storage, final String layout) {
             this(
                 storage,
-                new Credentials.FromEnv(),
+                new Users.FromEnv(),
                 Yaml.createYamlMappingBuilder().build(),
                 layout
             );
@@ -150,7 +150,7 @@ public interface Settings {
          *
          * @param cred Credentials
          */
-        public Fake(final Credentials cred) {
+        public Fake(final Users cred) {
             this(new InMemoryStorage(), cred, Yaml.createYamlMappingBuilder().build());
         }
 
@@ -160,7 +160,7 @@ public interface Settings {
          * @param cred Credentials
          * @param meta Yaml `meta` mapping
          */
-        public Fake(final Credentials cred, final YamlMapping meta) {
+        public Fake(final Users cred, final YamlMapping meta) {
             this(new InMemoryStorage(), cred, meta);
         }
 
@@ -172,7 +172,7 @@ public interface Settings {
          * @param meta Yaml `meta` mapping
          * @checkstyle ParameterNumberCheck (2 lines)
          */
-        public Fake(final Storage storage, final Credentials cred, final YamlMapping meta) {
+        public Fake(final Storage storage, final Users cred, final YamlMapping meta) {
             this(storage, cred, meta, "flat");
         }
 
@@ -187,7 +187,7 @@ public interface Settings {
          */
         public Fake(
             final Storage storage,
-            final Credentials cred,
+            final Users cred,
             final YamlMapping meta,
             final String layout
         ) {
@@ -218,7 +218,7 @@ public interface Settings {
         }
 
         @Override
-        public CompletionStage<Credentials> credentials() {
+        public CompletionStage<Users> credentials() {
             return CompletableFuture.completedFuture(this.cred);
         }
     }

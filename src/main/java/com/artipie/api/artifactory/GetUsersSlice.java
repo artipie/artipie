@@ -70,7 +70,7 @@ public final class GetUsersSlice implements Slice {
             final String base = this.settings.meta().string("base_url").replaceAll("/$", "");
             return new AsyncResponse(
                 this.settings.credentials().thenCompose(
-                    cred -> cred.users().<Response>thenApply(
+                    cred -> cred.list().<Response>thenApply(
                         list -> {
                             final JsonArrayBuilder json = Json.createArrayBuilder();
                             list.forEach(

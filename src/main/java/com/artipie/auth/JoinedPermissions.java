@@ -23,6 +23,7 @@
  */
 package com.artipie.auth;
 
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Permissions;
 import java.util.Arrays;
 import java.util.Collection;
@@ -59,12 +60,12 @@ public final class JoinedPermissions implements Permissions {
     }
 
     @Override
-    public boolean allowed(final String name, final String action) {
+    public boolean allowed(final Authentication.User user, final String action) {
         final boolean result;
         if (this.origins.isEmpty()) {
             result = true;
         } else {
-            result = this.origins.stream().anyMatch(origin -> origin.allowed(name, action));
+            result = this.origins.stream().anyMatch(origin -> origin.allowed(user, action));
         }
         return result;
     }

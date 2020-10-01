@@ -58,16 +58,16 @@ public class ArtipieServer {
     public static final User CAROL = new User("carol", "LetMeIn");
 
     /**
+     * Credentials file name.
+     */
+    public static final String CREDENTIALS_FILE = "_credentials.yml";
+
+    /**
      * All users.
      */
     private static final Collection<User> USERS = Arrays.asList(
         ArtipieServer.ALICE, ArtipieServer.BOB, ArtipieServer.CAROL
     );
-
-    /**
-     * Credentials file name.
-     */
-    private static final String CREDENTIALS_FILE = "_credentials.yml";
 
     /**
      * Root path.

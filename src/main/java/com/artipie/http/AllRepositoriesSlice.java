@@ -21,30 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
+package com.artipie.http;
 
-import com.artipie.auth.AuthFromEnv;
-import java.util.Optional;
-import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
+import com.artipie.Settings;
 
 /**
- * Test for {@link Credentials.FromEnv}.
- * @since 0.10
+ * Slice handles repository requests extracting repository name from URI path.
+ *
+ * @since 0.11
  */
-class CredentialsFromEnvTest {
+public final class AllRepositoriesSlice extends Slice.Wrap {
 
-    @Test
-    void returnsUserFromEnv() {
-        final String user = "john";
-        MatcherAssert.assertThat(
-            new Credentials.FromEnv(new MapOf<>(new MapEntry<>(AuthFromEnv.ENV_NAME, user)))
-                .users().toCompletableFuture().join(),
-            Matchers.containsInAnyOrder(new Credentials.User(user, Optional.empty()))
-        );
+    /**
+     * Ctor.
+     *
+     * @param settings Artipie settings.
+     */
+    public AllRepositoriesSlice(final Settings settings) {
+        super(new DockerRoutingSlice(settings, new SliceByPath(settings)));
     }
-
 }

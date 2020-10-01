@@ -35,11 +35,9 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
@@ -50,6 +48,7 @@ import org.junit.jupiter.api.Test;
  * Test for {@link GetPermissionSlice}.
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ParameterNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class GetPermissionSliceTest {
@@ -98,7 +97,8 @@ class GetPermissionSliceTest {
                     this.response(
                         repo,
                         Json.createObjectBuilder().build(),
-                        Collections.emptyList()
+                        Json.createObjectBuilder().build(),
+                        "**"
                     )
                 ),
                 new RequestLine(RqMethod.GET, String.format("/api/security/permissions/%s", repo))
@@ -110,13 +110,21 @@ class GetPermissionSliceTest {
     void returnsUsersAndPermissionsList() {
         final String repo = "maven";
         final String john = "john";
+        final String readers = "readers";
+        final String team = "team";
         final String mark = "mark";
         final RepoPerms perm = new RepoPerms(
             List.of(
-                new RepoPermissions.UserPermission(john, new ListOf<String>("read", "write")),
-                new RepoPermissions.UserPermission(mark, new ListOf<String>("*"))
+                new RepoPermissions.PermissionItem(john, new ListOf<>("read", "write")),
+                new RepoPermissions.PermissionItem(mark, new ListOf<>("*")),
+                new RepoPermissions.PermissionItem(
+                    String.format("/%s", readers), new ListOf<>("read")
+                ),
+                new RepoPermissions.PermissionItem(
+                    String.format("/%s", team), new ListOf<>("write", "delete")
+                )
             ),
-            Collections.singletonList("**")
+            Collections.singletonList("**/*")
         );
         perm.saveSettings(this.storage, repo);
         MatcherAssert.assertThat(
@@ -129,7 +137,11 @@ class GetPermissionSliceTest {
                             .add(john, Json.createArrayBuilder().add("r").add("w").build())
                             .add(mark, Json.createArrayBuilder().add("m").build())
                             .build(),
-                        Collections.singletonList("**")
+                        Json.createObjectBuilder()
+                            .add(readers, Json.createArrayBuilder().add("r").build())
+                            .add(team, Json.createArrayBuilder().add("w").add("d").build())
+                            .build(),
+                        "**/*"
                     )
                 ),
                 new RequestLine(RqMethod.GET, String.format("/api/security/permissions/%s", repo))
@@ -137,21 +149,14 @@ class GetPermissionSliceTest {
         );
     }
 
-    private byte[] response(
-        final String repo,
-        final JsonObject users,
-        final Collection<String> patterns
-    ) {
-        final JsonArrayBuilder incpatterns = Json.createArrayBuilder();
-        for (final String pattern : patterns) {
-            incpatterns.add(pattern);
-        }
+    private byte[] response(final String repo, final JsonObject users, final JsonObject groups,
+        final String pattern) {
         return Json.createObjectBuilder()
-            .add("include-patterns", incpatterns)
+            .add("includesPattern", pattern)
             .add("repositories", Json.createArrayBuilder().add(repo).build())
             .add(
                 "principals",
-                Json.createObjectBuilder().add("users", users)
+                Json.createObjectBuilder().add("users", users).add("groups", groups)
             ).build().toString().getBytes(StandardCharsets.UTF_8);
     }
 }
