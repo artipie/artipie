@@ -81,7 +81,45 @@ understand how Artipie is designed.
 
 ## Storage configuration
 
-TBW
+For now, we support two storage types: file system and [S3](https://aws.amazon.com/s3/?nc1=h_ls) storages. 
+To configure file system storage it is enough to set the path where Artipie will store all the items:
+
+```yaml
+storage:
+  type: fs
+  path: /urs/local/aripie/data
+```
+
+S3 storage configuration requires specifying `backet` and `credentials`:
+```yaml
+storage:
+  type: s3
+  bucket: my-bucket
+  region: my-region # optional
+  endpoint: https://my-s3-provider.com # optional
+  credentials:
+    type: basic
+    accessKeyId: xxx
+    secretAccessKey: xxx
+```
+
+Storages can be configured for each repository individually in repo configuration yaml or in 
+the `_storages.yaml` file along with aliases:
+
+```yaml
+storages:
+  default:
+    type: fs
+    path: ./.storage/data 
+```
+
+Then `default` storage alias can be used to configure a repository:
+
+```yaml
+repo:
+  type: maven
+  storage: default
+```
 
 ## Repository permissions
 
