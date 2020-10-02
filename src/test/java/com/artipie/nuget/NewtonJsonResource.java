@@ -28,8 +28,7 @@ import org.cactoos.io.ResourceOf;
 
 /**
  * Newton.Json package resource.
- *
- * @since 0.1
+ * @since 0.12
  */
 final class NewtonJsonResource {
 

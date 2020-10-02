@@ -40,7 +40,7 @@ import org.testcontainers.containers.GenericContainer;
 
 /**
  * Integration tests for Nuget repository.
- * @since 0.11
+ * @since 0.12
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class NugetITCase {
@@ -77,7 +77,7 @@ final class NugetITCase {
             this.tmp.resolve(String.format("repos/%s.yaml", name)),
             this.config().getBytes()
         );
-        this.nugetConfig();
+        this.createNugetConfig();
         this.cntn = new GenericContainer<>("mcr.microsoft.com/dotnet/sdk:5.0")
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
@@ -99,7 +99,7 @@ final class NugetITCase {
         );
     }
 
-    private void nugetConfig() throws Exception {
+    private void createNugetConfig() throws Exception {
         final String url = String.format(
             "http://host.testcontainers.internal:%d/my-nuget", this.port
         );
