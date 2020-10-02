@@ -90,7 +90,7 @@ storage:
   path: /urs/local/aripie/data
 ```
 
-S3 storage configuration requires specifying `backet` and `credentials`:
+S3 storage configuration requires specifying `bucket` and `credentials`:
 ```yaml
 storage:
   type: s3
