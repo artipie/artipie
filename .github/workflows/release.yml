@@ -19,11 +19,14 @@ jobs:
           cache: true
           tags: "latest,${{ env.RELEASE_VERSION }}"
       - name: Publish Image to Artipie Registry
+        # dont fail the whole pipeline in case of this step fail
+        continue-on-error: true
         uses: elgohr/Publish-Docker-Github-Action@2.19
         with:
           name: central.artipie.com/artipie/docker
           username: ${{ secrets.ARTIPIE_USERNAME }}
           password: ${{ secrets.ARTIPIE_PASSWORD }}
+          registry: central.artipie.com
           cache: true
           tags: "latest,${{ env.RELEASE_VERSION }}"
   run-benchmarks:
