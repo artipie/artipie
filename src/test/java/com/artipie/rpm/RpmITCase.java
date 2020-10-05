@@ -29,8 +29,9 @@ import com.artipie.asto.Key;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.rs.RsStatus;
+import com.google.common.io.ByteStreams;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Path;
@@ -68,21 +69,21 @@ public final class RpmITCase {
 
     @BeforeEach
     void init() throws IOException {
-        this.server = new ArtipieServer(this.tmp, "my-rpm", this.configs());
+        this.server = new ArtipieServer(this.tmp, "my-rpm", this.config());
         this.port = this.server.start();
     }
 
     @Test
-    void addsRpm() throws Exception {
+    void addsRpmAndCreatesRepodata() throws Exception {
         final HttpURLConnection con = (HttpURLConnection) new URL(
             String.format("http://localhost:%s/my-rpm/time-1.7-45.el7.x86_64.rpm", this.port)
         ).openConnection();
         con.setRequestMethod("PUT");
         con.setDoOutput(true);
-        try (OutputStream out = con.getOutputStream()) {
-            final byte[] input = new TestResource("rpm/time-1.7-45.el7.x86_64.rpm").asBytes();
-            out.write(input, 0, input.length);
-        }
+        ByteStreams.copy(
+            new ByteArrayInputStream(new TestResource("rpm/time-1.7-45.el7.x86_64.rpm").asBytes()),
+            con.getOutputStream()
+        );
         MatcherAssert.assertThat(
             "Response status is 202",
             con.getResponseCode(),
@@ -101,7 +102,7 @@ public final class RpmITCase {
         this.server.stop();
     }
 
-    private String configs() {
+    private String config() {
         return Yaml.createYamlMappingBuilder().add(
             "repo",
             Yaml.createYamlMappingBuilder()
