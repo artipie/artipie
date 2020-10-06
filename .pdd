@@ -6,6 +6,7 @@
 --exclude src/test/resources/com/artipie/snapshot/1.0-SNAPSHOT/*
 --exclude src/test/resources/com/artipie/helloworld/0.1/*
 --exclude src/test/resources/newtonsoft.json/12.0.3/*
+--exclude src/test/resources/rpm/*
 --exclude .idea/**/*
 --exclude examples/**/*
 --exclude examples/helm/tomcat-0.4.1.tgz
