@@ -52,6 +52,11 @@ import org.testcontainers.containers.GenericContainer;
 final class PypiITCase {
 
     /**
+     * Host.
+     */
+    private static final String HOST = "host.testcontainers.internal";
+
+    /**
      * Temporary directory for all tests.
      * @checkstyle VisibilityModifierCheck (3 lines)
      */
@@ -93,14 +98,16 @@ final class PypiITCase {
 
     @Test
     void pypiInstall() throws Exception {
-        final String url = String.format(
-            "http://host.testcontainers.internal:%d/my-pypi/", this.port
+        new TestResource("pypi-repo/alarmtime-0.1.5.tar.gz")
+            .saveTo(
+                this.storage,
+                new Key.From("repos", "my-pypi", "alarmtime", "alarmtime-0.1.5.tar.gz")
         );
-        this.addPackageToStorage();
         MatcherAssert.assertThat(
             this.exec(
-                "pip", "install", "--verbose", "--index-url",  url, "--no-deps",
-                "--trusted-host", "host.testcontainers.internal", "alarmtime==0.1.5"
+                "pip", "install", "--no-deps", "--trusted-host", PypiITCase.HOST,
+                "--index-url", String.format("http://%s:%d/my-pypi/", PypiITCase.HOST, this.port),
+                "alarmtime==0.1.5"
             ),
             Matchers.containsString("Successfully installed alarmtime-0.1.5")
         );
@@ -131,13 +138,5 @@ final class PypiITCase {
                 )
                 .build()
         ).build().toString();
-    }
-
-    private void addPackageToStorage() {
-        new TestResource("pypi-repo/alarmtime-0.1.5.tar.gz")
-            .saveTo(
-                this.storage,
-                new Key.From("repos", "my-pypi", "alarmtime", "alarmtime-0.1.5.tar.gz")
-        );
     }
 }
