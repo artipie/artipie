@@ -127,6 +127,7 @@ final class PypiITCase {
         this.prepareDirectory("pypi-repo/example-pckg/dist");
         this.exec("python3", "-m", "pip", "install", "--user", "--upgrade", "twine");
         MatcherAssert.assertThat(
+            "Packages should be uploaded",
             this.exec(
                 "python3", "-m", "twine", "upload", "--repository-url", this.url, "-u",
                 "any", "-p", "pass", "pypi-repo/example-pckg/dist/*"
@@ -139,6 +140,7 @@ final class PypiITCase {
             )
         );
         MatcherAssert.assertThat(
+            "Packages should be saved in storage",
             this.inStorage("artipietestpkg-0.0.3-py2-none-any.whl")
                 && this.inStorage("artipietestpkg-0.0.3.tar.gz"),
             new IsEqual<>(true)
