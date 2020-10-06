@@ -23,8 +23,8 @@
  */
 package com.artipie.pypi;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
+import com.artipie.RepoConfigYaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
@@ -32,8 +32,12 @@ import com.artipie.asto.test.TestResource;
 import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.file.Path;
+import org.apache.commons.io.FileUtils;
+import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +49,7 @@ import org.testcontainers.containers.GenericContainer;
 
 /**
  * Integration tests for Pypi repository.
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.12
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -79,16 +84,21 @@ final class PypiITCase {
     private Storage storage;
 
     /**
-     * Artipie server port.
+     * URL 'http://host:port/my-pypi/'.
      */
-    private int port;
+    private String url;
 
     @BeforeEach
     void init() throws IOException, InterruptedException {
         this.storage = new FileStorage(this.tmp);
-        this.server = new ArtipieServer(this.tmp, "my-pypi", this.config());
-        this.port = this.server.start();
-        Testcontainers.exposeHostPorts(this.port);
+        this.server = new ArtipieServer(
+            this.tmp, "my-pypi",
+            new RepoConfigYaml("pypi")
+                .withFileStorage(this.tmp.resolve("repos"))
+        );
+        final int port = this.server.start();
+        this.url = String.format("http://%s:%d/my-pypi/", PypiITCase.HOST, port);
+        Testcontainers.exposeHostPorts(port);
         this.cntn = new GenericContainer<>("python:3")
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
@@ -106,10 +116,32 @@ final class PypiITCase {
         MatcherAssert.assertThat(
             this.exec(
                 "pip", "install", "--no-deps", "--trusted-host", PypiITCase.HOST,
-                "--index-url", String.format("http://%s:%d/my-pypi/", PypiITCase.HOST, this.port),
-                "alarmtime==0.1.5"
+                "--index-url", this.url, "alarmtime==0.1.5"
             ),
             Matchers.containsString("Successfully installed alarmtime-0.1.5")
+        );
+    }
+
+    @Test
+    void pypiPublish() throws Exception {
+        this.prepareDirectory("pypi-repo/example-pckg/dist");
+        this.exec("python3", "-m", "pip", "install", "--user", "--upgrade", "twine");
+        MatcherAssert.assertThat(
+            this.exec(
+                "python3", "-m", "twine", "upload", "--repository-url", this.url, "-u",
+                "any", "-p", "pass", "pypi-repo/example-pckg/dist/*"
+            ),
+            new StringContainsInOrder(
+                new ListOf<String>(
+                    "Uploading artipietestpkg-0.0.3-py2-none-any.whl", "100%",
+                    "Uploading artipietestpkg-0.0.3.tar.gz", "100%"
+                )
+            )
+        );
+        MatcherAssert.assertThat(
+            this.inStorage("artipietestpkg-0.0.3-py2-none-any.whl")
+                && this.inStorage("artipietestpkg-0.0.3.tar.gz"),
+            new IsEqual<>(true)
         );
     }
 
@@ -124,19 +156,16 @@ final class PypiITCase {
         return this.cntn.execInContainer(command).getStdout();
     }
 
-    private String config() {
-        return Yaml.createYamlMappingBuilder().add(
-            "repo",
-            Yaml.createYamlMappingBuilder()
-                .add("type", "pypi")
-                .add(
-                    "storage",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "fs")
-                        .add("path", this.tmp.resolve("repos").toString())
-                        .build()
-                )
-                .build()
-        ).build().toString();
+    private void prepareDirectory(final String dist) throws IOException {
+        FileUtils.copyDirectory(
+            new TestResource(dist).asPath().toFile(),
+            this.tmp.resolve(dist).toFile()
+        );
+    }
+
+    private boolean inStorage(final String pckg) {
+        return this.storage.exists(
+            new Key.From("repos", "my-pypi", "artipietestpkg", pckg)
+        ).join();
     }
 }
