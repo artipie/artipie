@@ -23,11 +23,10 @@
  */
 package com.artipie.maven;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
+import com.artipie.RepoConfigYaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.jcabi.log.Logger;
@@ -100,7 +99,10 @@ final class MavenITCase {
     void init() throws IOException, InterruptedException {
         this.subdir = Files.createDirectory(Path.of(this.tmp.toString(), "subdir"));
         this.storage = new FileStorage(this.subdir);
-        this.server = new ArtipieServer(this.subdir, "my-maven", this.configs());
+        this.server = new ArtipieServer(
+            this.subdir, "my-maven",
+            new RepoConfigYaml("maven").withFileStorage(this.subdir.resolve("repos"))
+        );
         this.port = this.server.start();
         Testcontainers.exposeHostPorts(this.port);
         final Path setting = this.subdir.resolve("settings.xml");
@@ -117,10 +119,8 @@ final class MavenITCase {
     @ParameterizedTest
     @CsvSource({"helloworld,0.1", "snapshot,1.0-SNAPSHOT"})
     void downloadsArtifact(final String type, final String vers) throws Exception {
-        this.addFilesToStorage(
-            String.format("com/artipie/%s", type),
-            new Key.From("repos", "my-maven", "com", "artipie", type)
-        );
+        new TestResource(String.format("com/artipie/%s", type))
+            .addFilesTo(this.storage, new Key.From("repos", "my-maven", "com", "artipie", type));
         MatcherAssert.assertThat(
             this.exec(
                 "mvn", "-s", "/home/settings.xml", "dependency:get",
@@ -246,33 +246,4 @@ final class MavenITCase {
         );
     }
 
-    private String configs() {
-        return Yaml.createYamlMappingBuilder().add(
-            "repo",
-            Yaml.createYamlMappingBuilder()
-                .add("type", "maven")
-                .add(
-                    "storage",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "fs")
-                        .add("path", this.subdir.resolve("repos").toString())
-                        .build()
-                )
-                .build()
-        ).build().toString();
-    }
-
-    private void addFilesToStorage(final String resource, final Key key)
-        throws InterruptedException {
-        final Storage resources = new FileStorage(
-            new TestResource(resource).asPath()
-        );
-        final BlockingStorage bsto = new BlockingStorage(resources);
-        for (final Key item : bsto.list(Key.ROOT)) {
-            new BlockingStorage(this.storage).save(
-                new Key.From(key, item),
-                bsto.value(new Key.From(item))
-            );
-        }
-    }
 }
