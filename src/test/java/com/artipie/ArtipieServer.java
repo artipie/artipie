@@ -108,6 +108,17 @@ public class ArtipieServer {
     }
 
     /**
+     * Ctor.
+     *
+     * @param root Root directory.
+     * @param name Repo name.
+     * @param config Repo config.
+     */
+    public ArtipieServer(final Path root, final String name, final RepoConfigYaml config) {
+        this(root, name, config.toString());
+    }
+
+    /**
      * Starts the server.
      *
      * @return Port the servers listening on.

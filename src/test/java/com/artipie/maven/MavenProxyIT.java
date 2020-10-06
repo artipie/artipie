@@ -23,8 +23,8 @@
  */
 package com.artipie.maven;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
+import com.artipie.RepoConfigYaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
@@ -85,7 +85,12 @@ final class MavenProxyIT {
     @BeforeEach
     void setUp() throws Exception {
         this.storage = new FileStorage(this.tmp);
-        this.server = new ArtipieServer(this.tmp, "my-maven", this.configsProxy());
+        this.server = new ArtipieServer(
+            this.tmp, "my-maven",
+            new RepoConfigYaml("maven-proxy")
+                .withFileStorage(this.tmp.resolve("repos"))
+                .withRemoteUri("https://repo.maven.apache.org/maven2")
+        );
         this.port = this.server.start();
         final Path setting = this.tmp.resolve("settings.xml");
         setting.toFile().createNewFile();
@@ -126,27 +131,6 @@ final class MavenProxyIT {
     private String exec(final String... command) throws Exception {
         Logger.debug(this, "Command:\n%s", String.join(" ", command));
         return this.cntn.execInContainer(command).getStdout();
-    }
-
-    private String configsProxy() {
-        return Yaml.createYamlMappingBuilder().add(
-            "repo",
-            Yaml.createYamlMappingBuilder()
-                .add("type", "maven-proxy")
-                .add(
-                    "storage",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "fs")
-                        .add("path", this.tmp.resolve("repos").toString())
-                        .build()
-                )
-                .add(
-                    "settings",
-                    Yaml.createYamlMappingBuilder()
-                        .add("remote_uri", "https://repo.maven.apache.org/maven2")
-                        .build()
-                ).build()
-        ).build().toString();
     }
 
     private List<String> settings() {

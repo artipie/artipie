@@ -228,7 +228,7 @@ public final class RepoConfig {
         return new Concatenation(pub).single()
             .map(buf -> new Remaining(buf).bytes())
             .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
-            .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config: %s", yaml))
+            .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config:\n%s", yaml))
             .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
             .to(SingleInterop.get())
             .thenApply(yaml -> new RepoConfig(storages, prefix, yaml));
