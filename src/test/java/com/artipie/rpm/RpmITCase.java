@@ -23,9 +23,10 @@
  */
 package com.artipie.rpm;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
+import com.artipie.RepoConfigYaml;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.rs.RsStatus;
@@ -34,21 +35,35 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.testcontainers.Testcontainers;
+import org.testcontainers.containers.GenericContainer;
 
 /**
  * IT case for RPM repository.
  * @since 0.12
  * @checkstyle MagicNumberCheck (500 lines)
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@EnabledOnOs({OS.LINUX, OS.MAC})
 public final class RpmITCase {
+
+    /**
+     * Repo name.
+     */
+    private static final String REPO = "my-rpm";
 
     /**
      * Temporary directory for all tests.
@@ -67,16 +82,25 @@ public final class RpmITCase {
      */
     private int port;
 
+    /**
+     * Container.
+     */
+    private GenericContainer<?> cntn;
+
     @BeforeEach
     void init() throws IOException {
-        this.server = new ArtipieServer(this.tmp, "my-rpm", this.config());
+        this.server = new ArtipieServer(
+            this.tmp, RpmITCase.REPO, new RepoConfigYaml("rpm").withFileStorage(this.tmp)
+        );
         this.port = this.server.start();
     }
 
     @Test
     void addsRpmAndCreatesRepodata() throws Exception {
         final HttpURLConnection con = (HttpURLConnection) new URL(
-            String.format("http://localhost:%s/my-rpm/time-1.7-45.el7.x86_64.rpm", this.port)
+            String.format(
+                "http://localhost:%s/%s/time-1.7-45.el7.x86_64.rpm", this.port, RpmITCase.REPO
+            )
         ).openConnection();
         con.setRequestMethod("PUT");
         con.setDoOutput(true);
@@ -91,31 +115,80 @@ public final class RpmITCase {
         );
         MatcherAssert.assertThat(
             "Repository xml indexes are created",
-            new FileStorage(this.tmp).list(new Key.From("my-rpm/repodata")).join().size(),
+            new FileStorage(this.tmp).list(new Key.From(RpmITCase.REPO, "repodata")).join().size(),
             new IsEqual<>(4)
         );
         con.disconnect();
     }
 
+    @Test
+    void listYumOperationWorks() throws Exception {
+        this.prepareRpmRepository();
+        this.prepareContainer();
+        MatcherAssert.assertThat(
+            "Lists 'time' package",
+            this.yumExec("list"),
+            new StringContainsInOrder(new ListOf<>("time.x86_64", "1.7-45.el7"))
+        );
+    }
+
+    @Test
+    void installYumOperationWorks() throws Exception {
+        this.prepareRpmRepository();
+        this.prepareContainer();
+        MatcherAssert.assertThat(
+            "Installs 'time' package",
+            this.yumExec("install"),
+            new StringContainsInOrder(new ListOf<>("time-1.7-45.el7.x86_64", "Complete!"))
+        );
+    }
+
     @AfterEach
     void close() {
         this.server.stop();
+        if (this.cntn != null) {
+            this.cntn.stop();
+        }
     }
 
-    private String config() {
-        return Yaml.createYamlMappingBuilder().add(
-            "repo",
-            Yaml.createYamlMappingBuilder()
-                .add("type", "rpm")
-                .add(
-                    "storage",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "fs")
-                        .add("path", this.tmp.toString())
-                        .build()
-                )
-                .build()
-        ).build().toString();
+    private String yumExec(final String action) throws Exception {
+        return this.cntn.execInContainer(
+            "yum", "-y", "repo-pkgs", "example", action
+        ).getStdout();
+    }
+
+    private void prepareContainer() throws IOException, InterruptedException {
+        Testcontainers.exposeHostPorts(this.port);
+        final Path setting = this.tmp.resolve("example.repo");
+        this.tmp.resolve("example.repo").toFile().createNewFile();
+        Files.write(
+            setting,
+            new ListOf<>(
+                "[example]",
+                "name=Example Repository",
+                String.format(
+                    "baseurl=http://host.testcontainers.internal:%d/%s", this.port, RpmITCase.REPO
+                ),
+                "enabled=1",
+                "gpgcheck=0"
+            )
+        );
+        this.cntn = new GenericContainer<>("centos:centos8")
+            .withCommand("tail", "-f", "/dev/null")
+            .withWorkingDirectory("/home/")
+            .withFileSystemBind(this.tmp.toString(), "/home");
+        this.cntn.start();
+        this.cntn.execInContainer("mv", "/home/example.repo", "/etc/yum.repos.d/");
+    }
+
+    private void prepareRpmRepository() {
+        final Storage storage = new FileStorage(this.tmp);
+        new TestResource("rpm/time-1.7-45.el7.x86_64.rpm")
+            .saveTo(storage, new Key.From(RpmITCase.REPO, "time-1.7-45.el7.x86_64.rpm"));
+        new Rpm(
+            storage,
+            new RepoConfig.Simple(Digest.SHA256, new NamingPolicy.HashPrefixed(Digest.SHA1), true)
+        ).batchUpdate(new Key.From(RpmITCase.REPO)).blockingAwait();
     }
 
 }
