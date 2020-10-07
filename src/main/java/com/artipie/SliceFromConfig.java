@@ -25,7 +25,6 @@
 package com.artipie;
 
 import com.artipie.asto.Key;
-import com.artipie.asto.cache.StorageCache;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.docker.DockerProxy;
@@ -47,7 +46,7 @@ import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.group.GroupSlice;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.http.slice.TrimPathSlice;
-import com.artipie.maven.http.MavenProxySlice;
+import com.artipie.maven.MavenProxy;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
@@ -221,15 +220,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "maven-proxy":
                 slice = trimIfNotStandalone(
                     settings, standalone,
-                    new MavenProxySlice(
-                        SliceFromConfig.HTTP,
-                        URI.create(
-                            cfg.settings()
-                                .orElseThrow(() -> new IllegalStateException("Repo settings missed"))
-                                .string("remote_uri")
-                        ),
-                        new StorageCache(cfg.storage())
-                    )
+                    new MavenProxy(SliceFromConfig.HTTP, cfg)
                 );
                 break;
             case "maven-group":
