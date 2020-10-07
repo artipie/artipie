@@ -119,6 +119,29 @@ public final class RepoConfigYaml {
         return this;
     }
 
+    /**
+     * Adds remote uri with authentication to config.
+     * @param uri URI
+     * @param username Username
+     * @param password Password
+     * @return Itself
+     */
+    public RepoConfigYaml withRemoteUri(
+        final String uri,
+        final String username,
+        final String password
+    ) {
+        this.builder = this.builder.add(
+            "settings",
+            Yaml.createYamlMappingBuilder()
+                .add("remote_uri", uri)
+                .add("remote_username", username)
+                .add("remote_password", password)
+                .build()
+        );
+        return this;
+    }
+
     @Override
     public String toString() {
         return Yaml.createYamlMappingBuilder().add("repo", this.builder.build()).build().toString();

@@ -95,6 +95,11 @@ public class ArtipieServer {
     private VertxMain server;
 
     /**
+     * Port server is listening.
+     */
+    private int prt;
+
+    /**
      * Ctor.
      *
      * @param root Root directory.
@@ -167,7 +172,8 @@ public class ArtipieServer {
         );
         this.vertx = Vertx.vertx();
         this.server = new VertxMain(cfg, this.vertx, 0);
-        return this.server.start();
+        this.prt = this.server.start();
+        return this.prt;
     }
 
     /**
@@ -176,6 +182,15 @@ public class ArtipieServer {
     public void stop() {
         Optional.ofNullable(this.server).ifPresent(VertxMain::stop);
         Optional.ofNullable(this.vertx).ifPresent(Vertx::close);
+    }
+
+    /**
+     * Port server is listening.
+     *
+     * @return Server port, 0 if server is not started.
+     */
+    public int port() {
+        return this.prt;
     }
 
     /**
