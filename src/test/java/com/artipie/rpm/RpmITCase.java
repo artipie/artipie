@@ -99,7 +99,7 @@ public final class RpmITCase {
     void addsRpmAndCreatesRepodata() throws Exception {
         final HttpURLConnection con = (HttpURLConnection) new URL(
             String.format(
-                "http://localhost:%s/%s/time-1.7-45.el7.x86_64.rpm", RpmITCase.REPO, this.port
+                "http://localhost:%s/%s/time-1.7-45.el7.x86_64.rpm", this.port, RpmITCase.REPO
             )
         ).openConnection();
         con.setRequestMethod("PUT");
