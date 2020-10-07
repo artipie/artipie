@@ -122,20 +122,20 @@ public final class RpmITCase {
     }
 
     @Test
-    void listAndInstallsRpmPackage() throws Exception {
-        final Storage storage = new FileStorage(this.tmp);
-        new TestResource("rpm/time-1.7-45.el7.x86_64.rpm")
-            .saveTo(storage, new Key.From(RpmITCase.REPO, "time-1.7-45.el7.x86_64.rpm"));
-        new Rpm(
-            storage,
-            new RepoConfig.Simple(Digest.SHA256, new NamingPolicy.HashPrefixed(Digest.SHA1), true)
-        ).batchUpdate(new Key.From(RpmITCase.REPO)).blockingAwait();
+    void listYumOperationWorks() throws Exception {
+        this.prepareRpmRepository();
         this.prepareContainer();
         MatcherAssert.assertThat(
             "Lists 'time' package",
             this.yumExec("list"),
             new StringContainsInOrder(new ListOf<>("time.x86_64", "1.7-45.el7"))
         );
+    }
+
+    @Test
+    void installYumOperationWorks() throws Exception {
+        this.prepareRpmRepository();
+        this.prepareContainer();
         MatcherAssert.assertThat(
             "Installs 'time' package",
             this.yumExec("install"),
@@ -179,6 +179,16 @@ public final class RpmITCase {
             .withFileSystemBind(this.tmp.toString(), "/home");
         this.cntn.start();
         this.cntn.execInContainer("mv", "/home/example.repo", "/etc/yum.repos.d/");
+    }
+
+    private void prepareRpmRepository() {
+        final Storage storage = new FileStorage(this.tmp);
+        new TestResource("rpm/time-1.7-45.el7.x86_64.rpm")
+            .saveTo(storage, new Key.From(RpmITCase.REPO, "time-1.7-45.el7.x86_64.rpm"));
+        new Rpm(
+            storage,
+            new RepoConfig.Simple(Digest.SHA256, new NamingPolicy.HashPrefixed(Digest.SHA1), true)
+        ).batchUpdate(new Key.From(RpmITCase.REPO)).blockingAwait();
     }
 
 }
