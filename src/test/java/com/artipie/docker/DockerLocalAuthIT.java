@@ -23,12 +23,15 @@
  */
 package com.artipie.docker;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
+import com.artipie.RepoConfigYaml;
+import com.artipie.RepoPermissions;
+import com.artipie.RepoPerms;
 import com.artipie.docker.junit.DockerClient;
 import com.artipie.docker.junit.DockerClientSupport;
 import java.nio.file.Path;
 import java.util.Arrays;
+import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
@@ -43,6 +46,7 @@ import org.junit.jupiter.api.io.TempDir;
  * Integration test for auth in local Docker repositories.
  *
  * @since 0.10
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DockerClientSupport
@@ -70,42 +74,22 @@ final class DockerLocalAuthIT {
 
     @BeforeEach
     void setUp(@TempDir final Path root) throws Exception {
-        final String config = Yaml.createYamlMappingBuilder().add(
-            "repo",
-            Yaml.createYamlMappingBuilder()
-                .add("type", "docker")
-                .add(
-                    "storage",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "fs")
-                        .add("path", root.resolve("data").toString())
-                        .build()
+        this.server = new ArtipieServer(
+            root, "my-docker",
+            new RepoConfigYaml("docker").withFileStorage(root.resolve("data"))
+                .withPermissions(
+                    new RepoPerms(
+                        new ListOf<>(
+                            new RepoPermissions.PermissionItem(
+                                ArtipieServer.ALICE.name(), new ListOf<>("read", "write")
+                            ),
+                            new RepoPermissions.PermissionItem(
+                                ArtipieServer.BOB.name(), new ListOf<>("read")
+                            )
+                        )
+                    )
                 )
-                .add(
-                    "permissions",
-                    Yaml.createYamlMappingBuilder()
-                        .add(
-                            ArtipieServer.ALICE.name(),
-                            Yaml.createYamlSequenceBuilder()
-                                .add("read")
-                                .add("write")
-                                .build()
-                        )
-                        .add(
-                            ArtipieServer.BOB.name(),
-                            Yaml.createYamlSequenceBuilder()
-                                .add("read")
-                                .build()
-                        )
-                        .add(
-                            ArtipieServer.CAROL.name(),
-                            Yaml.createYamlSequenceBuilder().build()
-                        )
-                        .build()
-                )
-                .build()
-        ).build().toString();
-        this.server = new ArtipieServer(root, "my-docker", config);
+        );
         final int port = this.server.start();
         this.repository = String.format("localhost:%d", port);
         this.image = this.prepareImage();
