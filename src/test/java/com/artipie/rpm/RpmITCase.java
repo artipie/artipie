@@ -25,6 +25,8 @@ package com.artipie.rpm;
 
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
+import com.artipie.RepoPermissions;
+import com.artipie.RepoPerms;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
@@ -33,7 +35,9 @@ import com.artipie.http.rs.RsStatus;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,11 +46,11 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 
@@ -87,16 +91,25 @@ public final class RpmITCase {
      */
     private GenericContainer<?> cntn;
 
-    @BeforeEach
-    void init() throws IOException {
-        this.server = new ArtipieServer(
-            this.tmp, RpmITCase.REPO, new RepoConfigYaml("rpm").withFileStorage(this.tmp)
-        );
+    void startArtipie(final boolean anonymous) throws IOException {
+        final RepoConfigYaml config = new RepoConfigYaml("rpm").withFileStorage(this.tmp);
+        if (!anonymous) {
+            config.withPermissions(
+                new RepoPerms(
+                    new RepoPermissions.PermissionItem(
+                        ArtipieServer.ALICE.name(), new ListOf<>("*")
+                    )
+                )
+            );
+        }
+        this.server = new ArtipieServer(this.tmp, RpmITCase.REPO, config);
         this.port = this.server.start();
     }
 
-    @Test
-    void addsRpmAndCreatesRepodata() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void addsRpmAndCreatesRepodata(final boolean anonymous) throws Exception {
+        this.startArtipie(anonymous);
         final HttpURLConnection con = (HttpURLConnection) new URL(
             String.format(
                 "http://localhost:%s/%s/time-1.7-45.el7.x86_64.rpm", this.port, RpmITCase.REPO
@@ -104,6 +117,19 @@ public final class RpmITCase {
         ).openConnection();
         con.setRequestMethod("PUT");
         con.setDoOutput(true);
+        if (!anonymous) {
+            con.setAuthenticator(
+                new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(
+                            ArtipieServer.ALICE.name(),
+                            ArtipieServer.ALICE.password().toCharArray()
+                        );
+                    }
+                }
+            );
+        }
         ByteStreams.copy(
             new ByteArrayInputStream(new TestResource("rpm/time-1.7-45.el7.x86_64.rpm").asBytes()),
             con.getOutputStream()
@@ -121,10 +147,12 @@ public final class RpmITCase {
         con.disconnect();
     }
 
-    @Test
-    void listYumOperationWorks() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void listYumOperationWorks(final boolean anonymous) throws Exception {
+        this.startArtipie(anonymous);
         this.prepareRpmRepository();
-        this.prepareContainer();
+        this.prepareContainer(anonymous);
         MatcherAssert.assertThat(
             "Lists 'time' package",
             this.yumExec("list"),
@@ -132,10 +160,12 @@ public final class RpmITCase {
         );
     }
 
-    @Test
-    void installYumOperationWorks() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void installYumOperationWorks(final boolean anonymous) throws Exception {
+        this.startArtipie(anonymous);
         this.prepareRpmRepository();
-        this.prepareContainer();
+        this.prepareContainer(anonymous);
         MatcherAssert.assertThat(
             "Installs 'time' package",
             this.yumExec("install"),
@@ -157,7 +187,8 @@ public final class RpmITCase {
         ).getStdout();
     }
 
-    private void prepareContainer() throws IOException, InterruptedException {
+    private void prepareContainer(final boolean anonymous)
+        throws IOException, InterruptedException {
         Testcontainers.exposeHostPorts(this.port);
         final Path setting = this.tmp.resolve("example.repo");
         this.tmp.resolve("example.repo").toFile().createNewFile();
@@ -167,7 +198,8 @@ public final class RpmITCase {
                 "[example]",
                 "name=Example Repository",
                 String.format(
-                    "baseurl=http://host.testcontainers.internal:%d/%s", this.port, RpmITCase.REPO
+                    "baseurl=http://%shost.testcontainers.internal:%d/%s", this.auth(anonymous),
+                    this.port, RpmITCase.REPO
                 ),
                 "enabled=1",
                 "gpgcheck=0"
@@ -189,6 +221,16 @@ public final class RpmITCase {
             storage,
             new RepoConfig.Simple(Digest.SHA256, new NamingPolicy.HashPrefixed(Digest.SHA1), true)
         ).batchUpdate(new Key.From(RpmITCase.REPO)).blockingAwait();
+    }
+
+    private String auth(final boolean anonymous) {
+        String res = "";
+        if (!anonymous) {
+            res = String.format(
+                "%s:%s@", ArtipieServer.ALICE.name(), ArtipieServer.ALICE.password()
+            );
+        }
+        return res;
     }
 
 }
