@@ -30,9 +30,10 @@ import com.artipie.asto.fs.FileStorage;
 import com.jcabi.log.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
+import java.util.Arrays;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,7 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Integration tests for Nuget repository.
  * @since 0.12
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
@@ -69,16 +71,22 @@ final class NugetITCase {
     private GenericContainer<?> cntn;
 
     /**
-     * Artipie server port.
+     * URL 'http://host:port/my-nuget/'.
      */
-    private int port;
+    private String url;
+
+    /**
+     * Package name in the temporary directory.
+     */
+    private String pckg;
 
     @BeforeEach
     void init() throws Exception {
         final String name = "my-nuget";
         this.server = new ArtipieServer(this.tmp, name, this.config());
-        this.port = this.server.start();
-        Testcontainers.exposeHostPorts(this.port);
+        final int port = this.server.start();
+        this.url = String.format("http://host.testcontainers.internal:%d/my-nuget", port);
+        Testcontainers.exposeHostPorts(port);
         new FileStorage(this.tmp)
             .save(new Key.From(String.format("repos/%s.yaml", name)), this.config().toContent())
             .join();
@@ -106,10 +114,28 @@ final class NugetITCase {
         );
     }
 
-    private void createNugetConfig() throws Exception {
-        final String url = String.format(
-            "http://host.testcontainers.internal:%d/my-nuget", this.port
+    // @checkstyle MagicNumberCheck (2 lines)
+    @Test
+    @Timeout(30)
+    void shouldInstallPushedPackage() throws Exception {
+        this.pushPackage();
+        this.exec("dotnet", "new", "console", "-n", "TestProj");
+        MatcherAssert.assertThat(
+            this.exec(
+                "dotnet", "add", "TestProj", "package", this.pckg,
+                "-s", String.format("%s/index.json", this.url)
+            ),
+            new StringContainsInOrder(
+                Arrays.asList(
+                    // @checkstyle LineLengthCheck (1 line)
+                    "PackageReference for package 'newtonsoft.json' version '12.0.3' added to file '/home/TestProj/TestProj.csproj'",
+                    "Restored /home/TestProj/TestProj.csproj"
+                )
+            )
         );
+    }
+
+    private void createNugetConfig() throws Exception {
         final String source = "artipie-nuget-test";
         Files.write(
             this.tmp.resolve("NuGet.Config"),
@@ -118,7 +144,10 @@ final class NugetITCase {
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n",
                 "<configuration>",
                 "<packageSources>",
-                String.format("<add key=\"%s\" value=\"%s\"/>", source, url),
+                String.format(
+                    "<add key=\"%s\" value=\"%s\"/>",
+                    source, String.format("%s/index.json", this.url)
+                ),
                 "</packageSources>",
                 "</configuration>"
             ).getBytes()
@@ -129,7 +158,7 @@ final class NugetITCase {
         return new RepoConfigYaml("nuget")
             .withFileStorage(this.tmp.resolve("repos"))
             .withUrl(
-                String.format("http://host.testcontainers.internal:%d/my-nuget", this.port)
+                this.url
             );
     }
 
@@ -139,15 +168,14 @@ final class NugetITCase {
     }
 
     private String pushPackage() throws Exception {
-        final String uri = "http://host.testcontainers.internal:%d/my-nuget/index.json";
-        final String pckg = UUID.randomUUID().toString();
+        this.pckg = "newtonsoft.json";
         Files.write(
-            this.tmp.resolve(pckg),
+            this.tmp.resolve(this.pckg),
             new NewtonJsonResource("newtonsoft.json.12.0.3.nupkg").bytes()
         );
         return this.exec(
-            "dotnet", "nuget", "push", pckg, "--api-key", "this.source",
-            "-s", String.format(uri, this.port)
+            "dotnet", "nuget", "push", this.pckg, "--api-key", "this.source",
+            "-s", String.format("%s/index.json", this.url)
         );
     }
 }
