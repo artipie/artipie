@@ -175,7 +175,7 @@ final class NugetITCase {
             new NewtonJsonResource("newtonsoft.json.12.0.3.nupkg").bytes()
         );
         return this.exec(
-            "dotnet", "nuget", "push", this.pckg, "--api-key", "this.source",
+            "dotnet", "nuget", "push", this.pckg,
             "-s", String.format("%s/index.json", this.url)
         );
     }
