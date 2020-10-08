@@ -177,12 +177,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>vertx-server</artifactId>
-      <version>0.3.2</version>
+      <version>0.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http-client</artifactId>
-      <version>0.2</version>
+      <version>0.3.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -207,7 +207,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.6</version>
+      <version>0.7</version>
       <exclusions>
         <exclusion>
           <groupId>com.jcabi</groupId>
