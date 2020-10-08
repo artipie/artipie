@@ -76,12 +76,12 @@ public final class RepoConfigYaml {
     }
 
     /**
-     * Adds port to config.
-     * @param url Port
+     * Adds url to config.
+     * @param url Url
      * @return Itself
      */
     public RepoConfigYaml withUrl(final String url) {
-        this.builder = this.builder.add("url", String.valueOf(url));
+        this.builder = this.builder.add("url", url);
         return this;
     }
 
