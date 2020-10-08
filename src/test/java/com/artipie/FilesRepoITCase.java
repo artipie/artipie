@@ -23,12 +23,8 @@
  */
 package com.artipie;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.jcabi.log.Logger;
@@ -38,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
@@ -94,7 +91,8 @@ final class FilesRepoITCase {
     @ValueSource(booleans = {true, false})
     void curlGetShouldReceiveFile(final boolean anonymous) throws Exception {
         this.init(this.config(anonymous));
-        this.addFilesToStorage("file-repo", new Key.From("repos", "my-file", "file-repo"));
+        new TestResource("file-repo")
+            .addFilesTo(this.storage, new Key.From("repos", "my-file", "file-repo"));
         MatcherAssert.assertThat(
             this.curl("GET", this.userOpt(anonymous)),
             new MatchesPattern(
@@ -176,7 +174,7 @@ final class FilesRepoITCase {
         return this.cntn.execInContainer(cmdarr).getStdout();
     }
 
-    private void init(final String config) throws Exception {
+    private void init(final RepoConfigYaml config) throws Exception {
         this.storage = new FileStorage(this.tmp);
         this.server = new ArtipieServer(this.tmp, "my-file", config);
         this.port = this.server.start();
@@ -191,61 +189,20 @@ final class FilesRepoITCase {
         this.cntn.execInContainer("yum", "-y", "install", "curl");
     }
 
-    private String config(final boolean anonymous) {
-        YamlMappingBuilder yaml = Yaml.createYamlMappingBuilder()
-            .add("type", "file")
-            .add(
-                "storage",
-                Yaml.createYamlMappingBuilder()
-                    .add("type", "fs")
-                    .add("path", this.tmp.resolve("repos").toString())
-                    .build()
-            );
+    private RepoConfigYaml config(final boolean anonymous) {
+        final RepoConfigYaml res = new RepoConfigYaml("file")
+            .withFileStorage(this.tmp.resolve("repos"));
         if (!anonymous) {
-            yaml = yaml.add(
-                "credentials",
-                Yaml.createYamlMappingBuilder()
-                    .add("type", "file")
-                    .add("path", ArtipieServer.CREDENTIALS_FILE)
-                    .build()
-            )
-           .add(
-               "permissions",
-               this.perms()
-           );
-        }
-        return Yaml.createYamlMappingBuilder()
-            .add(
-                "repo", yaml.build()
-            ).build().toString();
-    }
-
-    private YamlMapping perms() {
-        return Yaml.createYamlMappingBuilder()
-            .add(
-                ArtipieServer.ALICE.name(),
-                Yaml.createYamlSequenceBuilder()
-                    .add("write")
-                    .add("download")
-                    .build()
-            )
-            .add(
-                ArtipieServer.BOB.name(),
-                Yaml.createYamlSequenceBuilder().build()
-            ).build();
-    }
-
-    private void addFilesToStorage(final String resource, final Key key) {
-        final Storage resources = new FileStorage(
-            new TestResource(resource).asPath()
-        );
-        final BlockingStorage bsto = new BlockingStorage(resources);
-        for (final Key item : bsto.list(Key.ROOT)) {
-            new BlockingStorage(this.storage).save(
-                new Key.From(key, item),
-                bsto.value(new Key.From(item))
+            res.withPermissions(
+                new RepoPerms(
+                    new RepoPermissions.PermissionItem(
+                        ArtipieServer.ALICE.name(),
+                        new ListOf<String>("write", "download")
+                    )
+                )
             );
         }
+        return res;
     }
 
     private Optional<ArtipieServer.User> userOpt(final boolean anonymous) {

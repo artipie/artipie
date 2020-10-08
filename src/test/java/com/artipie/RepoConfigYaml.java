@@ -73,6 +73,17 @@ public final class RepoConfigYaml {
     }
 
     /**
+     * Adds permissions section to config.
+     * @param perms Permissions
+     * @return Itself
+     */
+    public RepoConfigYaml withPermissions(final RepoPerms perms) {
+        this.builder = this.builder.add("permissions", perms.permsYaml())
+            .add("permissions_include_patterns", perms.patternsYaml());
+        return this;
+    }
+
+    /**
      * Adds remote uri to config.
      * @param uri URI
      * @return Itself
@@ -81,6 +92,29 @@ public final class RepoConfigYaml {
         this.builder = this.builder.add(
             "settings",
             Yaml.createYamlMappingBuilder().add("remote_uri", uri).build()
+        );
+        return this;
+    }
+
+    /**
+     * Adds remote uri with authentication to config.
+     * @param uri URI
+     * @param username Username
+     * @param password Password
+     * @return Itself
+     */
+    public RepoConfigYaml withRemoteUri(
+        final String uri,
+        final String username,
+        final String password
+    ) {
+        this.builder = this.builder.add(
+            "settings",
+            Yaml.createYamlMappingBuilder()
+                .add("remote_uri", uri)
+                .add("remote_username", username)
+                .add("remote_password", password)
+                .build()
         );
         return this;
     }

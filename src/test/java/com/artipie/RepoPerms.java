@@ -124,12 +124,26 @@ public final class RepoPerms {
      *
      * @return YAML sequence of patterns.
      */
-    private YamlSequence patternsYaml() {
+    public YamlSequence patternsYaml() {
         YamlSequenceBuilder builder = Yaml.createYamlSequenceBuilder();
         for (final String pattern : this.patterns) {
             builder = builder.add(pattern);
         }
         return builder.build();
+    }
+
+    /**
+     * YamlMapping with user permissions.
+     * @return YamlMapping with user permissions.
+     */
+    public YamlMapping permsYaml() {
+        YamlMappingBuilder perms = Yaml.createYamlMappingBuilder();
+        if (!this.usersperms.isEmpty()) {
+            for (final RepoPermissions.PermissionItem user : this.usersperms) {
+                perms = perms.add(user.username(), user.yaml().build());
+            }
+        }
+        return perms.build();
     }
 
     /**
@@ -144,19 +158,5 @@ public final class RepoPerms {
             res = res.add(node, mapping.value(node));
         }
         return res;
-    }
-
-    /**
-     * YamlMapping with user permissions.
-     * @return YamlMapping with user permissions.
-     */
-    private YamlMapping permsYaml() {
-        YamlMappingBuilder perms = Yaml.createYamlMappingBuilder();
-        if (!this.usersperms.isEmpty()) {
-            for (final RepoPermissions.PermissionItem user : this.usersperms) {
-                perms = perms.add(user.username(), user.yaml().build());
-            }
-        }
-        return perms.build();
     }
 }
