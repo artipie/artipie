@@ -71,7 +71,7 @@ final class NugetITCase {
     private GenericContainer<?> cntn;
 
     /**
-     * URL 'http://host:port/my-nuget/'.
+     * URL 'http://host:port/my-nuget'.
      */
     private String url;
 
@@ -149,6 +149,9 @@ final class NugetITCase {
                     source, String.format("%s/index.json", this.url)
                 ),
                 "</packageSources>",
+                "<disabledPackageSources>",
+                "<add key=\"nuget.org\" value=\"true\" />",
+                "</disabledPackageSources>",
                 "</configuration>"
             ).getBytes()
         );
@@ -157,9 +160,7 @@ final class NugetITCase {
     private RepoConfigYaml config() {
         return new RepoConfigYaml("nuget")
             .withFileStorage(this.tmp.resolve("repos"))
-            .withUrl(
-                this.url
-            );
+            .withUrl(this.url);
     }
 
     private String exec(final String... command) throws Exception {
