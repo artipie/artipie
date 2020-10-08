@@ -31,6 +31,7 @@ import com.jcabi.log.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.UUID;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -48,6 +49,7 @@ import org.testcontainers.containers.GenericContainer;
  * Integration tests for Nuget repository.
  * @since 0.12
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
@@ -75,11 +77,6 @@ final class NugetITCase {
      */
     private String url;
 
-    /**
-     * Package name in the temporary directory.
-     */
-    private String pckg;
-
     @BeforeEach
     void init() throws Exception {
         final String name = "my-nuget";
@@ -104,7 +101,6 @@ final class NugetITCase {
         this.cntn.stop();
     }
 
-    // @checkstyle MagicNumberCheck (2 lines)
     @Test
     @Timeout(10)
     void shouldPushPackage() throws Exception {
@@ -114,7 +110,6 @@ final class NugetITCase {
         );
     }
 
-    // @checkstyle MagicNumberCheck (2 lines)
     @Test
     @Timeout(30)
     void shouldInstallPushedPackage() throws Exception {
@@ -122,8 +117,8 @@ final class NugetITCase {
         this.exec("dotnet", "new", "console", "-n", "TestProj");
         MatcherAssert.assertThat(
             this.exec(
-                "dotnet", "add", "TestProj", "package", this.pckg,
-                "-s", String.format("%s/index.json", this.url)
+                "dotnet", "add", "TestProj", "package", "newtonsoft.json",
+                "--version", "12.0.3", "-s", String.format("%s/index.json", this.url)
             ),
             new StringContainsInOrder(
                 Arrays.asList(
@@ -136,19 +131,12 @@ final class NugetITCase {
     }
 
     private void createNugetConfig() throws Exception {
-        final String source = "artipie-nuget-test";
         Files.write(
             this.tmp.resolve("NuGet.Config"),
             String.join(
                 "",
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n",
                 "<configuration>",
-                "<packageSources>",
-                String.format(
-                    "<add key=\"%s\" value=\"%s\"/>",
-                    source, String.format("%s/index.json", this.url)
-                ),
-                "</packageSources>",
                 "<disabledPackageSources>",
                 "<add key=\"nuget.org\" value=\"true\" />",
                 "</disabledPackageSources>",
@@ -169,13 +157,13 @@ final class NugetITCase {
     }
 
     private String pushPackage() throws Exception {
-        this.pckg = "newtonsoft.json";
+        final String pckgname = UUID.randomUUID().toString();
         Files.write(
-            this.tmp.resolve(this.pckg),
+            this.tmp.resolve(pckgname),
             new NewtonJsonResource("newtonsoft.json.12.0.3.nupkg").bytes()
         );
         return this.exec(
-            "dotnet", "nuget", "push", this.pckg,
+            "dotnet", "nuget", "push", pckgname,
             "-s", String.format("%s/index.json", this.url)
         );
     }
