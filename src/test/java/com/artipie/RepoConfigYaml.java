@@ -25,6 +25,9 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.amihaiemil.eoyaml.YamlSequenceBuilder;
+import com.artipie.asto.Content;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /**
@@ -73,6 +76,16 @@ public final class RepoConfigYaml {
     }
 
     /**
+     * Adds url to config.
+     * @param url Url
+     * @return Itself
+     */
+    public RepoConfigYaml withUrl(final String url) {
+        this.builder = this.builder.add("url", url);
+        return this;
+    }
+
+    /**
      * Adds permissions section to config.
      * @param perms Permissions
      * @return Itself
@@ -93,6 +106,16 @@ public final class RepoConfigYaml {
             "settings",
             Yaml.createYamlMappingBuilder().add("remote_uri", uri).build()
         );
+        return this;
+    }
+
+    /**
+     * Adds remotes to config.
+     * @param remotes Remotes yaml sequence
+     * @return Itself
+     */
+    public RepoConfigYaml withRemotes(final YamlSequenceBuilder remotes) {
+        this.builder = this.builder.add("remotes", remotes.build());
         return this;
     }
 
@@ -122,5 +145,13 @@ public final class RepoConfigYaml {
     @Override
     public String toString() {
         return Yaml.createYamlMappingBuilder().add("repo", this.builder.build()).build().toString();
+    }
+
+    /**
+     * Repo settings as content.
+     * @return Instanse of {@link Content}
+     */
+    public Content toContent() {
+        return new Content.From(this.toString().getBytes(StandardCharsets.UTF_8));
     }
 }

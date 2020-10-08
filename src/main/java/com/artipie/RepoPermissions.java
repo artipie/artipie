@@ -310,6 +310,15 @@ public interface RepoPermissions {
         }
 
         /**
+         * Ctor.
+         * @param name Username
+         * @param permission Permission
+         */
+        public PermissionItem(final String name, final String permission) {
+            this(name, Collections.singletonList(permission));
+        }
+
+        /**
          * Get username.
          * @return String username
          */

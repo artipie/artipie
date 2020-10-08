@@ -23,8 +23,10 @@
  */
 package com.artipie.nuget;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
+import com.artipie.RepoConfigYaml;
+import com.artipie.asto.Key;
+import com.artipie.asto.fs.FileStorage;
 import com.jcabi.log.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,10 +79,9 @@ final class NugetITCase {
         this.server = new ArtipieServer(this.tmp, name, this.config());
         this.port = this.server.start();
         Testcontainers.exposeHostPorts(this.port);
-        Files.write(
-            this.tmp.resolve(String.format("repos/%s.yaml", name)),
-            this.config().getBytes()
-        );
+        new FileStorage(this.tmp)
+            .save(new Key.From(String.format("repos/%s.yaml", name)), this.config().toContent())
+            .join();
         this.createNugetConfig();
         this.cntn = new GenericContainer<>("mcr.microsoft.com/dotnet/sdk:5.0")
             .withCommand("tail", "-f", "/dev/null")
@@ -124,24 +125,12 @@ final class NugetITCase {
         );
     }
 
-    private String config() {
-        return Yaml.createYamlMappingBuilder().add(
-            "repo",
-            Yaml.createYamlMappingBuilder()
-                .add("type", "nuget")
-                .add(
-                    "url", String.format(
-                    "http://host.testcontainers.internal:%d/my-nuget", this.port
-                ))
-                .add(
-                    "storage",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "fs")
-                        .add("path", this.tmp.resolve("repos").toString())
-                        .build()
-                )
-                .build()
-        ).build().toString();
+    private RepoConfigYaml config() {
+        return new RepoConfigYaml("nuget")
+            .withFileStorage(this.tmp.resolve("repos"))
+            .withUrl(
+                String.format("http://host.testcontainers.internal:%d/my-nuget", this.port)
+            );
     }
 
     private String exec(final String... command) throws Exception {
