@@ -32,7 +32,6 @@ import com.artipie.asto.test.TestResource;
 import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.file.Path;
-import org.apache.commons.io.FileUtils;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -124,13 +123,17 @@ final class PypiITCase {
 
     @Test
     void pypiPublish() throws Exception {
-        this.prepareDirectory("pypi-repo/example-pckg/dist");
+        new TestResource("pypi-repo/example-pckg/dist/")
+            .addFilesTo(
+                this.storage,
+                new Key.From("pypi-repo", "example-pckg")
+        );
         this.exec("python3", "-m", "pip", "install", "--user", "--upgrade", "twine");
         MatcherAssert.assertThat(
             "Packages should be uploaded",
             this.exec(
                 "python3", "-m", "twine", "upload", "--repository-url", this.url, "-u",
-                "any", "-p", "pass", "pypi-repo/example-pckg/dist/*"
+                "any", "-p", "pass", "pypi-repo/example-pckg/*"
             ),
             new StringContainsInOrder(
                 new ListOf<String>(
@@ -156,13 +159,6 @@ final class PypiITCase {
     private String exec(final String... command) throws Exception {
         Logger.debug(this, "Command:\n%s", String.join(" ", command));
         return this.cntn.execInContainer(command).getStdout();
-    }
-
-    private void prepareDirectory(final String dist) throws IOException {
-        FileUtils.copyDirectory(
-            new TestResource(dist).asPath().toFile(),
-            this.tmp.resolve(dist).toFile()
-        );
     }
 
     private boolean inStorage(final String pckg) {
