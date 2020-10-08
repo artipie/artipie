@@ -23,6 +23,7 @@
  */
 package com.artipie.api.artifactory;
 
+import com.artipie.RepoConfigYaml;
 import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
 import com.artipie.Settings;
@@ -88,8 +89,7 @@ class GetPermissionSliceTest {
     @Test
     void returnsEmptyUsersIfNoPermissionsSet() {
         final String repo = "docker";
-        final RepoPerms perm = new RepoPerms();
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             new GetPermissionSlice(new Settings.Fake(this.storage)),
             new SliceHasResponse(
@@ -113,20 +113,19 @@ class GetPermissionSliceTest {
         final String readers = "readers";
         final String team = "team";
         final String mark = "mark";
-        final RepoPerms perm = new RepoPerms(
-            List.of(
-                new RepoPermissions.PermissionItem(john, new ListOf<>("read", "write")),
-                new RepoPermissions.PermissionItem(mark, new ListOf<>("*")),
-                new RepoPermissions.PermissionItem(
-                    String.format("/%s", readers), new ListOf<>("read")
+        new RepoConfigYaml(repo).withPermissions(
+            new RepoPerms(
+                List.of(
+                    new RepoPermissions.PermissionItem(john, new ListOf<>("read", "write")),
+                    new RepoPermissions.PermissionItem(mark, "*"),
+                    new RepoPermissions.PermissionItem(String.format("/%s", readers), "read"),
+                    new RepoPermissions.PermissionItem(
+                        String.format("/%s", team), new ListOf<>("write", "delete")
+                    )
                 ),
-                new RepoPermissions.PermissionItem(
-                    String.format("/%s", team), new ListOf<>("write", "delete")
-                )
-            ),
-            Collections.singletonList("**/*")
-        );
-        perm.saveSettings(this.storage, repo);
+                Collections.singletonList("**/*")
+            )
+        ).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             new GetPermissionSlice(new Settings.Fake(this.storage)),
             new SliceHasResponse(
