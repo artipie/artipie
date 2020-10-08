@@ -24,6 +24,7 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.RepoConfigYaml;
 import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
 import com.artipie.Settings;
@@ -40,7 +41,6 @@ import com.artipie.http.rs.RsStatus;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNull;
@@ -80,14 +80,15 @@ class DeletePermissionSliceTest {
         final Storage storage = new InMemoryStorage();
         final String repo = "docker";
         final Key.From key = new Key.From(String.format("%s.yaml", repo));
-        final RepoPerms perms = new RepoPerms(
-            List.of(
-                new RepoPermissions.PermissionItem("admin", new ListOf<String>("*")),
-                new RepoPermissions.PermissionItem("john", new ListOf<String>("delete")),
-                new RepoPermissions.PermissionItem("*", new ListOf<String>("download"))
+        new RepoConfigYaml(repo).withPermissions(
+            new RepoPerms(
+                List.of(
+                    new RepoPermissions.PermissionItem("admin", "*"),
+                    new RepoPermissions.PermissionItem("john", "delete"),
+                    new RepoPermissions.PermissionItem("*", "download")
+                )
             )
-        );
-        perms.saveSettings(storage, repo);
+        ).saveTo(storage, repo);
         MatcherAssert.assertThat(
             "Returns 200 OK",
             new DeletePermissionSlice(new Settings.Fake(storage)),

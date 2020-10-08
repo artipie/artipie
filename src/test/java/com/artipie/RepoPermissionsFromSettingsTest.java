@@ -80,10 +80,9 @@ class RepoPermissionsFromSettingsTest {
         final String download = "download";
         final String upload = "upload";
         final String repo = "maven";
-        final RepoPerms perm = new RepoPerms(
-            new RepoPermissions.PermissionItem(john, new ListOf<String>(download, upload))
-        );
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).withPermissions(
+            new RepoPerms(john, new ListOf<String>(download, upload))
+        ).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
                 .toCompletableFuture().join(),
@@ -96,8 +95,7 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void returnsEmptyMapWhenPermissionsAreNotSet() {
         final String repo = "pypi";
-        final RepoPerms perm = new RepoPerms();
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
                 .toCompletableFuture().join().size(),
@@ -108,10 +106,9 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void returnsPatternsList() {
         final String repo = "docker";
-        final RepoPerms perm = new RepoPerms(
-            Collections.emptyList(), new ListOf<>("**")
-        );
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).withPermissions(
+            new RepoPerms(Collections.emptyList(), new ListOf<>("**"))
+        ).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).patterns(repo)
                 .toCompletableFuture().join()
@@ -123,8 +120,7 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void returnsPatternsListWhenEmpty() {
         final String repo = "gem";
-        final RepoPerms perm = new RepoPerms();
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).patterns(repo)
                 .toCompletableFuture().join()
@@ -138,13 +134,14 @@ class RepoPermissionsFromSettingsTest {
         final String repo = "rpm";
         final String david = "david";
         final String add = "add";
-        final RepoPerms perm = new RepoPerms(
-            Collections.singleton(
-                new RepoPermissions.PermissionItem(david, new ListOf<String>(add, "update"))
-            ),
-            new ListOf<>("**")
-        );
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).withPermissions(
+            new RepoPerms(
+                Collections.singleton(
+                    new RepoPermissions.PermissionItem(david, new ListOf<String>(add, "update"))
+                ),
+                new ListOf<>("**")
+            )
+        ).saveTo(this.storage, repo);
         final String olga = "olga";
         final String victor = "victor";
         final String download = "download";
@@ -184,8 +181,7 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void addsUserPermissionsAndPatternsWhenEmpty() throws IOException {
         final String repo = "go";
-        final RepoPerms perm = new RepoPerms();
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).saveTo(this.storage, repo);
         final String ann = "ann";
         final String download = "download";
         new RepoPermissions.FromSettings(new Settings.Fake(this.storage))
@@ -210,10 +206,9 @@ class RepoPermissionsFromSettingsTest {
     @Test
     void deletesPermissionSection() throws IOException {
         final String repo = "nuget";
-        final RepoPerms perm = new RepoPerms(
-            new RepoPermissions.PermissionItem("someone", new ListOf<String>("r", "w"))
-        );
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).withPermissions(
+            new RepoPerms("someone", new ListOf<>("r", "w"))
+        ).saveTo(this.storage, repo);
         new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).remove(repo)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -224,7 +219,7 @@ class RepoPermissionsFromSettingsTest {
         MatcherAssert.assertThat(
             "Storage `type` is intact",
             this.repoSection(repo).string("type"),
-            new IsEqual<>("any")
+            new IsEqual<>(repo)
         );
     }
 
