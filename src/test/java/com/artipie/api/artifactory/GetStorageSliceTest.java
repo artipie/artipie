@@ -24,6 +24,7 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.IsJson;
+import com.artipie.RepoConfigYaml;
 import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
@@ -111,16 +112,7 @@ class GetStorageSliceTest {
         final Storage storage = new LoggingStorage(new InMemoryStorage());
         storage.save(
             new Key.From(String.format("%s.yaml", name)),
-            new Content.From(
-                String.join(
-                    "\n",
-                    "repo:",
-                    "  type: file",
-                    "  storage:",
-                    "    type: fs",
-                    String.format("    path: %s", temp.toString())
-                ).getBytes()
-            )
+            new RepoConfigYaml("file").withFileStorage(temp).toContent()
         );
         final Storage repo = new SubStorage(new Key.From(name), new FileStorage(temp));
         repo.save(new Key.From("foo/bar/1"), Content.EMPTY).join();

@@ -68,6 +68,15 @@ public final class RepoPerms {
 
     /**
      * Ctor.
+     * @param user Username
+     * @param action Action
+     */
+    public RepoPerms(final String user, final String action) {
+        this(new RepoPermissions.PermissionItem(user, action));
+    }
+
+    /**
+     * Ctor.
      * @param userperm Permission for a single user
      */
     public RepoPerms(final RepoPermissions.PermissionItem userperm) {

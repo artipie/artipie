@@ -23,8 +23,8 @@
  */
 package com.artipie.docker;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
+import com.artipie.RepoConfigYaml;
 import com.artipie.docker.junit.DockerClient;
 import com.artipie.docker.junit.DockerClientSupport;
 import java.io.IOException;
@@ -71,21 +71,12 @@ final class DockerOnPortIT {
     @BeforeEach
     void setUp(@TempDir final Path root) throws Exception {
         final int port = freePort();
-        final String config = Yaml.createYamlMappingBuilder().add(
-            "repo",
-            Yaml.createYamlMappingBuilder()
-                .add("type", "docker")
-                .add(
-                    "storage",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "fs")
-                        .add("path", root.resolve("data").toString())
-                        .build()
-                )
-                .add("port", String.valueOf(port))
-                .build()
-        ).build().toString();
-        this.server = new ArtipieServer(root, "my-docker", config);
+        this.server = new ArtipieServer(
+            root, "my-docker",
+            new RepoConfigYaml("docker")
+                .withFileStorage(root.resolve("data"))
+                .withPort(port)
+        );
         this.server.start();
         this.repository = String.format("localhost:%d", port);
         this.image = this.prepareImage();

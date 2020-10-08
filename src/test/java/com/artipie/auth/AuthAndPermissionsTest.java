@@ -25,6 +25,8 @@ package com.artipie.auth;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.RepoPermissions;
+import com.artipie.RepoPerms;
 import com.artipie.YamlPermissions;
 import com.artipie.http.auth.BasicIdentities;
 import com.artipie.http.auth.Permission;
@@ -55,7 +57,7 @@ import org.junit.jupiter.api.Test;
 public class AuthAndPermissionsTest {
 
     @Test
-    void allowsDownloadWhenAuthHeaderIsNotPresent() throws IOException {
+    void allowsDownloadWhenAuthHeaderIsNotPresent() {
         MatcherAssert.assertThat(
             new SliceAuth(
                 new SliceSimple(StandardRs.EMPTY),
@@ -173,7 +175,7 @@ public class AuthAndPermissionsTest {
     }
 
     @Test
-    void authIsNotRequiredForPublicRepo() throws IOException {
+    void authIsNotRequiredForPublicRepo() {
         final RsStatus status = RsStatus.ACCEPTED;
         MatcherAssert.assertThat(
             new SliceAuth(
@@ -226,25 +228,20 @@ public class AuthAndPermissionsTest {
         ).build();
     }
 
-    private YamlPermissions permissions() throws IOException {
+    private YamlPermissions permissions() {
         return new YamlPermissions(
-            Yaml.createYamlInput(
-                String.join(
-                    "\n",
-                    "admin:",
-                    "  - \"*\"",
-                    "john:",
-                    "  - delete",
-                    "  - deploy",
-                    "\"*\":",
-                    "  - download"
+            new RepoPerms(
+                new ListOf<>(
+                    new RepoPermissions.PermissionItem("admin", "*"),
+                    new RepoPermissions.PermissionItem("*", "download"),
+                    new RepoPermissions.PermissionItem("john", new ListOf<>("delete", "deploy"))
                 )
-            ).readYamlMapping()
+            ).permsYaml()
         );
     }
 
-    private YamlPermissions allAllowedPermissions() throws IOException {
-        return new YamlPermissions(Yaml.createYamlInput("\"*\":\n  - \"*\"").readYamlMapping());
+    private YamlPermissions allAllowedPermissions() {
+        return new YamlPermissions(new RepoPerms("*", "*").permsYaml());
     }
 
 }
