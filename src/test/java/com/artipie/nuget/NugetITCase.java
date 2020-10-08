@@ -28,6 +28,7 @@ import com.artipie.RepoConfigYaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.fs.FileStorage;
 import com.jcabi.log.Logger;
+import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -56,6 +57,11 @@ import org.testcontainers.containers.GenericContainer;
 final class NugetITCase {
 
     /**
+     * URL.
+     */
+    private static final String URL = "http://host.testcontainers.internal:%d/my-nuget/index.json";
+
+    /**
      * Temporary directory for all tests.
      * @checkstyle VisibilityModifierCheck (3 lines)
      */
@@ -73,17 +79,19 @@ final class NugetITCase {
     private GenericContainer<?> cntn;
 
     /**
-     * URL 'http://host:port/my-nuget'.
+     * Server port.
      */
-    private String url;
+    private int port;
 
     @BeforeEach
     void init() throws Exception {
         final String name = "my-nuget";
-        this.server = new ArtipieServer(this.tmp, name, this.config());
-        final int port = this.server.start();
-        this.url = String.format("http://host.testcontainers.internal:%d/my-nuget", port);
-        Testcontainers.exposeHostPorts(port);
+        try (ServerSocket socket = new ServerSocket(0)) {
+            this.port = socket.getLocalPort();
+            this.server = new ArtipieServer(this.tmp, name, this.config());
+        }
+        this.port = this.server.start();
+        Testcontainers.exposeHostPorts(this.port);
         new FileStorage(this.tmp)
             .save(new Key.From(String.format("repos/%s.yaml", name)), this.config().toContent())
             .join();
@@ -118,7 +126,7 @@ final class NugetITCase {
         MatcherAssert.assertThat(
             this.exec(
                 "dotnet", "add", "TestProj", "package", "newtonsoft.json",
-                "--version", "12.0.3", "-s", String.format("%s/index.json", this.url)
+                "--version", "12.0.3", "-s", String.format(NugetITCase.URL, this.port)
             ),
             new StringContainsInOrder(
                 Arrays.asList(
@@ -148,7 +156,7 @@ final class NugetITCase {
     private RepoConfigYaml config() {
         return new RepoConfigYaml("nuget")
             .withFileStorage(this.tmp.resolve("repos"))
-            .withUrl(this.url);
+            .withUrl(String.format("http://host.testcontainers.internal:%d/my-nuget", this.port));
     }
 
     private String exec(final String... command) throws Exception {
@@ -164,7 +172,7 @@ final class NugetITCase {
         );
         return this.exec(
             "dotnet", "nuget", "push", pckgname,
-            "-s", String.format("%s/index.json", this.url)
+            "-s", String.format(NugetITCase.URL, this.port)
         );
     }
 }
