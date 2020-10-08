@@ -73,6 +73,12 @@ public final class MavenProxy implements Slice {
     ) {
         final YamlMapping settings = this.cfg.settings()
             .orElseThrow(() -> new IllegalStateException("Repo settings missed"));
+        final String uri = settings.string("remote_uri");
+        if (uri == null) {
+            throw new IllegalStateException(
+                "`remote_uri` is not specified in settings for Maven proxy"
+            );
+        }
         final Authenticator auth;
         final String username = settings.string("remote_username");
         final String password = settings.string("remote_password");
@@ -81,19 +87,19 @@ public final class MavenProxy implements Slice {
         } else {
             if (username == null) {
                 throw new IllegalStateException(
-                    "`username` is not specified in settings for Maven proxy"
+                    "`remote_username` is not specified in settings for Maven proxy"
                 );
             }
             if (password == null) {
                 throw new IllegalStateException(
-                    "`password` is not specified in settings for Maven proxy"
+                    "`remote_password` is not specified in settings for Maven proxy"
                 );
             }
             auth = new GenericAuthenticator(username, password);
         }
         return new MavenProxySlice(
             this.client,
-            URI.create(settings.string("remote_uri")),
+            URI.create(uri),
             auth,
             new StorageCache(this.cfg.storage())
         ).response(line, headers, body);
