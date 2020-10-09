@@ -26,14 +26,8 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlNode;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
-import com.artipie.asto.Content;
-import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -42,12 +36,7 @@ import java.util.List;
  * Class for generating repo permissions.
  * @since 0.10
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RepoPerms {
-    /**
-     * Permissions section name.
-     */
-    private static final String PERMISSIONS = "permissions";
 
     /**
      * Collection with user permissions.
@@ -114,30 +103,6 @@ public final class RepoPerms {
     }
 
     /**
-     * Save to the storage repo with map with users and permissions.
-     * @param storage Storage
-     * @param repo Repo
-     */
-    public void saveSettings(final Storage storage, final String repo) {
-        final YamlMappingBuilder root = RepoPerms.repoSectionAsBuilder(
-            Yaml.createYamlMappingBuilder().add("type", "any").build()
-        );
-        storage.save(
-            new Key.From(String.format("%s.yaml", repo)),
-            new Content.From(
-                Yaml.createYamlMappingBuilder().add(
-                    "repo",
-                    root.add(
-                        RepoPerms.PERMISSIONS, this.permsYaml()
-                    ).add(
-                        "permissions_include_patterns", this.patternsYaml()
-                    ).build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
-
-    /**
      * Build YAML sequence of patterns.
      *
      * @return YAML sequence of patterns.
@@ -162,19 +127,5 @@ public final class RepoPerms {
             }
         }
         return perms.build();
-    }
-
-    /**
-     * Copy `repo` section from existing yaml setting.
-     * @param mapping Repo section mapping
-     * @return YamlMappingBuilder from existing yaml setting.
-     */
-    private static YamlMappingBuilder repoSectionAsBuilder(final YamlMapping mapping) {
-        YamlMappingBuilder res = Yaml.createYamlMappingBuilder();
-        final List<YamlNode> nodes = new ArrayList<>(mapping.keys());
-        for (final YamlNode node : nodes) {
-            res = res.add(node, mapping.value(node));
-        }
-        return res;
     }
 }

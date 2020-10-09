@@ -25,7 +25,7 @@ package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.RepoPerms;
+import com.artipie.RepoConfigYaml;
 import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
@@ -81,8 +81,7 @@ class AddUpdatePermissionSliceTest {
     @Test
     void updatesPermissionsAndPatterns() throws IOException {
         final String repo = "maven";
-        final RepoPerms perm = new RepoPerms();
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             "Returns 200 OK",
             new AddUpdatePermissionSlice(new Settings.Fake(this.storage)),
@@ -128,8 +127,7 @@ class AddUpdatePermissionSliceTest {
     @Test
     void validatesPatterns() {
         final String repo = "docker";
-        final RepoPerms perm = new RepoPerms();
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             new AddUpdatePermissionSlice(new Settings.Fake(this.storage)),
             new SliceHasResponse(
@@ -155,8 +153,7 @@ class AddUpdatePermissionSliceTest {
     @Test
     void doesNotAddReadersGroupTwice() {
         final String repo = "maven";
-        final RepoPerms perm = new RepoPerms();
-        perm.saveSettings(this.storage, repo);
+        new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             "Returns 200 OK",
             new AddUpdatePermissionSlice(new Settings.Fake(this.storage)),
