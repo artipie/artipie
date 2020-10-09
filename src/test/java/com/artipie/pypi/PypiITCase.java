@@ -25,7 +25,6 @@ package com.artipie.pypi;
 
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -249,11 +248,7 @@ final class PypiITCase {
             .withFileStorage(this.tmp.resolve("repos"));
         if (!anonymous) {
             yaml.withPermissions(
-                new RepoPerms(
-                    new RepoPermissions.PermissionItem(
-                        ArtipieServer.ALICE.name(), new ListOf<>("*")
-                    )
-                )
+                new RepoPerms(ArtipieServer.ALICE.name(), "*")
             );
         }
         return yaml;
