@@ -28,11 +28,14 @@ import com.artipie.RepoConfigYaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.fs.FileStorage;
 import com.jcabi.log.Logger;
+import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.UUID;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,10 +49,17 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Integration tests for Nuget repository.
  * @since 0.12
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class NugetITCase {
+
+    /**
+     * URL.
+     */
+    private static final String URL = "http://host.testcontainers.internal:%d/my-nuget/index.json";
 
     /**
      * Temporary directory for all tests.
@@ -69,14 +79,24 @@ final class NugetITCase {
     private GenericContainer<?> cntn;
 
     /**
-     * Artipie server port.
+     * Server port.
      */
     private int port;
 
+    /**
+     * For puzzle.
+     * @todo #602:30min Create constructor in `ArtipieServer` to pass server port.
+     *  Now config for server are generated earlier than server starts. So, we
+     *  need to overwrite file with config after server starting. Let's create
+     *  constructor in `ArtipieServer` to pass free port.
+     */
     @BeforeEach
     void init() throws Exception {
         final String name = "my-nuget";
-        this.server = new ArtipieServer(this.tmp, name, this.config());
+        try (ServerSocket socket = new ServerSocket(0)) {
+            this.port = socket.getLocalPort();
+            this.server = new ArtipieServer(this.tmp, name, this.config());
+        }
         this.port = this.server.start();
         Testcontainers.exposeHostPorts(this.port);
         new FileStorage(this.tmp)
@@ -96,7 +116,6 @@ final class NugetITCase {
         this.cntn.stop();
     }
 
-    // @checkstyle MagicNumberCheck (2 lines)
     @Test
     @Timeout(10)
     void shouldPushPackage() throws Exception {
@@ -106,20 +125,36 @@ final class NugetITCase {
         );
     }
 
-    private void createNugetConfig() throws Exception {
-        final String url = String.format(
-            "http://host.testcontainers.internal:%d/my-nuget", this.port
+    @Test
+    @Timeout(30)
+    void shouldInstallPushedPackage() throws Exception {
+        this.pushPackage();
+        this.exec("dotnet", "new", "console", "-n", "TestProj");
+        MatcherAssert.assertThat(
+            this.exec(
+                "dotnet", "add", "TestProj", "package", "newtonsoft.json",
+                "--version", "12.0.3", "-s", String.format(NugetITCase.URL, this.port)
+            ),
+            new StringContainsInOrder(
+                Arrays.asList(
+                    // @checkstyle LineLengthCheck (1 line)
+                    "PackageReference for package 'newtonsoft.json' version '12.0.3' added to file '/home/TestProj/TestProj.csproj'",
+                    "Restored /home/TestProj/TestProj.csproj"
+                )
+            )
         );
-        final String source = "artipie-nuget-test";
+    }
+
+    private void createNugetConfig() throws Exception {
         Files.write(
             this.tmp.resolve("NuGet.Config"),
             String.join(
                 "",
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n",
                 "<configuration>",
-                "<packageSources>",
-                String.format("<add key=\"%s\" value=\"%s\"/>", source, url),
-                "</packageSources>",
+                "<disabledPackageSources>",
+                "<add key=\"nuget.org\" value=\"true\" />",
+                "</disabledPackageSources>",
                 "</configuration>"
             ).getBytes()
         );
@@ -128,9 +163,7 @@ final class NugetITCase {
     private RepoConfigYaml config() {
         return new RepoConfigYaml("nuget")
             .withFileStorage(this.tmp.resolve("repos"))
-            .withUrl(
-                String.format("http://host.testcontainers.internal:%d/my-nuget", this.port)
-            );
+            .withUrl(String.format("http://host.testcontainers.internal:%d/my-nuget", this.port));
     }
 
     private String exec(final String... command) throws Exception {
@@ -139,15 +172,14 @@ final class NugetITCase {
     }
 
     private String pushPackage() throws Exception {
-        final String uri = "http://host.testcontainers.internal:%d/my-nuget/index.json";
-        final String pckg = UUID.randomUUID().toString();
+        final String pckgname = UUID.randomUUID().toString();
         Files.write(
-            this.tmp.resolve(pckg),
+            this.tmp.resolve(pckgname),
             new NewtonJsonResource("newtonsoft.json.12.0.3.nupkg").bytes()
         );
         return this.exec(
-            "dotnet", "nuget", "push", pckg, "--api-key", "this.source",
-            "-s", String.format(uri, this.port)
+            "dotnet", "nuget", "push", pckgname,
+            "-s", String.format(NugetITCase.URL, this.port)
         );
     }
 }
