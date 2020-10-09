@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        java: [8, 11, 13]
+        java: [11, 13]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
@@ -27,4 +27,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-jdk-${{ matrix.java }}-maven-
       - name: Build it with Maven
-        run: mvn clean install -Pitcase
+        run: mvn -B verify -Pitcase,-qulice
