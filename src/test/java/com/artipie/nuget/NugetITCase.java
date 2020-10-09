@@ -83,6 +83,13 @@ final class NugetITCase {
      */
     private int port;
 
+    /**
+     * For puzzle.
+     * @todo #602:30min Create constructor in `ArtipieServer` to pass server port.
+     *  Now config for server are generated earlier than server starts. So, we
+     *  need to overwrite file with config after server starting. Let's create
+     *  constructor in `ArtipieServer` to pass free port.
+     */
     @BeforeEach
     void init() throws Exception {
         final String name = "my-nuget";
