@@ -42,6 +42,7 @@ import org.llorllale.cactoos.matchers.MatcherOf;
  * @since 0.2
  * @checkstyle LeftCurlyCheck (500 lines)
  * @checkstyle ParameterNumberCheck (500 lines)
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class YamlPermissionsTest {
@@ -113,8 +114,14 @@ class YamlPermissionsTest {
     )
     void checksGroups(final String name, final String action,
         final String groups, final boolean res) {
+        final YamlMapping settings = new RepoPerms(
+            new ListOf<>(
+                new RepoPermissions.PermissionItem(name, "write"),
+                new RepoPermissions.PermissionItem("/readers", "read")
+            )
+        ).permsYaml();
         MatcherAssert.assertThat(
-            new YamlPermissions(this.yamlPermissions(name)).allowed(
+            new YamlPermissions(settings).allowed(
                 new Authentication.User(name, new ListOf<String>(groups.split(";"))), action
             ),
             new IsEqual<>(res)
@@ -133,18 +140,6 @@ class YamlPermissionsTest {
                 .yamlMapping("repo")
                 .yamlMapping("permissions")
         );
-    }
-
-    /**
-     * Permissions yaml mapping.
-     * @param name User name
-     * @return Permissions yaml
-     */
-    private YamlMapping yamlPermissions(final String name) {
-        return Yaml.createYamlMappingBuilder()
-            .add(name, Yaml.createYamlSequenceBuilder().add("write").build())
-            .add("/readers", Yaml.createYamlSequenceBuilder().add("read").build())
-            .build();
     }
 
 }

@@ -24,9 +24,12 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
+import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
@@ -34,7 +37,7 @@ import java.nio.file.Path;
  * Repo config yaml.
  * @since 0.12
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public final class RepoConfigYaml {
 
     /**
@@ -142,9 +145,26 @@ public final class RepoConfigYaml {
         return this;
     }
 
+    /**
+     * Saves repo config to the provided storage with given name.
+     * @param storage Where to save
+     * @param name Name to save with
+     */
+    public void saveTo(final Storage storage, final String name) {
+        storage.save(new Key.From(String.format("%s.yaml", name)), this.toContent()).join();
+    }
+
+    /**
+     * Repo config as yaml mapping.
+     * @return Instance of {@link YamlMapping}
+     */
+    public YamlMapping yaml() {
+        return Yaml.createYamlMappingBuilder().add("repo", this.builder.build()).build();
+    }
+
     @Override
     public String toString() {
-        return Yaml.createYamlMappingBuilder().add("repo", this.builder.build()).build().toString();
+        return this.yaml().toString();
     }
 
     /**
