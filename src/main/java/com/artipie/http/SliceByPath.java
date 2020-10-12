@@ -76,18 +76,13 @@ final class SliceByPath implements Slice {
         final Publisher<ByteBuffer> body) {
         final Key key;
         try {
-            final String[] split = new RequestLineFrom(line).uri().getPath()
-                .replaceAll("^/+", "").split("/");
-            if (this.settings.layout().equals("org")) {
-                if (split.length < 2) {
-                    throw new IllegalStateException("Expected at least 2 path segments");
-                }
-                key = new Key.From(split[0], split[1]);
-            } else {
-                if (split.length < 1) {
-                    throw new IllegalStateException("Expected at least 1 path segment");
-                }
-                key = new Key.From(split[0]);
+            key = this.keyFromPath(new RequestLineFrom(line).uri().getPath());
+            if (key.equals(Key.ROOT)) {
+                return new RsWithBody(
+                    new RsWithStatus(RsStatus.NOT_FOUND),
+                    "Failed to find a repository",
+                    StandardCharsets.UTF_8
+                );
             }
             return this.repositories.slice(key, false).response(line, headers, body);
         } catch (final IOException err) {
@@ -97,5 +92,26 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
+    }
+
+    /**
+     * Key from path.
+     * @param path Path from request line
+     * @return Key from path.
+     * @throws IOException In case of problems with reading settings.
+     */
+    private Key keyFromPath(final String path) throws IOException {
+        final String[] split = path.replaceAll("^/+", "").split("/");
+        Key key = Key.ROOT;
+        if (this.settings.layout().equals("org")) {
+            if (split.length >= 2) {
+                key = new Key.From(split[0], split[1]);
+            }
+        } else {
+            if (split.length == 1) {
+                key = new Key.From(split[0]);
+            }
+        }
+        return key;
     }
 }
