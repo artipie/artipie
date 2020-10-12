@@ -108,7 +108,7 @@ final class SliceByPath implements Slice {
                 key = new Key.From(split[0], split[1]);
             }
         } else {
-            if (split.length == 1) {
+            if (split.length >= 1) {
                 key = new Key.From(split[0]);
             }
         }
