@@ -21,44 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
-
-import com.artipie.http.client.auth.Authenticator;
-import java.util.Collection;
 
 /**
- * Proxy repository config.
+ * Tests for repository classes.
  *
  * @since 0.12
  */
-public interface ProxyRepoConfig {
-
-    /**
-     * Get all configured remote endpoints.
-     *
-     * @return Remote endpoints.
-     */
-    Collection<Remote> remotes();
-
-    /**
-     * Proxy repository remote.
-     *
-     * @since 0.12
-     */
-    interface Remote {
-
-        /**
-         * Get URL.
-         *
-         * @return URL.
-         */
-        String url();
-
-        /**
-         * Get authenticator.
-         *
-         * @return Authenticator.
-         */
-        Authenticator auth();
-    }
-}
+package com.artipie.repo;

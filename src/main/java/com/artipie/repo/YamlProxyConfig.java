@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
+package com.artipie.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
@@ -37,7 +37,7 @@ import java.util.stream.StreamSupport;
  *
  * @since 0.12
  */
-public final class YamlProxyRepoConfig implements ProxyRepoConfig {
+public final class YamlProxyConfig implements ProxyConfig {
 
     /**
      * Source YAML.
@@ -49,7 +49,7 @@ public final class YamlProxyRepoConfig implements ProxyRepoConfig {
      *
      * @param yaml Source YAML.
      */
-    public YamlProxyRepoConfig(final YamlMapping yaml) {
+    public YamlProxyConfig(final YamlMapping yaml) {
         this.yaml = yaml;
     }
 

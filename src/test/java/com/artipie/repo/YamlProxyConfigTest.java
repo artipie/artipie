@@ -21,31 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie;
+package com.artipie.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import java.util.Collection;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link YamlProxyRepoConfig}.
+ * Tests for {@link YamlProxyConfig}.
  *
  * @since 0.12
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public final class YamlProxyRepoConfigTest {
+public final class YamlProxyConfigTest {
 
     @Test
     public void parsesConfig() {
         final String firsturl = "https://artipie.com";
         final String secondurl = "http://localhost:8080/path";
-        final Collection<ProxyRepoConfig.Remote> remotes = new YamlProxyRepoConfig(
+        final Collection<ProxyConfig.Remote> remotes = new YamlProxyConfig(
             Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
@@ -64,7 +65,7 @@ public final class YamlProxyRepoConfigTest {
             remotes.size(),
             new IsEqual<>(2)
         );
-        final ProxyRepoConfig.Remote first = remotes.stream().findFirst().get();
+        final ProxyConfig.Remote first = remotes.stream().findFirst().get();
         MatcherAssert.assertThat(
             "First remote URL parsed",
             first.url(),
@@ -75,7 +76,7 @@ public final class YamlProxyRepoConfigTest {
             first.auth(),
             new IsInstanceOf(GenericAuthenticator.class)
         );
-        final ProxyRepoConfig.Remote second = remotes.stream().skip(1).findFirst().get();
+        final ProxyConfig.Remote second = remotes.stream().skip(1).findFirst().get();
         MatcherAssert.assertThat(
             "Second remote URL parsed",
             second.url(),
@@ -89,8 +90,22 @@ public final class YamlProxyRepoConfigTest {
     }
 
     @Test
+    public void parsesEmpty() {
+        final Collection<ProxyConfig.Remote> remotes = new YamlProxyConfig(
+            Yaml.createYamlMappingBuilder().add(
+                "remotes",
+                Yaml.createYamlSequenceBuilder().build()
+            ).build()
+        ).remotes();
+        MatcherAssert.assertThat(
+            remotes,
+            new IsEmptyCollection<>()
+        );
+    }
+
+    @Test
     public void failsToGetAuthWhenUsernameOnly() {
-        final ProxyRepoConfig.Remote remote = new YamlProxyRepoConfig(
+        final ProxyConfig.Remote remote = new YamlProxyConfig(
             Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
@@ -109,7 +124,7 @@ public final class YamlProxyRepoConfigTest {
 
     @Test
     public void failsToGetAuthWhenPasswordOnly() {
-        final ProxyRepoConfig.Remote remote = new YamlProxyRepoConfig(
+        final ProxyConfig.Remote remote = new YamlProxyConfig(
             Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
