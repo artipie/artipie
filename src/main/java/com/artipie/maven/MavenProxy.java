@@ -30,6 +30,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.Authenticator;
+import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.maven.http.MavenProxySlice;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -40,11 +41,6 @@ import org.reactivestreams.Publisher;
  * Maven proxy slice created from config.
  *
  * @since 0.12
- * @todo #668:30min Use GenericAuthenticator in MavenProxy
- *  For some reason `MavenProxyAuthIT` fails if GenericAuthenticator is used:
- *  proxy requests fails with 503 status.
- *  Right not now using `Authenticator.Basic` instead `GenericAuthenticator` limits
- *  authentication support to Basic scheme only.
  */
 public final class MavenProxy implements Slice {
 
@@ -99,7 +95,7 @@ public final class MavenProxy implements Slice {
                     "`remote_password` is not specified in settings for Maven proxy"
                 );
             }
-            auth = new Authenticator.Basic(username, password);
+            auth = new GenericAuthenticator(username, password);
         }
         return new MavenProxySlice(
             this.client,
