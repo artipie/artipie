@@ -1,8 +1,7 @@
 repo:
   type: maven-proxy
-  storage: default
   settings:
-    remote_uri: https://repo.maven.apache.org/maven2
-  permissions:
-    "*":
-      - "*"
+    remotes:
+      - uri: https://repo.maven.apache.org/maven2
+        cache:
+          - storage: default

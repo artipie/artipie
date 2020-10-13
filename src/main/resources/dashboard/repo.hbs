@@ -17,9 +17,11 @@
 repo:
   type: {{type}}
   storage: default{{#eq type "maven-proxy"}}
-  settings:
-    # proxy for Apache Maven central
-    remote_uri: https://repo.maven.apache.org/maven2{{/eq}}{{#eq type "maven-group"}}
+  # proxy for Apache Maven central
+  remotes:
+    - uri: https://repo.maven.apache.org/maven2
+      cache:
+        storage: default{{/eq}}{{#eq type "maven-group"}}
   settings:
     repositories:
       - {{user}}/mprivate1

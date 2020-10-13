@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import org.reactivestreams.Publisher;
 
 /**
@@ -74,22 +75,17 @@ final class SliceByPath implements Slice {
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Key key;
+        final Optional<Key> key;
         try {
-            final String[] split = new RequestLineFrom(line).uri().getPath()
-                .replaceAll("^/+", "").split("/");
-            if (this.settings.layout().equals("org")) {
-                if (split.length < 2) {
-                    throw new IllegalStateException("Expected at least 2 path segments");
-                }
-                key = new Key.From(split[0], split[1]);
-            } else {
-                if (split.length < 1) {
-                    throw new IllegalStateException("Expected at least 1 path segment");
-                }
-                key = new Key.From(split[0]);
+            key = this.keyFromPath(new RequestLineFrom(line).uri().getPath());
+            if (key.isEmpty()) {
+                return new RsWithBody(
+                    new RsWithStatus(RsStatus.NOT_FOUND),
+                    "Failed to find a repository",
+                    StandardCharsets.UTF_8
+                );
             }
-            return this.repositories.slice(key, false).response(line, headers, body);
+            return this.repositories.slice(key.get(), false).response(line, headers, body);
         } catch (final IOException err) {
             return new RsWithBody(
                 new RsWithStatus(RsStatus.INTERNAL_ERROR),
@@ -97,5 +93,25 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
+    }
+
+    /**
+     * Key from path.
+     * @param path Path from request line
+     * @return Key from path.
+     * @throws IOException In case of problems with reading settings.
+     */
+    private Optional<Key> keyFromPath(final String path) throws IOException {
+        final String[] split = path.replaceAll("^/+", "").split("/");
+        final Optional<Key> key;
+        final boolean org = this.settings.layout().equals("org");
+        if (org && split.length >= 2) {
+            key = Optional.of(new Key.From(split[0], split[1]));
+        } else if (!org && split.length >= 1) {
+            key = Optional.of(new Key.From(split[0]));
+        } else {
+            key = Optional.empty();
+        }
+        return key;
     }
 }

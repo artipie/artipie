@@ -152,7 +152,7 @@ final class MavenProxyAuthIT {
             "my-maven",
             new RepoConfigYaml("maven-proxy")
                 .withFileStorage(root.resolve("repos"))
-                .withRemoteUri(
+                .withRemote(
                     String.format("http://localhost:%s/maven-origin", this.origin.port()),
                     ArtipieServer.ALICE.name(),
                     ArtipieServer.ALICE.password()
