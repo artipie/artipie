@@ -23,17 +23,18 @@
  */
 package com.artipie.maven;
 
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.RepoConfig;
+import com.artipie.asto.cache.Cache;
 import com.artipie.asto.cache.StorageCache;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
-import com.artipie.http.client.auth.Authenticator;
-import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.maven.http.MavenProxySlice;
+import com.artipie.repo.ProxyConfig;
+import com.artipie.repo.YamlProxyConfig;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Map;
 import org.reactivestreams.Publisher;
 
@@ -71,37 +72,21 @@ public final class MavenProxy implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final YamlMapping settings = this.cfg.settings()
-            .orElseThrow(() -> new IllegalStateException("Repo settings missed"));
-        final String uri = settings.string("remote_uri");
-        if (uri == null) {
-            throw new IllegalStateException(
-                "`remote_uri` is not specified in settings for Maven proxy"
-            );
+        final Collection<ProxyConfig.Remote> remotes = new YamlProxyConfig(
+            this.cfg.repoConfig()
+        ).remotes();
+        if (remotes.isEmpty()) {
+            throw new IllegalArgumentException("No remotes specified");
         }
-        final Authenticator auth;
-        final String username = settings.string("remote_username");
-        final String password = settings.string("remote_password");
-        if (username == null && password == null) {
-            auth = Authenticator.ANONYMOUS;
-        } else {
-            if (username == null) {
-                throw new IllegalStateException(
-                    "`remote_username` is not specified in settings for Maven proxy"
-                );
-            }
-            if (password == null) {
-                throw new IllegalStateException(
-                    "`remote_password` is not specified in settings for Maven proxy"
-                );
-            }
-            auth = new GenericAuthenticator(username, password);
+        if (remotes.size() > 1) {
+            throw new IllegalArgumentException("Only one remote is allowed");
         }
+        final ProxyConfig.Remote remote = remotes.iterator().next();
         return new MavenProxySlice(
             this.client,
-            URI.create(uri),
-            auth,
-            new StorageCache(this.cfg.storage())
+            URI.create(remote.url()),
+            remote.auth(),
+            this.cfg.storageOpt().<Cache>map(StorageCache::new).orElse(Cache.NOP)
         ).response(line, headers, body);
     }
 }

@@ -89,7 +89,7 @@ final class MavenProxyIT {
             this.tmp, "my-maven",
             new RepoConfigYaml("maven-proxy")
                 .withFileStorage(this.tmp.resolve("repos"))
-                .withRemoteUri("https://repo.maven.apache.org/maven2")
+                .withRemote("https://repo.maven.apache.org/maven2")
         );
         this.port = this.server.start();
         final Path setting = this.tmp.resolve("settings.xml");
