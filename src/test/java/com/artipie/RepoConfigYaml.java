@@ -100,14 +100,16 @@ public final class RepoConfigYaml {
     }
 
     /**
-     * Adds remote uri to config.
-     * @param uri URI
+     * Adds remote to config.
+     * @param url URL
      * @return Itself
      */
-    public RepoConfigYaml withRemoteUri(final String uri) {
+    public RepoConfigYaml withRemote(final String url) {
         this.builder = this.builder.add(
-            "settings",
-            Yaml.createYamlMappingBuilder().add("remote_uri", uri).build()
+            "remotes",
+            Yaml.createYamlSequenceBuilder().add(
+                Yaml.createYamlMappingBuilder().add("url", url).build()
+            ).build()
         );
         return this;
     }
@@ -123,24 +125,26 @@ public final class RepoConfigYaml {
     }
 
     /**
-     * Adds remote uri with authentication to config.
-     * @param uri URI
+     * Adds remote with authentication to config.
+     * @param url URL
      * @param username Username
      * @param password Password
      * @return Itself
      */
-    public RepoConfigYaml withRemoteUri(
-        final String uri,
+    public RepoConfigYaml withRemote(
+        final String url,
         final String username,
         final String password
     ) {
         this.builder = this.builder.add(
-            "settings",
-            Yaml.createYamlMappingBuilder()
-                .add("remote_uri", uri)
-                .add("remote_username", username)
-                .add("remote_password", password)
-                .build()
+            "remotes",
+            Yaml.createYamlSequenceBuilder().add(
+                Yaml.createYamlMappingBuilder()
+                    .add("url", url)
+                    .add("username", username)
+                    .add("password", password)
+                    .build()
+            ).build()
         );
         return this;
     }
