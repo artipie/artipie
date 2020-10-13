@@ -25,10 +25,7 @@ package com.artipie.nuget;
 
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
-import com.artipie.asto.Key;
-import com.artipie.asto.fs.FileStorage;
 import com.jcabi.log.Logger;
-import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -89,25 +86,13 @@ final class NugetITCase {
      */
     private int port;
 
-    /**
-     * For puzzle.
-     * @todo #602:30min Create constructor in `ArtipieServer` to pass server port.
-     *  Now config for server are generated earlier than server starts. So, we
-     *  need to overwrite file with config after server starting. Let's create
-     *  constructor in `ArtipieServer` to pass free port.
-     */
     @BeforeEach
     void init() throws Exception {
         final String name = "my-nuget";
-        try (ServerSocket socket = new ServerSocket(0)) {
-            this.port = socket.getLocalPort();
-            this.server = new ArtipieServer(this.tmp, name, this.config());
-        }
-        this.port = this.server.start();
+        this.port = new RandomFreePort().value();
+        this.server = new ArtipieServer(this.tmp, name, this.config().toString(), this.port);
+        this.server.start();
         Testcontainers.exposeHostPorts(this.port);
-        new FileStorage(this.tmp)
-            .save(new Key.From(String.format("repos/%s.yaml", name)), this.config().toContent())
-            .join();
         this.createNugetConfig();
         this.cntn = new GenericContainer<>("mcr.microsoft.com/dotnet/sdk:5.0")
             .withCommand("tail", "-f", "/dev/null")

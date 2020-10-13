@@ -85,6 +85,12 @@ public class ArtipieServer {
     private final String config;
 
     /**
+     * Free port for starting server. If equal to 0, the server
+     * starts on an arbitrary free port.
+     */
+    private final int freeport;
+
+    /**
      * Vert.x instance used to run the server.
      */
     private Vertx vertx;
@@ -107,9 +113,7 @@ public class ArtipieServer {
      * @param config Repo config.
      */
     public ArtipieServer(final Path root, final String name, final String config) {
-        this.root = root;
-        this.name = name;
-        this.config = config;
+        this(root, name, config, 0);
     }
 
     /**
@@ -120,7 +124,24 @@ public class ArtipieServer {
      * @param config Repo config.
      */
     public ArtipieServer(final Path root, final String name, final RepoConfigYaml config) {
-        this(root, name, config.toString());
+        this(root, name, config.toString(), 0);
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param root Root directory.
+     * @param name Repo name.
+     * @param config Repo config.
+     * @param port Free port.
+     * @checkstyle ParameterNumberCheck (2 lines)
+     */
+    public ArtipieServer(final Path root, final String name, final String config,
+        final int port) {
+        this.root = root;
+        this.name = name;
+        this.config = config;
+        this.freeport = port;
     }
 
     /**
@@ -171,7 +192,7 @@ public class ArtipieServer {
             credentials().toString().getBytes()
         );
         this.vertx = Vertx.vertx();
-        this.server = new VertxMain(cfg, this.vertx, 0);
+        this.server = new VertxMain(cfg, this.vertx, this.freeport);
         this.prt = this.server.start();
         return this.prt;
     }
