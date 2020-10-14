@@ -68,26 +68,29 @@ Run `mvn install` (or `mvn install -U` to force download dependencies).
 
 ### Maven proxy Repo
 
-Try this `maven-central.yaml` file to host a proxy to Maven central:
+Try this `maven-proxy.yaml` file to host a proxy to Maven central:
 
 ```yaml
 repo:
   type: maven-proxy
-  storage: default
+  remotes:
+    - url: https://repo.maven.apache.org/maven2
+      username: Aladdin # optional
+      password: OpenSesame # optional
 ```
 
-Artipie will redirect all Maven requests to Maven central.
-Add it [as a mirror](https://maven.apache.org/guides/mini/guide-mirror-settings.html)
-to `settings.xml`:
-```xml
-<settings>
-  <mirrors>
-    <mirror>
-      <id>artipie-mirror</id>
-      <name>Artipie Mirror Repository</name>
-      <url>https://central.artipie.com/mirrors/maven-central</url>
-      <mirrorOf>central</mirrorOf>
-    </mirror>
-  </mirrors>
-</settings>
+Artipie will redirect all requests to Maven central.
+
+Proxy repository supports caching in local storage.
+To enable it and make previously accessed images available when source repository is down 
+add `storage` section to config:
+
+```yaml
+repo:
+  type: maven-proxy
+  remotes:
+    - url: https://repo.maven.apache.org/maven2
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-maven-cache
 ```
