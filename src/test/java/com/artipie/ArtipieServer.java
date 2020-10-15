@@ -248,7 +248,7 @@ public class ArtipieServer {
          * @param username Username.
          * @param pwd Password.
          */
-        User(final String username, final String pwd) {
+        public User(final String username, final String pwd) {
             this.username = username;
             this.pwd = pwd;
         }
