@@ -25,9 +25,9 @@ package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.CredsConfigYaml;
 import com.artipie.Settings;
 import com.artipie.Users;
-import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
@@ -35,10 +35,7 @@ import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonObject;
 import org.hamcrest.MatcherAssert;
@@ -63,12 +60,12 @@ class GetUsersSliceTest {
         .add("base_url", GetUsersSliceTest.BASE).build();
 
     @Test
-    void returnsUsersList() throws IOException {
+    void returnsUsersList() {
         final String jane = "jane";
         final String john = "john";
         final Storage storage = new InMemoryStorage();
         final Key key = new Key.From("_cred.yaml");
-        this.creds(storage, key, jane, john);
+        new CredsConfigYaml().withUsers(jane, john).saveTo(storage, key);
         MatcherAssert.assertThat(
             new GetUsersSlice(
                 new Settings.Fake(
@@ -96,21 +93,4 @@ class GetUsersSliceTest {
             .build();
     }
 
-    private void creds(final Storage storage, final Key key,
-        final String... users) throws IOException {
-        storage.save(
-            key,
-            new Content.From(
-                Yaml.createYamlInput(
-                    String.join(
-                        "\n",
-                        "credentials:",
-                        Stream.of(users).map(
-                            user -> String.format("  %s:\n%s", user, "    pass: plain123")
-                        ).collect(Collectors.joining("\n"))
-                    )
-                ).readYamlMapping().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        ).join();
-    }
 }
