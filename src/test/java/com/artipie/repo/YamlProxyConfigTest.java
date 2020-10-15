@@ -46,7 +46,7 @@ public final class YamlProxyConfigTest {
     public void parsesConfig() {
         final String firsturl = "https://artipie.com";
         final String secondurl = "http://localhost:8080/path";
-        final Collection<ProxyConfig.Remote> remotes = new YamlProxyConfig(
+        final Collection<YamlProxyConfig.YamlRemote> remotes = new YamlProxyConfig(
             Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
@@ -91,7 +91,7 @@ public final class YamlProxyConfigTest {
 
     @Test
     public void parsesEmpty() {
-        final Collection<ProxyConfig.Remote> remotes = new YamlProxyConfig(
+        final Collection<? extends ProxyConfig.Remote> remotes = new YamlProxyConfig(
             Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().build()
@@ -100,6 +100,22 @@ public final class YamlProxyConfigTest {
         MatcherAssert.assertThat(
             remotes,
             new IsEmptyCollection<>()
+        );
+    }
+
+    @Test
+    public void failsToGetUrlWhenNotSpecified() {
+        final ProxyConfig.Remote remote = new YamlProxyConfig(
+            Yaml.createYamlMappingBuilder().add(
+                "remotes",
+                Yaml.createYamlSequenceBuilder().add(
+                    Yaml.createYamlMappingBuilder().add("attr", "value").build()
+                ).build()
+            ).build()
+        ).remotes().iterator().next();
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            remote::url
         );
     }
 
