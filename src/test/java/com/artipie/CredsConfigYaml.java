@@ -31,6 +31,8 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import java.util.List;
+import java.util.Locale;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * Credentials config yaml.
@@ -59,7 +61,9 @@ public final class CredsConfigYaml {
     public CredsConfigYaml withUsers(final String... usernames) {
         for (final String name : usernames) {
             this.builder = this.builder.add(
-                name, Yaml.createYamlMappingBuilder().add("pass", "plain:123").build()
+                name, Yaml.createYamlMappingBuilder()
+                    .add("pass", "123")
+                    .add("type", "plain").build()
             );
         }
         return this;
@@ -72,7 +76,9 @@ public final class CredsConfigYaml {
      * @return Itself
      */
     public CredsConfigYaml withUserAndGroups(final String username, final List<String> groups) {
-        YamlMappingBuilder user = Yaml.createYamlMappingBuilder().add("pass", "plain:123");
+        YamlMappingBuilder user = Yaml.createYamlMappingBuilder()
+            .add("pass", "123")
+            .add("type", "plain");
         if (!groups.isEmpty()) {
             YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
             for (final String group : groups) {
@@ -81,6 +87,44 @@ public final class CredsConfigYaml {
             user = user.add("groups", seq.build());
         }
         this.builder = this.builder.add(username, user.build());
+        return this;
+    }
+
+    /**
+     * Adds user with plain password to credentials config.
+     * @param username Name of the user
+     * @param pswd Password
+     * @return Itself
+     */
+    public CredsConfigYaml withUserAndPlainPswd(final String username, final String pswd) {
+        this.builder = this.builder.add(
+            username,
+            Yaml.createYamlMappingBuilder()
+                .add("type", "plain")
+                .add("pass", pswd).build()
+        );
+        return this;
+    }
+
+    /**
+     * Adds user with password to credentials config. For sha256 format password is calculated.
+     * @param username Name of the user
+     * @param format Password format
+     * @param pswd Password
+     * @return Itself
+     */
+    public CredsConfigYaml withUserAndPswd(final String username, final Users.PasswordFormat format,
+        final String pswd) {
+        String pass = pswd;
+        if (format == Users.PasswordFormat.SHA256) {
+            pass = DigestUtils.sha256Hex(pass);
+        }
+        this.builder = this.builder.add(
+            username,
+            Yaml.createYamlMappingBuilder()
+                .add("type", format.name().toLowerCase(Locale.US))
+                .add("pass", pass).build()
+        );
         return this;
     }
 

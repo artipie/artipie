@@ -23,8 +23,8 @@
  */
 package com.artipie.auth;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.CredsConfigYaml;
 import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
 import com.artipie.YamlPermissions;
@@ -213,19 +213,8 @@ public class AuthAndPermissionsTest {
     }
 
     private YamlMapping credentials() {
-        return Yaml.createYamlMappingBuilder().add(
-            "credentials",
-            Yaml.createYamlMappingBuilder()
-                .add(
-                    "john",
-                    Yaml.createYamlMappingBuilder().add("pass", "plain:123").build()
-                )
-                .add(
-                    "admin",
-                    Yaml.createYamlMappingBuilder().add("pass", "plain:abc").build()
-                )
-                .build()
-        ).build();
+        return new CredsConfigYaml().withUserAndPlainPswd("john", "123")
+            .withUserAndPlainPswd("admin", "abc").yaml();
     }
 
     private YamlPermissions permissions() {
