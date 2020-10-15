@@ -106,7 +106,9 @@ public final class YamlProxyConfig implements ProxyConfig {
 
         @Override
         public String url() {
-            return this.source.string("url");
+            return Optional.ofNullable(this.source.string("url")).orElseThrow(
+                () -> new IllegalStateException("`url` is not specified for proxy remote")
+            );
         }
 
         @Override

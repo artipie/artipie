@@ -104,6 +104,22 @@ public final class YamlProxyConfigTest {
     }
 
     @Test
+    public void failsToGetUrlWhenNotSpecified() {
+        final ProxyConfig.Remote remote = new YamlProxyConfig(
+            Yaml.createYamlMappingBuilder().add(
+                "remotes",
+                Yaml.createYamlSequenceBuilder().add(
+                    Yaml.createYamlMappingBuilder().add("attr", "value").build()
+                ).build()
+            ).build()
+        ).remotes().iterator().next();
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            remote::url
+        );
+    }
+
+    @Test
     public void failsToGetAuthWhenUsernameOnly() {
         final ProxyConfig.Remote remote = new YamlProxyConfig(
             Yaml.createYamlMappingBuilder().add(
