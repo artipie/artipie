@@ -59,7 +59,7 @@ public final class CredsConfigYaml {
     public CredsConfigYaml withUsers(final String... usernames) {
         for (final String name : usernames) {
             this.builder = this.builder.add(
-                name, Yaml.createYamlMappingBuilder().add("pass", "pain:123").build()
+                name, Yaml.createYamlMappingBuilder().add("pass", "plain:123").build()
             );
         }
         return this;
@@ -72,7 +72,7 @@ public final class CredsConfigYaml {
      * @return Itself
      */
     public CredsConfigYaml withUserAndGroups(final String username, final List<String> groups) {
-        YamlMappingBuilder user = Yaml.createYamlMappingBuilder().add("pass", "pain:123");
+        YamlMappingBuilder user = Yaml.createYamlMappingBuilder().add("pass", "plain:123");
         if (!groups.isEmpty()) {
             YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
             for (final String group : groups) {
