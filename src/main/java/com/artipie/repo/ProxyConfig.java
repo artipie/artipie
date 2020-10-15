@@ -38,7 +38,7 @@ public interface ProxyConfig {
      *
      * @return Remote endpoints.
      */
-    Collection<Remote> remotes();
+    Collection<? extends Remote> remotes();
 
     /**
      * Proxy repository remote.

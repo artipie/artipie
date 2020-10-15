@@ -72,7 +72,7 @@ public final class MavenProxy implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final Collection<ProxyConfig.Remote> remotes = new YamlProxyConfig(
+        final Collection<? extends ProxyConfig.Remote> remotes = new YamlProxyConfig(
             this.cfg.repoConfig()
         ).remotes();
         if (remotes.isEmpty()) {

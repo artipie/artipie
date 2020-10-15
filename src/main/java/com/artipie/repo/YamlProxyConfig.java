@@ -54,7 +54,7 @@ public final class YamlProxyConfig implements ProxyConfig {
     }
 
     @Override
-    public Collection<Remote> remotes() {
+    public Collection<YamlRemote> remotes() {
         return StreamSupport.stream(
             Optional.ofNullable(
                 this.yaml.yamlSequence("remotes")
@@ -79,32 +79,41 @@ public final class YamlProxyConfig implements ProxyConfig {
      *
      * @since 0.12
      */
-    private static class YamlRemote implements Remote {
+    public static final class YamlRemote implements Remote {
 
         /**
          * Source YAML.
          */
-        private final YamlMapping yaml;
+        private final YamlMapping source;
 
         /**
          * Ctor.
          *
-         * @param yaml Source YAML.
+         * @param source Source YAML.
          */
-        YamlRemote(final YamlMapping yaml) {
-            this.yaml = yaml;
+        YamlRemote(final YamlMapping source) {
+            this.source = source;
+        }
+
+        /**
+         * Get source YAML.
+         *
+         * @return Source YAML.
+         */
+        public YamlMapping yaml() {
+            return this.source;
         }
 
         @Override
         public String url() {
-            return this.yaml.string("url");
+            return this.source.string("url");
         }
 
         @Override
         public Authenticator auth() {
             final Authenticator result;
-            final String username = this.yaml.string("username");
-            final String password = this.yaml.string("password");
+            final String username = this.source.string("username");
+            final String password = this.source.string("password");
             if (username == null && password == null) {
                 result = Authenticator.ANONYMOUS;
             } else {
