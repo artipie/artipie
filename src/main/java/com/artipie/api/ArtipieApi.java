@@ -70,7 +70,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
  * @checkstyle MethodLengthCheck (500 lines)
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength", "deprecation"})
 public final class ArtipieApi extends Slice.Wrap {
 
     /**
