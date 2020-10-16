@@ -132,7 +132,7 @@ final class AddUpdateUserSliceTest {
         MatcherAssert.assertThat(
             "User with correct password should be added",
             this.readCreds(username).string("pass"),
-            new IsEqual<>(this.shaPswd(pswd))
+            new IsEqual<>(DigestUtils.sha256Hex(pswd))
         );
         MatcherAssert.assertThat(
             "User has groups",
@@ -170,7 +170,7 @@ final class AddUpdateUserSliceTest {
         MatcherAssert.assertThat(
             "User with updated password should return",
             this.readCreds(username).string("pass"),
-            new IsEqual<>(this.shaPswd(newpswd))
+            new IsEqual<>(DigestUtils.sha256Hex(newpswd))
         );
         MatcherAssert.assertThat(
             "Yaml has readers group only",
@@ -190,10 +190,6 @@ final class AddUpdateUserSliceTest {
             json.add("groups", Json.createArrayBuilder(groups).build());
         }
         return Flowable.fromArray(ByteBuffer.wrap(json.build().toString().getBytes()));
-    }
-
-    private String shaPswd(final String pswd) {
-        return String.format("sha256:%s", DigestUtils.sha256Hex(pswd));
     }
 
     private YamlMapping readCreds(final String username) throws IOException {

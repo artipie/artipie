@@ -96,7 +96,7 @@ class ApiChangeUserPasswordTest {
         MatcherAssert.assertThat(
             "User with correct password should be added",
             this.getPasswordFromYaml(username),
-            new IsEqual<>(this.pswd(pswd))
+            new IsEqual<>(DigestUtils.sha256Hex(pswd))
         );
     }
 
@@ -125,7 +125,7 @@ class ApiChangeUserPasswordTest {
         MatcherAssert.assertThat(
             "User with correct password should be added",
             this.getPasswordFromYaml(username),
-            new IsEqual<>(this.pswd(pswd))
+            new IsEqual<>(DigestUtils.sha256Hex(pswd))
         );
     }
 
@@ -140,10 +140,6 @@ class ApiChangeUserPasswordTest {
 
     private Content body(final String pswd) {
         return new Content.From(String.format("password=%s", pswd).getBytes());
-    }
-
-    private String pswd(final String pswd) {
-        return String.format("sha256:%s", DigestUtils.sha256Hex(pswd));
     }
 
 }

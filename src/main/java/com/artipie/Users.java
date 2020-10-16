@@ -176,10 +176,8 @@ public interface Users {
                 yaml -> {
                     YamlMappingBuilder result = FromStorageYaml.removeUserRecord(user.uname, yaml);
                     YamlMappingBuilder info = Yaml.createYamlMappingBuilder()
-                        .add(
-                            "pass",
-                            String.format("%s:%s", format.name().toLowerCase(Locale.US), pswd)
-                        );
+                        .add("type", format.name().toLowerCase(Locale.US))
+                        .add("pass", pswd);
                     if (user.mail.isPresent()) {
                         info = info.add(FromStorageYaml.EMAIL, user.mail.get());
                     }
