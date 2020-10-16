@@ -72,7 +72,9 @@ import java.util.stream.Collectors;
  * @checkstyle CyclomaticComplexityCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
-@SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.StaticAccessToStaticFields"})
+@SuppressWarnings(
+    {"PMD.AvoidCatchingGenericException", "PMD.StaticAccessToStaticFields", "deprecation"}
+)
 public final class SliceFromConfig extends Slice.Wrap {
 
     /**

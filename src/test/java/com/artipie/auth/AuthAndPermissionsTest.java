@@ -53,7 +53,7 @@ import org.junit.jupiter.api.Test;
  * @since 0.9
  * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods", "deprecation"})
 public class AuthAndPermissionsTest {
 
     @Test

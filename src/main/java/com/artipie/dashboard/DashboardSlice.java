@@ -50,6 +50,7 @@ import java.util.regex.Pattern;
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
+@SuppressWarnings("deprecation")
 public final class DashboardSlice extends Slice.Wrap {
 
     /**

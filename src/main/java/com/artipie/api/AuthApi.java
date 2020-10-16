@@ -51,6 +51,7 @@ import org.apache.commons.codec.binary.Hex;
  * API authentication wrapper.
  * @since 0.6
  */
+@SuppressWarnings("deprecation")
 public final class AuthApi implements Identities {
 
     /**
