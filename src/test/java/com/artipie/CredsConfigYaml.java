@@ -129,6 +129,38 @@ public final class CredsConfigYaml {
     }
 
     /**
+     * Adds user with full info: name, password, email and groups.
+     * @param username Name
+     * @param format Password format
+     * @param pswd Password
+     * @param email Email
+     * @param groups Groups
+     * @return Itself
+     * @checkstyle ParameterNumberCheck (500 lines)
+     */
+    public CredsConfigYaml withFullInfo(final
+        String username, final Users.PasswordFormat format,
+        final String pswd, final String email, final List<String> groups) {
+        String pass = pswd;
+        if (format == Users.PasswordFormat.SHA256) {
+            pass = DigestUtils.sha256Hex(pass);
+        }
+        YamlMappingBuilder user = Yaml.createYamlMappingBuilder()
+            .add("type", format.name().toLowerCase(Locale.US))
+            .add("pass", pass)
+            .add("email", email);
+        if (!groups.isEmpty()) {
+            YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
+            for (final String group : groups) {
+                seq = seq.add(group);
+            }
+            user = user.add("groups", seq.build());
+        }
+        this.builder = this.builder.add(username, user.build());
+        return this;
+    }
+
+    /**
      * Saves credentials config to the provided storage by provided name.
      * @param storage Where to save
      * @param key Storage item name
