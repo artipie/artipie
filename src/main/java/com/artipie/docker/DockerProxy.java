@@ -38,10 +38,9 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.AuthClientSlice;
-import com.artipie.repo.YamlProxyConfig;
+import com.artipie.repo.ProxyConfig;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.reactivestreams.Publisher;
 
@@ -117,7 +116,7 @@ public final class DockerProxy implements Slice {
      */
     private Slice delegate() {
         final Docker proxies = new MultiReadDocker(
-            new YamlProxyConfig(this.cfg.repoConfig()).remotes().stream().map(
+            this.cfg.proxy().remotes().stream().map(
                 remote -> this.proxy(this.client, remote)
             ).collect(Collectors.toList())
         );
@@ -146,15 +145,12 @@ public final class DockerProxy implements Slice {
      * @param remote YAML remote config.
      * @return Docker proxy.
      */
-    private Docker proxy(final ClientSlices slices, final YamlProxyConfig.YamlRemote remote) {
+    private static Docker proxy(final ClientSlices slices, final ProxyConfig.Remote remote) {
         final Docker proxy = new ProxyDocker(
             new AuthClientSlice(slices.https(remote.url()), remote.auth())
         );
-        return Optional.ofNullable(remote.yaml().yamlMapping("cache")).<Docker>map(
-            node -> new CacheDocker(
-                proxy,
-                new AstoDocker(this.cfg.storage(node))
-            )
+        return remote.cache().<Docker>map(
+            storage -> new CacheDocker(proxy, new AstoDocker(storage))
         ).orElse(proxy);
     }
 }
