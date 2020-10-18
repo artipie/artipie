@@ -34,6 +34,8 @@ import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.http.auth.Permissions;
+import com.artipie.repo.ProxyConfig;
+import com.artipie.repo.YamlProxyConfig;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.net.MalformedURLException;
@@ -51,6 +53,7 @@ import org.reactivestreams.Publisher;
 /**
  * Repository config.
  * @since 0.2
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class RepoConfig {
@@ -150,38 +153,18 @@ public final class RepoConfig {
      * @return Async storage for repo
      */
     public Storage storage() {
-        return this.storage(this.repoConfig());
-    }
-
-    /**
-     * Storage configured in givent YAML.
-     *
-     * @param config YAML config to create storage from.
-     * @return Async storage for repo
-     */
-    public Storage storage(final YamlMapping config) {
-        return this.storageOpt(config).map(MeasuredStorage::new).orElseThrow(
+        return this.storageOpt().map(MeasuredStorage::new).orElseThrow(
             () -> new IllegalStateException("Storage is not configured")
         );
     }
 
     /**
-     * Create storage if configured.
+     * Create storage if configured in given YAML.
      *
      * @return Async storage for repo
      */
     public Optional<Storage> storageOpt() {
-        return this.storageOpt(this.repoConfig());
-    }
-
-    /**
-     * Create storage if configured in given YAML.
-     *
-     * @param config YAML config to create storage from.
-     * @return Async storage for repo
-     */
-    public Optional<Storage> storageOpt(final YamlMapping config) {
-        return Optional.ofNullable(config.value("storage")).map(
+        return Optional.ofNullable(this.repoConfig().value("storage")).map(
             node -> {
                 final Storage storage;
                 if (node instanceof Scalar) {
@@ -241,6 +224,15 @@ public final class RepoConfig {
      */
     public YamlMapping repoConfig() {
         return Objects.requireNonNull(this.yaml.yamlMapping("repo"), "yaml repo config is absent");
+    }
+
+    /**
+     * Get proxy config.
+     *
+     * @return Proxy config.
+     */
+    public ProxyConfig proxy() {
+        return new YamlProxyConfig(this.storages, this.prefix, this.repoConfig());
     }
 
     /**

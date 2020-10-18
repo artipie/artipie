@@ -31,7 +31,6 @@ import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.maven.http.MavenProxySlice;
 import com.artipie.repo.ProxyConfig;
-import com.artipie.repo.YamlProxyConfig;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -72,9 +71,7 @@ public final class MavenProxy implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final Collection<? extends ProxyConfig.Remote> remotes = new YamlProxyConfig(
-            this.cfg.repoConfig()
-        ).remotes();
+        final Collection<? extends ProxyConfig.Remote> remotes = this.cfg.proxy().remotes();
         if (remotes.isEmpty()) {
             throw new IllegalArgumentException("No remotes specified");
         }

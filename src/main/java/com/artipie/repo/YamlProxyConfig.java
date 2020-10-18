@@ -23,12 +23,21 @@
  */
 package com.artipie.repo;
 
+import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.MeasuredStorage;
+import com.artipie.StorageAliases;
+import com.artipie.YamlStorage;
+import com.artipie.asto.Key;
+import com.artipie.asto.LoggingStorage;
+import com.artipie.asto.Storage;
+import com.artipie.asto.SubStorage;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -40,6 +49,16 @@ import java.util.stream.StreamSupport;
 public final class YamlProxyConfig implements ProxyConfig {
 
     /**
+     * Storages.
+     */
+    private final StorageAliases storages;
+
+    /**
+     * Cache storage prefix.
+     */
+    private final Key prefix;
+
+    /**
      * Source YAML.
      */
     private final YamlMapping yaml;
@@ -47,9 +66,17 @@ public final class YamlProxyConfig implements ProxyConfig {
     /**
      * Ctor.
      *
+     * @param storages Storages.
+     * @param prefix Cache storage prefix.
      * @param yaml Source YAML.
      */
-    public YamlProxyConfig(final YamlMapping yaml) {
+    public YamlProxyConfig(
+        final StorageAliases storages,
+        final Key prefix,
+        final YamlMapping yaml
+    ) {
+        this.storages = storages;
+        this.prefix = prefix;
         this.yaml = yaml;
     }
 
@@ -79,7 +106,7 @@ public final class YamlProxyConfig implements ProxyConfig {
      *
      * @since 0.12
      */
-    public static final class YamlRemote implements Remote {
+    public final class YamlRemote implements Remote {
 
         /**
          * Source YAML.
@@ -93,15 +120,6 @@ public final class YamlProxyConfig implements ProxyConfig {
          */
         YamlRemote(final YamlMapping source) {
             this.source = source;
-        }
-
-        /**
-         * Get source YAML.
-         *
-         * @return Source YAML.
-         */
-        public YamlMapping yaml() {
-            return this.source;
         }
 
         @Override
@@ -132,6 +150,34 @@ public final class YamlProxyConfig implements ProxyConfig {
                 result = new GenericAuthenticator(username, password);
             }
             return result;
+        }
+
+        @Override
+        public Optional<Storage> cache() {
+            return Optional.ofNullable(this.source.yamlMapping("cache")).flatMap(
+                root -> Optional.ofNullable(root.value("storage")).map(
+                    node -> {
+                        final Storage storage;
+                        if (node instanceof Scalar) {
+                            storage = YamlProxyConfig.this.storages.storage(
+                                ((Scalar) node).value()
+                            );
+                        } else if (node instanceof YamlMapping) {
+                            storage = new YamlStorage((YamlMapping) node).storage();
+                        } else {
+                            throw new IllegalStateException(
+                                String.format("Invalid storage config: %s", node)
+                            );
+                        }
+                        return new MeasuredStorage(
+                            new SubStorage(
+                                YamlProxyConfig.this.prefix,
+                                new LoggingStorage(Level.INFO, storage)
+                            )
+                        );
+                    }
+                )
+            );
         }
     }
 }
