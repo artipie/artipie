@@ -29,12 +29,12 @@ import com.artipie.asto.cache.StorageCache;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
+import com.artipie.http.group.GroupSlice;
 import com.artipie.maven.http.MavenProxySlice;
-import com.artipie.repo.ProxyConfig;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.reactivestreams.Publisher;
 
 /**
@@ -71,19 +71,15 @@ public final class MavenProxy implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final Collection<? extends ProxyConfig.Remote> remotes = this.cfg.proxy().remotes();
-        if (remotes.isEmpty()) {
-            throw new IllegalArgumentException("No remotes specified");
-        }
-        if (remotes.size() > 1) {
-            throw new IllegalArgumentException("Only one remote is allowed");
-        }
-        final ProxyConfig.Remote remote = remotes.iterator().next();
-        return new MavenProxySlice(
-            this.client,
-            URI.create(remote.url()),
-            remote.auth(),
-            this.cfg.storageOpt().<Cache>map(StorageCache::new).orElse(Cache.NOP)
+        return new GroupSlice(
+            this.cfg.proxy().remotes().stream().map(
+                remote -> new MavenProxySlice(
+                    this.client,
+                    URI.create(remote.url()),
+                    remote.auth(),
+                    this.cfg.storageOpt().<Cache>map(StorageCache::new).orElse(Cache.NOP)
+                )
+            ).collect(Collectors.toList())
         ).response(line, headers, body);
     }
 }
