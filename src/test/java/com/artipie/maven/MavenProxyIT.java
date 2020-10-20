@@ -23,6 +23,7 @@
  */
 package com.artipie.maven;
 
+import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
 import com.artipie.asto.Key;
@@ -87,9 +88,24 @@ final class MavenProxyIT {
         this.storage = new FileStorage(this.tmp);
         this.server = new ArtipieServer(
             this.tmp, "my-maven",
-            new RepoConfigYaml("maven-proxy")
-                .withFileStorage(this.tmp.resolve("repos"))
-                .withRemote("https://repo.maven.apache.org/maven2")
+            new RepoConfigYaml("maven-proxy").withRemotes(
+                Yaml.createYamlSequenceBuilder()
+                    .add(
+                        Yaml.createYamlMappingBuilder()
+                            .add("url", "https://repo.maven.apache.org/maven2")
+                            .add(
+                                "cache",
+                                Yaml.createYamlMappingBuilder().add(
+                                    "storage",
+                                    Yaml.createYamlMappingBuilder()
+                                        .add("type", "fs")
+                                        .add("path", this.tmp.resolve("repos").toString())
+                                        .build()
+                                ).build()
+                            )
+                            .build()
+                    )
+            )
         );
         this.port = this.server.start();
         final Path setting = this.tmp.resolve("settings.xml");
