@@ -90,7 +90,8 @@ repo:
   type: maven-proxy
   remotes:
     - url: https://repo.maven.apache.org/maven2
-  storage:
-    type: fs
-    path: /tmp/artipie/data/my-maven-cache
+      cache:
+        storage:
+          type: fs
+          path: /tmp/artipie/data/my-maven-cache
 ```
