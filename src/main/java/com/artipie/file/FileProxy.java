@@ -39,7 +39,6 @@ import org.reactivestreams.Publisher;
  * File proxy slice created from config.
  *
  * @since 0.12
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class FileProxy implements Slice {
 
