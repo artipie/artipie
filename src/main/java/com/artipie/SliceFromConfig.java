@@ -31,7 +31,7 @@ import com.artipie.docker.DockerProxy;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.http.TrimmedDocker;
-import com.artipie.files.FileProxySlice;
+import com.artipie.file.FileProxy;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
 import com.artipie.helm.HelmSlice;
@@ -60,7 +60,6 @@ import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URI;
 import java.util.stream.Collectors;
 
 /**
@@ -155,15 +154,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "file-proxy":
                 slice = trimIfNotStandalone(
                     settings, standalone,
-                    new FileProxySlice(
-                        SliceFromConfig.HTTP,
-                        URI.create(
-                            cfg.settings()
-                                .orElseThrow(
-                                    () -> new IllegalStateException("Repo settings missed")
-                                ).string("remote_uri")
-                        )
-                    )
+                    new FileProxy(SliceFromConfig.HTTP, cfg)
                 );
                 break;
             case "npm":
