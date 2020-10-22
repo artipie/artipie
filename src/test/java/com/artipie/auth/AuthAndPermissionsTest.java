@@ -28,9 +28,8 @@ import com.artipie.CredsConfigYaml;
 import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
 import com.artipie.YamlPermissions;
-import com.artipie.http.auth.BasicIdentities;
+import com.artipie.http.auth.BasicAuthSlice;
 import com.artipie.http.auth.Permission;
-import com.artipie.http.auth.SliceAuth;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
@@ -49,20 +48,20 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for basic authorisation and permissions settings,
- * {@link SliceAuth}, {@link YamlPermissions} and {@link AuthFromYaml} are involved.
+ * {@link BasicAuthSlice}, {@link YamlPermissions} and {@link AuthFromYaml} are involved.
  * @since 0.9
  * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods", "deprecation"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public class AuthAndPermissionsTest {
 
     @Test
     void allowsDownloadWhenAuthHeaderIsNotPresent() {
         MatcherAssert.assertThat(
-            new SliceAuth(
+            new BasicAuthSlice(
                 new SliceSimple(StandardRs.EMPTY),
-                new Permission.ByName("download", this.permissions()),
-                new BasicIdentities(new AuthFromYaml(this.credentials()))
+                new AuthFromYaml(this.credentials()),
+                new Permission.ByName("download", this.permissions())
             ).response(
                 new RequestLine("POST", "/bar", "HTTP/1.2").toString(),
                 Collections.emptyList(),
@@ -75,10 +74,10 @@ public class AuthAndPermissionsTest {
     @Test
     void anyoneCanDownload() throws IOException {
         MatcherAssert.assertThat(
-            new SliceAuth(
+            new BasicAuthSlice(
                 new SliceSimple(StandardRs.EMPTY),
-                new Permission.ByName("download", this.permissions()),
-                new BasicIdentities(new AuthFromYaml(this.credentials()))
+                new AuthFromYaml(this.credentials()),
+                new Permission.ByName("download", this.permissions())
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
                 new ListOf<Map.Entry<String, String>>(
@@ -95,10 +94,10 @@ public class AuthAndPermissionsTest {
     @Test
     void anyoneCanNotDeploy() throws IOException {
         MatcherAssert.assertThat(
-            new SliceAuth(
+            new BasicAuthSlice(
                 new SliceSimple(StandardRs.EMPTY),
-                new Permission.ByName("deploy", this.permissions()),
-                new BasicIdentities(new AuthFromYaml(this.credentials()))
+                new AuthFromYaml(this.credentials()),
+                new Permission.ByName("deploy", this.permissions())
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
                 new ListOf<Map.Entry<String, String>>(
@@ -115,10 +114,10 @@ public class AuthAndPermissionsTest {
     @Test
     void adminCanDownload() throws IOException {
         MatcherAssert.assertThat(
-            new SliceAuth(
+            new BasicAuthSlice(
                 new SliceSimple(StandardRs.EMPTY),
-                new Permission.ByName("download", this.permissions()),
-                new BasicIdentities(new AuthFromYaml(this.credentials()))
+                new AuthFromYaml(this.credentials()),
+                new Permission.ByName("download", this.permissions())
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
                 new ListOf<Map.Entry<String, String>>(
@@ -136,10 +135,10 @@ public class AuthAndPermissionsTest {
     void johnCanDelete() throws IOException {
         final RsStatus status = RsStatus.NO_CONTENT;
         MatcherAssert.assertThat(
-            new SliceAuth(
+            new BasicAuthSlice(
                 new SliceSimple(new RsWithStatus(status)),
-                new Permission.ByName("delete", this.permissions()),
-                new BasicIdentities(new AuthFromYaml(this.credentials()))
+                new AuthFromYaml(this.credentials()),
+                new Permission.ByName("delete", this.permissions())
             ).response(
                 new RequestLine("PUT", "/foo", "HTTP/1.2").toString(),
                 new ListOf<Map.Entry<String, String>>(
@@ -157,10 +156,10 @@ public class AuthAndPermissionsTest {
     void adminCanDeploy() throws IOException {
         final RsStatus status = RsStatus.ACCEPTED;
         MatcherAssert.assertThat(
-            new SliceAuth(
+            new BasicAuthSlice(
                 new SliceSimple(new RsWithStatus(status)),
-                new Permission.ByName("deploy", this.permissions()),
-                new BasicIdentities(new AuthFromYaml(this.credentials()))
+                new AuthFromYaml(this.credentials()),
+                new Permission.ByName("deploy", this.permissions())
             ).response(
                 new RequestLine("PUT", "/foo", "HTTP/1.2").toString(),
                 new ListOf<Map.Entry<String, String>>(
@@ -178,10 +177,10 @@ public class AuthAndPermissionsTest {
     void authIsNotRequiredForPublicRepo() {
         final RsStatus status = RsStatus.ACCEPTED;
         MatcherAssert.assertThat(
-            new SliceAuth(
+            new BasicAuthSlice(
                 new SliceSimple(new RsWithStatus(status)),
-                new Permission.ByName("install", this.allAllowedPermissions()),
-                new BasicIdentities(new AuthFromYaml(this.credentials()))
+                new AuthFromYaml(this.credentials()),
+                new Permission.ByName("install", this.allAllowedPermissions())
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
                 Collections.emptyList(),
@@ -195,10 +194,10 @@ public class AuthAndPermissionsTest {
     void publicRepoWorksWithAuth() throws IOException {
         final RsStatus status = RsStatus.OK;
         MatcherAssert.assertThat(
-            new SliceAuth(
+            new BasicAuthSlice(
                 new SliceSimple(new RsWithStatus(status)),
-                new Permission.ByName("delete", this.allAllowedPermissions()),
-                new BasicIdentities(new AuthFromYaml(this.credentials()))
+                new AuthFromYaml(this.credentials()),
+                new Permission.ByName("delete", this.allAllowedPermissions())
             ).response(
                 new RequestLine("GET", "/foo", "HTTP/1.2").toString(),
                 new ListOf<Map.Entry<String, String>>(
