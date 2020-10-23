@@ -92,7 +92,7 @@ final class NpmITCase {
         final boolean anonymous = true;
         final String proj = "@hello/simple-npm-project";
         this.init(anonymous);
-        this.prepareDirectory(proj);
+        this.saveFilesToStrg(proj);
         MatcherAssert.assertThat(
             this.exec("npm", "install", proj, "--registry", this.url),
             new StringContainsInOrder(
@@ -136,7 +136,7 @@ final class NpmITCase {
         this.cntn.start();
     }
 
-    private void prepareDirectory(final String proj) {
+    private void saveFilesToStrg(final String proj) {
         new TestResource(String.format("npm/storage/%s/meta.json", proj))
             .saveTo(
                 this.storage,
