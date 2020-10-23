@@ -54,6 +54,7 @@ import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.NpmProxyConfig;
 import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
+import com.artipie.pypi.PypiProxy;
 import com.artipie.pypi.http.PySlice;
 import com.artipie.repo.PathPattern;
 import com.artipie.rpm.http.RpmSlice;
@@ -261,6 +262,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = trimIfNotStandalone(
                     settings, standalone,
                     new PySlice(cfg.storage(), permissions, auth)
+                );
+                break;
+            case "pypi-proxy":
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new PypiProxy(SliceFromConfig.HTTP, cfg)
                 );
                 break;
             case "docker":
