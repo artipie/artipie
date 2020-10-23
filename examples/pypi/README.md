@@ -30,7 +30,7 @@ Try this `pypi-proxy.yaml` file to host a proxy to `https://pypi.org/simple/` re
 
 ```yaml
 repo:
-  type: maven-proxy
+  type: pypi-proxy
   remotes:
     - url: https://pypi.org/simple/
       username: Aladdin # optional
