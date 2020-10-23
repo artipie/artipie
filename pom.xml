@@ -192,7 +192,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>npm-adapter</artifactId>
-      <version>0.7.5</version>
+      <version>0.7.6</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
