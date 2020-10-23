@@ -121,6 +121,7 @@ final class NpmITCase {
     void npmPublish() throws Exception {
         final boolean anonymous = true;
         final String proj = "@hello/simple-npm-project";
+        final String tgz = String.format("%s/-/%s-1.0.1.tgz", proj, proj);
         final Key path = new Key.From("repos/my-npm");
         this.init(anonymous);
         new TestResource("npm/simple-npm-project")
@@ -128,7 +129,7 @@ final class NpmITCase {
         MatcherAssert.assertThat(
             "Package was published",
             this.exec("npm", "publish", proj, "--registry", this.url),
-            new StringContains("+ @hello/simple-npm-project@1.0.1")
+            new StringContains(String.format("+ %s@1.0.1", proj))
         );
         final JsonObject meta = new JsonFromPublisher(
             this.storage.value(
@@ -141,12 +142,12 @@ final class NpmITCase {
                 .getJsonObject("1.0.1")
                 .getJsonObject("dist")
                 .getString("tarball"),
-            new IsEqual<>(String.format("/%s/-/%s-1.0.1.tgz", proj, proj))
+            new IsEqual<>(String.format("/%s", tgz))
         );
         MatcherAssert.assertThat(
             "File should be in storage after publishing",
             this.storage.exists(
-                new Key.From(path, String.format("%s/-/%s-1.0.1.tgz", proj, proj))
+                new Key.From(path, tgz)
             ).toCompletableFuture().join(),
             new IsEqual<>(true)
         );
