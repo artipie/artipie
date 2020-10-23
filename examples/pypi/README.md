@@ -23,3 +23,25 @@ To install package with `pip install` specify Artipie repository url with `--ind
 ```bash
 $ pip install --index-url http://username:password@localhost:8080/pypi/ myproject
 ```
+
+### Python proxy
+
+Try this `pypi-proxy.yaml` file to host a proxy to `https://pypi.org/simple/` repository:
+
+```yaml
+repo:
+  type: pypi-proxy
+  remotes:
+    - url: https://pypi.org/simple/
+      username: Aladdin # optional
+      password: OpenSesame # optional
+      cache:
+        storage:
+          type: fs
+          path: /tmp/artipie/data/my-pypi-cache
+```
+
+Artipie will redirect all requests to pypi simple repository.
+
+Proxy repository supports caching in local storage, all previously accessed indexes and packages are 
+available when source repository is down.
