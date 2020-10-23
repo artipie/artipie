@@ -24,9 +24,9 @@
 package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.CredsConfigYaml;
 import com.artipie.Settings;
 import com.artipie.Users;
-import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
@@ -78,7 +78,7 @@ final class DeleteUserSliceTest {
     void returnsNotFoundIfUserIsNotFoundInCredentials() {
         final Storage storage = new InMemoryStorage();
         final Key key = new Key.From("_credentials.yaml");
-        this.creds("john", storage, key);
+        new CredsConfigYaml().withUsers("john").saveTo(storage, key);
         MatcherAssert.assertThat(
             new DeleteUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
             new SliceHasResponse(
@@ -92,7 +92,7 @@ final class DeleteUserSliceTest {
     void returnsOkAndDeleteIfUserIsFoundInCredentials() throws IOException {
         final Storage storage = new InMemoryStorage();
         final Key key = new Key.From("_credentials.yaml");
-        this.creds("jane", storage, key);
+        new CredsConfigYaml().withUsers("jane").saveTo(storage, key);
         MatcherAssert.assertThat(
             "DeleteUserSlice response",
             new DeleteUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
@@ -116,18 +116,4 @@ final class DeleteUserSliceTest {
         );
     }
 
-    private void creds(final String username, final Storage storage, final Key key) {
-        storage.save(
-            key,
-            new Content.From(Yaml.createYamlMappingBuilder()
-                .add(
-                    "credentials",
-                    Yaml.createYamlMappingBuilder().add(
-                        username,
-                        Yaml.createYamlMappingBuilder().add("pass", "pain:123").build()
-                    ).build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        );
-    }
 }

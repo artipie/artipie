@@ -23,12 +23,9 @@
  */
 package com.artipie.api.artifactory;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlSequenceBuilder;
+import com.artipie.CredsConfigYaml;
 import com.artipie.Settings;
 import com.artipie.Users;
-import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
@@ -71,7 +68,7 @@ class GetUserSliceTest {
     void returnsNotFoundIfUserIsNotFoundInCredentials() {
         final Storage storage = new InMemoryStorage();
         final Key key = new Key.From("_credentials.yaml");
-        this.creds("john", storage, key, Collections.emptyList());
+        new CredsConfigYaml().withUsers("john").saveTo(storage, key);
         MatcherAssert.assertThat(
             new GetUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
             new SliceHasResponse(
@@ -86,7 +83,7 @@ class GetUserSliceTest {
         final String username = "jerry";
         final Storage storage = new InMemoryStorage();
         final Key key = new Key.From("_cred.yaml");
-        this.creds(username, storage, key, Collections.emptyList());
+        new CredsConfigYaml().withUsers(username).saveTo(storage, key);
         MatcherAssert.assertThat(
             new GetUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
             new SliceHasResponse(
@@ -117,7 +114,7 @@ class GetUserSliceTest {
         final Storage storage = new InMemoryStorage();
         final Key key = new Key.From("_cred.yaml");
         final List<String> groups = new ListOf<>("readers", "newbies");
-        this.creds(username, storage, key, groups);
+        new CredsConfigYaml().withUserAndGroups(username, groups).saveTo(storage, key);
         MatcherAssert.assertThat(
             new GetUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
             new SliceHasResponse(
@@ -138,27 +135,6 @@ class GetUserSliceTest {
                     )
                 ),
                 new RequestLine(RqMethod.GET, String.format("/api/security/users/%s", username))
-            )
-        );
-    }
-
-    private void creds(final String username, final Storage storage, final Key key,
-        final List<String> groups) {
-        YamlMappingBuilder user = Yaml.createYamlMappingBuilder().add("pass", "pain:123");
-        if (!groups.isEmpty()) {
-            YamlSequenceBuilder arr = Yaml.createYamlSequenceBuilder();
-            for (final String group : groups) {
-                arr = arr.add(group);
-            }
-            user = user.add("groups", arr.build());
-        }
-        storage.save(
-            key,
-                new Content.From(Yaml.createYamlMappingBuilder()
-                .add(
-                    "credentials",
-                    Yaml.createYamlMappingBuilder().add(username, user.build()).build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
             )
         );
     }

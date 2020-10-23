@@ -24,8 +24,6 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -189,7 +187,7 @@ public class ArtipieServer {
         );
         Files.write(
             repos.resolve(ArtipieServer.CREDENTIALS_FILE),
-            credentials().toString().getBytes()
+            credentials().getBytes()
         );
         this.vertx = Vertx.vertx();
         this.server = new VertxMain(cfg, this.vertx, this.freeport);
@@ -219,17 +217,12 @@ public class ArtipieServer {
      *
      * @return Credentials YAML.
      */
-    private static YamlMapping credentials() {
-        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
+    private static String credentials() {
+        final CredsConfigYaml cred = new CredsConfigYaml();
         for (final User user : ArtipieServer.USERS) {
-            builder = builder.add(
-                user.name(),
-                Yaml.createYamlMappingBuilder()
-                    .add("pass", String.format("plain:%s", user.password()))
-                    .build()
-            );
+            cred.withUserAndPlainPswd(user.name(), user.password());
         }
-        return Yaml.createYamlMappingBuilder().add("credentials", builder.build()).build();
+        return cred.toString();
     }
 
     /**
@@ -255,7 +248,7 @@ public class ArtipieServer {
          * @param username Username.
          * @param pwd Password.
          */
-        User(final String username, final String pwd) {
+        public User(final String username, final String pwd) {
             this.username = username;
             this.pwd = pwd;
         }

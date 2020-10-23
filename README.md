@@ -167,15 +167,18 @@ meta:
 
 If the `type` is set to `file`, another YAML file is required in the storage, with
 a list of users who will be allowed to create repos
-(each `pass` is combination or either `plain` or `sha256` and a text):
+(`type` is password format, `plain` and `sha256` types are supported):
 
 ```yaml
 credentials:
   jane:
-    pass: "plain:qwerty"
+    type: plain
+    pass: qwerty
+    email: jane@example.com # Optional
   john:
-    pass: "sha256:xxxxxxxxxxxxxxxxxxxxxxx"
-    groups:
+    type: sha256
+    pass: xxxxxxxxxxxxxxxxxxxxxxx
+    groups: # Optional
       - readers
       - dev-leads
 ```

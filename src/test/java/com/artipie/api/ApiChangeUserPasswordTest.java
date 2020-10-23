@@ -24,6 +24,7 @@
 package com.artipie.api;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.CredsConfigYaml;
 import com.artipie.Settings;
 import com.artipie.Users;
 import com.artipie.asto.Content;
@@ -39,7 +40,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -75,7 +75,7 @@ class ApiChangeUserPasswordTest {
     void returnsFoundIfUserWasAddedToCredentials() throws IOException {
         final String username = "mike";
         final String pswd = "qwerty123";
-        this.creds("person");
+        new CredsConfigYaml().withUsers("person").saveTo(this.storage, this.key);
         MatcherAssert.assertThat(
             "ApiChangeUserPassword response should be FOUND",
             new ApiChangeUserPassword(
@@ -96,7 +96,7 @@ class ApiChangeUserPasswordTest {
         MatcherAssert.assertThat(
             "User with correct password should be added",
             this.getPasswordFromYaml(username),
-            new IsEqual<>(this.pswd(pswd))
+            new IsEqual<>(DigestUtils.sha256Hex(pswd))
         );
     }
 
@@ -104,7 +104,7 @@ class ApiChangeUserPasswordTest {
     void returnsFoundIfPasswordWasUpdated() throws IOException {
         final String username = "john";
         final String pswd = "0000";
-        this.creds(username);
+        new CredsConfigYaml().withUsers(username).saveTo(this.storage, this.key);
         MatcherAssert.assertThat(
             "ApiChangeUserPassword response should be FOUND",
             new ApiChangeUserPassword(
@@ -125,7 +125,7 @@ class ApiChangeUserPasswordTest {
         MatcherAssert.assertThat(
             "User with correct password should be added",
             this.getPasswordFromYaml(username),
-            new IsEqual<>(this.pswd(pswd))
+            new IsEqual<>(DigestUtils.sha256Hex(pswd))
         );
     }
 
@@ -138,27 +138,8 @@ class ApiChangeUserPasswordTest {
             .asMapping().string("pass");
     }
 
-    private void creds(final String username) {
-        this.storage.save(
-            this.key,
-            new Content.From(Yaml.createYamlMappingBuilder()
-                .add(
-                    "credentials",
-                    Yaml.createYamlMappingBuilder().add(
-                        username,
-                        Yaml.createYamlMappingBuilder().add("pass", "sha265:123").build()
-                    ).build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
-        );
-    }
-
     private Content body(final String pswd) {
         return new Content.From(String.format("password=%s", pswd).getBytes());
-    }
-
-    private String pswd(final String pswd) {
-        return String.format("sha256:%s", DigestUtils.sha256Hex(pswd));
     }
 
 }

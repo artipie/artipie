@@ -21,28 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.maven;
+package com.artipie.file;
 
 import com.artipie.RepoConfig;
-import com.artipie.asto.cache.Cache;
-import com.artipie.asto.cache.StorageCache;
+import com.artipie.files.FileProxySlice;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
-import com.artipie.http.group.GroupSlice;
-import com.artipie.maven.http.MavenProxySlice;
+import com.artipie.repo.ProxyConfig;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.reactivestreams.Publisher;
 
 /**
- * Maven proxy slice created from config.
+ * File proxy slice created from config.
  *
  * @since 0.12
  */
-public final class MavenProxy implements Slice {
+public final class FileProxy implements Slice {
 
     /**
      * HTTP client.
@@ -60,7 +58,7 @@ public final class MavenProxy implements Slice {
      * @param client HTTP client.
      * @param cfg Repository configuration.
      */
-    public MavenProxy(final ClientSlices client, final RepoConfig cfg) {
+    public FileProxy(final ClientSlices client, final RepoConfig cfg) {
         this.client = client;
         this.cfg = cfg;
     }
@@ -71,15 +69,18 @@ public final class MavenProxy implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        return new GroupSlice(
-            this.cfg.proxy().remotes().stream().map(
-                remote -> new MavenProxySlice(
-                    this.client,
-                    URI.create(remote.url()),
-                    remote.auth(),
-                    remote.cache().<Cache>map(StorageCache::new).orElse(Cache.NOP)
-                )
-            ).collect(Collectors.toList())
+        final Collection<? extends ProxyConfig.Remote> remotes = this.cfg.proxy().remotes();
+        if (remotes.isEmpty()) {
+            throw new IllegalArgumentException("No remotes specified");
+        }
+        if (remotes.size() > 1) {
+            throw new IllegalArgumentException("Only one remote is allowed");
+        }
+        final ProxyConfig.Remote remote = remotes.iterator().next();
+        return new FileProxySlice(
+            this.client,
+            URI.create(remote.url()),
+            remote.auth()
         ).response(line, headers, body);
     }
 }

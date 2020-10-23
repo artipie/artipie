@@ -25,8 +25,7 @@ package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlSequenceBuilder;
+import com.artipie.CredsConfigYaml;
 import com.artipie.Settings;
 import com.artipie.Users;
 import com.artipie.asto.Content;
@@ -117,7 +116,7 @@ final class AddUpdateUserSliceTest {
         );
         final String ateam = "a-team";
         final String bteam = "b-team";
-        this.creds("person", Collections.emptyList());
+        new CredsConfigYaml().withUsers("person").saveTo(this.storage);
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
             new AddUpdateUserSlice(
@@ -133,7 +132,7 @@ final class AddUpdateUserSliceTest {
         MatcherAssert.assertThat(
             "User with correct password should be added",
             this.readCreds(username).string("pass"),
-            new IsEqual<>(this.shaPswd(pswd))
+            new IsEqual<>(DigestUtils.sha256Hex(pswd))
         );
         MatcherAssert.assertThat(
             "User has groups",
@@ -155,7 +154,7 @@ final class AddUpdateUserSliceTest {
             rqmeth,
             String.format("/api/security/users/%s", username)
         );
-        this.creds(username, Collections.emptyList());
+        new CredsConfigYaml().withUsers(username).saveTo(this.storage);
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
             new AddUpdateUserSlice(
@@ -171,7 +170,7 @@ final class AddUpdateUserSliceTest {
         MatcherAssert.assertThat(
             "User with updated password should return",
             this.readCreds(username).string("pass"),
-            new IsEqual<>(this.shaPswd(newpswd))
+            new IsEqual<>(DigestUtils.sha256Hex(newpswd))
         );
         MatcherAssert.assertThat(
             "Yaml has readers group only",
@@ -179,29 +178,6 @@ final class AddUpdateUserSliceTest {
                 .values().stream().map(node -> node.asScalar().value())
                 .collect(Collectors.toList()),
             Matchers.contains("readers")
-        );
-    }
-
-    private void creds(final String username, final List<String> groups) {
-        YamlMappingBuilder user = Yaml.createYamlMappingBuilder().add("pass", "pain:123");
-        if (!groups.isEmpty()) {
-            YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
-            for (final String group : groups) {
-                seq = seq.add(group);
-            }
-            user = user.add("groups", seq.build());
-        }
-        this.storage.save(
-            new Key.From("_credentials.yaml"),
-            new Content.From(Yaml.createYamlMappingBuilder()
-                .add(
-                    "credentials",
-                    Yaml.createYamlMappingBuilder().add(
-                        username,
-                        user.build()
-                    ).build()
-                ).build().toString().getBytes(StandardCharsets.UTF_8)
-            )
         );
     }
 
@@ -214,10 +190,6 @@ final class AddUpdateUserSliceTest {
             json.add("groups", Json.createArrayBuilder(groups).build());
         }
         return Flowable.fromArray(ByteBuffer.wrap(json.build().toString().getBytes()));
-    }
-
-    private String shaPswd(final String pswd) {
-        return String.format("sha256:%s", DigestUtils.sha256Hex(pswd));
     }
 
     private YamlMapping readCreds(final String username) throws IOException {

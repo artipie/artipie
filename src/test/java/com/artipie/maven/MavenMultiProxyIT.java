@@ -27,87 +27,68 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
 import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
+import com.artipie.asto.test.TestResource;
 import com.jcabi.log.Logger;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 
 /**
- * Integration test for {@link com.artipie.maven.http.MavenProxySlice}.
+ * Integration test for maven proxy with multiple remotes.
  *
+ * @since 0.12
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @since 0.11
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-@EnabledOnOs({OS.LINUX, OS.MAC})
-final class MavenProxyIT {
+@DisabledOnOs(OS.WINDOWS)
+final class MavenMultiProxyIT {
 
     /**
      * Temporary directory for all tests.
+     *
      * @checkstyle VisibilityModifierCheck (3 lines)
      */
     @TempDir
     Path tmp;
 
     /**
-     * Local Artipie server that stores artifacts.
+     * Artipie empty.
      */
-    private ArtipieServer server;
+    private ArtipieServer empty;
+
+    /**
+     * Artipie origin.
+     */
+    private ArtipieServer origin;
+
+    /**
+     * Artipie proxy.
+     */
+    private ArtipieServer proxy;
 
     /**
      * Container for local server.
      */
     private GenericContainer<?> cntn;
 
-    /**
-     * Storage.
-     */
-    private Storage storage;
-
-    /**
-     * Proxy Artipie server port.
-     */
-    private int port;
-
     @BeforeEach
     void setUp() throws Exception {
-        this.storage = new FileStorage(this.tmp);
-        this.server = new ArtipieServer(
-            this.tmp, "my-maven",
-            new RepoConfigYaml("maven-proxy").withRemotes(
-                Yaml.createYamlSequenceBuilder()
-                    .add(
-                        Yaml.createYamlMappingBuilder()
-                            .add("url", "https://repo.maven.apache.org/maven2")
-                            .add(
-                                "cache",
-                                Yaml.createYamlMappingBuilder().add(
-                                    "storage",
-                                    Yaml.createYamlMappingBuilder()
-                                        .add("type", "fs")
-                                        .add("path", this.tmp.resolve("repos").toString())
-                                        .build()
-                                ).build()
-                            )
-                            .build()
-                    )
-            )
-        );
-        this.port = this.server.start();
+        this.startEmpty();
+        this.startOrigin();
+        this.startProxy();
         final Path setting = this.tmp.resolve("settings.xml");
         setting.toFile().createNewFile();
         Files.write(setting, this.settings());
@@ -115,32 +96,28 @@ final class MavenProxyIT {
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
             .withFileSystemBind(this.tmp.toString(), "/home");
-        Testcontainers.exposeHostPorts(this.port);
+        Testcontainers.exposeHostPorts(this.proxy.port());
         this.cntn.start();
         this.exec("yum", "-y", "install", "maven");
     }
 
     @AfterEach
     void tearDown() {
-        this.server.stop();
         this.cntn.close();
+        this.proxy.stop();
+        this.origin.stop();
+        this.empty.stop();
     }
 
     @Test
-    void shouldGetArtifactFromCentralAndSaveInCache() throws Exception {
-        final String artifact = "-Dartifact=args4j:args4j:2.32:jar";
+    void shouldGetDependency() throws Exception {
         MatcherAssert.assertThat(
-            "Artifact wasn't downloaded",
             this.exec(
-                "mvn", "-s", "/home/settings.xml", "dependency:get", artifact
+                "mvn",
+                "-s", "/home/settings.xml",
+                "dependency:get", "-Dartifact=com.artipie:helloworld:0.1:jar"
             ).replaceAll("\n", ""),
             new StringContains("BUILD SUCCESS")
-        );
-        MatcherAssert.assertThat(
-            "Artifact wasn't saved in cache",
-            this.storage.exists(new Key.From("repos/my-maven/args4j/args4j/2.32/args4j-2.32.jar"))
-                .toCompletableFuture().join(),
-            new IsEqual<>(true)
         );
     }
 
@@ -149,8 +126,67 @@ final class MavenProxyIT {
         return this.cntn.execInContainer(command).getStdout();
     }
 
+    private void startEmpty() throws IOException {
+        final Path root = this.tmp.resolve("empty");
+        root.toFile().mkdirs();
+        final Path repos = root.resolve("repos");
+        this.empty = new ArtipieServer(
+            root,
+            "maven-empty",
+            new RepoConfigYaml("maven").withFileStorage(repos)
+        );
+        this.empty.start();
+    }
+
+    private void startOrigin() throws IOException {
+        final Path root = this.tmp.resolve("origin");
+        root.toFile().mkdirs();
+        final Path repos = root.resolve("repos");
+        new TestResource("com/artipie/helloworld").addFilesTo(
+            new FileStorage(repos),
+            new Key.From("maven-origin/com/artipie/helloworld")
+        );
+        this.origin = new ArtipieServer(
+            root,
+            "maven-origin",
+            new RepoConfigYaml("maven").withFileStorage(repos)
+        );
+        this.origin.start();
+    }
+
+    private void startProxy() throws IOException {
+        final Path root = this.tmp.resolve("proxy");
+        root.toFile().mkdirs();
+        this.proxy = new ArtipieServer(
+            root,
+            "my-maven",
+            new RepoConfigYaml("maven-proxy")
+                .withFileStorage(root.resolve("repos"))
+                .withRemotes(
+                    Yaml.createYamlSequenceBuilder().add(
+                        Yaml.createYamlMappingBuilder().add(
+                            "url",
+                            String.format(
+                                "http://localhost:%s/maven-origin",
+                                this.origin.port()
+                            )
+                        ).build()
+                    ).add(
+                        Yaml.createYamlMappingBuilder().add(
+                            "url",
+                            String.format(
+                                "http://localhost:%s/maven-empty",
+                                this.empty.port()
+                            )
+                        ).build()
+                    )
+                )
+        );
+        this.proxy.start();
+    }
+
     private List<String> settings() {
-        return new ListOf<String>(
+        return new ListOf<>(
             "<settings>",
             "    <profiles>",
             "        <profile>",
@@ -158,7 +194,10 @@ final class MavenProxyIT {
             "            <repositories>",
             "                <repository>",
             "                    <id>my-maven</id>",
-            String.format("<url>http://host.testcontainers.internal:%d/my-maven/</url>", this.port),
+            String.format(
+                "<url>http://host.testcontainers.internal:%d/my-maven/</url>",
+                this.proxy.port()
+            ),
             "                </repository>",
             "            </repositories>",
             "        </profile>",

@@ -25,10 +25,9 @@ package com.artipie.auth;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.amihaiemil.eoyaml.YamlSequenceBuilder;
+import com.artipie.CredsConfigYaml;
+import com.artipie.Users;
 import com.artipie.http.auth.Authentication;
-import java.util.Collections;
 import java.util.List;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cactoos.list.ListOf;
@@ -53,8 +52,7 @@ final class AuthFromYamlTest {
         final String pass = "qwerty";
         MatcherAssert.assertThat(
             new AuthFromYaml(
-                AuthFromYamlTest
-                    .settings(user, String.format("plain:%s", pass), Collections.emptyList())
+                AuthFromYamlTest.settings(user, String.format("plain:%s", pass))
             ).user(user, pass).get(),
             new IsEqual<>(new Authentication.User(user))
         );
@@ -67,8 +65,7 @@ final class AuthFromYamlTest {
         MatcherAssert.assertThat(
             new AuthFromYaml(
                 AuthFromYamlTest.settings(
-                    user, String.format("sha256:%s", DigestUtils.sha256Hex(pass)),
-                    Collections.emptyList()
+                    user, String.format("sha256:%s", DigestUtils.sha256Hex(pass))
                 )
             ).user(user, pass).get(),
             new IsEqual<>(new Authentication.User(user))
@@ -80,7 +77,7 @@ final class AuthFromYamlTest {
         final String user = "mark";
         MatcherAssert.assertThat(
             new AuthFromYaml(
-                AuthFromYamlTest.settings(user, "plain:123", Collections.emptyList())
+                AuthFromYamlTest.settings(user, "plain:123")
             ).user(user, "456").isEmpty(),
             new IsEqual<>(true)
         );
@@ -92,8 +89,7 @@ final class AuthFromYamlTest {
         MatcherAssert.assertThat(
             new AuthFromYaml(
                 AuthFromYamlTest.settings(
-                    "ann", String.format("sha256:%s", DigestUtils.sha256Hex(pass)),
-                    Collections.emptyList()
+                    "ann", String.format("sha256:%s", DigestUtils.sha256Hex(pass))
                 )
             ).user("anna", pass).isEmpty(),
             new IsEqual<>(true)
@@ -106,7 +102,7 @@ final class AuthFromYamlTest {
         final String user = "barton";
         MatcherAssert.assertThat(
             new AuthFromYaml(
-                AuthFromYamlTest.settings(user, "098", Collections.emptyList())
+                AuthFromYamlTest.settings(user, "098")
             ).user(user, pass).isEmpty(),
             new IsEqual<>(true)
         );
@@ -151,11 +147,7 @@ final class AuthFromYamlTest {
         final String pass = "qwerty";
         MatcherAssert.assertThat(
             new AuthFromYaml(
-                AuthFromYamlTest.simpleSettings(
-                    user,
-                    "plain",
-                    pass
-                )
+                new CredsConfigYaml().withUserAndPswd(user, Users.PasswordFormat.PLAIN, pass).yaml()
             ).user(user, pass).get(),
             new IsEqual<>(new Authentication.User(user))
         );
@@ -167,11 +159,8 @@ final class AuthFromYamlTest {
         final String pass = "123";
         MatcherAssert.assertThat(
             new AuthFromYaml(
-                AuthFromYamlTest.simpleSettings(
-                    user,
-                    "sha256",
-                    DigestUtils.sha256Hex(pass)
-                )
+                new CredsConfigYaml()
+                    .withUserAndPswd(user, Users.PasswordFormat.SHA256, pass).yaml()
             ).user(user, pass).get(),
             new IsEqual<>(new Authentication.User(user))
         );
@@ -182,11 +171,8 @@ final class AuthFromYamlTest {
         final String user = "mark";
         MatcherAssert.assertThat(
             new AuthFromYaml(
-                AuthFromYamlTest.simpleSettings(
-                    user,
-                    "plain",
-                    "123"
-                )
+                new CredsConfigYaml()
+                    .withUserAndPswd(user, Users.PasswordFormat.PLAIN, "123").yaml()
             ).user(user, "456").isEmpty(),
             new IsEqual<>(true)
         );
@@ -197,11 +183,8 @@ final class AuthFromYamlTest {
         final String pass = "abc";
         MatcherAssert.assertThat(
             new AuthFromYaml(
-                AuthFromYamlTest.simpleSettings(
-                    "ann",
-                    "sha256",
-                    DigestUtils.sha256Hex(pass)
-                )
+                new CredsConfigYaml()
+                    .withUserAndPswd("ann", Users.PasswordFormat.SHA256, pass).yaml()
             ).user("anna", pass).isEmpty(),
             new IsEqual<>(true)
         );
@@ -212,12 +195,8 @@ final class AuthFromYamlTest {
         final List<String> groups = new ListOf<>("readers", "a-team", "c-team");
         final String mark = "mark";
         MatcherAssert.assertThat(
-            new AuthFromYaml(
-                AuthFromYamlTest.settings(
-                    mark, "plain:000",
-                    groups
-                )
-            ).user(mark, "000").get(),
+            new AuthFromYaml(new CredsConfigYaml().withUserAndGroups(mark, groups).yaml())
+                .user(mark, "123").get(),
             new IsEqual<>(new Authentication.User(mark, groups))
         );
     }
@@ -264,29 +243,6 @@ final class AuthFromYamlTest {
      * @param user User
      * @param type Password type
      * @param pass Password
-     * @return Settings
-     */
-    private static YamlMapping simpleSettings(
-        final String user,
-        final String type,
-        final String pass) {
-        return Yaml.createYamlMappingBuilder().add(
-            "credentials",
-            Yaml.createYamlMappingBuilder()
-                .add(
-                    user,
-                    Yaml.createYamlMappingBuilder()
-                    .add("type", type)
-                    .add("pass", pass).build()
-                ).build()
-        ).build();
-    }
-
-    /**
-     * Composes yaml settings.
-     * @param user User
-     * @param type Password type
-     * @param pass Password
      * @param login Alternative login
      * @return Settings
      * @checkstyle ParameterNumberCheck (3 lines)
@@ -310,23 +266,13 @@ final class AuthFromYamlTest {
      * Composes yaml settings.
      * @param user User
      * @param pass Password
-     * @param groups Groups list
      * @return Settings
      */
-    private static YamlMapping settings(final String user, final String pass,
-        final List<String> groups) {
-        YamlMappingBuilder yaml = Yaml.createYamlMappingBuilder().add("pass", pass);
-        if (!groups.isEmpty()) {
-            YamlSequenceBuilder arr = Yaml.createYamlSequenceBuilder();
-            for (final String item : groups) {
-                arr = arr.add(item);
-            }
-            yaml = yaml.add("groups", arr.build());
-        }
+    private static YamlMapping settings(final String user, final String pass) {
         return Yaml.createYamlMappingBuilder().add(
             "credentials",
             Yaml.createYamlMappingBuilder()
-                .add(user, yaml.build())
+                .add(user, Yaml.createYamlMappingBuilder().add("pass", pass).build())
                 .build()
         ).build();
     }

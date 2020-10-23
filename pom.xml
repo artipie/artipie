@@ -156,7 +156,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>0.16.2</version>
+      <version>0.16.7</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -187,7 +187,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>files-adapter</artifactId>
-      <version>0.5.1</version>
+      <version>0.6.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -258,7 +258,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>0.4.6</version>
+      <version>0.4.8</version>
     </dependency>
     <dependency>
       <groupId>com.github.jknack</groupId>

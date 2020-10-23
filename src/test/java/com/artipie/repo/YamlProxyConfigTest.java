@@ -24,6 +24,8 @@
 package com.artipie.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.StorageAliases;
+import com.artipie.asto.Key;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import java.util.Collection;
@@ -46,8 +48,8 @@ public final class YamlProxyConfigTest {
     public void parsesConfig() {
         final String firsturl = "https://artipie.com";
         final String secondurl = "http://localhost:8080/path";
-        final Collection<ProxyConfig.Remote> remotes = new YamlProxyConfig(
-            Yaml.createYamlMappingBuilder().add(
+        final Collection<YamlProxyConfig.YamlRemote> remotes = new YamlProxyConfig(
+            StorageAliases.EMPTY, Key.ROOT, Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
                     Yaml.createYamlMappingBuilder()
@@ -56,7 +58,19 @@ public final class YamlProxyConfigTest {
                         .add("password", "qwerty")
                         .build()
                 ).add(
-                    Yaml.createYamlMappingBuilder().add("url", secondurl).build()
+                    Yaml.createYamlMappingBuilder()
+                        .add("url", secondurl)
+                        .add(
+                            "cache",
+                            Yaml.createYamlMappingBuilder().add(
+                                "storage",
+                                Yaml.createYamlMappingBuilder()
+                                    .add("type", "fs")
+                                    .add("path", "/var/artipie/data")
+                                    .build()
+                            ).build()
+                        )
+                        .build()
                 ).build()
             ).build()
         ).remotes();
@@ -76,6 +90,11 @@ public final class YamlProxyConfigTest {
             first.auth(),
             new IsInstanceOf(GenericAuthenticator.class)
         );
+        MatcherAssert.assertThat(
+            "Second remote is absent",
+            first.cache().isPresent(),
+            new IsEqual<>(false)
+        );
         final ProxyConfig.Remote second = remotes.stream().skip(1).findFirst().get();
         MatcherAssert.assertThat(
             "Second remote URL parsed",
@@ -87,12 +106,17 @@ public final class YamlProxyConfigTest {
             second.auth(),
             new IsEqual<>(Authenticator.ANONYMOUS)
         );
+        MatcherAssert.assertThat(
+            "Second remote has cache",
+            second.cache().isPresent(),
+            new IsEqual<>(true)
+        );
     }
 
     @Test
     public void parsesEmpty() {
-        final Collection<ProxyConfig.Remote> remotes = new YamlProxyConfig(
-            Yaml.createYamlMappingBuilder().add(
+        final Collection<? extends ProxyConfig.Remote> remotes = new YamlProxyConfig(
+            StorageAliases.EMPTY, Key.ROOT, Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().build()
             ).build()
@@ -104,9 +128,25 @@ public final class YamlProxyConfigTest {
     }
 
     @Test
+    public void failsToGetUrlWhenNotSpecified() {
+        final ProxyConfig.Remote remote = new YamlProxyConfig(
+            StorageAliases.EMPTY, Key.ROOT, Yaml.createYamlMappingBuilder().add(
+                "remotes",
+                Yaml.createYamlSequenceBuilder().add(
+                    Yaml.createYamlMappingBuilder().add("attr", "value").build()
+                ).build()
+            ).build()
+        ).remotes().iterator().next();
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            remote::url
+        );
+    }
+
+    @Test
     public void failsToGetAuthWhenUsernameOnly() {
         final ProxyConfig.Remote remote = new YamlProxyConfig(
-            Yaml.createYamlMappingBuilder().add(
+            StorageAliases.EMPTY, Key.ROOT, Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
                     Yaml.createYamlMappingBuilder()
@@ -125,7 +165,7 @@ public final class YamlProxyConfigTest {
     @Test
     public void failsToGetAuthWhenPasswordOnly() {
         final ProxyConfig.Remote remote = new YamlProxyConfig(
-            Yaml.createYamlMappingBuilder().add(
+            StorageAliases.EMPTY, Key.ROOT, Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
                     Yaml.createYamlMappingBuilder()

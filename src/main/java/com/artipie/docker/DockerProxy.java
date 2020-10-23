@@ -23,8 +23,6 @@
  */
 package com.artipie.docker;
 
-import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.RepoConfig;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.cache.CacheDocker;
@@ -32,8 +30,6 @@ import com.artipie.docker.composite.MultiReadDocker;
 import com.artipie.docker.composite.ReadWriteDocker;
 import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.http.TrimmedDocker;
-import com.artipie.docker.proxy.AuthClientSlice;
-import com.artipie.docker.proxy.Credentials;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.Response;
@@ -41,11 +37,11 @@ import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.ClientSlices;
+import com.artipie.http.client.auth.AuthClientSlice;
+import com.artipie.repo.ProxyConfig;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.reactivestreams.Publisher;
 
 /**
@@ -119,20 +115,9 @@ public final class DockerProxy implements Slice {
      * @return Docker proxy slice.
      */
     private Slice delegate() {
-        final YamlSequence remotes = Optional.ofNullable(
-            this.cfg.repoConfig().yamlSequence("remotes")
-        ).orElseThrow(() -> new IllegalStateException("`remotes` not found for Docker proxy"));
         final Docker proxies = new MultiReadDocker(
-            StreamSupport.stream(remotes.spliterator(), false).map(
-                remote -> {
-                    if (!(remote instanceof YamlMapping)) {
-                        throw new IllegalStateException(
-                            "`remotes` element is not mapping in Docker proxy"
-                        );
-                    }
-                    final YamlMapping mapping = (YamlMapping) remote;
-                    return this.proxy(this.client, mapping);
-                }
+            this.cfg.proxy().remotes().stream().map(
+                remote -> proxy(this.client, remote)
             ).collect(Collectors.toList())
         );
         Docker docker = this.cfg.storageOpt()
@@ -157,46 +142,15 @@ public final class DockerProxy implements Slice {
      * Create proxy from YAML config.
      *
      * @param slices HTTP client slices.
-     * @param mapping YAML config.
+     * @param remote YAML remote config.
      * @return Docker proxy.
      */
-    private Docker proxy(final ClientSlices slices, final YamlMapping mapping) {
-        final Credentials credentials;
-        final String username = mapping.string("username");
-        final String password = mapping.string("password");
-        if (username == null && password == null) {
-            credentials = Credentials.ANONYMOUS;
-        } else {
-            if (username == null) {
-                throw new IllegalStateException(
-                    "`username` is not specified in settings for Docker proxy"
-                );
-            }
-            if (password == null) {
-                throw new IllegalStateException(
-                    "`password` is not specified in settings for Docker proxy"
-                );
-            }
-            credentials = new Credentials.Basic(username, password);
-        }
+    private static Docker proxy(final ClientSlices slices, final ProxyConfig.Remote remote) {
         final Docker proxy = new ProxyDocker(
-            new AuthClientSlice(
-                slices,
-                slices.https(
-                    Optional.ofNullable(mapping.string("url")).orElseThrow(
-                        () -> new IllegalStateException(
-                            "`url` is not specified in settings for Docker proxy"
-                        )
-                    )
-                ),
-                credentials
-            )
+            new AuthClientSlice(slices.https(remote.url()), remote.auth())
         );
-        return Optional.ofNullable(mapping.yamlMapping("cache")).<Docker>map(
-            node -> new CacheDocker(
-                proxy,
-                new AstoDocker(this.cfg.storage(node))
-            )
+        return remote.cache().<Docker>map(
+            storage -> new CacheDocker(proxy, new AstoDocker(storage))
         ).orElse(proxy);
     }
 }
