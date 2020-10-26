@@ -30,13 +30,16 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
+import com.artipie.npm.misc.JsonFromPublisher;
 import com.artipie.nuget.RandomFreePort;
 import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import javax.json.JsonObject;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -110,6 +113,42 @@ final class NpmITCase {
         MatcherAssert.assertThat(
             "Installed project should contain package.json",
             this.inNpmModule(proj, "package.json"),
+            new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    void npmPublish() throws Exception {
+        final boolean anonymous = true;
+        final String proj = "@hello/simple-npm-project";
+        final String tgz = String.format("%s/-/%s-1.0.1.tgz", proj, proj);
+        final Key path = new Key.From("repos/my-npm");
+        this.init(anonymous);
+        new TestResource("npm/simple-npm-project")
+            .addFilesTo(this.storage, new Key.From(proj));
+        MatcherAssert.assertThat(
+            "Package was published",
+            this.exec("npm", "publish", proj, "--registry", this.url),
+            new StringContains(String.format("+ %s@1.0.1", proj))
+        );
+        final JsonObject meta = new JsonFromPublisher(
+            this.storage.value(
+                new Key.From(path, proj, "meta.json")
+            ).toCompletableFuture().join()
+        ).json().toCompletableFuture().join();
+        MatcherAssert.assertThat(
+            "Metadata should be valid",
+            meta.getJsonObject("versions")
+                .getJsonObject("1.0.1")
+                .getJsonObject("dist")
+                .getString("tarball"),
+            new IsEqual<>(String.format("/%s", tgz))
+        );
+        MatcherAssert.assertThat(
+            "File should be in storage after publishing",
+            this.storage.exists(
+                new Key.From(path, tgz)
+            ).toCompletableFuture().join(),
             new IsEqual<>(true)
         );
     }
