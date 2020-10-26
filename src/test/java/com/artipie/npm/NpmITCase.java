@@ -36,6 +36,7 @@ import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Optional;
 import javax.json.JsonObject;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -46,7 +47,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.Testcontainers;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
 /**
@@ -54,9 +58,19 @@ import org.testcontainers.containers.GenericContainer;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.12
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class NpmITCase {
+
+    /**
+     * Project name.
+     */
+    private static final String PROJ = "@hello/simple-npm-project";
+
+    /**
+     * Host name.
+     */
+    private static final String HOST = "host.testcontainers.internal";
 
     /**
      * Temporary directory for all tests.
@@ -81,59 +95,58 @@ final class NpmITCase {
     private Storage storage;
 
     /**
-     * URL 'http://host:port/my-npm/'.
-     */
-    private String url;
-
-    /**
      * Artipie server port.
      */
     private int port;
 
-    @Test
-    void npmInstall() throws Exception {
-        final boolean anonymous = true;
-        final String proj = "@hello/simple-npm-project";
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void npmInstall(final boolean anonymous) throws Exception {
         this.init(anonymous);
-        this.saveFilesToStrg(proj);
+        this.saveFilesToStrg(NpmITCase.PROJ);
         MatcherAssert.assertThat(
-            this.exec("npm", "install", proj, "--registry", this.url),
+            this.exec(
+                "npm", "install", NpmITCase.PROJ,
+                "--registry", this.url(this.userOpt(anonymous))
+            ).getStdout(),
             new StringContainsInOrder(
                 Arrays.asList(
-                    String.format("+ %s@1.0.1", proj),
+                    String.format("+ %s@1.0.1", NpmITCase.PROJ),
                     "added 1 package"
                 )
             )
         );
         MatcherAssert.assertThat(
             "Installed project should contain index.js",
-            this.inNpmModule(proj, "index.js"),
+            this.inNpmModule("index.js"),
             new IsEqual<>(true)
         );
         MatcherAssert.assertThat(
             "Installed project should contain package.json",
-            this.inNpmModule(proj, "package.json"),
+            this.inNpmModule("package.json"),
             new IsEqual<>(true)
         );
     }
 
-    @Test
-    void npmPublish() throws Exception {
-        final boolean anonymous = true;
-        final String proj = "@hello/simple-npm-project";
-        final String tgz = String.format("%s/-/%s-1.0.1.tgz", proj, proj);
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void npmPublish(final boolean anonymous) throws Exception {
+        final String tgz = String.format("%s/-/%s-1.0.1.tgz", NpmITCase.PROJ, NpmITCase.PROJ);
         final Key path = new Key.From("repos/my-npm");
         this.init(anonymous);
         new TestResource("npm/simple-npm-project")
-            .addFilesTo(this.storage, new Key.From(proj));
+            .addFilesTo(this.storage, new Key.From(NpmITCase.PROJ));
         MatcherAssert.assertThat(
             "Package was published",
-            this.exec("npm", "publish", proj, "--registry", this.url),
-            new StringContains(String.format("+ %s@1.0.1", proj))
+            this.exec(
+                "npm", "publish", NpmITCase.PROJ,
+                "--registry", this.url(this.userOpt(anonymous))
+            ).getStdout(),
+            new StringContains(String.format("+ %s@1.0.1", NpmITCase.PROJ))
         );
         final JsonObject meta = new JsonFromPublisher(
             this.storage.value(
-                new Key.From(path, proj, "meta.json")
+                new Key.From(path, NpmITCase.PROJ, "meta.json")
             ).toCompletableFuture().join()
         ).json().toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -153,6 +166,46 @@ final class NpmITCase {
         );
     }
 
+    @Test
+    void npmInstallFailWithForbidden() throws Exception {
+        final ArtipieServer.User user = ArtipieServer.BOB;
+        this.init(false);
+        this.saveFilesToStrg(NpmITCase.PROJ);
+        MatcherAssert.assertThat(
+            this.exec(
+                "npm", "install", NpmITCase.PROJ,
+                "--registry", this.url(Optional.of(user))
+            ).getStderr().replaceAll("\n", ""),
+            new StringContains(
+                String.format(
+                    "npm ERR! 403 403 Forbidden - GET http://%s:***@%s:%d/my-npm/%s",
+                    user.name(), NpmITCase.HOST, this.port, NpmITCase.PROJ.replace("/", "%2f")
+                )
+            )
+        );
+    }
+
+    @Test
+    void npmPublishFailWithForbidden() throws Exception {
+        final ArtipieServer.User user = ArtipieServer.BOB;
+        this.init(false);
+        new TestResource("npm/simple-npm-project")
+            .addFilesTo(this.storage, new Key.From(NpmITCase.PROJ));
+        MatcherAssert.assertThat(
+            "Package was published",
+            this.exec(
+                "npm", "publish", NpmITCase.PROJ,
+                "--registry", this.url(Optional.of(user))
+            ).getStderr().replaceAll("\n", ""),
+            new StringContains(
+                String.format(
+                    "npm ERR! 403 403 Forbidden - PUT http://%s:***@%s:%d/my-npm/%s",
+                    user.name(), NpmITCase.HOST, this.port, NpmITCase.PROJ.replace("/", "%2f")
+                )
+            )
+        );
+    }
+
     @AfterEach
     void tearDown() {
         this.server.stop();
@@ -166,7 +219,6 @@ final class NpmITCase {
             this.tmp, "my-npm", this.config(anonymous).toString(), this.port
         );
         this.server.start();
-        this.url = String.format("http://host.testcontainers.internal:%d/my-npm/", this.port);
         Testcontainers.exposeHostPorts(this.port);
         this.cntn = new GenericContainer<>("node:14-alpine")
             .withCommand("tail", "-f", "/dev/null")
@@ -190,15 +242,17 @@ final class NpmITCase {
         );
     }
 
-    private String exec(final String... command) throws Exception {
+    private Container.ExecResult exec(final String... command) throws Exception {
         Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command).getStdout();
+        return this.cntn.execInContainer(command);
     }
 
     private RepoConfigYaml config(final boolean anonymous) {
         final RepoConfigYaml yaml = new RepoConfigYaml("npm")
             .withFileStorage(this.tmp.resolve("repos"))
-            .withUrl(String.format("http://host.testcontainers.internal:%d/my-npm/", this.port));
+            .withUrl(
+                this.url(this.userOpt(anonymous))
+            );
         if (!anonymous) {
             yaml.withPermissions(
                 new RepoPerms(ArtipieServer.ALICE.name(), "*")
@@ -207,10 +261,33 @@ final class NpmITCase {
         return yaml;
     }
 
-    private boolean inNpmModule(final String proj, final String file) {
+    private boolean inNpmModule(final String file) {
         return this.storage.exists(
-            new Key.From("node_modules", proj, file)
+            new Key.From("node_modules", NpmITCase.PROJ, file)
         ).join();
+    }
+
+    private Optional<ArtipieServer.User> userOpt(final boolean anonymous) {
+        final Optional<ArtipieServer.User> user;
+        if (anonymous) {
+            user = Optional.empty();
+        } else {
+            user = Optional.of(ArtipieServer.ALICE);
+        }
+        return user;
+    }
+
+    private String url(final Optional<ArtipieServer.User> usr) {
+        String res = "";
+        if (usr.isPresent()) {
+            res = String.format(
+                "%s:%s@", usr.get().name(), usr.get().password()
+            );
+        }
+        return String.format(
+            "http://%s%s:%d/my-npm/",
+            res, NpmITCase.HOST, this.port
+        );
     }
 
 }
