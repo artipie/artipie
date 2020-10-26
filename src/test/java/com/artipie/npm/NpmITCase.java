@@ -105,6 +105,7 @@ final class NpmITCase {
         this.init(anonymous);
         this.saveFilesToStrg(NpmITCase.PROJ);
         MatcherAssert.assertThat(
+            "Package was installed",
             this.exec(
                 "npm", "install", NpmITCase.PROJ,
                 "--registry", this.url(this.userOpt(anonymous))
@@ -176,12 +177,7 @@ final class NpmITCase {
                 "npm", "install", NpmITCase.PROJ,
                 "--registry", this.url(Optional.of(user))
             ).getStderr().replaceAll("\n", ""),
-            new StringContains(
-                String.format(
-                    "npm ERR! 403 403 Forbidden - GET http://%s:***@%s:%d/my-npm/%s",
-                    user.name(), NpmITCase.HOST, this.port, NpmITCase.PROJ.replace("/", "%2f")
-                )
-            )
+            new StringContains("npm ERR! 403 403 Forbidden - GET")
         );
     }
 
@@ -192,17 +188,11 @@ final class NpmITCase {
         new TestResource("npm/simple-npm-project")
             .addFilesTo(this.storage, new Key.From(NpmITCase.PROJ));
         MatcherAssert.assertThat(
-            "Package was published",
             this.exec(
                 "npm", "publish", NpmITCase.PROJ,
                 "--registry", this.url(Optional.of(user))
             ).getStderr().replaceAll("\n", ""),
-            new StringContains(
-                String.format(
-                    "npm ERR! 403 403 Forbidden - PUT http://%s:***@%s:%d/my-npm/%s",
-                    user.name(), NpmITCase.HOST, this.port, NpmITCase.PROJ.replace("/", "%2f")
-                )
-            )
+            new StringContains("npm ERR! 403 403 Forbidden - PUT")
         );
     }
 
