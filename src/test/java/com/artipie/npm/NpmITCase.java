@@ -32,7 +32,7 @@ import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.npm.misc.JsonFromPublisher;
 import com.artipie.nuget.RandomFreePort;
-import com.jcabi.log.Logger;
+import com.artipie.test.TestContainer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -49,9 +49,6 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.Container;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * Integration tests for Npm repository.
@@ -87,7 +84,7 @@ final class NpmITCase {
     /**
      * Container.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     /**
      * Storage.
@@ -106,10 +103,10 @@ final class NpmITCase {
         this.saveFilesToStrg(NpmITCase.PROJ);
         MatcherAssert.assertThat(
             "Package was installed",
-            this.exec(
+            this.cntn.execStdout(
                 "npm", "install", NpmITCase.PROJ,
                 "--registry", this.url(this.userOpt(anonymous))
-            ).getStdout(),
+            ),
             new StringContainsInOrder(
                 Arrays.asList(
                     String.format("+ %s@1.0.1", NpmITCase.PROJ),
@@ -139,10 +136,10 @@ final class NpmITCase {
             .addFilesTo(this.storage, new Key.From(NpmITCase.PROJ));
         MatcherAssert.assertThat(
             "Package was published",
-            this.exec(
+            this.cntn.execStdout(
                 "npm", "publish", NpmITCase.PROJ,
                 "--registry", this.url(this.userOpt(anonymous))
-            ).getStdout(),
+            ),
             new StringContains(String.format("+ %s@1.0.1", NpmITCase.PROJ))
         );
         final JsonObject meta = new JsonFromPublisher(
@@ -173,10 +170,10 @@ final class NpmITCase {
         this.init(false);
         this.saveFilesToStrg(NpmITCase.PROJ);
         MatcherAssert.assertThat(
-            this.exec(
+            this.cntn.execStdErr(
                 "npm", "install", NpmITCase.PROJ,
                 "--registry", this.url(Optional.of(user))
-            ).getStderr().replaceAll("\n", ""),
+            ),
             new StringContains("npm ERR! 403 403 Forbidden - GET")
         );
     }
@@ -188,10 +185,10 @@ final class NpmITCase {
         new TestResource("npm/simple-npm-project")
             .addFilesTo(this.storage, new Key.From(NpmITCase.PROJ));
         MatcherAssert.assertThat(
-            this.exec(
+            this.cntn.execStdErr(
                 "npm", "publish", NpmITCase.PROJ,
                 "--registry", this.url(Optional.of(user))
-            ).getStderr().replaceAll("\n", ""),
+            ),
             new StringContains("npm ERR! 403 403 Forbidden - PUT")
         );
     }
@@ -199,7 +196,7 @@ final class NpmITCase {
     @AfterEach
     void tearDown() {
         this.server.stop();
-        this.cntn.stop();
+        this.cntn.close();
     }
 
     private void init(final boolean anonymous) throws IOException {
@@ -209,11 +206,7 @@ final class NpmITCase {
             this.tmp, "my-npm", this.config(anonymous).toString(), this.port
         );
         this.server.start();
-        Testcontainers.exposeHostPorts(this.port);
-        this.cntn = new GenericContainer<>("node:14-alpine")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
+        this.cntn = new TestContainer("node:14-alpine", this.tmp, this.port);
         this.cntn.start();
     }
 
@@ -230,11 +223,6 @@ final class NpmITCase {
                     "repos", "my-npm", proj, "-", String.format("%s-1.0.1.tgz", proj)
                 )
         );
-    }
-
-    private Container.ExecResult exec(final String... command) throws Exception {
-        Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command);
     }
 
     private RepoConfigYaml config(final boolean anonymous) {

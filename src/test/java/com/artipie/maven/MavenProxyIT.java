@@ -29,7 +29,7 @@ import com.artipie.RepoConfigYaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
-import com.jcabi.log.Logger;
+import com.artipie.test.TestContainer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -43,8 +43,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * Integration test for {@link com.artipie.maven.http.MavenProxySlice}.
@@ -71,7 +69,7 @@ final class MavenProxyIT {
     /**
      * Container for local server.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     /**
      * Storage.
@@ -111,13 +109,9 @@ final class MavenProxyIT {
         final Path setting = this.tmp.resolve("settings.xml");
         setting.toFile().createNewFile();
         Files.write(setting, this.settings());
-        this.cntn = new GenericContainer<>("centos:centos8")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
-        Testcontainers.exposeHostPorts(this.port);
+        this.cntn = new TestContainer("centos:centos8", this.tmp, this.port);
         this.cntn.start();
-        this.exec("yum", "-y", "install", "maven");
+        this.cntn.execStdout("yum", "-y", "install", "maven");
     }
 
     @AfterEach
@@ -131,9 +125,9 @@ final class MavenProxyIT {
         final String artifact = "-Dartifact=args4j:args4j:2.32:jar";
         MatcherAssert.assertThat(
             "Artifact wasn't downloaded",
-            this.exec(
+            this.cntn.execStdout(
                 "mvn", "-s", "/home/settings.xml", "dependency:get", artifact
-            ).replaceAll("\n", ""),
+            ),
             new StringContains("BUILD SUCCESS")
         );
         MatcherAssert.assertThat(
@@ -142,11 +136,6 @@ final class MavenProxyIT {
                 .toCompletableFuture().join(),
             new IsEqual<>(true)
         );
-    }
-
-    private String exec(final String... command) throws Exception {
-        Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command).getStdout();
     }
 
     private List<String> settings() {

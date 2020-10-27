@@ -25,20 +25,18 @@ package com.artipie.file;
 
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
-import com.jcabi.log.Logger;
+import com.artipie.test.TestContainer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
@@ -49,8 +47,6 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * Integration tests for Files repository.
@@ -79,7 +75,7 @@ final class FilesRepoITCase {
     /**
      * Container.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     /**
      * Storage.
@@ -156,7 +152,7 @@ final class FilesRepoITCase {
     @AfterEach
     void tearDown() {
         this.server.stop();
-        this.cntn.stop();
+        this.cntn.close();
     }
 
     private String curl(final String action,
@@ -174,8 +170,7 @@ final class FilesRepoITCase {
             }
         );
         final String[] cmdarr = cmdlst.toArray(new String[0]);
-        Logger.debug(this, "Command:\n%s", String.join(" ", cmdlst));
-        return this.cntn.execInContainer(cmdarr).getStdout();
+        return this.cntn.execStdout(cmdarr);
     }
 
     private void init(final RepoConfigYaml config) throws Exception {
@@ -183,14 +178,9 @@ final class FilesRepoITCase {
         this.server = new ArtipieServer(this.tmp, "my-file", config);
         this.port = this.server.start();
         this.server.start();
-        Testcontainers.exposeHostPorts(this.port);
-        this.cntn = new GenericContainer<>("centos:centos8")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
+        this.cntn = new TestContainer("centos:centos8", this.tmp, this.port);
         this.cntn.start();
-        Logger.debug(this, "Command:\nyum -y install curl");
-        this.cntn.execInContainer("yum", "-y", "install", "curl");
+        this.cntn.execStdout("yum", "-y", "install", "curl");
     }
 
     private RepoConfigYaml config(final boolean anonymous) {
@@ -198,12 +188,7 @@ final class FilesRepoITCase {
             .withFileStorage(this.tmp.resolve("repos"));
         if (!anonymous) {
             res.withPermissions(
-                new RepoPerms(
-                    new RepoPermissions.PermissionItem(
-                        ArtipieServer.ALICE.name(),
-                        new ListOf<String>("write", "download")
-                    )
-                )
+                new RepoPerms(ArtipieServer.ALICE.name(), "*")
             );
         }
         return res;

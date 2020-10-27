@@ -29,7 +29,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
-import com.jcabi.log.Logger;
+import com.artipie.test.TestContainer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,8 +50,6 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 
 /**
@@ -71,11 +69,6 @@ final class MavenITCase {
     Path tmp;
 
     /**
-     * Subdirectory in temporary directory.
-     */
-    private Path subdir;
-
-    /**
      * Tested Artipie server.
      */
     private ArtipieServer server;
@@ -83,7 +76,7 @@ final class MavenITCase {
     /**
      * Container.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     /**
      * Storage.
@@ -96,24 +89,19 @@ final class MavenITCase {
     private int port;
 
     @BeforeEach
-    void init() throws IOException, InterruptedException {
-        this.subdir = Files.createDirectory(Path.of(this.tmp.toString(), "subdir"));
-        this.storage = new FileStorage(this.subdir);
+    void init() throws Exception {
+        this.storage = new FileStorage(this.tmp);
         this.server = new ArtipieServer(
-            this.subdir, "my-maven",
-            new RepoConfigYaml("maven").withFileStorage(this.subdir.resolve("repos"))
+            this.tmp, "my-maven",
+            new RepoConfigYaml("maven").withFileStorage(this.tmp.resolve("repos"))
         );
         this.port = this.server.start();
-        Testcontainers.exposeHostPorts(this.port);
-        final Path setting = this.subdir.resolve("settings.xml");
+        final Path setting = this.tmp.resolve("settings.xml");
         setting.toFile().createNewFile();
         Files.write(setting, this.settings());
-        this.cntn = new GenericContainer<>("centos:centos8")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.subdir.toString(), "/home");
+        this.cntn = new TestContainer("centos:centos8", this.tmp, this.port);
         this.cntn.start();
-        this.cntn.execInContainer("yum", "-y", "install", "maven");
+        this.cntn.execStdout("yum", "-y", "install", "maven");
     }
 
     @ParameterizedTest
@@ -122,10 +110,10 @@ final class MavenITCase {
         new TestResource(String.format("com/artipie/%s", type))
             .addFilesTo(this.storage, new Key.From("repos", "my-maven", "com", "artipie", type));
         MatcherAssert.assertThat(
-            this.exec(
+            this.cntn.execStdout(
                 "mvn", "-s", "/home/settings.xml", "dependency:get",
                 String.format("-Dartifact=com.artipie:%s:%s", type, vers)
-            ).replaceAll("\n", ""),
+            ),
             new StringContainsInOrder(
                 new ListOf<String>(
                     // @checkstyle LineLengthCheck (2 lines)
@@ -149,14 +137,14 @@ final class MavenITCase {
         );
         MatcherAssert.assertThat(
             "Build failure",
-            this.exec(
+            this.cntn.execStdout(
                 "mvn", "-s", "/home/settings.xml", "-f",
                 String.format("/home/%s-src/pom.xml", type),
                 "deploy"
-            ).replaceAll("\n", ""),
+            ),
             new StringContains("BUILD SUCCESS")
         );
-        this.exec(
+        this.cntn.execStdout(
             "mvn", "-s", "/home/settings.xml", "-f",
             String.format("/home/%s-src/pom.xml", type),
             "clean"
@@ -203,26 +191,21 @@ final class MavenITCase {
     @AfterEach
     void release() {
         this.server.stop();
-        this.cntn.stop();
+        this.cntn.close();
     }
 
     private void prepareDirectory(final String src, final String pom) throws IOException {
         FileUtils.copyDirectory(
             new TestResource(src).asPath().toFile(),
-            this.subdir.resolve(src).toFile()
+            this.tmp.resolve(src).toFile()
         );
         Files.write(
-            this.subdir.resolve(pom),
+            this.tmp.resolve(pom),
             String.format(
-                Files.readString(this.subdir.resolve(pom)),
+                Files.readString(this.tmp.resolve(pom)),
                 this.port
             ).getBytes()
         );
-    }
-
-    private String exec(final String... command) throws Exception {
-        Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command).getStdout();
     }
 
     private List<String> settings() {

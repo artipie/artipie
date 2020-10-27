@@ -25,7 +25,7 @@ package com.artipie.nuget;
 
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
-import com.jcabi.log.Logger;
+import com.artipie.test.TestContainer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -42,7 +42,6 @@ import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * Integration tests for Nuget repository.
@@ -79,7 +78,7 @@ final class NugetITCase {
     /**
      * Container.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     /**
      * Server port.
@@ -94,17 +93,14 @@ final class NugetITCase {
         this.server.start();
         Testcontainers.exposeHostPorts(this.port);
         this.createNugetConfig();
-        this.cntn = new GenericContainer<>("mcr.microsoft.com/dotnet/sdk:5.0")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
+        this.cntn = new TestContainer("mcr.microsoft.com/dotnet/sdk:5.0", this.tmp, this.port);
         this.cntn.start();
     }
 
     @AfterEach
     void tearDown() {
         this.server.stop();
-        this.cntn.stop();
+        this.cntn.close();
     }
 
     @Test
@@ -120,9 +116,9 @@ final class NugetITCase {
     @Timeout(30)
     void shouldInstallPushedPackage() throws Exception {
         this.pushPackage();
-        this.exec("dotnet", "new", "console", "-n", "TestProj");
+        this.cntn.execStdout("dotnet", "new", "console", "-n", "TestProj");
         MatcherAssert.assertThat(
-            this.exec(
+            this.cntn.execStdout(
                 "dotnet", "add", "TestProj", "package", "newtonsoft.json",
                 "--version", "12.0.3", "-s", String.format(NugetITCase.URL, this.port)
             ),
@@ -157,18 +153,13 @@ final class NugetITCase {
             .withUrl(String.format("http://host.testcontainers.internal:%d/my-nuget", this.port));
     }
 
-    private String exec(final String... command) throws Exception {
-        Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command).getStdout();
-    }
-
     private String pushPackage() throws Exception {
         final String pckgname = UUID.randomUUID().toString();
         Files.write(
             this.tmp.resolve(pckgname),
             new NewtonJsonResource("newtonsoft.json.12.0.3.nupkg").bytes()
         );
-        return this.exec(
+        return this.cntn.execStdout(
             "dotnet", "nuget", "push", pckgname,
             "-s", String.format(NugetITCase.URL, this.port)
         );

@@ -30,15 +30,13 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
-import com.jcabi.log.Logger;
+import com.artipie.test.TestContainer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
@@ -48,8 +46,6 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * Integration tests for Pypi repository.
@@ -80,7 +76,7 @@ final class PypiITCase {
     /**
      * Container.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     /**
      * Storage.
@@ -107,11 +103,11 @@ final class PypiITCase {
                 new Key.From("repos", "my-pypi", "alarmtime", "alarmtime-0.1.5.tar.gz")
         );
         MatcherAssert.assertThat(
-            this.exec(
+            this.cntn.execStdout(
                 "pip", "install", "--no-deps", "--trusted-host", PypiITCase.HOST,
                 "--index-url", this.urlCntn(this.userOpt(anonymous)), "alarmtime==0.1.5"
             ),
-            Matchers.containsString("Successfully installed alarmtime-0.1.5")
+            new StringContains("Successfully installed alarmtime-0.1.5")
         );
     }
 
@@ -124,10 +120,10 @@ final class PypiITCase {
                 this.storage,
                 new Key.From("pypi-repo", "example-pckg")
         );
-        this.exec("python3", "-m", "pip", "install", "--user", "--upgrade", "twine");
+        this.cntn.execStdout("python3", "-m", "pip", "install", "--user", "--upgrade", "twine");
         MatcherAssert.assertThat(
             "Packages should be uploaded",
-            this.exec(
+            this.cntn.execStdout(
                 "python3", "-m", "twine", "upload", "--repository-url", this.url,
                 "-u", ArtipieServer.ALICE.name(), "-p", this.pswd(anonymous),
                 "pypi-repo/example-pckg/*"
@@ -151,7 +147,7 @@ final class PypiITCase {
     void pypiInstallShouldFailWithForbidden() throws Exception {
         this.init(false);
         MatcherAssert.assertThat(
-            this.exec(
+            this.cntn.execStdout(
                 "pip", "install", "--verbose", "--no-deps", "--trusted-host", PypiITCase.HOST,
                 "--index-url", this.urlCntn(Optional.of(ArtipieServer.BOB)), "anypackage"
             ),
@@ -171,22 +167,15 @@ final class PypiITCase {
                 this.storage,
                 new Key.From("pypi-repo", "example-pckg")
         );
-        this.exec("python3", "-m", "pip", "install", "--user", "--upgrade", "twine");
+        this.cntn.execStdout("python3", "-m", "pip", "install", "--user", "--upgrade", "twine");
         MatcherAssert.assertThat(
             "Packages should not be uploaded",
-            this.exec(
+            this.cntn.execStdErr(
                 "python3", "-m", "twine", "upload", "--verbose", "--repository-url", this.url,
                 "-u", ArtipieServer.BOB.name(), "-p", ArtipieServer.BOB.password(),
                 "pypi-repo/example-pckg/*"
             ),
-            new IsNot<>(
-                new StringContainsInOrder(
-                    new ListOf<String>(
-                        "Uploading artipietestpkg-0.0.3-py2-none-any.whl", "100%",
-                        "Uploading artipietestpkg-0.0.3.tar.gz", "100%"
-                    )
-                )
-            )
+            new StringContains("HTTPError: 403 Forbidden")
         );
         MatcherAssert.assertThat(
             "Packages should not be saved in storage",
@@ -199,7 +188,7 @@ final class PypiITCase {
     @AfterEach
     void tearDown() {
         this.server.stop();
-        this.cntn.stop();
+        this.cntn.close();
     }
 
     private void init(final boolean anonymous) throws IOException {
@@ -209,17 +198,8 @@ final class PypiITCase {
         );
         this.port = this.server.start();
         this.url = String.format("http://%s:%d/my-pypi/", PypiITCase.HOST, this.port);
-        Testcontainers.exposeHostPorts(this.port);
-        this.cntn = new GenericContainer<>("python:3")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
+        this.cntn = new TestContainer("python:3", this.tmp, this.port);
         this.cntn.start();
-    }
-
-    private String exec(final String... command) throws Exception {
-        Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command).getStdout();
     }
 
     private String pswd(final boolean anonymous) {

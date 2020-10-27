@@ -30,7 +30,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
-import com.jcabi.log.Logger;
+import com.artipie.test.TestContainer;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
@@ -41,8 +41,6 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * Test to pypi proxy.
@@ -82,7 +80,7 @@ public final class PypiProxyITCase {
     /**
      * Container.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     /**
      * Artipie proxy server port.
@@ -98,7 +96,7 @@ public final class PypiProxyITCase {
             new Key.From("origin", "my-pypi", "alarmtime", "alarmtime-0.1.5.tar.gz")
         );
         MatcherAssert.assertThat(
-            this.exec(
+            this.cntn.execStdout(
                 "pip", "install", "--no-deps", "--trusted-host", PypiProxyITCase.HOST,
                 "--index-url", this.url(anonymous), "alarmtime"
             ),
@@ -110,7 +108,7 @@ public final class PypiProxyITCase {
     void stop() {
         this.proxy.stop();
         this.origin.stop();
-        this.cntn.stop();
+        this.cntn.close();
     }
 
     private void init(final boolean anonymous) throws IOException {
@@ -122,11 +120,7 @@ public final class PypiProxyITCase {
             this.tmp, "my-pypi-proxy", this.proxyConfig(anonymous, this.origin.start())
         );
         this.port = this.proxy.start();
-        Testcontainers.exposeHostPorts(this.port);
-        this.cntn = new GenericContainer<>("python:3")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
+        this.cntn = new TestContainer("python:3", this.tmp, this.port);
         this.cntn.start();
     }
 
@@ -155,11 +149,6 @@ public final class PypiProxyITCase {
             );
         }
         return yaml;
-    }
-
-    private String exec(final String... command) throws Exception {
-        Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command).getStdout();
     }
 
     private String url(final boolean anonymous) {

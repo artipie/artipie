@@ -32,6 +32,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.test.TestContainer;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -52,7 +53,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * IT case for RPM repository.
@@ -89,7 +89,7 @@ public final class RpmITCase {
     /**
      * Container.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     void startArtipie(final boolean anonymous) throws IOException {
         final RepoConfigYaml config = new RepoConfigYaml("rpm").withFileStorage(this.tmp);
@@ -177,18 +177,18 @@ public final class RpmITCase {
     void close() {
         this.server.stop();
         if (this.cntn != null) {
-            this.cntn.stop();
+            this.cntn.close();
         }
     }
 
     private String yumExec(final String action) throws Exception {
-        return this.cntn.execInContainer(
+        return this.cntn.execStdout(
             "yum", "-y", "repo-pkgs", "example", action
-        ).getStdout();
+        );
     }
 
     private void prepareContainer(final boolean anonymous)
-        throws IOException, InterruptedException {
+        throws Exception {
         Testcontainers.exposeHostPorts(this.port);
         final Path setting = this.tmp.resolve("example.repo");
         this.tmp.resolve("example.repo").toFile().createNewFile();
@@ -205,12 +205,9 @@ public final class RpmITCase {
                 "gpgcheck=0"
             )
         );
-        this.cntn = new GenericContainer<>("centos:centos8")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
+        this.cntn = new TestContainer("centos:centos8", this.tmp, this.port);
         this.cntn.start();
-        this.cntn.execInContainer("mv", "/home/example.repo", "/etc/yum.repos.d/");
+        this.cntn.execStdout("mv", "/home/example.repo", "/etc/yum.repos.d/");
     }
 
     private void prepareRpmRepository() {
