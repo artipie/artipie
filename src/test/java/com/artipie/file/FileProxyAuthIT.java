@@ -81,8 +81,8 @@ final class FileProxyAuthIT {
     void setUp() throws Exception {
         this.startOrigin();
         this.startProxy();
-        this.cntn = new TestContainer("centos:centos8", this.tmp, this.proxy.port());
-        this.cntn.start();
+        this.cntn = new TestContainer("centos:centos8", this.tmp);
+        this.cntn.start(this.proxy.port());
         this.cntn.execStdout("yum", "-y", "install", "curl");
     }
 

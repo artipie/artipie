@@ -178,8 +178,8 @@ final class FilesRepoITCase {
         this.server = new ArtipieServer(this.tmp, "my-file", config);
         this.port = this.server.start();
         this.server.start();
-        this.cntn = new TestContainer("centos:centos8", this.tmp, this.port);
-        this.cntn.start();
+        this.cntn = new TestContainer("centos:centos8", this.tmp);
+        this.cntn.start(this.port);
         this.cntn.execStdout("yum", "-y", "install", "curl");
     }
 

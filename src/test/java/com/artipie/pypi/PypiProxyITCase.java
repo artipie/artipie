@@ -120,8 +120,8 @@ public final class PypiProxyITCase {
             this.tmp, "my-pypi-proxy", this.proxyConfig(anonymous, this.origin.start())
         );
         this.port = this.proxy.start();
-        this.cntn = new TestContainer("python:3", this.tmp, this.port);
-        this.cntn.start();
+        this.cntn = new TestContainer("python:3", this.tmp);
+        this.cntn.start(this.port);
     }
 
     private RepoConfigYaml originConfig(final boolean anonymous) {

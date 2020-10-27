@@ -93,8 +93,8 @@ final class NugetITCase {
         this.server.start();
         Testcontainers.exposeHostPorts(this.port);
         this.createNugetConfig();
-        this.cntn = new TestContainer("mcr.microsoft.com/dotnet/sdk:5.0", this.tmp, this.port);
-        this.cntn.start();
+        this.cntn = new TestContainer("mcr.microsoft.com/dotnet/sdk:5.0", this.tmp);
+        this.cntn.start(this.port);
     }
 
     @AfterEach

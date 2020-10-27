@@ -198,8 +198,8 @@ final class PypiITCase {
         );
         this.port = this.server.start();
         this.url = String.format("http://%s:%d/my-pypi/", PypiITCase.HOST, this.port);
-        this.cntn = new TestContainer("python:3", this.tmp, this.port);
-        this.cntn.start();
+        this.cntn = new TestContainer("python:3", this.tmp);
+        this.cntn.start(this.port);
     }
 
     private String pswd(final boolean anonymous) {

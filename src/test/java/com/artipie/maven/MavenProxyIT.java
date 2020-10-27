@@ -109,8 +109,8 @@ final class MavenProxyIT {
         final Path setting = this.tmp.resolve("settings.xml");
         setting.toFile().createNewFile();
         Files.write(setting, this.settings());
-        this.cntn = new TestContainer("centos:centos8", this.tmp, this.port);
-        this.cntn.start();
+        this.cntn = new TestContainer("centos:centos8", this.tmp);
+        this.cntn.start(this.port);
         this.cntn.execStdout("yum", "-y", "install", "maven");
     }
 

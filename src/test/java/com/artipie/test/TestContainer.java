@@ -44,21 +44,20 @@ public final class TestContainer implements AutoCloseable {
      * Ctor.
      * @param image Docker image
      * @param path Path for binding file system
-     * @param port Port for exposing
      */
-    @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
-    public TestContainer(final String image, final Path path, final int port) {
+    public TestContainer(final String image, final Path path) {
         this.cntn = new GenericContainer<>(image)
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
             .withFileSystemBind(path.toString(), "/home");
-        Testcontainers.exposeHostPorts(port);
     }
 
     /**
-     * Start container.
+     * Start container exposing specified port.
+     * @param port Port for exposing
      */
-    public void start() {
+    public void start(final int port) {
+        Testcontainers.exposeHostPorts(port);
         this.cntn.start();
     }
 

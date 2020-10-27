@@ -205,8 +205,8 @@ public final class RpmITCase {
                 "gpgcheck=0"
             )
         );
-        this.cntn = new TestContainer("centos:centos8", this.tmp, this.port);
-        this.cntn.start();
+        this.cntn = new TestContainer("centos:centos8", this.tmp);
+        this.cntn.start(this.port);
         this.cntn.execStdout("mv", "/home/example.repo", "/etc/yum.repos.d/");
     }
 

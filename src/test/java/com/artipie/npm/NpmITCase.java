@@ -206,8 +206,8 @@ final class NpmITCase {
             this.tmp, "my-npm", this.config(anonymous).toString(), this.port
         );
         this.server.start();
-        this.cntn = new TestContainer("node:14-alpine", this.tmp, this.port);
-        this.cntn.start();
+        this.cntn = new TestContainer("node:14-alpine", this.tmp);
+        this.cntn.start(this.port);
     }
 
     private void saveFilesToStrg(final String proj) {
