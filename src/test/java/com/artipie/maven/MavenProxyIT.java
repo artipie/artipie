@@ -30,17 +30,14 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.test.TestContainer;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -51,7 +48,7 @@ import org.junit.jupiter.api.io.TempDir;
  * @since 0.11
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-@EnabledOnOs({OS.LINUX, OS.MAC})
+@DisabledOnOs(OS.WINDOWS)
 final class MavenProxyIT {
 
     /**
@@ -75,11 +72,6 @@ final class MavenProxyIT {
      * Storage.
      */
     private Storage storage;
-
-    /**
-     * Proxy Artipie server port.
-     */
-    private int port;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -105,12 +97,11 @@ final class MavenProxyIT {
                     )
             )
         );
-        this.port = this.server.start();
-        final Path setting = this.tmp.resolve("settings.xml");
-        setting.toFile().createNewFile();
-        Files.write(setting, this.settings());
+        final int port = this.server.start();
+        new MavenSettings(port)
+            .writeTo(this.tmp);
         this.cntn = new TestContainer("centos:centos8", this.tmp);
-        this.cntn.start(this.port);
+        this.cntn.start(port);
         this.cntn.execStdout("yum", "-y", "install", "maven");
     }
 
@@ -138,24 +129,4 @@ final class MavenProxyIT {
         );
     }
 
-    private List<String> settings() {
-        return new ListOf<String>(
-            "<settings>",
-            "    <profiles>",
-            "        <profile>",
-            "            <id>artipie</id>",
-            "            <repositories>",
-            "                <repository>",
-            "                    <id>my-maven</id>",
-            String.format("<url>http://host.testcontainers.internal:%d/my-maven/</url>", this.port),
-            "                </repository>",
-            "            </repositories>",
-            "        </profile>",
-            "    </profiles>",
-            "    <activeProfiles>",
-            "        <activeProfile>artipie</activeProfile>",
-            "    </activeProfiles>",
-            "</settings>"
-        );
-    }
 }

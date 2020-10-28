@@ -32,11 +32,8 @@ import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.test.TestContainer;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.List;
-import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
@@ -83,9 +80,8 @@ final class MavenProxyAuthIT {
     void setUp() throws Exception {
         this.startOrigin();
         this.startProxy();
-        final Path setting = this.tmp.resolve("settings.xml");
-        setting.toFile().createNewFile();
-        Files.write(setting, this.settings());
+        new MavenSettings(this.proxy.port())
+            .writeTo(this.tmp);
         this.cntn = new TestContainer("centos:centos8", this.tmp);
         this.cntn.start(this.proxy.port());
         this.cntn.execStdout("yum", "-y", "install", "maven");
@@ -150,27 +146,4 @@ final class MavenProxyAuthIT {
         this.proxy.start();
     }
 
-    private List<String> settings() {
-        return new ListOf<>(
-            "<settings>",
-            "    <profiles>",
-            "        <profile>",
-            "            <id>artipie</id>",
-            "            <repositories>",
-            "                <repository>",
-            "                    <id>my-maven</id>",
-            String.format(
-                "<url>http://host.testcontainers.internal:%d/my-maven/</url>",
-                this.proxy.port()
-            ),
-            "                </repository>",
-            "            </repositories>",
-            "        </profile>",
-            "    </profiles>",
-            "    <activeProfiles>",
-            "        <activeProfile>artipie</activeProfile>",
-            "    </activeProfiles>",
-            "</settings>"
-        );
-    }
 }
