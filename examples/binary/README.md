@@ -30,6 +30,17 @@ In order to download a file, send a GET HTTP request:
 curl -X GET http://localhost:8080/repo/text.txt
 ```
 
-#### Advanced option
+### Proxy Binary Repo
 
-Binary repositories does not have any other opinions.
+Try this `repo-proxy.yaml` file to host files repository proxy:
+
+```yaml
+repo:
+  type: file-proxy
+  remotes:
+    - url: https://example-storage.com/my-files
+      username: Aladdin # optional
+      password: OpenSesame # optional
+```
+
+Artipie will redirect all requests to remote.
