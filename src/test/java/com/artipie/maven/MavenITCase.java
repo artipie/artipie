@@ -95,10 +95,8 @@ final class MavenITCase {
             new RepoConfigYaml("maven").withFileStorage(this.tmp.resolve("repos"))
         );
         this.port = this.server.start();
-        Files.write(
-            this.tmp.resolve("settings.xml"),
-            new MavenSettings(this.port).value()
-        );
+        new MavenSettings(this.port)
+            .writeTo(this.tmp);
         this.cntn = new TestContainer("centos:centos8", this.tmp);
         this.cntn.start(this.port);
         this.cntn.execStdout("yum", "-y", "install", "maven");
@@ -189,7 +187,7 @@ final class MavenITCase {
     }
 
     @AfterEach
-    void release() {
+    void tearDown() {
         this.server.stop();
         this.cntn.close();
     }

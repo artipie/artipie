@@ -23,6 +23,9 @@
  */
 package com.artipie.maven;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import org.cactoos.list.ListOf;
@@ -65,10 +68,14 @@ public final class MavenSettings {
     }
 
     /**
-     * Returns maven settings.
-     * @return Maven settings.
+     * Write maven settings to the specified path.
+     * @param path Path for writing
+     * @throws IOException In case of exception during writing.
      */
-    public List<String> value() {
-        return this.settings;
+    public void writeTo(final Path path) throws IOException {
+        Files.write(
+            path.resolve("settings.xml"),
+            this.settings
+        );
     }
 }

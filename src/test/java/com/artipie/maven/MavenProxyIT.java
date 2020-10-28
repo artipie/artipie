@@ -30,7 +30,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.test.TestContainer;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -99,10 +98,8 @@ final class MavenProxyIT {
             )
         );
         final int port = this.server.start();
-        Files.write(
-            this.tmp.resolve("settings.xml"),
-            new MavenSettings(port).value()
-        );
+        new MavenSettings(port)
+            .writeTo(this.tmp);
         this.cntn = new TestContainer("centos:centos8", this.tmp);
         this.cntn.start(port);
         this.cntn.execStdout("yum", "-y", "install", "maven");

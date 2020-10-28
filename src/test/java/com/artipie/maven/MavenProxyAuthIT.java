@@ -32,7 +32,6 @@ import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.test.TestContainer;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import org.hamcrest.MatcherAssert;
@@ -81,10 +80,8 @@ final class MavenProxyAuthIT {
     void setUp() throws Exception {
         this.startOrigin();
         this.startProxy();
-        Files.write(
-            this.tmp.resolve("settings.xml"),
-            new MavenSettings(this.proxy.port()).value()
-        );
+        new MavenSettings(this.proxy.port())
+            .writeTo(this.tmp);
         this.cntn = new TestContainer("centos:centos8", this.tmp);
         this.cntn.start(this.proxy.port());
         this.cntn.execStdout("yum", "-y", "install", "maven");
