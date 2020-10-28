@@ -30,7 +30,7 @@ import com.artipie.RepoPerms;
 import com.artipie.asto.Key;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
-import com.jcabi.log.Logger;
+import com.artipie.test.TestContainer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,8 +45,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * Integration test for {@link com.artipie.maven.http.MavenProxySlice}.
@@ -79,7 +77,7 @@ final class MavenProxyAuthIT {
     /**
      * Container for local server.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -88,13 +86,9 @@ final class MavenProxyAuthIT {
         final Path setting = this.tmp.resolve("settings.xml");
         setting.toFile().createNewFile();
         Files.write(setting, this.settings());
-        this.cntn = new GenericContainer<>("centos:centos8")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
-        Testcontainers.exposeHostPorts(this.proxy.port());
-        this.cntn.start();
-        this.exec("yum", "-y", "install", "maven");
+        this.cntn = new TestContainer("centos:centos8", this.tmp);
+        this.cntn.start(this.proxy.port());
+        this.cntn.execStdout("yum", "-y", "install", "maven");
     }
 
     @AfterEach
@@ -107,18 +101,13 @@ final class MavenProxyAuthIT {
     @Test
     void shouldGetDependency() throws Exception {
         MatcherAssert.assertThat(
-            this.exec(
+            this.cntn.execStdout(
                 "mvn",
                 "-s", "/home/settings.xml",
                 "dependency:get", "-Dartifact=com.artipie:helloworld:0.1:jar"
-            ).replaceAll("\n", ""),
+            ),
             new StringContains("BUILD SUCCESS")
         );
-    }
-
-    private String exec(final String... command) throws Exception {
-        Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command).getStdout();
     }
 
     private void startOrigin() throws IOException {

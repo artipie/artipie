@@ -40,7 +40,6 @@ import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
-import com.artipie.http.auth.BasicIdentities;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.group.GroupSlice;
@@ -72,9 +71,7 @@ import java.util.stream.Collectors;
  * @checkstyle CyclomaticComplexityCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
-@SuppressWarnings(
-    {"PMD.AvoidCatchingGenericException", "PMD.StaticAccessToStaticFields", "deprecation"}
-)
+@SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.StaticAccessToStaticFields"})
 public final class SliceFromConfig extends Slice.Wrap {
 
     /**
@@ -166,7 +163,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                         new Npm(cfg.storage()),
                         cfg.storage(),
                         permissions,
-                        new BasicIdentities(auth)
+                        auth
                     )
                 );
                 break;
@@ -183,7 +180,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                         cfg.storage(),
                         cfg.path(),
                         permissions,
-                        new BasicIdentities(auth)
+                        auth
                     )
                 );
                 break;
@@ -191,7 +188,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = trimIfNotStandalone(
                     settings, standalone,
                     new RpmSlice(
-                        cfg.storage(), permissions, new BasicIdentities(auth),
+                        cfg.storage(), permissions, auth,
                         new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings())
                     )
                 );
