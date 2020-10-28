@@ -30,7 +30,7 @@ import com.artipie.RepoPerms;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.fs.FileStorage;
-import com.jcabi.log.Logger;
+import com.artipie.test.TestContainer;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -43,8 +43,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * Integration test for files proxy.
@@ -77,19 +75,15 @@ final class FileProxyAuthIT {
     /**
      * Container for local server.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     @BeforeEach
     void setUp() throws Exception {
         this.startOrigin();
         this.startProxy();
-        this.cntn = new GenericContainer<>("centos:centos8")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
-        Testcontainers.exposeHostPorts(this.proxy.port());
-        this.cntn.start();
-        this.cntn.execInContainer("yum", "-y", "install", "curl");
+        this.cntn = new TestContainer("centos:centos8", this.tmp);
+        this.cntn.start(this.proxy.port());
+        this.cntn.execStdout("yum", "-y", "install", "curl");
     }
 
     @AfterEach
@@ -102,7 +96,7 @@ final class FileProxyAuthIT {
     @Test
     void shouldGetFile() throws Exception {
         MatcherAssert.assertThat(
-            this.exec(
+            this.cntn.execStdout(
                 "curl", "-i", "-X",
                 "GET",
                 String.format(
@@ -112,11 +106,6 @@ final class FileProxyAuthIT {
             ),
             new StringContains("HTTP/1.1 200 OK")
         );
-    }
-
-    private String exec(final String... command) throws Exception {
-        Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command).getStdout();
     }
 
     private void startOrigin() throws IOException {
