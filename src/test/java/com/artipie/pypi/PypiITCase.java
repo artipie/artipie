@@ -84,7 +84,7 @@ final class PypiITCase {
     private Storage storage;
 
     /**
-     * Helper for url that may contains user credentials.
+     * Repository url.
      */
     private RepositoryUrl url;
 
