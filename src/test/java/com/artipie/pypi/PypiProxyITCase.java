@@ -46,6 +46,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test to pypi proxy.
  * @since 0.12
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
