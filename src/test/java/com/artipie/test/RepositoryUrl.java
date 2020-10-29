@@ -29,7 +29,7 @@ import com.artipie.ArtipieServer;
  * Class to simplify working with url that may contains user credentials.
  * @since 0.12
  */
-public final class UrlCredsHelper {
+public final class RepositoryUrl {
 
     /**
      * Host, port, repo.
@@ -41,7 +41,7 @@ public final class UrlCredsHelper {
      * @param port Port
      * @param reponame Reponame for url path
      */
-    public UrlCredsHelper(final int port, final String reponame) {
+    public RepositoryUrl(final int port, final String reponame) {
         this.hostportrepo = String.format("host.testcontainers.internal:%d/%s/", port, reponame);
     }
 
@@ -49,7 +49,7 @@ public final class UrlCredsHelper {
      * Simple url.
      * @return Simple url.
      */
-    public String url() {
+    public String string() {
         return String.format("http://%s", this.hostportrepo);
     }
 
@@ -58,13 +58,13 @@ public final class UrlCredsHelper {
      * @param anonymous Add credentials tor url or not
      * @return Url with credentials for default user.
      */
-    public String url(final boolean anonymous) {
+    public String string(final boolean anonymous) {
         final ArtipieServer.User user = ArtipieServer.ALICE;
         final String res;
         if (anonymous) {
-            res = this.url();
+            res = this.string();
         } else {
-            res = this.url(user);
+            res = this.string(user);
         }
         return res;
     }
@@ -74,12 +74,9 @@ public final class UrlCredsHelper {
      * @param user User with name and password
      * @return Url with credentials for specified user.
      */
-    public String url(final ArtipieServer.User user) {
-        final String creds = String.format(
-            "%s:%s@", user.name(), user.password()
-        );
+    public String string(final ArtipieServer.User user) {
         return String.format(
-            "http://%s%s", creds, this.hostportrepo
+            "http://%s:%s@%s",  user.name(), user.password(), this.hostportrepo
         );
     }
 }

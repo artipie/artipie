@@ -32,8 +32,8 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.test.RepositoryUrl;
 import com.artipie.test.TestContainer;
-import com.artipie.test.UrlCredsHelper;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -199,7 +199,7 @@ public final class RpmITCase {
                 "[example]",
                 "name=Example Repository",
                 String.format(
-                    "baseurl=%s", new UrlCredsHelper(this.port, RpmITCase.REPO).url(anonymous)
+                    "baseurl=%s", new RepositoryUrl(this.port, RpmITCase.REPO).string(anonymous)
                 ),
                 "enabled=1",
                 "gpgcheck=0"

@@ -32,8 +32,8 @@ import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.npm.misc.JsonFromPublisher;
 import com.artipie.nuget.RandomFreePort;
+import com.artipie.test.RepositoryUrl;
 import com.artipie.test.TestContainer;
-import com.artipie.test.UrlCredsHelper;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -89,7 +89,7 @@ final class NpmITCase {
     /**
      * Helper for url that may contains user credentials.
      */
-    private UrlCredsHelper urlraw;
+    private RepositoryUrl url;
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
@@ -100,7 +100,7 @@ final class NpmITCase {
             "Package was installed",
             this.cntn.execStdout(
                 "npm", "install", NpmITCase.PROJ,
-                "--registry", this.urlraw.url(anonymous)
+                "--registry", this.url.string(anonymous)
             ),
             new StringContainsInOrder(
                 Arrays.asList(
@@ -133,7 +133,7 @@ final class NpmITCase {
             "Package was published",
             this.cntn.execStdout(
                 "npm", "publish", NpmITCase.PROJ,
-                "--registry", this.urlraw.url(anonymous)
+                "--registry", this.url.string(anonymous)
             ),
             new StringContains(String.format("+ %s@1.0.1", NpmITCase.PROJ))
         );
@@ -167,7 +167,7 @@ final class NpmITCase {
         MatcherAssert.assertThat(
             this.cntn.execStdErr(
                 "npm", "install", NpmITCase.PROJ,
-                "--registry", this.urlraw.url(user)
+                "--registry", this.url.string(user)
             ),
             new StringContains("npm ERR! 403 403 Forbidden - GET")
         );
@@ -182,7 +182,7 @@ final class NpmITCase {
         MatcherAssert.assertThat(
             this.cntn.execStdErr(
                 "npm", "publish", NpmITCase.PROJ,
-                "--registry", this.urlraw.url(user)
+                "--registry", this.url.string(user)
             ),
             new StringContains("npm ERR! 403 403 Forbidden - PUT")
         );
@@ -197,7 +197,7 @@ final class NpmITCase {
     private void init(final boolean anonymous) throws IOException {
         this.storage = new FileStorage(this.tmp);
         final int port = new RandomFreePort().value();
-        this.urlraw = new UrlCredsHelper(port, "my-npm");
+        this.url = new RepositoryUrl(port, "my-npm");
         this.server = new ArtipieServer(
             this.tmp, "my-npm", this.config(anonymous).toString(), port
         );
@@ -224,7 +224,7 @@ final class NpmITCase {
     private RepoConfigYaml config(final boolean anonymous) {
         final RepoConfigYaml yaml = new RepoConfigYaml("npm")
             .withFileStorage(this.tmp.resolve("repos"))
-            .withUrl(this.urlraw.url(anonymous));
+            .withUrl(this.url.string(anonymous));
         if (!anonymous) {
             yaml.withPermissions(
                 new RepoPerms(ArtipieServer.ALICE.name(), "*")

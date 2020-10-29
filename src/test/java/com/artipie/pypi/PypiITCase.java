@@ -30,8 +30,8 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
+import com.artipie.test.RepositoryUrl;
 import com.artipie.test.TestContainer;
-import com.artipie.test.UrlCredsHelper;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.cactoos.list.ListOf;
@@ -86,7 +86,7 @@ final class PypiITCase {
     /**
      * Helper for url that may contains user credentials.
      */
-    private UrlCredsHelper urlraw;
+    private RepositoryUrl url;
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
@@ -100,7 +100,7 @@ final class PypiITCase {
         MatcherAssert.assertThat(
             this.cntn.execStdout(
                 "pip", "install", "--no-deps", "--trusted-host", PypiITCase.HOST,
-                "--index-url", this.urlraw.url(anonymous),
+                "--index-url", this.url.string(anonymous),
                 "alarmtime==0.1.5"
             ),
             new StringContains("Successfully installed alarmtime-0.1.5")
@@ -120,7 +120,7 @@ final class PypiITCase {
         MatcherAssert.assertThat(
             "Packages should be uploaded",
             this.cntn.execStdout(
-                "python3", "-m", "twine", "upload", "--repository-url", this.urlraw.url(),
+                "python3", "-m", "twine", "upload", "--repository-url", this.url.string(),
                 "-u", ArtipieServer.ALICE.name(), "-p", this.pswd(anonymous),
                 "pypi-repo/example-pckg/*"
             ),
@@ -145,11 +145,11 @@ final class PypiITCase {
         MatcherAssert.assertThat(
             this.cntn.execStdout(
                 "pip", "install", "--verbose", "--no-deps", "--trusted-host", PypiITCase.HOST,
-                "--index-url", this.urlraw.url(ArtipieServer.BOB), "anypackage"
+                "--index-url", this.url.string(ArtipieServer.BOB), "anypackage"
             ),
             new StringContains(
                 String.format(
-                    "403 Client Error: Forbidden for url: %spip/", this.urlraw.url()
+                    "403 Client Error: Forbidden for url: %spip/", this.url.string()
                 )
             )
         );
@@ -168,7 +168,7 @@ final class PypiITCase {
             "Packages should not be uploaded",
             this.cntn.execStdErr(
                 "python3", "-m", "twine", "upload", "--verbose",
-                "--repository-url", this.urlraw.url(),
+                "--repository-url", this.url.string(),
                 "-u", ArtipieServer.BOB.name(), "-p", ArtipieServer.BOB.password(),
                 "pypi-repo/example-pckg/*"
             ),
@@ -194,7 +194,7 @@ final class PypiITCase {
             this.tmp, "my-pypi", this.config(anonymous)
         );
         final int port = this.server.start();
-        this.urlraw = new UrlCredsHelper(port, "my-pypi");
+        this.url = new RepositoryUrl(port, "my-pypi");
         this.cntn = new TestContainer("python:3", this.tmp);
         this.cntn.start(port);
     }
