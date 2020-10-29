@@ -33,10 +33,10 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.npm.misc.JsonFromPublisher;
 import com.artipie.nuget.RandomFreePort;
 import com.artipie.test.TestContainer;
+import com.artipie.test.UrlCredsHelper;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Optional;
 import javax.json.JsonObject;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -55,7 +55,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.12
  */
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class NpmITCase {
 
@@ -63,11 +63,6 @@ final class NpmITCase {
      * Project name.
      */
     private static final String PROJ = "@hello/simple-npm-project";
-
-    /**
-     * Host name.
-     */
-    private static final String HOST = "host.testcontainers.internal";
 
     /**
      * Temporary directory for all tests.
@@ -92,9 +87,9 @@ final class NpmITCase {
     private Storage storage;
 
     /**
-     * Artipie server port.
+     * Helper for url that may contains user credentials.
      */
-    private int port;
+    private UrlCredsHelper urlraw;
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
@@ -105,7 +100,7 @@ final class NpmITCase {
             "Package was installed",
             this.cntn.execStdout(
                 "npm", "install", NpmITCase.PROJ,
-                "--registry", this.url(this.userOpt(anonymous))
+                "--registry", this.urlraw.url(anonymous)
             ),
             new StringContainsInOrder(
                 Arrays.asList(
@@ -138,7 +133,7 @@ final class NpmITCase {
             "Package was published",
             this.cntn.execStdout(
                 "npm", "publish", NpmITCase.PROJ,
-                "--registry", this.url(this.userOpt(anonymous))
+                "--registry", this.urlraw.url(anonymous)
             ),
             new StringContains(String.format("+ %s@1.0.1", NpmITCase.PROJ))
         );
@@ -172,7 +167,7 @@ final class NpmITCase {
         MatcherAssert.assertThat(
             this.cntn.execStdErr(
                 "npm", "install", NpmITCase.PROJ,
-                "--registry", this.url(Optional.of(user))
+                "--registry", this.urlraw.url(user)
             ),
             new StringContains("npm ERR! 403 403 Forbidden - GET")
         );
@@ -187,7 +182,7 @@ final class NpmITCase {
         MatcherAssert.assertThat(
             this.cntn.execStdErr(
                 "npm", "publish", NpmITCase.PROJ,
-                "--registry", this.url(Optional.of(user))
+                "--registry", this.urlraw.url(user)
             ),
             new StringContains("npm ERR! 403 403 Forbidden - PUT")
         );
@@ -201,13 +196,14 @@ final class NpmITCase {
 
     private void init(final boolean anonymous) throws IOException {
         this.storage = new FileStorage(this.tmp);
-        this.port = new RandomFreePort().value();
+        final int port = new RandomFreePort().value();
+        this.urlraw = new UrlCredsHelper(port, "my-npm");
         this.server = new ArtipieServer(
-            this.tmp, "my-npm", this.config(anonymous).toString(), this.port
+            this.tmp, "my-npm", this.config(anonymous).toString(), port
         );
         this.server.start();
         this.cntn = new TestContainer("node:14-alpine", this.tmp);
-        this.cntn.start(this.port);
+        this.cntn.start(port);
     }
 
     private void saveFilesToStrg(final String proj) {
@@ -228,9 +224,7 @@ final class NpmITCase {
     private RepoConfigYaml config(final boolean anonymous) {
         final RepoConfigYaml yaml = new RepoConfigYaml("npm")
             .withFileStorage(this.tmp.resolve("repos"))
-            .withUrl(
-                this.url(this.userOpt(anonymous))
-            );
+            .withUrl(this.urlraw.url(anonymous));
         if (!anonymous) {
             yaml.withPermissions(
                 new RepoPerms(ArtipieServer.ALICE.name(), "*")
@@ -243,29 +237,6 @@ final class NpmITCase {
         return this.storage.exists(
             new Key.From("node_modules", NpmITCase.PROJ, file)
         ).join();
-    }
-
-    private Optional<ArtipieServer.User> userOpt(final boolean anonymous) {
-        final Optional<ArtipieServer.User> user;
-        if (anonymous) {
-            user = Optional.empty();
-        } else {
-            user = Optional.of(ArtipieServer.ALICE);
-        }
-        return user;
-    }
-
-    private String url(final Optional<ArtipieServer.User> usr) {
-        String res = "";
-        if (usr.isPresent()) {
-            res = String.format(
-                "%s:%s@", usr.get().name(), usr.get().password()
-            );
-        }
-        return String.format(
-            "http://%s%s:%d/my-npm/",
-            res, NpmITCase.HOST, this.port
-        );
     }
 
 }

@@ -33,6 +33,7 @@ import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.test.TestContainer;
+import com.artipie.test.UrlCredsHelper;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -198,8 +199,7 @@ public final class RpmITCase {
                 "[example]",
                 "name=Example Repository",
                 String.format(
-                    "baseurl=http://%shost.testcontainers.internal:%d/%s", this.auth(anonymous),
-                    this.port, RpmITCase.REPO
+                    "baseurl=%s", new UrlCredsHelper(this.port, RpmITCase.REPO).url(anonymous)
                 ),
                 "enabled=1",
                 "gpgcheck=0"
@@ -218,16 +218,6 @@ public final class RpmITCase {
             storage,
             new RepoConfig.Simple(Digest.SHA256, new NamingPolicy.HashPrefixed(Digest.SHA1), true)
         ).batchUpdate(new Key.From(RpmITCase.REPO)).blockingAwait();
-    }
-
-    private String auth(final boolean anonymous) {
-        String res = "";
-        if (!anonymous) {
-            res = String.format(
-                "%s:%s@", ArtipieServer.ALICE.name(), ArtipieServer.ALICE.password()
-            );
-        }
-        return res;
     }
 
 }
