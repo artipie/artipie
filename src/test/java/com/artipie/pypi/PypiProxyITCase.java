@@ -31,6 +31,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.test.TestContainer;
+import com.artipie.test.UrlCredsHelper;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
@@ -98,7 +99,7 @@ public final class PypiProxyITCase {
         MatcherAssert.assertThat(
             this.cntn.execStdout(
                 "pip", "install", "--no-deps", "--trusted-host", PypiProxyITCase.HOST,
-                "--index-url", this.url(anonymous), "alarmtime"
+                "--index-url", new UrlCredsHelper(this.port, "my-pypi").url(anonymous), "alarmtime"
             ),
             Matchers.containsString("Successfully installed alarmtime-0.1.5")
         );
@@ -151,17 +152,4 @@ public final class PypiProxyITCase {
         return yaml;
     }
 
-    private String url(final boolean anonymous) {
-        final String urlcntn;
-        if (anonymous) {
-            urlcntn = String.format("http://%s:%d/my-pypi/", PypiProxyITCase.HOST, this.port);
-        } else {
-            urlcntn = String.format(
-                "http://%s:%s@%s:%d/my-pypi/",
-                ArtipieServer.ALICE.name(), ArtipieServer.ALICE.password(),
-                PypiProxyITCase.HOST, this.port
-            );
-        }
-        return urlcntn;
-    }
 }
