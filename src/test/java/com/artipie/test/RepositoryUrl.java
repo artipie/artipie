@@ -27,7 +27,7 @@ import com.artipie.ArtipieServer;
 
 /**
  * Class to simplify working with url that may contains user credentials.
- * @since 0.12
+ * @since 0.13
  */
 public final class RepositoryUrl {
 
