@@ -30,10 +30,10 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
+import com.artipie.test.RepositoryUrl;
 import com.artipie.test.TestContainer;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Optional;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -52,7 +52,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.12
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class PypiITCase {
 
@@ -84,14 +84,9 @@ final class PypiITCase {
     private Storage storage;
 
     /**
-     * URL 'http://host:port/my-pypi/'.
+     * Repository url.
      */
-    private String url;
-
-    /**
-     * Artipie server port.
-     */
-    private int port;
+    private RepositoryUrl url;
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
@@ -105,7 +100,8 @@ final class PypiITCase {
         MatcherAssert.assertThat(
             this.cntn.execStdout(
                 "pip", "install", "--no-deps", "--trusted-host", PypiITCase.HOST,
-                "--index-url", this.urlCntn(this.userOpt(anonymous)), "alarmtime==0.1.5"
+                "--index-url", this.url.string(anonymous),
+                "alarmtime==0.1.5"
             ),
             new StringContains("Successfully installed alarmtime-0.1.5")
         );
@@ -124,7 +120,7 @@ final class PypiITCase {
         MatcherAssert.assertThat(
             "Packages should be uploaded",
             this.cntn.execStdout(
-                "python3", "-m", "twine", "upload", "--repository-url", this.url,
+                "python3", "-m", "twine", "upload", "--repository-url", this.url.string(),
                 "-u", ArtipieServer.ALICE.name(), "-p", this.pswd(anonymous),
                 "pypi-repo/example-pckg/*"
             ),
@@ -149,11 +145,11 @@ final class PypiITCase {
         MatcherAssert.assertThat(
             this.cntn.execStdout(
                 "pip", "install", "--verbose", "--no-deps", "--trusted-host", PypiITCase.HOST,
-                "--index-url", this.urlCntn(Optional.of(ArtipieServer.BOB)), "anypackage"
+                "--index-url", this.url.string(ArtipieServer.BOB), "anypackage"
             ),
             new StringContains(
                 String.format(
-                    "403 Client Error: Forbidden for url: %spip/", this.url
+                    "403 Client Error: Forbidden for url: %spip/", this.url.string()
                 )
             )
         );
@@ -171,7 +167,8 @@ final class PypiITCase {
         MatcherAssert.assertThat(
             "Packages should not be uploaded",
             this.cntn.execStdErr(
-                "python3", "-m", "twine", "upload", "--verbose", "--repository-url", this.url,
+                "python3", "-m", "twine", "upload", "--verbose",
+                "--repository-url", this.url.string(),
                 "-u", ArtipieServer.BOB.name(), "-p", ArtipieServer.BOB.password(),
                 "pypi-repo/example-pckg/*"
             ),
@@ -196,10 +193,10 @@ final class PypiITCase {
         this.server = new ArtipieServer(
             this.tmp, "my-pypi", this.config(anonymous)
         );
-        this.port = this.server.start();
-        this.url = String.format("http://%s:%d/my-pypi/", PypiITCase.HOST, this.port);
+        final int port = this.server.start();
+        this.url = new RepositoryUrl(port, "my-pypi");
         this.cntn = new TestContainer("python:3", this.tmp);
-        this.cntn.start(this.port);
+        this.cntn.start(port);
     }
 
     private String pswd(final boolean anonymous) {
@@ -208,19 +205,6 @@ final class PypiITCase {
             pass = ArtipieServer.ALICE.password();
         }
         return pass;
-    }
-
-    private String urlCntn(final Optional<ArtipieServer.User> user) {
-        final String urlcntn;
-        if (user.isEmpty()) {
-            urlcntn = this.url;
-        } else {
-            urlcntn = String.format(
-                "http://%s:%s@%s:%d/my-pypi/",
-                user.get().name(), user.get().password(), PypiITCase.HOST, this.port
-            );
-        }
-        return urlcntn;
     }
 
     private RepoConfigYaml config(final boolean anonymous) {
@@ -240,13 +224,4 @@ final class PypiITCase {
         ).join();
     }
 
-    private Optional<ArtipieServer.User> userOpt(final boolean anonymous) {
-        final Optional<ArtipieServer.User> user;
-        if (anonymous) {
-            user = Optional.empty();
-        } else {
-            user = Optional.of(ArtipieServer.ALICE);
-        }
-        return user;
-    }
 }
