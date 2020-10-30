@@ -26,7 +26,6 @@ package com.artipie.api;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicIdentities;
 import com.artipie.http.auth.Identities;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqHeaders;
 import com.jcabi.log.Logger;
 import java.io.IOException;
@@ -41,8 +40,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.crypto.Cipher;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -53,12 +50,6 @@ import org.apache.commons.codec.binary.Hex;
  */
 @SuppressWarnings("deprecation")
 public final class AuthApi implements Identities {
-
-    /**
-     * URI path pattern.
-     */
-    private static final Pattern PTN_PATH =
-        Pattern.compile("(?:/api/\\w+|/dashboard)?/(?<user>[^/.]+)(?:/.*)?");
 
     /**
      * Origin authentication.
@@ -76,22 +67,11 @@ public final class AuthApi implements Identities {
     @Override
     public Optional<Authentication.User> user(final String line,
         final Iterable<Map.Entry<String, String>> headers) {
-        final Matcher matcher = PTN_PATH.matcher(new RequestLineFrom(line).uri().getPath());
-        final Optional<Authentication.User> res;
-        if (matcher.matches()) {
-            res = Optional.ofNullable(
-                AuthApi.cookies(new RqHeaders(headers, "Cookie")).get("session")
-            ).map(AuthApi::session)
-                .orElse(
-                    new BasicIdentities(this.auth).user(line, headers)
-                        .map(Authentication.User::name)
-                )
-                .filter(name -> name.equals(matcher.group("user")))
-                .map(Authentication.User::new);
-        } else {
-            res = Optional.empty();
-        }
-        return res;
+        return Optional.ofNullable(
+            AuthApi.cookies(new RqHeaders(headers, "Cookie")).get("session")
+        ).map(AuthApi::session)
+            .orElse(new BasicIdentities(this.auth).user(line, headers))
+            .filter(user -> new ApiPermissions().allowed(user, line));
     }
 
     /**
@@ -125,9 +105,9 @@ public final class AuthApi implements Identities {
      * @return User id
      */
     @SuppressWarnings("PMD.PreserveStackTrace")
-    private static Optional<String> session(final String encoded) {
+    private static Optional<Authentication.User> session(final String encoded) {
         final String env = System.getenv("ARTIPIE_SESSION_KEY");
-        final Optional<String> user;
+        final Optional<Authentication.User> user;
         if (env == null) {
             user = Optional.empty();
         } else {
@@ -138,9 +118,11 @@ public final class AuthApi implements Identities {
                 final Cipher rsa = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
                 rsa.init(Cipher.DECRYPT_MODE, KeyFactory.getInstance("RSA").generatePrivate(spec));
                 user = Optional.of(
-                    new String(
-                        rsa.doFinal(Hex.decodeHex(encoded.toCharArray())),
-                        StandardCharsets.UTF_8
+                    new Authentication.User(
+                        new String(
+                            rsa.doFinal(Hex.decodeHex(encoded.toCharArray())),
+                            StandardCharsets.UTF_8
+                        )
                     )
                 );
             } catch (final IOException | DecoderException | GeneralSecurityException err) {
