@@ -45,7 +45,6 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import org.cactoos.scalar.Unchecked;
 import org.reactivestreams.Publisher;
 
 /**
@@ -75,7 +74,7 @@ public final class GetPermissionSlice implements Slice {
         final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
         return opt.<Response>map(
             repo -> new AsyncResponse(
-                new Unchecked<>(this.settings::storage).value()
+                this.settings.storage()
                     .exists(new Key.From(String.format("%s.yaml", repo))).thenCompose(
                         exists -> {
                             final CompletionStage<Response> res;

@@ -29,9 +29,6 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.common.RsJson;
-import com.jcabi.log.Logger;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import javax.json.Json;
@@ -67,23 +64,18 @@ public final class GetPermissionsSlice implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        try {
-            final String base = this.settings.meta().string("base_url").replaceAll("/$", "");
-            return new AsyncResponse(
-                new RepoPermissions.FromSettings(this.settings).repositories().<Response>thenApply(
-                    list -> {
-                        final JsonArrayBuilder json = Json.createArrayBuilder();
-                        list.forEach(
-                            perm -> json.add(GetPermissionsSlice.permJson(base, perm))
-                        );
-                        return new RsJson(json);
-                    }
-                )
-            );
-        } catch (final IOException err) {
-            Logger.error(this, err.getMessage());
-            throw new UncheckedIOException(err);
-        }
+        final String base = this.settings.meta().string("base_url").replaceAll("/$", "");
+        return new AsyncResponse(
+            new RepoPermissions.FromSettings(this.settings).repositories().<Response>thenApply(
+                list -> {
+                    final JsonArrayBuilder json = Json.createArrayBuilder();
+                    list.forEach(
+                        perm -> json.add(GetPermissionsSlice.permJson(base, perm))
+                    );
+                    return new RsJson(json);
+                }
+            )
+        );
     }
 
     /**

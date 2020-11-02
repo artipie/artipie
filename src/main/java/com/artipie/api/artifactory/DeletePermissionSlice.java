@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.cactoos.scalar.Unchecked;
 import org.reactivestreams.Publisher;
 
 /**
@@ -68,7 +67,7 @@ public final class DeletePermissionSlice implements Slice {
         final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
         return opt.<Response>map(
             repo -> new AsyncResponse(
-                new Unchecked<>(this.settings::storage).value()
+                this.settings.storage()
                     .exists(new Key.From(String.format("%s.yaml", repo)))
                     .thenCompose(
                         exists -> {

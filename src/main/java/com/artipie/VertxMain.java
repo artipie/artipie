@@ -38,7 +38,6 @@ import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -189,9 +188,8 @@ public final class VertxMain {
      *
      * @param settings Settings.
      * @param metrics Metrics.
-     * @throws IOException On error reading settings.
      */
-    private void startRepos(final Settings settings, final Metrics metrics) throws IOException {
+    private void startRepos(final Settings settings, final Metrics metrics) {
         final Storage storage = settings.storage();
         final String yaml = ".yaml";
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
@@ -205,13 +203,10 @@ public final class VertxMain {
             repo.port().ifPresent(
                 prt -> {
                     final String name = repo.name().replace(yaml, "");
-                    final Slice slice;
-                    try {
-                        slice = new ArtipieRepositories(settings).slice(new Key.From(name), true);
-                    } catch (final IOException ex) {
-                        throw new UncheckedIOException(ex);
-                    }
-                    this.listenOn(slice, metrics, prt);
+                    this.listenOn(
+                        new ArtipieRepositories(settings).slice(new Key.From(name), true),
+                        metrics, prt
+                    );
                     Logger.info(
                         VertxMain.class,
                         "Artipie repo '%s' was started on port %d", name, prt
@@ -244,9 +239,8 @@ public final class VertxMain {
      *
      * @param settings Settings.
      * @return Metrics.
-     * @throws IOException In case of I/O error reading settings.
      */
-    private static Metrics metrics(final Settings settings) throws IOException {
+    private static Metrics metrics(final Settings settings) {
         return Optional.ofNullable(settings.meta())
             .map(meta -> meta.yamlMapping("metrics"))
             .<Metrics>map(root -> new MetricsFromConfig(root).metrics())
