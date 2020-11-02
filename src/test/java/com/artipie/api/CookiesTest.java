@@ -23,37 +23,28 @@
  */
 package com.artipie.api;
 
-import com.artipie.http.auth.Authentication;
-import com.artipie.http.auth.BasicIdentities;
-import com.artipie.http.auth.Identities;
-import java.util.Map;
+import com.artipie.http.Headers;
 import java.util.Optional;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Test;
 
 /**
- * API authentication wrapper.
- * @since 0.6
+ * Test for {@link Cookies}.
+ *
+ * @since 0.13
+ * @todo #231:30min Add tests for Cookies class.
+ *  `Cookies` class lacks test coverage for primary code flow branches.
+ *  It is important that to check that proper user is extracted when headers contain session cookie.
+ *  This might require `Cookie` class refactoring as the class depends on system environment.
  */
-@SuppressWarnings("deprecation")
-public final class AuthApi implements Identities {
+class CookiesTest {
 
-    /**
-     * Origin authentication.
-     */
-    private final Authentication auth;
-
-    /**
-     * Wraps authentication with API restrictions.
-     * @param auth Origin
-     */
-    public AuthApi(final Authentication auth) {
-        this.auth = auth;
-    }
-
-    @Override
-    public Optional<Authentication.User> user(final String line,
-        final Iterable<Map.Entry<String, String>> headers) {
-        return new Cookies(headers).user().or(
-            () -> new BasicIdentities(this.auth).user(line, headers)
-        ).filter(user -> new ApiPermissions().allowed(user, line));
+    @Test
+    void shouldNotFindUserInEmptyHeaders() {
+        MatcherAssert.assertThat(
+            new Cookies(Headers.EMPTY).user(),
+            new IsEqual<>(Optional.empty())
+        );
     }
 }
