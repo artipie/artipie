@@ -24,6 +24,7 @@
 
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.ArtipieRepositories;
@@ -38,7 +39,6 @@ import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -181,7 +181,7 @@ public final class VertxMain {
                 )
             );
         }
-        return new YamlSettings(Files.readString(path, StandardCharsets.UTF_8));
+        return new YamlSettings(Yaml.createYamlInput(path.toFile()).readYamlMapping());
     }
 
     /**
