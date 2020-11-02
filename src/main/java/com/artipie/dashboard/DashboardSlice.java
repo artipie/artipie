@@ -26,15 +26,13 @@ package com.artipie.dashboard;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.Settings;
 import com.artipie.YamlPermissions;
-import com.artipie.api.AuthApi;
+import com.artipie.api.ApiAuthSlice;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
-import com.artipie.http.auth.Permission;
-import com.artipie.http.auth.SliceAuth;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -50,7 +48,6 @@ import java.util.regex.Pattern;
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-@SuppressWarnings("deprecation")
 public final class DashboardSlice extends Slice.Wrap {
 
     /**
@@ -77,7 +74,8 @@ public final class DashboardSlice extends Slice.Wrap {
                         .map(buf -> new Remaining(buf).bytes())
                         .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
                         .map(YamlPermissions::new),
-                    (auth, perm) -> new SliceAuth(
+                    (auth, perm) -> new ApiAuthSlice(
+                        auth, perm,
                         new SliceRoute(
                             new RtRulePath(
                                 new RtRule.ByPath(Pattern.compile("/dashboard/(?:[^/.]+)/?")),
@@ -87,9 +85,7 @@ public final class DashboardSlice extends Slice.Wrap {
                                 new RtRule.ByPath(Pattern.compile("/dashboard/(?:[^/.]+)/(?:[^/.]+)/?")),
                                 new PageSlice(new RepoPage(tpl, settings))
                             )
-                        ),
-                        new Permission.ByName("api", perm),
-                        new AuthApi(auth)
+                        )
                     )
                 ).to(SingleInterop.get())
             )
