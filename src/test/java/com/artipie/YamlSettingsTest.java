@@ -24,6 +24,7 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,11 +55,13 @@ class YamlSettingsTest {
     @Test
     public void shouldSetFlatAsDefaultLayout() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            String.join(
-                "",
-                "meta:\n",
-                "  storage:\n"
-            )
+            Yaml.createYamlInput(
+                String.join(
+                    "",
+                    "meta:\n",
+                    "  storage:\n"
+                )
+            ).readYamlMapping()
         );
         MatcherAssert.assertThat(
             settings.layout(),
@@ -80,19 +83,21 @@ class YamlSettingsTest {
     @Test
     public void shouldBuildS3StorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            String.join(
-                "",
-                "meta:\n",
-                "  storage:\n",
-                "    type: s3\n",
-                "    bucket: my-bucket\n",
-                "    region: my-region\n",
-                "    endpoint: https://my-s3-provider.com\n",
-                "    credentials:\n",
-                "      type: basic\n",
-                "      accessKeyId: ***\n",
-                "      secretAccessKey: ***"
-            )
+            Yaml.createYamlInput(
+                String.join(
+                    "",
+                    "meta:\n",
+                    "  storage:\n",
+                    "    type: s3\n",
+                    "    bucket: my-bucket\n",
+                    "    region: my-region\n",
+                    "    endpoint: https://my-s3-provider.com\n",
+                    "    credentials:\n",
+                    "      type: basic\n",
+                    "      accessKeyId: ***\n",
+                    "      secretAccessKey: ***"
+                )
+            ).readYamlMapping()
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -141,7 +146,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenPathIsNotSet() throws Exception {
+    public void shouldThrowExceptionWhenPathIsNotSet() {
         final YamlSettings settings = new YamlSettings(
             this.config("some/path", "file", Optional.empty())
         );
@@ -156,8 +161,10 @@ class YamlSettingsTest {
 
     @ParameterizedTest
     @MethodSource("badYamls")
-    public void shouldFailProvideStorageFromBadYaml(final String yaml) {
-        final YamlSettings settings = new YamlSettings(yaml);
+    public void shouldFailProvideStorageFromBadYaml(final String yaml) throws IOException {
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlInput(yaml).readYamlMapping()
+        );
         Assertions.assertThrows(RuntimeException.class, settings::storage);
     }
 
@@ -195,7 +202,8 @@ class YamlSettingsTest {
         );
     }
 
-    private String config(final String stpath, final String type, final Optional<String> path) {
+    private YamlMapping config(final String stpath, final String type,
+        final Optional<String> path) {
         final YamlMappingBuilder creds = path.map(
             val -> Yaml.createYamlMappingBuilder().add("type", type).add("path", val)
         ).orElse(Yaml.createYamlMappingBuilder().add("type", type));
@@ -208,6 +216,6 @@ class YamlSettingsTest {
                         .add("type", "fs")
                         .add("path", stpath).build()
                 ).add("credentials", creds.build()).build()
-            ).build().toString();
+            ).build();
     }
 }

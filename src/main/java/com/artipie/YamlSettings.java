@@ -23,14 +23,12 @@
  */
 package com.artipie;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.auth.CachedAuth;
 import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -57,25 +55,21 @@ public final class YamlSettings implements Settings {
     /**
      * YAML file content.
      */
-    private final String content;
+    private final YamlMapping content;
 
     /**
      * Ctor.
      * @param content YAML file content.
      */
-    public YamlSettings(final String content) {
+    public YamlSettings(final YamlMapping content) {
         this.content = content;
     }
 
     @Override
-    public Storage storage() throws IOException {
+    public Storage storage() {
         return new MeasuredStorage(
-            new YamlStorage(
-                Yaml.createYamlInput(this.content)
-                    .readYamlMapping()
-                    .yamlMapping(YamlSettings.KEY_META)
-                    .yamlMapping("storage")
-            ).storage()
+            new YamlStorage(this.content.yamlMapping(YamlSettings.KEY_META).yamlMapping("storage"))
+                .storage()
         );
     }
 
@@ -89,11 +83,8 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public String layout() throws IOException {
-        String name = Yaml.createYamlInput(this.content)
-            .readYamlMapping()
-            .yamlMapping(YamlSettings.KEY_META)
-            .string("layout");
+    public String layout() {
+        String name = this.content.yamlMapping(YamlSettings.KEY_META).string("layout");
         if (name == null) {
             name = "flat";
         }
@@ -101,33 +92,19 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public YamlMapping meta() throws IOException {
-        return Yaml.createYamlInput(this.content)
-            .readYamlMapping()
-            .yamlMapping(YamlSettings.KEY_META);
+    public YamlMapping meta() {
+        return this.content.yamlMapping(YamlSettings.KEY_META);
     }
 
     @Override
-    @SuppressWarnings("PMD.OnlyOneReturn")
     public CompletionStage<Users> credentials() {
-        final YamlMapping cred;
-        try {
-            cred = Yaml.createYamlInput(this.content)
-                .readYamlMapping()
-                .yamlMapping(YamlSettings.KEY_META)
-                .yamlMapping("credentials");
-        } catch (final IOException err) {
-            return CompletableFuture.failedFuture(err);
-        }
+        final YamlMapping cred = this.content
+            .yamlMapping(YamlSettings.KEY_META)
+            .yamlMapping("credentials");
         final CompletionStage<Users> res;
         final String path = "path";
         if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
-            final Storage strg;
-            try {
-                strg = this.storage();
-            } catch (final IOException err) {
-                return CompletableFuture.failedFuture(err);
-            }
+            final Storage strg = this.storage();
             final KeyFromPath key = new KeyFromPath(cred.string(path));
             res = strg.exists(key).thenApply(
                 exists -> {
