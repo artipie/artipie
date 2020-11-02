@@ -58,8 +58,6 @@ import com.artipie.pypi.http.PySlice;
 import com.artipie.repo.PathPattern;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.Vertx;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.stream.Collectors;
 
 /**
@@ -221,17 +219,11 @@ public final class SliceFromConfig extends Slice.Wrap {
                         cfg.settings().orElseThrow().yamlSequence("repositories").values()
                             .stream().map(node -> node.asScalar().value())
                             .map(
-                                name -> {
-                                    try {
-                                        return new AsyncSlice(
-                                            settings.storage().value(new Key.From(String.format("%s.yaml", name)))
-                                                .thenCompose(data -> RepoConfig.fromPublisher(aliases, new KeyFromPath(name), data))
-                                                .thenApply(sub -> new SliceFromConfig(settings, sub, aliases, standalone))
-                                        );
-                                    } catch (final IOException err) {
-                                        throw new UncheckedIOException(err);
-                                    }
-                                }
+                                name -> new AsyncSlice(
+                                    settings.storage().value(new Key.From(String.format("%s.yaml", name)))
+                                        .thenCompose(data -> RepoConfig.fromPublisher(aliases, new KeyFromPath(name), data))
+                                        .thenApply(sub -> new SliceFromConfig(settings, sub, aliases, standalone))
+                                )
                             ).collect(Collectors.toList())
                     )
                 );

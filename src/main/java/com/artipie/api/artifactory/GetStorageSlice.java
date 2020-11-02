@@ -37,8 +37,6 @@ import com.artipie.http.rs.common.RsJson;
 import com.artipie.repo.PathPattern;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
@@ -99,15 +97,13 @@ public final class GetStorageSlice implements Slice {
      *  This code duplication should be resolved by extracting this code to separate class.
      */
     private CompletionStage<Storage> storage(final String name) {
-        final Storage storage;
-        try {
-            storage = this.settings.storage();
-        } catch (final IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
         return Single.zip(
-            SingleInterop.fromFuture(storage.value(new Key.From(String.format("%s.yaml", name)))),
-            SingleInterop.fromFuture(StorageAliases.find(storage, new Key.From(name))),
+            SingleInterop.fromFuture(
+                this.settings.storage().value(new Key.From(String.format("%s.yaml", name)))
+            ),
+            SingleInterop.fromFuture(
+                StorageAliases.find(this.settings.storage(), new Key.From(name))
+            ),
             (data, aliases) -> SingleInterop.fromFuture(
                 RepoConfig.fromPublisher(aliases, new Key.From(name), data)
             ).map(RepoConfig::storage)
