@@ -40,7 +40,6 @@ import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.metrics.MetricSlice;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -120,11 +119,7 @@ public final class MainSlice extends Slice.Wrap {
      * @return Yaml node, could be null
      */
     private static Optional<YamlMapping> metricsStorage(final Settings settings) {
-        try {
-            return Optional.ofNullable(settings.meta().yamlMapping("metrics"))
-                .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("storage")));
-        } catch (final IOException err) {
-            throw new IllegalStateException("Invalid artipie config", err);
-        }
+        return Optional.ofNullable(settings.meta().yamlMapping("metrics"))
+            .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("storage")));
     }
 }

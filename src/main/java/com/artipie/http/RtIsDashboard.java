@@ -26,8 +26,6 @@ package com.artipie.http;
 import com.artipie.Settings;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rt.RtRule;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Map;
 
 /**
@@ -64,11 +62,7 @@ final class RtIsDashboard implements RtRule {
      * @return True if org
      */
     private static boolean isOrg(final Settings settings) {
-        try {
-            return settings.layout().equals("org");
-        } catch (final IOException err) {
-            throw new UncheckedIOException("Failed to read layout settings", err);
-        }
+        return settings.layout().equals("org");
     }
 
     /**
