@@ -43,8 +43,6 @@ import com.artipie.asto.Remaining;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
-import com.artipie.http.auth.Permission;
-import com.artipie.http.auth.SliceAuth;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
@@ -70,7 +68,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
  * @checkstyle MethodLengthCheck (500 lines)
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength", "deprecation"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class ArtipieApi extends Slice.Wrap {
 
     /**
@@ -91,7 +89,8 @@ public final class ArtipieApi extends Slice.Wrap {
                         .map(buf -> new Remaining(buf).bytes())
                         .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
                         .map(YamlPermissions::new),
-                    (auth, perm) -> new SliceAuth(
+                    (auth, perm) -> new ApiAuthSlice(
+                        auth, perm,
                         new SliceRoute(
                             new RtRulePath(
                                 new RtRule.All(
@@ -234,9 +233,7 @@ public final class ArtipieApi extends Slice.Wrap {
                                 ),
                                 new GetStorageSlice(settings)
                             )
-                        ),
-                        new Permission.ByName("api", perm),
-                        new AuthApi(auth)
+                        )
                     )
                 ).to(SingleInterop.get())
             )

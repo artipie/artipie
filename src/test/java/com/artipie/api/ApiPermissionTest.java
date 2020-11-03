@@ -24,28 +24,34 @@
 package com.artipie.api;
 
 import com.artipie.http.auth.Authentication;
-import com.artipie.http.auth.Permissions;
-import com.artipie.http.rq.RequestLineFrom;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.artipie.http.rq.RequestLine;
+import com.artipie.http.rq.RqMethod;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
- * Permissions for API and dashboard endpoints.
- * Accepts HTTP request line as action and checks that request is allowed for the user.
+ * Test for {@link ApiPermission}.
  *
  * @since 0.13
  */
-public final class ApiPermissions implements Permissions {
+class ApiPermissionTest {
 
-    /**
-     * URI path pattern.
-     */
-    private static final Pattern PTN_PATH =
-        Pattern.compile("(?:/api/\\w+|/dashboard)?/(?<user>[^/.]+)(?:/.*)?");
-
-    @Override
-    public boolean allowed(final Authentication.User user, final String action) {
-        final Matcher matcher = PTN_PATH.matcher(new RequestLineFrom(action).uri().getPath());
-        return matcher.matches() && user.name().equals(matcher.group("user"));
+    @ParameterizedTest
+    @CsvSource({
+        "/,false",
+        "/dashboard/alice,true",
+        "/api/lalala/alice,true",
+        "/dashboard/bob,false",
+        "/api/lalala/bob,false"
+    })
+    void allowed(final String path, final boolean result) {
+        MatcherAssert.assertThat(
+            new ApiPermission(new RequestLine(RqMethod.GET, path).toString()).allowed(
+                new Authentication.User("alice")
+            ),
+            new IsEqual<>(result)
+        );
     }
 }
