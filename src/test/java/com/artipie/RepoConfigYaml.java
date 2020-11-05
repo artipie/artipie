@@ -89,6 +89,34 @@ public final class RepoConfigYaml {
     }
 
     /**
+     * Adds path to config.
+     * @param path Path
+     * @return Itself
+     */
+    public RepoConfigYaml withPath(final String path) {
+        this.builder = this.builder.add("path", path);
+        return this;
+    }
+
+    /**
+     * Adds remote in settings section to config.
+     * @param url URL
+     * @return Itself
+     */
+    public RepoConfigYaml withRemoteSettings(final String url) {
+        this.builder = this.builder.add(
+            "settings",
+                Yaml.createYamlMappingBuilder().add(
+                    "remote",
+                    Yaml.createYamlMappingBuilder().add(
+                        "url", url
+                    ).build()
+                ).build()
+        );
+        return this;
+    }
+
+    /**
      * Adds permissions section to config.
      * @param perms Permissions
      * @return Itself
