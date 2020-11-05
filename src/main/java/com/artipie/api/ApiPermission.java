@@ -24,36 +24,42 @@
 package com.artipie.api;
 
 import com.artipie.http.auth.Authentication;
-import com.artipie.http.auth.BasicIdentities;
-import com.artipie.http.auth.Identities;
-import java.util.Map;
-import java.util.Optional;
+import com.artipie.http.auth.Permission;
+import com.artipie.http.rq.RequestLineFrom;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * API authentication wrapper.
- * @since 0.6
+ * Permissions for API and dashboard endpoints.
+ * Accepts HTTP request line as action and checks that request is allowed for the user.
+ *
+ * @since 0.13
  */
-@SuppressWarnings("deprecation")
-public final class AuthApi implements Identities {
+final class ApiPermission implements Permission {
 
     /**
-     * Origin authentication.
+     * URI path pattern.
      */
-    private final Authentication auth;
+    private static final Pattern PTN_PATH =
+        Pattern.compile("(?:/api/\\w+|/dashboard)?/(?<user>[^/.]+)(?:/.*)?");
 
     /**
-     * Wraps authentication with API restrictions.
-     * @param auth Origin
+     * HTTP request line.
      */
-    public AuthApi(final Authentication auth) {
-        this.auth = auth;
+    private final String line;
+
+    /**
+     * Ctor.
+     *
+     * @param line HTTP request line.
+     */
+    ApiPermission(final String line) {
+        this.line = line;
     }
 
     @Override
-    public Optional<Authentication.User> user(final String line,
-        final Iterable<Map.Entry<String, String>> headers) {
-        return new Cookies(headers).user().or(
-            () -> new BasicIdentities(this.auth).user(line, headers)
-        ).filter(user -> new ApiPermissions().allowed(user, line));
+    public boolean allowed(final Authentication.User user) {
+        final Matcher matcher = PTN_PATH.matcher(new RequestLineFrom(this.line).uri().getPath());
+        return matcher.matches() && user.name().equals(matcher.group("user"));
     }
 }
