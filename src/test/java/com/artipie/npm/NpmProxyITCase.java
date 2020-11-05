@@ -121,7 +121,6 @@ final class NpmProxyITCase {
         this.init(anonymous);
         final HttpURLConnection con = (HttpURLConnection) new URL(
             String.format(
-                // @checkstyle LineLengthCheck (1 line)
                 "http://localhost:%d/%s/%s/-/%s-1.0.1.tgz",
                 this.origin.port(), NpmProxyITCase.ORIGIN,
                 NpmProxyITCase.PROJ, NpmProxyITCase.PROJ
