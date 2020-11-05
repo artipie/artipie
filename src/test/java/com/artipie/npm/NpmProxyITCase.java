@@ -56,7 +56,6 @@ import org.junit.jupiter.api.io.TempDir;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
-@Disabled
 final class NpmProxyITCase {
 
     /**
@@ -97,24 +96,11 @@ final class NpmProxyITCase {
     private TestContainer cntn;
 
     @Test
+    @Disabled
     void installFromProxy() throws Exception {
         final boolean anonymous = true;
         this.init(anonymous);
-        final HttpURLConnection con = (HttpURLConnection) new URL(
-            String.format(
-                // @checkstyle LineLengthCheck (1 line)
-                "http://localhost:%d/%s/@hello/simple-npm-project/-/@hello/simple-npm-project-1.0.1.tgz", this.origin.port(), NpmProxyITCase.ORIGIN
-            )
-        ).openConnection();
-        con.setRequestMethod("GET");
-        con.setDoOutput(true);
         MatcherAssert.assertThat(
-            "Verify that tgz file exists. Response status is 200",
-            con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
-        );
-        MatcherAssert.assertThat(
-            "Package was installed",
             this.cntn.execStdErr(
                 "npm", "install", NpmProxyITCase.PROJ,
                 "--registry",
@@ -126,6 +112,26 @@ final class NpmProxyITCase {
                     "added 1 package"
                 )
             )
+        );
+    }
+
+    @Test
+    void getProjectFromOriginServer() throws IOException {
+        final boolean anonymous = true;
+        this.init(anonymous);
+        final HttpURLConnection con = (HttpURLConnection) new URL(
+            String.format(
+                // @checkstyle LineLengthCheck (1 line)
+                "http://localhost:%d/%s/%s/-/%s-1.0.1.tgz",
+                this.origin.port(), NpmProxyITCase.ORIGIN,
+                NpmProxyITCase.PROJ, NpmProxyITCase.PROJ
+            )
+        ).openConnection();
+        con.setRequestMethod("GET");
+        con.setDoOutput(true);
+        MatcherAssert.assertThat(
+            con.getResponseCode(),
+            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
         );
     }
 
