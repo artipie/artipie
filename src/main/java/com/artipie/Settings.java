@@ -28,7 +28,6 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -43,9 +42,8 @@ public interface Settings {
      * Provides a storage.
      *
      * @return Storage instance.
-     * @throws IOException In case of problems with reading settings.
      */
-    Storage storage() throws IOException;
+    Storage storage();
 
     /**
      * Provides authorization.
@@ -57,16 +55,14 @@ public interface Settings {
     /**
      * Repository layout.
      * @return Repository layout
-     * @throws IOException If failet to parse settings
      */
-    String layout() throws IOException;
+    String layout();
 
     /**
      * Artipie meta configuration.
      * @return Yaml mapping
-     * @throws IOException On error
      */
-    YamlMapping meta() throws IOException;
+    YamlMapping meta();
 
     /**
      * Artipie credentials.

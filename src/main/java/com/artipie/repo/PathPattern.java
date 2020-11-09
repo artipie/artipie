@@ -24,8 +24,6 @@
 package com.artipie.repo;
 
 import com.artipie.Settings;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -67,12 +65,7 @@ public final class PathPattern {
      * @return Regex pattern
      */
     public Pattern pattern() {
-        String name;
-        try {
-            name = this.settings.layout();
-        } catch (final IOException err) {
-            throw new UncheckedIOException("Failed to parse settings", err);
-        }
+        String name = this.settings.layout();
         if (name == null) {
             name = "flat";
         }

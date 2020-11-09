@@ -31,11 +31,8 @@ import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.api.ContentAs;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
@@ -130,7 +127,7 @@ public interface RepoPermissions {
 
         @Override
         public CompletionStage<List<String>> repositories() {
-            return this.storage().list(Key.ROOT)
+            return this.settings.storage().list(Key.ROOT)
                 .thenApply(
                     list -> list.stream()
                         .map(Key::string)
@@ -222,23 +219,11 @@ public interface RepoPermissions {
          * @return Completion action with yaml repo section
          */
         private CompletionStage<YamlMapping> repo(final Key key) {
-            return new RxStorageWrapper(this.storage())
+            return new RxStorageWrapper(this.settings.storage())
                 .value(key)
                 .to(ContentAs.YAML)
                 .map(yaml -> yaml.yamlMapping(FromSettings.REPO))
                 .to(SingleInterop.get());
-        }
-
-        /**
-         * Get storage from settings.
-         * @return Storage instance
-         */
-        private Storage storage() {
-            try {
-                return this.settings.storage();
-            } catch (final IOException err) {
-                throw new UncheckedIOException(err);
-            }
         }
 
         /**
@@ -248,7 +233,7 @@ public interface RepoPermissions {
          * @return Completable operation
          */
         private CompletableFuture<Void> saveSettings(final Key key, final YamlMapping result) {
-            return this.storage().save(
+            return this.settings.storage().save(
                 key, new Content.From(result.toString().getBytes(StandardCharsets.UTF_8))
             );
         }

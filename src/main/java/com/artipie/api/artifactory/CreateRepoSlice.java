@@ -29,7 +29,6 @@ import com.artipie.Settings;
 import com.artipie.api.ContentAs;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -46,7 +45,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.json.JsonObject;
-import org.cactoos.scalar.Unchecked;
 import org.reactivestreams.Publisher;
 
 /**
@@ -89,7 +87,7 @@ public final class CreateRepoSlice implements Slice {
                     valid(json).map(
                         name -> {
                             final Key key = CreateRepoSlice.yamlKey(line, name);
-                            return this.getStorage().exists(key)
+                            return this.settings.storage().exists(key)
                                 .thenCompose(
                                     exists -> {
                                         final CompletionStage<Response> res;
@@ -98,7 +96,7 @@ public final class CreateRepoSlice implements Slice {
                                                 new RsWithStatus(RsStatus.BAD_REQUEST)
                                             );
                                         } else {
-                                            res = this.getStorage().save(
+                                            res = this.settings.storage().save(
                                                 key,
                                                 new Content.From(
                                                     CreateRepoSlice.yaml().toString()
@@ -116,15 +114,6 @@ public final class CreateRepoSlice implements Slice {
                 )
             )
         );
-    }
-
-    /**
-     * Obtain storage from settings.
-     * @return Storage
-     * @throws java.io.UncheckedIOException on Error
-     */
-    private Storage getStorage() {
-        return new Unchecked<>(this.settings::storage).value();
     }
 
     /**
