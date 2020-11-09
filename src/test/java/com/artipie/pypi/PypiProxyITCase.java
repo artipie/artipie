@@ -23,6 +23,8 @@
  */
 package com.artipie.pypi;
 
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
 import com.artipie.RepoPerms;
@@ -100,7 +102,7 @@ public final class PypiProxyITCase {
         MatcherAssert.assertThat(
             this.cntn.execStdout(
                 "pip", "install", "--no-deps", "--trusted-host", PypiProxyITCase.HOST,
-                "--index-url", new RepositoryUrl(this.port, "my-pypi").string(anonymous),
+                "--index-url", new RepositoryUrl(this.port, "my-pypi-proxy").string(anonymous),
                 "alarmtime"
             ),
             Matchers.containsString("Successfully installed alarmtime-0.1.5")
@@ -139,16 +141,29 @@ public final class PypiProxyITCase {
     }
 
     private RepoConfigYaml proxyConfig(final boolean anonymous, final int prt) {
-        final RepoConfigYaml yaml = new RepoConfigYaml("pypi-proxy")
-            .withFileStorage(this.tmp.resolve("proxy"));
-        final String url = String.format("http://localhost:%d", prt);
+        final RepoConfigYaml yaml = new RepoConfigYaml("pypi-proxy");
+        final String url = String.format("http://localhost:%d/my-pypi", prt);
+        final YamlMappingBuilder rmts = Yaml.createYamlMappingBuilder()
+            .add("url", url)
+            .add(
+                "cache",
+                Yaml.createYamlMappingBuilder().add(
+                    "storage",
+                    Yaml.createYamlMappingBuilder()
+                        .add("type", "fs")
+                        .add("path", this.tmp.resolve("proxy").toString())
+                        .build()
+                ).build()
+            );
         if (anonymous) {
-            yaml.withRemote(url);
+            yaml.withRemotes(Yaml.createYamlSequenceBuilder().add(rmts.build()));
         } else {
-            yaml.withRemote(
-                url,
-                ArtipieServer.ALICE.name(),
-                ArtipieServer.ALICE.password()
+            yaml.withRemotes(
+                Yaml.createYamlSequenceBuilder().add(
+                    rmts.add("username", ArtipieServer.ALICE.name())
+                        .add("password", ArtipieServer.ALICE.password())
+                        .build()
+                )
             );
         }
         return yaml;
