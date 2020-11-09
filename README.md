@@ -152,7 +152,7 @@ empty `permissions` section restricts any operations for anyone.
 
 You may want to run Artipie for your company, which has a few teams.
 Each team may want to have its own repository. To do this, you create
-a global configuration file `/etc/artipie.yml`:
+a global configuration file `/etc/artipie/artipie.yml`:
 
 ```yaml
 meta:
@@ -217,7 +217,7 @@ so server requires restart in order to apply changes made in runtime.*
 ## Metrics
 
 You may enable some basic metrics collecting and periodic publishing to application log
-by adding `metrics` to `meta` section of global configuration file `/etc/artipie.yml`:
+by adding `metrics` to `meta` section of global configuration file `/etc/artipie/artipie.yml`:
 
 ```yaml
 meta:
