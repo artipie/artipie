@@ -24,9 +24,9 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.RepoPermissions;
-import com.artipie.Settings;
 import com.artipie.api.RsJson;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -58,14 +58,14 @@ public final class GetPermissionSlice implements Slice {
     /**
      * Artipie settings.
      */
-    private final Settings settings;
+    private final Storage storage;
 
     /**
      * Ctor.
-     * @param settings Artipie settings
+     * @param storage Artipie settings
      */
-    public GetPermissionSlice(final Settings settings) {
-        this.settings = settings;
+    public GetPermissionSlice(final Storage storage) {
+        this.storage = storage;
     }
 
     @Override
@@ -74,13 +74,13 @@ public final class GetPermissionSlice implements Slice {
         final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
         return opt.<Response>map(
             repo -> new AsyncResponse(
-                this.settings.storage()
+                this.storage
                     .exists(new Key.From(String.format("%s.yaml", repo))).thenCompose(
                         exists -> {
                             final CompletionStage<Response> res;
                             if (exists) {
                                 final RepoPermissions source = new RepoPermissions.FromSettings(
-                                    this.settings
+                                    this.storage
                                 );
                                 res = source.permissions(repo).thenCombine(
                                     source.patterns(repo),

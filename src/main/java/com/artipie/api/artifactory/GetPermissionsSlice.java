@@ -23,8 +23,9 @@
  */
 package com.artipie.api.artifactory;
 
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.RepoPermissions;
-import com.artipie.Settings;
+import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -49,24 +50,31 @@ public final class GetPermissionsSlice implements Slice {
     public static final String PATH = "/api/security/permissions";
 
     /**
-     * Artipie settings.
+     * Artipie settings storage.
      */
-    private final Settings settings;
+    private final Storage storage;
+
+    /**
+     * Artipie meta config.
+     */
+    private final YamlMapping meta;
 
     /**
      * Ctor.
-     * @param settings Setting
+     * @param storage Setting
+     * @param meta Artipie meta config
      */
-    public GetPermissionsSlice(final Settings settings) {
-        this.settings = settings;
+    public GetPermissionsSlice(final Storage storage, final YamlMapping meta) {
+        this.storage = storage;
+        this.meta = meta;
     }
 
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final String base = this.settings.meta().string("base_url").replaceAll("/$", "");
+        final String base = this.meta.string("base_url").replaceAll("/$", "");
         return new AsyncResponse(
-            new RepoPermissions.FromSettings(this.settings).repositories().<Response>thenApply(
+            new RepoPermissions.FromSettings(this.storage).repositories().<Response>thenApply(
                 list -> {
                     final JsonArrayBuilder json = Json.createArrayBuilder();
                     list.forEach(

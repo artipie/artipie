@@ -26,7 +26,6 @@ package com.artipie.api.artifactory;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.RepoConfigYaml;
-import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -70,7 +69,7 @@ class AddUpdatePermissionSliceTest {
     @Test
     void returnsBadRequestOnInvalidRequest() {
         MatcherAssert.assertThat(
-            new AddUpdatePermissionSlice(new Settings.Fake()),
+            new AddUpdatePermissionSlice(this.storage),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(RqMethod.PUT, "/some/api/permissions/maven")
@@ -84,7 +83,7 @@ class AddUpdatePermissionSliceTest {
         new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             "Returns 200 OK",
-            new AddUpdatePermissionSlice(new Settings.Fake(this.storage)),
+            new AddUpdatePermissionSlice(this.storage),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.OK),
                 new RequestLine(RqMethod.PUT, String.format("/api/security/permissions/%s", repo)),
@@ -129,7 +128,7 @@ class AddUpdatePermissionSliceTest {
         final String repo = "docker";
         new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new AddUpdatePermissionSlice(new Settings.Fake(this.storage)),
+            new AddUpdatePermissionSlice(this.storage),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(RqMethod.PUT, String.format("/api/security/permissions/%s", repo)),
@@ -156,7 +155,7 @@ class AddUpdatePermissionSliceTest {
         new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
             "Returns 200 OK",
-            new AddUpdatePermissionSlice(new Settings.Fake(this.storage)),
+            new AddUpdatePermissionSlice(this.storage),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.OK),
                 new RequestLine(RqMethod.PUT, String.format("/api/security/permissions/%s", repo)),
