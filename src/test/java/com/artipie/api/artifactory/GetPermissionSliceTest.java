@@ -26,7 +26,6 @@ package com.artipie.api.artifactory;
 import com.artipie.RepoConfigYaml;
 import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
-import com.artipie.Settings;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.hm.RsHasBody;
@@ -67,7 +66,7 @@ class GetPermissionSliceTest {
     @Test
     void returnsBadRequestOnInvalidRequest() {
         MatcherAssert.assertThat(
-            new GetPermissionSlice(new Settings.Fake()),
+            new GetPermissionSlice(this.storage),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(RqMethod.GET, "/some/api/permissions/maven")
@@ -78,7 +77,7 @@ class GetPermissionSliceTest {
     @Test
     void returnsNotFoundIfRepoDoesNotExists() {
         MatcherAssert.assertThat(
-            new GetPermissionSlice(new Settings.Fake(this.storage)),
+            new GetPermissionSlice(this.storage),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(RqMethod.GET, "/api/security/permissions/pypi")
@@ -91,7 +90,7 @@ class GetPermissionSliceTest {
         final String repo = "docker";
         new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new GetPermissionSlice(new Settings.Fake(this.storage)),
+            new GetPermissionSlice(this.storage),
             new SliceHasResponse(
                 new RsHasBody(
                     this.response(
@@ -127,7 +126,7 @@ class GetPermissionSliceTest {
             )
         ).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new GetPermissionSlice(new Settings.Fake(this.storage)),
+            new GetPermissionSlice(this.storage),
             new SliceHasResponse(
                 new RsHasBody(
                     this.response(

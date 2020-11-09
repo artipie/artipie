@@ -24,8 +24,8 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.RepoPermissions;
-import com.artipie.Settings;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -49,16 +49,16 @@ import org.reactivestreams.Publisher;
 public final class DeletePermissionSlice implements Slice {
 
     /**
-     * Artipie settings.
+     * Artipie settings storage.
      */
-    private final Settings settings;
+    private final Storage storage;
 
     /**
      * Ctor.
-     * @param settings Setting
+     * @param storage Setting
      */
-    public DeletePermissionSlice(final Settings settings) {
-        this.settings = settings;
+    public DeletePermissionSlice(final Storage storage) {
+        this.storage = storage;
     }
 
     @Override
@@ -67,13 +67,13 @@ public final class DeletePermissionSlice implements Slice {
         final Optional<String> opt = new FromRqLine(line, FromRqLine.RqPattern.REPO).get();
         return opt.<Response>map(
             repo -> new AsyncResponse(
-                this.settings.storage()
+                this.storage
                     .exists(new Key.From(String.format("%s.yaml", repo)))
                     .thenCompose(
                         exists -> {
                             final CompletionStage<Response> res;
                             if (exists) {
-                                res = new RepoPermissions.FromSettings(this.settings).remove(repo)
+                                res = new RepoPermissions.FromSettings(this.storage).remove(repo)
                                     .thenApply(
                                         ignored -> new RsWithBody(
                                             // @checkstyle LineLengthCheck (2 lines)

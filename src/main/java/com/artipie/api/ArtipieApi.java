@@ -203,28 +203,28 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByPath(GetPermissionsSlice.PATH),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetPermissionsSlice(settings)
+                                new GetPermissionsSlice(settings.storage(), settings.meta())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.REPO.pattern()),
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
-                                new AddUpdatePermissionSlice(settings)
+                                new AddUpdatePermissionSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.REPO.pattern()),
                                     new ByMethodsRule(RqMethod.DELETE)
                                 ),
-                                new DeletePermissionSlice(settings)
+                                new DeletePermissionSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.REPO.pattern()),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetPermissionSlice(settings)
+                                new GetPermissionSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
