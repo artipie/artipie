@@ -17,6 +17,11 @@ LABEL description="Artipie binary repository managment tool"
 LABEL maintainer="titantins@gmail.com"
 LABEL maintainer="g4s8.public@gmail.com"
 COPY --from=build_jar /jar/target/artipie-jar-with-dependencies.jar /usr/lib/artipie.jar
+
+# Create link to deprecated config file location for backward-compatibility
+# Remove this line at the next major release
+RUN mkdir -p /etc/artipie && ln -s /etc/artipie.yml /etc/artipie/artipie.yml
+
 VOLUME /var/artipie /etc/artipie
 EXPOSE 80
 CMD java $JVM_OPTS --enable-preview -XX:+ShowCodeDetailsInExceptionMessages -jar /usr/lib/artipie.jar --config-file=/etc/artipie/artipie.yml --port=80
