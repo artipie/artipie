@@ -6,7 +6,7 @@ set -e
 docker network create --driver bridge artipie-rpm-demo
 
 # Start Artipie.
-docker run --network artipie-rpm-demo --rm --name artipie -d -it -v $(pwd)/artipie.yaml:/etc/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:latest
+docker run --network artipie-rpm-demo --rm --name artipie -d -it -v $(pwd)/artipie.yaml:/etc/artipie/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:latest
 
 # Wait for container to be ready for new connections.
 sleep 5

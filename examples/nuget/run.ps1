@@ -2,7 +2,7 @@
 Set-PSDebug -Trace 1
 
 # Start Artipie.
-docker run --rm -d --name artipie -it -v ${PWD}/artipie.yaml:/etc/artipie.yml -v  ${PWD}:/var/artipie -p 8080:80 artipie/artipie:latest
+docker run --rm -d --name artipie -it -v ${PWD}/artipie.yaml:/etc/artipie/artipie.yml -v  ${PWD}:/var/artipie -p 8080:80 artipie/artipie:latest
 
 # Wait for container to be ready for new connections.
 Start-Sleep 5
