@@ -53,6 +53,7 @@ import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
+import com.artipie.repo.PathPattern;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.charset.StandardCharsets;
@@ -165,7 +166,7 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByPath(Pattern.compile("/api/repositories/.*")),
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
-                                new CreateRepoSlice(settings)
+                                new CreateRepoSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
@@ -231,7 +232,9 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByPath(GetStorageSlice.Request.PATH),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetStorageSlice(settings)
+                                new GetStorageSlice(
+                                    settings.storage(), new PathPattern(settings.layout()).pattern()
+                                )
                             )
                         )
                     )
