@@ -25,10 +25,10 @@ package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.Settings;
 import com.artipie.api.ContentAs;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -62,16 +62,16 @@ public final class CreateRepoSlice implements Slice {
         Pattern.compile("/api/repositories/(?<first>[^/.]+)(?<second>/[^/.]+)?/?");
 
     /**
-     * Artipie settings.
+     * Artipie settings storage.
      */
-    private final Settings settings;
+    private final Storage storage;
 
     /**
      * Ctor.
-     * @param settings Artipie settings
+     * @param storage Artipie settings storage
      */
-    public CreateRepoSlice(final Settings settings) {
-        this.settings = settings;
+    public CreateRepoSlice(final Storage storage) {
+        this.storage = storage;
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class CreateRepoSlice implements Slice {
                     valid(json).map(
                         name -> {
                             final Key key = CreateRepoSlice.yamlKey(line, name);
-                            return this.settings.storage().exists(key)
+                            return this.storage.exists(key)
                                 .thenCompose(
                                     exists -> {
                                         final CompletionStage<Response> res;
@@ -96,7 +96,7 @@ public final class CreateRepoSlice implements Slice {
                                                 new RsWithStatus(RsStatus.BAD_REQUEST)
                                             );
                                         } else {
-                                            res = this.settings.storage().save(
+                                            res = this.storage.save(
                                                 key,
                                                 new Content.From(
                                                     CreateRepoSlice.yaml().toString()

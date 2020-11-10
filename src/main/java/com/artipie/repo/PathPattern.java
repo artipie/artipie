@@ -23,7 +23,6 @@
  */
 package com.artipie.repo;
 
-import com.artipie.Settings;
 import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -48,16 +47,16 @@ public final class PathPattern {
     );
 
     /**
-     * Artipie settings.
+     * Artipie layout.
      */
-    private final Settings settings;
+    private final String layout;
 
     /**
      * New layout pattern from settings.
-     * @param settings Settings
+     * @param layout Artipie layout
      */
-    public PathPattern(final Settings settings) {
-        this.settings = settings;
+    public PathPattern(final String layout) {
+        this.layout = layout;
     }
 
     /**
@@ -65,7 +64,7 @@ public final class PathPattern {
      * @return Regex pattern
      */
     public Pattern pattern() {
-        String name = this.settings.layout();
+        String name = this.layout;
         if (name == null) {
             name = "flat";
         }
