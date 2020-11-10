@@ -26,14 +26,14 @@ package com.artipie.api;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
-import com.artipie.http.auth.BasicIdentities;
-import com.artipie.http.auth.Identities;
+import com.artipie.http.auth.BasicAuthSlice;
 import com.artipie.http.auth.Permission;
 import com.artipie.http.auth.Permissions;
-import com.artipie.http.auth.SliceAuth;
+import com.artipie.http.rs.RsStatus;
+import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.slice.SliceSimple;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.Optional;
 import org.reactivestreams.Publisher;
 
 /**
@@ -41,7 +41,6 @@ import org.reactivestreams.Publisher;
  *
  * @since 0.13
  */
-@SuppressWarnings("deprecation")
 public final class ApiAuthSlice implements Slice {
 
     /**
@@ -77,40 +76,22 @@ public final class ApiAuthSlice implements Slice {
         final String line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        return new SliceAuth(
-            this.origin,
-            new Permission.All(new ApiPermission(line), new Permission.ByName("api", this.perms)),
-            new ApiIdentities(this.auth)
+        final Permission permission = new Permission.All(
+            new ApiPermission(line),
+            new Permission.ByName("api", this.perms)
+        );
+        return new Cookies(headers).user().map(
+            user -> {
+                final Slice slice;
+                if (permission.allowed(user)) {
+                    slice = this.origin;
+                } else {
+                    slice = new SliceSimple(new RsWithStatus(RsStatus.FORBIDDEN));
+                }
+                return slice;
+            }
+        ).orElseGet(
+            () -> new BasicAuthSlice(this.origin, this.auth, permission)
         ).response(line, headers, body);
-    }
-
-    /**
-     * Identities implementation combining cookies auth with basic auth.
-     *
-     * @since 0.13
-     */
-    static final class ApiIdentities implements Identities {
-
-        /**
-         * Authentication.
-         */
-        private final Authentication auth;
-
-        /**
-         * Ctor.
-         *
-         * @param auth Authentication
-         */
-        ApiIdentities(final Authentication auth) {
-            this.auth = auth;
-        }
-
-        @Override
-        public Optional<Authentication.User> user(final String line,
-            final Iterable<Map.Entry<String, String>> headers) {
-            return new Cookies(headers).user().or(
-                () -> new BasicIdentities(this.auth).user(line, headers)
-            );
-        }
     }
 }
