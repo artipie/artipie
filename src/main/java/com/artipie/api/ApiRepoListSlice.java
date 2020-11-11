@@ -25,12 +25,12 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.rx.RxStorage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLineFrom;
-import io.reactivex.Single;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -73,22 +73,21 @@ final class ApiRepoListSlice implements Slice {
             throw new IllegalStateException("Should match");
         }
         final String user = matcher.group("user");
+        final RxStorage rxstorage = new RxStorageWrapper(this.storage);
         return new AsyncResponse(
-            Single.fromCallable(() -> this.storage)
-                .map(RxStorageWrapper::new)
-                .flatMap(str -> str.list(new Key.From(user)))
-                .map(
-                    repos -> {
-                        final JsonObjectBuilder json = Json.createObjectBuilder()
-                            .add("user", user);
-                        final JsonArrayBuilder arr = Json.createArrayBuilder();
-                        for (final Key key : repos) {
-                            arr.add(key.string().replace(".yaml", ""));
-                        }
-                        json.add("repositories", arr);
-                        return json;
+            rxstorage.list(new Key.From(user))
+            .map(
+                repos -> {
+                    final JsonObjectBuilder json = Json.createObjectBuilder()
+                        .add("user", user);
+                    final JsonArrayBuilder arr = Json.createArrayBuilder();
+                    for (final Key key : repos) {
+                        arr.add(key.string().replace(".yaml", ""));
                     }
-                ).map(builder -> new RsJson(builder::build))
+                    json.add("repositories", arr);
+                    return json;
+                }
+            ).map(builder -> new RsJson(builder::build))
         );
     }
 }

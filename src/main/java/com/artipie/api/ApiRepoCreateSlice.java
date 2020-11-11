@@ -32,6 +32,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
+import com.artipie.asto.rx.RxStorage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -52,6 +53,7 @@ import org.reactivestreams.Publisher;
 /**
  * Create repo API.
  * @since 0.6
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class ApiRepoCreateSlice implements Slice {
 
@@ -83,48 +85,47 @@ final class ApiRepoCreateSlice implements Slice {
         }
         final String name = matcher.group("key");
         final Key.From key = new Key.From(String.format("%s.yaml", name));
+        final RxStorage rxstorage = new RxStorageWrapper(this.storage);
         // @checkstyle LineLengthCheck (50 lines)
         // @checkstyle ReturnCountCheck (50 lines)
         return new AsyncResponse(
-            Single.fromCallable(() -> this.storage).map(RxStorageWrapper::new).flatMap(
-                rxstorage -> rxstorage.exists(key).flatMap(
-                    exist -> {
-                        if (exist) {
-                            return Single.just(new RsWithStatus(RsStatus.CONFLICT));
-                        } else {
-                            return rxstorage.save(
-                                key,
-                                new Content.From(
-                                    new Concatenation(body).single().map(buf -> new Remaining(buf).bytes())
-                                        .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
-                                        .map(
-                                            yaml -> {
-                                                final YamlMapping repo = yaml.yamlMapping("repo");
-                                                final YamlNode type = repo.value("type");
-                                                if (type == null || !Scalar.class.isAssignableFrom(type.getClass())) {
-                                                    throw new IllegalStateException("Repository type required");
-                                                }
-                                                final YamlNode stor = repo.value("storage");
-                                                if (stor == null || !Scalar.class.isAssignableFrom(stor.getClass())) {
-                                                    throw new IllegalStateException("Repository storage is required");
-                                                }
-                                                return Yaml.createYamlMappingBuilder().add(
-                                                    "repo",
-                                                    Yaml.createYamlMappingBuilder()
-                                                        .add("type", type)
-                                                        .add("storage", stor)
-                                                        .add("permissions", repo.value("permissions"))
-                                                        .build()
-                                                ).build()
-                                                    .toString()
-                                                    .getBytes(StandardCharsets.UTF_8);
+            rxstorage.exists(key).flatMap(
+                exist -> {
+                    if (exist) {
+                        return Single.just(new RsWithStatus(RsStatus.CONFLICT));
+                    } else {
+                        return rxstorage.save(
+                            key,
+                            new Content.From(
+                                new Concatenation(body).single().map(buf -> new Remaining(buf).bytes())
+                                    .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
+                                    .map(
+                                        yaml -> {
+                                            final YamlMapping repo = yaml.yamlMapping("repo");
+                                            final YamlNode type = repo.value("type");
+                                            if (type == null || !Scalar.class.isAssignableFrom(type.getClass())) {
+                                                throw new IllegalStateException("Repository type required");
                                             }
-                                        ).flatMapPublisher(bytes -> Flowable.just(ByteBuffer.wrap(bytes)))
-                                )
-                            ).andThen(Single.just(new RsWithStatus(RsStatus.OK)));
-                        }
+                                            final YamlNode stor = repo.value("storage");
+                                            if (stor == null || !Scalar.class.isAssignableFrom(stor.getClass())) {
+                                                throw new IllegalStateException("Repository storage is required");
+                                            }
+                                            return Yaml.createYamlMappingBuilder().add(
+                                                "repo",
+                                                Yaml.createYamlMappingBuilder()
+                                                    .add("type", type)
+                                                    .add("storage", stor)
+                                                    .add("permissions", repo.value("permissions"))
+                                                    .build()
+                                            ).build()
+                                                .toString()
+                                                .getBytes(StandardCharsets.UTF_8);
+                                        }
+                                    ).flatMapPublisher(bytes -> Flowable.just(ByteBuffer.wrap(bytes)))
+                            )
+                        ).andThen(Single.just(new RsWithStatus(RsStatus.OK)));
                     }
-                )
+                }
             ).to(SingleInterop.get())
         );
     }
