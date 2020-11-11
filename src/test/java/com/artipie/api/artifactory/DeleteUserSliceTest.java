@@ -25,7 +25,6 @@ package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.CredsConfigYaml;
-import com.artipie.Settings;
 import com.artipie.Users;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -55,7 +54,7 @@ final class DeleteUserSliceTest {
     @Test
     void returnsBadRequestOnInvalidRequest() {
         MatcherAssert.assertThat(
-            new DeleteUserSlice(new Settings.Fake()),
+            new DeleteUserSlice(new Users.FromEnv()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(RqMethod.DELETE, "/some/api/david")
@@ -66,7 +65,7 @@ final class DeleteUserSliceTest {
     @Test
     void returnsNotFoundIfCredentialsAreEmpty() {
         MatcherAssert.assertThat(
-            new DeleteUserSlice(new Settings.Fake()),
+            new DeleteUserSlice(new Users.FromEnv()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(RqMethod.DELETE, "/api/security/users/empty")
@@ -80,7 +79,7 @@ final class DeleteUserSliceTest {
         final Key key = new Key.From("_credentials.yaml");
         new CredsConfigYaml().withUsers("john").saveTo(storage, key);
         MatcherAssert.assertThat(
-            new DeleteUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
+            new DeleteUserSlice(new Users.FromStorageYaml(storage, key)),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(RqMethod.DELETE, "/api/security/users/notfound")
@@ -95,7 +94,7 @@ final class DeleteUserSliceTest {
         new CredsConfigYaml().withUsers("jane").saveTo(storage, key);
         MatcherAssert.assertThat(
             "DeleteUserSlice response",
-            new DeleteUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
+            new DeleteUserSlice(new Users.FromStorageYaml(storage, key)),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),

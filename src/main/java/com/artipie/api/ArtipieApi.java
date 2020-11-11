@@ -85,12 +85,13 @@ public final class ArtipieApi extends Slice.Wrap {
             new AsyncSlice(
                 Single.zip(
                     Single.fromCallable(settings::auth).flatMap(SingleInterop::fromFuture),
+                    Single.fromCallable(settings::credentials).flatMap(SingleInterop::fromFuture),
                     Single.fromCallable(settings::storage).map(RxStorageWrapper::new)
                         .flatMap(storage -> storage.value(new Key.From("_permissions.yaml")).flatMap(data -> new Concatenation(data).single()))
                         .map(buf -> new Remaining(buf).bytes())
                         .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
                         .map(YamlPermissions::new),
-                    (auth, perm) -> new ApiAuthSlice(
+                    (auth, creds, perm) -> new ApiAuthSlice(
                         auth, perm,
                         new SliceRoute(
                             new RtRulePath(
@@ -173,21 +174,21 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByPath(FromRqLine.RqPattern.USER.pattern()),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetUserSlice(settings)
+                                new GetUserSlice(creds)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(GetUsersSlice.PATH),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetUsersSlice(settings)
+                                new GetUsersSlice(creds, settings.meta())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.USER.pattern()),
                                     new ByMethodsRule(RqMethod.DELETE)
                                 ),
-                                new DeleteUserSlice(settings)
+                                new DeleteUserSlice(creds)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
@@ -197,7 +198,7 @@ public final class ArtipieApi extends Slice.Wrap {
                                         new ByMethodsRule(RqMethod.POST)
                                     )
                                 ),
-                                new AddUpdateUserSlice(settings)
+                                new AddUpdateUserSlice(creds)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
