@@ -23,9 +23,9 @@
  */
 package com.artipie.api.artifactory;
 
-import com.artipie.Settings;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
+import com.artipie.repo.PathPattern;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,7 +49,7 @@ class GetStorageSliceRequestTest {
         final String repo
     ) {
         final GetStorageSlice.Request request = new GetStorageSlice.Request(
-            new Settings.Fake(layout),
+            new PathPattern(layout).pattern(),
             new RequestLine(RqMethod.GET, path).toString()
         );
         MatcherAssert.assertThat(
@@ -69,7 +69,7 @@ class GetStorageSliceRequestTest {
         final String root
     ) {
         final GetStorageSlice.Request request = new GetStorageSlice.Request(
-            new Settings.Fake(layout),
+            new PathPattern(layout).pattern(),
             new RequestLine(RqMethod.GET, path).toString()
         );
         MatcherAssert.assertThat(

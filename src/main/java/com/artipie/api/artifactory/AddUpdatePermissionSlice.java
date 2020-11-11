@@ -83,7 +83,7 @@ public final class AddUpdatePermissionSlice implements Slice {
 
     /**
      * Ctor.
-     * @param storage Setting
+     * @param storage Artipie settings storage
      */
     public AddUpdatePermissionSlice(final Storage storage) {
         this.storage = storage;

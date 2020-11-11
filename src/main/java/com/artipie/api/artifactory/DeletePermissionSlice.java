@@ -55,7 +55,7 @@ public final class DeletePermissionSlice implements Slice {
 
     /**
      * Ctor.
-     * @param storage Setting
+     * @param storage Artipie settings storage
      */
     public DeletePermissionSlice(final Storage storage) {
         this.storage = storage;

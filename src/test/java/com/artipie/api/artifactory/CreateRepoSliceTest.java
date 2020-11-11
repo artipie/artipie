@@ -23,7 +23,6 @@
  */
 package com.artipie.api.artifactory;
 
-import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -52,7 +51,7 @@ class CreateRepoSliceTest {
         final Storage storage = new InMemoryStorage();
         MatcherAssert.assertThat(
             "Returns 200 OK",
-            new CreateRepoSlice(new Settings.Fake(storage)).response(
+            new CreateRepoSlice(storage).response(
                 new RequestLine("PUT", "/api/repositories/username/my_repo").toString(),
                 Collections.emptyList(),
                 this.jsonBody()
@@ -71,7 +70,7 @@ class CreateRepoSliceTest {
         final Storage storage = new InMemoryStorage();
         MatcherAssert.assertThat(
             "Returns 200 OK",
-            new CreateRepoSlice(new Settings.Fake(storage)).response(
+            new CreateRepoSlice(storage).response(
                 new RequestLine("PUT", "/api/repositories/my_repo").toString(),
                 Collections.emptyList(),
                 this.jsonBody()
@@ -90,7 +89,7 @@ class CreateRepoSliceTest {
         final Storage storage = new InMemoryStorage();
         storage.save(new Key.From("my_repo.yaml"), new Content.From(new byte[]{}));
         MatcherAssert.assertThat(
-            new CreateRepoSlice(new Settings.Fake(storage)).response(
+            new CreateRepoSlice(storage).response(
                 new RequestLine("PUT", "/api/repositories/my_repo").toString(),
                 Collections.emptyList(),
                 this.jsonBody()
@@ -102,7 +101,7 @@ class CreateRepoSliceTest {
     @Test
     void returnsBadRequestIfJsonIsNotValid() {
         MatcherAssert.assertThat(
-            new CreateRepoSlice(new Settings.Fake()).response(
+            new CreateRepoSlice(new InMemoryStorage()).response(
                 new RequestLine("PUT", "/api/repositories/my_repo").toString(),
                 Collections.emptyList(),
                 Flowable.fromArray(

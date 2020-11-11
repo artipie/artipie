@@ -306,7 +306,7 @@ public final class SliceFromConfig extends Slice.Wrap {
         if (standalone) {
             result = origin;
         } else {
-            result = new TrimPathSlice(origin, new PathPattern(settings).pattern());
+            result = new TrimPathSlice(origin, new PathPattern(settings.layout()).pattern());
         }
         return result;
     }
