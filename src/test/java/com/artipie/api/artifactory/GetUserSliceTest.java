@@ -24,7 +24,6 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.CredsConfigYaml;
-import com.artipie.Settings;
 import com.artipie.Users;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -56,7 +55,7 @@ class GetUserSliceTest {
     @Test
     void returnsNotFoundOnInvalidRequest() {
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake()),
+            new GetUserSlice(new Users.FromEnv()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(RqMethod.GET, "/some/api/david")
@@ -70,7 +69,7 @@ class GetUserSliceTest {
         final Key key = new Key.From("_credentials.yaml");
         new CredsConfigYaml().withUsers("john").saveTo(storage, key);
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
+            new GetUserSlice(new Users.FromStorageYaml(storage, key)),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(RqMethod.GET, "/api/security/users/josh")
@@ -85,7 +84,7 @@ class GetUserSliceTest {
         final Key key = new Key.From("_cred.yaml");
         new CredsConfigYaml().withUsers(username).saveTo(storage, key);
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
+            new GetUserSlice(new Users.FromStorageYaml(storage, key)),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
@@ -116,7 +115,7 @@ class GetUserSliceTest {
         final List<String> groups = new ListOf<>("readers", "newbies");
         new CredsConfigYaml().withUserAndGroups(username, groups).saveTo(storage, key);
         MatcherAssert.assertThat(
-            new GetUserSlice(new Settings.Fake(new Users.FromStorageYaml(storage, key))),
+            new GetUserSlice(new Users.FromStorageYaml(storage, key)),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
