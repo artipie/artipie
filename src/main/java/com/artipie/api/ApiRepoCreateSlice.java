@@ -27,11 +27,11 @@ import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
-import com.artipie.Settings;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
+import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -61,16 +61,16 @@ final class ApiRepoCreateSlice implements Slice {
     private static final Pattern PTN = Pattern.compile("/api/repos/(?<key>[^/.]+/[^/.]+)");
 
     /**
-     * Artipie settings.
+     * Artipie settings storage.
      */
-    private final Settings settings;
+    private final Storage storage;
 
     /**
      * New create API.
-     * @param settings Artipie settings
+     * @param storage Artipie settings storage
      */
-    ApiRepoCreateSlice(final Settings settings) {
-        this.settings = settings;
+    ApiRepoCreateSlice(final Storage storage) {
+        this.storage = storage;
     }
 
     @Override
@@ -86,13 +86,13 @@ final class ApiRepoCreateSlice implements Slice {
         // @checkstyle LineLengthCheck (50 lines)
         // @checkstyle ReturnCountCheck (50 lines)
         return new AsyncResponse(
-            Single.fromCallable(this.settings::storage).map(RxStorageWrapper::new).flatMap(
-                storage -> storage.exists(key).flatMap(
+            Single.fromCallable(() -> this.storage).map(RxStorageWrapper::new).flatMap(
+                rxstorage -> rxstorage.exists(key).flatMap(
                     exist -> {
                         if (exist) {
                             return Single.just(new RsWithStatus(RsStatus.CONFLICT));
                         } else {
-                            return storage.save(
+                            return rxstorage.save(
                                 key,
                                 new Content.From(
                                     new Concatenation(body).single().map(buf -> new Remaining(buf).bytes())

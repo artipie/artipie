@@ -23,7 +23,6 @@
  */
 package com.artipie.api;
 
-import com.artipie.Settings;
 import com.artipie.Users;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -60,16 +59,16 @@ final class ApiChangeUserPassword implements Slice {
     private static final Pattern PTN = Pattern.compile("/api/users/(?<user>[^/.]+)/password");
 
     /**
-     * Artipie settings.
+     * Artipie users.
      */
-    private final Settings settings;
+    private final Users users;
 
     /**
-     * New create API.
-     * @param settings Artipie settings
+     * New API change password.
+     * @param users Artipie users
      */
-    ApiChangeUserPassword(final Settings settings) {
-        this.settings = settings;
+    ApiChangeUserPassword(final Users users) {
+        this.users = users;
     }
 
     @Override
@@ -90,11 +89,9 @@ final class ApiChangeUserPassword implements Slice {
                     .findFirst().orElseThrow()
             ).flatMapCompletable(
                 pass -> Completable.fromFuture(
-                    this.settings.credentials().thenCompose(
-                        cred -> cred.add(
-                            new Users.User(user, Optional.empty()),
-                            DigestUtils.sha256Hex(pass), Users.PasswordFormat.SHA256
-                        )
+                    this.users.add(
+                        new Users.User(user, Optional.empty()),
+                        DigestUtils.sha256Hex(pass), Users.PasswordFormat.SHA256
                     ).toCompletableFuture()
                 )
             ).toSingleDefault(

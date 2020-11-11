@@ -139,28 +139,28 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)")),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new ApiRepoListSlice(settings)
+                                new ApiRepoListSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)/(?:[^/.]+)")),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new ApiRepoGetSlice(settings)
+                                new ApiRepoGetSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)")),
                                     new ByMethodsRule(RqMethod.POST)
                                 ),
-                                new ApiRepoUpdateSlice(settings)
+                                new ApiRepoUpdateSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/users/(?:[^/.]+)/password")),
                                     new ByMethodsRule(RqMethod.POST)
                                 ),
-                                new ApiChangeUserPassword(settings)
+                                new ApiChangeUserPassword(creds)
                             ),
                             new RtRulePath(
                                 new RtRule.All(

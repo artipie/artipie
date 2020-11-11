@@ -27,10 +27,10 @@ import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.artipie.Settings;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
+import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -59,16 +59,16 @@ final class ApiRepoGetSlice implements Slice {
     private static final Pattern PTN = Pattern.compile("/api/repos/(?<key>[^/.]+/[^/.]+)");
 
     /**
-     * Artipie settings.
+     * Artipie settings storage.
      */
-    private final Settings settings;
+    private final Storage storage;
 
     /**
      * New repo API.
-     * @param settings Artipie settings
+     * @param storage Artipie settings storage
      */
-    ApiRepoGetSlice(final Settings settings) {
-        this.settings = settings;
+    ApiRepoGetSlice(final Storage storage) {
+        this.storage = storage;
     }
 
     @Override
@@ -83,10 +83,10 @@ final class ApiRepoGetSlice implements Slice {
         final Key.From key = new Key.From(String.format("%s.yaml", name));
         // @checkstyle LineLengthCheck (50 lines)
         return new AsyncResponse(
-            Single.fromCallable(this.settings::storage).map(RxStorageWrapper::new).flatMap(
-                storage -> storage.exists(key).filter(exists -> exists)
+            Single.fromCallable(() -> this.storage).map(RxStorageWrapper::new).flatMap(
+                rxstorage -> rxstorage.exists(key).filter(exists -> exists)
                     .flatMapSingleElement(
-                        ignore -> storage.value(key)
+                        ignore -> rxstorage.value(key)
                             .flatMap(pub -> new Concatenation(pub).single())
                             .map(
                                 data -> Yaml.createYamlInput(

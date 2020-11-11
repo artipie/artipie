@@ -23,8 +23,8 @@
  */
 package com.artipie.api;
 
-import com.artipie.Settings;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -52,16 +52,16 @@ final class ApiRepoListSlice implements Slice {
     private static final Pattern PTN = Pattern.compile("/api/repos/(?<user>[^/.]+)");
 
     /**
-     * Artipie settings.
+     * Artipie settings storage.
      */
-    private final Settings settings;
+    private final Storage storage;
 
     /**
      * New repo list API.
-     * @param settings Artipie settings
+     * @param storage Artipie settings storage
      */
-    ApiRepoListSlice(final Settings settings) {
-        this.settings = settings;
+    ApiRepoListSlice(final Storage storage) {
+        this.storage = storage;
     }
 
     @Override
@@ -74,7 +74,7 @@ final class ApiRepoListSlice implements Slice {
         }
         final String user = matcher.group("user");
         return new AsyncResponse(
-            Single.fromCallable(this.settings::storage)
+            Single.fromCallable(() -> this.storage)
                 .map(RxStorageWrapper::new)
                 .flatMap(str -> str.list(new Key.From(user)))
                 .map(
