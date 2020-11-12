@@ -152,7 +152,6 @@ final class HelmITCase {
             this.tmp, "my-helm", this.config(anonymous).toString(), this.port
         );
         this.server.start();
-
     }
 
     private RepoConfigYaml config(final boolean anonymous) {
