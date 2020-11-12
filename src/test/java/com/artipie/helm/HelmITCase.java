@@ -164,7 +164,7 @@ final class HelmITCase {
         final RepoConfigYaml yaml = new RepoConfigYaml("helm")
             .withFileStorage(this.tmp.resolve("repos"))
             .withUrl(this.url.string(anonymous))
-            .withPath(HelmITCase.REPO);
+            .withPath(this.url.string());
         if (!anonymous) {
             yaml.withPermissions(
                 new RepoPerms(ArtipieServer.ALICE.name(), "*")
