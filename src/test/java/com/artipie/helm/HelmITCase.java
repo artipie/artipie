@@ -119,6 +119,7 @@ final class HelmITCase {
                 String.format("\"%s\" has been added to your repositories", chartrepo)
             )
         );
+        con.disconnect();
         MatcherAssert.assertThat(
             "Repo update from chart repository",
             this.cntn.execStdout("helm", "repo", "update"),
