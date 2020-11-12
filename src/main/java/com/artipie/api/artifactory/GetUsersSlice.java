@@ -23,7 +23,8 @@
  */
 package com.artipie.api.artifactory;
 
-import com.artipie.Settings;
+import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.Users;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -48,33 +49,36 @@ public final class GetUsersSlice implements Slice {
     public static final String PATH = "/api/security/users";
 
     /**
-     * Artipie settings.
+     * Artipie users.
      */
-    private final Settings settings;
+    private final Users users;
+
+    /**
+     * Artipie meta config.
+     */
+    private final YamlMapping meta;
 
     /**
      * Ctor.
-     * @param settings Setting
+     * @param users Users
+     * @param meta Meta info
      */
-    public GetUsersSlice(final Settings settings) {
-        this.settings = settings;
+    public GetUsersSlice(final Users users, final YamlMapping meta) {
+        this.users = users;
+        this.meta = meta;
     }
 
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final String base = this.settings.meta().string("base_url").replaceAll("/$", "");
+        final String base = this.meta.string("base_url").replaceAll("/$", "");
         return new AsyncResponse(
-            this.settings.credentials().thenCompose(
-                cred -> cred.list().<Response>thenApply(
-                    list -> {
-                        final JsonArrayBuilder json = Json.createArrayBuilder();
-                        list.forEach(
-                            user -> json.add(GetUsersSlice.getUserJson(base, user.name()))
-                        );
-                        return new RsJson(json);
-                    }
-                )
+            this.users.list().<Response>thenApply(
+                list -> {
+                    final JsonArrayBuilder json = Json.createArrayBuilder();
+                    list.forEach(user -> json.add(GetUsersSlice.getUserJson(base, user.name())));
+                    return new RsJson(json);
+                }
             )
         );
     }

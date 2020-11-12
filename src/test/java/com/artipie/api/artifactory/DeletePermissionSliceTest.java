@@ -27,7 +27,6 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.RepoConfigYaml;
 import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
-import com.artipie.Settings;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
@@ -56,7 +55,7 @@ class DeletePermissionSliceTest {
     @Test
     void returnsBadRequestOnInvalidRequest() {
         MatcherAssert.assertThat(
-            new DeletePermissionSlice(new Settings.Fake()),
+            new DeletePermissionSlice(new InMemoryStorage()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(RqMethod.DELETE, "/some/api/permissions/pypi")
@@ -67,7 +66,7 @@ class DeletePermissionSliceTest {
     @Test
     void returnsNotFoundIfRepositoryDoesNotExists() {
         MatcherAssert.assertThat(
-            new DeletePermissionSlice(new Settings.Fake()),
+            new DeletePermissionSlice(new InMemoryStorage()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(RqMethod.DELETE, "/api/security/permissions/pypi")
@@ -91,7 +90,7 @@ class DeletePermissionSliceTest {
         ).saveTo(storage, repo);
         MatcherAssert.assertThat(
             "Returns 200 OK",
-            new DeletePermissionSlice(new Settings.Fake(storage)),
+            new DeletePermissionSlice(storage),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),

@@ -53,6 +53,7 @@ import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
+import com.artipie.repo.PathPattern;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.charset.StandardCharsets;
@@ -84,12 +85,13 @@ public final class ArtipieApi extends Slice.Wrap {
             new AsyncSlice(
                 Single.zip(
                     Single.fromCallable(settings::auth).flatMap(SingleInterop::fromFuture),
+                    Single.fromCallable(settings::credentials).flatMap(SingleInterop::fromFuture),
                     Single.fromCallable(settings::storage).map(RxStorageWrapper::new)
                         .flatMap(storage -> storage.value(new Key.From("_permissions.yaml")).flatMap(data -> new Concatenation(data).single()))
                         .map(buf -> new Remaining(buf).bytes())
                         .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
                         .map(YamlPermissions::new),
-                    (auth, perm) -> new ApiAuthSlice(
+                    (auth, creds, perm) -> new ApiAuthSlice(
                         auth, perm,
                         new SliceRoute(
                             new RtRulePath(
@@ -137,56 +139,56 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)")),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new ApiRepoListSlice(settings)
+                                new ApiRepoListSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)/(?:[^/.]+)")),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new ApiRepoGetSlice(settings)
+                                new ApiRepoGetSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)")),
                                     new ByMethodsRule(RqMethod.POST)
                                 ),
-                                new ApiRepoUpdateSlice(settings)
+                                new ApiRepoUpdateSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/users/(?:[^/.]+)/password")),
                                     new ByMethodsRule(RqMethod.POST)
                                 ),
-                                new ApiChangeUserPassword(settings)
+                                new ApiChangeUserPassword(creds)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repositories/.*")),
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
-                                new CreateRepoSlice(settings)
+                                new CreateRepoSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.USER.pattern()),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetUserSlice(settings)
+                                new GetUserSlice(creds)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(GetUsersSlice.PATH),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetUsersSlice(settings)
+                                new GetUsersSlice(creds, settings.meta())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.USER.pattern()),
                                     new ByMethodsRule(RqMethod.DELETE)
                                 ),
-                                new DeleteUserSlice(settings)
+                                new DeleteUserSlice(creds)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
@@ -196,42 +198,44 @@ public final class ArtipieApi extends Slice.Wrap {
                                         new ByMethodsRule(RqMethod.POST)
                                     )
                                 ),
-                                new AddUpdateUserSlice(settings)
+                                new AddUpdateUserSlice(creds)
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(GetPermissionsSlice.PATH),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetPermissionsSlice(settings)
+                                new GetPermissionsSlice(settings.storage(), settings.meta())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.REPO.pattern()),
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
-                                new AddUpdatePermissionSlice(settings)
+                                new AddUpdatePermissionSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.REPO.pattern()),
                                     new ByMethodsRule(RqMethod.DELETE)
                                 ),
-                                new DeletePermissionSlice(settings)
+                                new DeletePermissionSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.REPO.pattern()),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetPermissionSlice(settings)
+                                new GetPermissionSlice(settings.storage())
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(GetStorageSlice.Request.PATH),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetStorageSlice(settings)
+                                new GetStorageSlice(
+                                    settings.storage(), new PathPattern(settings.layout()).pattern()
+                                )
                             )
                         )
                     )

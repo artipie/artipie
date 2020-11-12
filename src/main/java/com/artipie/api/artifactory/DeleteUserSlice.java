@@ -23,7 +23,7 @@
  */
 package com.artipie.api.artifactory;
 
-import com.artipie.Settings;
+import com.artipie.Users;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -47,16 +47,16 @@ import org.reactivestreams.Publisher;
  */
 public final class DeleteUserSlice implements Slice {
     /**
-     * Artipie settings.
+     * Artipie users.
      */
-    private final Settings settings;
+    private final Users users;
 
     /**
      * Ctor.
-     * @param settings Setting
+     * @param users Users
      */
-    public DeleteUserSlice(final Settings settings) {
-        this.settings = settings;
+    public DeleteUserSlice(final Users users) {
+        this.users = users;
     }
 
     @Override
@@ -65,29 +65,27 @@ public final class DeleteUserSlice implements Slice {
         final Optional<String> user = new FromRqLine(line, FromRqLine.RqPattern.USER).get();
         return user.<Response>map(
             username -> new AsyncResponse(
-                this.settings.credentials().thenCompose(
-                    cred -> cred.list().thenApply(
-                        users -> users.stream().anyMatch(item -> item.name().equals(username))
-                    ).thenCompose(
-                        has -> {
-                            final CompletionStage<Response> resp;
-                            if (has) {
-                                resp = cred.remove(username)
-                                    .thenApply(
-                                        ok -> new RsWithBody(
-                                            new RsWithStatus(RsStatus.OK),
-                                            String.format(
-                                                "User '%s' has been removed successfully.",
-                                                username
-                                            ).getBytes(StandardCharsets.UTF_8)
-                                        )
-                                    );
-                            } else {
-                                resp = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
-                            }
-                            return resp;
+                this.users.list().thenApply(
+                    items -> items.stream().anyMatch(item -> item.name().equals(username))
+                ).thenCompose(
+                    has -> {
+                        final CompletionStage<Response> resp;
+                        if (has) {
+                            resp = this.users.remove(username)
+                                .thenApply(
+                                    ok -> new RsWithBody(
+                                        new RsWithStatus(RsStatus.OK),
+                                        String.format(
+                                            "User '%s' has been removed successfully.",
+                                            username
+                                        ).getBytes(StandardCharsets.UTF_8)
+                                    )
+                                );
+                        } else {
+                            resp = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
                         }
-                    )
+                        return resp;
+                    }
                 )
             )
         ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));

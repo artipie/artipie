@@ -25,7 +25,7 @@ package com.artipie.maven;
 
 import com.artipie.RepoConfig;
 import com.artipie.asto.cache.Cache;
-import com.artipie.asto.cache.StorageCache;
+import com.artipie.asto.cache.FromStorageCache;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
@@ -77,7 +77,7 @@ public final class MavenProxy implements Slice {
                     this.client,
                     URI.create(remote.url()),
                     remote.auth(),
-                    remote.cache().<Cache>map(StorageCache::new).orElse(Cache.NOP)
+                    remote.cache().<Cache>map(FromStorageCache::new).orElse(Cache.NOP)
                 )
             ).collect(Collectors.toList())
         ).response(line, headers, body);

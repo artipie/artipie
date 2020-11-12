@@ -68,7 +68,7 @@ class RepoPermissionsFromSettingsTest {
         this.storage.save(new Key.From("abc"), Content.EMPTY).join();
         this.storage.save(new Key.From("three.yaml"), Content.EMPTY).join();
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).repositories()
+            new RepoPermissions.FromSettings(this.storage).repositories()
                 .toCompletableFuture().join(),
             Matchers.containsInAnyOrder("one", "two", "three")
         );
@@ -84,7 +84,7 @@ class RepoPermissionsFromSettingsTest {
             new RepoPerms(john, new ListOf<String>(download, upload))
         ).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
+            new RepoPermissions.FromSettings(this.storage).permissions(repo)
                 .toCompletableFuture().join(),
             Matchers.contains(
                 new RepoPermissions.PermissionItem(john, new ListOf<String>(download, upload))
@@ -97,7 +97,7 @@ class RepoPermissionsFromSettingsTest {
         final String repo = "pypi";
         new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).permissions(repo)
+            new RepoPermissions.FromSettings(this.storage).permissions(repo)
                 .toCompletableFuture().join().size(),
             new IsEqual<>(0)
         );
@@ -110,7 +110,7 @@ class RepoPermissionsFromSettingsTest {
             new RepoPerms(Collections.emptyList(), new ListOf<>("**"))
         ).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).patterns(repo)
+            new RepoPermissions.FromSettings(this.storage).patterns(repo)
                 .toCompletableFuture().join()
                 .stream().map(RepoPermissions.PathPattern::string).collect(Collectors.toList()),
             Matchers.contains("**")
@@ -122,7 +122,7 @@ class RepoPermissionsFromSettingsTest {
         final String repo = "gem";
         new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).patterns(repo)
+            new RepoPermissions.FromSettings(this.storage).patterns(repo)
                 .toCompletableFuture().join()
                 .stream().map(RepoPermissions.PathPattern::string).collect(Collectors.toList()),
             new IsEmptyCollection<>()
@@ -146,7 +146,7 @@ class RepoPermissionsFromSettingsTest {
         final String victor = "victor";
         final String download = "download";
         final String deploy = "deploy";
-        new RepoPermissions.FromSettings(new Settings.Fake(this.storage))
+        new RepoPermissions.FromSettings(this.storage)
             .update(
                 repo,
                 new ListOf<>(
@@ -184,7 +184,7 @@ class RepoPermissionsFromSettingsTest {
         new RepoConfigYaml(repo).saveTo(this.storage, repo);
         final String ann = "ann";
         final String download = "download";
-        new RepoPermissions.FromSettings(new Settings.Fake(this.storage))
+        new RepoPermissions.FromSettings(this.storage)
             .update(
                 repo,
                 new ListOf<>(new RepoPermissions.PermissionItem(ann, new ListOf<>(download))),
@@ -209,7 +209,7 @@ class RepoPermissionsFromSettingsTest {
         new RepoConfigYaml(repo).withPermissions(
             new RepoPerms("someone", new ListOf<>("r", "w"))
         ).saveTo(this.storage, repo);
-        new RepoPermissions.FromSettings(new Settings.Fake(this.storage)).remove(repo)
+        new RepoPermissions.FromSettings(this.storage).remove(repo)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Permissions section are empty",

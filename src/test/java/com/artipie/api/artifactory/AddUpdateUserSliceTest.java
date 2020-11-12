@@ -26,7 +26,6 @@ package com.artipie.api.artifactory;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.CredsConfigYaml;
-import com.artipie.Settings;
 import com.artipie.Users;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
@@ -80,7 +79,7 @@ final class AddUpdateUserSliceTest {
     @EnumSource(value = RqMethod.class, names = {"PUT", "POST"})
     void returnsBadRequestOnInvalidRequest(final RqMethod rqmeth) {
         MatcherAssert.assertThat(
-            new AddUpdateUserSlice(new Settings.Fake()),
+            new AddUpdateUserSlice(new Users.FromEnv()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(rqmeth, "/some/api/david")
@@ -92,7 +91,7 @@ final class AddUpdateUserSliceTest {
     @EnumSource(value = RqMethod.class, names = {"PUT", "POST"})
     void returnsBadRequestIfCredentialsAreEmpty(final RqMethod rqmeth) {
         MatcherAssert.assertThat(
-            new AddUpdateUserSlice(new Settings.Fake()),
+            new AddUpdateUserSlice(new Users.FromEnv()),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(rqmeth, "/api/security/users/empty"),
@@ -120,9 +119,7 @@ final class AddUpdateUserSliceTest {
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
             new AddUpdateUserSlice(
-                new Settings.Fake(
-                    new Users.FromStorageYaml(this.storage, new Key.From("_credentials.yaml"))
-                )
+                new Users.FromStorageYaml(this.storage, new Key.From("_credentials.yaml"))
             ).response(
                 rqline.toString(), Headers.EMPTY,
                 this.jsonBody(pswd, username, new ListOf<String>(ateam, bteam))
@@ -158,9 +155,7 @@ final class AddUpdateUserSliceTest {
         MatcherAssert.assertThat(
             "AddUpdateUserSlice response should be OK",
             new AddUpdateUserSlice(
-                new Settings.Fake(
-                    new Users.FromStorageYaml(this.storage, new Key.From("_credentials.yaml"))
-                )
+                new Users.FromStorageYaml(this.storage, new Key.From("_credentials.yaml"))
             ).response(
                 rqline.toString(), Headers.EMPTY,
                 this.jsonBody(newpswd, username, Collections.emptyList())

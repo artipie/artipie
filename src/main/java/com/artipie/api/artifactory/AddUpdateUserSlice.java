@@ -23,7 +23,6 @@
  */
 package com.artipie.api.artifactory;
 
-import com.artipie.Settings;
 import com.artipie.Users;
 import com.artipie.api.ContentAs;
 import com.artipie.http.Response;
@@ -57,17 +56,17 @@ import org.reactivestreams.Publisher;
 public final class AddUpdateUserSlice implements Slice {
 
     /**
-     * Artipie settings.
+     * Artipie users.
      */
-    private final Settings settings;
+    private final Users users;
 
     /**
      * Ctor.
      *
-     * @param settings Artipie setting
+     * @param users Artipie users
      */
-    public AddUpdateUserSlice(final Settings settings) {
-        this.settings = settings;
+    public AddUpdateUserSlice(final Users users) {
+        this.users = users;
     }
 
     @Override
@@ -76,18 +75,17 @@ public final class AddUpdateUserSlice implements Slice {
         final Optional<String> user = new FromRqLine(line, FromRqLine.RqPattern.USER).get();
         return user.<Response>map(
             username -> new AsyncResponse(
-                AddUpdateUserSlice.info(body, username)
-                    .thenCompose(
-                        json -> json.map(
-                            info -> this.settings.credentials()
-                                .thenCompose(
-                                    cred -> cred.add(
-                                        info.getKey(),
-                                        DigestUtils.sha256Hex(info.getValue()),
-                                        Users.PasswordFormat.SHA256
-                                    ).thenApply(ok -> new RsWithStatus(RsStatus.OK))
-                                )
-                ).orElse(CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST))))
+                AddUpdateUserSlice.info(body, username).thenCompose(
+                    json -> json.map(
+                        info -> this.users.add(
+                            info.getKey(),
+                            DigestUtils.sha256Hex(info.getValue()),
+                            Users.PasswordFormat.SHA256
+                        ).thenApply(ok -> new RsWithStatus(RsStatus.OK))
+                    ).orElse(
+                        CompletableFuture.completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST))
+                    )
+                )
             )
         ).orElse(new RsWithStatus(RsStatus.BAD_REQUEST));
     }

@@ -28,9 +28,9 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
-import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -65,16 +65,16 @@ final class ApiRepoUpdateSlice implements Slice {
     private static final Pattern PTN = Pattern.compile("/api/repos/(?<user>[^/.]+)");
 
     /**
-     * Artipie settings.
+     * Artipie settings storage.
      */
-    private final Settings settings;
+    private final Storage storage;
 
     /**
      * New patch API.
-     * @param settings Artipie settings
+     * @param storage Artipie settings storage
      */
-    ApiRepoUpdateSlice(final Settings settings) {
-        this.settings = settings;
+    ApiRepoUpdateSlice(final Storage storage) {
+        this.storage = storage;
     }
 
     @Override
@@ -102,7 +102,7 @@ final class ApiRepoUpdateSlice implements Slice {
                             name
                         )
                     );
-                    final RxStorageWrapper rxsto = new RxStorageWrapper(this.settings.storage());
+                    final RxStorageWrapper rxsto = new RxStorageWrapper(this.storage);
                     final YamlMapping config = Yaml.createYamlInput(
                         form.stream().filter(input -> input.getName().equals("config"))
                             .map(NameValuePair::getValue)

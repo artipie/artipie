@@ -31,6 +31,7 @@ import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.api.ContentAs;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
@@ -113,21 +114,21 @@ public interface RepoPermissions {
         private static final String REPO = "repo";
 
         /**
-         * Artipie settings.
+         * Artipie settings storage.
          */
-        private final Settings settings;
+        private final Storage storage;
 
         /**
          * Ctor.
-         * @param settings Artipie settings
+         * @param storage Artipie settings storage
          */
-        public FromSettings(final Settings settings) {
-            this.settings = settings;
+        public FromSettings(final Storage storage) {
+            this.storage = storage;
         }
 
         @Override
         public CompletionStage<List<String>> repositories() {
-            return this.settings.storage().list(Key.ROOT)
+            return this.storage.list(Key.ROOT)
                 .thenApply(
                     list -> list.stream()
                         .map(Key::string)
@@ -219,7 +220,7 @@ public interface RepoPermissions {
          * @return Completion action with yaml repo section
          */
         private CompletionStage<YamlMapping> repo(final Key key) {
-            return new RxStorageWrapper(this.settings.storage())
+            return new RxStorageWrapper(this.storage)
                 .value(key)
                 .to(ContentAs.YAML)
                 .map(yaml -> yaml.yamlMapping(FromSettings.REPO))
@@ -233,7 +234,7 @@ public interface RepoPermissions {
          * @return Completable operation
          */
         private CompletableFuture<Void> saveSettings(final Key key, final YamlMapping result) {
-            return this.settings.storage().save(
+            return this.storage.save(
                 key, new Content.From(result.toString().getBytes(StandardCharsets.UTF_8))
             );
         }

@@ -25,7 +25,6 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.RepoConfig;
-import com.artipie.Settings;
 import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -34,7 +33,6 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.common.RsJson;
-import com.artipie.repo.PathPattern;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.ByteBuffer;
@@ -55,26 +53,33 @@ import org.reactivestreams.Publisher;
 public final class GetStorageSlice implements Slice {
 
     /**
-     * Settings.
+     * Artipie settings storage.
      */
-    private final Settings settings;
+    private final Storage storage;
+
+    /**
+     * Artipie path pattern.
+     */
+    private final Pattern path;
 
     /**
      * New storage list slice.
-     * @param settings Settings
+     * @param storage Artipie settings storage
+     * @param path Artipie path pattern
      */
-    public GetStorageSlice(final Settings settings) {
-        this.settings = settings;
+    public GetStorageSlice(final Storage storage, final Pattern path) {
+        this.storage = storage;
+        this.path = path;
     }
 
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Request request = new Request(this.settings, line);
+        final Request request = new Request(this.path, line);
         final Key root = request.root();
         return new AsyncResponse(
-            this.storage(request.repo()).thenCompose(
-                storage -> storage.list(root).thenApply(
+            this.repoStorage(request.repo()).thenCompose(
+                repo -> repo.list(root).thenApply(
                     list -> {
                         final KeyList keys = new KeyList(root);
                         list.forEach(keys::add);
@@ -96,13 +101,13 @@ public final class GetStorageSlice implements Slice {
      *  and `ArtipieRepositories#resolve(String)`.
      *  This code duplication should be resolved by extracting this code to separate class.
      */
-    private CompletionStage<Storage> storage(final String name) {
+    private CompletionStage<Storage> repoStorage(final String name) {
         return Single.zip(
             SingleInterop.fromFuture(
-                this.settings.storage().value(new Key.From(String.format("%s.yaml", name)))
+                this.storage.value(new Key.From(String.format("%s.yaml", name)))
             ),
             SingleInterop.fromFuture(
-                StorageAliases.find(this.settings.storage(), new Key.From(name))
+                StorageAliases.find(this.storage, new Key.From(name))
             ),
             (data, aliases) -> SingleInterop.fromFuture(
                 RepoConfig.fromPublisher(aliases, new Key.From(name), data)
@@ -164,9 +169,9 @@ public final class GetStorageSlice implements Slice {
         public static final Pattern PATH = Pattern.compile("/api/storage(?<target>/.+)");
 
         /**
-         * Settings.
+         * Artipie path pattern.
          */
-        private final Settings settings;
+        private final Pattern path;
 
         /**
          * Request line.
@@ -176,11 +181,11 @@ public final class GetStorageSlice implements Slice {
         /**
          * Ctor.
          *
-         * @param settings Settings.
+         * @param path Path pattern.
          * @param line Request line.
          */
-        public Request(final Settings settings, final String line) {
-            this.settings = settings;
+        public Request(final Pattern path, final String line) {
+            this.path = path;
             this.line = line;
         }
 
@@ -202,7 +207,7 @@ public final class GetStorageSlice implements Slice {
          */
         public Key root() {
             final String target = this.target();
-            final Matcher matcher = new PathPattern(this.settings).pattern().matcher(target);
+            final Matcher matcher = this.path.matcher(target);
             if (matcher.matches()) {
                 return new Key.From(matcher.group(1).substring(1));
             } else {
@@ -218,12 +223,12 @@ public final class GetStorageSlice implements Slice {
          * @return Target.
          */
         private String target() {
-            final String path = new RequestLineFrom(this.line).uri().getPath();
-            final Matcher matcher = PATH.matcher(path);
+            final String rqpath = new RequestLineFrom(this.line).uri().getPath();
+            final Matcher matcher = PATH.matcher(rqpath);
             if (matcher.matches()) {
                 return matcher.group("target");
             } else {
-                throw new IllegalArgumentException(String.format("Invalid path: '%s'", path));
+                throw new IllegalArgumentException(String.format("Invalid path: '%s'", rqpath));
             }
         }
     }
