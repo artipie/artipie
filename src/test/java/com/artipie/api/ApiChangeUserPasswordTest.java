@@ -25,7 +25,6 @@ package com.artipie.api;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.CredsConfigYaml;
-import com.artipie.Settings;
 import com.artipie.Users;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
@@ -78,9 +77,7 @@ class ApiChangeUserPasswordTest {
         new CredsConfigYaml().withUsers("person").saveTo(this.storage, this.key);
         MatcherAssert.assertThat(
             "ApiChangeUserPassword response should be FOUND",
-            new ApiChangeUserPassword(
-                new Settings.Fake(new Users.FromStorageYaml(this.storage, this.key))
-            ),
+            new ApiChangeUserPassword(new Users.FromStorageYaml(this.storage, this.key)),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.FOUND),
@@ -107,9 +104,7 @@ class ApiChangeUserPasswordTest {
         new CredsConfigYaml().withUsers(username).saveTo(this.storage, this.key);
         MatcherAssert.assertThat(
             "ApiChangeUserPassword response should be FOUND",
-            new ApiChangeUserPassword(
-                new Settings.Fake(new Users.FromStorageYaml(this.storage, this.key))
-            ),
+            new ApiChangeUserPassword(new Users.FromStorageYaml(this.storage, this.key)),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.FOUND),
