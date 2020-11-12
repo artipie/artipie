@@ -9,6 +9,7 @@
 --exclude src/test/resources/pypi-repo/**/*
 --exclude src/test/resources/npm/**/*
 --exclude src/test/resources/rpm/*
+--exclude src/test/resources/helm/*
 --exclude .idea/**/*
 --exclude examples/**/*
 --exclude examples/helm/tomcat-0.4.1.tgz
