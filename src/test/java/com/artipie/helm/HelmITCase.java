@@ -28,14 +28,11 @@ import com.artipie.RepoConfigYaml;
 import com.artipie.RepoPerms;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.fs.FileStorage;
-import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.RandomFreePort;
 import com.artipie.test.RepositoryUrl;
-import com.artipie.test.TestContainer;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,9 +41,6 @@ import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterEach;
@@ -55,14 +49,13 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.testcontainers.shaded.org.yaml.snakeyaml.Yaml;
 
 /**
  * Integration tests for Helm repository.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.13
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "unchecked"})
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class HelmITCase {
 
@@ -89,11 +82,6 @@ final class HelmITCase {
     private ArtipieServer server;
 
     /**
-     * Container.
-     */
-    private TestContainer cntn;
-
-    /**
      * Storage.
      */
     private Storage storage;
@@ -111,7 +99,7 @@ final class HelmITCase {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void uploadChartAndCreateIndexYaml(final boolean anonymous) throws Exception {
-        this.init(anonymous);
+        this.startArtipie(anonymous);
         final HttpURLConnection con = (HttpURLConnection) new URL(
             String.format(
                 "http://localhost:%s/%s/%s", this.port, HelmITCase.REPO, HelmITCase.CHART
@@ -143,23 +131,10 @@ final class HelmITCase {
             con.getResponseCode(),
             new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
         );
-        final Map<String, Object> index = new Yaml().load(
-            new PublisherAs(
-                new RxStorageWrapper(this.storage)
-                    .value(new Key.From("repos", HelmITCase.REPO, "index.yaml"))
-                    .blockingGet()
-            ).asciiString().toCompletableFuture().join()
-        );
         MatcherAssert.assertThat(
-            "Version from index.yaml is correct",
-            (String)
-                ((ArrayList<LinkedHashMap<String, Object>>)
-                    ((Map<String, Object>)
-                        index.get("entries"))
-                        .get("tomcat"))
-                    .get(0)
-                    .get("version"),
-            new IsEqual<>("0.4.1")
+            "Index.yaml was created",
+            this.storage.exists(new Key.From("repos", HelmITCase.REPO, "index.yaml")),
+            new IsEqual<>(true)
         );
         con.disconnect();
     }
@@ -167,10 +142,9 @@ final class HelmITCase {
     @AfterEach
     void tearDown() {
         this.server.stop();
-        this.cntn.close();
     }
 
-    private void init(final boolean anonymous) throws IOException {
+    private void startArtipie(final boolean anonymous) throws IOException {
         this.storage = new FileStorage(this.tmp);
         this.port = new RandomFreePort().value();
         this.url = new RepositoryUrl(this.port, "my-helm");
@@ -178,8 +152,7 @@ final class HelmITCase {
             this.tmp, "my-helm", this.config(anonymous).toString(), this.port
         );
         this.server.start();
-        this.cntn = new TestContainer("bitnami/kubectl:1.19", this.tmp);
-        this.cntn.start(this.port);
+
     }
 
     private RepoConfigYaml config(final boolean anonymous) {
