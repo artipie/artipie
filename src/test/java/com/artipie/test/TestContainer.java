@@ -46,10 +46,20 @@ public final class TestContainer implements AutoCloseable {
      * @param path Path for binding file system
      */
     public TestContainer(final String image, final Path path) {
-        this.cntn = new GenericContainer<>(image)
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(path.toString(), "/home");
+        this(
+            new GenericContainer<>(image)
+                .withCommand("tail", "-f", "/dev/null")
+                .withWorkingDirectory("/home/")
+                .withFileSystemBind(path.toString(), "/home")
+        );
+    }
+
+    /**
+     * Ctor.
+     * @param cntn Generic container
+     */
+    public TestContainer(final GenericContainer<?> cntn) {
+        this.cntn = cntn;
     }
 
     /**
