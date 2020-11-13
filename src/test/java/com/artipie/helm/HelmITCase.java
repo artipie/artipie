@@ -151,6 +151,7 @@ final class HelmITCase {
             new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
         );
         MatcherAssert.assertThat(
+            "`Index.yaml` was created",
             new FileStorage(this.tmp.resolve("repos")).exists(
                 new Key.From(HelmITCase.REPO, "index.yaml")
             ).join(),
