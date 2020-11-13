@@ -24,7 +24,6 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.RepoPermissions;
-import com.artipie.api.RsJson;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Response;
@@ -33,6 +32,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.common.RsJson;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;

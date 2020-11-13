@@ -24,12 +24,12 @@
 package com.artipie.http;
 
 import com.artipie.Settings;
-import com.artipie.api.RsJson;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.common.RsJson;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;

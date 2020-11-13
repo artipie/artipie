@@ -24,11 +24,11 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.Users;
-import com.artipie.api.RsJson;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.common.RsJson;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
