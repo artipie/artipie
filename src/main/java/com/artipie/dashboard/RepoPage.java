@@ -28,7 +28,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.artipie.Settings;
-import com.artipie.api.ContentAs;
+import com.artipie.api.ContentAsYaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.rq.RequestLineFrom;
@@ -91,7 +91,7 @@ final class RepoPage implements Page {
         // @checkstyle LineLengthCheck (30 lines)
         return Single.fromCallable(this.settings::storage).map(RxStorageWrapper::new).flatMap(
             storage -> storage.exists(key).filter(exists -> exists).flatMapSingleElement(
-                ignore -> storage.value(key).to(ContentAs.YAML).map(
+                ignore -> storage.value(key).to(new ContentAsYaml()).map(
                     config -> {
                         final YamlMapping repo = config.yamlMapping("repo");
                         YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
