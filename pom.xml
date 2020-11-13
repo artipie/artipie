@@ -161,7 +161,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.31</version>
+      <version>0.32</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -207,7 +207,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.7</version>
+      <version>0.7.1</version>
       <exclusions>
         <exclusion>
           <groupId>com.jcabi</groupId>
@@ -248,7 +248,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>0.7.1</version>
+      <version>0.7.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
