@@ -23,7 +23,6 @@
  */
 package com.artipie.metrics;
 
-import com.artipie.api.RsJson;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentAs;
@@ -31,6 +30,7 @@ import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rs.common.RsJson;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Observable;
 import java.nio.ByteBuffer;
