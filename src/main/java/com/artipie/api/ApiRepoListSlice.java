@@ -31,6 +31,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rs.common.RsJson;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.regex.Matcher;
