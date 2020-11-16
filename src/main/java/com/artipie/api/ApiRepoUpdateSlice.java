@@ -88,7 +88,7 @@ final class ApiRepoUpdateSlice implements Slice {
         final String user = matcher.group("user");
         // @checkstyle LineLengthCheck (500 lines)
         return new AsyncResponse(
-            Single.just(body).to(ContentAs.STRING).map(
+            Single.just(body).to(com.artipie.asto.ext.ContentAs.STRING).map(
                 payload -> URLEncodedUtils.parse(payload, StandardCharsets.UTF_8)
             ).flatMap(
                 form -> {
@@ -112,7 +112,7 @@ final class ApiRepoUpdateSlice implements Slice {
                         exist -> {
                             final Single<YamlMapping> res;
                             if (exist) {
-                                res = rxsto.value(key).to(ContentAs.YAML).map(
+                                res = rxsto.value(key).to(new ContentAsYaml()).map(
                                     source -> {
                                         final YamlMapping patch = config.yamlMapping("repo");
                                         YamlMappingBuilder repo = Yaml.createYamlMappingBuilder();

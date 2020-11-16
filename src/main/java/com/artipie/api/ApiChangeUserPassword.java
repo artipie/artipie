@@ -24,6 +24,7 @@
 package com.artipie.api;
 
 import com.artipie.Users;
+import com.artipie.asto.ext.ContentAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;

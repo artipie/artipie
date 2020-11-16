@@ -24,7 +24,7 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.Users;
-import com.artipie.api.ContentAs;
+import com.artipie.api.ContentAsJson;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -103,7 +103,7 @@ public final class AddUpdateUserSlice implements Slice {
         final String email = "email";
         final String pswd = "password";
         final String groups = "groups";
-        return Single.just(body).to(ContentAs.JSON).map(
+        return Single.just(body).to(new ContentAsJson()).map(
             json -> {
                 final Optional<Pair<Users.User, String>> res;
                 if (json.containsKey(pswd) && json.containsKey(email)) {

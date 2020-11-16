@@ -25,7 +25,7 @@ package com.artipie.api.artifactory;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.api.ContentAs;
+import com.artipie.api.ContentAsJson;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -82,7 +82,7 @@ public final class CreateRepoSlice implements Slice {
     ) {
         // @checkstyle ReturnCountCheck (20 lines)
         return new AsyncResponse(
-            Single.just(body).to(ContentAs.JSON).flatMap(
+            Single.just(body).to(new ContentAsJson()).flatMap(
                 json -> Single.fromFuture(
                     valid(json).map(
                         name -> {
