@@ -26,6 +26,8 @@ package com.artipie.helm;
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
 import com.artipie.RepoPerms;
+import com.artipie.asto.Key;
+import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.RandomFreePort;
@@ -57,6 +59,10 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Integration tests for Helm repository.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @todo #607:60min Verify install using kubectl in docker.
+ *  Now test just check that `index.yaml` was created. It would
+ *  be better to verify install within `helm install`. For this,
+ *  it's necessary to create a kubernetes cluster in Docker.
  * @since 0.13
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -132,6 +138,26 @@ final class HelmITCase {
                 )
             )
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void helmCreateIndexYaml(final boolean anonymous) throws Exception {
+        this.init(anonymous);
+        final HttpURLConnection con = this.putToLocalhost(anonymous);
+        MatcherAssert.assertThat(
+            "Response status is 200",
+            con.getResponseCode(),
+            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+        );
+        MatcherAssert.assertThat(
+            "`Index.yaml` was created",
+            new FileStorage(this.tmp.resolve("repos")).exists(
+                new Key.From(HelmITCase.REPO, "index.yaml")
+            ).join(),
+            new IsEqual<>(true)
+        );
+        con.disconnect();
     }
 
     @AfterEach
