@@ -24,13 +24,15 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlInput;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
-import com.artipie.api.ContentAsYaml;
+import com.artipie.asto.Concatenation;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.auth.AuthFromEnv;
@@ -211,13 +213,19 @@ public interface Users {
         /**
          * Credentials as yaml.
          * @return Completion action with yaml
+         * @todo #730:30min When `ContentAs` is used here instead of `Concatenation` and
+         *  `Remaining` ITs get stuck on github actions (this does not happen locally on mac os),
+         *  figure out why, make necessary corrections and use `ContentAs` here.
          */
         public CompletionStage<YamlMapping> yaml() {
             return new RxStorageWrapper(this.storage)
                 .value(this.key)
-                .to(new ContentAsYaml())
-                .to(SingleInterop.get())
-                .thenApply(yaml -> (YamlMapping) yaml);
+                .flatMap(content -> new Concatenation(content).single())
+                .map(Remaining::new)
+                .map(Remaining::bytes)
+                .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.US_ASCII)))
+                .map(YamlInput::readYamlMapping)
+                .to(SingleInterop.get());
         }
 
         /**
