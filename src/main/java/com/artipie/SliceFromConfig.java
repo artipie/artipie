@@ -25,10 +25,13 @@
 package com.artipie;
 
 import com.artipie.asto.Key;
+import com.artipie.asto.SubStorage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
+import com.artipie.docker.Docker;
 import com.artipie.docker.DockerProxy;
 import com.artipie.docker.asto.AstoDocker;
+import com.artipie.docker.asto.RegistryRoot;
 import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.file.FileProxy;
@@ -260,16 +263,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "docker":
+                final Docker docker = new AstoDocker(
+                    new SubStorage(RegistryRoot.V2, cfg.storage())
+                );
                 if (standalone) {
-                    slice = new DockerSlice(
-                        new AstoDocker(cfg.storage()),
-                        permissions,
-                        auth
-                    );
+                    slice = new DockerSlice(docker, permissions, auth);
                 } else {
                     slice = new DockerRoutingSlice.Reverted(
                         new DockerSlice(
-                            new TrimmedDocker(new AstoDocker(cfg.storage()), cfg.name()),
+                            new TrimmedDocker(docker, cfg.name()),
                             permissions,
                             auth
                         )
