@@ -21,23 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.http;
+package com.artipie;
 
-import com.artipie.asto.Key;
-import java.io.IOException;
+import java.util.concurrent.CompletionStage;
 
 /**
- * Repositories HTTP endpoints.
- * @since 0.9
+ * Artipie repositories registry.
+ *
+ * @since 0.13
  */
 public interface Repositories {
 
     /**
-     * Find slice by name.
-     * @param prefix Repository name
-     * @param standalone Standalone flag
-     * @return Repository slice
-     * @throws IOException On error
+     * Find repository config by name.
+     *
+     * @param name Repository name
+     * @return Repository config
      */
-    Slice slice(Key prefix, boolean standalone) throws IOException;
+    CompletionStage<RepoConfig> config(String name);
 }
