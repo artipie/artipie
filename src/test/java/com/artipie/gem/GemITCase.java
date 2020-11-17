@@ -45,7 +45,7 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Integration tests for Helm repository.
+ * Integration tests for Gem repository.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.13
  */
