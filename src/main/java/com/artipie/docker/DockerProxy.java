@@ -24,7 +24,9 @@
 package com.artipie.docker;
 
 import com.artipie.RepoConfig;
+import com.artipie.asto.SubStorage;
 import com.artipie.docker.asto.AstoDocker;
+import com.artipie.docker.asto.RegistryRoot;
 import com.artipie.docker.cache.CacheDocker;
 import com.artipie.docker.composite.MultiReadDocker;
 import com.artipie.docker.composite.ReadWriteDocker;
@@ -123,7 +125,9 @@ public final class DockerProxy implements Slice {
         Docker docker = this.cfg.storageOpt()
             .<Docker>map(
                 storage -> {
-                    final AstoDocker local = new AstoDocker(storage);
+                    final AstoDocker local = new AstoDocker(
+                        new SubStorage(RegistryRoot.V2, storage)
+                    );
                     return new ReadWriteDocker(new MultiReadDocker(local, proxies), local);
                 }
             )
@@ -150,7 +154,10 @@ public final class DockerProxy implements Slice {
             new AuthClientSlice(slices.https(remote.url()), remote.auth())
         );
         return remote.cache().<Docker>map(
-            storage -> new CacheDocker(proxy, new AstoDocker(storage))
+            storage -> new CacheDocker(
+                proxy,
+                new AstoDocker(new SubStorage(RegistryRoot.V2, storage))
+            )
         ).orElse(proxy);
     }
 }
