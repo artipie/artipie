@@ -93,11 +93,6 @@ public final class GetStorageSlice implements Slice {
      *
      * @param name Repo name.
      * @return Repo storage.
-     * @todo #545:30min Code duplication for creating repo storage.
-     *  Creating repository storage from `Settings`
-     *  is duplicated in `GetStorageSlice#storage(String)` method
-     *  and `ArtipieRepositories#resolve(String)`.
-     *  This code duplication should be resolved by extracting this code to separate class.
      */
     private CompletionStage<Storage> repoStorage(final String name) {
         return new RepositoriesFromStorage(this.storage).config(name)
