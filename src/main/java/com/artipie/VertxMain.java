@@ -193,11 +193,9 @@ public final class VertxMain {
         final Storage storage = settings.storage();
         final String yaml = ".yaml";
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
-            keys -> keys.stream().filter(key -> key.string().endsWith(yaml)).map(
-                key -> storage.value(key).thenCompose(
-                    content -> RepoConfig.fromPublisher(StorageAliases.EMPTY, key, content)
-                ).toCompletableFuture().join()
-            ).collect(Collectors.toList())
+            keys -> keys.stream().map(Key::string).filter(name -> name.endsWith(yaml)).map(
+                name -> new RepositoriesFromStorage(storage).config(name)
+            ).map(stage -> stage.toCompletableFuture().join()).collect(Collectors.toList())
         ).toCompletableFuture().join();
         for (final RepoConfig repo : configs) {
             repo.port().ifPresent(
