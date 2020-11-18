@@ -24,7 +24,6 @@
 
 package com.artipie;
 
-import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
@@ -46,7 +45,6 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.group.GroupSlice;
-import com.artipie.http.slice.KeyFromPath;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.MavenProxy;
 import com.artipie.maven.http.MavenSlice;
@@ -223,9 +221,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                             .stream().map(node -> node.asScalar().value())
                             .map(
                                 name -> new AsyncSlice(
-                                    settings.storage().value(new Key.From(String.format("%s.yaml", name)))
-                                        .thenCompose(data -> RepoConfig.fromPublisher(aliases, new KeyFromPath(name), data))
-                                        .thenApply(sub -> new SliceFromConfig(settings, sub, aliases, standalone))
+                                    new RepositoriesFromStorage(settings.storage()).config(name)
+                                        .thenApply(
+                                            sub -> new SliceFromConfig(
+                                                settings, sub, aliases, standalone
+                                            )
+                                        )
                                 )
                             ).collect(Collectors.toList())
                     )

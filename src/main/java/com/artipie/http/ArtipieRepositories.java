@@ -35,6 +35,7 @@ import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -43,7 +44,7 @@ import java.util.concurrent.CompletionStage;
  * Artipie repositories implementation.
  * @since 0.9
  */
-public final class ArtipieRepositories implements Repositories {
+public final class ArtipieRepositories {
 
     /**
      * Artipie settings.
@@ -58,7 +59,13 @@ public final class ArtipieRepositories implements Repositories {
         this.settings = settings;
     }
 
-    @Override
+    /**
+     * Find slice by name.
+     * @param name Repository name
+     * @param standalone Standalone flag
+     * @return Repository slice
+     * @throws IOException On error
+     */
     public Slice slice(final Key name, final boolean standalone) {
         final Storage storage = this.settings.storage();
         final Key.From key = new Key.From(String.format("%s.yaml", name.string()));
