@@ -33,6 +33,9 @@ import java.util.concurrent.CompletionStage;
  * Artipie repositories created from {@link Settings}.
  *
  * @since 0.13
+ * @todo #597:30min Add unit tests for RepositoriesFromStorage class.
+ *  `RepositoriesFromStorage` class was extracted from existing code and lacks test coverage.
+ *  It's methods should be tested for all important execution paths.
  */
 public final class RepositoriesFromStorage implements Repositories {
 
