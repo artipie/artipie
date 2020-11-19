@@ -24,11 +24,13 @@
 
 package com.artipie;
 
-import com.artipie.asto.Key;
+import com.artipie.asto.SubStorage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
+import com.artipie.docker.Docker;
 import com.artipie.docker.DockerProxy;
 import com.artipie.docker.asto.AstoDocker;
+import com.artipie.docker.asto.RegistryRoot;
 import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.file.FileProxy;
@@ -43,7 +45,6 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.group.GroupSlice;
-import com.artipie.http.slice.KeyFromPath;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.MavenProxy;
 import com.artipie.maven.http.MavenSlice;
@@ -220,9 +221,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                             .stream().map(node -> node.asScalar().value())
                             .map(
                                 name -> new AsyncSlice(
-                                    settings.storage().value(new Key.From(String.format("%s.yaml", name)))
-                                        .thenCompose(data -> RepoConfig.fromPublisher(aliases, new KeyFromPath(name), data))
-                                        .thenApply(sub -> new SliceFromConfig(settings, sub, aliases, standalone))
+                                    new RepositoriesFromStorage(settings.storage()).config(name)
+                                        .thenApply(
+                                            sub -> new SliceFromConfig(
+                                                settings, sub, aliases, standalone
+                                            )
+                                        )
                                 )
                             ).collect(Collectors.toList())
                     )
@@ -260,16 +264,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "docker":
+                final Docker docker = new AstoDocker(
+                    new SubStorage(RegistryRoot.V2, cfg.storage())
+                );
                 if (standalone) {
-                    slice = new DockerSlice(
-                        new AstoDocker(cfg.storage()),
-                        permissions,
-                        auth
-                    );
+                    slice = new DockerSlice(docker, permissions, auth);
                 } else {
                     slice = new DockerRoutingSlice.Reverted(
                         new DockerSlice(
-                            new TrimmedDocker(new AstoDocker(cfg.storage()), cfg.name()),
+                            new TrimmedDocker(docker, cfg.name()),
                             permissions,
                             auth
                         )

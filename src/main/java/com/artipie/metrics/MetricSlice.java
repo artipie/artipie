@@ -23,9 +23,9 @@
  */
 package com.artipie.metrics;
 
-import com.artipie.api.ContentAs;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.ext.ContentAs;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;

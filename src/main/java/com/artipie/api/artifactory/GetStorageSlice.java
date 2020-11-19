@@ -25,7 +25,7 @@
 package com.artipie.api.artifactory;
 
 import com.artipie.RepoConfig;
-import com.artipie.StorageAliases;
+import com.artipie.RepositoriesFromStorage;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Response;
@@ -33,8 +33,6 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.common.RsJson;
-import hu.akarnokd.rxjava2.interop.SingleInterop;
-import io.reactivex.Single;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
@@ -95,24 +93,10 @@ public final class GetStorageSlice implements Slice {
      *
      * @param name Repo name.
      * @return Repo storage.
-     * @todo #545:30min Code duplication for creating repo storage.
-     *  Creating repository storage from `Settings`
-     *  is duplicated in `GetStorageSlice#storage(String)` method
-     *  and `ArtipieRepositories#resolve(String)`.
-     *  This code duplication should be resolved by extracting this code to separate class.
      */
     private CompletionStage<Storage> repoStorage(final String name) {
-        return Single.zip(
-            SingleInterop.fromFuture(
-                this.storage.value(new Key.From(String.format("%s.yaml", name)))
-            ),
-            SingleInterop.fromFuture(
-                StorageAliases.find(this.storage, new Key.From(name))
-            ),
-            (data, aliases) -> SingleInterop.fromFuture(
-                RepoConfig.fromPublisher(aliases, new Key.From(name), data)
-            ).map(RepoConfig::storage)
-        ).flatMap(self -> self).to(SingleInterop.get());
+        return new RepositoriesFromStorage(this.storage).config(name)
+            .thenApply(RepoConfig::storage);
     }
 
     /**

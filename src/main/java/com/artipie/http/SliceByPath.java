@@ -48,26 +48,11 @@ final class SliceByPath implements Slice {
     private final Settings settings;
 
     /**
-     * Repositories.
-     */
-    private final Repositories repositories;
-
-    /**
      * New slice from settings.
      * @param settings Artipie settings
      */
     SliceByPath(final Settings settings) {
-        this(settings, new ArtipieRepositories(settings));
-    }
-
-    /**
-     * New slice from settings and repositories.
-     * @param settings Artipie settings
-     * @param repositories Repositories provider
-     */
-    SliceByPath(final Settings settings, final Repositories repositories) {
         this.settings = settings;
-        this.repositories = repositories;
     }
 
     // @checkstyle ReturnCountCheck (20 lines)
@@ -85,7 +70,8 @@ final class SliceByPath implements Slice {
                     StandardCharsets.UTF_8
                 );
             }
-            return this.repositories.slice(key.get(), false).response(line, headers, body);
+            return new ArtipieRepositories(this.settings).slice(key.get(), false)
+                .response(line, headers, body);
         } catch (final IOException err) {
             return new RsWithBody(
                 new RsWithStatus(RsStatus.INTERNAL_ERROR),

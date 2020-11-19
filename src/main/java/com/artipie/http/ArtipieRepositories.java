@@ -23,7 +23,7 @@
  */
 package com.artipie.http;
 
-import com.artipie.RepoConfig;
+import com.artipie.RepositoriesFromStorage;
 import com.artipie.Settings;
 import com.artipie.SliceFromConfig;
 import com.artipie.StorageAliases;
@@ -33,8 +33,7 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
-import hu.akarnokd.rxjava2.interop.SingleInterop;
-import io.reactivex.Single;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -43,7 +42,7 @@ import java.util.concurrent.CompletionStage;
  * Artipie repositories implementation.
  * @since 0.9
  */
-public final class ArtipieRepositories implements Repositories {
+public final class ArtipieRepositories {
 
     /**
      * Artipie settings.
@@ -58,16 +57,21 @@ public final class ArtipieRepositories implements Repositories {
         this.settings = settings;
     }
 
-    @Override
+    /**
+     * Find slice by name.
+     * @param name Repository name
+     * @param standalone Standalone flag
+     * @return Repository slice
+     * @throws IOException On error
+     */
     public Slice slice(final Key name, final boolean standalone) {
         final Storage storage = this.settings.storage();
-        final Key.From key = new Key.From(String.format("%s.yaml", name.string()));
         return new AsyncSlice(
-            storage.exists(key).thenCompose(
+            storage.exists(new Key.From(String.format("%s.yaml", name.string()))).thenCompose(
                 exists -> {
                     final CompletionStage<Slice> res;
                     if (exists) {
-                        res = this.resolve(storage, name, key, standalone);
+                        res = this.resolve(storage, name, standalone);
                     } else {
                         res = CompletableFuture.completedFuture(
                             new SliceSimple(new RsRepoNotFound(name))
@@ -83,7 +87,6 @@ public final class ArtipieRepositories implements Repositories {
      * Resolve async {@link Slice} by provided configuration.
      * @param storage Artipie config storage
      * @param name Repository name
-     * @param key Config key
      * @param standalone Standalone flag
      * @return Async slice for repo
      * @checkstyle ParameterNumberCheck (2 lines)
@@ -91,16 +94,12 @@ public final class ArtipieRepositories implements Repositories {
     private CompletionStage<Slice> resolve(
         final Storage storage,
         final Key name,
-        final Key key,
         final boolean standalone
     ) {
-        return Single.zip(
-            SingleInterop.fromFuture(storage.value(key)),
-            SingleInterop.fromFuture(StorageAliases.find(storage, name)),
-            (data, aliases) -> SingleInterop.fromFuture(
-                RepoConfig.fromPublisher(aliases, name, data)
-            ).map(config -> new SliceFromConfig(this.settings, config, aliases, standalone))
-        ).<Slice>flatMap(self -> self).to(SingleInterop.get());
+        return new RepositoriesFromStorage(storage).config(name.string()).thenCombine(
+            StorageAliases.find(storage, name),
+            (config, aliases) -> new SliceFromConfig(this.settings, config, aliases, standalone)
+        );
     }
 
     /**
