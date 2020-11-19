@@ -23,7 +23,7 @@
  */
 
 /**
- * Tests for gem-adapter related classes.
+ * Tests for Gem repository related classes.
  *
  * @since 0.13
  */

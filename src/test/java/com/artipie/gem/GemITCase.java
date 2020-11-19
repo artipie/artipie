@@ -121,7 +121,7 @@ final class GemITCase {
     }
 
     private void push(final boolean anonymous) throws Exception {
-        final String key = new Base64Encoded("usr:pwd").asString();
+        final String key = new Base64Encoded("any:any").asString();
         new TestResource(String.format("gem/%s", GemITCase.RAILS))
             .saveTo(this.storage, new Key.From(GemITCase.RAILS));
         final String urlwithslash = this.url.string(anonymous);
