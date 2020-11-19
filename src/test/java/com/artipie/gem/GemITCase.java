@@ -124,13 +124,13 @@ final class GemITCase {
         final String key = new Base64Encoded("any:any").asString();
         new TestResource(String.format("gem/%s", GemITCase.RAILS))
             .saveTo(this.storage, new Key.From(GemITCase.RAILS));
-        final String urlwithslash = this.url.string(anonymous);
+        final String tmpurl = this.url.string(anonymous);
         this.cntn.execStdout(
             "/bin/bash", "-c",
             String.format(
                 "GEM_HOST_API_KEY=%s gem push %s --host %s",
                 key, GemITCase.RAILS,
-                urlwithslash.substring(0, urlwithslash.length() - 1)
+                tmpurl.substring(0, tmpurl.length() - 1)
             )
         );
     }
