@@ -27,6 +27,7 @@ import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.MeasuredStorage;
+import com.artipie.SliceFromConfig;
 import com.artipie.StorageAliases;
 import com.artipie.YamlStorage;
 import com.artipie.asto.Key;
@@ -135,7 +136,7 @@ public final class YamlProxyConfig implements ProxyConfig {
             final String username = this.source.string("username");
             final String password = this.source.string("password");
             if (username == null && password == null) {
-                result = Authenticator.ANONYMOUS;
+                result = new GenericAuthenticator(SliceFromConfig.HTTP);
             } else {
                 if (username == null) {
                     throw new IllegalStateException(
@@ -147,7 +148,7 @@ public final class YamlProxyConfig implements ProxyConfig {
                         "`password` is not specified for proxy remote"
                     );
                 }
-                result = new GenericAuthenticator(username, password);
+                result = new GenericAuthenticator(SliceFromConfig.HTTP, username, password);
             }
             return result;
         }

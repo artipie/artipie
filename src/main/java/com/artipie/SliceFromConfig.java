@@ -75,8 +75,13 @@ public final class SliceFromConfig extends Slice.Wrap {
 
     /**
      * Http client.
+     * @todo #213:30min HTTP client should not be a singleton.
+     *  HTTP client now is a singleton within application.
+     *  It's instance is stored in static variable.
+     *  It should be refactored so it's only instance is built on start of app
+     *  and passed from top level to this class and other usages.
      */
-    private static final JettyClientSlices HTTP;
+    public static final JettyClientSlices HTTP;
 
     static {
         HTTP = new JettyClientSlices(new HttpClientSettings());
