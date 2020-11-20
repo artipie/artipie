@@ -134,22 +134,23 @@ final class GemITCase {
         new TestResource(String.format("gem/%s", GemITCase.RAILS))
             .saveTo(this.storage, new Key.From(GemITCase.RAILS));
         final String tmpurl = this.url.string(anonymous);
+        final String apikey;
         if (anonymous) {
-            final String key = new Base64Encoded("any:any").asString();
-            this.cntn.execStdout(
-                "/bin/bash", "-c",
-                String.format(
-                    "GEM_HOST_API_KEY=%s gem push %s --host %s",
-                    key, GemITCase.RAILS,
-                    tmpurl.substring(0, tmpurl.length() - 1)
-                )
-            );
+            apikey = new Base64Encoded("any:any").asString();
         } else {
-            this.cntn.execStdout(
-                "gem", "push", GemITCase.RAILS,
-                "--host", tmpurl.substring(0, tmpurl.length() - 1)
-            );
+            apikey = new Base64Encoded(
+                String.format("%s:%s", ArtipieServer.ALICE.name(), ArtipieServer.ALICE.password())
+            ).asString();
         }
+        this.cntn.execStdout(
+            "/bin/bash", "-c",
+            String.format(
+                "GEM_HOST_API_KEY=%s gem push %s --host %s",
+                apikey,
+                GemITCase.RAILS,
+                tmpurl.substring(0, tmpurl.length() - 1)
+            )
+        );
     }
 
     private void init(final boolean anonymous) throws IOException {
