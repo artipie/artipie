@@ -34,7 +34,6 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -116,16 +115,7 @@ final class DockerProxyIT {
         this.server.stop();
     }
 
-    /**
-     * Test.
-     * @throws Exception In case of any error
-     * @todo #499:30min Fix DockerProxyIT.shouldPullRemote test.
-     *  Test fails due to busybox image missing in both remote repositories.
-     *  It is possible that this specific image was deleted
-     *  or there is some actual bug in proxy implementation.
-     */
     @Test
-    @Disabled
     void shouldPullRemote() throws Exception {
         final String img = new Image.From(
             this.repository,

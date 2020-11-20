@@ -26,7 +26,6 @@ package com.artipie.repo;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
-import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import java.util.Collection;
 import org.hamcrest.MatcherAssert;
@@ -102,9 +101,9 @@ public final class YamlProxyConfigTest {
             new IsEqual<>(secondurl)
         );
         MatcherAssert.assertThat(
-            "Second remote authenticator is anonymous",
+            "Second remote authenticator is GenericAuthenticator",
             second.auth(),
-            new IsEqual<>(Authenticator.ANONYMOUS)
+            new IsInstanceOf(GenericAuthenticator.class)
         );
         MatcherAssert.assertThat(
             "Second remote has cache",
