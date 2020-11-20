@@ -26,6 +26,7 @@ package com.artipie.nuget;
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
 import com.artipie.test.TestContainer;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -35,13 +36,12 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.Testcontainers;
+import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 
 /**
  * Integration tests for Nuget repository.
@@ -60,10 +60,8 @@ final class NugetITCase {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
      */
-    @TempDir
-    Path tmp;
+    private Path tmp;
 
     /**
      * Tested Artipie server.
@@ -82,6 +80,7 @@ final class NugetITCase {
 
     @BeforeEach
     void init() throws Exception {
+        this.tmp = Files.createTempDirectory("junit-nuget");
         final String name = "my-nuget";
         this.port = new RandomFreePort().value();
         this.server = new ArtipieServer(this.tmp, name, this.config().toString(), this.port);
@@ -93,9 +92,15 @@ final class NugetITCase {
     }
 
     @AfterEach
+    @SuppressWarnings("PMD.AvoidPrintStackTrace")
     void tearDown() {
         this.server.stop();
         this.cntn.close();
+        try {
+            FileUtils.cleanDirectory(this.tmp.toFile());
+        } catch (final IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Test
@@ -107,21 +112,8 @@ final class NugetITCase {
         );
     }
 
-    /**
-     * Test.
-     * @throws Exception In case of any error
-     * @todo #679:30min Fix NugetITCase.shouldInstallPushedPackage test.
-     *  Test fails due to temp folder cleanup failure:
-     *  java.io.IOException: Failed to delete temp directory /tmp/junit7011768386395731632.
-     *  The following paths could not be deleted (see suppressed exceptions for details): ,
-     *  TestProj, TestProj/Program.cs, TestProj/TestProj.csproj, TestProj/obj,
-     *  TestProj/obj/TestProj.csproj.nuget.dgspec.json, TestProj/obj/TestProj.csproj.nuget.g.props,
-     *  TestProj/obj/TestProj.csproj.nuget.g.targets, TestProj/obj/project.assets.json,
-     *  TestProj/obj/project.nuget.cache
-     */
     @Test
     @Timeout(30)
-    @Disabled
     void shouldInstallPushedPackage() throws Exception {
         this.pushPackage();
         this.cntn.execStdout("dotnet", "new", "console", "-n", "TestProj");
