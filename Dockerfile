@@ -13,9 +13,9 @@ RUN mvn versions:set -DnewVersion=${version} && \
 
 FROM adoptopenjdk/openjdk14:alpine-jre
 ENV JVM_OPTS=""
-LABEL description="Artipie binary repository managment tool"
-LABEL maintainer="titantins@gmail.com"
+LABEL description="Artipie binary repository management tool"
 LABEL maintainer="g4s8.public@gmail.com"
+LABEL maintainer="oleg.mozzhechkov@gmail.com"
 COPY --from=build_jar /jar/target/artipie-jar-with-dependencies.jar /usr/lib/artipie.jar
 
 # Create link to deprecated config file location for backward-compatibility
