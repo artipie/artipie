@@ -141,7 +141,7 @@ class YamlSettingsTest {
         Files.writeString(yaml, this.credentials());
         MatcherAssert.assertThat(
             settings.credentials().toCompletableFuture().join(),
-            new IsInstanceOf(Users.FromStorageYaml.class)
+            new IsInstanceOf(UsersFromStorageYaml.class)
         );
     }
 

@@ -29,6 +29,7 @@ import com.artipie.auth.CachedAuth;
 import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
+import com.artipie.management.Users;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -110,9 +111,9 @@ public final class YamlSettings implements Settings {
                 exists -> {
                     final Users creds;
                     if (exists) {
-                        creds = new Users.FromStorageYaml(strg, key);
+                        creds = new UsersFromStorageYaml(strg, key);
                     } else {
-                        creds = new Users.FromEnv();
+                        creds = new UsersFromEnv();
                     }
                     return creds;
                 }
@@ -124,7 +125,7 @@ public final class YamlSettings implements Settings {
                 )
             );
         } else {
-            res = CompletableFuture.completedStage(new Users.FromEnv());
+            res = CompletableFuture.completedStage(new UsersFromEnv());
         }
         return res;
     }

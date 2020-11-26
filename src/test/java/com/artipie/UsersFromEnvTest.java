@@ -24,6 +24,7 @@
 package com.artipie;
 
 import com.artipie.auth.AuthFromEnv;
+import com.artipie.management.Users;
 import java.util.Optional;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
@@ -32,7 +33,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link Users.FromEnv}.
+ * Test for {@link UsersFromEnv}.
  * @since 0.10
  */
 class UsersFromEnvTest {
@@ -41,7 +42,7 @@ class UsersFromEnvTest {
     void returnsUserFromEnv() {
         final String user = "john";
         MatcherAssert.assertThat(
-            new Users.FromEnv(new MapOf<>(new MapEntry<>(AuthFromEnv.ENV_NAME, user)))
+            new UsersFromEnv(new MapOf<>(new MapEntry<>(AuthFromEnv.ENV_NAME, user)))
                 .list().toCompletableFuture().join(),
             Matchers.containsInAnyOrder(new Users.User(user, Optional.empty()))
         );

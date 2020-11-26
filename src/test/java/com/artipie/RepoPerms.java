@@ -28,6 +28,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
+import com.artipie.management.RepoPermissions;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;

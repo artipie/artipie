@@ -27,6 +27,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.auth.Authentication;
+import com.artipie.management.RepoPermissions;
 import java.io.IOException;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
