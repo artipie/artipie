@@ -25,11 +25,11 @@ package com.artipie.file;
 
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.fs.FileStorage;
+import com.artipie.management.RepoPermissions;
 import com.artipie.test.TestContainer;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

@@ -25,10 +25,10 @@ package com.artipie.docker;
 
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
 import com.artipie.docker.junit.DockerClient;
 import com.artipie.docker.junit.DockerClientSupport;
+import com.artipie.management.RepoPermissions;
 import java.nio.file.Path;
 import java.util.Arrays;
 import org.cactoos.list.ListOf;

@@ -23,6 +23,7 @@
  */
 package com.artipie;
 
+import com.artipie.management.RepoPermissions;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.params.ParameterizedTest;

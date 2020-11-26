@@ -24,19 +24,10 @@
 package com.artipie.api;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.RepoPermissionsFromStorage;
 import com.artipie.Settings;
 import com.artipie.YamlPermissions;
-import com.artipie.api.artifactory.AddUpdatePermissionSlice;
-import com.artipie.api.artifactory.AddUpdateUserSlice;
-import com.artipie.api.artifactory.CreateRepoSlice;
-import com.artipie.api.artifactory.DeletePermissionSlice;
-import com.artipie.api.artifactory.DeleteUserSlice;
-import com.artipie.api.artifactory.FromRqLine;
-import com.artipie.api.artifactory.GetPermissionSlice;
-import com.artipie.api.artifactory.GetPermissionsSlice;
 import com.artipie.api.artifactory.GetStorageSlice;
-import com.artipie.api.artifactory.GetUserSlice;
-import com.artipie.api.artifactory.GetUsersSlice;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
@@ -53,6 +44,21 @@ import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
+import com.artipie.management.api.ApiAuthSlice;
+import com.artipie.management.api.ApiChangeUserPassword;
+import com.artipie.management.api.ApiRepoGetSlice;
+import com.artipie.management.api.ApiRepoListSlice;
+import com.artipie.management.api.ApiRepoUpdateSlice;
+import com.artipie.management.api.artifactory.AddUpdatePermissionSlice;
+import com.artipie.management.api.artifactory.AddUpdateUserSlice;
+import com.artipie.management.api.artifactory.CreateRepoSlice;
+import com.artipie.management.api.artifactory.DeletePermissionSlice;
+import com.artipie.management.api.artifactory.DeleteUserSlice;
+import com.artipie.management.api.artifactory.FromRqLine;
+import com.artipie.management.api.artifactory.GetPermissionSlice;
+import com.artipie.management.api.artifactory.GetPermissionsSlice;
+import com.artipie.management.api.artifactory.GetUserSlice;
+import com.artipie.management.api.artifactory.GetUsersSlice;
 import com.artipie.repo.PathPattern;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
@@ -202,31 +208,42 @@ public final class ArtipieApi extends Slice.Wrap {
                             ),
                             new RtRulePath(
                                 new RtRule.All(
-                                    new RtRule.ByPath(GetPermissionsSlice.PATH),
+                                    new RtRule.ByPath("/api/security/permissions"),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetPermissionsSlice(settings.storage(), settings.meta())
+                                new GetPermissionsSlice(
+                                    new RepoPermissionsFromStorage(settings.storage()),
+                                    settings.meta()
+                                )
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.REPO.pattern()),
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
-                                new AddUpdatePermissionSlice(settings.storage())
+                                new AddUpdatePermissionSlice(
+                                    new RepoPermissionsFromStorage(settings.storage())
+                                )
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.REPO.pattern()),
                                     new ByMethodsRule(RqMethod.DELETE)
                                 ),
-                                new DeletePermissionSlice(settings.storage())
+                                new DeletePermissionSlice(
+                                    settings.storage(),
+                                    new RepoPermissionsFromStorage(settings.storage())
+                                )
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(FromRqLine.RqPattern.REPO.pattern()),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new GetPermissionSlice(settings.storage())
+                                new GetPermissionSlice(
+                                    settings.storage(),
+                                    new RepoPermissionsFromStorage(settings.storage())
+                                )
                             ),
                             new RtRulePath(
                                 new RtRule.All(

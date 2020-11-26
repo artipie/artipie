@@ -25,13 +25,13 @@ package com.artipie.rpm;
 
 import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPermissions;
 import com.artipie.RepoPerms;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.management.RepoPermissions;
 import com.artipie.test.RepositoryUrl;
 import com.artipie.test.TestContainer;
 import com.google.common.io.ByteStreams;

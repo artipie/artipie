@@ -30,8 +30,10 @@ import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.management.Users;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import org.apache.commons.codec.digest.DigestUtils;
 
 /**
@@ -140,7 +142,7 @@ public final class CredsConfigYaml {
      */
     public CredsConfigYaml withFullInfo(final
         String username, final Users.PasswordFormat format,
-        final String pswd, final String email, final List<String> groups) {
+        final String pswd, final String email, final Set<String> groups) {
         String pass = pswd;
         if (format == Users.PasswordFormat.SHA256) {
             pass = DigestUtils.sha256Hex(pass);

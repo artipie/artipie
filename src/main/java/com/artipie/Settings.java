@@ -28,6 +28,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
+import com.artipie.management.Users;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -112,7 +113,7 @@ public interface Settings {
         public Fake(final Storage storage) {
             this(
                 storage,
-                new Users.FromEnv(),
+                new UsersFromEnv(),
                 Yaml.createYamlMappingBuilder().build()
             );
         }
@@ -135,7 +136,7 @@ public interface Settings {
         public Fake(final Storage storage, final String layout) {
             this(
                 storage,
-                new Users.FromEnv(),
+                new UsersFromEnv(),
                 Yaml.createYamlMappingBuilder().build(),
                 layout
             );

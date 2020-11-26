@@ -30,6 +30,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.management.RepoPermissions;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +45,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link RepoPermissions.FromSettings}.
+ * Test for {@link RepoPermissionsFromStorage}.
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
@@ -68,7 +69,7 @@ class RepoPermissionsFromSettingsTest {
         this.storage.save(new Key.From("abc"), Content.EMPTY).join();
         this.storage.save(new Key.From("three.yaml"), Content.EMPTY).join();
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(this.storage).repositories()
+            new RepoPermissionsFromStorage(this.storage).repositories()
                 .toCompletableFuture().join(),
             Matchers.containsInAnyOrder("one", "two", "three")
         );
@@ -84,7 +85,7 @@ class RepoPermissionsFromSettingsTest {
             new RepoPerms(john, new ListOf<String>(download, upload))
         ).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(this.storage).permissions(repo)
+            new RepoPermissionsFromStorage(this.storage).permissions(repo)
                 .toCompletableFuture().join(),
             Matchers.contains(
                 new RepoPermissions.PermissionItem(john, new ListOf<String>(download, upload))
@@ -97,7 +98,7 @@ class RepoPermissionsFromSettingsTest {
         final String repo = "pypi";
         new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(this.storage).permissions(repo)
+            new RepoPermissionsFromStorage(this.storage).permissions(repo)
                 .toCompletableFuture().join().size(),
             new IsEqual<>(0)
         );
@@ -110,7 +111,7 @@ class RepoPermissionsFromSettingsTest {
             new RepoPerms(Collections.emptyList(), new ListOf<>("**"))
         ).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(this.storage).patterns(repo)
+            new RepoPermissionsFromStorage(this.storage).patterns(repo)
                 .toCompletableFuture().join()
                 .stream().map(RepoPermissions.PathPattern::string).collect(Collectors.toList()),
             Matchers.contains("**")
@@ -122,7 +123,7 @@ class RepoPermissionsFromSettingsTest {
         final String repo = "gem";
         new RepoConfigYaml(repo).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new RepoPermissions.FromSettings(this.storage).patterns(repo)
+            new RepoPermissionsFromStorage(this.storage).patterns(repo)
                 .toCompletableFuture().join()
                 .stream().map(RepoPermissions.PathPattern::string).collect(Collectors.toList()),
             new IsEmptyCollection<>()
@@ -146,7 +147,7 @@ class RepoPermissionsFromSettingsTest {
         final String victor = "victor";
         final String download = "download";
         final String deploy = "deploy";
-        new RepoPermissions.FromSettings(this.storage)
+        new RepoPermissionsFromStorage(this.storage)
             .update(
                 repo,
                 new ListOf<>(
@@ -184,7 +185,7 @@ class RepoPermissionsFromSettingsTest {
         new RepoConfigYaml(repo).saveTo(this.storage, repo);
         final String ann = "ann";
         final String download = "download";
-        new RepoPermissions.FromSettings(this.storage)
+        new RepoPermissionsFromStorage(this.storage)
             .update(
                 repo,
                 new ListOf<>(new RepoPermissions.PermissionItem(ann, new ListOf<>(download))),
@@ -209,7 +210,7 @@ class RepoPermissionsFromSettingsTest {
         new RepoConfigYaml(repo).withPermissions(
             new RepoPerms("someone", new ListOf<>("r", "w"))
         ).saveTo(this.storage, repo);
-        new RepoPermissions.FromSettings(this.storage).remove(repo)
+        new RepoPermissionsFromStorage(this.storage).remove(repo)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Permissions section are empty",

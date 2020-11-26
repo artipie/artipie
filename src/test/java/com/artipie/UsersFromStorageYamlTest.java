@@ -28,12 +28,13 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.management.Users;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.cactoos.list.ListOf;
+import org.cactoos.set.SetOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -41,7 +42,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link Users.FromStorageYaml}.
+ * Test for {@link UsersFromStorageYaml}.
  * @since 0.9
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
@@ -67,16 +68,16 @@ class UsersFromStorageYamlTest {
     @Test
     void readsYamlWithEmailFromStorage() {
         final Users.User jane = new Users.User(
-            "jane", this.email("jane"), new ListOf<String>("readers")
+            "jane", this.email("jane"), new SetOf<String>("readers")
         );
         final Users.User john = new Users.User(
-            "john", this.email("john"), new ListOf<String>("reviewers", "supporters")
+            "john", this.email("john"), new SetOf<String>("reviewers", "supporters")
         );
         final Users.PasswordFormat sha = Users.PasswordFormat.SHA256;
         final String pass = "111";
         this.creds(sha, new ImmutablePair<>(jane, pass), new ImmutablePair<>(john, pass));
         MatcherAssert.assertThat(
-            new Users.FromStorageYaml(this.storage, this.key).list()
+            new UsersFromStorageYaml(this.storage, this.key).list()
                 .toCompletableFuture().join(),
             Matchers.containsInAnyOrder(jane, john)
         );
@@ -88,7 +89,7 @@ class UsersFromStorageYamlTest {
         final Users.User john = new Users.User("olga");
         new CredsConfigYaml().withUsers(jane.name(), john.name()).saveTo(this.storage, this.key);
         MatcherAssert.assertThat(
-            new Users.FromStorageYaml(this.storage, this.key).list()
+            new UsersFromStorageYaml(this.storage, this.key).list()
                 .toCompletableFuture().join(),
             Matchers.containsInAnyOrder(jane, john)
         );
@@ -97,15 +98,15 @@ class UsersFromStorageYamlTest {
     @Test
     void addsUser() {
         final Users.User maria = new Users.User(
-            "maria", this.email("maria"), new ListOf<>("newbies", "tester")
+            "maria", this.email("maria"), new SetOf<>("newbies", "tester")
         );
         final Users.User olga = new Users.User(
-            "olga", this.email("olga"), new ListOf<>("readers", "a-team")
+            "olga", this.email("olga"), new SetOf<>("readers", "a-team")
         );
         final String pass = "abc";
         final Users.PasswordFormat sha = Users.PasswordFormat.SHA256;
         this.creds(sha, new ImmutablePair<>(maria, pass));
-        new Users.FromStorageYaml(this.storage, this.key)
+        new UsersFromStorageYaml(this.storage, this.key)
             .add(olga, DigestUtils.sha256Hex(pass), sha).toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
@@ -124,13 +125,13 @@ class UsersFromStorageYamlTest {
     void updatesUser() {
         final Users.User jack = new Users.User("jack");
         final Users.User silvia = new Users.User(
-            "silvia", this.email("silvia"), new ListOf<>("readers")
+            "silvia", this.email("silvia"), new SetOf<>("readers")
         );
         final String old = "345";
         final String newpass = "000";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
         this.creds(plain, new ImmutablePair<>(jack, old), new ImmutablePair<>(silvia, old));
-        new Users.FromStorageYaml(this.storage, this.key)
+        new UsersFromStorageYaml(this.storage, this.key)
             .add(silvia, newpass, Users.PasswordFormat.PLAIN).toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
@@ -152,7 +153,7 @@ class UsersFromStorageYamlTest {
         final String pass = "123";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
         this.creds(plain, new ImmutablePair<>(mark, pass), new ImmutablePair<>(ann, pass));
-        new Users.FromStorageYaml(this.storage, this.key).remove(ann.name())
+        new UsersFromStorageYaml(this.storage, this.key).remove(ann.name())
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
@@ -168,7 +169,7 @@ class UsersFromStorageYamlTest {
         final String pass = "098";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
         this.creds(plain, new ImmutablePair<>(ted, pass), new ImmutablePair<>(alex, pass));
-        new Users.FromStorageYaml(this.storage, this.key).remove("alice")
+        new UsersFromStorageYaml(this.storage, this.key).remove("alice")
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
