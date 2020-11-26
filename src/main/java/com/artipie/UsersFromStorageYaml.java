@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 
 /**
  * Credentials from main artipie config.
- * @since 0.9
+ * @since 0.12.2
  */
 public final class UsersFromStorageYaml implements Users {
 

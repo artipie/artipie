@@ -36,7 +36,7 @@ import org.cactoos.list.ListOf;
 
 /**
  * Credentials from env.
- * @since 0.10
+ * @since 0.12.2
  */
 public final class UsersFromEnv implements Users {
 

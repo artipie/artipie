@@ -47,7 +47,7 @@ import org.cactoos.set.SetOf;
 
 /**
  * {@link RepoPermissions} from Artipie settings.
- * @since 0.10
+ * @since 0.12.2
  */
 public final class RepoPermissionsFromStorage implements RepoPermissions {
 
