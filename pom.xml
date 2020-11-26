@@ -55,6 +55,34 @@ SOFTWARE.
       </roles>
       <timezone>+1</timezone>
     </developer>
+    <developer>
+      <id>2</id>
+      <name>Oleg Mozzhechkov</name>
+      <email>oleg.mozzhechkov@gmail.com</email>
+      <roles>
+        <role>Architect</role>
+        <role>Developer</role>
+      </roles>
+      <timezone>+3</timezone>
+    </developer>
+    <developer>
+      <id>3</id>
+      <name>Alena Gerasimova</name>
+      <email>olena.gerasimova@gmail.com</email>
+      <roles>
+        <role>Developer</role>
+      </roles>
+      <timezone>+3</timezone>
+    </developer>
+    <developer>
+      <id>4</id>
+      <name>Aleksandr Krasnov</name>
+      <email>aakrasnov19@gmail.com</email>
+      <roles>
+        <role>Developer</role>
+      </roles>
+      <timezone>+3</timezone>
+    </developer>
   </developers>
   <issueManagement>
     <system>GitHub</system>
