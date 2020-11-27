@@ -34,8 +34,10 @@ import com.artipie.test.RepositoryUrl;
 import com.artipie.test.TestContainer;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import org.cactoos.text.Base64Encoded;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
@@ -48,11 +50,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Integration tests for Gem repository.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @todo #606:30min Add IT case for push and install with authentication.
- *  Now `SliceFromConfig` authentication and permissions are not passed to
- *  gem-adapter. After they are passed there, it is necessary to add
- *  `false` in the `ValueSource` for methods `GemITCase#gemPushWorks` and
- *  `GemITCase#gemInstallPushedGemWorks`
+ * @todo #768:30min Disable IT case for install with Basic authentication.
+ *  It is necessary to add `false` in the `ValueSource` for method
+ *  `GemITCase#gemInstallPushedGemWorks` when `Basic` authentication
+ *  would be supported in the Gem repository.
  * @since 0.13
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -97,7 +98,7 @@ final class GemITCase {
     private Storage storage;
 
     @ParameterizedTest
-    @ValueSource(booleans = {true})
+    @ValueSource(booleans = {true, false})
     public void gemPushWorks(final boolean anonymous) throws Exception {
         this.init(anonymous);
         this.push(anonymous);
@@ -114,13 +115,24 @@ final class GemITCase {
     void gemInstallPushedGemWorks(final boolean anonymous) throws Exception {
         this.init(anonymous);
         this.push(anonymous);
+        this.cntn.execStdout("gem", "sources", "--remove", "https://rubygems.org/");
         MatcherAssert.assertThat(
             this.cntn.execStdout(
                 "gem", "install", GemITCase.RAILS,
                 "--source", this.url.string(anonymous),
-                "--ignore-dependencies"
+                "--ignore-dependencies", "-V"
             ),
-            new StringContains("Successfully installed rails-6.0.2.21")
+            new AllOf<>(
+                Arrays.asList(
+                    new StringContains("Successfully installed rails-6.0.2.21"),
+                    new StringContains(
+                        String.format(
+                            "GET %squick/Marshal.4.8/%sspec.rz200 OK",
+                            this.url.string(anonymous), GemITCase.RAILS
+                        )
+                    )
+                )
+            )
         );
     }
 
@@ -133,7 +145,7 @@ final class GemITCase {
     private void push(final boolean anonymous) throws Exception {
         new TestResource(String.format("gem/%s", GemITCase.RAILS))
             .saveTo(this.storage, new Key.From(GemITCase.RAILS));
-        final String tmpurl = this.url.string(anonymous);
+        final String tmpurl = this.url.string(true);
         final String apikey;
         if (anonymous) {
             apikey = new Base64Encoded("any:any").asString();

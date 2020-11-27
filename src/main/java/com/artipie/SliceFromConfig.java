@@ -59,7 +59,9 @@ import com.artipie.pypi.http.PySlice;
 import com.artipie.repo.PathPattern;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.Vertx;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
+import org.jruby.javasupport.JavaEmbedUtils;
 
 /**
  * Slice from repo config.
@@ -174,7 +176,12 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "gem":
                 slice = trimIfNotStandalone(
                     settings, standalone,
-                    new GemSlice(cfg.storage())
+                    new GemSlice(
+                        cfg.storage(),
+                        JavaEmbedUtils.initialize(new ArrayList<>(0)),
+                        permissions,
+                        auth
+                    )
                 );
                 break;
             case "helm":
