@@ -23,31 +23,27 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
-import com.artipie.asto.fs.RxFile;
-import io.vertx.reactivex.core.Vertx;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
+import com.artipie.asto.test.TestResource;
+import io.reactivex.Flowable;
+import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.ExecutionException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.hamcrest.core.IsInstanceOf;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link RepoConfig}.
  * @since 0.2
  */
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 public final class RepoConfigTest {
-
-    /**
-     * Vertx instance.
-     */
-    private Vertx vertx;
 
     @Test
     public void readsCustom() throws Exception {
@@ -106,14 +102,91 @@ public final class RepoConfigTest {
         );
     }
 
-    @BeforeEach
-    void setUp() {
-        this.vertx = Vertx.vertx();
+    @Test
+    public void readsRepositoryTypeRepoPart() throws Exception {
+        final RepoConfig config = this.readMin();
+        MatcherAssert.assertThat(
+            config.type(),
+            new IsEqual<>("maven")
+        );
     }
 
-    @AfterEach
-    void tearDown() {
-        this.vertx.close();
+    @Test
+    public void throwExceptionWhenPathNotSpecified() {
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> this.repoCustom().path()
+        );
+    }
+
+    @Test
+    public void getEmptyWhenPermissionsNotSpecified() throws Exception {
+        MatcherAssert.assertThat(
+            this.readMin().permissions(),
+            new IsEqual<>(Optional.empty())
+        );
+    }
+
+    @Test
+    public void getPermissionsPart() throws Exception {
+        MatcherAssert.assertThat(
+            this.readFull().permissions().get(),
+            new IsInstanceOf(YamlPermissions.class)
+        );
+    }
+
+    @Test
+    public void getPathPart() throws Exception {
+        MatcherAssert.assertThat(
+            this.readFull().path(),
+            new IsEqual<>("mvn")
+        );
+    }
+
+    @Test
+    public void getUrlWhenUrlIsCorrect() {
+        final String target = "http://host:8080/correct";
+        MatcherAssert.assertThat(
+            this.repoCustom("url", target).url().toString(),
+            new IsEqual<>(target)
+        );
+    }
+
+    @Test
+    public void throwExceptionWhenUrlIsMalformed() {
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> this.repoCustom("url", "host:8080/without/scheme").url()
+        );
+    }
+
+    @Test
+    public void throwsExceptionWhenStorageWithDefaultAliasesNotConfigured() {
+        MatcherAssert.assertThat(
+            Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> this.repoCustom().storage()
+            ).getMessage(),
+            new IsEqual<>("Storage is not configured")
+        );
+    }
+
+    @Test
+    public void throwsExceptionForInvalidStorageConfig() {
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> new RepoConfig(
+                StorageAliases.EMPTY,
+                new Key.From("key"),
+                Yaml.createYamlMappingBuilder().add(
+                    "repo", Yaml.createYamlMappingBuilder()
+                        .add(
+                            "storage", Yaml.createYamlSequenceBuilder()
+                                .add("wrong because sequence").build()
+                        ).build()
+                ).build()
+            ).storage()
+        );
     }
 
     private RepoConfig readFull() throws Exception {
@@ -124,17 +197,31 @@ public final class RepoConfigTest {
         return this.readFromResource("repo-min-config.yml");
     }
 
-    private RepoConfig readFromResource(final String name)
-        throws URISyntaxException, ExecutionException, InterruptedException {
-        final RxFile file = new RxFile(
-            Paths.get(
-                Thread.currentThread()
-                    .getContextClassLoader()
-                    .getResource(name)
-                    .toURI()
-            )
+    private RepoConfig repoCustom() {
+        return this.repoCustom("url", "http://host:8080/correct");
+    }
+
+    private RepoConfig repoCustom(final String name, final String value) {
+        return new RepoConfig(
+            StorageAliases.EMPTY,
+            new Key.From("repo-custom.yml"),
+            Yaml.createYamlMappingBuilder().add(
+                "repo", Yaml.createYamlMappingBuilder()
+                    .add("type", "maven")
+                    .add(name, value)
+                    .build()
+            ).build()
         );
-        return RepoConfig.fromPublisher(StorageAliases.EMPTY, new Key.From(name), file.flow())
-            .toCompletableFuture().get();
+    }
+
+    private RepoConfig readFromResource(final String name)
+        throws ExecutionException, InterruptedException {
+        return RepoConfig.fromPublisher(
+            StorageAliases.EMPTY,
+            new Key.From(name),
+            Flowable.just(
+                ByteBuffer.wrap(new TestResource(name).asBytes())
+            )
+        ).toCompletableFuture().get();
     }
 }
