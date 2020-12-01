@@ -69,6 +69,16 @@ public final class RepoConfigYaml {
     }
 
     /**
+     * Adds alias storage to config.
+     * @param alias Storage alias
+     * @return Itself
+     */
+    public RepoConfigYaml withStorageAlias(final String alias) {
+        this.builder = this.builder.add("storage", alias);
+        return this;
+    }
+
+    /**
      * Adds port to config.
      * @param port Port
      * @return Itself
