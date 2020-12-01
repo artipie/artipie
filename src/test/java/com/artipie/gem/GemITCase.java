@@ -50,10 +50,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Integration tests for Gem repository.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @todo #768:30min Disable IT case for install with Basic authentication.
- *  It is necessary to add `false` in the `ValueSource` for method
- *  `GemITCase#gemInstallPushedGemWorks` when `Basic` authentication
- *  would be supported in the Gem repository.
  * @since 0.13
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -111,7 +107,7 @@ final class GemITCase {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true})
+    @ValueSource(booleans = {true, false})
     void gemInstallPushedGemWorks(final boolean anonymous) throws Exception {
         this.init(anonymous);
         this.push(anonymous);
