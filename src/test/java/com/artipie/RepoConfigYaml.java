@@ -69,12 +69,12 @@ public final class RepoConfigYaml {
     }
 
     /**
-     * Adds aliase storage to config.
-     * @param aliase Storage aliase
+     * Adds alias storage to config.
+     * @param alias Storage alias
      * @return Itself
      */
-    public RepoConfigYaml withStorageAliase(final String aliase) {
-        this.builder = this.builder.add("storage", "default");
+    public RepoConfigYaml withStorageAlias(final String alias) {
+        this.builder = this.builder.add("storage", alias);
         return this;
     }
 

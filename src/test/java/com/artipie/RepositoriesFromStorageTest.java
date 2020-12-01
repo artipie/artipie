@@ -51,11 +51,11 @@ final class RepositoriesFromStorageTest {
     private static final String TYPE = "maven";
 
     @Test
-    void findRepoSettingAndCreateRepoConfigWithStorageAliase() {
+    void findRepoSettingAndCreateRepoConfigWithStorageAlias() {
         final Storage storage = new InMemoryStorage();
         final String alias = "default";
         new RepoConfigYaml(RepositoriesFromStorageTest.TYPE)
-            .withStorageAliase(alias)
+            .withStorageAlias(alias)
             .saveTo(storage, RepositoriesFromStorageTest.REPO);
         storage.save(
             new Key.From("_storages.yaml"),
