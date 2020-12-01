@@ -47,7 +47,7 @@ import java.util.concurrent.CompletionStage;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class YamlSettings implements Settings {
-    
+
     /**
      * YAML file content.
      */
