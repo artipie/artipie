@@ -48,10 +48,6 @@ import java.util.concurrent.CompletionStage;
  */
 public final class YamlSettings implements Settings {
 
-    /**
-     * Meta section.
-     */
-    private static final String KEY_META = "meta";
 
     /**
      * YAML file content.
@@ -94,7 +90,7 @@ public final class YamlSettings implements Settings {
 
     @Override
     public YamlMapping meta() {
-        return this.content.yamlMapping(YamlSettings.KEY_META);
+        return this.content.yamlMapping("meta");
     }
 
     @Override
