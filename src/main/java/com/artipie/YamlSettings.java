@@ -49,11 +49,6 @@ import java.util.concurrent.CompletionStage;
 public final class YamlSettings implements Settings {
 
     /**
-     * Meta section.
-     */
-    private static final String KEY_META = "meta";
-
-    /**
      * YAML file content.
      */
     private final YamlMapping content;
@@ -69,7 +64,7 @@ public final class YamlSettings implements Settings {
     @Override
     public Storage storage() {
         return new MeasuredStorage(
-            new YamlStorage(this.content.yamlMapping(YamlSettings.KEY_META).yamlMapping("storage"))
+            new YamlStorage(this.meta().yamlMapping("storage"))
                 .storage()
         );
     }
@@ -85,7 +80,7 @@ public final class YamlSettings implements Settings {
 
     @Override
     public String layout() {
-        String name = this.content.yamlMapping(YamlSettings.KEY_META).string("layout");
+        String name = this.meta().string("layout");
         if (name == null) {
             name = "flat";
         }
@@ -94,13 +89,12 @@ public final class YamlSettings implements Settings {
 
     @Override
     public YamlMapping meta() {
-        return this.content.yamlMapping(YamlSettings.KEY_META);
+        return this.content.yamlMapping("meta");
     }
 
     @Override
     public CompletionStage<Users> credentials() {
-        final YamlMapping cred = this.content
-            .yamlMapping(YamlSettings.KEY_META)
+        final YamlMapping cred = this.meta()
             .yamlMapping("credentials");
         final CompletionStage<Users> res;
         final String path = "path";
