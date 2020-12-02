@@ -59,7 +59,6 @@ import com.artipie.management.api.artifactory.GetPermissionSlice;
 import com.artipie.management.api.artifactory.GetPermissionsSlice;
 import com.artipie.management.api.artifactory.GetUserSlice;
 import com.artipie.management.api.artifactory.GetUsersSlice;
-import com.artipie.repo.PathPattern;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.charset.StandardCharsets;
@@ -251,7 +250,7 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new GetStorageSlice(
-                                    settings.storage(), new PathPattern(settings.layout()).pattern()
+                                    settings.storage(), settings.layout().pattern()
                                 )
                             )
                         )

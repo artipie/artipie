@@ -52,17 +52,8 @@ final class RtIsDashboard implements RtRule {
 
     @Override
     public boolean apply(final String line, final Iterable<Map.Entry<String, String>> headers) {
-        return isOrg(this.settings)
+        return this.settings.layout().hasDashboard()
             && isDashboardPath(new RequestLineFrom(line).uri().getPath());
-    }
-
-    /**
-     * Check if layout is org.
-     * @param settings Artipie settings
-     * @return True if org
-     */
-    private static boolean isOrg(final Settings settings) {
-        return settings.layout().equals("org");
     }
 
     /**

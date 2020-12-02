@@ -24,6 +24,7 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.Layout;
 import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
@@ -156,7 +157,7 @@ final class DockerRoutingSliceTest {
         }
 
         @Override
-        public String layout() {
+        public Layout layout() {
             throw new UnsupportedOperationException();
         }
 
