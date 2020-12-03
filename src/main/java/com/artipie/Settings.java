@@ -57,7 +57,7 @@ public interface Settings {
      * Repository layout.
      * @return Repository layout
      */
-    String layout();
+    Layout layout();
 
     /**
      * Artipie meta configuration.
@@ -96,7 +96,7 @@ public interface Settings {
         /**
          * Layout.
          */
-        private final String layout;
+        private final Layout layout;
 
         /**
          * Ctor.
@@ -123,7 +123,7 @@ public interface Settings {
          *
          * @param layout Layout
          */
-        public Fake(final String layout) {
+        public Fake(final Layout layout) {
             this(new InMemoryStorage(), layout);
         }
 
@@ -133,7 +133,7 @@ public interface Settings {
          * @param storage Storage
          * @param layout Layout
          */
-        public Fake(final Storage storage, final String layout) {
+        public Fake(final Storage storage, final Layout layout) {
             this(
                 storage,
                 new UsersFromEnv(),
@@ -170,7 +170,7 @@ public interface Settings {
          * @checkstyle ParameterNumberCheck (2 lines)
          */
         public Fake(final Storage storage, final Users cred, final YamlMapping meta) {
-            this(storage, cred, meta, "flat");
+            this(storage, cred, meta, new Layout.Flat());
         }
 
         /**
@@ -186,7 +186,7 @@ public interface Settings {
             final Storage storage,
             final Users cred,
             final YamlMapping meta,
-            final String layout
+            final Layout layout
         ) {
             this.storage = storage;
             this.cred = cred;
@@ -205,7 +205,7 @@ public interface Settings {
         }
 
         @Override
-        public String layout() {
+        public Layout layout() {
             return this.layout;
         }
 

@@ -29,7 +29,6 @@ import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -60,44 +59,17 @@ final class SliceByPath implements Slice {
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Optional<Key> key;
-        try {
-            key = this.keyFromPath(new RequestLineFrom(line).uri().getPath());
-            if (key.isEmpty()) {
-                return new RsWithBody(
-                    new RsWithStatus(RsStatus.NOT_FOUND),
-                    "Failed to find a repository",
-                    StandardCharsets.UTF_8
-                );
-            }
-            return new ArtipieRepositories(this.settings).slice(key.get(), false)
-                .response(line, headers, body);
-        } catch (final IOException err) {
+        final Optional<Key> key = this.settings.layout().keyFromPath(
+            new RequestLineFrom(line).uri().getPath()
+        );
+        if (key.isEmpty()) {
             return new RsWithBody(
-                new RsWithStatus(RsStatus.INTERNAL_ERROR),
-                "Failed to parse repository config",
+                new RsWithStatus(RsStatus.NOT_FOUND),
+                "Failed to find a repository",
                 StandardCharsets.UTF_8
             );
         }
-    }
-
-    /**
-     * Key from path.
-     * @param path Path from request line
-     * @return Key from path.
-     * @throws IOException In case of problems with reading settings.
-     */
-    private Optional<Key> keyFromPath(final String path) throws IOException {
-        final String[] split = path.replaceAll("^/+", "").split("/");
-        final Optional<Key> key;
-        final boolean org = this.settings.layout().equals("org");
-        if (org && split.length >= 2) {
-            key = Optional.of(new Key.From(split[0], split[1]));
-        } else if (!org && split.length >= 1) {
-            key = Optional.of(new Key.From(split[0]));
-        } else {
-            key = Optional.empty();
-        }
-        return key;
+        return new ArtipieRepositories(this.settings).slice(key.get(), false)
+            .response(line, headers, body);
     }
 }

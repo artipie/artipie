@@ -56,7 +56,6 @@ import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.pypi.PypiProxy;
 import com.artipie.pypi.http.PySlice;
-import com.artipie.repo.PathPattern;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.Vertx;
 import java.util.ArrayList;
@@ -321,7 +320,7 @@ public final class SliceFromConfig extends Slice.Wrap {
         if (standalone) {
             result = origin;
         } else {
-            result = new TrimPathSlice(origin, new PathPattern(settings.layout()).pattern());
+            result = new TrimPathSlice(origin, settings.layout().pattern());
         }
         return result;
     }

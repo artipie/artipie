@@ -79,12 +79,15 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public String layout() {
-        String name = this.meta().string("layout");
-        if (name == null) {
-            name = "flat";
+    public Layout layout() {
+        final Layout result;
+        final String name = this.meta().string("layout");
+        if (name == null || name.equals("flat")) {
+            result = new Layout.Flat();
+        } else {
+            result = new Layout.Org();
         }
-        return name;
+        return result;
     }
 
     @Override

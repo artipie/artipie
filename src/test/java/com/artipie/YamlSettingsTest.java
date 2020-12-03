@@ -34,7 +34,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
@@ -65,7 +64,7 @@ class YamlSettingsTest {
         );
         MatcherAssert.assertThat(
             settings.layout(),
-            new IsEqual<>("flat")
+            new IsInstanceOf(Layout.Flat.class)
         );
     }
 
