@@ -123,7 +123,9 @@ public interface StorageAliases {
          * @return Illegal state exception.
          */
         private static RuntimeException illegalState() {
-            throw new IllegalStateException("yaml file with aliases is malformed");
+            throw new IllegalStateException(
+                "yaml file with aliases is malformed or alias is absent"
+            );
         }
     }
 }
