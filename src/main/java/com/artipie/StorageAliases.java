@@ -31,6 +31,7 @@ import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -47,6 +48,11 @@ public interface StorageAliases {
     };
 
     /**
+     * Name of the file with storage aliases.
+     */
+    String FILE_NAME = "_storages.yaml";
+
+    /**
      * Find storage by alias.
      * @param alias Storage alias
      * @return Storage instance
@@ -61,7 +67,7 @@ public interface StorageAliases {
      */
     @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     static CompletableFuture<StorageAliases> find(final Storage storage, final Key repo) {
-        final Key.From key = new Key.From(repo, "_storages.yaml");
+        final Key.From key = new Key.From(repo, StorageAliases.FILE_NAME);
         return storage.exists(key).thenCompose(
             found -> {
                 final CompletableFuture<StorageAliases> res;
@@ -105,7 +111,19 @@ public interface StorageAliases {
 
         @Override
         public Storage storage(final String alias) {
-            return new YamlStorage(this.yaml.yamlMapping("storages").yamlMapping(alias)).storage();
+            return Optional.ofNullable(this.yaml.yamlMapping("storages")).map(
+                node -> Optional.ofNullable(node.yamlMapping(alias)).map(
+                    aliasyaml -> new YamlStorage(aliasyaml).storage()
+                ).orElseThrow(FromYaml::illegalState)
+            ).orElseThrow(FromYaml::illegalState);
+        }
+
+        /**
+         * Throws illegal state exception.
+         * @return Illegal state exception.
+         */
+        private static RuntimeException illegalState() {
+            throw new IllegalStateException("yaml file with aliases is malformed");
         }
     }
 }
