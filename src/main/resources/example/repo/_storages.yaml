@@ -1,4 +1,4 @@
-storages:
+repo:
   default:
     type: fs
     path: ./.storage/data
