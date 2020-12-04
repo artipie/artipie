@@ -164,7 +164,7 @@ public final class VertxMain {
             new JavaResource("example/artipie.yaml").copy(path);
             Files.createDirectory(Paths.get("./repo"));
             final List<String> resources = Arrays.asList(
-                "_credentials.yaml", "_storages.yaml", "_permissions.yaml"
+                "_credentials.yaml", StorageAliases.FILE_NAME, "_permissions.yaml"
             );
             for (final String res : resources) {
                 new JavaResource(String.format("example/repo/%s", res))
