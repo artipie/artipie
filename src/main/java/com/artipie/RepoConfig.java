@@ -24,17 +24,15 @@
 
 package com.artipie;
 
-import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
-import com.artipie.asto.LoggingStorage;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
-import com.artipie.asto.SubStorage;
 import com.artipie.http.auth.Permissions;
 import com.artipie.repo.ProxyConfig;
+import com.artipie.repo.StorageYamlConfig;
 import com.artipie.repo.YamlProxyConfig;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
@@ -46,7 +44,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.CompletionStage;
-import java.util.logging.Level;
 import java.util.stream.Stream;
 import org.reactivestreams.Publisher;
 
@@ -165,19 +162,7 @@ public final class RepoConfig {
      */
     public Optional<Storage> storageOpt() {
         return Optional.ofNullable(this.repoConfig().value("storage")).map(
-            node -> {
-                final Storage storage;
-                if (node instanceof Scalar) {
-                    storage = this.storages.storage(((Scalar) node).value());
-                } else if (node instanceof YamlMapping) {
-                    storage = new YamlStorage((YamlMapping) node).storage();
-                } else {
-                    throw new IllegalStateException(
-                        String.format("Invalid storage config: %s", node)
-                    );
-                }
-                return new SubStorage(this.prefix, new LoggingStorage(Level.INFO, storage));
-            }
+            node -> new StorageYamlConfig(node, this.storages).subStorage(this.prefix)
         );
     }
 

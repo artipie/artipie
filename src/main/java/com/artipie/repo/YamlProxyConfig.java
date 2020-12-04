@@ -23,22 +23,17 @@
  */
 package com.artipie.repo;
 
-import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.MeasuredStorage;
 import com.artipie.SliceFromConfig;
 import com.artipie.StorageAliases;
-import com.artipie.YamlStorage;
 import com.artipie.asto.Key;
-import com.artipie.asto.LoggingStorage;
 import com.artipie.asto.Storage;
-import com.artipie.asto.SubStorage;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -157,26 +152,11 @@ public final class YamlProxyConfig implements ProxyConfig {
         public Optional<Storage> cache() {
             return Optional.ofNullable(this.source.yamlMapping("cache")).flatMap(
                 root -> Optional.ofNullable(root.value("storage")).map(
-                    node -> {
-                        final Storage storage;
-                        if (node instanceof Scalar) {
-                            storage = YamlProxyConfig.this.storages.storage(
-                                ((Scalar) node).value()
-                            );
-                        } else if (node instanceof YamlMapping) {
-                            storage = new YamlStorage((YamlMapping) node).storage();
-                        } else {
-                            throw new IllegalStateException(
-                                String.format("Invalid storage config: %s", node)
-                            );
-                        }
-                        return new MeasuredStorage(
-                            new SubStorage(
-                                YamlProxyConfig.this.prefix,
-                                new LoggingStorage(Level.INFO, storage)
-                            )
-                        );
-                    }
+                    node -> new MeasuredStorage(
+                        new StorageYamlConfig(
+                            node, YamlProxyConfig.this.storages
+                        ).subStorage(YamlProxyConfig.this.prefix)
+                    )
                 )
             );
         }
