@@ -26,13 +26,9 @@ package com.artipie.repo;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.StorageAliases;
-import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
-import com.artipie.asto.fs.FileStorage;
-import com.artipie.asto.rx.RxStorageWrapper;
-import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
@@ -42,14 +38,8 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link StorageYamlConfig}.
  * @since 0.14
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class StorageYamlConfigTest {
-
-    /**
-     * Path storage.
-     */
-    private static final String PATH = "/some/path";
 
     @Test
     void throwsExceptionForInvalidStorageConfig() {
@@ -100,19 +90,12 @@ final class StorageYamlConfigTest {
 
     @Test
     void returnsSubStorageWithCorrectPrefix() {
-        final String data = "verify prefix";
         final Key prefix = new Key.From("prefix");
-        new RxStorageWrapper(this.config().subStorage(prefix)).save(
-            Key.ROOT,
-            new Content.From(data.getBytes())
-        );
         MatcherAssert.assertThat(
-            new FileStorage(Path.of(StorageYamlConfigTest.PATH))
-                .value(prefix)
-                .join()
-                .size()
-                .get(),
-            new IsEqual<>((long) data.length())
+            this.config().subStorage(prefix)
+                .list(Key.ROOT).join()
+                .contains(prefix),
+            new IsEqual<>(true)
         );
     }
 
@@ -126,7 +109,7 @@ final class StorageYamlConfigTest {
     private YamlMapping storageYaml() {
         return Yaml.createYamlMappingBuilder()
             .add("type", "fs")
-            .add("path", StorageYamlConfigTest.PATH)
+            .add("path", "/some/path")
             .build();
     }
 
