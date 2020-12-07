@@ -31,6 +31,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.fs.FileStorage;
+import com.artipie.asto.rx.RxStorageWrapper;
 import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -41,6 +42,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link StorageYamlConfig}.
  * @since 0.14
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class StorageYamlConfigTest {
 
@@ -100,10 +102,10 @@ final class StorageYamlConfigTest {
     void returnsSubStorageWithCorrectPrefix() {
         final String data = "verify prefix";
         final Key prefix = new Key.From("prefix");
-        this.config().subStorage(prefix).save(
+        new RxStorageWrapper(this.config().subStorage(prefix)).save(
             Key.ROOT,
             new Content.From(data.getBytes())
-        ).join();
+        );
         MatcherAssert.assertThat(
             new FileStorage(Path.of(StorageYamlConfigTest.PATH))
                 .value(prefix)
