@@ -24,10 +24,16 @@
 package com.artipie.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.StorageAliases;
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.SubStorage;
+import com.artipie.asto.fs.FileStorage;
+import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -39,14 +45,9 @@ import org.junit.jupiter.api.Test;
 final class StorageYamlConfigTest {
 
     /**
-     * Type storage.
-     */
-    private static final String TYPE = "type";
-
-    /**
      * Path storage.
      */
-    private static final String PATH = "path";
+    private static final String PATH = "/some/path";
 
     @Test
     void throwsExceptionForInvalidStorageConfig() {
@@ -78,10 +79,7 @@ final class StorageYamlConfigTest {
                     Yaml.createYamlMappingBuilder().add(
                         "storages", Yaml.createYamlMappingBuilder()
                             .add(
-                                alias, Yaml.createYamlMappingBuilder()
-                                    .add(StorageYamlConfigTest.TYPE, "fs")
-                                    .add(StorageYamlConfigTest.PATH, "/some/path")
-                                    .build()
+                                alias, this.storageYaml()
                             ).build()
                     ).build()
                 )
@@ -94,18 +92,40 @@ final class StorageYamlConfigTest {
     void returnsSubStorage() {
         MatcherAssert.assertThat(
             this.config().subStorage(new Key.From()),
-            new IsInstanceOf(Storage.class)
+            new IsInstanceOf(SubStorage.class)
+        );
+    }
+
+    @Test
+    void returnsSubStorageWithCorrectPrefix() {
+        final String data = "verify prefix";
+        final Key prefix = new Key.From("prefix");
+        this.config().subStorage(prefix).save(
+            Key.ROOT,
+            new Content.From(data.getBytes())
+        ).join();
+        MatcherAssert.assertThat(
+            new FileStorage(Path.of(StorageYamlConfigTest.PATH))
+                .value(prefix)
+                .join()
+                .size()
+                .get(),
+            new IsEqual<>((long) data.length())
         );
     }
 
     private StorageYamlConfig config() {
         return new StorageYamlConfig(
-            Yaml.createYamlMappingBuilder()
-                .add(StorageYamlConfigTest.TYPE, "fs")
-                .add(StorageYamlConfigTest.PATH, "some path")
-                .build(),
+            this.storageYaml(),
             StorageAliases.EMPTY
         );
+    }
+
+    private YamlMapping storageYaml() {
+        return Yaml.createYamlMappingBuilder()
+            .add("type", "fs")
+            .add("path", StorageYamlConfigTest.PATH)
+            .build();
     }
 
 }
