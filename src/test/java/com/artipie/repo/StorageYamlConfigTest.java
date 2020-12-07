@@ -26,6 +26,7 @@ package com.artipie.repo;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.StorageAliases;
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
@@ -91,10 +92,13 @@ final class StorageYamlConfigTest {
     @Test
     void returnsSubStorageWithCorrectPrefix() {
         final Key prefix = new Key.From("prefix");
+        final Storage strg = this.config().subStorage(prefix);
+        strg.save(Key.ROOT,  new Content.From("data".getBytes()))
+            .join();
         MatcherAssert.assertThat(
-            this.config().subStorage(prefix)
-                .list(Key.ROOT).join()
-                .contains(prefix),
+            strg.list(Key.ROOT)
+            .join()
+            .contains(prefix),
             new IsEqual<>(true)
         );
     }
