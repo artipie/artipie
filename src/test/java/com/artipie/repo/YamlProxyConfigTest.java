@@ -24,6 +24,7 @@
 package com.artipie.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
 import com.artipie.http.client.auth.GenericAuthenticator;
@@ -47,8 +48,8 @@ public final class YamlProxyConfigTest {
     public void parsesConfig() {
         final String firsturl = "https://artipie.com";
         final String secondurl = "http://localhost:8080/path";
-        final Collection<YamlProxyConfig.YamlRemote> remotes = new YamlProxyConfig(
-            StorageAliases.EMPTY, Key.ROOT, Yaml.createYamlMappingBuilder().add(
+        final Collection<YamlProxyConfig.YamlRemote> remotes = this.remotes(
+            Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
                     Yaml.createYamlMappingBuilder()
@@ -72,7 +73,7 @@ public final class YamlProxyConfigTest {
                         .build()
                 ).build()
             ).build()
-        ).remotes();
+        );
         MatcherAssert.assertThat(
             "Both remotes parsed",
             remotes.size(),
@@ -114,12 +115,12 @@ public final class YamlProxyConfigTest {
 
     @Test
     public void parsesEmpty() {
-        final Collection<? extends ProxyConfig.Remote> remotes = new YamlProxyConfig(
-            StorageAliases.EMPTY, Key.ROOT, Yaml.createYamlMappingBuilder().add(
+        final Collection<? extends ProxyConfig.Remote> remotes = this.remotes(
+            Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().build()
             ).build()
-        ).remotes();
+        );
         MatcherAssert.assertThat(
             remotes,
             new IsEmptyCollection<>()
@@ -128,14 +129,14 @@ public final class YamlProxyConfigTest {
 
     @Test
     public void failsToGetUrlWhenNotSpecified() {
-        final ProxyConfig.Remote remote = new YamlProxyConfig(
-            StorageAliases.EMPTY, Key.ROOT, Yaml.createYamlMappingBuilder().add(
+        final ProxyConfig.Remote remote = this.remotes(
+            Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
                     Yaml.createYamlMappingBuilder().add("attr", "value").build()
                 ).build()
             ).build()
-        ).remotes().iterator().next();
+        ).iterator().next();
         Assertions.assertThrows(
             IllegalStateException.class,
             remote::url
@@ -144,8 +145,8 @@ public final class YamlProxyConfigTest {
 
     @Test
     public void failsToGetAuthWhenUsernameOnly() {
-        final ProxyConfig.Remote remote = new YamlProxyConfig(
-            StorageAliases.EMPTY, Key.ROOT, Yaml.createYamlMappingBuilder().add(
+        final ProxyConfig.Remote remote = this.remotes(
+            Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
                     Yaml.createYamlMappingBuilder()
@@ -154,7 +155,7 @@ public final class YamlProxyConfigTest {
                         .build()
                 ).build()
             ).build()
-        ).remotes().iterator().next();
+        ).iterator().next();
         Assertions.assertThrows(
             IllegalStateException.class,
             remote::auth
@@ -163,8 +164,8 @@ public final class YamlProxyConfigTest {
 
     @Test
     public void failsToGetAuthWhenPasswordOnly() {
-        final ProxyConfig.Remote remote = new YamlProxyConfig(
-            StorageAliases.EMPTY, Key.ROOT, Yaml.createYamlMappingBuilder().add(
+        final ProxyConfig.Remote remote = this.remotes(
+            Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
                     Yaml.createYamlMappingBuilder()
@@ -173,10 +174,46 @@ public final class YamlProxyConfigTest {
                         .build()
                 ).build()
             ).build()
-        ).remotes().iterator().next();
+        ).iterator().next();
         Assertions.assertThrows(
             IllegalStateException.class,
             remote::auth
         );
     }
+
+    @Test
+    public void returnsEmptyCollectionWhenYamlEmpty() {
+        final Collection<YamlProxyConfig.YamlRemote> remote =
+            this.remotes(Yaml.createYamlMappingBuilder().build());
+        MatcherAssert.assertThat(
+            remote.isEmpty(),
+            new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    public void throwsExceptionWhenYamlRemotesIsNotMapping() {
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () ->
+                this.remotes(Yaml.createYamlMappingBuilder().add(
+                    "remotes",
+                    Yaml.createYamlSequenceBuilder().add(
+                        Yaml.createYamlSequenceBuilder()
+                            .add("url:http://localhost:8080")
+                            .add("username:alice")
+                            .add("password:qwerty")
+                            .build()
+                    ).build()
+                ).build()
+            )
+        );
+    }
+
+    private Collection<YamlProxyConfig.YamlRemote> remotes(final YamlMapping yaml) {
+        return new YamlProxyConfig(
+            StorageAliases.EMPTY, Key.ROOT, yaml
+        ).remotes();
+    }
+
 }
