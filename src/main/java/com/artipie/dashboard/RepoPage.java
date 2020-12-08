@@ -27,8 +27,8 @@ import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.artipie.Settings;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.management.api.ContentAsYaml;
@@ -63,18 +63,18 @@ final class RepoPage implements Page {
     private final Handlebars handlebars;
 
     /**
-     * Settings.
+     * Settings storage.
      */
-    private final Settings settings;
+    private final Storage storage;
 
     /**
      * New page.
      * @param tpl Template engine
-     * @param settings Settings
+     * @param storage Settings storage
      */
-    RepoPage(final TemplateLoader tpl, final Settings settings) {
+    RepoPage(final TemplateLoader tpl, final Storage storage) {
         this.handlebars = new Handlebars(tpl);
-        this.settings = settings;
+        this.storage = storage;
     }
 
     @Override
@@ -89,53 +89,52 @@ final class RepoPage implements Page {
         final String[] parts = name.split("/");
         final Key.From key = new Key.From(String.format("%s.yaml", name));
         // @checkstyle LineLengthCheck (30 lines)
-        return Single.fromCallable(this.settings::storage).map(RxStorageWrapper::new).flatMap(
-            storage -> storage.exists(key).filter(exists -> exists).flatMapSingleElement(
-                ignore -> storage.value(key).to(new ContentAsYaml()).map(
-                    config -> {
-                        final YamlMapping repo = config.yamlMapping("repo");
-                        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
-                        builder = builder.add("type", repo.value("type"));
-                        if (repo.value("storage") != null
-                            && Scalar.class.isAssignableFrom(repo.value("storage").getClass())) {
-                            builder = builder.add("storage", repo.value("storage"));
-                        }
-                        builder = builder.add("permissions", repo.value("permissions"));
-                        if (repo.value("settings") != null) {
-                            builder = builder.add("settings", repo.value("settings"));
-                        }
-                        return Yaml.createYamlMappingBuilder().add("repo", builder.build()).build();
+        final RxStorageWrapper rxsto = new RxStorageWrapper(this.storage);
+        return rxsto.exists(key).filter(exists -> exists).flatMapSingleElement(
+            ignore -> rxsto.value(key).to(new ContentAsYaml()).map(
+                config -> {
+                    final YamlMapping repo = config.yamlMapping("repo");
+                    YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
+                    builder = builder.add("type", repo.value("type"));
+                    if (repo.value("storage") != null
+                        && Scalar.class.isAssignableFrom(repo.value("storage").getClass())) {
+                        builder = builder.add("storage", repo.value("storage"));
                     }
-                ).map(
-                    yaml -> this.handlebars.compile("repo").apply(
-                        new MapOf<>(
-                            new MapEntry<>("title", name),
-                            new MapEntry<>("user", parts[0]),
-                            new MapEntry<>("name", parts[1]),
-                            new MapEntry<>("config", yaml.toString()),
-                            new MapEntry<>("found", true),
-                            new MapEntry<>("type", yaml.yamlMapping("repo").value("type").asScalar().value())
-                        )
+                    builder = builder.add("permissions", repo.value("permissions"));
+                    if (repo.value("settings") != null) {
+                        builder = builder.add("settings", repo.value("settings"));
+                    }
+                    return Yaml.createYamlMappingBuilder().add("repo", builder.build()).build();
+                }
+            ).map(
+                yaml -> this.handlebars.compile("repo").apply(
+                    new MapOf<>(
+                        new MapEntry<>("title", name),
+                        new MapEntry<>("user", parts[0]),
+                        new MapEntry<>("name", parts[1]),
+                        new MapEntry<>("config", yaml.toString()),
+                        new MapEntry<>("found", true),
+                        new MapEntry<>("type", yaml.yamlMapping("repo").value("type").asScalar().value())
                     )
                 )
-            ).switchIfEmpty(
-                Single.fromCallable(
-                    () -> this.handlebars.compile("repo").apply(
-                        new MapOf<>(
-                            new MapEntry<>("title", name),
-                            new MapEntry<>("user", parts[0]),
-                            new MapEntry<>("name", parts[1]),
-                            new MapEntry<>("found", false),
-                            new MapEntry<>(
-                                "type",
-                                URLEncodedUtils.parse(
-                                    new RequestLineFrom(line).uri(),
-                                    StandardCharsets.UTF_8
-                                ).stream()
-                                    .filter(pair -> "type".equals(pair.getName()))
-                                    .findFirst().map(NameValuePair::getValue)
-                                    .orElse("maven")
-                            )
+            )
+        ).switchIfEmpty(
+            Single.fromCallable(
+                () -> this.handlebars.compile("repo").apply(
+                    new MapOf<>(
+                        new MapEntry<>("title", name),
+                        new MapEntry<>("user", parts[0]),
+                        new MapEntry<>("name", parts[1]),
+                        new MapEntry<>("found", false),
+                        new MapEntry<>(
+                            "type",
+                            URLEncodedUtils.parse(
+                                new RequestLineFrom(line).uri(),
+                                StandardCharsets.UTF_8
+                            ).stream()
+                                .filter(pair -> "type".equals(pair.getName()))
+                                .findFirst().map(NameValuePair::getValue)
+                                .orElse("maven")
                         )
                     )
                 )
