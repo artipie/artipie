@@ -23,8 +23,8 @@
  */
 package com.artipie.dashboard;
 
-import com.artipie.Settings;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.rq.RequestLineFrom;
 import com.github.jknack.handlebars.Handlebars;
@@ -57,16 +57,16 @@ final class UserPage implements Page {
     /**
      * Settings.
      */
-    private final Settings settings;
+    private final Storage storage;
 
     /**
      * New page.
      * @param tpl Template loader
-     * @param settings Settings
+     * @param storage Settings storage
      */
-    UserPage(final TemplateLoader tpl, final Settings settings) {
+    UserPage(final TemplateLoader tpl, final Storage storage) {
         this.handlebars = new Handlebars(tpl);
-        this.settings = settings;
+        this.storage = storage;
     }
 
     @Override
@@ -77,9 +77,7 @@ final class UserPage implements Page {
             throw new IllegalStateException("Should match");
         }
         final String user = matcher.group("user");
-        return Single.fromCallable(this.settings::storage)
-            .map(RxStorageWrapper::new)
-            .flatMap(str -> str.list(new Key.From(user)))
+        return new RxStorageWrapper(this.storage).list(new Key.From(user))
             .map(
                 repos -> this.handlebars.compile("user").apply(
                     new MapOf<>(
