@@ -93,8 +93,6 @@ final class StorageYamlConfigTest {
     void returnsSubStorageWithCorrectPrefix() {
         final Key prefix = new Key.From("prefix");
         final Storage strg = this.config().subStorage(prefix);
-        strg.save(Key.ROOT,  new Content.From("data".getBytes()))
-            .join();
         MatcherAssert.assertThat(
             strg.list(Key.ROOT)
             .join()
