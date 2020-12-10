@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.dashboard;
+package com.artipie.api;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.Settings;
@@ -36,6 +36,10 @@ import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.management.api.ApiAuthSlice;
+import com.artipie.management.api.CookiesAuthScheme;
+import com.artipie.management.dashboard.PageSlice;
+import com.artipie.management.dashboard.RepoPage;
+import com.artipie.management.dashboard.UserPage;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
@@ -73,6 +77,7 @@ public final class DashboardSlice extends Slice.Wrap {
                         .flatMap(storage -> storage.value(new Key.From("_permissions.yaml")).flatMap(data -> new Concatenation(data).single()))
                         .map(buf -> new Remaining(buf).bytes())
                         .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
+                        .map(yaml -> yaml.yamlMapping("permissions"))
                         .map(YamlPermissions::new),
                     (auth, perm) -> new ApiAuthSlice(
                         auth, perm,
@@ -85,7 +90,8 @@ public final class DashboardSlice extends Slice.Wrap {
                                 new RtRule.ByPath(Pattern.compile("/dashboard/(?:[^/.]+)/(?:[^/.]+)/?")),
                                 new PageSlice(new RepoPage(tpl, settings.storage()))
                             )
-                        )
+                        ),
+                        new CookiesAuthScheme()
                     )
                 ).to(SingleInterop.get())
             )
