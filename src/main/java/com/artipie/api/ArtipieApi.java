@@ -49,6 +49,7 @@ import com.artipie.management.api.ApiChangeUserPassword;
 import com.artipie.management.api.ApiRepoGetSlice;
 import com.artipie.management.api.ApiRepoListSlice;
 import com.artipie.management.api.ApiRepoUpdateSlice;
+import com.artipie.management.api.CookiesAuthScheme;
 import com.artipie.management.api.artifactory.AddUpdatePermissionSlice;
 import com.artipie.management.api.artifactory.AddUpdateUserSlice;
 import com.artipie.management.api.artifactory.CreateRepoSlice;
@@ -95,6 +96,7 @@ public final class ArtipieApi extends Slice.Wrap {
                         .flatMap(storage -> storage.value(new Key.From("_permissions.yaml")).flatMap(data -> new Concatenation(data).single()))
                         .map(buf -> new Remaining(buf).bytes())
                         .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
+                        .map(yaml -> yaml.yamlMapping("permissions"))
                         .map(YamlPermissions::new),
                     (auth, creds, perm) -> new ApiAuthSlice(
                         auth, perm,
@@ -253,7 +255,8 @@ public final class ArtipieApi extends Slice.Wrap {
                                     settings.storage(), settings.layout().pattern()
                                 )
                             )
-                        )
+                        ),
+                        new CookiesAuthScheme()
                     )
                 ).to(SingleInterop.get())
             )
