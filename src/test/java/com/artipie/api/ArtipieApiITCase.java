@@ -30,7 +30,6 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
-import com.artipie.http.rs.RsStatus;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -112,7 +111,7 @@ class ArtipieApiITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(HttpURLConnection.HTTP_OK)
         );
         con.disconnect();
     }

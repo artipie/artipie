@@ -165,6 +165,10 @@ public class ArtipieServer {
      * @param layout Layout
      * @return Port the servers listening on.
      * @throws IOException In case of error creating configs or running the server.
+     * @todo #775:30min Specify layout when ArtipieServer instance is created
+     *  Layout should be specified when ArtipieServer is created, not on start. As this class
+     *  already has too many fields, consider creating separate class to create whole
+     *  artipie.yaml and passing instance of this class to the ctor.
      */
     public int start(final String layout) throws IOException {
         final Path repos = this.root.resolve("repos");
