@@ -24,10 +24,8 @@
 
 package com.artipie.api.artifactory;
 
-import com.artipie.RepoConfig;
-import com.artipie.RepositoriesFromStorage;
+import com.artipie.Repositories;
 import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -35,7 +33,6 @@ import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.common.RsJson;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.json.Json;
@@ -53,7 +50,7 @@ public final class GetStorageSlice implements Slice {
     /**
      * Artipie settings storage.
      */
-    private final Storage storage;
+    private final Repositories repos;
 
     /**
      * Artipie path pattern.
@@ -62,11 +59,11 @@ public final class GetStorageSlice implements Slice {
 
     /**
      * New storage list slice.
-     * @param storage Artipie settings storage
+     * @param repos Artipie settings storage
      * @param path Artipie path pattern
      */
-    public GetStorageSlice(final Storage storage, final Pattern path) {
-        this.storage = storage;
+    public GetStorageSlice(final Repositories repos, final Pattern path) {
+        this.repos = repos;
         this.path = path;
     }
 
@@ -76,7 +73,7 @@ public final class GetStorageSlice implements Slice {
         final Request request = new Request(this.path, line);
         final Key root = request.root();
         return new AsyncResponse(
-            this.repoStorage(request.repo()).thenCompose(
+            this.repos.repoStorage(request.repo()).thenCompose(
                 repo -> repo.list(root).thenApply(
                     list -> {
                         final KeyList keys = new KeyList(root);
@@ -86,17 +83,6 @@ public final class GetStorageSlice implements Slice {
                 ).thenApply(RsJson::new)
             )
         );
-    }
-
-    /**
-     * Get storage by repo name.
-     *
-     * @param name Repo name.
-     * @return Repo storage.
-     */
-    private CompletionStage<Storage> repoStorage(final String name) {
-        return new RepositoriesFromStorage(this.storage).config(name)
-            .thenApply(RepoConfig::storage);
     }
 
     /**

@@ -25,6 +25,7 @@ package com.artipie.api;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.RepoPermissionsFromStorage;
+import com.artipie.RepositoriesFromStorage;
 import com.artipie.Settings;
 import com.artipie.YamlPermissions;
 import com.artipie.api.artifactory.GetStorageSlice;
@@ -252,7 +253,8 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new GetStorageSlice(
-                                    settings.storage(), settings.layout().pattern()
+                                    new RepositoriesFromStorage(settings.storage()),
+                                    settings.layout().pattern()
                                 )
                             )
                         ),

@@ -62,4 +62,9 @@ public final class RepositoriesFromStorage implements Repositories {
             )
         ).flatMap(self -> self).to(SingleInterop.get());
     }
+
+    @Override
+    public CompletionStage<Storage> repoStorage(final String name) {
+        return this.config(name).thenApply(RepoConfig::storage);
+    }
 }

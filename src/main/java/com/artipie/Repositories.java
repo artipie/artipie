@@ -23,6 +23,7 @@
  */
 package com.artipie;
 
+import com.artipie.asto.Storage;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -39,4 +40,12 @@ public interface Repositories {
      * @return Repository config
      */
     CompletionStage<RepoConfig> config(String name);
+
+    /**
+     * Get storage by repo name.
+     *
+     * @param name Repository name.
+     * @return Repository storage.
+     */
+    CompletionStage<Storage> repoStorage(String name);
 }

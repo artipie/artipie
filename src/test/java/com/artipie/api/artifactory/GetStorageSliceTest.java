@@ -25,6 +25,7 @@ package com.artipie.api.artifactory;
 
 import com.artipie.IsJson;
 import com.artipie.RepoConfigYaml;
+import com.artipie.RepositoriesFromStorage;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.LoggingStorage;
@@ -76,7 +77,9 @@ class GetStorageSliceTest {
     void shouldReturnExpectedData(final String layout, final String repo) {
         final Storage storage = this.example(this.tmp, repo);
         MatcherAssert.assertThat(
-            new GetStorageSlice(storage, new PathPattern(layout).pattern()),
+            new GetStorageSlice(
+                new RepositoriesFromStorage(storage), new PathPattern(layout).pattern()
+            ),
             new SliceHasResponse(
                 new AllOf<>(
                     Arrays.asList(
