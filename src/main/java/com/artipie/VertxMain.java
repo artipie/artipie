@@ -204,7 +204,9 @@ public final class VertxMain {
         for (final RepoConfig repo : configs) {
             repo.port().ifPresent(
                 prt -> {
-                    final String name = new ConfigFile(repo.name()).trimExtension().get();
+                    final String name = new ConfigFile(repo.name())
+                        .trimExtension()
+                        .orElse(repo.name());
                     this.listenOn(
                         new ArtipieRepositories(settings).slice(new Key.From(name), true),
                         metrics, prt
