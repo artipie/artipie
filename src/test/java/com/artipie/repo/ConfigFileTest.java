@@ -34,10 +34,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 /**
- * Test cases for {@link ConfigFilesExtensions}.
+ * Test cases for {@link ConfigFile}.
  * @since 0.14
  */
-final class ConfigFilesExtensionsTest {
+final class ConfigFileTest {
 
     /**
      * Filename.
@@ -61,8 +61,8 @@ final class ConfigFilesExtensionsTest {
             this.saveByKey(storage, ".yml");
         }
         MatcherAssert.assertThat(
-            new ConfigFilesExtensions(ConfigFilesExtensionsTest.NAME)
-                .exists(storage)
+            new ConfigFile(new Key.From(ConfigFileTest.NAME))
+                .existsIn(storage)
                 .toCompletableFuture().join(),
             new IsEqual<>(result)
         );
@@ -73,8 +73,8 @@ final class ConfigFilesExtensionsTest {
     void trimFilenameExtensionCorrect(final String extension) {
         final String name = "filename";
         MatcherAssert.assertThat(
-            new ConfigFilesExtensions.Trim(String.join("", name, extension))
-                .value()
+            new ConfigFile(String.join("", name, extension))
+                .trimExtension()
                 .get(),
             new IsEqual<>(name)
         );
@@ -83,8 +83,8 @@ final class ConfigFilesExtensionsTest {
     @Test
     void returnsEmptyAfterTrimForIncorrectName() {
         MatcherAssert.assertThat(
-            new ConfigFilesExtensions.Trim("file.jar")
-                .value()
+            new ConfigFile("file.jar")
+                .trimExtension()
                 .isPresent(),
             new IsEqual<>(false)
         );
@@ -92,7 +92,7 @@ final class ConfigFilesExtensionsTest {
 
     private void saveByKey(final Storage storage, final String extension) {
         storage.save(
-            new Key.From(String.format("%s%s", ConfigFilesExtensionsTest.NAME, extension)),
+            new Key.From(String.format("%s%s", ConfigFileTest.NAME, extension)),
             Content.EMPTY
         );
     }
