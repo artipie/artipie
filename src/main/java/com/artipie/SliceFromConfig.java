@@ -251,12 +251,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "npm-proxy":
                 slice = new NpmProxySlice(
-                        cfg.path(),
-                        new NpmProxy(
-                            new NpmProxyConfig(cfg.settings().orElseThrow()),
-                            Vertx.vertx(),
-                            cfg.storage()
-                        )
+                    cfg.path(),
+                    new NpmProxy(
+                        new NpmProxyConfig(cfg.settings().orElseThrow()),
+                        Vertx.vertx(),
+                        cfg.storage()
+                    )
                 );
                 break;
             case "pypi":
