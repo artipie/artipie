@@ -96,12 +96,11 @@ final class NpmProxyITCase {
     private TestContainer cntn;
 
     @Test
-    @Disabled
     void installFromProxy() throws Exception {
         final boolean anonymous = true;
         this.init(anonymous);
         MatcherAssert.assertThat(
-            this.cntn.execStdErr(
+            this.cntn.execStdout(
                 "npm", "install", NpmProxyITCase.PROJ,
                 "--registry",
                 new RepositoryUrl(this.proxy.port(), NpmProxyITCase.PROXY).string(anonymous)
