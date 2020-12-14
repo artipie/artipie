@@ -171,7 +171,7 @@ public final class ArtipieApi extends Slice.Wrap {
                             ),
                             new RtRulePath(
                                 new RtRule.All(
-                                    new RtRule.ByPath(Pattern.compile("/api/repositories/.*")),
+                                    new RtRule.ByPath(FromRqLine.RqPattern.CREATE_REPO.pattern()),
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
                                 new CreateRepoSlice(settings.storage())
@@ -209,7 +209,7 @@ public final class ArtipieApi extends Slice.Wrap {
                             ),
                             new RtRulePath(
                                 new RtRule.All(
-                                    new RtRule.ByPath("/api/security/permissions"),
+                                    new RtRule.ByPath(FromRqLine.RqPattern.REPOS.pattern()),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new GetPermissionsSlice(
