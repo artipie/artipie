@@ -129,6 +129,9 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @todo #90:30min This method still needs more refactoring.
      *  We should test if the type exist in the constructed map. If the type does not exist,
      *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
+     * @todo #738:30min Remove creating a Vert.x instance in npm-proxy case.
+     *  Vertx.vertx() call creates a Vert.x instance, a very heavy object. It should be
+     *  created only once for whole application on start and reused everywhere.
      * @checkstyle LineLengthCheck (150 lines)
      * @checkstyle ExecutableStatementCountCheck (100 lines)
      * @checkstyle JavaNCSSCheck (500 lines)
@@ -250,15 +253,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "npm-proxy":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new NpmProxySlice(
-                        cfg.path(),
-                        new NpmProxy(
-                            new NpmProxyConfig(cfg.settings().orElseThrow()),
-                            Vertx.vertx(),
-                            cfg.storage()
-                        )
+                slice = new NpmProxySlice(
+                    cfg.path(),
+                    new NpmProxy(
+                        new NpmProxyConfig(cfg.settings().orElseThrow()),
+                        Vertx.vertx(),
+                        cfg.storage()
                     )
                 );
                 break;
