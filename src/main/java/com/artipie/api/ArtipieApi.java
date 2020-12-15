@@ -27,7 +27,6 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.RepoPermissionsFromStorage;
 import com.artipie.Settings;
 import com.artipie.YamlPermissions;
-import com.artipie.api.artifactory.GetStorageSlice;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
@@ -58,8 +57,10 @@ import com.artipie.management.api.artifactory.DeleteUserSlice;
 import com.artipie.management.api.artifactory.FromRqLine;
 import com.artipie.management.api.artifactory.GetPermissionSlice;
 import com.artipie.management.api.artifactory.GetPermissionsSlice;
+import com.artipie.management.api.artifactory.GetStorageSlice;
 import com.artipie.management.api.artifactory.GetUserSlice;
 import com.artipie.management.api.artifactory.GetUsersSlice;
+import com.artipie.repo.ArtipieStorages;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.charset.StandardCharsets;
@@ -252,7 +253,8 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new GetStorageSlice(
-                                    settings.storage(), settings.layout().pattern()
+                                    new ArtipieStorages(settings.storage()),
+                                    settings.layout().pattern()
                                 )
                             )
                         ),
