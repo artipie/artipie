@@ -33,6 +33,7 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
+import com.artipie.repo.ConfigFile;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
@@ -67,7 +68,7 @@ public final class ArtipieRepositories {
     public Slice slice(final Key name, final boolean standalone) {
         final Storage storage = this.settings.storage();
         return new AsyncSlice(
-            storage.exists(new Key.From(String.format("%s.yaml", name.string()))).thenCompose(
+            new ConfigFile(name).existsIn(storage).thenCompose(
                 exists -> {
                     final CompletionStage<Slice> res;
                     if (exists) {

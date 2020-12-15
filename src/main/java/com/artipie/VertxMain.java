@@ -34,6 +34,7 @@ import com.artipie.http.Slice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.nop.NopMetrics;
+import com.artipie.repo.ConfigFile;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
@@ -191,11 +192,11 @@ public final class VertxMain {
      */
     private void startRepos(final Settings settings, final Metrics metrics) {
         final Storage storage = settings.storage();
-        final String yaml = ".yaml";
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
-            keys -> keys.stream().map(Key::string)
-                .filter(name -> name.endsWith(yaml) && name.charAt(0) != '_')
-                .map(name -> name.substring(0, name.length() - yaml.length()))
+            keys -> keys.stream()
+                .filter(name -> name.string().charAt(0) != '_')
+                .filter(name -> new ConfigFile(name).isYamlOrYml())
+                .map(name -> new ConfigFile(name).name())
                 .map(name -> new RepositoriesFromStorage(storage).config(name))
                 .map(stage -> stage.toCompletableFuture().join())
                 .collect(Collectors.toList())
@@ -203,7 +204,7 @@ public final class VertxMain {
         for (final RepoConfig repo : configs) {
             repo.port().ifPresent(
                 prt -> {
-                    final String name = repo.name().replace(yaml, "");
+                    final String name = new ConfigFile(repo.name()).name();
                     this.listenOn(
                         new ArtipieRepositories(settings).slice(new Key.From(name), true),
                         metrics, prt
