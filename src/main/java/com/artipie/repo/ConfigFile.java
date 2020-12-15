@@ -23,10 +23,8 @@
  */
 package com.artipie.repo;
 
-import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
@@ -34,22 +32,30 @@ import java.util.regex.Pattern;
 
 /**
  * Supporting several config files extensions (e.g. `.yaml` and `.yml`).
+ * Files with two different extensions are interpreted in the same way.
+ * For example, if `name.yaml` is searched in the storage then
+ * files `name.yaml` and `name.yml` are searched.
  *
  * @since 0.14
  */
 public final class ConfigFile {
 
     /**
-     * Pattern to divide filename into two groups: name and extension.
+     * Pattern to divide `yaml` or `yml` filename into two groups: name and extension.
      */
-    private static final Pattern PTN = Pattern.compile("(?<name>.*)(\\.yaml|\\.yml)$");
+    private static final Pattern PTN_YAML = Pattern.compile("(?<name>.*)(\\.yaml|\\.yml)$");
+
+    /**
+     * Pattern to divide all filenames into two groups: name and extension.
+     */
+    private static final Pattern PTN_ALL = Pattern.compile("(?<name>.+?)(?<extension>\\.[^.]*$|$)");
 
     /**
      * Filename.
      */
     private final String filename;
 
-    /**
+    /**>
      * Ctor.
      * @param filename Filename
      */
@@ -66,12 +72,22 @@ public final class ConfigFile {
     }
 
     /**
-     * Does file exist in the specified storage?
+     * Does config file exist in the specified storage? The filename should be
+     * without extensions or with `.yaml` or `.yml` extension.
+     *
      * @param storage Storage where the file with different extensions is checked for existence
      * @return True if a file with either of the two extensions exists, false otherwise.
      */
     public CompletionStage<Boolean> existsIn(final Storage storage) {
-        final String name = this.trimExtension().orElse(this.filename);
+        if (!(this.isYamlOrYml() || this.matcher("extension").isEmpty())) {
+            throw new IllegalStateException(
+                String.format(
+                    "Config file `%s` should have `.yaml` or `.yml` or be without extension.",
+                    this.filename
+                )
+            );
+        }
+        final String name = this.name();
         final Key yaml = new Key.From(String.format("%s.yaml", name));
         return storage.exists(yaml)
             .thenCompose(
@@ -89,27 +105,34 @@ public final class ConfigFile {
     }
 
     /**
-     * Obtains contents from the specified storage.
-     * @return Content of the file.
+     * Is `yaml` or `yml` file?
+     * @return True if is the file with `yaml` or `yml` extension, false otherwise.
      */
-    public CompletableFuture<Content> valueFrom() {
-        throw new UnsupportedOperationException();
+    public boolean isYamlOrYml() {
+        return PTN_YAML.matcher(this.filename).matches();
     }
 
     /**
-     * Trim name of the config file.
-     * @return Filename without extensions if a filename ends with either of
-     *  the two extensions, otherwise empty.
+     * Filename.
+     * @return Filename without extension.
      */
-    public Optional<String> trimExtension() {
-        final Optional<String> result;
-        final Matcher matcher = PTN.matcher(this.filename);
-        if (matcher.matches()) {
-            result = Optional.of(matcher.group("name"));
-        } else {
-            result = Optional.empty();
+    public String name() {
+        return this.matcher("name");
+    }
+
+    /**
+     * Matcher.
+     * @param group Matcher group name
+     * @return Value for specified group name.
+     */
+    private String matcher(final String group) {
+        final Matcher matcher = PTN_ALL.matcher(this.filename);
+        if (!matcher.matches()) {
+            throw new IllegalStateException(
+                String.format("Failed to get name from string `%s`", this.filename)
+            );
         }
-        return result;
+        return matcher.group(group);
     }
 
 }

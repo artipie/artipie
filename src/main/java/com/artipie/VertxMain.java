@@ -195,18 +195,16 @@ public final class VertxMain {
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
             keys -> keys.stream()
                 .filter(name -> name.string().charAt(0) != '_')
-                .map(name -> new ConfigFile(name).trimExtension())
-                .filter(Optional::isPresent)
-                .map(name -> new RepositoriesFromStorage(storage).config(name.get()))
+                .filter(name -> new ConfigFile(name).isYamlOrYml())
+                .map(name -> new ConfigFile(name).name())
+                .map(name -> new RepositoriesFromStorage(storage).config(name))
                 .map(stage -> stage.toCompletableFuture().join())
                 .collect(Collectors.toList())
         ).toCompletableFuture().join();
         for (final RepoConfig repo : configs) {
             repo.port().ifPresent(
                 prt -> {
-                    final String name = new ConfigFile(repo.name())
-                        .trimExtension()
-                        .orElse(repo.name());
+                    final String name = new ConfigFile(repo.name()).name();
                     this.listenOn(
                         new ArtipieRepositories(settings).slice(new Key.From(name), true),
                         metrics, prt

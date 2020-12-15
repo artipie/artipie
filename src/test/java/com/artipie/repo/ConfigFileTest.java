@@ -29,6 +29,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -45,48 +46,56 @@ final class ConfigFileTest {
     private static final String NAME = "my-file";
 
     @ParameterizedTest
-    @CsvSource({
-        "false,false",
-        "false,true",
-        "true,false",
-        "true,true"
-    })
-    void returnsCorrectResult(final boolean yaml, final boolean yml) {
+    @CsvSource({".yaml", ".yml", "''"})
+    void existInStorageReturnsWhenYamlExist(final String extension) {
         final Storage storage = new InMemoryStorage();
-        final boolean result = yaml || yml;
-        if (yaml) {
-            this.saveByKey(storage, ".yaml");
-        }
-        if (yml) {
-            this.saveByKey(storage, ".yml");
-        }
+        this.saveByKey(storage, ".yaml");
         MatcherAssert.assertThat(
-            new ConfigFile(new Key.From(ConfigFileTest.NAME))
+            new ConfigFile(new Key.From(ConfigFileTest.NAME + extension))
                 .existsIn(storage)
                 .toCompletableFuture().join(),
-            new IsEqual<>(result)
+            new IsEqual<>(true)
         );
     }
 
     @ParameterizedTest
-    @CsvSource({".yaml", ".yml"})
-    void trimFilenameExtensionCorrect(final String extension) {
+    @CsvSource({".yaml", ".yml", ".jar", ".json", "''"})
+    void getFilenameWithoutExtensionCorrect(final String extension) {
         final String name = "filename";
         MatcherAssert.assertThat(
-            new ConfigFile(String.join("", name, extension))
-                .trimExtension()
-                .get(),
+            new ConfigFile(String.join("", name, extension)).name(),
             new IsEqual<>(name)
         );
     }
 
     @Test
-    void returnsEmptyAfterTrimForIncorrectName() {
+    void failsGetNameFromEmptyString() {
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> new ConfigFile("").name()
+        );
+    }
+
+    @Test
+    void failToCheckExistingForConfigFileWithBadExtension() {
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> new ConfigFile("filename.jar").existsIn(new InMemoryStorage())
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "file.yaml,true",
+        "name.yml,true",
+        "name.xml,false",
+        "name,false"
+    })
+    void yamlOrYmlDeterminedCorrectly(final String filename, final boolean yaml) {
         MatcherAssert.assertThat(
-            new ConfigFile("file.jar")
-                .trimExtension()
-                .isPresent(),
-            new IsEqual<>(false)
+            new ConfigFile(filename)
+                .isYamlOrYml(),
+            new IsEqual<>(yaml)
         );
     }
 
