@@ -75,9 +75,10 @@ class ArtipieApiITCase {
         this.server = new ArtipieServer(
             this.tmp, "my_repo",
             new RepoConfigYaml("binary")
-                .withFileStorage(this.tmp.resolve("repos/test"))
+                .withFileStorage(this.tmp.resolve("repos/test")),
+            "org"
         );
-        this.port = this.server.start("org");
+        this.port = this.server.start();
     }
 
     @ParameterizedTest
