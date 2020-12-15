@@ -23,12 +23,14 @@
  */
 package com.artipie.repo;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Supporting several config files extensions (e.g. `.yaml` and `.yml`).
@@ -51,11 +53,16 @@ public final class ConfigFile {
     private static final Pattern PTN_ALL = Pattern.compile("(?<name>.+?)(?<extension>\\.[^.]*$|$)");
 
     /**
+     * Extension group name.
+     */
+    private static final String EXTNSN = "extension";
+
+    /**
      * Filename.
      */
     private final String filename;
 
-    /**>
+    /**
      * Ctor.
      * @param filename Filename
      */
@@ -76,19 +83,19 @@ public final class ConfigFile {
      * @param storage Storage where the file with different extensions is checked for existence
      * @return True if a file with either of the two extensions exists, false otherwise.
      */
-    public CompletionStage<Boolean> existsIn(final Storage storage) {
-        final CompletionStage<Boolean> res;
-        if (this.isYamlOrYml() || this.matcher("extension").isEmpty()) {
+    public CompletableFuture<Boolean> existsIn(final Storage storage) {
+        final CompletableFuture<Boolean> res;
+        if (this.isYamlOrYml() || this.matcher(ConfigFile.EXTNSN).isEmpty()) {
             final String name = this.name();
-            final Key yaml = new Key.From(String.format("%s.yaml", name));
+            final Key yaml = key(name, Formats.YAML.value());
             res = storage.exists(yaml)
                 .thenCompose(
                     exist -> {
-                        final CompletionStage<Boolean> result;
+                        final CompletableFuture<Boolean> result;
                         if (exist) {
                             result = CompletableFuture.completedFuture(true);
                         } else {
-                            final Key yml = new Key.From(String.format("%s.yml", name));
+                            final Key yml = key(name, Formats.YML.value());
                             result = storage.exists(yml);
                         }
                         return result;
@@ -98,6 +105,38 @@ public final class ConfigFile {
             res = CompletableFuture.completedFuture(false);
         }
         return res;
+    }
+
+    /**
+     * Obtains contents from the specified storage. If files with both extensions
+     * exists, the file with `.yaml` extension will be obtained.
+     * @param storage Storage from which the file is obtained
+     * @return Content of the file.
+     */
+    public CompletableFuture<Content> valueFrom(final Storage storage) {
+        if (!(this.isYamlOrYml() || this.matcher(ConfigFile.EXTNSN).isEmpty())) {
+            throw new IllegalStateException(
+                String.format(
+                    "Filename `%s` should have `.yaml` or `.yml` extension or be without extension",
+                    this.filename
+                )
+            );
+        }
+        final String name = this.name();
+        final Key yaml = key(name, Formats.YAML.value());
+        return storage.exists(yaml)
+            .thenCompose(
+                exists -> {
+                    final CompletionStage<Content> result;
+                    if (exists) {
+                        result = storage.value(yaml);
+                    } else {
+                        final Key yml = key(name, Formats.YML.value());
+                        result = storage.value(yml);
+                    }
+                    return result;
+                }
+            );
     }
 
     /**
@@ -129,6 +168,52 @@ public final class ConfigFile {
             );
         }
         return matcher.group(group);
+    }
+
+    /**
+     * Key.
+     * @param name Filename
+     * @param extension Extension
+     * @return Key from filename and extension.
+     */
+    private static Key key(final String name, final String extension) {
+        return new Key.From(StringUtils.join("", name, extension));
+    }
+
+    /**
+     * Config files extensions.
+     */
+    enum Formats {
+        /**
+         * YAML.
+         */
+        YAML(".yaml"),
+
+        /**
+         * YML.
+         */
+        YML(".yml");
+
+        /**
+         * Extension.
+         */
+        private final String extension;
+
+        /**
+         * Ctor.
+         * @param extension Extension
+         */
+        Formats(final String extension) {
+            this.extension = extension;
+        }
+
+        /**
+         * Extension.
+         * @return Extension string.
+         */
+        String value() {
+            return this.extension;
+        }
     }
 
 }

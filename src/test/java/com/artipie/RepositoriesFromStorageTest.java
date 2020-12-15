@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
  *
  * @since 0.14
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class RepositoriesFromStorageTest {
 
     /**
@@ -67,12 +67,27 @@ final class RepositoriesFromStorageTest {
     }
 
     @Test
-    void findRepoSettingAndCreateRepoConfigWithStorageAlias() {
+    void findRepoSettingAndCreateRepoConfigWithStorageAliasFromYaml() {
         final String alias = "default";
         new RepoConfigYaml(RepositoriesFromStorageTest.TYPE)
             .withStorageAlias(alias)
             .saveTo(this.storage, RepositoriesFromStorageTest.REPO);
         this.saveAliasConfig(alias);
+        MatcherAssert.assertThat(
+            this.repoConfig()
+                .storageOpt()
+                .isPresent(),
+            new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    void findRepoSettingAndCreateRepoConfigWithStorageAliasForYml() {
+        final String alias = "default";
+        new RepoConfigYaml(RepositoriesFromStorageTest.TYPE)
+            .withStorageAlias(alias)
+            .saveTo(this.storage, RepositoriesFromStorageTest.REPO);
+        this.saveAliasConfig(alias, "_storages.yml");
         MatcherAssert.assertThat(
             this.repoConfig()
                 .storageOpt()
@@ -178,8 +193,12 @@ final class RepositoriesFromStorageTest {
     }
 
     private void saveAliasConfig(final String alias) {
+        this.saveAliasConfig(alias, "_storages.yaml");
+    }
+
+    private void saveAliasConfig(final String alias, final String filename) {
         this.storage.save(
-            new Key.From(StorageAliases.FILE_NAME),
+            new Key.From(filename),
             new Content.From(
                 Yaml.createYamlMappingBuilder().add(
                     "storages", Yaml.createYamlMappingBuilder()

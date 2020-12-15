@@ -193,7 +193,7 @@ public final class RepoConfigYaml {
      * @param name Name to save with
      */
     public void saveTo(final Storage storage, final String name) {
-        storage.save(new Key.From(String.format("%s.yaml", name)), this.toContent()).join();
+        storage.save(new Key.From(String.format("%s.yml", name)), this.toContent()).join();
     }
 
     /**

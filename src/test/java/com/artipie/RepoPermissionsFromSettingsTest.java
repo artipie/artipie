@@ -68,10 +68,11 @@ class RepoPermissionsFromSettingsTest {
         this.storage.save(new Key.From("two.yaml"), Content.EMPTY).join();
         this.storage.save(new Key.From("abc"), Content.EMPTY).join();
         this.storage.save(new Key.From("three.yaml"), Content.EMPTY).join();
+        this.storage.save(new Key.From("four.yml"), Content.EMPTY).join();
         MatcherAssert.assertThat(
             new RepoPermissionsFromStorage(this.storage).repositories()
                 .toCompletableFuture().join(),
-            Matchers.containsInAnyOrder("one", "two", "three")
+            Matchers.containsInAnyOrder("one", "two", "three", "four")
         );
     }
 

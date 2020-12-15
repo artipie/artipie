@@ -29,6 +29,7 @@ import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
+import com.artipie.repo.ConfigFile;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -68,11 +69,11 @@ public interface StorageAliases {
     @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     static CompletableFuture<StorageAliases> find(final Storage storage, final Key repo) {
         final Key.From key = new Key.From(repo, StorageAliases.FILE_NAME);
-        return storage.exists(key).thenCompose(
+        return new ConfigFile(key).existsIn(storage).thenCompose(
             found -> {
                 final CompletableFuture<StorageAliases> res;
                 if (found) {
-                    res = storage.value(key).thenCompose(
+                    res = new ConfigFile(key).valueFrom(storage).thenCompose(
                         pub -> new Concatenation(pub).single()
                             .map(buf -> new Remaining(buf).bytes())
                             .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
