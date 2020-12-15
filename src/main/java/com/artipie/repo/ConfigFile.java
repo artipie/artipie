@@ -72,9 +72,7 @@ public final class ConfigFile {
     }
 
     /**
-     * Does config file exist in the specified storage? The filename should be
-     * without extensions or with `.yaml` or `.yml` extension.
-     *
+     * Does config file exist in the specified storage?
      * @param storage Storage where the file with different extensions is checked for existence
      * @return True if a file with either of the two extensions exists, false otherwise.
      */
