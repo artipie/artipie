@@ -37,6 +37,8 @@ import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Tests for {@link RepositoriesFromStorage}.
@@ -66,28 +68,14 @@ final class RepositoriesFromStorageTest {
         this.storage = new InMemoryStorage();
     }
 
-    @Test
-    void findRepoSettingAndCreateRepoConfigWithStorageAliasFromYaml() {
+    @ParameterizedTest
+    @CsvSource({"_storages.yaml", "_storages.yml"})
+    void findRepoSettingAndCreateRepoConfigWithStorageAlias(final String filename) {
         final String alias = "default";
         new RepoConfigYaml(RepositoriesFromStorageTest.TYPE)
             .withStorageAlias(alias)
             .saveTo(this.storage, RepositoriesFromStorageTest.REPO);
-        this.saveAliasConfig(alias);
-        MatcherAssert.assertThat(
-            this.repoConfig()
-                .storageOpt()
-                .isPresent(),
-            new IsEqual<>(true)
-        );
-    }
-
-    @Test
-    void findRepoSettingAndCreateRepoConfigWithStorageAliasForYml() {
-        final String alias = "default";
-        new RepoConfigYaml(RepositoriesFromStorageTest.TYPE)
-            .withStorageAlias(alias)
-            .saveTo(this.storage, RepositoriesFromStorageTest.REPO);
-        this.saveAliasConfig(alias, "_storages.yml");
+        this.saveAliasConfig(alias, filename);
         MatcherAssert.assertThat(
             this.repoConfig()
                 .storageOpt()
@@ -175,7 +163,7 @@ final class RepositoriesFromStorageTest {
 
     @Test
     void throwsExceptionForUnknownAlias() {
-        this.saveAliasConfig("some alias");
+        this.saveAliasConfig("some alias", StorageAliases.FILE_NAME);
         new RepoConfigYaml(RepositoriesFromStorageTest.TYPE)
             .withStorageAlias("unknown alias")
             .saveTo(this.storage, RepositoriesFromStorageTest.REPO);
@@ -190,10 +178,6 @@ final class RepositoriesFromStorageTest {
         return new RepositoriesFromStorage(this.storage)
             .config(RepositoriesFromStorageTest.REPO)
             .toCompletableFuture().join();
-    }
-
-    private void saveAliasConfig(final String alias) {
-        this.saveAliasConfig(alias, "_storages.yaml");
     }
 
     private void saveAliasConfig(final String alias, final String filename) {
