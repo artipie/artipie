@@ -77,10 +77,12 @@ final class ConfigFileTest {
     }
 
     @Test
-    void failToCheckExistingForConfigFileWithBadExtension() {
-        Assertions.assertThrows(
-            IllegalStateException.class,
-            () -> new ConfigFile("filename.jar").existsIn(new InMemoryStorage())
+    void returnFalseForConfigFileWithBadExtension() {
+        MatcherAssert.assertThat(
+            new ConfigFile("filename.jar")
+                .existsIn(new InMemoryStorage())
+                .toCompletableFuture().join(),
+            new IsEqual<>(false)
         );
     }
 

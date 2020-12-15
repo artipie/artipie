@@ -79,29 +79,27 @@ public final class ConfigFile {
      * @return True if a file with either of the two extensions exists, false otherwise.
      */
     public CompletionStage<Boolean> existsIn(final Storage storage) {
-        if (!(this.isYamlOrYml() || this.matcher("extension").isEmpty())) {
-            throw new IllegalStateException(
-                String.format(
-                    "Config file `%s` should have `.yaml` or `.yml` or be without extension.",
-                    this.filename
-                )
-            );
-        }
-        final String name = this.name();
-        final Key yaml = new Key.From(String.format("%s.yaml", name));
-        return storage.exists(yaml)
-            .thenCompose(
-                exist -> {
-                    final CompletionStage<Boolean> result;
-                    if (exist) {
-                        result = CompletableFuture.completedFuture(true);
-                    } else {
-                        final Key yml = new Key.From(String.format("%s.yml", name));
-                        result = storage.exists(yml);
+        final CompletionStage<Boolean> res;
+        if (this.isYamlOrYml() || this.matcher("extension").isEmpty()) {
+            final String name = this.name();
+            final Key yaml = new Key.From(String.format("%s.yaml", name));
+            res = storage.exists(yaml)
+                .thenCompose(
+                    exist -> {
+                        final CompletionStage<Boolean> result;
+                        if (exist) {
+                            result = CompletableFuture.completedFuture(true);
+                        } else {
+                            final Key yml = new Key.From(String.format("%s.yml", name));
+                            result = storage.exists(yml);
+                        }
+                        return result;
                     }
-                    return result;
-                }
-            );
+                );
+        } else {
+            res = CompletableFuture.completedFuture(false);
+        }
+        return res;
     }
 
     /**
