@@ -194,7 +194,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>management-api</artifactId>
-      <version>0.2.2</version>
+      <version>0.3</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
