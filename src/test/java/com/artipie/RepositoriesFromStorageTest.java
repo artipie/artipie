@@ -45,7 +45,7 @@ import org.junit.jupiter.params.provider.CsvSource;
  *
  * @since 0.14
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class RepositoriesFromStorageTest {
 
     /**
