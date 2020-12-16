@@ -40,7 +40,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.CompletionStage;
@@ -208,7 +207,9 @@ public final class RepoConfig {
      * @return Async YAML mapping
      */
     public YamlMapping repoConfig() {
-        return Objects.requireNonNull(this.yaml.yamlMapping("repo"), "yaml repo config is absent");
+        return Optional.ofNullable(this.yaml.yamlMapping("repo")).orElseThrow(
+            () -> new IllegalStateException("Invalid repo configuration")
+        );
     }
 
     /**
