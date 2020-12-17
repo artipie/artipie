@@ -104,6 +104,11 @@ public class ArtipieServer {
     private int prt;
 
     /**
+     * Artipie layout.
+     */
+    private final String layout;
+
+    /**
      * Ctor.
      *
      * @param root Root directory.
@@ -136,10 +141,40 @@ public class ArtipieServer {
      */
     public ArtipieServer(final Path root, final String name, final String config,
         final int port) {
+        this(root, name, config, port, "flat");
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param root Root directory.
+     * @param name Repo name.
+     * @param config Repo config.
+     * @param layout Layout
+     * @checkstyle ParameterNumberCheck (2 lines)
+     */
+    public ArtipieServer(final Path root, final String name, final RepoConfigYaml config,
+        final String layout) {
+        this(root, name, config.toString(), 0, layout);
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param root Root directory.
+     * @param name Repo name.
+     * @param config Repo config.
+     * @param port Free port.
+     * @param layout Layout
+     * @checkstyle ParameterNumberCheck (2 lines)
+     */
+    public ArtipieServer(final Path root, final String name, final String config,
+        final int port, final String layout) {
         this.root = root;
         this.name = name;
         this.config = config;
         this.freeport = port;
+        this.layout = layout;
     }
 
     /**
@@ -156,21 +191,6 @@ public class ArtipieServer {
      *  for usage in all these places.
      */
     public int start() throws IOException {
-        return this.start("flat");
-    }
-
-    /**
-     * Starts the server.
-     *
-     * @param layout Layout
-     * @return Port the servers listening on.
-     * @throws IOException In case of error creating configs or running the server.
-     * @todo #775:30min Specify layout when ArtipieServer instance is created
-     *  Layout should be specified when ArtipieServer is created, not on start. As this class
-     *  already has too many fields, consider creating separate class to create whole
-     *  artipie.yaml and passing instance of this class to the ctor.
-     */
-    public int start(final String layout) throws IOException {
         final Path repos = this.root.resolve("repos");
         repos.toFile().mkdir();
         Files.write(
@@ -197,7 +217,7 @@ public class ArtipieServer {
                             .add("path", ArtipieServer.CREDENTIALS_FILE)
                             .build()
                     )
-                    .add("layout", layout)
+                    .add("layout", this.layout)
                     .add("base_url", "http://artipie.example.com")
                     .build()
             ).build().toString().getBytes()
