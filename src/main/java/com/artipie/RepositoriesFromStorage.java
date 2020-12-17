@@ -25,6 +25,7 @@ package com.artipie;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.repo.ConfigFile;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.util.concurrent.CompletionStage;
@@ -52,13 +53,14 @@ public final class RepositoriesFromStorage implements Repositories {
 
     @Override
     public CompletionStage<RepoConfig> config(final String name) {
+        final Key keyname = new Key.From(name);
         return Single.zip(
             SingleInterop.fromFuture(
-                this.storage.value(new Key.From(String.format("%s.yaml", name)))
+                new ConfigFile(keyname).valueFrom(this.storage)
             ),
-            SingleInterop.fromFuture(StorageAliases.find(this.storage, new Key.From(name))),
+            SingleInterop.fromFuture(StorageAliases.find(this.storage, keyname)),
             (data, aliases) -> SingleInterop.fromFuture(
-                RepoConfig.fromPublisher(aliases, new Key.From(name), data)
+                RepoConfig.fromPublisher(aliases, keyname, data)
             )
         ).flatMap(self -> self).to(SingleInterop.get());
     }

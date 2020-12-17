@@ -23,8 +23,10 @@
  */
 package com.artipie.repo;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
@@ -55,7 +57,7 @@ public final class ConfigFile {
      */
     private final String filename;
 
-    /**>
+    /**
      * Ctor.
      * @param filename Filename
      */
@@ -78,9 +80,9 @@ public final class ConfigFile {
      */
     public CompletionStage<Boolean> existsIn(final Storage storage) {
         final CompletionStage<Boolean> res;
-        if (this.isYamlOrYml() || this.matcher("extension").isEmpty()) {
+        if (this.isYamlOrYml() || this.extension().isEmpty()) {
             final String name = this.name();
-            final Key yaml = new Key.From(String.format("%s.yaml", name));
+            final Key yaml = Extension.YAML.key(name);
             res = storage.exists(yaml)
                 .thenCompose(
                     exist -> {
@@ -88,7 +90,7 @@ public final class ConfigFile {
                         if (exist) {
                             result = CompletableFuture.completedFuture(true);
                         } else {
-                            final Key yml = new Key.From(String.format("%s.yml", name));
+                            final Key yml = Extension.YML.key(name);
                             result = storage.exists(yml);
                         }
                         return result;
@@ -98,6 +100,38 @@ public final class ConfigFile {
             res = CompletableFuture.completedFuture(false);
         }
         return res;
+    }
+
+    /**
+     * Obtains contents from the specified storage. If files with both extensions
+     * exists, the file with `.yaml` extension will be obtained.
+     * @param storage Storage from which the file is obtained
+     * @return Content of the file.
+     */
+    public CompletionStage<Content> valueFrom(final Storage storage) {
+        if (!(this.isYamlOrYml() || this.extension().isEmpty())) {
+            throw new IllegalStateException(
+                String.format(
+                    "Filename `%s` should have `.yaml` or `.yml` extension or be without extension",
+                    this.filename
+                )
+            );
+        }
+        final String name = this.name();
+        final Key yaml = Extension.YAML.key(name);
+        return storage.exists(yaml)
+            .thenCompose(
+                exists -> {
+                    final CompletionStage<Content> result;
+                    if (exists) {
+                        result = storage.value(yaml);
+                    } else {
+                        final Key yml = Extension.YML.key(name);
+                        result = storage.value(yml);
+                    }
+                    return result;
+                }
+            );
     }
 
     /**
@@ -117,6 +151,21 @@ public final class ConfigFile {
     }
 
     /**
+     * Extension.
+     * @return Extension if present, empty otherwise.
+     */
+    public Optional<String> extension() {
+        final Optional<String> extnsn;
+        final String val = this.matcher("extension");
+        if (val.isEmpty()) {
+            extnsn = Optional.empty();
+        } else {
+            extnsn = Optional.of(val);
+        }
+        return extnsn;
+    }
+
+    /**
      * Matcher.
      * @param group Matcher group name
      * @return Value for specified group name.
@@ -129,6 +178,43 @@ public final class ConfigFile {
             );
         }
         return matcher.group(group);
+    }
+
+    /**
+     * Config files extensions.
+     */
+    enum Extension {
+        /**
+         * YAML.
+         */
+        YAML(".yaml"),
+
+        /**
+         * YML.
+         */
+        YML(".yml");
+
+        /**
+         * Extension.
+         */
+        private final String extension;
+
+        /**
+         * Ctor.
+         * @param extension Extension
+         */
+        Extension(final String extension) {
+            this.extension = extension;
+        }
+
+        /**
+         * Key.
+         * @param name Filename
+         * @return Key from filename and extension.
+         */
+        Key key(final String name) {
+            return new Key.From(String.format("%s%s", name, this.extension));
+        }
     }
 
 }
