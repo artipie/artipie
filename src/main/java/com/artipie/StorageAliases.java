@@ -34,6 +34,7 @@ import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Storage configuration by alias.
@@ -71,16 +72,16 @@ public interface StorageAliases {
         final Key.From key = new Key.From(repo, StorageAliases.FILE_NAME);
         return new ConfigFile(key).existsIn(storage).thenCompose(
             found -> {
-                final CompletableFuture<StorageAliases> res;
+                final CompletionStage<StorageAliases> res;
                 if (found) {
-                    res = new ConfigFile(key).valueFrom(storage).<StorageAliases>thenCompose(
+                    res = new ConfigFile(key).valueFrom(storage).thenCompose(
                         pub -> new Concatenation(pub).single()
                             .map(buf -> new Remaining(buf).bytes())
                             .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
                             .map(cnt -> Yaml.createYamlInput(cnt).readYamlMapping())
                             .to(SingleInterop.get())
                             .thenApply(FromYaml::new)
-                    ).toCompletableFuture();
+                    );
                 } else {
                     res = repo.parent()
                         .map(parent -> StorageAliases.find(storage, parent))
