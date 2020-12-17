@@ -73,14 +73,14 @@ public interface StorageAliases {
             found -> {
                 final CompletableFuture<StorageAliases> res;
                 if (found) {
-                    res = new ConfigFile(key).valueFrom(storage).thenCompose(
+                    res = new ConfigFile(key).valueFrom(storage).<StorageAliases>thenCompose(
                         pub -> new Concatenation(pub).single()
                             .map(buf -> new Remaining(buf).bytes())
                             .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
                             .map(cnt -> Yaml.createYamlInput(cnt).readYamlMapping())
                             .to(SingleInterop.get())
                             .thenApply(FromYaml::new)
-                    );
+                    ).toCompletableFuture();
                 } else {
                     res = repo.parent()
                         .map(parent -> StorageAliases.find(storage, parent))
@@ -88,7 +88,7 @@ public interface StorageAliases {
                 }
                 return res;
             }
-        );
+        ).toCompletableFuture();
     }
 
     /**

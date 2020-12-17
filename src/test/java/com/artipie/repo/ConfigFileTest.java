@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Test cases for {@link ConfigFile}.
@@ -54,20 +55,20 @@ final class ConfigFileTest {
     private static final byte[] CONTENT = "content from config file".getBytes();
 
     @ParameterizedTest
-    @CsvSource({".yaml", ".yml", "''"})
+    @ValueSource(strings = {".yaml", ".yml", ""})
     void existInStorageReturnsTrueWhenYamlExist(final String extension) {
         final Storage storage = new InMemoryStorage();
         this.saveByKey(storage, ".yaml");
         MatcherAssert.assertThat(
             new ConfigFile(new Key.From(ConfigFileTest.NAME + extension))
                 .existsIn(storage)
-                .join(),
+                .toCompletableFuture().join(),
             new IsEqual<>(true)
         );
     }
 
     @ParameterizedTest
-    @CsvSource({".yaml", ".yml", "''"})
+    @ValueSource(strings = {".yaml", ".yml", ""})
     void valueFromStorageReturnsContentWhenYamlExist(final String extension) {
         final Storage storage = new InMemoryStorage();
         this.saveByKey(storage, ".yml");
@@ -75,7 +76,7 @@ final class ConfigFileTest {
             new PublisherAs(
                 new ConfigFile(new Key.From(ConfigFileTest.NAME + extension))
                     .valueFrom(storage)
-                    .join()
+                    .toCompletableFuture().join()
             ).bytes()
             .toCompletableFuture().join(),
             new IsEqual<>(ConfigFileTest.CONTENT)
@@ -92,7 +93,7 @@ final class ConfigFileTest {
             new PublisherAs(
                 new ConfigFile(new Key.From(ConfigFileTest.NAME))
                     .valueFrom(storage)
-                    .join()
+                    .toCompletableFuture().join()
             ).asciiString()
             .toCompletableFuture().join(),
             new IsEqual<>(yaml)
@@ -100,12 +101,18 @@ final class ConfigFileTest {
     }
 
     @ParameterizedTest
-    @CsvSource({".yaml", ".yml", ".jar", ".json", "''"})
-    void getFilenameWithoutExtensionCorrect(final String extension) {
+    @ValueSource(strings = {".yaml", ".yml", ".jar", ".json", ""})
+    void getFilenameAndExtensionCorrect(final String extension) {
         final String name = "filename";
         MatcherAssert.assertThat(
+            "Correct name",
             new ConfigFile(String.join("", name, extension)).name(),
             new IsEqual<>(name)
+        );
+        MatcherAssert.assertThat(
+            "Correct extension",
+            new ConfigFile(String.join("", name, extension)).extension().orElse(""),
+            new IsEqual<>(extension)
         );
     }
 
@@ -130,7 +137,7 @@ final class ConfigFileTest {
         MatcherAssert.assertThat(
             new ConfigFile("filename.jar")
                 .existsIn(new InMemoryStorage())
-                .join(),
+                .toCompletableFuture().join(),
             new IsEqual<>(false)
         );
     }
