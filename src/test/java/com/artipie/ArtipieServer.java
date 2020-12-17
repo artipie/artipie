@@ -58,7 +58,7 @@ public class ArtipieServer {
     /**
      * Credentials file name.
      */
-    public static final String CREDENTIALS_FILE = "_credentials.yml";
+    public static final String CREDENTIALS_FILE = "_credentials.yaml";
 
     /**
      * All users.
