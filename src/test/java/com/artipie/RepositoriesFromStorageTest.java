@@ -37,6 +37,8 @@ import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Tests for {@link RepositoriesFromStorage}.
@@ -66,13 +68,14 @@ final class RepositoriesFromStorageTest {
         this.storage = new InMemoryStorage();
     }
 
-    @Test
-    void findRepoSettingAndCreateRepoConfigWithStorageAlias() {
+    @ParameterizedTest
+    @CsvSource({"_storages.yaml", "_storages.yml"})
+    void findRepoSettingAndCreateRepoConfigWithStorageAlias(final String filename) {
         final String alias = "default";
         new RepoConfigYaml(RepositoriesFromStorageTest.TYPE)
             .withStorageAlias(alias)
             .saveTo(this.storage, RepositoriesFromStorageTest.REPO);
-        this.saveAliasConfig(alias);
+        this.saveAliasConfig(alias, filename);
         MatcherAssert.assertThat(
             this.repoConfig()
                 .storageOpt()
@@ -160,7 +163,7 @@ final class RepositoriesFromStorageTest {
 
     @Test
     void throwsExceptionForUnknownAlias() {
-        this.saveAliasConfig("some alias");
+        this.saveAliasConfig("some alias", StorageAliases.FILE_NAME);
         new RepoConfigYaml(RepositoriesFromStorageTest.TYPE)
             .withStorageAlias("unknown alias")
             .saveTo(this.storage, RepositoriesFromStorageTest.REPO);
@@ -177,9 +180,9 @@ final class RepositoriesFromStorageTest {
             .toCompletableFuture().join();
     }
 
-    private void saveAliasConfig(final String alias) {
+    private void saveAliasConfig(final String alias, final String filename) {
         this.storage.save(
-            new Key.From(StorageAliases.FILE_NAME),
+            new Key.From(filename),
             new Content.From(
                 Yaml.createYamlMappingBuilder().add(
                     "storages", Yaml.createYamlMappingBuilder()

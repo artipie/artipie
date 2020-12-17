@@ -34,6 +34,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.management.RepoPermissions;
 import com.artipie.management.api.ContentAsYaml;
+import com.artipie.repo.ConfigFile;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -84,9 +85,8 @@ public final class RepoPermissionsFromStorage implements RepoPermissions {
         return this.storage.list(Key.ROOT)
             .thenApply(
                 list -> list.stream()
-                    .map(Key::string)
-                    .filter(key -> key.contains("yaml"))
-                    .map(key -> key.replace(".yaml", ""))
+                    .filter(name -> new ConfigFile(name).isYamlOrYml())
+                    .map(name -> new ConfigFile(name).name())
                     .collect(Collectors.toList())
         );
     }
