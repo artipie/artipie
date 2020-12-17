@@ -194,7 +194,6 @@ public final class VertxMain {
         final Storage storage = settings.storage();
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
             keys -> keys.stream()
-                .filter(name -> name.string().charAt(0) != '_')
                 .filter(name -> new ConfigFile(name).isYamlOrYml())
                 .map(name -> new ConfigFile(name).name())
                 .map(name -> new RepositoriesFromStorage(storage).config(name))
@@ -202,19 +201,23 @@ public final class VertxMain {
                 .collect(Collectors.toList())
         ).toCompletableFuture().join();
         for (final RepoConfig repo : configs) {
-            repo.port().ifPresent(
-                prt -> {
-                    final String name = new ConfigFile(repo.name()).name();
-                    this.listenOn(
-                        new ArtipieRepositories(settings).slice(new Key.From(name), true),
-                        metrics, prt
-                    );
-                    Logger.info(
-                        VertxMain.class,
-                        "Artipie repo '%s' was started on port %d", name, prt
-                    );
-                }
-            );
+            try {
+                repo.port().ifPresent(
+                    prt -> {
+                        final String name = new ConfigFile(repo.name()).name();
+                        this.listenOn(
+                            new ArtipieRepositories(settings).slice(new Key.From(name), true),
+                            metrics, prt
+                        );
+                        Logger.info(
+                            VertxMain.class,
+                            "Artipie repo '%s' was started on port %d", name, prt
+                        );
+                    }
+                );
+            } catch (final IllegalStateException err) {
+                Logger.error(this, String.format("Invalid repo config file %s", repo.name()));
+            }
         }
     }
 
