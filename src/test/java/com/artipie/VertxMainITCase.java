@@ -41,7 +41,7 @@ import org.junit.jupiter.api.io.TempDir;
  * Test for {@link VertxMain}.
  * @since 0.1
  */
-class VertxMainTest {
+class VertxMainITCase {
 
     /**
      * Temporary directory for all tests.
