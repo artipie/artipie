@@ -28,8 +28,8 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
-import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.repo.ConfigFile;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
@@ -193,7 +193,7 @@ public final class RepoConfigYaml {
      * @param name Name to save with
      */
     public void saveTo(final Storage storage, final String name) {
-        storage.save(new Key.From(String.format("%s.yaml", name)), this.toContent()).join();
+        storage.save(ConfigFile.Extension.YAML.key(name), this.toContent()).join();
     }
 
     /**

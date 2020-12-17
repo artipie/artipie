@@ -34,10 +34,10 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
-import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.auth.AuthFromYaml;
 import com.artipie.http.auth.Authentication;
 import com.artipie.management.Users;
+import com.artipie.repo.ConfigFile;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -163,14 +163,14 @@ public final class UsersFromStorageYaml implements Users {
      *  figure out why, make necessary corrections and use `ContentAs` here.
      */
     public CompletionStage<YamlMapping> yaml() {
-        return new RxStorageWrapper(this.storage)
-            .value(this.key)
-            .flatMap(content -> new Concatenation(content).single())
-            .map(Remaining::new)
-            .map(Remaining::bytes)
-            .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.US_ASCII)))
-            .map(YamlInput::readYamlMapping)
-            .to(SingleInterop.get());
+        return SingleInterop.fromFuture(
+            new ConfigFile(this.key).valueFrom(this.storage)
+        ).flatMap(content -> new Concatenation(content).single())
+        .map(Remaining::new)
+        .map(Remaining::bytes)
+        .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.US_ASCII)))
+        .map(YamlInput::readYamlMapping)
+        .to(SingleInterop.get());
     }
 
     /**
