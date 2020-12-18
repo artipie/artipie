@@ -30,6 +30,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
+import com.artipie.repo.ConfigFile;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -38,9 +39,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
@@ -66,20 +67,10 @@ class ArtipieApiITCase {
      */
     private int port;
 
-    @BeforeEach
-    void init() throws IOException {
-        final Storage storage = new FileStorage(this.tmp);
-        storage.save(
-            new Key.From("repos/_permissions.yaml"), new Content.From(this.apiPerms().getBytes())
-        ).join();
-        this.server = new ArtipieServer(
-            this.tmp, "my_repo",
-            new RepoConfigYaml("binary")
-                .withFileStorage(this.tmp.resolve("repos/test")),
-            "org"
-        );
-        this.port = this.server.start();
-    }
+    /**
+     * Http connection.
+     */
+    private HttpURLConnection con;
 
     @ParameterizedTest
     @ValueSource(
@@ -91,12 +82,45 @@ class ArtipieApiITCase {
         }
     )
     void getRequestsWork(final String url) throws Exception {
-        final HttpURLConnection con = (HttpURLConnection)
+        this.init(ConfigFile.Extension.YAML.value());
+        this.initConnection(url);
+        MatcherAssert.assertThat(
+            "Response status is 200",
+            this.con.getResponseCode(),
+            new IsEqual<>(HttpURLConnection.HTTP_OK)
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "api/repos/bob,.yaml", "api/repos/bob,.yml",
+        "dashboard/bob,.yaml", "dashboard/bob,.yml",
+        "api/security/users/bob,.yaml", "api/security/users/bob,.yml"
+    })
+    void readsConfigWithYamlAndYmlExtension(final String url, final String extension)
+        throws Exception {
+        this.init(extension);
+        this.initConnection(url);
+        MatcherAssert.assertThat(
+            "Response status is 200 for different extension",
+            this.con.getResponseCode(),
+            new IsEqual<>(HttpURLConnection.HTTP_OK)
+        );
+    }
+
+    @AfterEach
+    void stop() {
+        this.con.disconnect();
+        this.server.stop();
+    }
+
+    private void initConnection(final String url) throws Exception {
+        this.con = (HttpURLConnection)
             new URL(
                 String.format("http://localhost:%s/%s", this.port, url)
             ).openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty(
+        this.con.setRequestMethod("GET");
+        this.con.setRequestProperty(
             "Authorization",
             String.format(
                 "Basic %s",
@@ -109,17 +133,21 @@ class ArtipieApiITCase {
                 )
             )
         );
-        MatcherAssert.assertThat(
-            "Response status is 200",
-            con.getResponseCode(),
-            new IsEqual<>(HttpURLConnection.HTTP_OK)
-        );
-        con.disconnect();
     }
 
-    @AfterEach
-    void stop() {
-        this.server.stop();
+    private void init(final String extension) throws IOException {
+        final Storage storage = new FileStorage(this.tmp.resolve("repos"));
+        storage.save(
+            new Key.From(String.format("_permissions%s", extension)),
+            new Content.From(this.apiPerms().getBytes())
+        ).join();
+        this.server = new ArtipieServer(
+            this.tmp, "my_repo",
+            new RepoConfigYaml("binary")
+                .withFileStorage(this.tmp.resolve("repos/test")),
+            "org"
+        );
+        this.port = this.server.start();
     }
 
     private String apiPerms() {

@@ -23,14 +23,10 @@
  */
 package com.artipie.api;
 
-import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.RepoPermissionsFromStorage;
 import com.artipie.Settings;
 import com.artipie.YamlPermissions;
-import com.artipie.asto.Concatenation;
-import com.artipie.asto.Key;
-import com.artipie.asto.Remaining;
-import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.headers.Header;
@@ -48,6 +44,7 @@ import com.artipie.management.api.ApiChangeUserPassword;
 import com.artipie.management.api.ApiRepoGetSlice;
 import com.artipie.management.api.ApiRepoListSlice;
 import com.artipie.management.api.ApiRepoUpdateSlice;
+import com.artipie.management.api.ContentAsYaml;
 import com.artipie.management.api.CookiesAuthScheme;
 import com.artipie.management.api.artifactory.AddUpdatePermissionSlice;
 import com.artipie.management.api.artifactory.AddUpdateUserSlice;
@@ -61,6 +58,7 @@ import com.artipie.management.api.artifactory.GetStorageSlice;
 import com.artipie.management.api.artifactory.GetUserSlice;
 import com.artipie.management.api.artifactory.GetUsersSlice;
 import com.artipie.repo.ArtipieStorages;
+import com.artipie.repo.ConfigFile;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.charset.StandardCharsets;
@@ -93,12 +91,12 @@ public final class ArtipieApi extends Slice.Wrap {
                 Single.zip(
                     Single.fromCallable(settings::auth).flatMap(SingleInterop::fromFuture),
                     Single.fromCallable(settings::credentials).flatMap(SingleInterop::fromFuture),
-                    Single.fromCallable(settings::storage).map(RxStorageWrapper::new)
-                        .flatMap(storage -> storage.value(new Key.From("_permissions.yaml")).flatMap(data -> new Concatenation(data).single()))
-                        .map(buf -> new Remaining(buf).bytes())
-                        .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
-                        .map(yaml -> yaml.yamlMapping("permissions"))
-                        .map(YamlPermissions::new),
+                    Single.fromCallable(settings::storage).<YamlMapping>flatMap(
+                        storage -> SingleInterop.fromFuture(
+                            new ConfigFile("_permissions.yaml").valueFrom(storage)
+                        ).to(new ContentAsYaml())
+                    ).map(yaml -> yaml.yamlMapping("permissions"))
+                    .map(YamlPermissions::new),
                     (auth, creds, perm) -> new ApiAuthSlice(
                         auth, perm,
                         new SliceRoute(
