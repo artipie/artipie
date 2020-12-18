@@ -24,6 +24,7 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlInput;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
@@ -160,20 +161,16 @@ public final class UsersFromStorageYaml implements Users {
      * @todo #730:30min When `ContentAs` is used here instead of `Concatenation` and
      *  `Remaining` ITs get stuck on github actions (this does not happen locally on mac os),
      *  figure out why, make necessary corrections and use `ContentAs` here.
-     * @todo #797:30min Extract logic for creating yaml from Content.
-     *  In this method, `RepoPermissionsFromStorage#repo`, `StorageAliases#find`
-     *  the code for creating yaml from content is duplicate. It is necessary
-     *  to extract class to eliminate code duplication.
      */
     public CompletionStage<YamlMapping> yaml() {
-        return new ConfigFile(this.key).valueFrom(this.storage)
-            .thenCompose(
-                pub -> new Concatenation(pub).single()
-                    .map(buf -> new Remaining(buf).bytes())
-                    .map(bytes -> new String(bytes, StandardCharsets.US_ASCII))
-                    .map(cnt -> Yaml.createYamlInput(cnt).readYamlMapping())
-                    .to(SingleInterop.get())
-            );
+        return SingleInterop.fromFuture(
+            new ConfigFile(this.key).valueFrom(this.storage)
+        ).flatMap(content -> new Concatenation(content).single())
+        .map(Remaining::new)
+        .map(Remaining::bytes)
+        .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.US_ASCII)))
+        .map(YamlInput::readYamlMapping)
+        .to(SingleInterop.get());
     }
 
     /**
