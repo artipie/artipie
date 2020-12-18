@@ -24,7 +24,6 @@
 package com.artipie.api;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.Settings;
 import com.artipie.YamlPermissions;
 import com.artipie.asto.Concatenation;
@@ -35,7 +34,6 @@ import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.management.api.ApiAuthSlice;
-import com.artipie.management.api.ContentAsYaml;
 import com.artipie.management.api.CookiesAuthScheme;
 import com.artipie.management.dashboard.PageSlice;
 import com.artipie.management.dashboard.RepoPage;
