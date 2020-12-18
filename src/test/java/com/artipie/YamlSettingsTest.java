@@ -148,7 +148,8 @@ class YamlSettingsTest {
     @Test
     public void returnsRepoConfigs(@TempDir final Path tmp) {
         MatcherAssert.assertThat(
-            new YamlSettings(this.config(tmp.toString(), "file", Optional.empty())).repoConfigs(),
+            new YamlSettings(this.config(tmp.toString(), "file", Optional.empty()))
+                .repoConfigs().get().string(),
             new IsEqual<>("repos")
         );
     }
