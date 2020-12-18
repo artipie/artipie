@@ -24,6 +24,8 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.artipie.asto.Key;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -109,6 +111,11 @@ public class ArtipieServer {
     private final String layout;
 
     /**
+     * Repo configs key.
+     */
+    private final Optional<Key> repoconfigs;
+
+    /**
      * Ctor.
      *
      * @param root Root directory.
@@ -141,7 +148,7 @@ public class ArtipieServer {
      */
     public ArtipieServer(final Path root, final String name, final String config,
         final int port) {
-        this(root, name, config, port, "flat");
+        this(root, name, config, port, "flat", Optional.empty());
     }
 
     /**
@@ -155,7 +162,21 @@ public class ArtipieServer {
      */
     public ArtipieServer(final Path root, final String name, final RepoConfigYaml config,
         final String layout) {
-        this(root, name, config.toString(), 0, layout);
+        this(root, name, config.toString(), 0, layout, Optional.empty());
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param root Root directory.
+     * @param name Repo name.
+     * @param config Repo config.
+     * @param repoconfigs Repo configs key
+     * @checkstyle ParameterNumberCheck (2 lines)
+     */
+    public ArtipieServer(final Path root, final String name, final RepoConfigYaml config,
+        final Optional<Key> repoconfigs) {
+        this(root, name, config.toString(), 0, "flat", repoconfigs);
     }
 
     /**
@@ -166,15 +187,17 @@ public class ArtipieServer {
      * @param config Repo config.
      * @param port Free port.
      * @param layout Layout
+     * @param repoconfig Repository configs key
      * @checkstyle ParameterNumberCheck (2 lines)
      */
     public ArtipieServer(final Path root, final String name, final String config,
-        final int port, final String layout) {
+        final int port, final String layout, final Optional<Key> repoconfig) {
         this.root = root;
         this.name = name;
         this.config = config;
         this.freeport = port;
         this.layout = layout;
+        this.repoconfigs = repoconfig;
     }
 
     /**
@@ -193,34 +216,42 @@ public class ArtipieServer {
     public int start() throws IOException {
         final Path repos = this.root.resolve("repos");
         repos.toFile().mkdir();
+        this.repoconfigs.ifPresent(key -> repos.resolve(key.string()).toFile().mkdir());
         Files.write(
-            repos.resolve(String.format("%s.yaml", this.name)),
+            repos.resolve(
+                String.format(
+                    "%s%s.yaml",
+                    this.repoconfigs.map(Key::string)
+                        .map(key -> String.format("%s/", key)).orElse(""),
+                    this.name
+                )
+            ),
             this.config.getBytes()
         );
         final Path cfg = this.root.resolve("artipie.yaml");
+        YamlMappingBuilder meta = Yaml.createYamlMappingBuilder()
+            .add(
+                "storage",
+                Yaml.createYamlMappingBuilder()
+                    .add("type", "fs")
+                    .add("path", repos.toString())
+                    .build()
+            )
+            .add(
+                "credentials",
+                Yaml.createYamlMappingBuilder()
+                    .add("type", "file")
+                    .add("path", ArtipieServer.CREDENTIALS_FILE)
+                    .build()
+            )
+            .add("layout", this.layout)
+            .add("base_url", "http://artipie.example.com");
+        if (this.repoconfigs.isPresent()) {
+            meta = meta.add("repo_configs", this.repoconfigs.get().string());
+        }
         Files.write(
             cfg,
-            Yaml.createYamlMappingBuilder().add(
-                "meta",
-                Yaml.createYamlMappingBuilder()
-                    .add(
-                        "storage",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "fs")
-                            .add("path", repos.toString())
-                            .build()
-                    )
-                    .add(
-                        "credentials",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "file")
-                            .add("path", ArtipieServer.CREDENTIALS_FILE)
-                            .build()
-                    )
-                    .add("layout", this.layout)
-                    .add("base_url", "http://artipie.example.com")
-                    .build()
-            ).build().toString().getBytes()
+            Yaml.createYamlMappingBuilder().add("meta", meta.build()).build().toString().getBytes()
         );
         Files.write(
             repos.resolve(ArtipieServer.CREDENTIALS_FILE),

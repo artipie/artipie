@@ -34,6 +34,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
@@ -145,6 +146,14 @@ class YamlSettingsTest {
     }
 
     @Test
+    public void returnsRepoConfigs(@TempDir final Path tmp) {
+        MatcherAssert.assertThat(
+            new YamlSettings(this.config(tmp.toString(), "file", Optional.empty())).repoConfigs(),
+            new IsEqual<>("repos")
+        );
+    }
+
+    @Test
     public void shouldThrowExceptionWhenPathIsNotSet() {
         final YamlSettings settings = new YamlSettings(
             this.config("some/path", "file", Optional.empty())
@@ -214,7 +223,10 @@ class YamlSettingsTest {
                     Yaml.createYamlMappingBuilder()
                         .add("type", "fs")
                         .add("path", stpath).build()
-                ).add("credentials", creds.build()).build()
+                )
+                    .add("credentials", creds.build())
+                    .add("repo_configs", "repos")
+                    .build()
             ).build();
     }
 }

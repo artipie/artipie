@@ -29,6 +29,7 @@ import com.artipie.SliceFromConfig;
 import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.SubStorage;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
@@ -66,7 +67,9 @@ public final class ArtipieRepositories {
      * @throws IOException On error
      */
     public Slice slice(final Key name, final boolean standalone) {
-        final Storage storage = this.settings.storage();
+        final Storage storage = this.settings.repoConfigs()
+            .<Storage>map(key -> new SubStorage(key, this.settings.storage()))
+            .orElse(this.settings.storage());
         return new AsyncSlice(
             new ConfigFile(name).existsIn(storage).thenCompose(
                 exists -> {
