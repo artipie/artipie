@@ -235,6 +235,14 @@ Artipie provides a set of APIs to manage repositories and users.  The current AP
 You may want configure it via environment variables:
 
   - `SSL_TRUSTALL` - trust all unknown certificates
+  
+To configure repository config files location, add to the global configuration file `/etc/artipie/artipie.yml`:
+```yaml
+meta:
+  repo_configs: configs
+```
+Location is the storage key relatively to the main storage, or, in file system storage terms, 
+subdirectory where repo configs are located relatively to the storage.
 
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.
 
