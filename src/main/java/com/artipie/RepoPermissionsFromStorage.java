@@ -31,7 +31,6 @@ import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.management.RepoPermissions;
 import com.artipie.management.api.ContentAsYaml;
 import com.artipie.repo.ConfigFile;
@@ -140,7 +139,7 @@ public final class RepoPermissionsFromStorage implements RepoPermissions {
 
     @Override
     public CompletionStage<Collection<PermissionItem>> permissions(final String repo) {
-        return this.repo(RepoPermissionsFromStorage.repoSettingsKey(repo)).thenApply(
+        return this.repo(new Key.From(repo)).thenApply(
             yaml -> Optional.ofNullable(yaml.yamlMapping(RepoPermissionsFromStorage.PERMS))
         ).thenApply(
             yaml -> yaml.map(
@@ -158,7 +157,7 @@ public final class RepoPermissionsFromStorage implements RepoPermissions {
 
     @Override
     public CompletionStage<Collection<PathPattern>> patterns(final String repo) {
-        return this.repo(RepoPermissionsFromStorage.repoSettingsKey(repo)).thenApply(
+        return this.repo(new Key.From(repo)).thenApply(
             yaml -> Optional
                 .ofNullable(yaml.yamlSequence(RepoPermissionsFromStorage.INCLUDE_PATTERNS))
         ).thenApply(
@@ -177,11 +176,11 @@ public final class RepoPermissionsFromStorage implements RepoPermissions {
      * @return Completion action with yaml repo section
      */
     private CompletionStage<YamlMapping> repo(final Key key) {
-        return new RxStorageWrapper(this.storage)
-            .value(key)
-            .to(new ContentAsYaml())
-            .map(yaml -> yaml.yamlMapping(RepoPermissionsFromStorage.REPO_SECTION))
-            .to(SingleInterop.get());
+        return SingleInterop.fromFuture(
+            new ConfigFile(key).valueFrom(this.storage)
+        ).to(new ContentAsYaml())
+        .map(yaml -> yaml.yamlMapping(RepoPermissionsFromStorage.REPO_SECTION))
+        .to(SingleInterop.get());
     }
 
     /**
@@ -202,7 +201,7 @@ public final class RepoPermissionsFromStorage implements RepoPermissions {
      * @return Settings key
      */
     private static Key repoSettingsKey(final String repo) {
-        return new Key.From(String.format("%s.yaml", repo));
+        return ConfigFile.Extension.YAML.key(repo);
     }
 
     /**

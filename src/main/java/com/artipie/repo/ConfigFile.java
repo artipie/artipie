@@ -183,7 +183,7 @@ public final class ConfigFile {
     /**
      * Config files extensions.
      */
-    enum Extension {
+    public enum Extension {
         /**
          * YAML.
          */
@@ -208,11 +208,19 @@ public final class ConfigFile {
         }
 
         /**
+         * Extension value.
+         * @return Extension.
+         */
+        public String value() {
+            return this.extension;
+        }
+
+        /**
          * Key.
          * @param name Filename
          * @return Key from filename and extension.
          */
-        Key key(final String name) {
+        public Key key(final String name) {
             return new Key.From(String.format("%s%s", name, this.extension));
         }
     }

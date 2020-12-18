@@ -40,6 +40,8 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Test for {@link UsersFromStorageYaml}.
@@ -83,14 +85,18 @@ class UsersFromStorageYamlTest {
         );
     }
 
-    @Test
-    void readsYamlFromStorage() {
+    @ParameterizedTest
+    @ValueSource(strings = {".yaml", ".yml", ""})
+    void readsYamlFromStorage(final String extension) {
         final Users.User jane = new Users.User("maria");
         final Users.User john = new Users.User("olga");
-        new CredsConfigYaml().withUsers(jane.name(), john.name()).saveTo(this.storage, this.key);
+        new CredsConfigYaml().withUsers(jane.name(), john.name())
+            .saveTo(this.storage, this.key);
         MatcherAssert.assertThat(
-            new UsersFromStorageYaml(this.storage, this.key).list()
-                .toCompletableFuture().join(),
+            new UsersFromStorageYaml(
+                this.storage, new Key.From(String.format("_cred%s", extension))
+            ).list()
+            .toCompletableFuture().join(),
             Matchers.containsInAnyOrder(jane, john)
         );
     }

@@ -23,15 +23,12 @@
  */
 package com.artipie;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
-import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
+import com.artipie.management.api.ContentAsYaml;
 import com.artipie.repo.ConfigFile;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -74,14 +71,11 @@ public interface StorageAliases {
             found -> {
                 final CompletionStage<StorageAliases> res;
                 if (found) {
-                    res = new ConfigFile(key).valueFrom(storage).thenCompose(
-                        pub -> new Concatenation(pub).single()
-                            .map(buf -> new Remaining(buf).bytes())
-                            .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
-                            .map(cnt -> Yaml.createYamlInput(cnt).readYamlMapping())
-                            .to(SingleInterop.get())
-                            .thenApply(FromYaml::new)
-                    );
+                    res = SingleInterop.fromFuture(
+                        new ConfigFile(key).valueFrom(storage)
+                    ).to(new ContentAsYaml())
+                    .to(SingleInterop.get())
+                    .thenApply(FromYaml::new);
                 } else {
                     res = repo.parent()
                         .map(parent -> StorageAliases.find(storage, parent))
