@@ -27,9 +27,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.Settings;
 import com.artipie.YamlPermissions;
 import com.artipie.asto.Concatenation;
-import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
-import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.rt.RtRule;
@@ -40,6 +38,7 @@ import com.artipie.management.api.CookiesAuthScheme;
 import com.artipie.management.dashboard.PageSlice;
 import com.artipie.management.dashboard.RepoPage;
 import com.artipie.management.dashboard.UserPage;
+import com.artipie.repo.ConfigFile;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
@@ -66,6 +65,10 @@ public final class DashboardSlice extends Slice.Wrap {
      * Primary ctor.
      * @param settings Settings
      * @param tpl Template loader for pages
+     * @todo #797:30min When `ContentAs` is used here instead of `Concatenation` and
+     *  `Remaining` `ArtipieApiITCase` get stuck on github actions (this does not happen
+     *  locally on windows os), figure out why, make necessary corrections and
+     *  use `ContentAs` here. Probably this problem is similar to artipie/artipie#790.
      */
     private DashboardSlice(final Settings settings, final TemplateLoader tpl) {
         // @checkstyle LineLengthCheck (100 lines)
@@ -73,12 +76,14 @@ public final class DashboardSlice extends Slice.Wrap {
             new AsyncSlice(
                 Single.zip(
                     Single.fromCallable(settings::auth).flatMap(SingleInterop::fromFuture),
-                    Single.fromCallable(settings::storage).map(RxStorageWrapper::new)
-                        .flatMap(storage -> storage.value(new Key.From("_permissions.yaml")).flatMap(data -> new Concatenation(data).single()))
-                        .map(buf -> new Remaining(buf).bytes())
-                        .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
-                        .map(yaml -> yaml.yamlMapping("permissions"))
-                        .map(YamlPermissions::new),
+                    Single.fromCallable(settings::storage).flatMap(
+                        storage -> SingleInterop.fromFuture(
+                            new ConfigFile("_permissions.yaml").valueFrom(storage)
+                        ).flatMap(data -> new Concatenation(data).single())
+                    ).map(buf -> new Remaining(buf).bytes())
+                    .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.UTF_8)).readYamlMapping())
+                    .map(yaml -> yaml.yamlMapping("permissions"))
+                    .map(YamlPermissions::new),
                     (auth, perm) -> new ApiAuthSlice(
                         auth, perm,
                         new SliceRoute(
