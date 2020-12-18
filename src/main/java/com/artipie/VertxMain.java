@@ -191,7 +191,7 @@ public final class VertxMain {
      * @param metrics Metrics.
      */
     private void startRepos(final Settings settings, final Metrics metrics) {
-        final Storage storage = settings.storage();
+        final Storage storage = settings.repoConfigsStorage();
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
             keys -> keys.stream()
                 .filter(name -> new ConfigFile(name).isYamlOrYml())

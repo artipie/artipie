@@ -26,6 +26,7 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.artipie.asto.SubStorage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -145,6 +146,15 @@ class YamlSettingsTest {
     }
 
     @Test
+    public void returnsRepoConfigs(@TempDir final Path tmp) {
+        MatcherAssert.assertThat(
+            new YamlSettings(this.config(tmp.toString(), "file", Optional.empty()))
+                .repoConfigsStorage(),
+            new IsInstanceOf(SubStorage.class)
+        );
+    }
+
+    @Test
     public void shouldThrowExceptionWhenPathIsNotSet() {
         final YamlSettings settings = new YamlSettings(
             this.config("some/path", "file", Optional.empty())
@@ -214,7 +224,10 @@ class YamlSettingsTest {
                     Yaml.createYamlMappingBuilder()
                         .add("type", "fs")
                         .add("path", stpath).build()
-                ).add("credentials", creds.build()).build()
+                )
+                    .add("credentials", creds.build())
+                    .add("repo_configs", "repos")
+                    .build()
             ).build();
     }
 }
