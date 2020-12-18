@@ -66,6 +66,13 @@ public interface Settings {
     YamlMapping meta();
 
     /**
+     * Repo configs storage, or, in file system storage terms, subdirectory where repo
+     * configs are located relatively to the storage.
+     * @return Repo configs storage
+     */
+    Storage repoConfigsStorage();
+
+    /**
      * Artipie credentials.
      * @return Completion action with credentials
      */
@@ -212,6 +219,11 @@ public interface Settings {
         @Override
         public YamlMapping meta() {
             return this.meta;
+        }
+
+        @Override
+        public Storage repoConfigsStorage() {
+            return this.storage;
         }
 
         @Override

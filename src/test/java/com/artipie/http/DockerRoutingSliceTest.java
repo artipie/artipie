@@ -167,6 +167,11 @@ final class DockerRoutingSliceTest {
         }
 
         @Override
+        public Storage repoConfigsStorage() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public CompletionStage<Users> credentials() {
             throw new UnsupportedOperationException();
         }
