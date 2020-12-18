@@ -34,7 +34,6 @@ import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.repo.ConfigFile;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -63,10 +62,9 @@ public final class ArtipieRepositories {
      * @param name Repository name
      * @param standalone Standalone flag
      * @return Repository slice
-     * @throws IOException On error
      */
     public Slice slice(final Key name, final boolean standalone) {
-        final Storage storage = this.settings.storage();
+        final Storage storage = this.settings.repoConfigsStorage();
         return new AsyncSlice(
             new ConfigFile(name).existsIn(storage).thenCompose(
                 exists -> {
