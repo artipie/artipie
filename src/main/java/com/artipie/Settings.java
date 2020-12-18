@@ -25,12 +25,10 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.management.Users;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -68,11 +66,11 @@ public interface Settings {
     YamlMapping meta();
 
     /**
-     * Repo configs storage key, or, in file system storage terms, subdirectory where repo
+     * Repo configs storage, or, in file system storage terms, subdirectory where repo
      * configs are located relatively to the storage.
-     * @return Repo configs key
+     * @return Repo configs storage
      */
-    Optional<Key> repoConfigs();
+    Storage repoConfigsStorage();
 
     /**
      * Artipie credentials.
@@ -224,8 +222,8 @@ public interface Settings {
         }
 
         @Override
-        public Optional<Key> repoConfigs() {
-            return Optional.empty();
+        public Storage repoConfigsStorage() {
+            return this.storage;
         }
 
         @Override

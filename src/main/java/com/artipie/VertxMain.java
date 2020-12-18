@@ -27,7 +27,6 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.SubStorage;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -192,9 +191,7 @@ public final class VertxMain {
      * @param metrics Metrics.
      */
     private void startRepos(final Settings settings, final Metrics metrics) {
-        final Storage storage = settings.repoConfigs()
-            .<Storage>map(key -> new SubStorage(key, settings.storage()))
-            .orElse(settings.storage());
+        final Storage storage = settings.repoConfigsStorage();
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
             keys -> keys.stream()
                 .filter(name -> new ConfigFile(name).isYamlOrYml())

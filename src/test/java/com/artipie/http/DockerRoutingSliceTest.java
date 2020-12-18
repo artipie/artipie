@@ -27,7 +27,6 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.Layout;
 import com.artipie.Settings;
 import com.artipie.asto.Content;
-import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
@@ -43,7 +42,6 @@ import com.artipie.management.Users;
 import io.reactivex.Flowable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.hamcrest.MatcherAssert;
@@ -169,7 +167,7 @@ final class DockerRoutingSliceTest {
         }
 
         @Override
-        public Optional<Key> repoConfigs() {
+        public Storage repoConfigsStorage() {
             throw new UnsupportedOperationException();
         }
 

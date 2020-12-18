@@ -26,6 +26,7 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.artipie.asto.SubStorage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +35,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
@@ -149,8 +149,8 @@ class YamlSettingsTest {
     public void returnsRepoConfigs(@TempDir final Path tmp) {
         MatcherAssert.assertThat(
             new YamlSettings(this.config(tmp.toString(), "file", Optional.empty()))
-                .repoConfigs().get().string(),
-            new IsEqual<>("repos")
+                .repoConfigsStorage(),
+            new IsInstanceOf(SubStorage.class)
         );
     }
 

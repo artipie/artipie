@@ -26,6 +26,7 @@ package com.artipie;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.SubStorage;
 import com.artipie.auth.CachedAuth;
 import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
@@ -98,8 +99,10 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public Optional<Key> repoConfigs() {
-        return Optional.ofNullable(this.meta().string("repo_configs")).map(Key.From::new);
+    public Storage repoConfigsStorage() {
+        return Optional.ofNullable(this.meta().string("repo_configs"))
+            .<Storage>map(str -> new SubStorage(new Key.From(str), this.storage()))
+            .orElse(this.storage());
     }
 
     @Override
