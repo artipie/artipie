@@ -28,11 +28,12 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
+import com.artipie.asto.Concatenation;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.management.RepoPermissions;
-import com.artipie.management.api.ContentAsYaml;
 import com.artipie.repo.ConfigFile;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
@@ -176,11 +177,14 @@ public final class RepoPermissionsFromStorage implements RepoPermissions {
      * @return Completion action with yaml repo section
      */
     private CompletionStage<YamlMapping> repo(final Key key) {
-        return SingleInterop.fromFuture(
-            new ConfigFile(key).valueFrom(this.storage)
-        ).to(new ContentAsYaml())
-        .map(yaml -> yaml.yamlMapping(RepoPermissionsFromStorage.REPO_SECTION))
-        .to(SingleInterop.get());
+        return new ConfigFile(key).valueFrom(this.storage)
+            .thenCompose(
+                pub -> new Concatenation(pub).single()
+                    .map(buf -> new Remaining(buf).bytes())
+                    .map(bytes -> new String(bytes, StandardCharsets.US_ASCII))
+                    .map(cnt -> Yaml.createYamlInput(cnt).readYamlMapping())
+                    .to(SingleInterop.get())
+            ).thenApply(yaml -> yaml.yamlMapping(RepoPermissionsFromStorage.REPO_SECTION));
     }
 
     /**
