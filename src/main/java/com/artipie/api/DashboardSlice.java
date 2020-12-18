@@ -65,7 +65,7 @@ public final class DashboardSlice extends Slice.Wrap {
      * Primary ctor.
      * @param settings Settings
      * @param tpl Template loader for pages
-     * @todo #730:30min When `ContentAs` is used here instead of `Concatenation` and
+     * @todo #797:30min When `ContentAs` is used here instead of `Concatenation` and
      *  `Remaining` `ArtipieApiITCase` get stuck on github actions (this does not happen
      *  locally on windows os), figure out why, make necessary corrections and
      *  use `ContentAs` here. Probably this problem is similar to artipie/artipie#790.
