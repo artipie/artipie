@@ -31,6 +31,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.management.RepoPermissions;
+import com.artipie.repo.ConfigFile;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +44,8 @@ import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Test for {@link RepoPermissionsFromStorage}.
@@ -76,8 +79,9 @@ class RepoPermissionsFromSettingsTest {
         );
     }
 
-    @Test
-    void returnsPermissionsList() {
+    @ParameterizedTest
+    @ValueSource(strings = {".yaml", ".yml", ""})
+    void returnsPermissionsListForDifferentExtensions(final String extension) {
         final String john = "john";
         final String download = "download";
         final String upload = "upload";
@@ -86,7 +90,8 @@ class RepoPermissionsFromSettingsTest {
             new RepoPerms(john, new ListOf<String>(download, upload))
         ).saveTo(this.storage, repo);
         MatcherAssert.assertThat(
-            new RepoPermissionsFromStorage(this.storage).permissions(repo)
+            new RepoPermissionsFromStorage(this.storage)
+                .permissions(String.format("%s%s", repo, extension))
                 .toCompletableFuture().join(),
             Matchers.contains(
                 new RepoPermissions.PermissionItem(john, new ListOf<String>(download, upload))
@@ -238,8 +243,11 @@ class RepoPermissionsFromSettingsTest {
 
     private YamlMapping repoSection(final String repo) throws IOException {
         return Yaml.createYamlInput(
-            new PublisherAs(this.storage.value(new Key.From(String.format("%s.yaml", repo))).join())
-                .asciiString().toCompletableFuture().join()
+            new PublisherAs(
+                new ConfigFile(repo).valueFrom(this.storage)
+                    .toCompletableFuture().join()
+            ).asciiString()
+            .toCompletableFuture().join()
         ).readYamlMapping().yamlMapping("repo");
     }
 
