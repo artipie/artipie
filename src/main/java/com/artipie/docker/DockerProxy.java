@@ -37,6 +37,7 @@ import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.AuthClientSlice;
@@ -135,7 +136,7 @@ public final class DockerProxy implements Slice {
         if (!this.standalone) {
             docker = new TrimmedDocker(docker, this.cfg.name());
         }
-        Slice slice = new DockerSlice(docker, this.perms, this.auth);
+        Slice slice = new DockerSlice(docker, this.perms, new BasicAuthScheme(this.auth));
         if (!this.standalone) {
             slice = new DockerRoutingSlice.Reverted(slice);
         }
