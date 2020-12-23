@@ -42,6 +42,7 @@ import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.group.GroupSlice;
@@ -279,13 +280,13 @@ public final class SliceFromConfig extends Slice.Wrap {
                     new SubStorage(RegistryRoot.V2, cfg.storage())
                 );
                 if (standalone) {
-                    slice = new DockerSlice(docker, permissions, auth);
+                    slice = new DockerSlice(docker, permissions, new BasicAuthScheme(auth));
                 } else {
                     slice = new DockerRoutingSlice.Reverted(
                         new DockerSlice(
                             new TrimmedDocker(docker, cfg.name()),
                             permissions,
-                            auth
+                            new BasicAuthScheme(auth)
                         )
                     );
                 }
