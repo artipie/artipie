@@ -59,6 +59,7 @@ import com.artipie.management.api.artifactory.GetUserSlice;
 import com.artipie.management.api.artifactory.GetUsersSlice;
 import com.artipie.repo.ArtipieStorages;
 import com.artipie.repo.ConfigFile;
+import com.artipie.repo.ConfigFileApi;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.charset.StandardCharsets;
@@ -145,21 +146,24 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)")),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new ApiRepoListSlice(settings.storage())
+                                new ApiRepoListSlice(
+                                    settings.storage(),
+                                    new ConfigFileApi(settings.storage())
+                                )
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)/(?:[^/.]+)")),
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
-                                new ApiRepoGetSlice(settings.storage())
+                                new ApiRepoGetSlice(new ConfigFileApi(settings.storage()))
                             ),
                             new RtRulePath(
                                 new RtRule.All(
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)")),
                                     new ByMethodsRule(RqMethod.POST)
                                 ),
-                                new ApiRepoUpdateSlice(settings.storage())
+                                new ApiRepoUpdateSlice(new ConfigFileApi(settings.storage()))
                             ),
                             new RtRulePath(
                                 new RtRule.All(
@@ -173,7 +177,10 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByPath(FromRqLine.RqPattern.CREATE_REPO.pattern()),
                                     new ByMethodsRule(RqMethod.PUT)
                                 ),
-                                new CreateRepoSlice(settings.storage())
+                                new CreateRepoSlice(
+                                    settings.storage(),
+                                    new ConfigFileApi(settings.storage())
+                                )
                             ),
                             new RtRulePath(
                                 new RtRule.All(
@@ -231,8 +238,8 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.DELETE)
                                 ),
                                 new DeletePermissionSlice(
-                                    settings.storage(),
-                                    new RepoPermissionsFromStorage(settings.storage())
+                                    new RepoPermissionsFromStorage(settings.storage()),
+                                    new ConfigFileApi(settings.storage())
                                 )
                             ),
                             new RtRulePath(
@@ -241,8 +248,8 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new GetPermissionSlice(
-                                    settings.storage(),
-                                    new RepoPermissionsFromStorage(settings.storage())
+                                    new RepoPermissionsFromStorage(settings.storage()),
+                                    new ConfigFileApi(settings.storage())
                                 )
                             ),
                             new RtRulePath(
@@ -262,4 +269,5 @@ public final class ArtipieApi extends Slice.Wrap {
             )
         );
     }
+
 }
