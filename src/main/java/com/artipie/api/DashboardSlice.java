@@ -39,6 +39,7 @@ import com.artipie.management.dashboard.PageSlice;
 import com.artipie.management.dashboard.RepoPage;
 import com.artipie.management.dashboard.UserPage;
 import com.artipie.repo.ConfigFile;
+import com.artipie.repo.ConfigFileApi;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
@@ -89,11 +90,21 @@ public final class DashboardSlice extends Slice.Wrap {
                         new SliceRoute(
                             new RtRulePath(
                                 new RtRule.ByPath(Pattern.compile("/dashboard/(?:[^/.]+)/?")),
-                                new PageSlice(new UserPage(tpl, settings.storage()))
+                                new PageSlice(
+                                    new UserPage(
+                                        tpl,
+                                        settings.storage(),
+                                        new ConfigFileApi(settings.storage())
+                                    )
+                                )
                             ),
                             new RtRulePath(
                                 new RtRule.ByPath(Pattern.compile("/dashboard/(?:[^/.]+)/(?:[^/.]+)/?")),
-                                new PageSlice(new RepoPage(tpl, settings.storage()))
+                                new PageSlice(
+                                    new RepoPage(
+                                        tpl, new ConfigFileApi(settings.storage())
+                                    )
+                                )
                             )
                         ),
                         new CookiesAuthScheme()
