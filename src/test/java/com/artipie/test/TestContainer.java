@@ -78,7 +78,9 @@ public final class TestContainer implements AutoCloseable {
      * @throws Exception In case of exception during execution command in container.
      */
     public String execStdErr(final String... command) throws Exception {
-        return this.exec(command).getStderr().replace("\n", "");
+        final Container.ExecResult exec = this.exec(command);
+        this.logStd(exec, true);
+        return exec.getStderr().replace("\n", "");
     }
 
     /**
@@ -88,7 +90,32 @@ public final class TestContainer implements AutoCloseable {
      * @throws Exception In case of exception during execution command in container.
      */
     public String execStdout(final String... command) throws Exception {
-        return this.exec(command).getStdout().replace("\n", "");
+        final Container.ExecResult exec = this.exec(command);
+        final int code = exec.getExitCode();
+        if (code != 0) {
+            this.logStd(exec, true);
+            throw new IllegalStateException(
+                String.format(
+                    "'%s' failed with %s code", String.join(" ", command), code
+                )
+            );
+        }
+        this.logStd(exec, false);
+        return exec.getStdout().replace("\n", "");
+    }
+
+    /**
+     * Stdout result of the command execution without checking exit code.
+     * It is necessary to verify that output contains required information
+     * in case exit code is not equal 0.
+     * @param command Command for execution in container
+     * @return Stdout result of the execution.
+     * @throws Exception In case of exception during execution command in container.
+     */
+    public String execStdoutWithoutCheckExitCode(final String... command) throws Exception {
+        final Container.ExecResult exec = this.exec(command);
+        this.logStd(exec, true);
+        return exec.getStdout().replace("\n", "");
     }
 
     @Override
@@ -106,4 +133,20 @@ public final class TestContainer implements AutoCloseable {
         Logger.debug(this, "Command:\n%s", String.join(" ", command));
         return this.cntn.execInContainer(command);
     }
+
+    /**
+     * Log std result of the command execution.
+     * @param exec Result of the execution
+     * @param error Is it necessary to log stderr as error?
+     */
+    private void logStd(final Container.ExecResult exec, final boolean error) {
+        final String outputerr = String.format("\nSTDERR:\n%s", exec.getStderr());
+        if (error) {
+            Logger.info(this, String.format("\nSTDOUT:\n%s", exec.getStdout()));
+            Logger.error(this, outputerr);
+        } else {
+            Logger.warn(this, outputerr);
+        }
+    }
+
 }
