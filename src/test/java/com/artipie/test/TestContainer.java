@@ -78,9 +78,7 @@ public final class TestContainer implements AutoCloseable {
      * @throws Exception In case of exception during execution command in container.
      */
     public String execStdErr(final String... command) throws Exception {
-        final Container.ExecResult exec = this.exec(command);
-        this.logStd(exec, true);
-        return exec.getStderr().replace("\n", "");
+        return replaceBreakLine(this.exec(command).getStderr());
     }
 
     /**
@@ -93,15 +91,13 @@ public final class TestContainer implements AutoCloseable {
         final Container.ExecResult exec = this.exec(command);
         final int code = exec.getExitCode();
         if (code != 0) {
-            this.logStd(exec, true);
             throw new IllegalStateException(
                 String.format(
                     "'%s' failed with %s code", String.join(" ", command), code
                 )
             );
         }
-        this.logStd(exec, false);
-        return exec.getStdout().replace("\n", "");
+        return replaceBreakLine(exec.getStdout());
     }
 
     /**
@@ -113,9 +109,7 @@ public final class TestContainer implements AutoCloseable {
      * @throws Exception In case of exception during execution command in container.
      */
     public String execStdoutWithoutCheckExitCode(final String... command) throws Exception {
-        final Container.ExecResult exec = this.exec(command);
-        this.logStd(exec, true);
-        return exec.getStdout().replace("\n", "");
+        return replaceBreakLine(this.exec(command).getStdout());
     }
 
     @Override
@@ -131,22 +125,21 @@ public final class TestContainer implements AutoCloseable {
      */
     private Container.ExecResult exec(final String... command) throws Exception {
         Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command);
+        final Container.ExecResult exec = this.cntn.execInContainer(command);
+        Logger.debug(
+            this,
+            String.format("\nSTDOUT:\n%s \nSTDERR:\n%s", exec.getStdout(), exec.getStderr())
+        );
+        return exec;
     }
 
     /**
-     * Log std result of the command execution.
-     * @param exec Result of the execution
-     * @param error Is it necessary to log stderr as error?
+     * Replaces break lines with empty string.
+     * @param text Input text
+     * @return Text in which break lines were replaced with empty string.
      */
-    private void logStd(final Container.ExecResult exec, final boolean error) {
-        final String outputerr = String.format("\nSTDERR:\n%s", exec.getStderr());
-        if (error) {
-            Logger.info(this, String.format("\nSTDOUT:\n%s", exec.getStdout()));
-            Logger.error(this, outputerr);
-        } else {
-            Logger.warn(this, outputerr);
-        }
+    private static String replaceBreakLine(final String text) {
+        return text.replace("\n", "");
     }
 
 }
