@@ -143,7 +143,7 @@ final class PypiITCase {
     void pypiInstallShouldFailWithForbidden() throws Exception {
         this.init(false);
         MatcherAssert.assertThat(
-            this.cntn.execStdout(
+            this.cntn.execStdoutWithoutCheckExitCode(
                 "pip", "install", "--verbose", "--no-deps", "--trusted-host", PypiITCase.HOST,
                 "--index-url", this.url.string(ArtipieServer.BOB), "anypackage"
             ),

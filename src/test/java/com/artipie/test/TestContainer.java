@@ -78,7 +78,7 @@ public final class TestContainer implements AutoCloseable {
      * @throws Exception In case of exception during execution command in container.
      */
     public String execStdErr(final String... command) throws Exception {
-        return this.exec(command).getStderr().replace("\n", "");
+        return replaceBreakLine(this.exec(command).getStderr());
     }
 
     /**
@@ -88,7 +88,28 @@ public final class TestContainer implements AutoCloseable {
      * @throws Exception In case of exception during execution command in container.
      */
     public String execStdout(final String... command) throws Exception {
-        return this.exec(command).getStdout().replace("\n", "");
+        final Container.ExecResult exec = this.exec(command);
+        final int code = exec.getExitCode();
+        if (code != 0) {
+            throw new IllegalStateException(
+                String.format(
+                    "'%s' failed with %s code", String.join(" ", command), code
+                )
+            );
+        }
+        return replaceBreakLine(exec.getStdout());
+    }
+
+    /**
+     * Stdout result of the command execution without checking exit code.
+     * It is necessary to verify that output contains required information
+     * in case exit code is not equal 0.
+     * @param command Command for execution in container
+     * @return Stdout result of the execution.
+     * @throws Exception In case of exception during execution command in container.
+     */
+    public String execStdoutWithoutCheckExitCode(final String... command) throws Exception {
+        return replaceBreakLine(this.exec(command).getStdout());
     }
 
     @Override
@@ -104,6 +125,21 @@ public final class TestContainer implements AutoCloseable {
      */
     private Container.ExecResult exec(final String... command) throws Exception {
         Logger.debug(this, "Command:\n%s", String.join(" ", command));
-        return this.cntn.execInContainer(command);
+        final Container.ExecResult exec = this.cntn.execInContainer(command);
+        Logger.debug(
+            this,
+            String.format("\nSTDOUT:\n%s \nSTDERR:\n%s", exec.getStdout(), exec.getStderr())
+        );
+        return exec;
     }
+
+    /**
+     * Replaces break lines with empty string.
+     * @param text Input text
+     * @return Text in which break lines were replaced with empty string.
+     */
+    private static String replaceBreakLine(final String text) {
+        return text.replace("\n", "");
+    }
+
 }
