@@ -71,7 +71,7 @@ class DockerPermissionsTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
+    @ValueSource(strings = {
         "repository:my-alpine:read",
         "whatever",
         "foo:bar:"
