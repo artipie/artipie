@@ -136,7 +136,11 @@ public final class DockerProxy implements Slice {
         if (!this.standalone) {
             docker = new TrimmedDocker(docker, this.cfg.name());
         }
-        Slice slice = new DockerSlice(docker, this.perms, new BasicAuthScheme(this.auth));
+        Slice slice = new DockerSlice(
+            docker,
+            new DockerPermissions(this.perms),
+            new BasicAuthScheme(this.auth)
+        );
         if (!this.standalone) {
             slice = new DockerRoutingSlice.Reverted(slice);
         }

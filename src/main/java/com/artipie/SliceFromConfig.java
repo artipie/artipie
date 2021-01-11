@@ -28,6 +28,7 @@ import com.artipie.asto.SubStorage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.docker.Docker;
+import com.artipie.docker.DockerPermissions;
 import com.artipie.docker.DockerProxy;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.RegistryRoot;
@@ -280,12 +281,16 @@ public final class SliceFromConfig extends Slice.Wrap {
                     new SubStorage(RegistryRoot.V2, cfg.storage())
                 );
                 if (standalone) {
-                    slice = new DockerSlice(docker, permissions, new BasicAuthScheme(auth));
+                    slice = new DockerSlice(
+                        docker,
+                        new DockerPermissions(permissions),
+                        new BasicAuthScheme(auth)
+                    );
                 } else {
                     slice = new DockerRoutingSlice.Reverted(
                         new DockerSlice(
                             new TrimmedDocker(docker, cfg.name()),
-                            permissions,
+                            new DockerPermissions(permissions),
                             new BasicAuthScheme(auth)
                         )
                     );
