@@ -1,0 +1,132 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 artipie.com
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.artipie.debian;
+
+import com.artipie.ArtipieServer;
+import com.artipie.RepoConfigYaml;
+import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
+import com.artipie.asto.SubStorage;
+import com.artipie.asto.fs.FileStorage;
+import com.artipie.asto.test.TestResource;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.cactoos.list.ListOf;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.text.StringContainsInOrder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.io.TempDir;
+import org.testcontainers.Testcontainers;
+import org.testcontainers.containers.GenericContainer;
+
+/**
+ * Debian integration test.
+ * @since 0.15
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ */
+@EnabledOnOs({OS.LINUX, OS.MAC})
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+public final class DebianITCase {
+
+    /**
+     * Repository name.
+     */
+    private static final String NAME = "my-debian";
+
+    /**
+     * Temporary directory for all tests.
+     * @checkstyle VisibilityModifierCheck (3 lines)
+     */
+    @TempDir
+    Path tmp;
+
+    /**
+     * Tested Artipie server.
+     */
+    private ArtipieServer server;
+
+    /**
+     * Container.
+     */
+    private GenericContainer<?> cntn;
+
+    /**
+     * Storage.
+     */
+    private Storage storage;
+
+    @BeforeEach
+    void init() throws Exception {
+        this.storage = new FileStorage(this.tmp);
+        this.server = new ArtipieServer(
+            this.tmp, DebianITCase.NAME,
+            new RepoConfigYaml("deb").withFileStorage(this.tmp.resolve("repos"))
+        );
+        final int port = this.server.start();
+        Testcontainers.exposeHostPorts(port);
+        final Path setting = this.tmp.resolve("sources.list");
+        Files.write(
+            setting,
+            String.format(
+                "deb [trusted=yes] http://host.testcontainers.internal:%d/my-debian %s main",
+                port, DebianITCase.NAME
+            ).getBytes()
+        );
+        this.cntn = new GenericContainer<>("debian")
+            .withCommand("tail", "-f", "/dev/null")
+            .withWorkingDirectory("/home/")
+            .withFileSystemBind(this.tmp.toString(), "/home");
+        this.cntn.start();
+        this.cntn.execInContainer("mv", "/home/sources.list", "/etc/apt/");
+    }
+
+    @Test
+    void searchWorks() throws IOException, InterruptedException {
+        final Storage sub = new SubStorage(
+            new Key.From("repos", DebianITCase.NAME), this.storage
+        );
+        new TestResource("debian/pspp_1.2.0-3_amd64.deb")
+            .saveTo(sub, new Key.From("main", "pspp_1.2.0-3_amd64.deb"));
+        new TestResource("debian/Packages.gz").saveTo(
+            sub,
+            new Key.From(String.format("dists/%s/main/binary-amd64/Packages.gz", DebianITCase.NAME))
+        );
+        this.cntn.execInContainer("apt-get", "update");
+        MatcherAssert.assertThat(
+            this.cntn.execInContainer("apt-cache", "search", "pspp").getStdout(),
+            new StringContainsInOrder(new ListOf<>("pspp", "Statistical analysis tool"))
+        );
+    }
+
+    @AfterEach
+    void stop() {
+        this.server.stop();
+        this.cntn.stop();
+    }
+}
