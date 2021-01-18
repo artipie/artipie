@@ -27,6 +27,7 @@ package com.artipie;
 import com.artipie.asto.SubStorage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.http.PhpComposer;
+import com.artipie.debian.http.DebianSlice;
 import com.artipie.docker.Docker;
 import com.artipie.docker.DockerPermissions;
 import com.artipie.docker.DockerProxy;
@@ -47,6 +48,7 @@ import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.group.GroupSlice;
+import com.artipie.http.slice.LoggingSlice;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.MavenProxy;
 import com.artipie.maven.http.MavenSlice;
@@ -298,6 +300,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "docker-proxy":
                 slice = new DockerProxy(SliceFromConfig.HTTP, standalone, cfg, permissions, auth);
+                break;
+            case "deb":
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new LoggingSlice(new DebianSlice(cfg.storage(), permissions, auth, cfg.name()))
+                );
                 break;
             default:
                 throw new IllegalStateException(
