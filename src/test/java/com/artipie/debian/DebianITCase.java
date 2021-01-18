@@ -47,6 +47,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 
@@ -85,6 +87,10 @@ public final class DebianITCase {
      * Storage.
      */
     private Storage storage;
+
+    /**
+     * Artipie server port.
+     */
     private int port;
 
     @BeforeEach
@@ -95,13 +101,13 @@ public final class DebianITCase {
             new RepoConfigYaml("deb").withFileStorage(this.tmp.resolve("repos"))
         );
         this.port = this.server.start();
-        Testcontainers.exposeHostPorts(port);
+        Testcontainers.exposeHostPorts(this.port);
         final Path setting = this.tmp.resolve("sources.list");
         Files.write(
             setting,
             String.format(
                 "deb [trusted=yes] http://host.testcontainers.internal:%d/my-debian %s main",
-                port, DebianITCase.NAME
+                this.port, DebianITCase.NAME
             ).getBytes()
         );
         this.cntn = new GenericContainer<>("debian")
@@ -130,15 +136,16 @@ public final class DebianITCase {
         );
     }
 
-    @Test
-    void pushAndInstallWorks() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"POST", "PUT"})
+    void pushAndInstallWorks(final String method) throws Exception {
         final HttpURLConnection con = (HttpURLConnection) new URL(
             String.format(
                 "http://localhost:%d/%s/main/aglfn_1.7-3_amd64.deb", this.port, DebianITCase.NAME
             )
         ).openConnection();
         con.setDoOutput(true);
-        con.setRequestMethod("PUT");
+        con.setRequestMethod(method);
         final DataOutputStream out = new DataOutputStream(con.getOutputStream());
         out.write(new TestResource("debian/aglfn_1.7-3_amd64.deb").asBytes());
         out.close();
