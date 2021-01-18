@@ -30,11 +30,16 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
+import com.artipie.http.rs.RsStatus;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,6 +85,7 @@ public final class DebianITCase {
      * Storage.
      */
     private Storage storage;
+    private int port;
 
     @BeforeEach
     void init() throws Exception {
@@ -88,7 +94,7 @@ public final class DebianITCase {
             this.tmp, DebianITCase.NAME,
             new RepoConfigYaml("deb").withFileStorage(this.tmp.resolve("repos"))
         );
-        final int port = this.server.start();
+        this.port = this.server.start();
         Testcontainers.exposeHostPorts(port);
         final Path setting = this.tmp.resolve("sources.list");
         Files.write(
@@ -121,6 +127,31 @@ public final class DebianITCase {
         MatcherAssert.assertThat(
             this.cntn.execInContainer("apt-cache", "search", "pspp").getStdout(),
             new StringContainsInOrder(new ListOf<>("pspp", "Statistical analysis tool"))
+        );
+    }
+
+    @Test
+    void pushAndInstallWorks() throws Exception {
+        final HttpURLConnection con = (HttpURLConnection) new URL(
+            String.format(
+                "http://localhost:%d/%s/main/aglfn_1.7-3_amd64.deb", this.port, DebianITCase.NAME
+            )
+        ).openConnection();
+        con.setDoOutput(true);
+        con.setRequestMethod("PUT");
+        final DataOutputStream out = new DataOutputStream(con.getOutputStream());
+        out.write(new TestResource("debian/aglfn_1.7-3_amd64.deb").asBytes());
+        out.close();
+        MatcherAssert.assertThat(
+            "Response for upload is OK",
+            con.getResponseCode(),
+            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+        );
+        this.cntn.execInContainer("apt-get", "update");
+        MatcherAssert.assertThat(
+            "Package was downloaded and unpacked",
+            this.cntn.execInContainer("apt-get", "install", "-y", "aglfn").getStdout(),
+            new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))
         );
     }
 
