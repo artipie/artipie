@@ -31,8 +31,8 @@ import com.artipie.asto.SubStorage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.test.TestContainer;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -49,8 +49,6 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * Debian integration test.
@@ -81,7 +79,7 @@ public final class DebianITCase {
     /**
      * Container.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     /**
      * Storage.
@@ -101,7 +99,6 @@ public final class DebianITCase {
             new RepoConfigYaml("deb").withFileStorage(this.tmp.resolve("repos"))
         );
         this.port = this.server.start();
-        Testcontainers.exposeHostPorts(this.port);
         final Path setting = this.tmp.resolve("sources.list");
         Files.write(
             setting,
@@ -110,16 +107,13 @@ public final class DebianITCase {
                 this.port, DebianITCase.NAME
             ).getBytes()
         );
-        this.cntn = new GenericContainer<>("debian")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
-        this.cntn.start();
-        this.cntn.execInContainer("mv", "/home/sources.list", "/etc/apt/");
+        this.cntn = new TestContainer("debian", this.tmp);
+        this.cntn.start(this.port);
+        this.cntn.execStdout("mv", "/home/sources.list", "/etc/apt/");
     }
 
     @Test
-    void searchWorks() throws IOException, InterruptedException {
+    void searchWorks() throws Exception {
         final Storage sub = new SubStorage(
             new Key.From("repos", DebianITCase.NAME), this.storage
         );
@@ -129,9 +123,9 @@ public final class DebianITCase {
             sub,
             new Key.From(String.format("dists/%s/main/binary-amd64/Packages.gz", DebianITCase.NAME))
         );
-        this.cntn.execInContainer("apt-get", "update");
+        this.cntn.execStdout("apt-get", "update");
         MatcherAssert.assertThat(
-            this.cntn.execInContainer("apt-cache", "search", "pspp").getStdout(),
+            this.cntn.execStdout("apt-cache", "search", "pspp"),
             new StringContainsInOrder(new ListOf<>("pspp", "Statistical analysis tool"))
         );
     }
@@ -154,10 +148,10 @@ public final class DebianITCase {
             con.getResponseCode(),
             new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
         );
-        this.cntn.execInContainer("apt-get", "update");
+        this.cntn.execStdout("apt-get", "update");
         MatcherAssert.assertThat(
             "Package was downloaded and unpacked",
-            this.cntn.execInContainer("apt-get", "install", "-y", "aglfn").getStdout(),
+            this.cntn.execStdout("apt-get", "install", "-y", "aglfn"),
             new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))
         );
     }
@@ -165,6 +159,6 @@ public final class DebianITCase {
     @AfterEach
     void stop() {
         this.server.stop();
-        this.cntn.stop();
+        this.cntn.close();
     }
 }
