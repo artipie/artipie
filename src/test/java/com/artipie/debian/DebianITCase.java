@@ -30,11 +30,16 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
-import java.io.IOException;
+import com.artipie.http.rs.RsStatus;
+import com.artipie.test.TestContainer;
+import java.io.DataOutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,8 +47,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.GenericContainer;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Debian integration test.
@@ -74,12 +79,17 @@ public final class DebianITCase {
     /**
      * Container.
      */
-    private GenericContainer<?> cntn;
+    private TestContainer cntn;
 
     /**
      * Storage.
      */
     private Storage storage;
+
+    /**
+     * Artipie server port.
+     */
+    private int port;
 
     @BeforeEach
     void init() throws Exception {
@@ -88,26 +98,22 @@ public final class DebianITCase {
             this.tmp, DebianITCase.NAME,
             new RepoConfigYaml("deb").withFileStorage(this.tmp.resolve("repos"))
         );
-        final int port = this.server.start();
-        Testcontainers.exposeHostPorts(port);
+        this.port = this.server.start();
         final Path setting = this.tmp.resolve("sources.list");
         Files.write(
             setting,
             String.format(
                 "deb [trusted=yes] http://host.testcontainers.internal:%d/my-debian %s main",
-                port, DebianITCase.NAME
+                this.port, DebianITCase.NAME
             ).getBytes()
         );
-        this.cntn = new GenericContainer<>("debian")
-            .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
-            .withFileSystemBind(this.tmp.toString(), "/home");
-        this.cntn.start();
-        this.cntn.execInContainer("mv", "/home/sources.list", "/etc/apt/");
+        this.cntn = new TestContainer("debian", this.tmp);
+        this.cntn.start(this.port);
+        this.cntn.execStdout("mv", "/home/sources.list", "/etc/apt/");
     }
 
     @Test
-    void searchWorks() throws IOException, InterruptedException {
+    void searchWorks() throws Exception {
         final Storage sub = new SubStorage(
             new Key.From("repos", DebianITCase.NAME), this.storage
         );
@@ -117,16 +123,42 @@ public final class DebianITCase {
             sub,
             new Key.From(String.format("dists/%s/main/binary-amd64/Packages.gz", DebianITCase.NAME))
         );
-        this.cntn.execInContainer("apt-get", "update");
+        this.cntn.execStdout("apt-get", "update");
         MatcherAssert.assertThat(
-            this.cntn.execInContainer("apt-cache", "search", "pspp").getStdout(),
+            this.cntn.execStdout("apt-cache", "search", "pspp"),
             new StringContainsInOrder(new ListOf<>("pspp", "Statistical analysis tool"))
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"POST", "PUT"})
+    void pushAndInstallWorks(final String method) throws Exception {
+        final HttpURLConnection con = (HttpURLConnection) new URL(
+            String.format(
+                "http://localhost:%d/%s/main/aglfn_1.7-3_amd64.deb", this.port, DebianITCase.NAME
+            )
+        ).openConnection();
+        con.setDoOutput(true);
+        con.setRequestMethod(method);
+        final DataOutputStream out = new DataOutputStream(con.getOutputStream());
+        out.write(new TestResource("debian/aglfn_1.7-3_amd64.deb").asBytes());
+        out.close();
+        MatcherAssert.assertThat(
+            "Response for upload is OK",
+            con.getResponseCode(),
+            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+        );
+        this.cntn.execStdout("apt-get", "update");
+        MatcherAssert.assertThat(
+            "Package was downloaded and unpacked",
+            this.cntn.execStdout("apt-get", "install", "-y", "aglfn"),
+            new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))
         );
     }
 
     @AfterEach
     void stop() {
         this.server.stop();
-        this.cntn.stop();
+        this.cntn.close();
     }
 }
