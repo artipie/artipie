@@ -338,5 +338,13 @@ public class ArtipieServer {
         public String password() {
             return this.pwd;
         }
+
+        /**
+         * Username and password separated by colon.
+         * @return Username:pswd
+         */
+        public String nameAndPswd() {
+            return String.format("%s:%s", this.username, this.pwd);
+        }
     }
 }
