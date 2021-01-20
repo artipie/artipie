@@ -1,0 +1,4 @@
+meta:
+  storage:
+    type: fs
+    path: /var/artipie/configs
