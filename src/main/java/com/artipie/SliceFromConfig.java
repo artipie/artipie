@@ -214,8 +214,14 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "nuget":
                 slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new NuGet(cfg.url(), cfg.storage(), permissions, auth)
+                    settings,
+                    standalone,
+                    new NuGet(
+                        cfg.url(),
+                        new com.artipie.nuget.AstoRepository(cfg.storage()),
+                        permissions,
+                        auth
+                    )
                 );
                 break;
             case "maven":
