@@ -21,5 +21,5 @@ npm publish --registry http://localhost:8080/npm_repo/
 cd "${basedir}/sample-consumer"
 npm install sample-npm-project --registry http://localhost:8080/npm_repo/
 
-# Remove container.
-#docker stop artipie
+# Stop and remove container.
+docker stop artipie
