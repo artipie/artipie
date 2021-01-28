@@ -1,21 +1,25 @@
 set -x
 set -e
 
-# Start artipie.
-docker run --rm -d --name artipie -it -v $(pwd)/artipie.yaml:/etc/artipie/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:latest
+image="$1"
+if [[ -z "$image" ]]; then
+  image="artipie/artipie:latest"
+fi
+basedir="$(dirname $(readlink -f $0))"
 
-# Wait for container to be ready for new connections.
-sleep 5
+# Start artipie.
+docker run --rm --detach --name artipie \
+  -v "${basedir}/artipie.yaml:/etc/artipie/artipie.yml" \
+  -v "${basedir}:/var/artipie" \
+  -p 8080:80 "$image"
 
 # Publish the sample-npm-project.
-cd sample-npm-project
+cd "${basedir}/sample-npm-project"
 npm publish --registry http://localhost:8080/npm_repo/
-cd -
 
 # Install the sample-npm-project.
-cd sample-consumer
+cd "${basedir}/sample-consumer"
 npm install sample-npm-project --registry http://localhost:8080/npm_repo/
-cd -
 
-# Remove container.
+# Stop and remove container.
 docker stop artipie
