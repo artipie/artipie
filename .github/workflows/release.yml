@@ -14,9 +14,9 @@ jobs:
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-jdk-${{ matrix.java }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-jdk-11-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-jdk-${{ matrix.java }}-maven-
+            ${{ runner.os }}-jdk-11-maven-
           runs-on: ubuntu-latest
       - name: Login to Docker Hub
         uses: docker/login-action@v1

@@ -39,6 +39,7 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -148,6 +149,7 @@ final class DockerLocalAuthIT {
     }
 
     @Test
+    @Disabled
     void shouldPullPushed() throws Exception {
         this.login(ArtipieServer.ALICE);
         this.client.run("push", this.image.remote());

@@ -1,5 +1,0 @@
-repo:
-  type: deb
-  storage:
-    type: fs
-    path: /var/artipie/data
