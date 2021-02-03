@@ -26,6 +26,7 @@ package com.artipie;
 
 import com.artipie.asto.SubStorage;
 import com.artipie.auth.LoggingAuth;
+import com.artipie.composer.AstoRepository;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.debian.http.DebianSlice;
 import com.artipie.docker.Docker;
@@ -210,7 +211,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "php":
-                slice = trimIfNotStandalone(settings, standalone, new PhpComposer(cfg.storage()));
+                slice = trimIfNotStandalone(
+                    settings, standalone, new PhpComposer(new AstoRepository(cfg.storage()))
+                );
                 break;
             case "nuget":
                 slice = trimIfNotStandalone(
