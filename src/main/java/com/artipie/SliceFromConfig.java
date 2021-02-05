@@ -28,6 +28,7 @@ import com.artipie.asto.SubStorage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.AstoRepository;
 import com.artipie.composer.http.PhpComposer;
+import com.artipie.debian.Config;
 import com.artipie.debian.http.DebianSlice;
 import com.artipie.docker.Docker;
 import com.artipie.docker.DockerPermissions;
@@ -312,7 +313,10 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "deb":
                 slice = trimIfNotStandalone(
                     settings, standalone,
-                    new DebianSlice(cfg.storage(), permissions, auth, cfg.name())
+                    new DebianSlice(
+                        cfg.storage(), permissions, auth,
+                        new Config.FromYaml(cfg.name(), cfg.settings())
+                    )
                 );
                 break;
             default:

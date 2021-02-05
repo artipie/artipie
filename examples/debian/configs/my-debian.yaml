@@ -3,3 +3,6 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
+  settings:
+    Components: main
+    Architectures: amd64
