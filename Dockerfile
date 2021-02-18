@@ -10,13 +10,13 @@ RUN addgroup -S -g 2020 artipie && \
     adduser -h /dev/null -D -S -g artipie -u 2021 -s /sbin/nologin artipie && \
     mkdir -p /etc/artipie /usr/lib/artipie /var/artipie && \
     chown artipie:artipie -R /etc/artipie /usr/lib/artipie /var/artipie
+USER 2020:2021
 
 COPY target/dependency  /usr/lib/artipie/lib
 COPY target/${JAR_FILE} /usr/lib/artipie/artipie.jar
 
 VOLUME /var/artipie /etc/artipie
 WORKDIR /var/artipie
-USER 2020:2021
 EXPOSE 8080
 CMD [ \
   "java", \
