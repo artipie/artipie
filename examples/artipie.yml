@@ -1,0 +1,5 @@
+meta:
+  layout: flat
+  storage:
+    type: fs
+    path: /var/artipie/cfg
