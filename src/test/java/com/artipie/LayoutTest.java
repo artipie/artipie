@@ -24,12 +24,13 @@
 package com.artipie;
 
 import com.artipie.asto.Key;
-import com.artipie.http.AllRepositoriesSlice;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Tests for {@link Layout}.
@@ -64,11 +65,16 @@ final class LayoutTest {
         );
     }
 
-    @Test
-    void extractsKey() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "foo/bar/baz/favicon.ico",
+        "foo/bar/robots.txt",
+        "foo/bar",
+    })
+    void extractsKey(final String path) {
         MatcherAssert.assertThat(
-            new Layout.Org().keyFromPath("/foo/bar/baz/zor"),
-            Matchers.is(Optional.of(new Key.From("foo", "bar")))
+            new Layout.Org().keyFromPath(path),
+            Matchers.is(Optional.of(new Key.From("foo/bar")))
         );
     }
 }
