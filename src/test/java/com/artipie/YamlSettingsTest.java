@@ -77,8 +77,8 @@ class YamlSettingsTest {
                 String.join(
                     "",
                     "meta:\n",
-                    "  storage:\n",
-                    "layout: org\n"
+                    "  storage: []\n",
+                    "  layout: org\n"
                 )
             ).readYamlMapping()
         );
