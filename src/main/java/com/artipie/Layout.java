@@ -97,7 +97,7 @@ public interface Layout {
     }
 
     /**
-     * Flat layout. Consists of two parts.
+     * Org layout.
      *
      * @since 0.14
      * @todo #586:30min Add unit tests for Layout.Org
