@@ -69,6 +69,25 @@ class YamlSettingsTest {
         );
     }
 
+
+    @Test
+    void shouldBeOrgLayout() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlInput(
+                String.join(
+                    "",
+                    "meta:\n",
+                    "  storage:\n",
+                    "layout: org\n"
+                )
+            ).readYamlMapping()
+        );
+        MatcherAssert.assertThat(
+            settings.layout(),
+            new IsInstanceOf(Layout.Org.class)
+        );
+    }
+
     @Test
     public void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
