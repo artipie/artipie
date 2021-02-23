@@ -69,7 +69,7 @@ final class LayoutTest {
     @ValueSource(strings = {
         "foo/bar/baz/favicon.ico",
         "foo/bar/robots.txt",
-        "foo/bar",
+        "foo/bar"
     })
     void extractsKey(final String path) {
         MatcherAssert.assertThat(
