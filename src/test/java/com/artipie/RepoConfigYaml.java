@@ -188,6 +188,21 @@ public final class RepoConfigYaml {
     }
 
     /**
+     * Adds Components and Architectures.
+     * @param components Components space separated list
+     * @param archs Architectures space separated list
+     * @return Itself
+     */
+    public RepoConfigYaml withComponentsAndArchs(final String components, final String archs) {
+        this.builder = this.builder.add(
+            "settings",
+            Yaml.createYamlMappingBuilder()
+                .add("Components", components).add("Architectures", archs).build()
+        );
+        return this;
+    }
+
+    /**
      * Saves repo config to the provided storage with given name.
      * @param storage Where to save
      * @param name Name to save with

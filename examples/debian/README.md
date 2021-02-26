@@ -12,7 +12,14 @@ repo:
   storage:
     type: fs
     path: /var/artipie/my-debian
+  settings:
+    Components: main
+    Architectures: amd64
 ```
+
+where `Components` is a space separated list of the repository components 
+(in other words components can be called areas or subdirectories) and `Architectures` is a 
+space separated list of the architectures, supported by the repository. These fields are mandatory.
 
 Start Artipie Docker image:
 
