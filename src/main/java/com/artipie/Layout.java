@@ -70,9 +70,6 @@ public interface Layout {
      * Flat layout. Consists of one part.
      *
      * @since 0.14
-     * @todo #586:30min Add unit tests for Layout.Flat
-     *  `Layout.Flat` class was extracted from existing code and lacks test coverage.
-     *  It's methods should be tested for all important execution paths.
      */
     final class Flat implements Layout {
 
@@ -85,7 +82,7 @@ public interface Layout {
         public Optional<Key> keyFromPath(final String path) {
             final String[] parts = splitPath(path);
             final Optional<Key> key;
-            if (parts.length >= 1) {
+            if (parts.length >= 1 && !parts[0].isBlank()) {
                 key = Optional.of(new Key.From(parts[0]));
             } else {
                 key = Optional.empty();

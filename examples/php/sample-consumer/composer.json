@@ -2,7 +2,7 @@
   "repositories": [
     {
       "type": "composer",
-      "url": "http://localhost:8080/my-php"
+      "url": "http://artipie.artipie:8080/my-php"
     },
     {
       "packagist": false

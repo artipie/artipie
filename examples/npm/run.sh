@@ -1,12 +1,7 @@
-basedir="$(dirname $(readlink -f $0))"
-source "${basedir}/../utils.sh"
+#!/bin/bash
 
-image="$1"
-port=8080
+opts="--registry=http://artipie.artipie:8080/npm_repo"
 
-opts="--registry=http://localhost:${port}/npm_repo"
-
-start_artipie "$image" "$port"
-cd "${basedir}/sample-npm-project" && npm publish "$opts"
-cd "${basedir}/sample-consumer" && npm install "$opts"
-cd "${basedir}/sample-npm-project" && npm unpublish "$opts" "sample-npm-project@1.0.0"
+cd /test/sample-npm-project && npm publish "$opts"
+cd /test/sample-consumer && npm install "$opts"
+cd /test/sample-npm-project && npm unpublish "$opts" "sample-npm-project@1.0.0"

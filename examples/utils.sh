@@ -41,7 +41,7 @@ function start_artipie {
     image=$ARTIPIE_IMAGE
   fi
   if [[ -z "$image" ]]; then
-    image="artipie/artipie:latest"
+    image="artipie/artipie:1.0-SNAPSHOT"
   fi
   local port="$2"
   if [[ -z "$port" ]]; then
@@ -52,9 +52,10 @@ function start_artipie {
   [[ -z "$image" || -z "$port" ]] && die "invalid image or port params"
   stop_artipie
   docker run --rm --detach --name artipie \
-    -v "${basedir}/artipie.yaml:/etc/artipie/artipie.yml" \
-    -v "${basedir}:/var/artipie" \
-    -p "${port}:80" "$image"
+    -v "${basedir}/../artipie.yml:/etc/artipie/artipie.yml" \
+    -v "${basedir}/cfg:/var/artipie/cfg" \
+    -v "${basedir}/data:/var/artipie/data" \
+    -p "${port}:8080" "$image"
   log_debug "artipie started"
   # stop artipie docker container on script exit
   if [[ -z "$ARTIPIE_NOSTOP" ]]; then
@@ -66,7 +67,7 @@ function stop_artipie {
   local container=$(docker ps --filter name=artipie -q 2> /dev/null)
   if [[ -n "$container" ]]; then
     log_debug "stopping artipie container ${container}"
-    docker stop "$container"
+    docker stop "$container" || echo "failed to stop"
   fi
 }
 

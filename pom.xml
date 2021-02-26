@@ -83,6 +83,15 @@ SOFTWARE.
       </roles>
       <timezone>+3</timezone>
     </developer>
+    <developer>
+      <id>5</id>
+      <name>Kirill Chernyavskiy</name>
+      <email>g4s8.public@gmail.com</email>
+      <roles>
+        <role>Architect</role>
+      </roles>
+      <timezone>+3</timezone>
+    </developer>
   </developers>
   <issueManagement>
     <system>GitHub</system>
@@ -106,6 +115,7 @@ SOFTWARE.
   <properties>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
+    <docker.image.name>artipie/artipie</docker.image.name>
   </properties>
   <dependencies>
     <dependency>
@@ -361,26 +371,38 @@ SOFTWARE.
         <filtering>false</filtering>
       </testResource>
     </testResources>
-    <plugins>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <skip>false</skip>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>com.qulice</groupId>
-        <artifactId>qulice-maven-plugin</artifactId>
-        <configuration>
-          <excludes combine.children="append">
-            <exclude>checkstyle:.*/src/test/resources/.*</exclude>
-            <exclude>pmd:.*/src/test/resources/.*</exclude>
-          </excludes>
-          <license>file:${basedir}/LICENSE.txt</license>
-        </configuration>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <configuration>
+            <skip>false</skip>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>com.qulice</groupId>
+          <artifactId>qulice-maven-plugin</artifactId>
+          <configuration>
+            <excludes combine.children="append">
+              <exclude>checkstyle:.*/src/test/resources/.*</exclude>
+              <exclude>pmd:.*/src/test/resources/.*</exclude>
+            </excludes>
+            <license>file:${basedir}/LICENSE.txt</license>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>com.jcabi</groupId>
+          <artifactId>jcabi-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>jcabi-versionalize-packages</id>
+              <phase>none</phase>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
   <profiles>
     <profile>
@@ -406,31 +428,68 @@ SOFTWARE.
       </build>
     </profile>
     <profile>
-      <id>assembly</id>
+      <id>docker-build</id>
+      <activation>
+        <file>
+          <exists>/var/run/docker.sock</exists>
+        </file>
+      </activation>
       <build>
         <plugins>
           <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
             <configuration>
-              <finalName>artipie</finalName>
               <archive>
                 <manifest>
                   <mainClass>com.artipie.VertxMain</mainClass>
                 </manifest>
               </archive>
-              <descriptorRefs>
-                <descriptorRef>jar-with-dependencies</descriptorRef>
-              </descriptorRefs>
             </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
             <executions>
               <execution>
-                <id>make-assembly</id>
+                <id>copy-dependencies</id>
                 <phase>package</phase>
                 <goals>
-                  <goal>single</goal>
+                  <goal>copy-dependencies</goal>
                 </goals>
               </execution>
             </executions>
+            <configuration>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>com.spotify</groupId>
+            <artifactId>dockerfile-maven-plugin</artifactId>
+            <version>1.4.13</version>
+            <executions>
+              <execution>
+                <id>default</id>
+                <goals>
+                  <goal>build</goal>
+                  <goal>push</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <repository>${docker.image.name}</repository>
+              <tag>${project.version}</tag>
+              <dockerfile>Dockerfile</dockerfile>
+              <buildArgs>
+                <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+              </buildArgs>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
           </plugin>
         </plugins>
       </build>

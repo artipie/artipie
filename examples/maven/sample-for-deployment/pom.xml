@@ -10,7 +10,7 @@
     <distributionManagement>
         <repository>
             <id>artipie</id>
-            <url>http://localhost:8080/my-maven</url>
+            <url>http://artipie.artipie:8080/my-maven</url>
         </repository>
     </distributionManagement>
 </project>

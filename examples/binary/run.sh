@@ -1,25 +1,20 @@
-set -x
+#!/bin/bash
+
 set -e
-
-# Start artipie.
-docker run --rm -d --name artipie -it -v $(pwd)/artipie.yaml:/etc/artipie/artipie.yml -v $(pwd):/var/artipie -p 8080:80 artipie/artipie:latest
-
-# Wait for container to be ready for new connections.
-sleep 5
+set -x
 
 # Create a file for subsequent publication.
 echo "hello world" > text.txt
 
-# Publish text.txt.
-curl --silent -X PUT --data-binary "@text.txt" http://localhost:8080/repo/text.txt
+curl -X PUT --data-binary "@text.txt" http://artipie.artipie:8080/bin/text.txt
 
 # Download the file.
-STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" -X GET http://localhost:8080/repo/text.txt)
-
-# Remove container.
-docker stop artipie
+STATUSCODE=$(curl --silent --output /dev/stderr --write-out "%{http_code}" http://artipie.artipie:8080/bin/text.txt)
 
 # Make sure status code is 200.
-if test $STATUSCODE -ne 200; then
+if [[ "$STATUSCODE" -ne 200 ]]; then
+  echo "TEST_FAILURE: binary response status=$STATUSCODE"
   exit 1
+else
+  echo "binary test completed succesfully"
 fi
