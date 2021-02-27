@@ -67,7 +67,7 @@ public interface Layout {
     }
 
     /**
-     * Flat layout. Consists of one part.
+     * Flat layout. Consists of two parts.
      *
      * @since 0.14
      */
