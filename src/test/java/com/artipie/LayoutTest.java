@@ -28,9 +28,11 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.llorllale.cactoos.matchers.IsTrue;
 
 /**
  * Tests for {@link Layout}.
@@ -43,7 +45,7 @@ final class LayoutTest {
     void alwaysAllowsDashboard() {
         MatcherAssert.assertThat(
             new Layout.Org().hasDashboard(),
-            Matchers.is(true)
+            new IsTrue()
         );
     }
 
@@ -61,7 +63,7 @@ final class LayoutTest {
     void emptyIfPathIsNotAKey() {
         MatcherAssert.assertThat(
             new Layout.Org().keyFromPath("/foo"),
-            Matchers.is(Optional.empty())
+            new IsEqual<>(Optional.empty())
         );
     }
 
@@ -69,7 +71,7 @@ final class LayoutTest {
     void emptyIfPathIsEmptyString() {
         MatcherAssert.assertThat(
             new Layout.Org().keyFromPath(""),
-            Matchers.is(Optional.empty())
+            new IsEqual<>(Optional.empty())
         );
     }
 
@@ -82,7 +84,9 @@ final class LayoutTest {
     void extractsKey(final String path) {
         MatcherAssert.assertThat(
             new Layout.Org().keyFromPath(path),
-            Matchers.is(Optional.of(new Key.From("foo/bar")))
+            new IsEqual<>(
+                Optional.of(new Key.From("foo/bar"))
+            )
         );
     }
 }
