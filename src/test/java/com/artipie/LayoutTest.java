@@ -59,18 +59,14 @@ final class LayoutTest {
         );
     }
 
-    @Test
-    void emptyIfPathIsNotAKey() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "/foo",
+        ""
+    })
+    void emptyForPathOfLessThanTwoParts(final String path) {
         MatcherAssert.assertThat(
-            new Layout.Org().keyFromPath("/foo"),
-            new IsEqual<>(Optional.empty())
-        );
-    }
-
-    @Test
-    void emptyIfPathIsEmptyString() {
-        MatcherAssert.assertThat(
-            new Layout.Org().keyFromPath(""),
+            new Layout.Org().keyFromPath(path),
             new IsEqual<>(Optional.empty())
         );
     }
