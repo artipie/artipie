@@ -35,7 +35,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Tests for {@link Layout}.
  *
- * @since 0.14
+ * @since 0.16
  */
 final class LayoutTest {
 
