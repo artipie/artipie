@@ -97,7 +97,7 @@ public interface Layout {
     }
 
     /**
-     * Org layout.
+     * Org layout. Consists of one part.
      *
      * @since 0.14
      */
