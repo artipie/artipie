@@ -65,6 +65,14 @@ final class LayoutTest {
         );
     }
 
+    @Test
+    void emptyIfPathIsEmptyString() {
+        MatcherAssert.assertThat(
+            new Layout.Org().keyFromPath(""),
+            Matchers.is(Optional.empty())
+        );
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
         "foo/bar/baz/favicon.ico",
