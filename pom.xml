@@ -291,7 +291,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>0.7.3</version>
+      <version>0.7.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
