@@ -67,7 +67,7 @@ public interface Layout {
     }
 
     /**
-     * Flat layout. Consists of two parts.
+     * Flat layout. Consists of one part.
      *
      * @since 0.14
      */
@@ -97,7 +97,7 @@ public interface Layout {
     }
 
     /**
-     * Org layout. Consists of one part.
+     * Org layout. Consists of two parts.
      *
      * @since 0.14
      */
