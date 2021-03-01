@@ -199,7 +199,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.33.1</version>
+      <version>0.34</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -291,7 +291,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>0.7.3</version>
+      <version>0.7.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -301,7 +301,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>0.11</version>
+      <version>0.13.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
