@@ -23,34 +23,27 @@
  */
 package com.artipie.maven;
 
+import com.artipie.test.TestDeployment;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container.ExecResult;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.Network;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.utility.MountableFile;
 
 /**
  * Integration tests for Maven repository.
@@ -65,72 +58,38 @@ import org.testcontainers.utility.MountableFile;
 final class MavenITCase {
 
     /**
-     * Artipie container.
+     * Test deployments.
+     * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    private GenericContainer<?> artipie;
-
-    /**
-     * Client container.
-     */
-    private GenericContainer<?> client;
-
-    /**
-     * Network.
-     */
-    private Network net;
-
-    @BeforeEach
-    void init() throws Exception {
-        this.net = Network.newNetwork();
-        this.artipie = new GenericContainer<>("artipie/artipie:1.0-SNAPSHOT")
-            .withNetwork(this.net).withNetworkAliases("artipie")
-            .withClasspathResourceMapping(
-                "artipie.yaml", "/etc/artipie/artipie.yml", BindMode.READ_ONLY
-            )
-            .withClasspathResourceMapping(
-                "maven.yml", "/var/artipie/repo/my-maven.yml", BindMode.READ_ONLY
-            )
-            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("MavenITCase:server")));
-        this.client = new GenericContainer<>("maven:3.6.3-jdk-11")
+    @RegisterExtension
+    final TestDeployment containers = new TestDeployment(
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withRepoConfig("maven.yml", "my-maven"),
+        () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
                 "maven-settings.xml", "/w/settings.xml", BindMode.READ_ONLY
             )
-            .withNetwork(this.net)
-            .withCommand("tail", "-f", "/dev/null");
-        this.artipie.start();
-        this.client.start();
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        this.artipie.stop();
-        this.client.stop();
-        this.net.close();
-    }
+    );
 
     @ParameterizedTest
     @CsvSource({"helloworld,0.1", "snapshot,1.0-SNAPSHOT"})
     void downloadsArtifact(final String type, final String vers) throws Exception {
         final String meta = String.format("com/artipie/%s/maven-metadata.xml", type);
-        this.artipie.copyFileToContainer(
-            MountableFile.forClasspathResource(meta),
-            String.join("/", "/var/artipie/data/my-maven", meta)
+        this.containers.putResourceArtipie(
+            meta, String.join("/", "/var/artipie/data/my-maven", meta)
         );
         final String base = String.format("com/artipie/%s/%s", type, vers);
         MavenITCase.getResourceFiles(base).stream().map(r -> String.join("/", base, r)).forEach(
-            item -> this.artipie.copyFileToContainer(
-                MountableFile.forClasspathResource(item),
-                String.join("/", "/var/artipie/data/my-maven", item)
+            item -> this.containers.putResourceArtipie(
+                item, String.join("/", "/var/artipie/data/my-maven", item)
             )
         );
-        MatcherAssert.assertThat(
-            this.client.execInContainer(
-                StandardCharsets.UTF_8,
-                "mvn", "-B", "-q", "-s", "settings.xml", "-e", "dependency:get",
-                String.format("-Dartifact=com.artipie:%s:%s", type, vers)
-            ),
-            new ContainerResultMatcher(Matchers.equalTo(0))
+        this.containers.assertExec(
+            "Failed to get dependency",
+            new ContainerResultMatcher(Matchers.equalTo(0)),
+            "mvn", "-B", "-q", "-s", "settings.xml", "-e", "dependency:get",
+            String.format("-Dartifact=com.artipie:%s:%s", type, vers)
         );
     }
 
@@ -138,27 +97,20 @@ final class MavenITCase {
     @Disabled
     @CsvSource({"helloworld,0.1,0.1", "snapshot,1.0-SNAPSHOT"})
     void deploysArtifact(final String type, final String vers) throws Exception {
-        this.client.copyFileToContainer(
-            MountableFile.forClasspathResource(String.format("%s-src/pom.xml", type)),
-            "/w/pom.xml"
+        this.containers.putResourceArtipie(
+            String.format("%s-src/pom.xml", type), "/w/pom.xml"
         );
-        MatcherAssert.assertThat(
+        this.containers.assertExec(
             "Deploy failed",
-            this.client.execInContainer(
-                StandardCharsets.UTF_8,
-                "mvn", "-B", "-q", "-s", "settings.xml",
-                "deploy", "-Dmaven.install.skip=true"
-            ),
-            new ContainerResultMatcher(Matchers.is(0))
+            new ContainerResultMatcher(Matchers.is(0)),
+            "mvn", "-B", "-q", "-s", "settings.xml",
+            "deploy", "-Dmaven.install.skip=true"
         );
-        MatcherAssert.assertThat(
+        this.containers.assertExec(
             "Download failed",
-            this.client.execInContainer(
-                StandardCharsets.UTF_8,
-                "mvn", "-B", "-q", "-s", "settings.xml", "-U", "dependency:get",
-                String.format("-Dartifact=com.artipie:%s:%s", type, vers)
-            ),
-            new ContainerResultMatcher(Matchers.is(0))
+            new ContainerResultMatcher(Matchers.is(0)),
+            "mvn", "-B", "-q", "-s", "settings.xml", "-U", "dependency:get",
+            String.format("-Dartifact=com.artipie:%s:%s", type, vers)
         );
     }
 
@@ -168,7 +120,8 @@ final class MavenITCase {
      * @return List of subresources
      * @todo #855:30min Refactor resource extracting
      *  Consider creating a method to scan resources from directory and
-     *  bind it to container path.
+     *  bind it to container path. Also, move maven-related resources
+     *  from test resource root directory to subfulder, e.g. `maven-it`.
      */
     @SuppressWarnings("PMD.AssignmentInOperand")
     private static List<String> getResourceFiles(final String path) throws IOException {
@@ -204,7 +157,10 @@ final class MavenITCase {
      * Container exec result matcher.
      * @since 0.16
      * @todo #855:30min Move this class to test sources,
-     *  add additional constructors and default to expect zero status.
+     *  add additional constructors for int status and default to expect zero status.
+     *  Consider creating standard enum or public static fields for
+     *  `SUCCESS` - exit code is `0` and
+     *  `ERROR` - exit code is greater than `0`
      */
     private static final class ContainerResultMatcher extends TypeSafeMatcher<ExecResult> {
 
