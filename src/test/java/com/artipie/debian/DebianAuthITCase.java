@@ -158,7 +158,7 @@ public final class DebianAuthITCase {
         this.server = new ArtipieServer(
             this.tmp, DebianAuthITCase.NAME,
             new RepoConfigYaml("deb").withFileStorage(this.tmp.resolve("repos"))
-                .withPermissions(perms)
+                .withPermissions(perms).withComponentsAndArchs("main", "amd64")
         );
         this.port = this.server.start();
         final Path setting = this.tmp.resolve("sources.list");
