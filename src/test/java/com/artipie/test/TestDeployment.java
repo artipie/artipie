@@ -31,12 +31,10 @@ import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
@@ -45,6 +43,10 @@ import org.testcontainers.utility.MountableFile;
  * Artipie container can be accessed from client container by {@code artipie} hostname.
  * To run a command in client container and match a result use {@code assertExec} method.
  * @since 0.19
+ * @todo #855:30min Add Slf4j logging consumer for artipie container
+ *  It's not working for some reason and prints nothing to the test output.
+ *  A workaround was added with custom consumer for system stdout frame printing as
+ *  lambda. Properly configure SLf4j consumer and remove this workaround.
  */
 public final class TestDeployment implements BeforeEachCallback, AfterEachCallback {
 
@@ -85,12 +87,15 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     }
 
     @Override
+    @SuppressWarnings("PMD.SystemPrintln")
     public void beforeEach(final ExtensionContext context) throws Exception {
         this.net = Network.newNetwork();
         this.artipie = this.asup.get()
             .withNetwork(this.net).withNetworkAliases("artipie");
         this.artipie = this.artipie.withLogConsumer(
-            new Slf4jLogConsumer(LoggerFactory.getLogger(this.artipie.getDockerImageName()))
+            frame -> System.out.printf(
+                "%s: %s", this.artipie.getDockerImageName(), frame.getUtf8String()
+            )
         );
         this.client = this.csup.get()
             .withNetwork(this.net)
@@ -138,7 +143,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
      * @param res Resource path
      * @param path Artipie path
      */
-    public void putResourceArtipie(final String res, final String path) {
+    public void putResourceToArtipie(final String res, final String path) {
         this.artipie.copyFileToContainer(
             MountableFile.forClasspathResource(res), path
         );

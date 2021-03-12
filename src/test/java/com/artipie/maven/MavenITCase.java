@@ -76,12 +76,12 @@ final class MavenITCase {
     @CsvSource({"helloworld,0.1", "snapshot,1.0-SNAPSHOT"})
     void downloadsArtifact(final String type, final String vers) throws Exception {
         final String meta = String.format("com/artipie/%s/maven-metadata.xml", type);
-        this.containers.putResourceArtipie(
+        this.containers.putResourceToArtipie(
             meta, String.join("/", "/var/artipie/data/my-maven", meta)
         );
         final String base = String.format("com/artipie/%s/%s", type, vers);
         MavenITCase.getResourceFiles(base).stream().map(r -> String.join("/", base, r)).forEach(
-            item -> this.containers.putResourceArtipie(
+            item -> this.containers.putResourceToArtipie(
                 item, String.join("/", "/var/artipie/data/my-maven", item)
             )
         );
@@ -97,7 +97,7 @@ final class MavenITCase {
     @Disabled
     @CsvSource({"helloworld,0.1,0.1", "snapshot,1.0-SNAPSHOT"})
     void deploysArtifact(final String type, final String vers) throws Exception {
-        this.containers.putResourceArtipie(
+        this.containers.putResourceToArtipie(
             String.format("%s-src/pom.xml", type), "/w/pom.xml"
         );
         this.containers.assertExec(
@@ -121,7 +121,7 @@ final class MavenITCase {
      * @todo #855:30min Refactor resource extracting
      *  Consider creating a method to scan resources from directory and
      *  bind it to container path. Also, move maven-related resources
-     *  from test resource root directory to subfulder, e.g. `maven-it`.
+     *  from test resource root directory to subfolder, e.g. `maven-it`.
      */
     @SuppressWarnings("PMD.AssignmentInOperand")
     private static List<String> getResourceFiles(final String path) throws IOException {
