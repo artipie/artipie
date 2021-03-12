@@ -1,0 +1,6 @@
+meta:
+  storage:
+    type: fs
+    path: /var/artipie/repo
+  layout: flat
+  base_url: http://artipie:8080/
