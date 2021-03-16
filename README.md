@@ -41,29 +41,29 @@ The following set of features makes Artipie unique among all others:
     [HuaweiCloud OBS](https://www.huaweicloud.com/en-us/product/obs.html) etc.
   * Its quality of Java code is extraordinary high :)
 
+# Quickstart
+
 The fastest way to start using Artipie is via
-[Docker](https://docs.docker.com/get-docker/). First,
-create a new directory `artipie` and `repo` sub-directory inside it. Then, put your
-YAML config file into the `repo` sub-dir. Make sure that the name of your config file
-is the name of repository you are going to host, and its name matches `[a-z0-9_]{3,32}`.
-For example `foo.yaml`:
-
-```yaml
-repo:
-  type: maven
-  storage:
-    type: fs
-    path: /var/artipie
-```
-
-Now, go back to `artipie` and start the container:
+[Docker](https://docs.docker.com/get-docker/):
 
 ```bash
-$ docker run -p 8080:80 artipie/artipie:latest
+docker run --rm --name artipie -p 8080:8080 --user=artipie:artipie artipie/artipie:latest
 ```
 
-You should be able to use it with [Maven](https://maven.apache.org/)
-at `http://localhost:8080`.
+It'll start a new Docker container with latest Artipie image. A new image generates
+default server config if not found at `/etc/artipie/artipie.yml`, prints initial
+credentials to console and prints a link to the dashboard. If started on localhost with command
+above, the dashboard URI is http://localhost:8080/dashboard/artipie.
+
+
+To create a new artifact repository:
+ 1. Go to the dashboard
+ 2. Enter the name of a new repository, choose a type, and click button "Add"
+ 3. Artipie generates standard configuration for this kind of repository, and
+  asks for review or edit. You can ignore this step for now.
+ 4. Below the repository configuration, the page will have a simple configuration
+  for your client, and usage examples, e.g. the code for `pom.xml` for Maven repository.
+
 
 More examples are [here](./examples).
 
