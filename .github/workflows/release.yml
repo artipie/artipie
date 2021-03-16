@@ -18,11 +18,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-jdk-11-maven-
           runs-on: ubuntu-latest
+      - run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - run: mvn versions:set -DnewVersion=${{ env.RELEASE_VERSION }}
+      - run: mvn -B deploy -Pdocker -Ddocker.image.name=${{ secrets.DOCKERHUB_REPO }}
+      - run: mvn versions:set -DnewVersion=latest
       - run: mvn -B deploy -Pdocker -Ddocker.image.name=${{ secrets.DOCKERHUB_REPO }}
   # run-benchmarks:
   #   runs-on: ubuntu-latest
