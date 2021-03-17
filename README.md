@@ -64,6 +64,12 @@ To create a new artifact repository:
  4. Below the repository configuration, the page will have a simple configuration
   for your client, and usage examples, e.g. the code for `pom.xml` for Maven repository.
 
+Default server configuration refers to `/var/artipie/repos` to look up for repository configurations.
+You may want to mount local configurations here to edit it manually by adding `docker run` mount option:
+`-v <your-local-config-dir>:/var/artipie/repo`, where `<your-local-config-dir>` is you local config directory.<br/>
+**Important:** check that `<your-local-config-dir>` has correct permissions, it should be `2020:2021`, to change it correctly use
+`chown -R 2020:2021 <your-local-config-dir>`.
+
 
 More examples are [here](./examples).
 
