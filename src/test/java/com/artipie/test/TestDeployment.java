@@ -26,6 +26,7 @@ package com.artipie.test;
 
 import java.io.IOException;
 import java.util.function.Supplier;
+import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -35,6 +36,7 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
@@ -120,6 +122,22 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     }
 
     /**
+     * Assert binary file in Artipie container using matcher provided.
+     * @param msg Assertion message
+     * @param path Path in container
+     * @param matcher Matcher InputStream of content
+     */
+    public void assertArtipieContent(final String msg, final String path,
+        final Matcher<byte[]> matcher) {
+        this.artipie.copyFileFromContainer(
+            path, stream -> {
+                MatcherAssert.assertThat(msg, IOUtils.toByteArray(stream), matcher);
+                return null;
+            }
+        );
+    }
+
+    /**
      * Exec command in client container and assert result.
      * @param msg Assertion message on failure
      * @param matcher Exec result matcher
@@ -136,6 +154,15 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
             return;
         }
         MatcherAssert.assertThat(msg, exec, matcher);
+    }
+
+    /**
+     * Put binary data into Artipie container.
+     * @param bin Data to put
+     * @param path Path in the container
+     */
+    public void putBinaryToArtipie(final byte[] bin, final String path) {
+        this.artipie.copyFileToContainer(Transferable.of(bin), path);
     }
 
     /**

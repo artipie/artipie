@@ -55,7 +55,7 @@ import org.testcontainers.containers.Container.ExecResult;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
-final class MavenITCase {
+public final class MavenITCase {
 
     /**
      * Test deployments.
@@ -162,7 +162,7 @@ final class MavenITCase {
      *  `SUCCESS` - exit code is `0` and
      *  `ERROR` - exit code is greater than `0`
      */
-    private static final class ContainerResultMatcher extends TypeSafeMatcher<ExecResult> {
+    public static final class ContainerResultMatcher extends TypeSafeMatcher<ExecResult> {
 
         /**
          * Expected status matcher.
@@ -173,7 +173,7 @@ final class MavenITCase {
          * New matcher.
          * @param status Expected status
          */
-        ContainerResultMatcher(final Matcher<Integer> status) {
+        public ContainerResultMatcher(final Matcher<Integer> status) {
             this.status = status;
         }
 
