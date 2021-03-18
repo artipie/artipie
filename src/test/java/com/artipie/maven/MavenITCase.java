@@ -36,6 +36,8 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -170,21 +172,44 @@ public final class MavenITCase {
         private final Matcher<Integer> status;
 
         /**
+         * Stdout matcher.
+         */
+        private final Matcher<String> stdout;
+
+        /**
+         * New matcher.
+         * @param status Expected status
+         * @param stdout Expected message in stdout
+         */
+        public ContainerResultMatcher(final Matcher<Integer> status, final Matcher<String> stdout) {
+            this.status = status;
+            this.stdout = stdout;
+        }
+
+        /**
          * New matcher.
          * @param status Expected status
          */
         public ContainerResultMatcher(final Matcher<Integer> status) {
-            this.status = status;
+            this(status, new StringContains(""));
+        }
+
+        /**
+         * New default matcher with expected status 0.
+         */
+        public ContainerResultMatcher() {
+            this(new IsEqual<>(0), new StringContains(""));
         }
 
         @Override
         public void describeTo(final Description description) {
-            description.appendText("status ").appendDescriptionOf(this.status);
+            description.appendText("status ").appendDescriptionOf(this.status)
+            .appendText("stdout ").appendDescriptionOf(this.stdout);
         }
 
         @Override
         public boolean matchesSafely(final ExecResult item) {
-            return this.status.matches(item.getExitCode());
+            return this.status.matches(item.getExitCode()) && this.stdout.matches(item.getStdout());
         }
 
         @Override

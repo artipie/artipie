@@ -315,7 +315,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                     settings, standalone,
                     new DebianSlice(
                         cfg.storage(), permissions, auth,
-                        new Config.FromYaml(cfg.name(), cfg.settings())
+                        new Config.FromYaml(cfg.name(), cfg.settings(), settings.storage())
                     )
                 );
                 break;
