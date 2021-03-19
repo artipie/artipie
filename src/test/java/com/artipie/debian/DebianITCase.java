@@ -23,32 +23,18 @@
  */
 package com.artipie.debian;
 
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
-import com.artipie.asto.SubStorage;
-import com.artipie.asto.fs.FileStorage;
-import com.artipie.asto.test.TestResource;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.test.TestContainer;
-import java.io.DataOutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.artipie.maven.MavenITCase;
+import com.artipie.test.TestDeployment;
+import java.io.IOException;
 import org.cactoos.list.ListOf;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.testcontainers.containers.BindMode;
 
 /**
  * Debian integration test.
@@ -60,106 +46,62 @@ import org.junit.jupiter.params.provider.ValueSource;
 public final class DebianITCase {
 
     /**
-     * Repository name.
+     * Test deployments.
+     * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    private static final String NAME = "my-debian";
-
-    /**
-     * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
-    @TempDir
-    Path tmp;
-
-    /**
-     * Tested Artipie server.
-     */
-    private ArtipieServer server;
-
-    /**
-     * Container.
-     */
-    private TestContainer cntn;
-
-    /**
-     * Storage.
-     */
-    private Storage storage;
-
-    /**
-     * Artipie server port.
-     */
-    private int port;
+    @RegisterExtension
+    final TestDeployment containers = new TestDeployment(
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withRepoConfig("debian/debian.yml", "my-debian"),
+        () -> new TestDeployment.ClientContainer("debian")
+            .withWorkingDirectory("/w")
+            .withClasspathResourceMapping(
+                "debian/sources.list", "/w/sources.list", BindMode.READ_ONLY
+            )
+            .withClasspathResourceMapping(
+                "debian/aglfn_1.7-3_amd64.deb", "/w/aglfn_1.7-3_amd64.deb", BindMode.READ_ONLY
+            )
+    );
 
     @BeforeEach
-    void init() throws Exception {
-        this.storage = new FileStorage(this.tmp);
-        this.server = new ArtipieServer(
-            this.tmp, DebianITCase.NAME,
-            new RepoConfigYaml("deb").withFileStorage(this.tmp.resolve("repos"))
-                .withComponentsAndArchs("main", "amd64")
+    void setUp() throws IOException {
+        this.containers.assertExec(
+            "Apt-get update failed",
+            new MavenITCase.ContainerResultMatcher(),
+            "apt-get", "update"
         );
-        this.port = this.server.start();
-        final Path setting = this.tmp.resolve("sources.list");
-        Files.write(
-            setting,
-            String.format(
-                "deb [trusted=yes] http://host.testcontainers.internal:%d/my-debian %s main",
-                this.port, DebianITCase.NAME
-            ).getBytes()
+        this.containers.assertExec(
+            "Failed to install curl",
+            new MavenITCase.ContainerResultMatcher(),
+            "apt-get", "install", "-y", "curl"
         );
-        this.cntn = new TestContainer("debian", this.tmp);
-        this.cntn.start(this.port);
-        this.cntn.execStdout("mv", "/home/sources.list", "/etc/apt/");
+        this.containers.assertExec(
+            "Failed to move debian sources.list",
+            new MavenITCase.ContainerResultMatcher(),
+            "mv", "/w/sources.list", "/etc/apt/"
+        );
     }
 
     @Test
-    void searchWorks() throws Exception {
-        final Storage sub = new SubStorage(
-            new Key.From("repos", DebianITCase.NAME), this.storage
+    void pushAndInstallWorks() throws Exception {
+        this.containers.assertExec(
+            "Failed to upload deb package",
+            new MavenITCase.ContainerResultMatcher(),
+            "curl", "http://artipie:8080/my-debian/main/aglfn_1.7-3_amd64.deb",
+            "--upload-file", "/w/aglfn_1.7-3_amd64.deb"
         );
-        new TestResource("debian/pspp_1.2.0-3_amd64.deb")
-            .saveTo(sub, new Key.From("main", "pspp_1.2.0-3_amd64.deb"));
-        new TestResource("debian/Packages.gz").saveTo(
-            sub,
-            new Key.From(String.format("dists/%s/main/binary-amd64/Packages.gz", DebianITCase.NAME))
+        this.containers.assertExec(
+            "Apt-get update failed",
+            new MavenITCase.ContainerResultMatcher(),
+            "apt-get", "update"
         );
-        this.cntn.execStdout("apt-get", "update");
-        MatcherAssert.assertThat(
-            this.cntn.execStdout("apt-cache", "search", "pspp"),
-            new StringContainsInOrder(new ListOf<>("pspp", "Statistical analysis tool"))
+        this.containers.assertExec(
+            "Package was not downloaded and unpacked",
+            new MavenITCase.ContainerResultMatcher(
+                new IsEqual<>(0),
+                new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))
+            ),
+            "apt-get", "install", "-y", "aglfn"
         );
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"POST", "PUT"})
-    void pushAndInstallWorks(final String method) throws Exception {
-        final HttpURLConnection con = (HttpURLConnection) new URL(
-            String.format(
-                "http://localhost:%d/%s/main/aglfn_1.7-3_amd64.deb", this.port, DebianITCase.NAME
-            )
-        ).openConnection();
-        con.setDoOutput(true);
-        con.setRequestMethod(method);
-        final DataOutputStream out = new DataOutputStream(con.getOutputStream());
-        out.write(new TestResource("debian/aglfn_1.7-3_amd64.deb").asBytes());
-        out.close();
-        MatcherAssert.assertThat(
-            "Response for upload is OK",
-            con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
-        );
-        this.cntn.execStdout("apt-get", "update");
-        MatcherAssert.assertThat(
-            "Package was downloaded and unpacked",
-            this.cntn.execStdout("apt-get", "install", "-y", "aglfn"),
-            new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))
-        );
-    }
-
-    @AfterEach
-    void stop() {
-        this.server.stop();
-        this.cntn.close();
     }
 }
