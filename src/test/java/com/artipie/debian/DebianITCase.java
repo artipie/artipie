@@ -66,7 +66,7 @@ public final class DebianITCase {
     @BeforeEach
     void setUp() throws IOException {
         this.containers.assertExec(
-            "apt-get update successful",
+            "Apt-get update failed",
             new MavenITCase.ContainerResultMatcher(),
             "apt-get", "update"
         );
@@ -76,7 +76,7 @@ public final class DebianITCase {
             "apt-get", "install", "-y", "curl"
         );
         this.containers.assertExec(
-            "Move debian sources",
+            "Failed to move debian sources.list",
             new MavenITCase.ContainerResultMatcher(),
             "mv", "/w/sources.list", "/etc/apt/"
         );
@@ -85,18 +85,18 @@ public final class DebianITCase {
     @Test
     void pushAndInstallWorks() throws Exception {
         this.containers.assertExec(
-            "Deb package uploaded",
+            "Failed to upload deb package",
             new MavenITCase.ContainerResultMatcher(),
             "curl", "http://artipie:8080/my-debian/main/aglfn_1.7-3_amd64.deb",
             "--upload-file", "/w/aglfn_1.7-3_amd64.deb"
         );
         this.containers.assertExec(
-            "Apt-get update successful",
+            "Apt-get update failed",
             new MavenITCase.ContainerResultMatcher(),
             "apt-get", "update"
         );
         this.containers.assertExec(
-            "Package was downloaded and unpacked",
+            "Package was not downloaded and unpacked",
             new MavenITCase.ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))
