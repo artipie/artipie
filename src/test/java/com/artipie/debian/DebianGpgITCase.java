@@ -42,7 +42,7 @@ import org.testcontainers.containers.BindMode;
 
 /**
  * Debian integration test.
- * @since 0.15
+ * @since 0.17
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
@@ -73,7 +73,7 @@ public final class DebianGpgITCase {
     @BeforeEach
     void setUp() throws IOException {
         this.containers.assertExec(
-            "apt-get update successful",
+            "Apt-get update failed",
             new MavenITCase.ContainerResultMatcher(),
             "apt-get", "update"
         );
