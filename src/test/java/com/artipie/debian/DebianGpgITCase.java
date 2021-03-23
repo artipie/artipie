@@ -60,7 +60,7 @@ public final class DebianGpgITCase {
             .withClasspathResourceMapping(
                 "debian/secret-keys.gpg", "/var/artipie/repo/secret-keys.gpg", BindMode.READ_ONLY
             ),
-        () -> new TestDeployment.ClientContainer("debian")
+        () -> new TestDeployment.ClientContainer("debian:10.8")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
                 "debian/aglfn_1.7-3_amd64.deb", "/w/aglfn_1.7-3_amd64.deb", BindMode.READ_ONLY
