@@ -177,6 +177,15 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     }
 
     /**
+     * Put binary data into client container.
+     * @param bin Data to put
+     * @param path Path in the container
+     */
+    public void putBinaryToClient(final byte[] bin, final String path) {
+        this.client.copyFileToContainer(Transferable.of(bin), path);
+    }
+
+    /**
      * Artipie container builder.
      * @since 0.18
      */

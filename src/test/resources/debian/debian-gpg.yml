@@ -1,0 +1,11 @@
+---
+repo:
+  type: deb
+  storage:
+    type: fs
+    path: /var/artipie/data/
+  settings:
+    Components: main
+    Architectures: amd64
+    gpg_password: 1q2w3e4r5t6y7u
+    gpg_secret_key: secret-keys.gpg
