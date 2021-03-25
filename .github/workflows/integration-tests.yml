@@ -26,6 +26,8 @@ jobs:
           key: ${{ runner.os }}-jdk-${{ matrix.java }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-jdk-${{ matrix.java }}-maven-
+      - name: Build it with Maven
+          run: mvn -B test -Dtest=DebianITCase,DebianGpgITCase,BinaryITCase,RpmITCase
       # @todo #851:30min Fix integration tests. Integration tests should start Artipie docker
       #  image built on package state (artipie/artipie:1.0-SNAPSHOT) using testcontainers,
       #  and test it against different use cases. Update integration tests and enable
