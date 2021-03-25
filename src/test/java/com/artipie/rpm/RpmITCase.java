@@ -79,7 +79,7 @@ public final class RpmITCase {
     }
 
     @Test
-    void addsRpmAndCreatesRepodata() throws Exception {
+    void uploadsAndInstallsThePackage() throws Exception {
         this.containers.assertExec(
             "Failed to upload rpm package",
             new MavenITCase.ContainerResultMatcher(),
