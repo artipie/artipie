@@ -23,201 +23,77 @@
  */
 package com.artipie.rpm;
 
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPerms;
-import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
-import com.artipie.asto.fs.FileStorage;
-import com.artipie.asto.test.TestResource;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.management.RepoPermissions;
-import com.artipie.test.RepositoryUrl;
-import com.artipie.test.TestContainer;
-import com.google.common.io.ByteStreams;
-import java.io.ByteArrayInputStream;
+import com.artipie.maven.MavenITCase;
+import com.artipie.test.TestDeployment;
 import java.io.IOException;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.cactoos.list.ListOf;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.testcontainers.Testcontainers;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.testcontainers.containers.BindMode;
 
 /**
  * IT case for RPM repository.
  * @since 0.12
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-@EnabledOnOs({OS.LINUX, OS.MAC})
+@DisabledOnOs(OS.WINDOWS)
 public final class RpmITCase {
 
     /**
-     * Repo name.
+     * Test deployments.
+     * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    private static final String REPO = "my-rpm";
-
-    /**
-     * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
-    @TempDir
-    Path tmp;
-
-    /**
-     * Tested Artipie server.
-     */
-    private ArtipieServer server;
-
-    /**
-     * Artipie server port.
-     */
-    private int port;
-
-    /**
-     * Container.
-     */
-    private TestContainer cntn;
-
-    void startArtipie(final boolean anonymous) throws IOException {
-        final RepoConfigYaml config = new RepoConfigYaml("rpm").withFileStorage(this.tmp);
-        if (!anonymous) {
-            config.withPermissions(
-                new RepoPerms(
-                    new RepoPermissions.PermissionItem(
-                        ArtipieServer.ALICE.name(), new ListOf<>("*")
-                    )
-                )
-            );
-        }
-        this.server = new ArtipieServer(this.tmp, RpmITCase.REPO, config);
-        this.port = this.server.start();
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void addsRpmAndCreatesRepodata(final boolean anonymous) throws Exception {
-        this.startArtipie(anonymous);
-        final HttpURLConnection con = (HttpURLConnection) new URL(
-            String.format(
-                "http://localhost:%s/%s/time-1.7-45.el7.x86_64.rpm", this.port, RpmITCase.REPO
+    @RegisterExtension
+    final TestDeployment containers = new TestDeployment(
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withRepoConfig("rpm/my-rpm.yml", "my-rpm"),
+        () -> new TestDeployment.ClientContainer("centos:centos8")
+            .withClasspathResourceMapping(
+                "rpm/time-1.7-45.el7.x86_64.rpm", "/w/time-1.7-45.el7.x86_64.rpm",
+                BindMode.READ_ONLY
             )
-        ).openConnection();
-        con.setRequestMethod("PUT");
-        con.setDoOutput(true);
-        if (!anonymous) {
-            con.setAuthenticator(
-                new Authenticator() {
-                    @Override
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(
-                            ArtipieServer.ALICE.name(),
-                            ArtipieServer.ALICE.password().toCharArray()
-                        );
-                    }
-                }
-            );
-        }
-        ByteStreams.copy(
-            new ByteArrayInputStream(new TestResource("rpm/time-1.7-45.el7.x86_64.rpm").asBytes()),
-            con.getOutputStream()
-        );
-        MatcherAssert.assertThat(
-            "Response status is 202",
-            con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.ACCEPTED.code()))
-        );
-        MatcherAssert.assertThat(
-            "Repository xml indexes are created",
-            new FileStorage(this.tmp).list(new Key.From(RpmITCase.REPO, "repodata")).join().size(),
-            new IsEqual<>(4)
-        );
-        con.disconnect();
-    }
+    );
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void listYumOperationWorks(final boolean anonymous) throws Exception {
-        this.startArtipie(anonymous);
-        this.prepareRpmRepository();
-        this.prepareContainer(anonymous);
-        MatcherAssert.assertThat(
-            "Lists 'time' package",
-            this.yumExec("list"),
-            new StringContainsInOrder(new ListOf<>("time.x86_64", "1.7-45.el7"))
+    @BeforeEach
+    void setUp() throws IOException {
+        this.containers.assertExec(
+            "Yum install curl failed",
+            new MavenITCase.ContainerResultMatcher(),
+            "yum", "-y", "install", "curl"
         );
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void installYumOperationWorks(final boolean anonymous) throws Exception {
-        this.startArtipie(anonymous);
-        this.prepareRpmRepository();
-        this.prepareContainer(anonymous);
-        MatcherAssert.assertThat(
-            "Installs 'time' package",
-            this.yumExec("install"),
-            new StringContainsInOrder(new ListOf<>("time-1.7-45.el7.x86_64", "Complete!"))
-        );
-    }
-
-    @AfterEach
-    void close() {
-        this.server.stop();
-        if (this.cntn != null) {
-            this.cntn.close();
-        }
-    }
-
-    private String yumExec(final String action) throws Exception {
-        return this.cntn.execStdout(
-            "yum", "-y", "repo-pkgs", "example", action
-        );
-    }
-
-    private void prepareContainer(final boolean anonymous)
-        throws Exception {
-        Testcontainers.exposeHostPorts(this.port);
-        final Path setting = this.tmp.resolve("example.repo");
-        this.tmp.resolve("example.repo").toFile().createNewFile();
-        Files.write(
-            setting,
-            new ListOf<>(
-                "[example]",
+        this.containers.putBinaryToClient(
+            String.join(
+                "\n", "[example]",
                 "name=Example Repository",
-                String.format(
-                    "baseurl=%s", new RepositoryUrl(this.port, RpmITCase.REPO).string(anonymous)
-                ),
+                "baseurl=http://artipie:8080/my-rpm",
                 "enabled=1",
                 "gpgcheck=0"
-            )
+            ).getBytes(),
+            "/etc/yum.repos.d/example.repo"
         );
-        this.cntn = new TestContainer("centos:centos8", this.tmp);
-        this.cntn.start(this.port);
-        this.cntn.execStdout("mv", "/home/example.repo", "/etc/yum.repos.d/");
     }
 
-    private void prepareRpmRepository() {
-        final Storage storage = new FileStorage(this.tmp);
-        new TestResource("rpm/time-1.7-45.el7.x86_64.rpm")
-            .saveTo(storage, new Key.From(RpmITCase.REPO, "time-1.7-45.el7.x86_64.rpm"));
-        new Rpm(
-            storage,
-            new RepoConfig.Simple(Digest.SHA256, new NamingPolicy.HashPrefixed(Digest.SHA1), true)
-        ).batchUpdate(new Key.From(RpmITCase.REPO)).blockingAwait();
+    @Test
+    void addsRpmAndCreatesRepodata() throws Exception {
+        this.containers.assertExec(
+            "Failed to upload rpm package",
+            new MavenITCase.ContainerResultMatcher(),
+            "curl", "http://artipie:8080/my-rpm/time-1.7-45.el7.x86_64.rpm",
+            "--upload-file", "/w/time-1.7-45.el7.x86_64.rpm"
+        );
+        this.containers.assertExec(
+            "Failed to install time package",
+            new MavenITCase.ContainerResultMatcher(
+                new IsEqual<>(0),
+                new StringContainsInOrder(new ListOf<>("time-1.7-45.el7.x86_64", "Complete!"))
+            ),
+            "yum", "-y", "repo-pkgs", "example", "install"
+        );
     }
 
 }
