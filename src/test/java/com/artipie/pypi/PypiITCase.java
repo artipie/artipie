@@ -28,34 +28,23 @@ import com.artipie.RepoConfigYaml;
 import com.artipie.RepoPerms;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.fs.FileStorage;
-import com.artipie.asto.test.TestResource;
 import com.artipie.maven.MavenITCase;
 import com.artipie.test.RepositoryUrl;
 import com.artipie.test.TestContainer;
+import com.artipie.test.TestDeployment;
 import java.io.IOException;
 import java.nio.file.Path;
-
-import com.artipie.test.TestDeployment;
-import org.cactoos.list.ListOf;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.text.StringContainsInOrder;
-import org.junit.Ignore;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.containers.BindMode;
 
 /**
  * Integration tests for Pypi repository.
+ *
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.12
  */
@@ -64,27 +53,28 @@ import org.testcontainers.containers.BindMode;
 final class PypiITCase {
     /**
      * Test deployments.
+     *
      * @checkstyle VisibilityModifierCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
-            () -> TestDeployment.ArtipieContainer.defaultDefinition()
-                    .withRepoConfig("pypi-repo/pypi.yml", "my-python"),
-            () -> new TestDeployment.ClientContainer("python")
-                    .withWorkingDirectory("/var/artipie")
-                    .withClasspathResourceMapping(
-                            "pypi-repo/alarmtime-0.1.5.tar.gz",
-                            "/var/artipie/data/artipie/pypi/alarmtime/alarmtime-0.1.5.tar.gz",
-                            BindMode.READ_ONLY
-                    )
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withRepoConfig("pypi-repo/pypi.yml", "my-python"),
+        () -> new TestDeployment.ClientContainer("python")
+            .withWorkingDirectory("/var/artipie")
+            .withClasspathResourceMapping(
+                "pypi-repo/alarmtime-0.1.5.tar.gz",
+                "/var/artipie/data/artipie/pypi/alarmtime/alarmtime-0.1.5.tar.gz",
+                BindMode.READ_ONLY
+            )
     );
 
     @BeforeEach
     void setUp() throws IOException {
         this.containers.assertExec(
-                "Apt-get update failed",
-                new MavenITCase.ContainerResultMatcher(),
-                "apt-get", "update"
+            "Apt-get update failed",
+            new MavenITCase.ContainerResultMatcher(),
+            "apt-get", "update"
         );
     }
 
@@ -95,6 +85,7 @@ final class PypiITCase {
 
     /**
      * Temporary directory for all tests.
+     *
      * @checkstyle VisibilityModifierCheck (3 lines)
      */
     @TempDir
@@ -177,9 +168,9 @@ final class PypiITCase {
     @Test
     void pushAndInstallWorks() throws Exception {
         this.containers.assertExec(
-                "Apt-get update failed",
-                new MavenITCase.ContainerResultMatcher(),
-                "apt-get", "update"
+            "Apt-get update failed",
+            new MavenITCase.ContainerResultMatcher(),
+            "apt-get", "update"
         );
     }
 //    @Test
