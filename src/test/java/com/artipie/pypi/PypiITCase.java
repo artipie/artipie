@@ -26,6 +26,7 @@ package com.artipie.pypi;
 import com.artipie.maven.MavenITCase;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -58,6 +59,11 @@ final class PypiITCase {
                 "/var/artipie/data/artipie/pypi/alarmtime/alarmtime-0.1.5.tar.gz",
                 BindMode.READ_ONLY
             )
+            .withClasspathResourceMapping(
+                "pypi-repo/example-pckg",
+                "/var/artipie/data/artipie/pypi/example-pckg",
+                BindMode.READ_ONLY
+            )
     );
 
     @BeforeEach
@@ -66,6 +72,11 @@ final class PypiITCase {
             "Apt-get update failed",
             new MavenITCase.ContainerResultMatcher(),
             "apt-get", "update"
+        );
+        this.containers.assertExec(
+            "Install twine",
+            new MavenITCase.ContainerResultMatcher(),
+            "python", "-m", "pip", "install", "twine"
         );
     }
 
@@ -77,4 +88,16 @@ final class PypiITCase {
             "apt-get", "update"
         );
     }
+
+    @Test
+    void canUpload() throws Exception {
+        this.containers.assertExec(
+            "Failed to upload",
+            new MavenITCase.ContainerResultMatcher(Matchers.is(0)),
+            "python3", "-m", "twine", "upload", "--repository-url",
+            "http://artipie:8080/my-python/", "-u", "alice", "-p", "123",
+            "/var/artipie/data/artipie/pypi/example-pckg/dist/*"
+        );
+    }
 }
+
