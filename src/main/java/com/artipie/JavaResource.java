@@ -23,6 +23,7 @@
  */
 package com.artipie;
 
+import com.jcabi.log.Logger;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,6 +74,9 @@ public final class JavaResource {
      * @throws IOException On error
      */
     public void copy(final Path dest) throws IOException {
+        if (!Files.exists(dest.getParent())) {
+            Files.createDirectories(dest.getParent());
+        }
         try (
             InputStream src = new BufferedInputStream(
                 Objects.requireNonNull(this.clo.getResourceAsStream(this.name))
@@ -83,5 +87,6 @@ public final class JavaResource {
         ) {
             IOUtils.copy(src, out);
         }
+        Logger.info(this, "Resource copied successfully `%s` → `%s`", this.name, dest);
     }
 }

@@ -103,7 +103,7 @@ public final class VertxMain {
      * @throws IOException In case of error reading settings.
      */
     public int start() throws IOException {
-        final Settings settings = settings(this.config);
+        final Settings settings = this.settings(this.config);
         final Metrics metrics = metrics(settings);
         final int main = this.listenOn(new MainSlice(settings), metrics, this.port);
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
@@ -160,24 +160,30 @@ public final class VertxMain {
      * @todo #284:30min Extract this method to separate class and write proper unit tests
      *  for that. Also add tests for `JavaResource` class which is used to copy resources.
      */
-    private static Settings settings(final Path path) throws IOException {
+    private Settings settings(final Path path) throws IOException {
         if (!Files.exists(path)) {
             new JavaResource("example/artipie.yaml").copy(path);
-            Files.createDirectory(Paths.get("./repo"));
             final List<String> resources = Arrays.asList(
                 "_credentials.yaml", StorageAliases.FILE_NAME, "_permissions.yaml"
             );
             for (final String res : resources) {
                 new JavaResource(String.format("example/repo/%s", res))
-                    .copy(Paths.get(String.format("./repo/%s", res)));
+                    .copy(Paths.get(String.format("/var/artipie/repo/%s", res)));
             }
             Logger.info(
                 VertxMain.class,
                 String.join(
-                    " ",
-                    "Settings were not found, creating default.",
-                    "Default username/password: `artipie`/`artipie`. ",
-                    "Check the dashboard at http://localhost/dashboard/artipie"
+                    "\n",
+                    "", "", "\t+===============================================================+",
+                    "\t\t\t\t\tHello!",
+                    "\t\tArtipie configuration was not found, created default.",
+                    "\t\t\tDefault username/password: `artipie`/`artipie`. ",
+                    "\t\t\t\t   Check the dashboard at:",
+                    String.format(
+                        "\t\t\thttp://localhost:%d/dashboard/artipie",
+                        this.port
+                    ),
+                    "\t-===============================================================-", ""
                 )
             );
         }

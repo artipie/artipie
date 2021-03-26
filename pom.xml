@@ -135,19 +135,19 @@ SOFTWARE.
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
-      <version>1.15.1</version>
+      <version>1.15.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>1.15.1</version>
+      <version>1.15.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>mockserver</artifactId>
-      <version>1.15.1</version>
+      <version>1.15.2</version>
       <scope>test</scope>
     </dependency>
     <!-- maven -->
@@ -199,7 +199,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.33.1</version>
+      <version>0.34</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -291,7 +291,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>0.7.3</version>
+      <version>0.7.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -301,12 +301,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>0.11</version>
+      <version>0.13.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>debian-adapter</artifactId>
-      <version>0.3</version>
+      <version>0.4.2</version>
     </dependency>
     <dependency>
       <groupId>com.github.jknack</groupId>
