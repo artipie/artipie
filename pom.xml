@@ -306,7 +306,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>debian-adapter</artifactId>
-      <version>0.4</version>
+      <version>0.4.2</version>
     </dependency>
     <dependency>
       <groupId>com.github.jknack</groupId>
