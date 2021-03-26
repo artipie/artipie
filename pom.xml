@@ -380,12 +380,6 @@ SOFTWARE.
             <skip>false</skip>
           </configuration>
         </plugin>
-        <!--
-         @todo #789:30min Enable forbidden-apis plugin.
-          Check code for compliance with code style described
-          in CONTRIBUTING.md. Fix as many classes as time allows
-          and than update this todo to fix the rest.
-        -->
         <plugin>
           <groupId>com.qulice</groupId>
           <artifactId>qulice-maven-plugin</artifactId>
