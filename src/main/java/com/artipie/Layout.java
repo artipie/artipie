@@ -97,12 +97,9 @@ public interface Layout {
     }
 
     /**
-     * Flat layout. Consists of two parts.
+     * Org layout. Consists of two parts.
      *
      * @since 0.14
-     * @todo #586:30min Add unit tests for Layout.Org
-     *  `Layout.Org` class was extracted from existing code and lacks test coverage.
-     *  It's methods should be tested for all important execution paths.
      */
     final class Org implements Layout {
 
