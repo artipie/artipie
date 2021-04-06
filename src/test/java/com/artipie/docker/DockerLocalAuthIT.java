@@ -51,6 +51,7 @@ import org.junit.jupiter.api.io.TempDir;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DockerClientSupport
+@Disabled
 final class DockerLocalAuthIT {
 
     /**
