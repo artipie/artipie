@@ -122,8 +122,7 @@ public final class YamlStorage {
         final ClientBuilder builder = Client.builder().endpoints(
             yaml.yamlSequence("endpoints")
                 .values().stream().map(node -> node.asScalar().value())
-                .map(URI::create)
-                .collect(Collectors.toList())
+                .collect(Collectors.toList()).toArray(new String[0])
         );
         final String sto = yaml.string("timeout");
         if (sto != null) {
