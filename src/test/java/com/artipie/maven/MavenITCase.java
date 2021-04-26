@@ -66,11 +66,11 @@ public final class MavenITCase {
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("maven.yml", "my-maven"),
+            .withRepoConfig("maven/maven.yml", "my-maven"),
         () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
-                "maven-settings.xml", "/w/settings.xml", BindMode.READ_ONLY
+                "maven/maven-settings.xml", "/w/settings.xml", BindMode.READ_ONLY
             )
     );
 
