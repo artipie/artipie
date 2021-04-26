@@ -23,6 +23,7 @@
  */
 package com.artipie.maven;
 
+import com.artipie.asto.test.TestResource;
 import com.artipie.test.TestDeployment;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,7 +39,6 @@ import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -51,9 +51,6 @@ import org.testcontainers.containers.Container.ExecResult;
  * Integration tests for Maven repository.
  * @since 0.11
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @todo #855:30min Deploy test is broken, mvn deploy fails
- *  on 500 server respose due to file not exist exception at
- *  maven upload.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
@@ -96,11 +93,10 @@ public final class MavenITCase {
     }
 
     @ParameterizedTest
-    @Disabled
     @CsvSource({"helloworld,0.1,0.1", "snapshot,1.0-SNAPSHOT"})
     void deploysArtifact(final String type, final String vers) throws Exception {
-        this.containers.putResourceToArtipie(
-            String.format("%s-src/pom.xml", type), "/w/pom.xml"
+        this.containers.putBinaryToClient(
+            new TestResource(String.format("%s-src/pom.xml", type)).asBytes(), "/w/pom.xml"
         );
         this.containers.assertExec(
             "Deploy failed",
