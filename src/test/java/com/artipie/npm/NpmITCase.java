@@ -48,7 +48,11 @@ import org.llorllale.cactoos.matchers.MatcherOf;
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class NpmITCase {
 
-    public static final String REPO = "http://artipie:8080/my-npm";
+    /**
+     * Artipie url.
+     */
+    private static final String REPO = "http://artipie:8080/my-npm";
+
     /**
      * Project name.
      */
@@ -92,7 +96,6 @@ final class NpmITCase {
                 )
             ),
             "npm", "install", NpmITCase.PROJ, "--registry", NpmITCase.REPO
-
         );
         this.containers.assertExec(
             "Package was installed",
