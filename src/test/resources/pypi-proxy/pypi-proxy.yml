@@ -1,0 +1,15 @@
+---
+repo:
+  type: pypi-proxy
+  url: http://artipieproxy:8080/my-pypi-proxy
+  remotes:
+    - url: http://artipie:8080/my-pypi
+      username: alice
+      password: 123
+      cache:
+        storage:
+          type: fs
+          path: /var/artipie/data
+  permissions:
+    alice:
+      - "*"
