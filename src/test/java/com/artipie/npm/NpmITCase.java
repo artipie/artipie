@@ -23,32 +23,21 @@
  */
 package com.artipie.npm;
 
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPerms;
-import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
-import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
-import com.artipie.npm.misc.JsonFromPublisher;
-import com.artipie.nuget.RandomFreePort;
-import com.artipie.test.RepositoryUrl;
-import com.artipie.test.TestContainer;
-import java.io.IOException;
-import java.nio.file.Path;
+import com.artipie.maven.MavenITCase;
+import com.artipie.test.TestDeployment;
+import java.io.ByteArrayInputStream;
 import java.util.Arrays;
-import javax.json.JsonObject;
-import org.hamcrest.MatcherAssert;
+import javax.json.Json;
+import org.hamcrest.core.IsAnything;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.llorllale.cactoos.matchers.MatcherOf;
 
 /**
  * Integration tests for Npm repository.
@@ -60,183 +49,102 @@ import org.junit.jupiter.params.provider.ValueSource;
 final class NpmITCase {
 
     /**
+     * Artipie url.
+     */
+    private static final String REPO = "http://artipie:8080/my-npm";
+
+    /**
      * Project name.
      */
     private static final String PROJ = "@hello/simple-npm-project";
 
     /**
-     * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
+     * Added npm project line.
      */
-    @TempDir
-    Path tmp;
+    private static final String ADDED_PROJ = String.format("+ %s@1.0.1", NpmITCase.PROJ);
 
     /**
-     * Tested Artipie server.
+     * Test deployments.
+     * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    private ArtipieServer server;
+    @RegisterExtension
+    final TestDeployment containers = new TestDeployment(
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withRepoConfig("npm/npm.yml", "my-npm"),
+        () -> new TestDeployment.ClientContainer("node:14-alpine")
+            .withWorkingDirectory("/w")
+    );
 
-    /**
-     * Container.
-     */
-    private TestContainer cntn;
-
-    /**
-     * Storage.
-     */
-    private Storage storage;
-
-    /**
-     * Repository url.
-     */
-    private RepositoryUrl url;
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void npmInstall(final boolean anonymous) throws Exception {
-        this.init(anonymous);
-        this.saveFilesToStrg(NpmITCase.PROJ);
-        MatcherAssert.assertThat(
-            "Package was installed",
-            this.cntn.execStdout(
-                "npm", "install", NpmITCase.PROJ,
-                "--registry", this.url.string(anonymous)
-            ),
-            new StringContainsInOrder(
-                Arrays.asList(
-                    String.format("+ %s@1.0.1", NpmITCase.PROJ),
-                    "added 1 package"
-                )
+    @Test
+    void npmInstall() throws Exception {
+        this.containers.putBinaryToArtipie(
+            new TestResource(String.format("npm/storage/%s/meta.json", NpmITCase.PROJ)).asBytes(),
+            String.format("/var/artipie/data/my-npm/%s/meta.json", NpmITCase.PROJ)
+        );
+        this.containers.putBinaryToArtipie(
+            new TestResource(
+                String.format("npm/storage/%s/-/%s-1.0.1.tgz", NpmITCase.PROJ, NpmITCase.PROJ)
+            ).asBytes(),
+            String.format(
+                "/var/artipie/data/my-npm/%s/-/%s-1.0.1.tgz", NpmITCase.PROJ, NpmITCase.PROJ
             )
         );
-        MatcherAssert.assertThat(
-            "Installed project should contain index.js",
-            this.inNpmModule("index.js"),
-            new IsEqual<>(true)
-        );
-        MatcherAssert.assertThat(
-            "Installed project should contain package.json",
-            this.inNpmModule("package.json"),
-            new IsEqual<>(true)
-        );
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void npmPublish(final boolean anonymous) throws Exception {
-        final String tgz = String.format("%s/-/%s-1.0.1.tgz", NpmITCase.PROJ, NpmITCase.PROJ);
-        final Key path = new Key.From("repos/my-npm");
-        this.init(anonymous);
-        new TestResource("npm/simple-npm-project")
-            .addFilesTo(this.storage, new Key.From(NpmITCase.PROJ));
-        MatcherAssert.assertThat(
-            "Package was published",
-            this.cntn.execStdout(
-                "npm", "publish", NpmITCase.PROJ,
-                "--registry", this.url.string(anonymous)
-            ),
-            new StringContains(String.format("+ %s@1.0.1", NpmITCase.PROJ))
-        );
-        final JsonObject meta = new JsonFromPublisher(
-            this.storage.value(
-                new Key.From(path, NpmITCase.PROJ, "meta.json")
-            ).toCompletableFuture().join()
-        ).json().toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            "Metadata should be valid",
-            meta.getJsonObject("versions")
-                .getJsonObject("1.0.1")
-                .getJsonObject("dist")
-                .getString("tarball"),
-            new IsEqual<>(String.format("/%s", tgz))
-        );
-        MatcherAssert.assertThat(
-            "File should be in storage after publishing",
-            this.storage.exists(
-                new Key.From(path, tgz)
-            ).toCompletableFuture().join(),
-            new IsEqual<>(true)
-        );
-    }
-
-    @Test
-    void npmInstallFailWithForbidden() throws Exception {
-        final ArtipieServer.User user = ArtipieServer.BOB;
-        this.init(false);
-        this.saveFilesToStrg(NpmITCase.PROJ);
-        MatcherAssert.assertThat(
-            this.cntn.execStdErr(
-                "npm", "install", NpmITCase.PROJ,
-                "--registry", this.url.string(user)
-            ),
-            new StringContains("npm ERR! 403 403 Forbidden - GET")
-        );
-    }
-
-    @Test
-    void npmPublishFailWithForbidden() throws Exception {
-        final ArtipieServer.User user = ArtipieServer.BOB;
-        this.init(false);
-        new TestResource("npm/simple-npm-project")
-            .addFilesTo(this.storage, new Key.From(NpmITCase.PROJ));
-        MatcherAssert.assertThat(
-            this.cntn.execStdErr(
-                "npm", "publish", NpmITCase.PROJ,
-                "--registry", this.url.string(user)
-            ),
-            new StringContains("npm ERR! 403 403 Forbidden - PUT")
-        );
-    }
-
-    @AfterEach
-    void tearDown() {
-        this.server.stop();
-        this.cntn.close();
-    }
-
-    private void init(final boolean anonymous) throws IOException {
-        this.storage = new FileStorage(this.tmp);
-        final int port = new RandomFreePort().value();
-        this.url = new RepositoryUrl(port, "my-npm");
-        this.server = new ArtipieServer(
-            this.tmp, "my-npm", this.config(anonymous).toString(), port
-        );
-        this.server.start();
-        this.cntn = new TestContainer("node:14-alpine", this.tmp);
-        this.cntn.start(port);
-    }
-
-    private void saveFilesToStrg(final String proj) {
-        new TestResource(String.format("npm/storage/%s/meta.json", proj))
-            .saveTo(
-                this.storage,
-                new Key.From("repos", "my-npm", proj, "meta.json")
-        );
-        new TestResource(String.format("npm/storage/%s/-/%s-1.0.1.tgz", proj, proj))
-            .saveTo(
-                this.storage,
-                new Key.From(
-                    "repos", "my-npm", proj, "-", String.format("%s-1.0.1.tgz", proj)
+        this.containers.assertExec(
+            "Package was not installed",
+            new MavenITCase.ContainerResultMatcher(
+                new IsEqual<>(0),
+                new StringContainsInOrder(
+                    Arrays.asList(NpmITCase.ADDED_PROJ, "added 1 package")
                 )
+            ),
+            "npm", "install", NpmITCase.PROJ, "--registry", NpmITCase.REPO
+        );
+        this.containers.assertExec(
+            "Package was installed",
+            new MavenITCase.ContainerResultMatcher(
+                new IsEqual<>(0), new StringContains("@hello/simple-npm-project@1.0.1")
+            ),
+            "npm", "list"
         );
     }
 
-    private RepoConfigYaml config(final boolean anonymous) {
-        final RepoConfigYaml yaml = new RepoConfigYaml("npm")
-            .withFileStorage(this.tmp.resolve("repos"))
-            .withUrl(this.url.string(anonymous));
-        if (!anonymous) {
-            yaml.withPermissions(
-                new RepoPerms(ArtipieServer.ALICE.name(), "*")
-            );
-        }
-        return yaml;
-    }
-
-    private boolean inNpmModule(final String file) {
-        return this.storage.exists(
-            new Key.From("node_modules", NpmITCase.PROJ, file)
-        ).join();
+    @Test
+    void npmPublish() throws Exception {
+        final String tgz = String.format("%s/-/%s-1.0.1.tgz", NpmITCase.PROJ, NpmITCase.PROJ);
+        this.containers.putBinaryToClient(
+            new TestResource("npm/simple-npm-project/index.js").asBytes(),
+            String.format("/w/%s/index.js", NpmITCase.PROJ)
+        );
+        this.containers.putBinaryToClient(
+            new TestResource("npm/simple-npm-project/package.json").asBytes(),
+            String.format("/w/%s/package.json", NpmITCase.PROJ)
+        );
+        this.containers.assertExec(
+            "Package was published",
+            new MavenITCase.ContainerResultMatcher(
+                new IsEqual<>(0),
+                new StringContains(NpmITCase.ADDED_PROJ)
+            ),
+            "npm", "publish", NpmITCase.PROJ, "--registry", NpmITCase.REPO
+        );
+        this.containers.assertArtipieContent(
+            "Meta json is incorrect",
+            String.format("/var/artipie/data/my-npm/%s/meta.json", NpmITCase.PROJ),
+            new MatcherOf<>(
+                bytes -> {
+                    return Json.createReader(new ByteArrayInputStream(bytes)).readObject()
+                        .getJsonObject("versions")
+                        .getJsonObject("1.0.1")
+                        .getJsonObject("dist")
+                        .getString("tarball").equals(String.format("/%s", tgz));
+                }
+            )
+        );
+        this.containers.assertArtipieContent(
+            "Tarball should be added to storage",
+            String.format("/var/artipie/data/my-npm/%s", tgz),
+            new IsAnything<>()
+        );
     }
 
 }
