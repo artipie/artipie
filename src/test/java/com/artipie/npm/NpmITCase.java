@@ -59,6 +59,11 @@ final class NpmITCase {
     private static final String PROJ = "@hello/simple-npm-project";
 
     /**
+     * Added npm project line.
+     */
+    private static final String ADDED_PROJ = String.format("+ %s@1.0.1", NpmITCase.PROJ);
+
+    /**
      * Test deployments.
      * @checkstyle VisibilityModifierCheck (10 lines)
      */
@@ -89,10 +94,7 @@ final class NpmITCase {
             new MavenITCase.ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(
-                    Arrays.asList(
-                        String.format("+ %s@1.0.1", NpmITCase.PROJ),
-                        "added 1 package"
-                    )
+                    Arrays.asList(NpmITCase.ADDED_PROJ, "added 1 package")
                 )
             ),
             "npm", "install", NpmITCase.PROJ, "--registry", NpmITCase.REPO
@@ -121,7 +123,7 @@ final class NpmITCase {
             "Package was published",
             new MavenITCase.ContainerResultMatcher(
                 new IsEqual<>(0),
-                new StringContains(String.format("+ %s@1.0.1", NpmITCase.PROJ))
+                new StringContains(NpmITCase.ADDED_PROJ)
             ),
             "npm", "publish", NpmITCase.PROJ, "--registry", NpmITCase.REPO
         );
