@@ -1,0 +1,9 @@
+---
+repo:
+  type: pypi
+  storage:
+    type: fs
+    path: /var/artipie/data/
+  permissions:
+    alice:
+      - "*"
