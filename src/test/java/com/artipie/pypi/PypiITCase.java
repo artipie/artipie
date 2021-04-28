@@ -78,14 +78,29 @@ final class PypiITCase {
             new MavenITCase.ContainerResultMatcher(),
             "python", "-m", "pip", "install", "twine"
         );
+        this.containers.assertExec(
+            "Install twine",
+            new MavenITCase.ContainerResultMatcher(),
+            "python", "-m", "pip", "install", "--upgrade", "pip"
+        );
     }
 
     @Test
-    void pushAndInstallWorks() throws Exception {
+    void installPythonPackage() throws IOException {
+        String meta = "pypi-repo/example-pckg/dist/artipietestpkg-0.0.3.tar.gz";
+        this.containers.putResourceToArtipie(
+            meta, "/var/artipie/data/my-python/artipietestpkg/artipietestpkg-0.0.3.tar.gz"
+        );
+        meta = "pypi-repo/example-pckg/dist/artipietestpkg-0.0.3-py2-none-any.whl";
+        this.containers.putResourceToArtipie(
+            meta,
+            "/var/artipie/data/my-python/artipietestpkg/artipietestpkg-0.0.3-py2-none-any.whl"
+        );
         this.containers.assertExec(
-            "Apt-get update failed",
-            new MavenITCase.ContainerResultMatcher(),
-            "apt-get", "update"
+            "Failed to install package",
+            new MavenITCase.ContainerResultMatcher(Matchers.equalTo(0)),
+            "python", "-m", "pip", "install", "--trusted-host", "artipie", "--index-url",
+            "http://artipie:8080/my-python", "artipietestpkg"
         );
     }
 
@@ -97,6 +112,11 @@ final class PypiITCase {
             "python3", "-m", "twine", "upload", "--repository-url",
             "http://artipie:8080/my-python/", "-u", "alice", "-p", "123",
             "/var/artipie/data/artipie/pypi/example-pckg/dist/*"
+        );
+        this.containers.assertArtipieContent(
+            "Bad content after upload",
+            "/var/artipie/data/my-python/artipietestpkg/artipietestpkg-0.0.3.tar.gz",
+            Matchers.not("123".getBytes())
         );
     }
 }
