@@ -52,7 +52,7 @@ final class PypiITCase {
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("pypi-repo/pypi.yml", "my-python"),
-        () -> new TestDeployment.ClientContainer("python")
+        () -> new TestDeployment.ClientContainer("python:3.7")
             .withWorkingDirectory("/var/artipie")
             .withClasspathResourceMapping(
                 "pypi-repo/alarmtime-0.1.5.tar.gz",
