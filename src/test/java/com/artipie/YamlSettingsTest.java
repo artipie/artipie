@@ -53,7 +53,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class YamlSettingsTest {
 
     @Test
-    public void shouldSetFlatAsDefaultLayout() throws Exception {
+    void shouldSetFlatAsDefaultLayout() throws Exception {
         final YamlSettings settings = new YamlSettings(
             Yaml.createYamlInput(
                 String.join(
@@ -70,7 +70,25 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void shouldBuildFileStorageFromSettings() throws Exception {
+    void shouldBeOrgLayout() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlInput(
+                String.join(
+                    "",
+                    "meta:\n",
+                    "  storage: []\n",
+                    "  layout: org\n"
+                )
+            ).readYamlMapping()
+        );
+        MatcherAssert.assertThat(
+            settings.layout(),
+            new IsInstanceOf(Layout.Org.class)
+        );
+    }
+
+    @Test
+    void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
             this.config("some/path", "env", Optional.empty())
         );
@@ -81,7 +99,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void shouldBuildS3StorageFromSettings() throws Exception {
+    void shouldBuildS3StorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
             Yaml.createYamlInput(
                 String.join(
@@ -106,7 +124,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void shouldCreateAuthFromEnv() throws Exception {
+    void shouldCreateAuthFromEnv() throws Exception {
         final YamlSettings settings = new YamlSettings(
             this.config("some/path", "env", Optional.empty())
         );
@@ -117,7 +135,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void shouldCreateAuthFromYaml(@TempDir final Path tmp)
+    void shouldCreateAuthFromYaml(@TempDir final Path tmp)
         throws Exception {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
@@ -132,7 +150,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void returnsCredentials(@TempDir final Path tmp) throws IOException {
+    void returnsCredentials(@TempDir final Path tmp) throws IOException {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
             this.config(tmp.toString(), "file", Optional.of(fname))
@@ -146,7 +164,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void returnsRepoConfigs(@TempDir final Path tmp) {
+    void returnsRepoConfigs(@TempDir final Path tmp) {
         MatcherAssert.assertThat(
             new YamlSettings(this.config(tmp.toString(), "file", Optional.empty()))
                 .repoConfigsStorage(),
@@ -155,7 +173,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenPathIsNotSet() {
+    void shouldThrowExceptionWhenPathIsNotSet() {
         final YamlSettings settings = new YamlSettings(
             this.config("some/path", "file", Optional.empty())
         );
@@ -170,7 +188,7 @@ class YamlSettingsTest {
 
     @ParameterizedTest
     @MethodSource("badYamls")
-    public void shouldFailProvideStorageFromBadYaml(final String yaml) throws IOException {
+    void shouldFailProvideStorageFromBadYaml(final String yaml) throws IOException {
         final YamlSettings settings = new YamlSettings(
             Yaml.createYamlInput(yaml).readYamlMapping()
         );

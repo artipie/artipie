@@ -36,6 +36,7 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -114,6 +115,7 @@ final class NugetITCase {
 
     @Test
     @Timeout(30)
+    @Disabled
     void shouldInstallPushedPackage() throws Exception {
         this.pushPackage();
         this.cntn.execStdout("dotnet", "new", "console", "-n", "TestProj");

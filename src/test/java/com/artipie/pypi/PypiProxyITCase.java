@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
@@ -52,6 +53,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
+@Disabled
 public final class PypiProxyITCase {
 
     /**
