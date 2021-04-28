@@ -55,11 +55,6 @@ final class PypiITCase {
         () -> new TestDeployment.ClientContainer("python:3.7")
             .withWorkingDirectory("/var/artipie")
             .withClasspathResourceMapping(
-                "pypi-repo/alarmtime-0.1.5.tar.gz",
-                "/var/artipie/data/artipie/pypi/alarmtime/alarmtime-0.1.5.tar.gz",
-                BindMode.READ_ONLY
-            )
-            .withClasspathResourceMapping(
                 "pypi-repo/example-pckg",
                 "/var/artipie/data/artipie/pypi/example-pckg",
                 BindMode.READ_ONLY
