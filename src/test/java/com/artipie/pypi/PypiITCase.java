@@ -74,12 +74,12 @@ final class PypiITCase {
             "apt-get", "update"
         );
         this.containers.assertExec(
-            "Install twine",
+            "Failed to install twine",
             new MavenITCase.ContainerResultMatcher(),
             "python", "-m", "pip", "install", "twine"
         );
         this.containers.assertExec(
-            "Install twine",
+            "Failed to upgrade pip",
             new MavenITCase.ContainerResultMatcher(),
             "python", "-m", "pip", "install", "--upgrade", "pip"
         );
