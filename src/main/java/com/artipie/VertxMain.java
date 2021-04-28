@@ -27,6 +27,7 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -41,12 +42,12 @@ import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -161,15 +162,27 @@ public final class VertxMain {
      *  for that. Also add tests for `JavaResource` class which is used to copy resources.
      */
     private Settings settings(final Path path) throws IOException {
+        boolean initialize = Boolean.parseBoolean(System.getenv("ARTIPIE_INIT"));
         if (!Files.exists(path)) {
             new JavaResource("example/artipie.yaml").copy(path);
+            initialize = true;
+        }
+        final Settings settings = new YamlSettings(
+            Yaml.createYamlInput(path.toFile()).readYamlMapping()
+        );
+        final BlockingStorage bsto = new BlockingStorage(settings.storage());
+        final Key init = new Key.From(".artipie", "initialized");
+        if (initialize && !bsto.exists(init)) {
             final List<String> resources = Arrays.asList(
                 "_credentials.yaml", StorageAliases.FILE_NAME, "_permissions.yaml"
             );
             for (final String res : resources) {
-                new JavaResource(String.format("example/repo/%s", res))
-                    .copy(Paths.get(String.format("/var/artipie/repo/%s", res)));
+                final Path tmp = Files.createTempFile(res, ".tmp");
+                new JavaResource(String.format("example/repo/%s", res)).copy(tmp);
+                bsto.save(new Key.From(res), Files.readAllBytes(tmp));
+                Files.delete(tmp);
             }
+            bsto.save(init, "true".getBytes());
             Logger.info(
                 VertxMain.class,
                 String.join(
@@ -187,7 +200,7 @@ public final class VertxMain {
                 )
             );
         }
-        return new YamlSettings(Yaml.createYamlInput(path.toFile()).readYamlMapping());
+        return settings;
     }
 
     /**
@@ -199,9 +212,9 @@ public final class VertxMain {
     private void startRepos(final Settings settings, final Metrics metrics) {
         final Storage storage = settings.repoConfigsStorage();
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
-            keys -> keys.stream()
-                .filter(name -> new ConfigFile(name).isYamlOrYml())
-                .map(name -> new ConfigFile(name).name())
+            keys -> keys.stream().map(key -> new ConfigFile(key))
+                .filter(Predicate.not(ConfigFile::isSystem).and(ConfigFile::isYamlOrYml))
+                .map(ConfigFile::name)
                 .map(name -> new RepositoriesFromStorage(storage).config(name))
                 .map(stage -> stage.toCompletableFuture().join())
                 .collect(Collectors.toList())
@@ -222,7 +235,11 @@ public final class VertxMain {
                     }
                 );
             } catch (final IllegalStateException err) {
-                Logger.error(this, String.format("Invalid repo config file %s", repo.name()));
+                Logger.error(
+                    this,
+                    "Invalid repo config file %s: %[exception]s", repo.name(),
+                    err
+                );
             }
         }
     }

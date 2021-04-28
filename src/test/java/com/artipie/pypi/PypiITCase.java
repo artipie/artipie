@@ -120,4 +120,3 @@ final class PypiITCase {
         );
     }
 }
-

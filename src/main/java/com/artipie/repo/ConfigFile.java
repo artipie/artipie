@@ -151,6 +151,14 @@ public final class ConfigFile {
     }
 
     /**
+     * Is system file.
+     * @return True if it's a system configuration file
+     */
+    public boolean isSystem() {
+        return this.filename.length() > 0 && this.filename.charAt(0) == '_';
+    }
+
+    /**
      * Extension.
      * @return Extension if present, empty otherwise.
      */

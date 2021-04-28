@@ -1,0 +1,5 @@
+repo:
+  type: rpm
+  storage:
+    type: fs
+    path: /var/artipie/data

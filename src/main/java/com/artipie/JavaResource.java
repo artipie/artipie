@@ -82,7 +82,7 @@ public final class JavaResource {
                 Objects.requireNonNull(this.clo.getResourceAsStream(this.name))
             );
             OutputStream out = Files.newOutputStream(
-                dest, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE
+                dest, StandardOpenOption.WRITE, StandardOpenOption.CREATE
             )
         ) {
             IOUtils.copy(src, out);
