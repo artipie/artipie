@@ -26,7 +26,9 @@ package com.artipie.pypi;
 import com.artipie.maven.MavenITCase;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
+import org.cactoos.list.ListOf;
 import org.hamcrest.Matchers;
+import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -82,18 +84,30 @@ final class PypiITCase {
 
     @Test
     void installPythonPackage() throws IOException {
-        String meta = "pypi-repo/example-pckg/dist/artipietestpkg-0.0.3.tar.gz";
+        final String meta = "pypi-repo/example-pckg/dist/artipietestpkg-0.0.3.tar.gz";
         this.containers.putResourceToArtipie(
             meta, "/var/artipie/data/my-python/artipietestpkg/artipietestpkg-0.0.3.tar.gz"
         );
-        meta = "pypi-repo/example-pckg/dist/artipietestpkg-0.0.3-py2-none-any.whl";
-        this.containers.putResourceToArtipie(
-            meta,
-            "/var/artipie/data/my-python/artipietestpkg/artipietestpkg-0.0.3-py2-none-any.whl"
-        );
         this.containers.assertExec(
             "Failed to install package",
-            new MavenITCase.ContainerResultMatcher(Matchers.equalTo(0)),
+            new MavenITCase.ContainerResultMatcher(
+                Matchers.equalTo(0),
+                new StringContainsInOrder(
+                    new ListOf<>(
+                        "Looking in indexes: http://artipie:8080/my-python",
+                        "Collecting artipietestpkg",
+                        "  Downloading http://artipie:8080/my-python/artipietestpkg/{}"
+                            .format("artipietestpkg-0.0.3.tar.gz"),
+                        "Building wheels for collected packages: artipietestpkg",
+                        "  Building wheel for artipietestpkg (setup.py): started",
+                        "  Building wheel for artipietestpkg (setup.py): {}"
+                            .format("finished with status 'done'"),
+                        "Successfully built artipietestpkg",
+                        "Installing collected packages: artipietestpkg",
+                        "Successfully installed artipietestpkg-0.0.3"
+                    )
+                )
+            ),
             "python", "-m", "pip", "install", "--trusted-host", "artipie", "--index-url",
             "http://artipie:8080/my-python", "artipietestpkg"
         );
@@ -103,7 +117,15 @@ final class PypiITCase {
     void canUpload() throws Exception {
         this.containers.assertExec(
             "Failed to upload",
-            new MavenITCase.ContainerResultMatcher(Matchers.is(0)),
+            new MavenITCase.ContainerResultMatcher(
+                Matchers.is(0),
+                new StringContainsInOrder(
+                    new ListOf<>(
+                        "Uploading artipietestpkg-0.0.3-py2-none-any.whl", "100%",
+                        "Uploading artipietestpkg-0.0.3.tar.gz", "100%"
+                    )
+                )
+            ),
             "python3", "-m", "twine", "upload", "--repository-url",
             "http://artipie:8080/my-python/", "-u", "alice", "-p", "123",
             "/var/artipie/data/artipie/pypi/example-pckg/dist/*"
