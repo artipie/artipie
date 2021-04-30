@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.artipie.itcase;
+package com.artipie.file;
 
 import com.artipie.maven.MavenITCase;
 import com.artipie.test.TestDeployment;
@@ -36,7 +36,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * @since 0.18
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-final class BinaryITCase {
+final class FileITCase {
 
     /**
      * Deployment for tests.
@@ -45,7 +45,7 @@ final class BinaryITCase {
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("itcase/bin.yml", "bin"),
+            .withRepoConfig("binary/bin.yml", "bin"),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
             .withWorkingDirectory("/w")
     );

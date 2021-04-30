@@ -23,31 +23,21 @@
  */
 package com.artipie.file;
 
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPerms;
-import com.artipie.asto.Key;
-import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.asto.fs.FileStorage;
-import com.artipie.management.RepoPermissions;
-import com.artipie.test.TestContainer;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.Collections;
-import org.hamcrest.MatcherAssert;
+import com.artipie.maven.MavenITCase;
+import com.artipie.test.TestDeployment;
+import org.cactoos.map.MapEntry;
+import org.cactoos.map.MapOf;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Integration test for files proxy.
  *
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.11
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -55,96 +45,50 @@ import org.junit.jupiter.api.io.TempDir;
 final class FileProxyAuthIT {
 
     /**
-     * Temporary directory for all tests.
-     *
-     * @checkstyle VisibilityModifierCheck (3 lines)
+     * Test deployments.
+     * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    @TempDir
-    Path tmp;
-
-    /**
-     * Artipie origin.
-     */
-    private ArtipieServer origin;
-
-    /**
-     * Artipie proxy.
-     */
-    private ArtipieServer proxy;
-
-    /**
-     * Container for local server.
-     */
-    private TestContainer cntn;
+    @RegisterExtension
+    final TestDeployment containers = new TestDeployment(
+        new MapOf<>(
+            new MapEntry<>(
+                "artipie",
+                () -> TestDeployment.ArtipieContainer.defaultDefinition()
+                    .withRepoConfig("binary/bin-with-perms.yml", "my-bin")
+                    .withCredentials("pypi-proxy/_credentials.yaml")
+            ),
+            new MapEntry<>(
+                "artipie-proxy",
+                () -> TestDeployment.ArtipieContainer.defaultDefinition()
+                    .withRepoConfig("binary/bin-proxy.yml", "my-bin-proxy")
+            )
+        ),
+        () -> new TestDeployment.ClientContainer("alpine:3.11")
+            .withWorkingDirectory("/w")
+    );
 
     @BeforeEach
     void setUp() throws Exception {
-        this.startOrigin();
-        this.startProxy();
-        this.cntn = new TestContainer("centos:centos8", this.tmp);
-        this.cntn.start(this.proxy.port());
-        this.cntn.execStdout("yum", "-y", "install", "curl");
-    }
-
-    @AfterEach
-    void tearDown() {
-        this.cntn.close();
-        this.proxy.stop();
-        this.origin.stop();
+        this.containers.assertExec(
+            "Failed to install deps",
+            new MavenITCase.ContainerResultMatcher(),
+            "apk", "add", "--no-cache", "curl"
+        );
     }
 
     @Test
-    void shouldGetFile() throws Exception {
-        MatcherAssert.assertThat(
-            this.cntn.execStdout(
-                "curl", "-i", "-X",
-                "GET",
-                String.format(
-                    "http://host.testcontainers.internal:%d/my-file/foo/bar.txt",
-                    this.proxy.port()
-                )
+    void shouldGetAndCacheFile() throws Exception {
+        final byte[] data = "Hello world!".getBytes();
+        this.containers.putBinaryToArtipie(
+            "artipie", data,
+            "/var/artipie/data/my-bin/foo/bar.txt"
+        );
+        this.containers.assertExec(
+            "File was not downloaded",
+            new MavenITCase.ContainerResultMatcher(
+                new IsEqual<>(0), new StringContains("HTTP/1.1 200 OK")
             ),
-            new StringContains("HTTP/1.1 200 OK")
+            "curl", "-i", "-X", "GET", "http://artipie-proxy:8080/my-bin-proxy/foo/bar.txt"
         );
-    }
-
-    private void startOrigin() throws IOException {
-        final Path root = this.tmp.resolve("origin");
-        root.toFile().mkdirs();
-        final Path repos = root.resolve("repos");
-        new BlockingStorage(new FileStorage(repos)).save(
-            new Key.From("file-origin/foo/bar.txt"),
-            "data".getBytes(StandardCharsets.UTF_8)
-        );
-        this.origin = new ArtipieServer(
-            root,
-            "file-origin",
-            new RepoConfigYaml("file").withFileStorage(repos).withPermissions(
-                new RepoPerms(
-                    new RepoPermissions.PermissionItem(
-                        ArtipieServer.ALICE.name(),
-                        Collections.singletonList("r")
-                    )
-                )
-            )
-        );
-        this.origin.start();
-    }
-
-    private void startProxy() throws IOException {
-        final Path root = this.tmp.resolve("proxy");
-        root.toFile().mkdirs();
-        this.proxy = new ArtipieServer(
-            root,
-            "my-file",
-            new RepoConfigYaml("file-proxy")
-                .withFileStorage(root.resolve("repos"))
-                .withRemote(
-                    String.format("http://localhost:%s/file-origin", this.origin.port()),
-                    ArtipieServer.ALICE.name(),
-                    ArtipieServer.ALICE.password()
-                )
-        );
-        this.proxy.start();
     }
 }
