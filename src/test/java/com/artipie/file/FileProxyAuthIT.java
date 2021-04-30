@@ -55,7 +55,7 @@ final class FileProxyAuthIT {
                 "artipie",
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()
                     .withRepoConfig("binary/bin-with-perms.yml", "my-bin")
-                    .withCredentials("pypi-proxy/_credentials.yaml")
+                    .withCredentials("_credentials.yaml")
             ),
             new MapEntry<>(
                 "artipie-proxy",
