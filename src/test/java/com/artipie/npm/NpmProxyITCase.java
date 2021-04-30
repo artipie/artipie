@@ -23,30 +23,18 @@
  */
 package com.artipie.npm;
 
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPerms;
-import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
-import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.nuget.RandomFreePort;
-import com.artipie.test.RepositoryUrl;
-import com.artipie.test.TestContainer;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.file.Path;
+import com.artipie.maven.MavenITCase;
+import com.artipie.test.TestDeployment;
 import java.util.Arrays;
-import org.hamcrest.MatcherAssert;
+import org.cactoos.map.MapEntry;
+import org.cactoos.map.MapOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Integration test for {@link com.artipie.npm.proxy.http.NpmProxySlice}.
@@ -63,157 +51,70 @@ final class NpmProxyITCase {
     private static final String PROJ = "@hello/simple-npm-project";
 
     /**
-     * Origin repo name.
+     * Added npm project line.
      */
-    private static final String ORIGIN = "npm-origin";
+    private static final String ADDED_PROJ = String.format("+ %s@1.0.1", NpmProxyITCase.PROJ);
 
     /**
-     * Proxy repo name.
+     * Test deployments.
+     * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    private static final String PROXY = "npm-proxy";
-
-    /**
-     * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
-    @TempDir
-    Path tmp;
-
-    /**
-     * Test origin.
-     */
-    private ArtipieServer origin;
-
-    /**
-     * Test proxy.
-     */
-    private ArtipieServer proxy;
-
-    /**
-     * Container.
-     */
-    private TestContainer cntn;
+    @RegisterExtension
+    final TestDeployment containers = new TestDeployment(
+        new MapOf<>(
+            new MapEntry<>(
+                "artipie",
+                () -> TestDeployment.ArtipieContainer.defaultDefinition()
+                    .withRepoConfig("npm/npm.yml", "my-npm")
+            ),
+            new MapEntry<>(
+                "artipie-proxy",
+                () -> TestDeployment.ArtipieContainer.defaultDefinition()
+                    .withRepoConfig("npm/npm-proxy.yml", "my-npm-proxy")
+            )
+        ),
+        () -> new TestDeployment.ClientContainer("node:14-alpine")
+            .withWorkingDirectory("/w")
+    );
 
     @Test
     void installFromProxy() throws Exception {
-        final boolean anonymous = true;
-        this.init(anonymous);
-        MatcherAssert.assertThat(
-            this.cntn.execStdout(
-                "npm", "install", NpmProxyITCase.PROJ,
-                "--registry",
-                new RepositoryUrl(this.proxy.port(), NpmProxyITCase.PROXY).string(anonymous)
-            ),
-            new StringContainsInOrder(
-                Arrays.asList(
-                    String.format("+ %s@1.0.1", NpmProxyITCase.PROJ),
-                    "added 1 package"
-                )
-            )
+        this.containers.putBinaryToArtipie(
+            "artipie",
+            new TestResource(
+                String.format("npm/storage/%s/meta.json", NpmProxyITCase.PROJ)
+            ).asBytes(),
+            String.format("/var/artipie/data/my-npm/%s/meta.json", NpmProxyITCase.PROJ)
         );
-    }
-
-    @Test
-    void getProjectFromOriginServer() throws IOException {
-        final boolean anonymous = true;
-        this.init(anonymous);
-        final HttpURLConnection con = (HttpURLConnection) new URL(
+        final byte[] tgz = new TestResource(
+            String.format("npm/storage/%s/-/%s-1.0.1.tgz", NpmProxyITCase.PROJ, NpmProxyITCase.PROJ)
+        ).asBytes();
+        this.containers.putBinaryToArtipie(
+            "artipie", tgz,
             String.format(
-                "http://localhost:%d/%s/%s/-/%s-1.0.1.tgz",
-                this.origin.port(), NpmProxyITCase.ORIGIN,
+                "/var/artipie/data/my-npm/%s/-/%s-1.0.1.tgz",
                 NpmProxyITCase.PROJ, NpmProxyITCase.PROJ
             )
-        ).openConnection();
-        con.setRequestMethod("GET");
-        con.setDoOutput(true);
-        MatcherAssert.assertThat(
-            con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
         );
-    }
-
-    @AfterEach
-    void stop() {
-        this.proxy.stop();
-        this.origin.stop();
-        this.cntn.close();
-    }
-
-    private void init(final boolean anonymous) throws IOException {
-        this.startOrigin(anonymous);
-        this.startProxy(anonymous);
-        this.cntn = new TestContainer("node:14-alpine", this.tmp);
-        this.cntn.start(this.proxy.port());
-    }
-
-    private void startOrigin(final boolean anonymous) throws IOException {
-        final Path root = this.tmp.resolve("origin");
-        root.toFile().mkdirs();
-        final Path repos = root.resolve("repos");
-        this.saveFilesToStrg(new FileStorage(repos));
-        final int port = new RandomFreePort().value();
-        this.origin = new ArtipieServer(
-            root,
-            NpmProxyITCase.ORIGIN,
-            this.originConfig(anonymous, repos, port).toString(),
-            port
-        );
-        this.origin.start();
-    }
-
-    private void startProxy(final boolean anonymous) throws IOException {
-        final Path root = this.tmp.resolve("proxy");
-        root.toFile().mkdirs();
-        final int proxyport = new RandomFreePort().value();
-        this.proxy = new ArtipieServer(
-            root,
-            NpmProxyITCase.PROXY,
-            this.proxyConfig(anonymous, root, proxyport).toString(),
-            proxyport
-        );
-        this.proxy.start();
-    }
-
-    private RepoConfigYaml originConfig(final boolean anonymous, final Path repos, final int port) {
-        final RepoConfigYaml yaml = new RepoConfigYaml("npm")
-            .withFileStorage(repos)
-            .withUrl(String.format("http://localhost:%d/%s", port, NpmProxyITCase.ORIGIN));
-        if (!anonymous) {
-            yaml.withPermissions(
-                new RepoPerms(ArtipieServer.ALICE.name(), "*")
-            );
-        }
-        return yaml;
-    }
-
-    private RepoConfigYaml proxyConfig(
-        final boolean anonymous, final Path root, final int proxyport
-    ) {
-        return new RepoConfigYaml("npm-proxy")
-            .withFileStorage(root.resolve("repos"))
-            .withUrl(new RepositoryUrl(proxyport, NpmProxyITCase.PROXY).string(anonymous))
-            .withPath(NpmProxyITCase.PROXY)
-            .withRemoteSettings(
-                String.format(
-                    "http://localhost:%d/%s", this.origin.port(), NpmProxyITCase.ORIGIN
+        this.containers.assertExec(
+            "Package was not installed",
+            new MavenITCase.ContainerResultMatcher(
+                new IsEqual<>(0),
+                new StringContainsInOrder(
+                    Arrays.asList(NpmProxyITCase.ADDED_PROJ, "added 1 package")
                 )
-            );
-    }
-
-    private void saveFilesToStrg(final Storage storage) {
-        new TestResource(String.format("npm/storage/%s/meta.json", NpmProxyITCase.PROJ))
-            .saveTo(
-                storage,
-                new Key.From(NpmProxyITCase.ORIGIN, NpmProxyITCase.PROJ, "meta.json")
+            ),
+            "npm", "install", NpmProxyITCase.PROJ, "--registry",
+            "http://artipie-proxy:8080/my-npm-proxy"
         );
-        new TestResource(
-            String.format("npm/storage/%s/-/%s-1.0.1.tgz", NpmProxyITCase.PROJ, NpmProxyITCase.PROJ)
-        ).saveTo(
-            storage,
-            new Key.From(
-                NpmProxyITCase.ORIGIN, NpmProxyITCase.PROJ, "-",
-                String.format("%s-1.0.1.tgz", NpmProxyITCase.PROJ)
-            )
+        this.containers.assertArtipieContent(
+            "artipie-proxy",
+            "Package was not cached in proxy",
+            String.format(
+                "/var/artipie/data/my-npm-proxy/%s/-/%s-1.0.1.tgz",
+                NpmProxyITCase.PROJ, NpmProxyITCase.PROJ
+            ),
+            new IsEqual<>(tgz)
         );
     }
 
