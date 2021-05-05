@@ -57,13 +57,12 @@ public final class PypiProxyITCase {
                 "artipie",
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()
                     .withRepoConfig("pypi-proxy/pypi.yml", "my-pypi")
-                    .withCredentials("pypi-proxy/_credentials.yaml")
+                    .withCredentials("_credentials.yaml")
             ),
             new MapEntry<>(
                 "artipie-proxy",
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()
                     .withRepoConfig("pypi-proxy/pypi-proxy.yml", "my-pypi-proxy")
-                    .withCredentials("pypi-proxy/_credentials.yaml")
             )
         ),
         () -> new TestDeployment.ClientContainer("python:3")

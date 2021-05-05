@@ -122,7 +122,7 @@ public final class MavenITCase {
      *  from test resource root directory to subfolder, e.g. `maven-it`.
      */
     @SuppressWarnings("PMD.AssignmentInOperand")
-    private static List<String> getResourceFiles(final String path) throws IOException {
+    static List<String> getResourceFiles(final String path) throws IOException {
         final List<String> filenames = new ArrayList<>(0);
         try (InputStream in = getResourceAsStream(path);
             BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
