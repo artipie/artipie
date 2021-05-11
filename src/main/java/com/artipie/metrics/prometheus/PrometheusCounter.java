@@ -21,9 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics.memory;
+package com.artipie.metrics.prometheus;
 
 import com.artipie.metrics.Counter;
+import io.prometheus.client.CollectorRegistry;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -31,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @since 0.8
  */
-public final class InMemoryCounter implements Counter {
+public final class PrometheusCounter implements Counter {
 
     /**
      * Current counter value.

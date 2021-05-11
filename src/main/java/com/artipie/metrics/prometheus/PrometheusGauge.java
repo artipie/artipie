@@ -21,44 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics.memory;
+package com.artipie.metrics.prometheus;
 
-import com.artipie.metrics.Counter;
-import java.util.concurrent.atomic.AtomicLong;
+import com.artipie.metrics.Gauge;
 
 /**
- * {@link Counter} implementation storing data in memory.
+ * {@link Gauge} implementation storing data in memory.
  *
  * @since 0.8
  */
-public final class InMemoryCounter implements Counter {
+public final class PrometheusGauge implements Gauge {
 
     /**
-     * Current counter value.
+     * Current value.
      */
-    private final AtomicLong counter = new AtomicLong();
+    private volatile long current;
 
     @Override
-    public void add(final long amount) {
-        if (amount < 0) {
-            throw new IllegalArgumentException(
-                String.format("Amount should not be negative: %d", amount)
-            );
-        }
-        this.counter.addAndGet(amount);
-    }
-
-    @Override
-    public void inc() {
-        this.counter.incrementAndGet();
+    public void set(final long update) {
+        this.current = update;
     }
 
     /**
-     * Get counter value.
+     * Get gauge value.
      *
-     * @return Counter value.
+     * @return Gauge value.
      */
     public long value() {
-        return this.counter.getAndSet(0L);
+        return this.current;
     }
 }
