@@ -24,6 +24,8 @@
 package com.artipie.metrics.memory;
 
 import com.artipie.metrics.Counter;
+import io.prometheus.client.CollectorRegistry;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -37,6 +39,9 @@ public final class InMemoryCounter implements Counter {
      * Current counter value.
      */
     private final AtomicLong counter = new AtomicLong();
+    private static CollectorRegistry registry = new CollectorRegistry();
+    private static final io.prometheus.client.Counter prometheusCounter = io.prometheus.client.Counter.build()
+        .name("requests_total").help("Total requests.").register(registry);
 
     @Override
     public void add(final long amount) {
@@ -46,11 +51,13 @@ public final class InMemoryCounter implements Counter {
             );
         }
         this.counter.addAndGet(amount);
+        prometheusCounter.inc();
     }
 
     @Override
     public void inc() {
         this.counter.incrementAndGet();
+        prometheusCounter.inc();
     }
 
     /**
@@ -60,5 +67,21 @@ public final class InMemoryCounter implements Counter {
      */
     public long value() {
         return this.counter.getAndSet(0L);
+    }
+
+    /**
+     * Get prometheus counter value.
+     *
+     * @return prometheusCounter value.
+     */
+    public int prometheusValue() {
+        PushGateway pg = new PushGateway("prometheus.zhedge.xyz:9091");
+        try {
+            pg.pushAdd(registry, "my_batch_job");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return 9;
     }
 }
