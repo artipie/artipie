@@ -35,11 +35,12 @@ public final class PrometheusGauge implements Gauge {
     /**
      * Current value.
      */
-    private volatile long current;
+    private io.prometheus.client.Gauge current = io.prometheus.client.Gauge.build()
+        .name("my_batch_job_duration_seconds").help("Duration of my batch job in seconds.").register(PrometheusMetrics.registry);
 
     @Override
     public void set(final long update) {
-        this.current = update;
+        this.current.set(update);
     }
 
     /**
@@ -48,6 +49,6 @@ public final class PrometheusGauge implements Gauge {
      * @return Gauge value.
      */
     public long value() {
-        return this.current;
+        return (long) this.current.get();
     }
 }

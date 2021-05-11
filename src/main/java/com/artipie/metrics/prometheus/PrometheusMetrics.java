@@ -26,6 +26,7 @@ package com.artipie.metrics.prometheus;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.publish.MetricsOutput;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Counter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,9 +39,7 @@ import java.util.concurrent.ConcurrentMap;
  * @since 0.9
  */
 public final class PrometheusMetrics implements Metrics {
-    private static CollectorRegistry registry = new CollectorRegistry();
-    private static final io.prometheus.client.Counter prometheusCounter = io.prometheus.client.Counter.build()
-        .name("requests_total").help("Total requests.").register(registry);
+    public static final CollectorRegistry registry = new CollectorRegistry();
     /**
      * Counters by name.
      */
@@ -63,16 +62,6 @@ public final class PrometheusMetrics implements Metrics {
 
     @Override
     public void publish(final MetricsOutput out) {
-//        final Map<String, Long> counters = new HashMap<>(this.cnts.size());
-//        for (final Map.Entry<String, PrometheusCounter> entry : this.cnts.entrySet()) {
-//            counters.put(entry.getKey(), entry.getValue().value());
-//        }
-//        out.counters(counters);
-//        final Map<String, Long> gauges = new HashMap<>(this.ggs.size());
-//        for (final Map.Entry<String, PrometheusGauge> entry : this.ggs.entrySet()) {
-//            counters.put(entry.getKey(), entry.getValue().value());
-//        }
-//        out.gauges(gauges);
         PushGateway pg = new PushGateway("prometheus.zhedge.xyz:9091");
         try {
             pg.pushAdd(registry, "my_batch_job");

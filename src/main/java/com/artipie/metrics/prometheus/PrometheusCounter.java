@@ -38,7 +38,8 @@ public final class PrometheusCounter implements Counter {
     /**
      * Current counter value.
      */
-    private final AtomicLong counter = new AtomicLong();
+    private final io.prometheus.client.Counter counter = io.prometheus.client.Counter.build()
+        .name("requests_total").help("Total requests.").register(PrometheusMetrics.registry);
 
     @Override
     public void add(final long amount) {
@@ -47,12 +48,12 @@ public final class PrometheusCounter implements Counter {
                 String.format("Amount should not be negative: %d", amount)
             );
         }
-        this.counter.addAndGet(amount);
+        this.counter.inc(amount);
     }
 
     @Override
     public void inc() {
-        this.counter.incrementAndGet();
+        this.counter.inc();
     }
 
     /**
@@ -61,6 +62,6 @@ public final class PrometheusCounter implements Counter {
      * @return Counter value.
      */
     public long value() {
-        return this.counter.getAndSet(0L);
+        return (long) this.counter.get();
     }
 }
