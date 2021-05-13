@@ -73,7 +73,7 @@ final class NugetITCase {
     }
 
     @Test
-    void shouldPushPackage() throws Exception {
+    void shouldPushAndInstallPackage() throws Exception {
         final String pckgname = UUID.randomUUID().toString();
         this.containers.putBinaryToClient(
             new TestResource("nuget/newtonsoft.json/12.0.3/newtonsoft.json.12.0.3.nupkg").asBytes(),
