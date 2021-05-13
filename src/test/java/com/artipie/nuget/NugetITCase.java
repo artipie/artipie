@@ -23,120 +23,43 @@
  */
 package com.artipie.nuget;
 
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.test.TestContainer;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.artipie.asto.test.TestResource;
+import com.artipie.maven.MavenITCase;
+import com.artipie.test.TestDeployment;
 import java.util.Arrays;
 import java.util.UUID;
-import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Integration tests for Nuget repository.
  * @since 0.12
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class NugetITCase {
 
     /**
-     * URL.
+     * Test deployments.
+     * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    private static final String URL = "http://host.testcontainers.internal:%d/my-nuget/index.json";
-
-    /**
-     * Temporary directory for all tests.
-     */
-    private Path tmp;
-
-    /**
-     * Tested Artipie server.
-     */
-    private ArtipieServer server;
-
-    /**
-     * Container.
-     */
-    private TestContainer cntn;
-
-    /**
-     * Server port.
-     */
-    private int port;
+    @RegisterExtension
+    final TestDeployment containers = new TestDeployment(
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withRepoConfig("nuget/nuget.yml", "my-nuget"),
+        () -> new TestDeployment.ClientContainer("mcr.microsoft.com/dotnet/sdk:5.0")
+            .withWorkingDirectory("/w")
+    );
 
     @BeforeEach
-    void init() throws Exception {
-        this.tmp = Files.createTempDirectory("junit-nuget");
-        final String name = "my-nuget";
-        this.port = new RandomFreePort().value();
-        this.server = new ArtipieServer(this.tmp, name, this.config().toString(), this.port);
-        this.server.start();
-        Testcontainers.exposeHostPorts(this.port);
-        this.createNugetConfig();
-        this.cntn = new TestContainer("mcr.microsoft.com/dotnet/sdk:5.0", this.tmp);
-        this.cntn.start(this.port);
-    }
-
-    @AfterEach
-    @SuppressWarnings("PMD.AvoidPrintStackTrace")
-    void tearDown() {
-        this.server.stop();
-        this.cntn.close();
-        try {
-            FileUtils.cleanDirectory(this.tmp.toFile());
-        } catch (final IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    @Test
-    @Timeout(10)
-    void shouldPushPackage() throws Exception {
-        MatcherAssert.assertThat(
-            this.pushPackage(),
-            new StringContains("Your package was pushed.")
-        );
-    }
-
-    @Test
-    @Timeout(30)
-    @Disabled
-    void shouldInstallPushedPackage() throws Exception {
-        this.pushPackage();
-        this.cntn.execStdout("dotnet", "new", "console", "-n", "TestProj");
-        MatcherAssert.assertThat(
-            this.cntn.execStdout(
-                "dotnet", "add", "TestProj", "package", "newtonsoft.json",
-                "--version", "12.0.3", "-s", String.format(NugetITCase.URL, this.port)
-            ),
-            new StringContainsInOrder(
-                Arrays.asList(
-                    // @checkstyle LineLengthCheck (1 line)
-                    "PackageReference for package 'newtonsoft.json' version '12.0.3' added to file '/home/TestProj/TestProj.csproj'",
-                    "Restored /home/TestProj/TestProj.csproj"
-                )
-            )
-        );
-    }
-
-    private void createNugetConfig() throws Exception {
-        Files.write(
-            this.tmp.resolve("NuGet.Config"),
+    void init() {
+        this.containers.putBinaryToClient(
             String.join(
                 "",
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n",
@@ -145,25 +68,45 @@ final class NugetITCase {
                 "<add key=\"nuget.org\" value=\"true\" />",
                 "</disabledPackageSources>",
                 "</configuration>"
-            ).getBytes()
+            ).getBytes(), "/w/NuGet.Config"
         );
     }
 
-    private RepoConfigYaml config() {
-        return new RepoConfigYaml("nuget")
-            .withFileStorage(this.tmp.resolve("repos"))
-            .withUrl(String.format("http://host.testcontainers.internal:%d/my-nuget", this.port));
-    }
-
-    private String pushPackage() throws Exception {
+    @Test
+    void shouldPushPackage() throws Exception {
         final String pckgname = UUID.randomUUID().toString();
-        Files.write(
-            this.tmp.resolve(pckgname),
-            new NewtonJsonResource("newtonsoft.json.12.0.3.nupkg").bytes()
+        this.containers.putBinaryToClient(
+            new TestResource("nuget/newtonsoft.json/12.0.3/newtonsoft.json.12.0.3.nupkg").asBytes(),
+            String.format("/w/%s", pckgname)
         );
-        return this.cntn.execStdout(
-            "dotnet", "nuget", "push", pckgname,
-            "-s", String.format(NugetITCase.URL, this.port)
+        this.containers.assertExec(
+            "Package was not pushed",
+            new MavenITCase.ContainerResultMatcher(
+                new IsEqual<>(0),
+                new StringContains("Your package was pushed.")
+            ),
+            "dotnet", "nuget", "push", pckgname, "-s", "http://artipie:8080/my-nuget/index.json"
+        );
+        this.containers.assertExec(
+            "New project was not created",
+            new MavenITCase.ContainerResultMatcher(),
+            "dotnet", "new", "console", "-n", "TestProj"
+        );
+        this.containers.assertExec(
+            "Package was not added",
+            new MavenITCase.ContainerResultMatcher(
+                new IsEqual<>(0),
+                new StringContainsInOrder(
+                    Arrays.asList(
+                        // @checkstyle LineLengthCheck (1 line)
+                        "PackageReference for package 'newtonsoft.json' version '12.0.3' added to file '/w/TestProj/TestProj.csproj'",
+                        "Restored /w/TestProj/TestProj.csproj"
+                    )
+                )
+            ),
+            "dotnet", "add", "TestProj", "package", "newtonsoft.json",
+            "--version", "12.0.3", "-s", "http://artipie:8080/my-nuget/index.json"
         );
     }
+
 }

@@ -54,7 +54,7 @@ final class NewtonJsonResource {
      */
     public byte[] bytes() throws Exception {
         return ByteStreams.toByteArray(
-            new ResourceOf(String.format("newtonsoft.json/12.0.3/%s", this.name)).stream()
+            new ResourceOf(String.format("nuget/newtonsoft.json/12.0.3/%s", this.name)).stream()
         );
     }
 }
