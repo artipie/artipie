@@ -1,3 +1,26 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 artipie.com
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package com.artipie.metrics.prometheus;
 
 import java.io.BufferedWriter;
@@ -59,6 +82,11 @@ import io.prometheus.client.exporter.common.TextFormat;
 public class PushGateway {
 
     private static final int MILLISECONDS_PER_SECOND = 1000;
+    private static final String urf8 = "UTF-8";
+    private static final String responseCodeFrom = "Response code from ";
+    private static final String postReq = "POST";
+    private static final String putReq = "PUT";
+    private static final String deleteReq = "DELETE";
 
     // Visible for testing.
     protected final String gatewayBaseURL;
@@ -110,7 +138,7 @@ public class PushGateway {
      * This uses the PUT HTTP method.
      */
     public void push(CollectorRegistry registry, String job) throws IOException {
-        doRequest(registry, job, null, "PUT");
+        doRequest(registry, job, null, putReq);
     }
 
     /**
@@ -132,7 +160,7 @@ public class PushGateway {
      * This uses the PUT HTTP method.
      */
     public void push(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
-        doRequest(registry, job, groupingKey, "PUT");
+        doRequest(registry, job, groupingKey, putReq);
     }
 
     /**
@@ -154,7 +182,7 @@ public class PushGateway {
      * This uses the POST HTTP method.
      */
     public void pushAdd(CollectorRegistry registry, String job) throws IOException {
-        doRequest(registry, job, null, "POST");
+        doRequest(registry, job, null, postReq);
     }
 
     /**
@@ -176,7 +204,7 @@ public class PushGateway {
      * This uses the POST HTTP method.
      */
     public void pushAdd(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
-        doRequest(registry, job, groupingKey, "POST");
+        doRequest(registry, job, groupingKey, postReq);
     }
 
     /**
@@ -200,7 +228,7 @@ public class PushGateway {
      * This uses the DELETE HTTP method.
      */
     public void delete(String job) throws IOException {
-        doRequest(null, job, null, "DELETE");
+        doRequest(null, job, null, deleteReq);
     }
 
     /**
@@ -210,31 +238,35 @@ public class PushGateway {
      * This uses the DELETE HTTP method.
      */
     public void delete(String job, Map<String, String> groupingKey) throws IOException {
-        doRequest(null, job, groupingKey, "DELETE");
+        doRequest(null, job, groupingKey, deleteReq);
     }
 
-    void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
+    String getUrl(String job) {
         String url = gatewayBaseURL;
         if (job.contains("/")) {
             url += "job@base64/" + base64url(job);
         } else {
-            url += "job/" + URLEncoder.encode(job, "UTF-8");
+            url += "job/" + URLEncoder.encode(job, urf8);
         }
+        return url;
+    }
 
+    void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
+        String url = getUrl(job);
         if (groupingKey != null) {
             for (Map.Entry<String, String> entry: groupingKey.entrySet()) {
                 if (entry.getValue().isEmpty()) {
-                    url += "/" + entry.getKey() + "@base64/=";
+                    url += "/".concat(entry.getKey()).concat("@base64/=");
                 } else if (entry.getValue().contains("/")) {
-                    url += "/" + entry.getKey() + "@base64/" + base64url(entry.getValue());
+                    url += "/".concat(entry.getKey()).concat("@base64/").concat(base64url(entry.getValue()));
                 } else {
-                    url += "/" + entry.getKey() + "/" + URLEncoder.encode(entry.getValue(), "UTF-8");
+                    url = url.concat("/").concat(entry.getKey()).concat("/").concat(URLEncoder.encode(entry.getValue(), urf8));
                 }
             }
         }
         HttpURLConnection connection = connectionFactory.create(url);
         connection.setRequestProperty("Content-Type", TextFormat.CONTENT_TYPE_004);
-        if (!method.equals("DELETE")) {
+        if (!method.equals(deleteReq)) {
             connection.setDoOutput(true);
         }
         connection.setRequestMethod(method);
@@ -244,8 +276,8 @@ public class PushGateway {
         connection.connect();
 
         try {
-            if (!method.equals("DELETE")) {
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8"));
+            if (!method.equals(deleteReq)) {
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), urf8));
                 TextFormat.write004(writer, registry.metricFamilySamples());
                 writer.flush();
                 writer.close();
@@ -257,9 +289,9 @@ public class PushGateway {
                 InputStream errorStream = connection.getErrorStream();
                 if(errorStream != null) {
                     String errBody = readFromStream(errorStream);
-                    errorMessage = "Response code from " + url + " was " + response + ", response body: " + errBody;
+                    errorMessage = responseCodeFrom + url + " was " + response + ", response body: " + errBody;
                 } else {
-                    errorMessage = "Response code from " + url + " was " + response;
+                    errorMessage = responseCodeFrom + url + " was " + response;
                 }
                 throw new IOException(errorMessage);
             }
@@ -271,7 +303,7 @@ public class PushGateway {
     private static String base64url(String v) {
         // Per RFC4648 table 2. We support Java 6, and java.util.Base64 was only added in Java 8,
         try {
-            return DatatypeConverter.printBase64Binary(v.getBytes("UTF-8")).replace("+", "-").replace("/", "_");
+            return DatatypeConverter.printBase64Binary(v.getBytes(urf8)).replace("+", "-").replace("/", "_");
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);  // Unreachable.
         }
@@ -296,6 +328,6 @@ public class PushGateway {
         while ((length = is.read(buffer)) != -1) {
             result.write(buffer, 0, length);
         }
-        return result.toString("UTF-8");
+        return result.toString(urf8);
     }
 }

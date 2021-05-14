@@ -37,6 +37,11 @@ public final class PrometheusCounter implements Counter {
      */
     private io.prometheus.client.Counter counter;
 
+    /**
+     * Current counter value.
+     *
+     * @param counter is good
+     */
     public PrometheusCounter(io.prometheus.client.Counter counter) {
         this.counter = counter;
     }
