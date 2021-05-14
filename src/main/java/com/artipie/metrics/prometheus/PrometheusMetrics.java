@@ -26,10 +26,7 @@ package com.artipie.metrics.prometheus;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.publish.MetricsOutput;
 import io.prometheus.client.CollectorRegistry;
-import io.prometheus.client.Counter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -39,7 +36,7 @@ import java.util.concurrent.ConcurrentMap;
  * @since 0.9
  */
 public final class PrometheusMetrics implements Metrics {
-    public static final CollectorRegistry registry = new CollectorRegistry();
+    public final CollectorRegistry registry = new CollectorRegistry();
     /**
      * Counters by name.
      */
@@ -52,12 +49,18 @@ public final class PrometheusMetrics implements Metrics {
 
     @Override
     public PrometheusCounter counter(final String name) {
-        return this.cnts.computeIfAbsent(name, ignored -> new PrometheusCounter());
+        return new PrometheusCounter(
+            io.prometheus.client.Counter.build().name(name)
+                .register(this.registry)
+        );
     }
 
     @Override
     public PrometheusGauge gauge(final String name) {
-        return this.ggs.computeIfAbsent(name, ignored -> new PrometheusGauge());
+        return new PrometheusGauge(
+            io.prometheus.client.Gauge.build().name(name)
+                .register(this.registry)
+        );
     }
 
     @Override

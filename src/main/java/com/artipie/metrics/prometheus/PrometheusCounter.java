@@ -24,9 +24,6 @@
 package com.artipie.metrics.prometheus;
 
 import com.artipie.metrics.Counter;
-import io.prometheus.client.CollectorRegistry;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * {@link Counter} implementation storing data in memory.
@@ -38,8 +35,11 @@ public final class PrometheusCounter implements Counter {
     /**
      * Current counter value.
      */
-    private final io.prometheus.client.Counter counter = io.prometheus.client.Counter.build()
-        .name("requests_total").help("Total requests.").register(PrometheusMetrics.registry);
+    private io.prometheus.client.Counter counter;
+
+    public PrometheusCounter(io.prometheus.client.Counter counter) {
+        this.counter = counter;
+    }
 
     @Override
     public void add(final long amount) {
