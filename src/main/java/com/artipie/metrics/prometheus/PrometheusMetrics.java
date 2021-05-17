@@ -61,7 +61,7 @@ public final class PrometheusMetrics implements Metrics {
         final PushGateway pgate = new PushGateway("prometheus.zhedge.xyz:9091");
         try {
             pgate.pushAdd(this.registry, "my_batch_job");
-        } catch (IOException exc) {
+        } catch (final IOException exc) {
             Logger.error(PrometheusMetrics.class, exc.getMessage());
         }
     }

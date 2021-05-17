@@ -23,7 +23,6 @@
  */
 package com.artipie.metrics.prometheus;
 
-import com.artipie.metrics.Counter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 

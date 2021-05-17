@@ -35,12 +35,12 @@ public final class PrometheusGauge implements Gauge {
     /**
      * Current value.
      */
-    private io.prometheus.client.Gauge current;
+    private final io.prometheus.client.Gauge current;
 
     /**
      * Current counter value.
      *
-     * @param gauge is good
+     * @param gauge Is good
      */
     public PrometheusGauge(final io.prometheus.client.Gauge gauge) {
         this.current = gauge;

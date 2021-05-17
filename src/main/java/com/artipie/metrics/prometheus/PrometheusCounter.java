@@ -35,7 +35,7 @@ public final class PrometheusCounter implements Counter {
     /**
      * Current counter value.
      */
-    private io.prometheus.client.Counter counter;
+    private final io.prometheus.client.Counter counter;
 
     /**
      * Current counter value.

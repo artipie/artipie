@@ -21,20 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.artipie.metrics.prometheus;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
- * {@link HttpConnectionFactory} implementation storing data in memory.
+ * Artipie metrics implementation storing data in memory.
  *
  * @since 0.8
  */
-public class DefaultHttpConnectionFactory implements HttpConnectionFactory {
-    @Override
-    public HttpURLConnection create(final String url) throws IOException {
-        return (HttpURLConnection) new URL(url).openConnection();
-    }
-}
+package com.artipie.metrics.prometheus;
