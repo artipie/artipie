@@ -40,9 +40,9 @@ public final class PrometheusCounter implements Counter {
     /**
      * Current counter value.
      *
-     * @param counter is good
+     * @param counter Is good
      */
-    public PrometheusCounter(io.prometheus.client.Counter counter) {
+    public PrometheusCounter(final io.prometheus.client.Counter counter) {
         this.counter = counter;
     }
 

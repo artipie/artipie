@@ -35,7 +35,7 @@ import java.net.URL;
  */
 public class DefaultHttpConnectionFactory implements HttpConnectionFactory {
     @Override
-    public HttpURLConnection create(String url) throws IOException {
+    public HttpURLConnection create(final String url) throws IOException {
         return (HttpURLConnection) new URL(url).openConnection();
     }
 }

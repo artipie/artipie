@@ -33,5 +33,12 @@ import java.net.HttpURLConnection;
  * @since 0.8
  */
 public interface HttpConnectionFactory {
+    /**
+     * Current counter value.
+     *
+     * @param url Is OK
+     * @return Connection is OK
+     * @throws IOException Is OK
+     */
     HttpURLConnection create(String url) throws IOException;
 }

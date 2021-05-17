@@ -23,6 +23,7 @@
  */
 package com.artipie.metrics.prometheus;
 
+import com.artipie.metrics.Metrics;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,13 +31,10 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.Map;
 import javax.xml.bind.DatatypeConverter;
 
@@ -45,48 +43,18 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 
 /**
- * Export metrics via the Prometheus Pushgateway.
- * <p>
- * The Prometheus Pushgateway exists to allow ephemeral and batch jobs to expose their metrics to Prometheus.
- * Since these kinds of jobs may not exist long enough to be scraped, they can instead push their metrics
- * to a Pushgateway. This class allows pushing the contents of a {@link CollectorRegistry} to
- * a Pushgateway.
- * <p>
- * Example usage:
- * <pre>
- * {@code
- *   void executeBatchJob() throws Exception {
- *     CollectorRegistry registry = new CollectorRegistry();
- *     Gauge duration = Gauge.build()
- *         .name("my_batch_job_duration_seconds").help("Duration of my batch job in seconds.").register(registry);
- *     Gauge.Timer durationTimer = duration.startTimer();
- *     try {
- *       // Your code here.
+ * {@link PushGateway} implementation storing data in memory.
  *
- *       // This is only added to the registry after success,
- *       // so that a previous success in the Pushgateway isn't overwritten on failure.
- *       Gauge lastSuccess = Gauge.build()
- *           .name("my_batch_job_last_success").help("Last time my batch job succeeded, in unixtime.").register(registry);
- *       lastSuccess.setToCurrentTime();
- *     } finally {
- *       durationTimer.setDuration();
- *       PushGateway pg = new PushGateway("127.0.0.1:9091");
- *       pg.pushAdd(registry, "my_batch_job");
- *     }
- *   }
- * }
- * </pre>
- * <p>
- * See <a href="https://github.com/prometheus/pushgateway">https://github.com/prometheus/pushgateway</a>
+ * @since 0.9
  */
 public class PushGateway {
-
     private static final int MILLISECONDS_PER_SECOND = 1000;
     private static final String urf8 = "UTF-8";
     private static final String responseCodeFrom = "Response code from ";
     private static final String postReq = "POST";
     private static final String putReq = "PUT";
     private static final String deleteReq = "DELETE";
+    private static final String was = " was ";
 
     // Visible for testing.
     protected final String gatewayBaseURL;
@@ -98,7 +66,7 @@ public class PushGateway {
      * <p>
      * @param address  host:port or ip:port of the Pushgateway.
      */
-    public PushGateway(String address) {
+    public PushGateway(final String address) {
         this(createURLSneakily("http://" + address));
     }
 
@@ -107,13 +75,13 @@ public class PushGateway {
      * <p>
      * @param serverBaseURL the base URL and optional context path of the Pushgateway server.
      */
-    public PushGateway(URL serverBaseURL) {
+    public PushGateway(final URL serverBaseURL) {
         this.gatewayBaseURL = URI.create(serverBaseURL.toString() + "/metrics/")
             .normalize()
             .toString();
     }
 
-    public void setConnectionFactory(HttpConnectionFactory connectionFactory) {
+    public void setConnectionFactory(final HttpConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
     }
 
@@ -137,8 +105,8 @@ public class PushGateway {
      * <p>
      * This uses the PUT HTTP method.
      */
-    public void push(CollectorRegistry registry, String job) throws IOException {
-        doRequest(registry, job, null, putReq);
+    public void push(final CollectorRegistry registry, final String job) throws IOException {
+        doRequest(registry, job, null, PushGateway.putReq);
     }
 
     /**
@@ -148,8 +116,8 @@ public class PushGateway {
      * <p>
      * This uses the PUT HTTP method.
      */
-    public void push(Collector collector, String job) throws IOException {
-        CollectorRegistry registry = new CollectorRegistry();
+    public void push(final Collector collector, final String job) throws IOException {
+        final CollectorRegistry registry = new CollectorRegistry();
         collector.register(registry);
         push(registry, job);
     }
@@ -159,8 +127,9 @@ public class PushGateway {
      * <p>
      * This uses the PUT HTTP method.
      */
-    public void push(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
-        doRequest(registry, job, groupingKey, putReq);
+    public void push(final CollectorRegistry registry, final String job,
+        final Map<String, String> groupingKey) throws IOException {
+        doRequest(registry, job, groupingKey, PushGateway.putReq);
     }
 
     /**
@@ -170,8 +139,9 @@ public class PushGateway {
      * <p>
      * This uses the PUT HTTP method.
      */
-    public void push(Collector collector, String job, Map<String, String> groupingKey) throws IOException {
-        CollectorRegistry registry = new CollectorRegistry();
+    public void push(final Collector collector, final String job,
+        final Map<String, String> groupingKey) throws IOException {
+        final CollectorRegistry registry = new CollectorRegistry();
         collector.register(registry);
         push(registry, job, groupingKey);
     }
@@ -181,8 +151,8 @@ public class PushGateway {
      * <p>
      * This uses the POST HTTP method.
      */
-    public void pushAdd(CollectorRegistry registry, String job) throws IOException {
-        doRequest(registry, job, null, postReq);
+    public void pushAdd(final CollectorRegistry registry, final String job) throws IOException {
+        doRequest(registry, job, null, PushGateway.postReq);
     }
 
     /**
@@ -192,8 +162,8 @@ public class PushGateway {
      * <p>
      * This uses the POST HTTP method.
      */
-    public void pushAdd(Collector collector, String job) throws IOException {
-        CollectorRegistry registry = new CollectorRegistry();
+    public void pushAdd(final Collector collector, final String job) throws IOException {
+        final CollectorRegistry registry = new CollectorRegistry();
         collector.register(registry);
         pushAdd(registry, job);
     }
@@ -203,8 +173,9 @@ public class PushGateway {
      * <p>
      * This uses the POST HTTP method.
      */
-    public void pushAdd(CollectorRegistry registry, String job, Map<String, String> groupingKey) throws IOException {
-        doRequest(registry, job, groupingKey, postReq);
+    public void pushAdd(final CollectorRegistry registry, final String job,
+        final Map<String, String> groupingKey) throws IOException {
+        doRequest(registry, job, groupingKey, PushGateway.postReq);
     }
 
     /**
@@ -214,8 +185,9 @@ public class PushGateway {
      * <p>
      * This uses the POST HTTP method.
      */
-    public void pushAdd(Collector collector, String job, Map<String, String> groupingKey) throws IOException {
-        CollectorRegistry registry = new CollectorRegistry();
+    public void pushAdd(final Collector collector, final String job,
+        final Map<String, String> groupingKey) throws IOException {
+        final CollectorRegistry registry = new CollectorRegistry();
         collector.register(registry);
         pushAdd(registry, job, groupingKey);
     }
@@ -227,8 +199,8 @@ public class PushGateway {
      * Deletes metrics with no grouping key and the provided job.
      * This uses the DELETE HTTP method.
      */
-    public void delete(String job) throws IOException {
-        doRequest(null, job, null, deleteReq);
+    public void delete(final String job) throws IOException {
+        doRequest(null, job, null, PushGateway.deleteReq);
     }
 
     /**
@@ -237,34 +209,45 @@ public class PushGateway {
      * Deletes metrics with the provided job and grouping key.
      * This uses the DELETE HTTP method.
      */
-    public void delete(String job, Map<String, String> groupingKey) throws IOException {
-        doRequest(null, job, groupingKey, deleteReq);
+    public void delete(final String job, final Map<String, String> groupingKey)
+        throws IOException {
+        doRequest(null, job, groupingKey, PushGateway.deleteReq);
     }
 
-    String getUrl(String job) {
+    String getUrl(final String job) throws UnsupportedEncodingException {
         String url = gatewayBaseURL;
         if (job.contains("/")) {
-            url += "job@base64/" + base64url(job);
+            url = url.concat("job@base64/").concat(base64url(job));
         } else {
-            url += "job/" + URLEncoder.encode(job, urf8);
+            url = url.concat("job/").concat(URLEncoder.encode(job, PushGateway.urf8));
         }
         return url;
     }
 
-    void doRequest(CollectorRegistry registry, String job, Map<String, String> groupingKey, String method) throws IOException {
-        String url = getUrl(job);
+    String enhanceUrl(String url, final Map<String, String> groupingKey)
+        throws UnsupportedEncodingException {
+        String newUrl = url;
         if (groupingKey != null) {
-            for (Map.Entry<String, String> entry: groupingKey.entrySet()) {
+            for (final Map.Entry<String, String> entry: groupingKey.entrySet()) {
                 if (entry.getValue().isEmpty()) {
-                    url += "/".concat(entry.getKey()).concat("@base64/=");
+                    newUrl = newUrl.concat("/").concat(entry.getKey()).concat("@base64/=");
                 } else if (entry.getValue().contains("/")) {
-                    url += "/".concat(entry.getKey()).concat("@base64/").concat(base64url(entry.getValue()));
+                    newUrl = newUrl.concat("/").concat(entry.getKey()).concat("@base64/")
+                        .concat(base64url(entry.getValue()));
                 } else {
-                    url = url.concat("/").concat(entry.getKey()).concat("/").concat(URLEncoder.encode(entry.getValue(), urf8));
+                    newUrl = newUrl.concat("/").concat(entry.getKey()).concat("/")
+                        .concat(URLEncoder.encode(entry.getValue(), PushGateway.urf8));
                 }
             }
         }
-        HttpURLConnection connection = connectionFactory.create(url);
+        return newUrl;
+    }
+
+    void doRequest(final CollectorRegistry registry, final String job,
+        final Map<String, String> groupingKey, final String method) throws IOException {
+        String url = getUrl(job);
+        url = enhanceUrl(url, groupingKey);
+        final HttpURLConnection connection = connectionFactory.create(url);
         connection.setRequestProperty("Content-Type", TextFormat.CONTENT_TYPE_004);
         if (!method.equals(deleteReq)) {
             connection.setDoOutput(true);
@@ -277,21 +260,26 @@ public class PushGateway {
 
         try {
             if (!method.equals(deleteReq)) {
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), urf8));
+                final BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(connection.getOutputStream(), PushGateway.urf8)
+                );
                 TextFormat.write004(writer, registry.metricFamilySamples());
                 writer.flush();
                 writer.close();
             }
 
-            int response = connection.getResponseCode();
+            final int response = connection.getResponseCode();
             if (response/100 != 2) {
                 String errorMessage;
-                InputStream errorStream = connection.getErrorStream();
-                if(errorStream != null) {
-                    String errBody = readFromStream(errorStream);
-                    errorMessage = responseCodeFrom + url + " was " + response + ", response body: " + errBody;
+                final InputStream errorStream = connection.getErrorStream();
+                if (errorStream == null) {
+                    errorMessage = PushGateway.responseCodeFrom.concat(url)
+                        .concat(was).concat(String.valueOf(response));
                 } else {
-                    errorMessage = responseCodeFrom + url + " was " + response;
+                    final String errBody = readFromStream(errorStream);
+                    errorMessage = PushGateway.responseCodeFrom.concat(url).concat(was)
+                        .concat(String.valueOf(response)).concat(", response body: ")
+                        .concat(errBody);
                 }
                 throw new IOException(errorMessage);
             }
@@ -300,34 +288,30 @@ public class PushGateway {
         }
     }
 
-    private static String base64url(String v) {
+    private static String base64url(final String v) {
         // Per RFC4648 table 2. We support Java 6, and java.util.Base64 was only added in Java 8,
         try {
-            return DatatypeConverter.printBase64Binary(v.getBytes(urf8)).replace("+", "-").replace("/", "_");
+            return DatatypeConverter.printBase64Binary(v.getBytes(PushGateway.urf8))
+                .replace("+", "-").replace("/", "_");
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);  // Unreachable.
         }
     }
 
     /**
-     * Returns a grouping key with the instance label set to the machine's IP address.
-     * <p>
-     * This is a convenience function, and should only be used where you want to
-     * push per-instance metrics rather than cluster/job level metrics.
+     * Current counter value.
+     *
+     * @param is is OK
+     * @throws IOException is OK
      */
-    public static Map<String, String> instanceIPGroupingKey() throws UnknownHostException {
-        Map<String, String> groupingKey = new HashMap<String, String>();
-        groupingKey.put("instance", InetAddress.getLocalHost().getHostAddress());
-        return groupingKey;
-    }
-
-    private static String readFromStream(InputStream is) throws IOException {
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = is.read(buffer)) != -1) {
+    private static String readFromStream(final InputStream is) throws IOException {
+        final ByteArrayOutputStream result = new ByteArrayOutputStream();
+        final byte[] buffer = new byte[1024];
+        int length = is.read(buffer);
+        while (length != -1) {
             result.write(buffer, 0, length);
+            length = is.read(buffer);
         }
-        return result.toString(urf8);
+        return result.toString(PushGateway.urf8);
     }
 }
