@@ -85,11 +85,6 @@ public class PushGateway {
     /**
      * Simple Variable.
      */
-    private static final String DELETEREQ = "DELETE";
-
-    /**
-     * Simple Variable.
-     */
     private static final String WAS = " was ";
 
     /**
@@ -100,7 +95,7 @@ public class PushGateway {
     /**
      * Simple Variable.
      */
-    final private HttpConnectionFactory connfactory = new DefaultHttpConnectionFactory();
+    private final HttpConnectionFactory connfactory;
 
     /**
      * Construct a Pushgateway, with the given address.
@@ -120,24 +115,7 @@ public class PushGateway {
         this.gatebaseurl = URI.create(serverburl.toString().concat("/metrics/"))
             .normalize()
             .toString();
-    }
-
-    /**
-     * Creates a URL instance from a String representation of a URL without throwing a
-     * checked exception.
-     * Required because you can't wrap a call to another constructor in a try statement.
-     *
-     * @param urlstring The String representation of the URL.
-     * @return The URL instance.
-     */
-    private static URL createSneakily(final String urlstring) {
-        URL res = null;
-        try {
-            res = new URL(urlstring);
-        } catch (final MalformedURLException exc) {
-            Logger.error(PushGateway.class, exc.getMessage());
-        }
-        return res;
+        this.connfactory = new DefaultHttpConnectionFactory();
     }
 
     /**
@@ -148,7 +126,7 @@ public class PushGateway {
      * @throws IOException Is OK
      */
     public void pushAdd(final CollectorRegistry registry, final String job) throws IOException {
-        this.doRequest(registry, job, null, PushGateway.POSTREQ);
+        this.doRequest(registry, job, null);
     }
 
     /**
@@ -198,50 +176,58 @@ public class PushGateway {
     /**
      * Current counter value.
      *
+     * @param response Is OK
+     * @param connection Is OK
+     * @param url Is OK
+     * @throws IOException Is OK
+     */
+    static void checkError(final int response, final HttpURLConnection connection,
+        final String url) throws IOException {
+        if (response / PushGateway.HUNDRED != 2) {
+            final String errormessage;
+            final InputStream errorstream = connection.getErrorStream();
+            if (errorstream == null) {
+                errormessage = PushGateway.RESCODE.concat(url)
+                    .concat(PushGateway.WAS).concat(String.valueOf(response));
+            } else {
+                final String errbody = readFromStream(errorstream);
+                errormessage = PushGateway.RESCODE.concat(url)
+                    .concat(PushGateway.WAS)
+                    .concat(String.valueOf(response)).concat(", response body: ")
+                    .concat(errbody);
+                Logger.error(PushGateway.class, errormessage);
+            }
+        }
+    }
+
+    /**
+     * Current counter value.
+     *
      * @param registry Is OK
      * @param job Is OK
      * @param groupingkey Is OK
-     * @param method Is OK
      * @throws IOException Is OK
      */
     void doRequest(final CollectorRegistry registry, final String job,
-        final Map<String, String> groupingkey, final String method) throws IOException {
+        final Map<String, String> groupingkey) throws IOException {
         String url = this.getUrl(job);
         url = PushGateway.enhanceUrl(url, groupingkey);
         final HttpURLConnection connection = this.connfactory.create(url);
         connection.setRequestProperty("Content-Type", TextFormat.CONTENT_TYPE_004);
-        if (!method.equals(PushGateway.DELETEREQ)) {
-            connection.setDoOutput(true);
-        }
-        connection.setRequestMethod(method);
+        connection.setDoOutput(true);
+        connection.setRequestMethod(PushGateway.POSTREQ);
         connection.setConnectTimeout(PushGateway.TEN * PushGateway.THOUSAND);
         connection.setReadTimeout(PushGateway.TEN * PushGateway.THOUSAND);
         connection.connect();
         try {
-            if (!method.equals(PushGateway.DELETEREQ)) {
-                final BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(connection.getOutputStream(), PushGateway.UTF8)
-                );
-                TextFormat.write004(writer, registry.metricFamilySamples());
-                writer.flush();
-                writer.close();
-            }
+            final BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(connection.getOutputStream(), PushGateway.UTF8)
+            );
+            TextFormat.write004(writer, registry.metricFamilySamples());
+            writer.flush();
+            writer.close();
             final int response = connection.getResponseCode();
-            if (response / PushGateway.HUNDRED != 2) {
-                final String errormessage;
-                final InputStream errorstream = connection.getErrorStream();
-                if (errorstream == null) {
-                    errormessage = PushGateway.RESCODE.concat(url)
-                        .concat(PushGateway.WAS).concat(String.valueOf(response));
-                } else {
-                    final String errbody = readFromStream(errorstream);
-                    errormessage = PushGateway.RESCODE.concat(url)
-                        .concat(PushGateway.WAS)
-                        .concat(String.valueOf(response)).concat(", response body: ")
-                        .concat(errbody);
-                }
-                throw new IOException(errormessage);
-            }
+            PushGateway.checkError(response, connection, url);
         } finally {
             connection.disconnect();
         }
@@ -280,5 +266,23 @@ public class PushGateway {
             length = instream.read(buffer);
         }
         return result.toString(PushGateway.UTF8);
+    }
+
+    /**
+     * Creates a URL instance from a String representation of a URL without throwing a
+     * checked exception.
+     * Required because you can't wrap a call to another constructor in a try statement.
+     *
+     * @param urlstring The String representation of the URL.
+     * @return The URL instance.
+     */
+    private static URL createSneakily(final String urlstring) {
+        URL res = null;
+        try {
+            res = new URL(urlstring);
+        } catch (final MalformedURLException exc) {
+            Logger.error(PushGateway.class, exc.getMessage());
+        }
+        return res;
     }
 }

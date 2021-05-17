@@ -32,7 +32,7 @@ import java.net.URL;
  *
  * @since 0.8
  */
-public class DefaultHttpConnectionFactory implements HttpConnectionFactory {
+public final class DefaultHttpConnectionFactory implements HttpConnectionFactory {
     @Override
     public HttpURLConnection create(final String url) throws IOException {
         return (HttpURLConnection) new URL(url).openConnection();
