@@ -23,28 +23,18 @@
  */
 package com.artipie.pypi;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPerms;
-import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
-import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
-import com.artipie.test.RepositoryUrl;
-import com.artipie.test.TestContainer;
-import java.io.IOException;
-import java.nio.file.Path;
-import org.hamcrest.MatcherAssert;
+import com.artipie.maven.MavenITCase;
+import com.artipie.test.TestDeployment;
+import org.cactoos.map.MapEntry;
+import org.cactoos.map.MapOf;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEach;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Test to pypi proxy.
@@ -57,118 +47,49 @@ import org.junit.jupiter.params.provider.ValueSource;
 public final class PypiProxyITCase {
 
     /**
-     * Host.
+     * Test deployments.
+     * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    private static final String HOST = "host.testcontainers.internal";
-
-    /**
-     * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
-    @TempDir
-    Path tmp;
-
-    /**
-     * Test origin.
-     */
-    private ArtipieServer origin;
-
-    /**
-     * Storage.
-     */
-    private Storage storage;
-
-    /**
-     * Test proxy.
-     */
-    private ArtipieServer proxy;
-
-    /**
-     * Container.
-     */
-    private TestContainer cntn;
-
-    /**
-     * Artipie proxy server port.
-     */
-    private int port;
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void installFromProxy(final boolean anonymous) throws Exception {
-        this.init(anonymous);
-        new TestResource("pypi-repo/alarmtime-0.1.5.tar.gz").saveTo(
-            this.storage,
-            new Key.From("origin", "my-pypi", "alarmtime", "alarmtime-0.1.5.tar.gz")
-        );
-        MatcherAssert.assertThat(
-            this.cntn.execStdout(
-                "pip", "install", "--no-deps", "--trusted-host", PypiProxyITCase.HOST,
-                "--index-url", new RepositoryUrl(this.port, "my-pypi-proxy").string(anonymous),
-                "alarmtime"
+    @RegisterExtension
+    final TestDeployment containers = new TestDeployment(
+        new MapOf<>(
+            new MapEntry<>(
+                "artipie",
+                () -> TestDeployment.ArtipieContainer.defaultDefinition()
+                    .withRepoConfig("pypi-proxy/pypi.yml", "my-pypi")
+                    .withCredentials("_credentials.yaml")
             ),
-            Matchers.containsString("Successfully installed alarmtime-0.1.5")
+            new MapEntry<>(
+                "artipie-proxy",
+                () -> TestDeployment.ArtipieContainer.defaultDefinition()
+                    .withRepoConfig("pypi-proxy/pypi-proxy.yml", "my-pypi-proxy")
+            )
+        ),
+        () -> new TestDeployment.ClientContainer("python:3")
+            .withWorkingDirectory("/w")
+    );
+
+    @Test
+    void installFromProxy() throws Exception {
+        final byte[] data = new TestResource("pypi-repo/alarmtime-0.1.5.tar.gz").asBytes();
+        this.containers.putBinaryToArtipie(
+            "artipie", data,
+            "/var/artipie/data/my-pypi/alarmtime/alarmtime-0.1.5.tar.gz"
         );
-    }
-
-    @AfterEach
-    void stop() {
-        this.proxy.stop();
-        this.origin.stop();
-        this.cntn.close();
-    }
-
-    private void init(final boolean anonymous) throws IOException {
-        this.storage = new FileStorage(this.tmp);
-        this.origin = new ArtipieServer(
-            this.tmp, "my-pypi", this.originConfig(anonymous)
+        this.containers.assertExec(
+            "Package was not installed",
+            new MavenITCase.ContainerResultMatcher(
+                new IsEqual<>(0),
+                Matchers.containsString("Successfully installed alarmtime-0.1.5")
+            ),
+            "pip", "install", "--no-deps", "--trusted-host", "artipie-proxy",
+            "--index-url", "http://alice:123@artipie-proxy:8080/my-pypi-proxy/", "alarmtime"
         );
-        this.proxy = new ArtipieServer(
-            this.tmp, "my-pypi-proxy", this.proxyConfig(anonymous, this.origin.start())
+        this.containers.assertArtipieContent(
+            "artipie-proxy",
+            "/var/artipie/data/my-pypi-proxy/alarmtime/alarmtime-0.1.5.tar.gz",
+            new IsEqual<>(data)
         );
-        this.port = this.proxy.start();
-        this.cntn = new TestContainer("python:3", this.tmp);
-        this.cntn.start(this.port);
-    }
-
-    private RepoConfigYaml originConfig(final boolean anonymous) {
-        final RepoConfigYaml yaml = new RepoConfigYaml("pypi")
-            .withFileStorage(this.tmp.resolve("origin"));
-        if (!anonymous) {
-            yaml.withPermissions(
-                new RepoPerms(ArtipieServer.ALICE.name(), "*")
-            );
-        }
-        return yaml;
-    }
-
-    private RepoConfigYaml proxyConfig(final boolean anonymous, final int prt) {
-        final RepoConfigYaml yaml = new RepoConfigYaml("pypi-proxy");
-        final String url = String.format("http://localhost:%d/my-pypi", prt);
-        final YamlMappingBuilder rmts = Yaml.createYamlMappingBuilder()
-            .add("url", url)
-            .add(
-                "cache",
-                Yaml.createYamlMappingBuilder().add(
-                    "storage",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "fs")
-                        .add("path", this.tmp.resolve("proxy").toString())
-                        .build()
-                ).build()
-            );
-        if (anonymous) {
-            yaml.withRemotes(Yaml.createYamlSequenceBuilder().add(rmts.build()));
-        } else {
-            yaml.withRemotes(
-                Yaml.createYamlSequenceBuilder().add(
-                    rmts.add("username", ArtipieServer.ALICE.name())
-                        .add("password", ArtipieServer.ALICE.password())
-                        .build()
-                )
-            );
-        }
-        return yaml;
     }
 
 }
