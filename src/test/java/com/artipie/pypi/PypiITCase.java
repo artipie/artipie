@@ -96,12 +96,16 @@ final class PypiITCase {
                     new ListOf<>(
                         "Looking in indexes: http://artipie:8080/my-python",
                         "Collecting artipietestpkg",
-                        "  Downloading http://artipie:8080/my-python/artipietestpkg/{}"
-                            .format("artipietestpkg-0.0.3.tar.gz"),
+                        String.format(
+                            "  Downloading http://artipie:8080/my-python/artipietestpkg/%s",
+                            "artipietestpkg-0.0.3.tar.gz"
+                        ),
                         "Building wheels for collected packages: artipietestpkg",
                         "  Building wheel for artipietestpkg (setup.py): started",
-                        "  Building wheel for artipietestpkg (setup.py): {}"
-                            .format("finished with status 'done'"),
+                        String.format(
+                            "  Building wheel for artipietestpkg (setup.py): %s",
+                            "finished with status 'done'"
+                        ),
                         "Successfully built artipietestpkg",
                         "Installing collected packages: artipietestpkg",
                         "Successfully installed artipietestpkg-0.0.3"
