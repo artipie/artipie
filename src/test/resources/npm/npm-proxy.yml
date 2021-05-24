@@ -1,0 +1,11 @@
+---
+repo:
+  type: npm-proxy
+  url: http://artipie-proxy:8080/my-npm-proxy
+  path: my-npm-proxy
+  storage:
+    type: fs
+    path: /var/artipie/data/
+  settings:
+    remote:
+      url: http://artipie:8080/my-npm

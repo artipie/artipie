@@ -1,32 +1,17 @@
 /*
- * The MIT License (MIT)
- *
- * Copyright (c) 2020 artipie.com
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
+ * https://github.com/artipie/artipie/LICENSE.txt
  */
 
 package com.artipie.test;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
+import org.cactoos.map.MapEntry;
+import org.cactoos.map.MapOf;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -37,6 +22,7 @@ import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.images.builder.Transferable;
+import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
@@ -53,9 +39,14 @@ import org.testcontainers.utility.MountableFile;
 public final class TestDeployment implements BeforeEachCallback, AfterEachCallback {
 
     /**
+     * Default name of the ClientContainer.
+     */
+    private static final String DEF = "artipie";
+
+    /**
      * Artipie builder.
      */
-    private final Supplier<ArtipieContainer> asup;
+    private final Map<String, Supplier<ArtipieContainer>> asup;
 
     /**
      * Client builder.
@@ -70,7 +61,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     /**
      * Artipie container.
      */
-    private ArtipieContainer artipie;
+    private Map<String, ArtipieContainer> artipie;
 
     /**
      * Client container.
@@ -84,6 +75,16 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
      */
     public TestDeployment(final Supplier<ArtipieContainer> artipie,
         final Supplier<ClientContainer> client) {
+        this(new MapOf<>(new MapEntry<>(TestDeployment.DEF, artipie)), client);
+    }
+
+    /**
+     * New container test.
+     * @param artipie Artipie container definition
+     * @param client Client container definition
+     */
+    public TestDeployment(final Map<String, Supplier<ArtipieContainer>> artipie,
+        final Supplier<ClientContainer> client) {
         this.asup = artipie;
         this.csup = client;
     }
@@ -92,25 +93,35 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     @SuppressWarnings("PMD.SystemPrintln")
     public void beforeEach(final ExtensionContext context) throws Exception {
         this.net = Network.newNetwork();
-        this.artipie = this.asup.get()
-            .withNetwork(this.net).withNetworkAliases("artipie");
-        this.artipie = this.artipie.withLogConsumer(
-            frame -> System.out.printf(
-                "%s: %s", this.artipie.getDockerImageName(), frame.getUtf8String()
+        this.artipie = this.asup.entrySet().stream().map(
+            entry -> new MapEntry<>(
+                entry.getKey(),
+                entry.getValue().get().withNetwork(this.net).withNetworkAliases(entry.getKey())
             )
-        );
+        ).collect(Collectors.toMap(MapEntry::getKey, MapEntry::getValue));
+        this.artipie = this.artipie.entrySet().stream().map(
+            entry -> new MapEntry<>(
+                entry.getKey(),
+                entry.getValue().withLogConsumer(
+                    frame -> System.out.printf(
+                        "%s - %s: %s", entry.getValue().getDockerImageName(), entry.getKey(),
+                        frame.getUtf8String()
+                    )
+                )
+            )
+        ).collect(Collectors.toMap(MapEntry::getKey, MapEntry::getValue));
         this.client = this.csup.get()
             .withNetwork(this.net)
             .withCommand("tail", "-f", "/dev/null");
-        this.artipie.start();
+        this.artipie.values().forEach(GenericContainer::start);
         this.client.start();
     }
 
     @Override
     public void afterEach(final ExtensionContext context) throws Exception {
         if (this.artipie != null) {
-            this.artipie.stop();
-            this.artipie.close();
+            this.artipie.values().forEach(GenericContainer::stop);
+            this.artipie.values().forEach(Startable::close);
         }
         if (this.client != null) {
             this.client.stop();
@@ -123,18 +134,31 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
 
     /**
      * Assert binary file in Artipie container using matcher provided.
+     * @param name Artipie container name
+     * @param msg Assertion message
+     * @param path Path in container
+     * @param matcher Matcher InputStream of content
+     * @checkstyle ParameterNumberCheck (5 lines)
+     */
+    public void assertArtipieContent(final String name, final String msg, final String path,
+        final Matcher<byte[]> matcher) {
+        this.artipie.get(name).copyFileFromContainer(
+            path, stream -> {
+                MatcherAssert.assertThat(msg, IOUtils.toByteArray(stream), matcher);
+                return null;
+            }
+        );
+    }
+
+    /**
+     * Assert binary file in Artipie container using matcher provided.
      * @param msg Assertion message
      * @param path Path in container
      * @param matcher Matcher InputStream of content
      */
     public void assertArtipieContent(final String msg, final String path,
         final Matcher<byte[]> matcher) {
-        this.artipie.copyFileFromContainer(
-            path, stream -> {
-                MatcherAssert.assertThat(msg, IOUtils.toByteArray(stream), matcher);
-                return null;
-            }
-        );
+        this.assertArtipieContent(TestDeployment.DEF, msg, path, matcher);
     }
 
     /**
@@ -158,11 +182,33 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
 
     /**
      * Put binary data into Artipie container.
+     * @param name Artipie container name
+     * @param bin Data to put
+     * @param path Path in the container
+     */
+    public void putBinaryToArtipie(final String name, final byte[] bin, final String path) {
+        this.artipie.get(name).copyFileToContainer(Transferable.of(bin), path);
+    }
+
+    /**
+     * Put binary data into Artipie container.
      * @param bin Data to put
      * @param path Path in the container
      */
     public void putBinaryToArtipie(final byte[] bin, final String path) {
-        this.artipie.copyFileToContainer(Transferable.of(bin), path);
+        this.putBinaryToArtipie(TestDeployment.DEF, bin, path);
+    }
+
+    /**
+     * Put resource to artipie server.
+     * @param name Artipie container name
+     * @param res Resource path
+     * @param path Artipie path
+     */
+    public void putResourceToArtipie(final String name, final String res, final String path) {
+        this.artipie.get(name).copyFileToContainer(
+            MountableFile.forClasspathResource(res), path
+        );
     }
 
     /**
@@ -171,9 +217,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
      * @param path Artipie path
      */
     public void putResourceToArtipie(final String res, final String path) {
-        this.artipie.copyFileToContainer(
-            MountableFile.forClasspathResource(res), path
-        );
+        this.putResourceToArtipie(TestDeployment.DEF, res, path);
     }
 
     /**
@@ -226,6 +270,17 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         public ArtipieContainer withRepoConfig(final String res, final String repo) {
             return this.withClasspathResourceMapping(
                 res, String.format("/var/artipie/repo/%s.yaml", repo), BindMode.READ_ONLY
+            );
+        }
+
+        /**
+         * With repository configuration.
+         * @param res Config resource path
+         * @return Self
+         */
+        public ArtipieContainer withCredentials(final String res) {
+            return this.withClasspathResourceMapping(
+                res, "/var/artipie/repo/_credentials.yaml", BindMode.READ_ONLY
             );
         }
 

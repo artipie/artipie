@@ -5,13 +5,13 @@
 --exclude src/main/resources/images/**/*
 --exclude src/test/resources/com/artipie/snapshot/1.0-SNAPSHOT/*
 --exclude src/test/resources/com/artipie/helloworld/0.1/*
---exclude src/test/resources/newtonsoft.json/12.0.3/*
 --exclude src/test/resources/pypi-repo/**/*
 --exclude src/test/resources/npm/**/*
 --exclude src/test/resources/rpm/*
 --exclude src/test/resources/helm/*
 --exclude src/test/resources/gem/*
 --exclude src/test/resources/debian/*
+--exclude src/test/resources/nuget/**/*
 --exclude .idea/**/*
 --exclude examples/**/*
 --exclude examples/helm/tomcat-0.4.1.tgz

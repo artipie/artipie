@@ -1,0 +1,8 @@
+repo:
+  type: file
+  storage:
+    type: fs
+    path: /var/artipie/data/
+  permissions:
+    alice:
+      - "*"
