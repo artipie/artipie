@@ -27,7 +27,7 @@ SOFTWARE.
   <parent>
     <groupId>com.artipie</groupId>
     <artifactId>ppom</artifactId>
-    <version>0.4.2</version>
+    <version>0.5.1</version>
   </parent>
   <artifactId>artipie</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -116,6 +116,7 @@ SOFTWARE.
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <docker.image.name>artipie/artipie</docker.image.name>
+    <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
   </properties>
   <dependencies>
     <dependency>
@@ -393,7 +394,6 @@ SOFTWARE.
               <exclude>checkstyle:.*/src/test/resources/.*</exclude>
               <exclude>pmd:.*/src/test/resources/.*</exclude>
             </excludes>
-            <license>file:${basedir}/LICENSE.txt</license>
           </configuration>
         </plugin>
         <plugin>
