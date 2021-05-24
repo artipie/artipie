@@ -151,31 +151,6 @@ SOFTWARE.
       <version>1.15.2</version>
       <scope>test</scope>
     </dependency>
-    <!-- maven -->
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-resolver-provider</artifactId>
-      <version>3.6.3</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-connector-basic</artifactId>
-      <version>1.4.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-transport-file</artifactId>
-      <version>1.4.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-transport-http</artifactId>
-      <version>1.4.2</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -278,11 +253,6 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>go-adapter</artifactId>
       <version>0.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>npm-proxy-adapter</artifactId>
-      <version>0.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
