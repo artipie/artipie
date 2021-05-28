@@ -5,7 +5,7 @@
 package com.artipie.pypi;
 
 import com.artipie.asto.test.TestResource;
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
@@ -59,7 +59,7 @@ public final class PypiProxyITCase {
         );
         this.containers.assertExec(
             "Package was not installed",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 Matchers.containsString("Successfully installed alarmtime-0.1.5")
             ),

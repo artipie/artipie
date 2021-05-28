@@ -5,6 +5,7 @@
 package com.artipie.maven;
 
 import com.artipie.asto.test.TestResource;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,19 +15,12 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-import org.hamcrest.TypeSafeMatcher;
-import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.Container.ExecResult;
 
 /**
  * Integration tests for Maven repository.
@@ -67,7 +61,7 @@ public final class MavenITCase {
         );
         this.containers.assertExec(
             "Failed to get dependency",
-            new ContainerResultMatcher(Matchers.equalTo(0)),
+            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
             "mvn", "-B", "-q", "-s", "settings.xml", "-e", "dependency:get",
             String.format("-Dartifact=com.artipie:%s:%s", type, vers)
         );
@@ -81,13 +75,13 @@ public final class MavenITCase {
         );
         this.containers.assertExec(
             "Deploy failed",
-            new ContainerResultMatcher(Matchers.is(0)),
+            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
             "mvn", "-B", "-q", "-s", "settings.xml",
             "deploy", "-Dmaven.install.skip=true"
         );
         this.containers.assertExec(
             "Download failed",
-            new ContainerResultMatcher(Matchers.is(0)),
+            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
             "mvn", "-B", "-q", "-s", "settings.xml", "-U", "dependency:get",
             String.format("-Dartifact=com.artipie:%s:%s", type, vers)
         );
@@ -132,72 +126,4 @@ public final class MavenITCase {
         );
     }
 
-    /**
-     * Container exec result matcher.
-     * @since 0.16
-     * @todo #855:30min Move this class to test sources,
-     *  add additional constructors for int status and default to expect zero status.
-     *  Consider creating standard enum or public static fields for
-     *  `SUCCESS` - exit code is `0` and
-     *  `ERROR` - exit code is greater than `0`
-     */
-    public static final class ContainerResultMatcher extends TypeSafeMatcher<ExecResult> {
-
-        /**
-         * Expected status matcher.
-         */
-        private final Matcher<Integer> status;
-
-        /**
-         * Stdout matcher.
-         */
-        private final Matcher<String> stdout;
-
-        /**
-         * New matcher.
-         * @param status Expected status
-         * @param stdout Expected message in stdout
-         */
-        public ContainerResultMatcher(final Matcher<Integer> status, final Matcher<String> stdout) {
-            this.status = status;
-            this.stdout = stdout;
-        }
-
-        /**
-         * New matcher.
-         * @param status Expected status
-         */
-        public ContainerResultMatcher(final Matcher<Integer> status) {
-            this(status, new StringContains(""));
-        }
-
-        /**
-         * New default matcher with expected status 0.
-         */
-        public ContainerResultMatcher() {
-            this(new IsEqual<>(0), new StringContains(""));
-        }
-
-        @Override
-        public void describeTo(final Description description) {
-            description.appendText("status ").appendDescriptionOf(this.status)
-            .appendText("stdout ").appendDescriptionOf(this.stdout);
-        }
-
-        @Override
-        public boolean matchesSafely(final ExecResult item) {
-            return this.status.matches(item.getExitCode()) && this.stdout.matches(item.getStdout());
-        }
-
-        @Override
-        public void describeMismatchSafely(final ExecResult res, final Description desc) {
-            desc.appendText("failed with status:\n")
-                .appendValue(res.getExitCode())
-                .appendText("\nSTDOUT: ")
-                .appendText(res.getStdout())
-                .appendText("\nSTDERR: ")
-                .appendText(res.getStderr())
-                .appendText("\n");
-        }
-    }
 }

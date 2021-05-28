@@ -5,7 +5,7 @@
 
 package com.artipie.file;
 
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ final class FileITCase {
     void setUp() throws Exception {
         this.deployment.assertExec(
             "Failed to install deps",
-            new MavenITCase.ContainerResultMatcher(Matchers.is(0)),
+            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
             "apk", "add", "--no-cache", "curl"
         );
     }
@@ -46,7 +46,7 @@ final class FileITCase {
         this.deployment.putBinaryToArtipie(target, "/var/artipie/data/bin/target");
         this.deployment.assertExec(
             "Failed to download artifact",
-            new MavenITCase.ContainerResultMatcher(Matchers.is(0)),
+            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
             "curl", "-X", "GET", "http://artipie:8080/bin/target"
         );
     }
@@ -55,7 +55,7 @@ final class FileITCase {
     void canUpload() throws Exception {
         this.deployment.assertExec(
             "Failed to upload",
-            new MavenITCase.ContainerResultMatcher(Matchers.is(0)),
+            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
             "curl", "-X", "PUT", "--data-binary", "123", "http://artipie:8080/bin/test"
         );
         this.deployment.assertArtipieContent(

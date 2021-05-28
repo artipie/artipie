@@ -5,7 +5,7 @@
 package com.artipie.nuget;
 
 import com.artipie.asto.test.TestResource;
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.util.Arrays;
 import java.util.UUID;
@@ -62,7 +62,7 @@ final class NugetITCase {
         );
         this.containers.assertExec(
             "Package was not pushed",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContains("Your package was pushed.")
             ),
@@ -70,12 +70,12 @@ final class NugetITCase {
         );
         this.containers.assertExec(
             "New project was not created",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "dotnet", "new", "console", "-n", "TestProj"
         );
         this.containers.assertExec(
             "Package was not added",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(
                     Arrays.asList(
