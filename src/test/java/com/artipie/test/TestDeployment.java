@@ -285,6 +285,17 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         }
 
         /**
+         * With repository permissions.
+         * @param res Config resource path
+         * @return Self
+         */
+        public ArtipieContainer withPermissions(final String res) {
+            return this.withClasspathResourceMapping(
+                res, "/var/artipie/repo/_permissions.yaml", BindMode.READ_ONLY
+            );
+        }
+
+        /**
          * New defaut definition.
          * @return Default container definition
          */
