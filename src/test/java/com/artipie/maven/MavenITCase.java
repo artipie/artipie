@@ -61,7 +61,7 @@ public final class MavenITCase {
         );
         this.containers.assertExec(
             "Failed to get dependency",
-            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
+            new ContainerResultMatcher(),
             "mvn", "-B", "-q", "-s", "settings.xml", "-e", "dependency:get",
             String.format("-Dartifact=com.artipie:%s:%s", type, vers)
         );

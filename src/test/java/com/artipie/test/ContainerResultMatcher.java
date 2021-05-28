@@ -13,7 +13,7 @@ import org.testcontainers.containers.Container;
 
 /**
  * Container exec result matcher.
- * @since 0.16
+ * @since 0.20
  */
 public final class ContainerResultMatcher extends TypeSafeMatcher<Container.ExecResult> {
 

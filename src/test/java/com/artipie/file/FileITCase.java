@@ -35,7 +35,7 @@ final class FileITCase {
     void setUp() throws Exception {
         this.deployment.assertExec(
             "Failed to install deps",
-            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
+            new ContainerResultMatcher(),
             "apk", "add", "--no-cache", "curl"
         );
     }
