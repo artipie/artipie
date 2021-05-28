@@ -1,6 +1,6 @@
 name: Release Docker images
 on:
-  create:
+  push:
     tags:
       - .*
 jobs:
