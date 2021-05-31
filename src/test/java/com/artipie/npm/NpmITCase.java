@@ -5,7 +5,7 @@
 package com.artipie.npm;
 
 import com.artipie.asto.test.TestResource;
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
@@ -72,7 +72,7 @@ final class NpmITCase {
         );
         this.containers.assertExec(
             "Package was not installed",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(
                     Arrays.asList(NpmITCase.ADDED_PROJ, "added 1 package")
@@ -82,7 +82,7 @@ final class NpmITCase {
         );
         this.containers.assertExec(
             "Package was installed",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0), new StringContains("@hello/simple-npm-project@1.0.1")
             ),
             "npm", "list"
@@ -102,7 +102,7 @@ final class NpmITCase {
         );
         this.containers.assertExec(
             "Package was published",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContains(NpmITCase.ADDED_PROJ)
             ),

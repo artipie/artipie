@@ -5,7 +5,7 @@
 package com.artipie.gem;
 
 import com.artipie.asto.test.TestResource;
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
 import org.cactoos.list.ListOf;
@@ -51,7 +51,7 @@ final class GemITCase {
     void gemPushAndInstallWorks() throws IOException {
         this.containers.assertExec(
             "Packages was not pushed",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(
                     new ListOf<String>("POST http://artipie:8080/my-gem/api/v1/gems", "200 OK")
@@ -67,12 +67,12 @@ final class GemITCase {
         );
         this.containers.assertExec(
             "rubygems.org was not removed from sources",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "gem", "sources", "--remove", "https://rubygems.org/"
         );
         this.containers.assertExec(
             "Package was not installed",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(
                     new ListOf<String>(

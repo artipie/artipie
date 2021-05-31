@@ -4,7 +4,7 @@
  */
 package com.artipie.file;
 
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
@@ -52,7 +52,7 @@ final class FileProxyAuthIT {
     void setUp() throws Exception {
         this.containers.assertExec(
             "Failed to install deps",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "apk", "add", "--no-cache", "curl"
         );
     }
@@ -66,7 +66,7 @@ final class FileProxyAuthIT {
         );
         this.containers.assertExec(
             "File was not downloaded",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0), new StringContains("HTTP/1.1 200 OK")
             ),
             "curl", "-i", "-X", "GET", "http://artipie-proxy:8080/my-bin-proxy/foo/bar.txt"

@@ -5,7 +5,7 @@
 package com.artipie.npm;
 
 import com.artipie.asto.test.TestResource;
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.util.Arrays;
 import org.cactoos.map.MapEntry;
@@ -79,7 +79,7 @@ final class NpmProxyITCase {
         );
         this.containers.assertExec(
             "Package was not installed",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(
                     Arrays.asList(NpmProxyITCase.ADDED_PROJ, "added 1 package")
