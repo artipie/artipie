@@ -4,7 +4,7 @@
  */
 package com.artipie.api;
 
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +40,7 @@ final class ArtipieApiITCase {
     void setUp() throws Exception {
         this.deployment.assertExec(
             "Failed to install deps",
-            new MavenITCase.ContainerResultMatcher(Matchers.is(0)),
+            new ContainerResultMatcher(Matchers.is(0)),
             "apk", "add", "--no-cache", "curl"
         );
     }
@@ -60,7 +60,7 @@ final class ArtipieApiITCase {
         );
         this.deployment.assertExec(
             "Failed to create a new repo",
-            new MavenITCase.ContainerResultMatcher(Matchers.is(0)),
+            new ContainerResultMatcher(Matchers.is(0)),
             "curl", "-X", "GET", "http://artipie:8080/api/repos/alice",
             "-X", "POST",
             "-u", "alice:123",
