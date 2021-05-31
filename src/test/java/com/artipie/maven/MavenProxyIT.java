@@ -4,6 +4,7 @@
  */
 package com.artipie.maven;
 
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import org.hamcrest.core.IsAnything;
 import org.hamcrest.core.IsEqual;
@@ -43,7 +44,7 @@ final class MavenProxyIT {
     void shouldGetArtifactFromCentralAndSaveInCache() throws Exception {
         this.containers.assertExec(
             "Artifact wasn't downloaded",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0), new StringContains("BUILD SUCCESS")
             ),
             "mvn", "-s", "settings.xml", "dependency:get", "-Dartifact=args4j:args4j:2.32:jar"

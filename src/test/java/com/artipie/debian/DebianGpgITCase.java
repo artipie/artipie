@@ -4,7 +4,7 @@
  */
 package com.artipie.debian;
 
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
 import org.cactoos.list.ListOf;
@@ -55,22 +55,22 @@ public final class DebianGpgITCase {
     void setUp() throws IOException {
         this.containers.assertExec(
             "Apt-get update failed",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "apt-get", "update"
         );
         this.containers.assertExec(
             "Failed to install curl",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "apt-get", "install", "-y", "curl"
         );
         this.containers.assertExec(
             "Failed to install gnupg",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "apt-get", "install", "-y", "gnupg"
         );
         this.containers.assertExec(
             "Failed to add public key to apt-get",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "apt-key", "add", "/w/public-key.asc"
         );
         this.containers.putBinaryToClient(
@@ -83,13 +83,13 @@ public final class DebianGpgITCase {
     void pushAndInstallWorks() throws Exception {
         this.containers.assertExec(
             "Failed to upload deb package",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "curl", "http://artipie:8080/my-debian/main/aglfn_1.7-3_amd64.deb",
             "--upload-file", "/w/aglfn_1.7-3_amd64.deb"
         );
         this.containers.assertExec(
             "Apt-get update failed",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new AllOf<String>(
                     new ListOf<Matcher<? super String>>(
@@ -107,7 +107,7 @@ public final class DebianGpgITCase {
         );
         this.containers.assertExec(
             "Package was not downloaded and unpacked",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))
             ),
