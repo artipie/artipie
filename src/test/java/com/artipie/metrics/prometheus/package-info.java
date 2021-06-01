@@ -4,7 +4,7 @@
  */
 
 /**
- * Artipie metrics implementation storing data in memory.
+ * Tests for Artipie metrics implementation storing data in memory.
  *
  * @since 0.8
  */
