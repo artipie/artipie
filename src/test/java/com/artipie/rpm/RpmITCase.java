@@ -4,7 +4,7 @@
  */
 package com.artipie.rpm;
 
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
 import org.cactoos.list.ListOf;
@@ -44,7 +44,7 @@ public final class RpmITCase {
     void setUp() throws IOException {
         this.containers.assertExec(
             "Yum install curl failed",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "yum", "-y", "install", "curl"
         );
         this.containers.putBinaryToClient(
@@ -63,13 +63,13 @@ public final class RpmITCase {
     void uploadsAndInstallsThePackage() throws Exception {
         this.containers.assertExec(
             "Failed to upload rpm package",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "curl", "http://artipie:8080/my-rpm/time-1.7-45.el7.x86_64.rpm",
             "--upload-file", "/w/time-1.7-45.el7.x86_64.rpm"
         );
         this.containers.assertExec(
             "Failed to install time package",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(new ListOf<>("time-1.7-45.el7.x86_64", "Complete!"))
             ),

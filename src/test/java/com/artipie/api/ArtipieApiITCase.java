@@ -4,144 +4,68 @@
  */
 package com.artipie.api;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.asto.Content;
-import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
-import com.artipie.asto.fs.FileStorage;
-import com.artipie.repo.ConfigFile;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.file.Path;
-import org.apache.commons.codec.binary.Base64;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import com.artipie.test.ContainerResultMatcher;
+import com.artipie.test.TestDeployment;
+import java.net.URLEncoder;
+import java.util.concurrent.TimeUnit;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * IT for Artipie API and dashboard.
  * @since 0.14
+ * @checkstyle MagicNumberCheck (500 lines)
  */
-class ArtipieApiITCase {
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+final class ArtipieApiITCase {
 
     /**
-     * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
+     * Deployment for tests.
+     * @checkstyle VisibilityModifierCheck (5 lines)
      */
-    @TempDir
-    Path tmp;
+    @RegisterExtension
+    final TestDeployment deployment = new TestDeployment(
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withCredentials("_credentials.yaml")
+            .withPermissions("_permissions.yaml"),
+        () -> new TestDeployment.ClientContainer("alpine:3.11")
+            .withWorkingDirectory("/w")
+    );
 
-    /**
-     * Tested Artipie server.
-     */
-    private ArtipieServer server;
-
-    /**
-     * Port.
-     */
-    private int port;
-
-    /**
-     * Http connection.
-     */
-    private HttpURLConnection con;
-
-    @ParameterizedTest
-    @ValueSource(
-        strings = {
-            "api/repos/bob",
-            "dashboard/bob", "dashboard/bob/my_repo",
-            "api/security/users/bob", "api/security/permissions/my_repo",
-            "api/security/permissions"
-        }
-    )
-    void getRequestsWork(final String url) throws Exception {
-        this.init(ConfigFile.Extension.YAML.value());
-        this.initConnection(url);
-        MatcherAssert.assertThat(
-            "Response status is 200",
-            this.con.getResponseCode(),
-            new IsEqual<>(HttpURLConnection.HTTP_OK)
+    @BeforeEach
+    void setUp() throws Exception {
+        this.deployment.assertExec(
+            "Failed to install deps",
+            new ContainerResultMatcher(Matchers.is(0)),
+            "apk", "add", "--no-cache", "curl"
         );
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "api/repos/bob,.yaml", "api/repos/bob,.yml",
-        "dashboard/bob,.yaml", "dashboard/bob,.yml",
-        "api/security/users/bob,.yaml", "api/security/users/bob,.yml"
-    })
-    void readsConfigWithYamlAndYmlExtension(final String url, final String extension)
-        throws Exception {
-        this.init(extension);
-        this.initConnection(url);
-        MatcherAssert.assertThat(
-            "Response status is 200 for different extension",
-            this.con.getResponseCode(),
-            new IsEqual<>(HttpURLConnection.HTTP_OK)
+    @Test
+    @Timeout(value = 500, unit = TimeUnit.MILLISECONDS)
+    @Disabled
+    void createRepository() throws Exception {
+        final String repo = "repo1";
+        final String config = String.join(
+            "\n",
+            "repo:",
+            "  type: file",
+            "  storage:",
+            "    type: fs",
+            "    path: /var/artipie/repo/1"
+        );
+        this.deployment.assertExec(
+            "Failed to create a new repo",
+            new ContainerResultMatcher(Matchers.is(0)),
+            "curl", "-X", "GET", "http://artipie:8080/api/repos/alice",
+            "-X", "POST",
+            "-u", "alice:123",
+            "-F", String.format("repo=%s", repo),
+            "-F", String.format("config=%s", URLEncoder.encode(config, "UTF-8"))
         );
     }
-
-    @AfterEach
-    void stop() {
-        this.con.disconnect();
-        this.server.stop();
-    }
-
-    private void initConnection(final String url) throws Exception {
-        this.con = (HttpURLConnection)
-            new URL(
-                String.format("http://localhost:%s/%s", this.port, url)
-            ).openConnection();
-        this.con.setRequestMethod("GET");
-        this.con.setRequestProperty(
-            "Authorization",
-            String.format(
-                "Basic %s",
-                new String(
-                    Base64.encodeBase64(
-                        String.format(
-                            "%s:%s", ArtipieServer.BOB.name(), ArtipieServer.BOB.password()
-                        ).getBytes()
-                    )
-                )
-            )
-        );
-    }
-
-    private void init(final String extension) throws IOException {
-        final Storage storage = new FileStorage(this.tmp.resolve("repos"));
-        storage.save(
-            new Key.From(String.format("_permissions%s", extension)),
-            new Content.From(this.apiPerms().getBytes())
-        ).join();
-        this.server = new ArtipieServer(
-            this.tmp, "my_repo",
-            new RepoConfigYaml("binary")
-                .withFileStorage(this.tmp.resolve("repos/test")),
-            "org"
-        );
-        this.port = this.server.start();
-    }
-
-    private String apiPerms() {
-        return Yaml.createYamlMappingBuilder()
-            .add(
-                "permissions",
-                Yaml.createYamlMappingBuilder()
-                    .add(
-                        ArtipieServer.BOB.name(),
-                        Yaml.createYamlSequenceBuilder().add("api").build()
-                    ).build()
-            )
-            .build().toString();
-    }
-
 }

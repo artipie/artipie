@@ -34,7 +34,6 @@ import com.artipie.http.group.GroupSlice;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.MavenProxy;
 import com.artipie.maven.http.MavenSlice;
-import com.artipie.npm.Npm;
 import com.artipie.npm.http.NpmSlice;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.NpmProxyConfig;
@@ -154,7 +153,6 @@ public final class SliceFromConfig extends Slice.Wrap {
                     settings, standalone,
                     new NpmSlice(
                         cfg.url(),
-                        new Npm(cfg.storage()),
                         cfg.storage(),
                         permissions,
                         auth
