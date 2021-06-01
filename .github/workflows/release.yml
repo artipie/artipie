@@ -1,6 +1,6 @@
-name: Docker Release and Run Benchmarks
+name: Release Docker images
 on:
-  create:
+  push:
     tags:
       - .*
 jobs:
@@ -28,6 +28,16 @@ jobs:
       - run: mvn -B deploy -Pdocker -Ddocker.image.name=${{ secrets.DOCKERHUB_REPO }}
       - run: mvn versions:set -DnewVersion=latest
       - run: mvn -B deploy -Pdocker -Ddocker.image.name=${{ secrets.DOCKERHUB_REPO }}
+      - name: Create Github Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ env.RELEASE_VERSION }}
+          draft: false
+          prerelease: false
   # run-benchmarks:
   #   runs-on: ubuntu-latest
   #   needs: docker-publish
