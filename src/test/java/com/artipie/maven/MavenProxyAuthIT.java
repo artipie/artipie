@@ -5,6 +5,7 @@
 package com.artipie.maven;
 
 import com.artipie.asto.test.TestResource;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
@@ -68,7 +69,7 @@ final class MavenProxyAuthIT {
             );
         this.containers.assertExec(
             "Helloworld was not installed",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContains("BUILD SUCCESS")
             ),

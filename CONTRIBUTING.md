@@ -32,6 +32,16 @@ Example configuration uses `org` layout of Artipie with two level hierarchy,
 user `test` with password `123`, and `default` storage in `./example/storage` directory.
 To access the dashboard open `http://localhost/test` in your browser and enter user credentials.
 
+
+### Testing
+
+This is a build and test pipeline for artipie main assembly verification:
+ 1. Unit testing (can be run with `mvn test`): it runs all unit tests. The unit test should not depend on any external component. The testing framework is a Junit5, Maven plugin is Surefire.
+ 2. Packaging (`mvn package`) - copy all dependencies into `target/dependency` directory and produce `artipie.jav` file. Then create Docker image based on dependencies and jar file, docker reuses cached layers if dependencies didn't change. It uses `docker-build` Maven profile activated by default if `/var/run/docker.sock` file exists.
+ 3. Integration testing (`mvn verify`) - it runs all integration tests against actual docker image of artipie. Maven ensures that the image is up to date and can be accessed by `artipie/artipie:1.0-SNAPSHOT` tag. We use Junit5 as a test framework, Failsafe maven plugin and Testcontainers for running Dockers.
+ 4. Smoke tests (`examples/run.sh`) - start preconfigured Artipie Docker container, attach data volumes and connect test network, then run small Docker-based test scripts withing same network against Artipie server. The server could be accessed via `artipie.artipie:8080` address.
+ 5. Deploy (`mvn deploy`) - uploading Docker image to registry.
+
 ## Code style
 
 Code style is enforced by "qulice" Maven plugin which aggregates multiple rules for "checkstyle" and "PMD".
