@@ -4,7 +4,7 @@
  */
 package com.artipie.pypi;
 
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
 import org.cactoos.list.ListOf;
@@ -48,17 +48,17 @@ final class PypiITCase {
     void setUp() throws IOException {
         this.containers.assertExec(
             "Apt-get update failed",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "apt-get", "update"
         );
         this.containers.assertExec(
             "Failed to install twine",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "python", "-m", "pip", "install", "twine"
         );
         this.containers.assertExec(
             "Failed to upgrade pip",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "python", "-m", "pip", "install", "--upgrade", "pip"
         );
     }
@@ -71,7 +71,7 @@ final class PypiITCase {
         );
         this.containers.assertExec(
             "Failed to install package",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 Matchers.equalTo(0),
                 new StringContainsInOrder(
                     new ListOf<>(
@@ -102,7 +102,7 @@ final class PypiITCase {
     void canUpload() throws Exception {
         this.containers.assertExec(
             "Failed to upload",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 Matchers.is(0),
                 new StringContainsInOrder(
                     new ListOf<>(
