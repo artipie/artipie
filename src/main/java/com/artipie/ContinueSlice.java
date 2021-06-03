@@ -68,18 +68,6 @@ public final class ContinueSlice implements Slice {
      */
     private static final class ContinueResponse implements Response {
 
-        /**
-         * Origin response.
-         */
-        private final Response origin;
-
-        /**
-         * Wrap response with {@code continue} support.
-         * @param origin Origin response
-         */
-        private ContinueResponse(final Response origin) {
-            this.origin = origin;
-        }
 
         @Override
         public CompletionStage<Void> send(final Connection connection) {
