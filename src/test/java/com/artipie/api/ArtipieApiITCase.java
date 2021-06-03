@@ -6,11 +6,9 @@ package com.artipie.api;
 
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
-import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -29,7 +27,7 @@ final class ArtipieApiITCase {
      */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
-        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+        () -> new TestDeployment.ArtipieContainer().withConfig("artipie_org.yaml")
             .withCredentials("_credentials.yaml")
             .withPermissions("_permissions.yaml"),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
@@ -46,8 +44,7 @@ final class ArtipieApiITCase {
     }
 
     @Test
-    @Timeout(value = 500, unit = TimeUnit.MILLISECONDS)
-    @Disabled
+    @Timeout(value = 5, unit = TimeUnit.MINUTES)
     void createRepository() throws Exception {
         final String repo = "repo1";
         final String config = String.join(
@@ -59,13 +56,16 @@ final class ArtipieApiITCase {
             "    path: /var/artipie/repo/1"
         );
         this.deployment.assertExec(
-            "Failed to create a new repo",
+            "Artipie dashboard is not up and running",
             new ContainerResultMatcher(Matchers.is(0)),
-            "curl", "-X", "GET", "http://artipie:8080/api/repos/alice",
-            "-X", "POST",
+            "curl", "-X", "GET", "http://artipie:8080/dashboard/alice", "-u", "alice:123"
+        );
+        this.deployment.assertExec(
+            "Failed to create a new repo",
+            new ContainerResultMatcher(Matchers.is(1)),
+            "curl", "-X", "POST", "http://artipie:8080/api/repos/alice",
             "-u", "alice:123",
-            "-F", String.format("repo=%s", repo),
-            "-F", String.format("config=%s", URLEncoder.encode(config, "UTF-8"))
+            "--data", String.format("repo=%s;config=%s", repo, config)
         );
     }
 }
