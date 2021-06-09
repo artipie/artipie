@@ -1,0 +1,9 @@
+meta:
+  storage:
+    type: fs
+    path: /var/artipie/repo
+  layout: org
+  base_url: http://artipie:8080/
+  credentials:
+    type: file
+    path: _credentials.yaml

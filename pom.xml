@@ -175,12 +175,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>0.35</version>
+      <version>1.1.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>management-api</artifactId>
-      <version>0.4.1</version>
+      <version>0.4.4</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>

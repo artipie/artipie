@@ -6,19 +6,27 @@ package com.artipie.api;
 
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
-import java.net.URLEncoder;
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
+import org.cactoos.list.ListOf;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * IT for Artipie API and dashboard.
  * @since 0.14
  * @checkstyle MagicNumberCheck (500 lines)
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @todo #896:30min Tests to create and update repositories are disabled due to test deployment
+ *  configuration problem: there is no write permission on directory with the repository configs for
+ *  `artipie` user in artipie container. Here is corresponding question on SO
+ *  https://stackoverflow.com/questions/67869196/change-files-owner-when-copying-resources-with-testcontainers
+ *  Wait for the answer, fix permission error and enable tests.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class ArtipieApiITCase {
@@ -29,7 +37,7 @@ final class ArtipieApiITCase {
      */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
-        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+        () -> new TestDeployment.ArtipieContainer().withConfig("artipie_org.yaml")
             .withCredentials("_credentials.yaml")
             .withPermissions("_permissions.yaml"),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
@@ -46,26 +54,71 @@ final class ArtipieApiITCase {
     }
 
     @Test
-    @Timeout(value = 500, unit = TimeUnit.MILLISECONDS)
+    void dashboardIsUp() throws IOException {
+        this.deployment.assertExec(
+            "Artipie dashboard is not up and running",
+            new ContainerResultMatcher(
+                Matchers.is(0),
+                new StringContainsInOrder(
+                    new ListOf<String>(
+                        "<!DOCTYPE html>", "<title>alice</title>", "Your repositories:"
+                    )
+                )
+            ),
+            "curl", "-X", "GET", "http://artipie:8080/dashboard/alice", "-u", "alice:123"
+        );
+    }
+
+    @Test
     @Disabled
     void createRepository() throws Exception {
         final String repo = "repo1";
-        final String config = String.join(
+        final String config = this.config();
+        this.deployment.assertExec(
+            "Failed to create a new repo",
+            new ContainerResultMatcher(Matchers.is(0), new StringContains("<!DOCTYPE html>")),
+            "curl", "-X", "POST", "http://artipie:8080/api/repos/alice",
+            "-u", "alice:123",
+            "--data", String.format("repo=%s;config=%s", repo, config)
+        );
+        this.deployment.assertArtipieContent(
+            "Repo config is wrong",
+            String.format("/var/artipie/repo/alice/%s.yaml", repo),
+            new IsEqual<>(config.getBytes())
+        );
+    }
+
+    @Test
+    @Disabled
+    void updatesRepository() throws Exception {
+        final String repo = "repo1";
+        String config = this.config();
+        this.deployment.putBinaryToArtipie(
+            config.getBytes(), String.format("/var/artipie/repo/alice/%s.yaml", repo)
+        );
+        config = config.replace("/var/artipie/repo/1", "/var/artipie/repo/one");
+        this.deployment.assertExec(
+            "Failed to create a new repo",
+            new ContainerResultMatcher(Matchers.is(0), new StringContains("<!DOCTYPE html>")),
+            "curl", "-X", "POST", "http://artipie:8080/api/repos/alice",
+            "-u", "alice:123",
+            "--data", String.format("repo=%s;config=%s", repo, config)
+        );
+        this.deployment.assertArtipieContent(
+            "Repo config is wrong",
+            String.format("/var/artipie/repo/alice/%s.yaml", repo),
+            new IsEqual<>(config.getBytes())
+        );
+    }
+
+    private String config() {
+        return String.join(
             "\n",
             "repo:",
             "  type: file",
             "  storage:",
             "    type: fs",
             "    path: /var/artipie/repo/1"
-        );
-        this.deployment.assertExec(
-            "Failed to create a new repo",
-            new ContainerResultMatcher(Matchers.is(0)),
-            "curl", "-X", "GET", "http://artipie:8080/api/repos/alice",
-            "-X", "POST",
-            "-u", "alice:123",
-            "-F", String.format("repo=%s", repo),
-            "-F", String.format("config=%s", URLEncoder.encode(config, "UTF-8"))
         );
     }
 }
