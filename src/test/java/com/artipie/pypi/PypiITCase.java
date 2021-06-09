@@ -4,205 +4,121 @@
  */
 package com.artipie.pypi;
 
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPerms;
-import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
-import com.artipie.asto.fs.FileStorage;
-import com.artipie.asto.test.TestResource;
-import com.artipie.test.RepositoryUrl;
-import com.artipie.test.TestContainer;
+import com.artipie.test.ContainerResultMatcher;
+import com.artipie.test.TestDeployment;
 import java.io.IOException;
-import java.nio.file.Path;
 import org.cactoos.list.ListOf;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.StringContains;
+import org.hamcrest.Matchers;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.testcontainers.containers.BindMode;
 
 /**
  * Integration tests for Pypi repository.
+ *
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.12
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class PypiITCase {
-
     /**
-     * Host.
+     * Test deployments.
+     *
+     * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    private static final String HOST = "host.testcontainers.internal";
-
-    /**
-     * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
-    @TempDir
-    Path tmp;
-
-    /**
-     * Tested Artipie server.
-     */
-    private ArtipieServer server;
-
-    /**
-     * Container.
-     */
-    private TestContainer cntn;
-
-    /**
-     * Storage.
-     */
-    private Storage storage;
-
-    /**
-     * Repository url.
-     */
-    private RepositoryUrl url;
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void pypiInstall(final boolean anonymous) throws Exception {
-        this.init(anonymous);
-        new TestResource("pypi-repo/alarmtime-0.1.5.tar.gz")
-            .saveTo(
-                this.storage,
-                new Key.From("repos", "my-pypi", "alarmtime", "alarmtime-0.1.5.tar.gz")
-        );
-        MatcherAssert.assertThat(
-            this.cntn.execStdout(
-                "pip", "install", "--no-deps", "--trusted-host", PypiITCase.HOST,
-                "--index-url", this.url.string(anonymous),
-                "alarmtime==0.1.5"
-            ),
-            new StringContains("Successfully installed alarmtime-0.1.5")
-        );
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void pypiPublish(final boolean anonymous) throws Exception {
-        this.init(anonymous);
-        new TestResource("pypi-repo/example-pckg/dist/")
-            .addFilesTo(
-                this.storage,
-                new Key.From("pypi-repo", "example-pckg")
-        );
-        this.cntn.execStdout("python3", "-m", "pip", "install", "--user", "--upgrade", "twine");
-        MatcherAssert.assertThat(
-            "Packages should be uploaded",
-            this.cntn.execStdout(
-                "python3", "-m", "twine", "upload", "--repository-url", this.url.string(),
-                "-u", ArtipieServer.ALICE.name(), "-p", this.pswd(anonymous),
-                "pypi-repo/example-pckg/*"
-            ),
-            new StringContainsInOrder(
-                new ListOf<String>(
-                    "Uploading artipietestpkg-0.0.3-py2-none-any.whl", "100%",
-                    "Uploading artipietestpkg-0.0.3.tar.gz", "100%"
-                )
+    @RegisterExtension
+    final TestDeployment containers = new TestDeployment(
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withRepoConfig("pypi-repo/pypi.yml", "my-python"),
+        () -> new TestDeployment.ClientContainer("python:3.7")
+            .withWorkingDirectory("/var/artipie")
+            .withClasspathResourceMapping(
+                "pypi-repo/example-pckg",
+                "/var/artipie/data/artipie/pypi/example-pckg",
+                BindMode.READ_ONLY
             )
+    );
+
+    @BeforeEach
+    void setUp() throws IOException {
+        this.containers.assertExec(
+            "Apt-get update failed",
+            new ContainerResultMatcher(),
+            "apt-get", "update"
         );
-        MatcherAssert.assertThat(
-            "Packages should be saved in storage",
-            this.inStorage("artipietestpkg-0.0.3-py2-none-any.whl")
-                && this.inStorage("artipietestpkg-0.0.3.tar.gz"),
-            new IsEqual<>(true)
+        this.containers.assertExec(
+            "Failed to install twine",
+            new ContainerResultMatcher(),
+            "python", "-m", "pip", "install", "twine"
+        );
+        this.containers.assertExec(
+            "Failed to upgrade pip",
+            new ContainerResultMatcher(),
+            "python", "-m", "pip", "install", "--upgrade", "pip"
         );
     }
 
     @Test
-    void pypiInstallShouldFailWithForbidden() throws Exception {
-        this.init(false);
-        MatcherAssert.assertThat(
-            this.cntn.execStdoutWithoutCheckExitCode(
-                "pip", "install", "--verbose", "--no-deps", "--trusted-host", PypiITCase.HOST,
-                "--index-url", this.url.string(ArtipieServer.BOB), "anypackage"
-            ),
-            new StringContains(
-                String.format(
-                    "403 Client Error: Forbidden for url: %spip/", this.url.string()
+    void installPythonPackage() throws IOException {
+        final String meta = "pypi-repo/example-pckg/dist/artipietestpkg-0.0.3.tar.gz";
+        this.containers.putResourceToArtipie(
+            meta, "/var/artipie/data/my-python/artipietestpkg/artipietestpkg-0.0.3.tar.gz"
+        );
+        this.containers.assertExec(
+            "Failed to install package",
+            new ContainerResultMatcher(
+                Matchers.equalTo(0),
+                new StringContainsInOrder(
+                    new ListOf<>(
+                        "Looking in indexes: http://artipie:8080/my-python",
+                        "Collecting artipietestpkg",
+                        String.format(
+                            "  Downloading http://artipie:8080/my-python/artipietestpkg/%s",
+                            "artipietestpkg-0.0.3.tar.gz"
+                        ),
+                        "Building wheels for collected packages: artipietestpkg",
+                        "  Building wheel for artipietestpkg (setup.py): started",
+                        String.format(
+                            "  Building wheel for artipietestpkg (setup.py): %s",
+                            "finished with status 'done'"
+                        ),
+                        "Successfully built artipietestpkg",
+                        "Installing collected packages: artipietestpkg",
+                        "Successfully installed artipietestpkg-0.0.3"
+                    )
                 )
-            )
+            ),
+            "python", "-m", "pip", "install", "--trusted-host", "artipie", "--index-url",
+            "http://artipie:8080/my-python", "artipietestpkg"
         );
     }
 
     @Test
-    void pypiPublishShouldFailSinceForbidden() throws Exception {
-        this.init(false);
-        new TestResource("pypi-repo/example-pckg/dist/")
-            .addFilesTo(
-                this.storage,
-                new Key.From("pypi-repo", "example-pckg")
-        );
-        this.cntn.execStdout("python3", "-m", "pip", "install", "--user", "--upgrade", "twine");
-        MatcherAssert.assertThat(
-            "Packages should not be uploaded",
-            this.cntn.execStdErr(
-                "python3", "-m", "twine", "upload", "--verbose",
-                "--repository-url", this.url.string(),
-                "-u", ArtipieServer.BOB.name(), "-p", ArtipieServer.BOB.password(),
-                "pypi-repo/example-pckg/*"
+    void canUpload() throws Exception {
+        this.containers.assertExec(
+            "Failed to upload",
+            new ContainerResultMatcher(
+                Matchers.is(0),
+                new StringContainsInOrder(
+                    new ListOf<>(
+                        "Uploading artipietestpkg-0.0.3-py2-none-any.whl", "100%",
+                        "Uploading artipietestpkg-0.0.3.tar.gz", "100%"
+                    )
+                )
             ),
-            new StringContains("HTTPError: 403 Forbidden")
+            "python3", "-m", "twine", "upload", "--repository-url",
+            "http://artipie:8080/my-python/", "-u", "alice", "-p", "123",
+            "/var/artipie/data/artipie/pypi/example-pckg/dist/*"
         );
-        MatcherAssert.assertThat(
-            "Packages should not be saved in storage",
-            this.inStorage("artipietestpkg-0.0.3-py2-none-any.whl")
-                || this.inStorage("artipietestpkg-0.0.3.tar.gz"),
-            new IsEqual<>(false)
+        this.containers.assertArtipieContent(
+            "Bad content after upload",
+            "/var/artipie/data/my-python/artipietestpkg/artipietestpkg-0.0.3.tar.gz",
+            Matchers.not("123".getBytes())
         );
     }
-
-    @AfterEach
-    void tearDown() {
-        this.server.stop();
-        this.cntn.close();
-    }
-
-    private void init(final boolean anonymous) throws IOException {
-        this.storage = new FileStorage(this.tmp);
-        this.server = new ArtipieServer(
-            this.tmp, "my-pypi", this.config(anonymous)
-        );
-        final int port = this.server.start();
-        this.url = new RepositoryUrl(port, "my-pypi");
-        this.cntn = new TestContainer("python:3", this.tmp);
-        this.cntn.start(port);
-    }
-
-    private String pswd(final boolean anonymous) {
-        String pass = "pass";
-        if (!anonymous) {
-            pass = ArtipieServer.ALICE.password();
-        }
-        return pass;
-    }
-
-    private RepoConfigYaml config(final boolean anonymous) {
-        final RepoConfigYaml yaml = new RepoConfigYaml("pypi")
-            .withFileStorage(this.tmp.resolve("repos"));
-        if (!anonymous) {
-            yaml.withPermissions(
-                new RepoPerms(ArtipieServer.ALICE.name(), "*")
-            );
-        }
-        return yaml;
-    }
-
-    private boolean inStorage(final String pckg) {
-        return this.storage.exists(
-            new Key.From("repos", "my-pypi", "artipietestpkg", pckg)
-        ).join();
-    }
-
 }
