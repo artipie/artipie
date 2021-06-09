@@ -22,6 +22,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * @since 0.14
  * @checkstyle MagicNumberCheck (500 lines)
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @todo #896:30min Tests to create and update repositories are disabled due to test deployment
+ *  configuration problem: there is no write permission on directory with the repository configs for
+ *  `artipie` user in artipie container. Here is corresponding question on SO
+ *  https://stackoverflow.com/questions/67869196/change-files-owner-when-copying-resources-with-testcontainers
+ *  Wait for the answer, fix permission error and enable tests.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class ArtipieApiITCase {
