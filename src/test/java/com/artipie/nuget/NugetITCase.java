@@ -1,30 +1,11 @@
 /*
- * The MIT License (MIT)
- *
- * Copyright (c) 2020 artipie.com
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
+ * https://github.com/artipie/artipie/LICENSE.txt
  */
 package com.artipie.nuget;
 
 import com.artipie.asto.test.TestResource;
-import com.artipie.maven.MavenITCase;
+import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.util.Arrays;
 import java.util.UUID;
@@ -81,7 +62,7 @@ final class NugetITCase {
         );
         this.containers.assertExec(
             "Package was not pushed",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContains("Your package was pushed.")
             ),
@@ -89,12 +70,12 @@ final class NugetITCase {
         );
         this.containers.assertExec(
             "New project was not created",
-            new MavenITCase.ContainerResultMatcher(),
+            new ContainerResultMatcher(),
             "dotnet", "new", "console", "-n", "TestProj"
         );
         this.containers.assertExec(
             "Package was not added",
-            new MavenITCase.ContainerResultMatcher(
+            new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(
                     Arrays.asList(

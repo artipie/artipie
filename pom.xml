@@ -27,7 +27,7 @@ SOFTWARE.
   <parent>
     <groupId>com.artipie</groupId>
     <artifactId>ppom</artifactId>
-    <version>0.4.2</version>
+    <version>0.5.1</version>
   </parent>
   <artifactId>artipie</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -116,6 +116,7 @@ SOFTWARE.
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <docker.image.name>artipie/artipie</docker.image.name>
+    <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
   </properties>
   <dependencies>
     <dependency>
@@ -148,31 +149,6 @@ SOFTWARE.
       <groupId>org.testcontainers</groupId>
       <artifactId>mockserver</artifactId>
       <version>1.15.2</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- maven -->
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-resolver-provider</artifactId>
-      <version>3.6.3</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-connector-basic</artifactId>
-      <version>1.4.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-transport-file</artifactId>
-      <version>1.4.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-transport-http</artifactId>
-      <version>1.4.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -235,7 +211,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>npm-adapter</artifactId>
-      <version>0.8.1</version>
+      <version>0.9.1</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -277,11 +253,6 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>go-adapter</artifactId>
       <version>0.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>npm-proxy-adapter</artifactId>
-      <version>0.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -411,7 +382,6 @@ SOFTWARE.
               <exclude>checkstyle:.*/src/test/resources/.*</exclude>
               <exclude>pmd:.*/src/test/resources/.*</exclude>
             </excludes>
-            <license>file:${basedir}/LICENSE.txt</license>
           </configuration>
         </plugin>
         <plugin>
