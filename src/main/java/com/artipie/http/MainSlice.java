@@ -79,6 +79,13 @@ public final class MainSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
+                    new RtRule.All(
+                        new ByMethodsRule(RqMethod.GET),
+                        new RtRule.ByPath("/.version")
+                    ),
+                    new VersionSlice()
+                ),
+                new RtRulePath(
                     new RtRule.ByPath(Pattern.compile("/api/?.*")),
                     new ArtipieApi(settings)
                 ),

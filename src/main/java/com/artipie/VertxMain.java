@@ -111,13 +111,16 @@ public final class VertxMain {
     public static void main(final String... args) throws IOException, ParseException {
         final Vertx vertx = Vertx.vertx();
         final Path config;
+        final String vers;
         final int port;
         final int defp = 80;
         final Options options = new Options();
         final String popt = "p";
         final String fopt = "f";
+        final String vopt = "v";
         options.addOption(popt, "port", true, "The port to start artipie on");
         options.addOption(fopt, "config-file", true, "The path to artipie configuration file");
+        options.addOption(vopt, "version", true, "The version of artipie");
         final CommandLineParser parser = new DefaultParser();
         final CommandLine cmd = parser.parse(options, args);
         if (cmd.hasOption(popt)) {
@@ -131,6 +134,12 @@ public final class VertxMain {
         } else {
             throw new IllegalStateException("Storage is not configured");
         }
+        if (cmd.hasOption(vopt)) {
+            vers = cmd.getOptionValue(vopt);
+        } else {
+            vers = "Build version is unknown";
+        }
+        Logger.info(VertxMain.class, "Used version of Artipie: %s", vers);
         new VertxMain(config, vertx, port).start();
     }
 
