@@ -25,7 +25,7 @@ public final class VersionSlice implements Slice {
     /**
      * Name of file with.
      */
-    static final String PROPERTIES_FILE = ".properties";
+    static final String PROPERTIES_FILE = "artipie.properties";
 
     /**
      * Key of field which contains Artipie version.
