@@ -175,12 +175,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>1.1.0</version>
+      <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>management-api</artifactId>
-      <version>0.4.4</version>
+      <version>0.4.5</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -247,7 +247,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>composer-adapter</artifactId>
-      <version>0.3.7</version>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
