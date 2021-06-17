@@ -1,7 +1,5 @@
 FROM adoptopenjdk/openjdk14:alpine-jre
-ARG ARTIPIE_VERSION=default_val
 ARG JAR_FILE
-ENV ARTIPIE_VERSION $ARTIPIE_VERSION
 ENV JVM_OPTS=""
 
 LABEL description="Artipie binary repository management tool"
