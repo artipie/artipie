@@ -4,6 +4,7 @@
  */
 package com.artipie.http;
 
+import com.artipie.ArtipieProperties;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
@@ -20,13 +21,13 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link VersionSlice}.
- * @since 0.20
+ * @since 0.21
  */
 final class VersionSliceTest {
     @Test
     void returnVersionOfApplication() throws IOException {
         final Properties properties = new Properties();
-        properties.load(new TestResource(VersionSlice.PROPERTIES_FILE).asInputStream());
+        properties.load(new TestResource("artipie.properties").asInputStream());
         MatcherAssert.assertThat(
             new VersionSlice(),
             new SliceHasResponse(
@@ -35,7 +36,7 @@ final class VersionSliceTest {
                     new RsHasBody(
                         String.format(
                             "[{\"version\":\"%s\"}]",
-                            properties.getProperty(VersionSlice.VERSION_KEY)
+                            properties.getProperty(ArtipieProperties.VERSION_KEY)
                         ),
                         StandardCharsets.UTF_8
                     )

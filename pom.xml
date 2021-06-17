@@ -463,7 +463,6 @@ SOFTWARE.
               <dockerfile>Dockerfile</dockerfile>
               <buildArgs>
                 <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
-                <ARTIPIE_VERSION>${project.version}</ARTIPIE_VERSION>
               </buildArgs>
             </configuration>
           </plugin>

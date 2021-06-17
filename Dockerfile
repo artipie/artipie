@@ -20,10 +20,11 @@ COPY target/${JAR_FILE} /usr/lib/artipie/artipie.jar
 VOLUME /var/artipie /etc/artipie
 WORKDIR /var/artipie
 EXPOSE 8080
-CMD java --enable-preview \
-  -XX:+ShowCodeDetailsInExceptionMessages \
-  -cp /usr/lib/artipie/artipie.jar:/usr/lib/artipie/lib/* \
-  com.artipie.VertxMain \
-  --config-file=/etc/artipie/artipie.yml \
-  --port=8080 \
-  --version=${ARTIPIE_VERSION} \
+CMD [ \
+  "java", \
+  "--enable-preview", "-XX:+ShowCodeDetailsInExceptionMessages", \
+  "-cp", "/usr/lib/artipie/artipie.jar:/usr/lib/artipie/lib/*", \
+  "com.artipie.VertxMain", \
+  "--config-file=/etc/artipie/artipie.yml", \
+  "--port=8080" \
+]
