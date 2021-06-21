@@ -5,13 +5,9 @@
 package com.artipie.http;
 
 import com.artipie.ArtipieProperties;
-import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.common.RsJson;
 import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import javax.json.Json;
 import org.reactivestreams.Publisher;
 
@@ -39,17 +35,10 @@ public final class VersionSlice implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        return new AsyncResponse(
-            CompletableFuture.supplyAsync(
-                () -> new RsWithStatus(
-                    new RsJson(
-                        Json.createArrayBuilder().add(
-                            Json.createObjectBuilder().add("version", this.properties.version())
-                        ).build()
-                    ),
-                    RsStatus.OK
-                )
-            )
+        return new RsJson(
+            Json.createArrayBuilder().add(
+                Json.createObjectBuilder().add("version", this.properties.version())
+            ).build()
         );
     }
 }

@@ -5,19 +5,19 @@
 package com.artipie.http;
 
 import com.artipie.ArtipieProperties;
-import com.artipie.asto.test.TestResource;
+import com.artipie.IsJson;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Properties;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import wtf.g4s8.hamcrest.json.JsonContains;
+import wtf.g4s8.hamcrest.json.JsonHas;
+import wtf.g4s8.hamcrest.json.JsonValueIs;
 
 /**
  * Tests for {@link VersionSlice}.
@@ -26,20 +26,19 @@ import org.junit.jupiter.api.Test;
  */
 final class VersionSliceTest {
     @Test
-    void returnVersionOfApplication() throws IOException {
-        final Properties properties = new Properties();
-        properties.load(new TestResource("artipie.properties").asInputStream());
+    void returnVersionOfApplication() {
+        final ArtipieProperties proprts = new ArtipieProperties();
         MatcherAssert.assertThat(
-            new VersionSlice(new ArtipieProperties()),
+            new VersionSlice(proprts),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
                     new RsHasBody(
-                        String.format(
-                            "[{\"version\":\"%s\"}]",
-                            properties.getProperty(ArtipieProperties.VERSION_KEY)
-                        ),
-                        StandardCharsets.UTF_8
+                        new IsJson(
+                            new JsonContains(
+                                new JsonHas("version", new JsonValueIs(proprts.version()))
+                            )
+                        )
                     )
                 ),
                 new RequestLine(RqMethod.GET, "/.version")
