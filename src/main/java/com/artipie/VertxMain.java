@@ -131,6 +131,11 @@ public final class VertxMain {
         } else {
             throw new IllegalStateException("Storage is not configured");
         }
+        Logger.info(
+            VertxMain.class,
+            "Used version of Artipie: %s",
+            new ArtipieProperties().version()
+        );
         new VertxMain(config, vertx, port).start();
     }
 
