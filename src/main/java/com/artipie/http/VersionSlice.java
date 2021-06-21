@@ -21,14 +21,17 @@ import org.reactivestreams.Publisher;
  */
 public final class VersionSlice implements Slice {
     /**
-     * Name of file with.
+     * Artipie properties.
      */
-    public static final String PROPERTIES_FILE = "artipie.properties";
+    private final ArtipieProperties properties;
 
     /**
-     * Key of field which contains Artipie version.
+     * Ctor.
+     * @param properties Artipie properties
      */
-    public static final String VERSION_KEY = "artipie.version";
+    public VersionSlice(final ArtipieProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public Response response(
@@ -41,10 +44,7 @@ public final class VersionSlice implements Slice {
                 () -> new RsWithStatus(
                     new RsJson(
                         Json.createArrayBuilder().add(
-                            Json.createObjectBuilder().add(
-                                "version",
-                                new ArtipieProperties().version()
-                            )
+                            Json.createObjectBuilder().add("version", this.properties.version())
                         ).build()
                     ),
                     RsStatus.OK

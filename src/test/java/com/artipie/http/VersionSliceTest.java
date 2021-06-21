@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link VersionSlice}.
  * @since 0.21
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class VersionSliceTest {
     @Test
@@ -29,7 +30,7 @@ final class VersionSliceTest {
         final Properties properties = new Properties();
         properties.load(new TestResource("artipie.properties").asInputStream());
         MatcherAssert.assertThat(
-            new VersionSlice(),
+            new VersionSlice(new ArtipieProperties()),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
