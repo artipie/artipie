@@ -9,7 +9,6 @@ import com.artipie.ResponseMetricsSlice;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.PrefixedMetrics;
-import java.time.Duration;
 import java.util.logging.Level;
 
 /**
@@ -34,14 +33,11 @@ public final class BaseSlice extends Slice.Wrap {
             new TrafficMetricSlice(
                 new ResponseMetricsSlice(
                     new SafeSlice(
-                        new TimeoutSlice(
-                            new MeasuredSlice(
-                                new LoggingSlice(
-                                    Level.INFO,
-                                    origin
-                                )
-                            ),
-                            Duration.ofMinutes(1)
+                        new MeasuredSlice(
+                            new LoggingSlice(
+                                Level.INFO,
+                                origin
+                            )
                         )
                     ),
                     new PrefixedMetrics(metrics, "http.response.")
