@@ -180,7 +180,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>management-api</artifactId>
-      <version>0.4.6</version>
+      <version>0.4.8</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
