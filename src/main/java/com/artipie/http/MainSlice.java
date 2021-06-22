@@ -5,6 +5,7 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.ArtipieProperties;
 import com.artipie.Settings;
 import com.artipie.YamlStorage;
 import com.artipie.api.ArtipieApi;
@@ -77,6 +78,13 @@ public final class MainSlice extends Slice.Wrap {
                             )
                         )
                     )
+                ),
+                new RtRulePath(
+                    new RtRule.All(
+                        new ByMethodsRule(RqMethod.GET),
+                        new RtRule.ByPath("/.version")
+                    ),
+                    new VersionSlice(new ArtipieProperties())
                 ),
                 new RtRulePath(
                     new RtRule.ByPath(Pattern.compile("/api/?.*")),
