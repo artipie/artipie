@@ -21,7 +21,7 @@ import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.file.FileProxy;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.GemSlice;
-import com.artipie.helm.HelmSlice;
+import com.artipie.helm.http.HelmSlice;
 import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
