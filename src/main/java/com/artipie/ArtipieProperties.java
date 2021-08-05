@@ -55,6 +55,21 @@ public final class ArtipieProperties {
     }
 
     /**
+     * Obtains timeout of caching configuration files in milliseconds.
+     * @return Timeout of caching files with configuration.
+     */
+    public int configCacheTimeout() {
+        int time;
+        try {
+            time = Integer.parseInt(this.properties.getProperty("artipie.config.cache.timeout"));
+        } catch (final NumberFormatException exc) {
+            // @checkstyle MagicNumberCheck (1 line)
+            time = 2 * 60 * 1000;
+        }
+        return time;
+    }
+
+    /**
      * Load content of file.
      */
     private void loadProperties() {

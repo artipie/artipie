@@ -202,6 +202,11 @@ public final class RepoConfig {
         return new YamlProxyConfig(this.storages, this.prefix, this.repoConfig());
     }
 
+    @Override
+    public String toString() {
+        return this.yaml.toString();
+    }
+
     /**
      * Reads string by key from repo part of YAML.
      *
