@@ -14,6 +14,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
+import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
@@ -90,8 +91,7 @@ public final class RepositoriesFromStorage implements Repositories {
     }
 
     /**
-     * Extra class for passing pair of values. The equality of these objects
-     * should be checked against the comparison of keys.
+     * Extra class for passing pair of values.
      * @since 0.22
      */
     private static final class KeyAndStorage {
@@ -127,7 +127,7 @@ public final class RepositoriesFromStorage implements Repositories {
                 res = true;
             } else if (obj instanceof KeyAndStorage) {
                 final KeyAndStorage data = (KeyAndStorage) obj;
-                res = this.key.equals(data.key);
+                res = this.key.equals(data.key) && Objects.equals(data.storage, this.storage);
             } else {
                 res = false;
             }

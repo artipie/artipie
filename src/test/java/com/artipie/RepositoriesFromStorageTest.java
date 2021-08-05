@@ -85,7 +85,7 @@ final class RepositoriesFromStorageTest {
             this::repoConfig
         );
         MatcherAssert.assertThat(
-            result.getCause(),
+            result.getCause().getCause(),
             new IsInstanceOf(ValueNotFoundException.class)
         );
     }
