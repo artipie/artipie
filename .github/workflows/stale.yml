@@ -2,7 +2,7 @@
 name: Mark stale issues and pull requests
 on:
   schedule:
-  - cron: '00 */2 * * *'
+  - cron: '00 */6 * * *'
 jobs:
   stale:
     runs-on: ubuntu-latest
@@ -18,3 +18,4 @@ jobs:
         stale-issue-label: 'stale'
         stale-pr-label: 'stale'
         days-before-issue-close: -1
+        operations-per-run: 100
