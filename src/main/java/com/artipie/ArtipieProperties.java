@@ -22,7 +22,7 @@ public final class ArtipieProperties {
     /**
      * Expiration time for cached auth.
      */
-    public static final String AUTH_TIMEOUT = "artipie.cached.auth.timeout=";
+    public static final String AUTH_TIMEOUT = "artipie.cached.auth.timeout";
 
     /**
      * Expiration time for cache of configuration files.
