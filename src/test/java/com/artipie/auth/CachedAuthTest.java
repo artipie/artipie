@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -19,25 +18,16 @@ import org.junit.jupiter.api.Test;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CachedAuthTest {
-    /**
-     * Cached authentication.
-     */
-    private CachedAuth target;
-
-    @BeforeEach
-    void setUp() {
-        this.target = new CachedAuth();
-        this.target.invalidateAll();
-    }
-
     @Test
     void callsOriginOnlyOnce() {
         final String username = "usr";
         final AtomicInteger counter = new AtomicInteger();
         final String expected = "usr-1";
+        final CachedAuth target = new CachedAuth();
+        target.invalidateAll();
         MatcherAssert.assertThat(
             "Wrong user on first cache call",
-            this.target.user(
+            target.user(
                 username,
                 "",
                 (usr, pass) -> Optional.of(
@@ -48,7 +38,7 @@ final class CachedAuthTest {
         );
         MatcherAssert.assertThat(
             "Wrong user on second cache call",
-            this.target.user(
+            target.user(
                 username,
                 "",
                 (usr, pass) -> Optional.of(
@@ -63,11 +53,13 @@ final class CachedAuthTest {
     void failsToGetUserWhenCacheContainsAnotherUser() {
         final String absent = "absent_user";
         final String cached = "cached_user";
-        this.target.user(
+        final CachedAuth target = new CachedAuth();
+        target.invalidateAll();
+        target.user(
             cached, "", (usr, pass) -> Optional.of(new Authentication.User(cached))
         );
         MatcherAssert.assertThat(
-            this.target.user(absent, "", (usr, pass) -> Optional.empty()).isPresent(),
+            target.user(absent, "", (usr, pass) -> Optional.empty()).isPresent(),
             new IsEqual<>(false)
         );
     }
@@ -75,11 +67,13 @@ final class CachedAuthTest {
     @Test
     void getsUserFromCache() {
         final String user = "super_user";
-        this.target.user(
+        final CachedAuth target = new CachedAuth();
+        target.invalidateAll();
+        target.user(
             user, "", (usr, pass) -> Optional.of(new Authentication.User(user))
         );
         MatcherAssert.assertThat(
-            this.target.user(user, "", (usr, pass) -> Optional.empty()).isPresent(),
+            target.user(user, "", (usr, pass) -> Optional.empty()).isPresent(),
             new IsEqual<>(true)
         );
     }
