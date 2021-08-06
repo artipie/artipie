@@ -35,33 +35,33 @@ public final class RepositoriesFromStorage implements Repositories {
     private static LoadingCache<KeyAndStorage, Single<StorageAliases>> aliases;
 
     static {
-        final CacheLoader<KeyAndStorage, Single<String>> ldrconfigs = new CacheLoader<>() {
-            @Override
-            public Single<String> load(final KeyAndStorage pair) {
-                return Single.fromFuture(
-                    new ConfigFile(pair.key)
-                        .valueFrom(pair.storage)
-                        .thenApply(PublisherAs::new)
-                        .thenCompose(PublisherAs::asciiString)
-                        .toCompletableFuture()
-                );
-            }
-        };
-        final CacheLoader<KeyAndStorage, Single<StorageAliases>> ldralias = new CacheLoader<>() {
-            @Override
-            public Single<StorageAliases> load(final KeyAndStorage pair) {
-                return Single.fromFuture(
-                    StorageAliases.find(pair.storage, pair.key)
-                );
-            }
-        };
-        final int timeout = new ArtipieProperties().configCacheTimeout();
+        System.setProperty(
+            ArtipieProperties.CONFIG_TIMEOUT,
+            new ArtipieProperties().configCacheTimeout()
+        );
+        final int timeout = Integer.getInteger(ArtipieProperties.CONFIG_TIMEOUT, 2 * 60 * 1000);
         RepositoriesFromStorage.configs = CacheBuilder.newBuilder()
             .expireAfterWrite(timeout, TimeUnit.MILLISECONDS)
-            .softValues().build(ldrconfigs);
+            .softValues()
+            .build(
+                new CacheLoader<>() {
+                    @Override
+                    public Single<String> load(final KeyAndStorage config) {
+                        return config.configContent();
+                    }
+                }
+            );
         RepositoriesFromStorage.aliases = CacheBuilder.newBuilder()
             .expireAfterWrite(timeout, TimeUnit.MILLISECONDS)
-            .softValues().build(ldralias);
+            .softValues()
+            .build(
+                new CacheLoader<>() {
+                    @Override
+                    public Single<StorageAliases> load(final KeyAndStorage alias) {
+                        return alias.aliases();
+                    }
+                }
+            );
     }
 
     /**
@@ -91,7 +91,7 @@ public final class RepositoriesFromStorage implements Repositories {
     }
 
     /**
-     * Extra class for passing pair of values.
+     * Extra class for obtaining aliases content of configuration file.
      * @since 0.22
      */
     private static final class KeyAndStorage {
@@ -127,11 +127,35 @@ public final class RepositoriesFromStorage implements Repositories {
                 res = true;
             } else if (obj instanceof KeyAndStorage) {
                 final KeyAndStorage data = (KeyAndStorage) obj;
-                res = this.key.equals(data.key) && Objects.equals(data.storage, this.storage);
+                res = Objects.equals(this.key, data.key)
+                    && Objects.equals(data.storage, this.storage);
             } else {
                 res = false;
             }
             return res;
+        }
+
+        /**
+         * Obtains content of configuration file.
+         * @return Content of configuration file.
+         */
+        Single<String> configContent() {
+            return Single.fromFuture(
+                new ConfigFile(this.key).valueFrom(this.storage)
+                    .thenApply(PublisherAs::new)
+                    .thenCompose(PublisherAs::asciiString)
+                    .toCompletableFuture()
+            );
+        }
+
+        /**
+         * Obtains aliases from storage by key.
+         * @return Aliases from storage by key.
+         */
+        Single<StorageAliases> aliases() {
+            return Single.fromFuture(
+                StorageAliases.find(this.storage, this.key)
+            );
         }
     }
 }
