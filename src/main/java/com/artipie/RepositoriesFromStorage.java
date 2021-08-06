@@ -27,12 +27,12 @@ public final class RepositoriesFromStorage implements Repositories {
     /**
      * Cache for config files.
      */
-    private static LoadingCache<KeyAndStorage, Single<String>> configs;
+    private static LoadingCache<FilesContent, Single<String>> configs;
 
     /**
      * Cache for aliases.
      */
-    private static LoadingCache<KeyAndStorage, Single<StorageAliases>> aliases;
+    private static LoadingCache<FilesContent, Single<StorageAliases>> aliases;
 
     static {
         System.setProperty(
@@ -46,7 +46,7 @@ public final class RepositoriesFromStorage implements Repositories {
             .build(
                 new CacheLoader<>() {
                     @Override
-                    public Single<String> load(final KeyAndStorage config) {
+                    public Single<String> load(final FilesContent config) {
                         return config.configContent();
                     }
                 }
@@ -57,7 +57,7 @@ public final class RepositoriesFromStorage implements Repositories {
             .build(
                 new CacheLoader<>() {
                     @Override
-                    public Single<StorageAliases> load(final KeyAndStorage alias) {
+                    public Single<StorageAliases> load(final FilesContent alias) {
                         return alias.aliases();
                     }
                 }
@@ -80,7 +80,7 @@ public final class RepositoriesFromStorage implements Repositories {
 
     @Override
     public CompletionStage<RepoConfig> config(final String name) {
-        final KeyAndStorage pair = new KeyAndStorage(new Key.From(name), this.storage);
+        final FilesContent pair = new FilesContent(new Key.From(name), this.storage);
         return Single.zip(
             RepositoriesFromStorage.configs.getUnchecked(pair),
             RepositoriesFromStorage.aliases.getUnchecked(pair),
@@ -94,7 +94,7 @@ public final class RepositoriesFromStorage implements Repositories {
      * Extra class for obtaining aliases content of configuration file.
      * @since 0.22
      */
-    private static final class KeyAndStorage {
+    private static final class FilesContent {
         /**
          * Key.
          */
@@ -110,7 +110,7 @@ public final class RepositoriesFromStorage implements Repositories {
          * @param key Key
          * @param storage Storage
          */
-        private KeyAndStorage(final Key key, final Storage storage) {
+        private FilesContent(final Key key, final Storage storage) {
             this.key = key;
             this.storage = storage;
         }
@@ -125,8 +125,8 @@ public final class RepositoriesFromStorage implements Repositories {
             final boolean res;
             if (obj == this) {
                 res = true;
-            } else if (obj instanceof KeyAndStorage) {
-                final KeyAndStorage data = (KeyAndStorage) obj;
+            } else if (obj instanceof FilesContent) {
+                final FilesContent data = (FilesContent) obj;
                 res = Objects.equals(this.key, data.key)
                     && Objects.equals(data.storage, this.storage);
             } else {
