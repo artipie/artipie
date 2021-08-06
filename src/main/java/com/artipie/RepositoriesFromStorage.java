@@ -91,7 +91,7 @@ public final class RepositoriesFromStorage implements Repositories {
     }
 
     /**
-     * Extra class for obtaining aliases content of configuration file.
+     * Extra class for obtaining aliases and content of configuration file.
      * @since 0.22
      */
     private static final class FilesContent {

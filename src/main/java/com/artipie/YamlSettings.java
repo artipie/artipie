@@ -8,7 +8,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
-import com.artipie.auth.CachedAuth;
+import com.artipie.auth.AuthCache;
 import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
@@ -38,11 +38,18 @@ public final class YamlSettings implements Settings {
     private final YamlMapping content;
 
     /**
+     * Authentication cache.
+     */
+    private final AuthCache authcache;
+
+    /**
      * Ctor.
      * @param content YAML file content.
+     * @param authcache Auth cache
      */
-    public YamlSettings(final YamlMapping content) {
+    public YamlSettings(final YamlMapping content, final AuthCache authcache) {
         this.content = content;
+        this.authcache = authcache;
     }
 
     @Override
@@ -58,7 +65,10 @@ public final class YamlSettings implements Settings {
         return this.credentials().thenCompose(
             Users::auth
         ).thenApply(
-            auth -> new Authentication.Joined(new CachedAuth(new GithubAuth()), auth)
+            auth -> new Authentication.Joined(
+                new CachedAuthWrap(this.authcache, new GithubAuth()),
+                auth
+            )
         );
     }
 
@@ -125,5 +135,36 @@ public final class YamlSettings implements Settings {
      */
     private static boolean hasTypeFile(final YamlMapping cred) {
         return cred != null && "file".equals(cred.string("type"));
+    }
+
+    /**
+     * Wrapping for auth cache.
+     * @since 0.22
+     */
+    private static final class CachedAuthWrap implements Authentication {
+        /**
+         * Auth cache.
+         */
+        private final AuthCache cache;
+
+        /**
+         * Auth provider.
+         */
+        private final Authentication origin;
+
+        /**
+         * Ctor.
+         * @param cache Auth cache
+         * @param origin Auth provider
+         */
+        CachedAuthWrap(final AuthCache cache, final Authentication origin) {
+            this.cache = cache;
+            this.origin = origin;
+        }
+
+        @Override
+        public Optional<User> user(final String username, final String password) {
+            return this.cache.user(username, password, this.origin);
+        }
     }
 }

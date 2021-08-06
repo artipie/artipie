@@ -4,11 +4,13 @@
  */
 package com.artipie.auth;
 
+import com.artipie.ArtipieProperties;
 import com.artipie.http.auth.Authentication;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,53 +20,113 @@ import java.util.concurrent.TimeUnit;
  * instead of calling origin authentication.
  * </p>
  * @since 0.10
- * @todo #285:30min Specify expiration time configuration.
- *  Instead of using scheduled executor to clean-up all cache map, use
- *  some configuration to clean-up only expired items, e.g. if token was not accessed for
- *  X minutes, then remove only this token. Consider using Guava's time-evicted-cache
- *  implementation: https://github.com/google/guava/wiki/CachesExplained#eviction
- * @todo #442:30min Refactor this class to move cache field to instance field
- *  and make sure the instance is not created on each request. Right now we're using
- *  a hotfix - CachedAuth created from settings on each request but uses static hash map
- *  field for caching.
  */
-public final class CachedAuth implements Authentication {
-
+public final class CachedAuth implements AuthCache {
     /**
-     * Static cache hash map.
+     * Cache for users.
      */
-    private static final ConcurrentMap<String, Optional<Authentication.User>> CACHE =
-        new ConcurrentHashMap<>();
+    private static LoadingCache<Data, Optional<Authentication.User>> users;
 
     static {
-        Executors.newSingleThreadScheduledExecutor()
-            // @checkstyle MagicNumberCheck (1 line)
-            .schedule(CachedAuth.CACHE::clear, 5, TimeUnit.MINUTES);
-    }
-
-    /**
-     * Decorated auth provider.
-     */
-    private final Authentication origin;
-
-    /**
-     * Primary constructor.
-     * @param origin Origin auth provider
-     */
-    public CachedAuth(final Authentication origin) {
-        this.origin = origin;
+        System.setProperty(
+            ArtipieProperties.AUTH_TIMEOUT,
+            new ArtipieProperties().cachedAuthTimeout()
+        );
+        final int timeout = Integer.getInteger(ArtipieProperties.AUTH_TIMEOUT, 5 * 60 * 1000);
+        CachedAuth.users = CacheBuilder.newBuilder()
+            .expireAfterAccess(timeout, TimeUnit.MILLISECONDS)
+            .softValues()
+            .build(
+                new CacheLoader<>() {
+                    @Override
+                    public Optional<Authentication.User> load(final Data data) {
+                        return data.user();
+                    }
+                }
+            );
     }
 
     @Override
-    public Optional<Authentication.User> user(final String username, final String password) {
-        return CachedAuth.CACHE.computeIfAbsent(username, key -> this.origin.user(key, password));
+    public Optional<Authentication.User> user(
+        final String username,
+        final String password,
+        final Authentication origin
+    ) {
+        return CachedAuth.users.getUnchecked(
+            new Data(username, password, origin)
+        );
+    }
+
+    @Override
+    public void invalidateAll() {
+        CachedAuth.users.invalidateAll();
     }
 
     @Override
     public String toString() {
         return String.format(
-            "%s(origin=%s, size=%d)",
-            this.getClass().getSimpleName(), this.origin, CachedAuth.CACHE.size()
+            "%s(size=%d)",
+            this.getClass().getSimpleName(), CachedAuth.users.size()
         );
+    }
+
+    /**
+     * Extra class for using instance field in static section.
+     * @since 0.22
+     */
+    private static class Data {
+        /**
+         * Username.
+         */
+        private final String username;
+
+        /**
+         * Password.
+         */
+        private final String pswd;
+
+        /**
+         * Auth provider.
+         */
+        private final Authentication origin;
+
+        /**
+         * Ctor.
+         * @param username Username
+         * @param pswd Password
+         * @param origin Auth provider
+         */
+        Data(final String username, final String pswd, final Authentication origin) {
+            this.username = username;
+            this.pswd = pswd;
+            this.origin = origin;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            final boolean res;
+            if (this == obj) {
+                res = true;
+            } else if (obj == null || this.getClass() != obj.getClass()) {
+                res = false;
+            } else {
+                final Data data = (Data) obj;
+                res = Objects.equals(this.username, data.username);
+            }
+            return res;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.username);
+        }
+
+        /**
+         * Find user by credentials.
+         * @return User login if found.
+         */
+        Optional<Authentication.User> user() {
+            return this.origin.user(this.username, this.pswd);
+        }
     }
 }

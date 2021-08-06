@@ -9,6 +9,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.auth.CachedAuth;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -154,7 +155,8 @@ public final class VertxMain {
             initialize = true;
         }
         final Settings settings = new YamlSettings(
-            Yaml.createYamlInput(path.toFile()).readYamlMapping()
+            Yaml.createYamlInput(path.toFile()).readYamlMapping(),
+            new CachedAuth()
         );
         final BlockingStorage bsto = new BlockingStorage(settings.storage());
         final Key init = new Key.From(".artipie", "initialized");
