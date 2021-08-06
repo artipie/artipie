@@ -20,6 +20,11 @@ public final class ArtipieProperties {
     public static final String VERSION_KEY = "artipie.version";
 
     /**
+     * Expiration time for cache of configuration files.
+     */
+    static final String CONFIG_TIMEOUT = "artipie.config.cache.timeout";
+
+    /**
      * Name of file with properties.
      */
     private final String filename;
@@ -52,6 +57,14 @@ public final class ArtipieProperties {
      */
     public String version() {
         return this.properties.getProperty(ArtipieProperties.VERSION_KEY);
+    }
+
+    /**
+     * Obtains timeout of caching configuration files in milliseconds.
+     * @return Timeout of caching files with configuration.
+     */
+    public String configCacheTimeout() {
+        return this.properties.getProperty(ArtipieProperties.CONFIG_TIMEOUT);
     }
 
     /**
