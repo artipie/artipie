@@ -57,10 +57,10 @@ public final class RepositoriesFromStorage implements Repositories {
         };
         final int timeout = new ArtipieProperties().configCacheTimeout();
         RepositoriesFromStorage.configs = CacheBuilder.newBuilder()
-            .expireAfterAccess(timeout, TimeUnit.MILLISECONDS)
+            .expireAfterWrite(timeout, TimeUnit.MILLISECONDS)
             .softValues().build(ldrconfigs);
         RepositoriesFromStorage.aliases = CacheBuilder.newBuilder()
-            .expireAfterAccess(timeout, TimeUnit.MILLISECONDS)
+            .expireAfterWrite(timeout, TimeUnit.MILLISECONDS)
             .softValues().build(ldralias);
     }
 
