@@ -12,18 +12,18 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test case for {@link CachedAuth}.
+ * Test case for {@link CachedUsers}.
  *
- * @since 0.10
+ * @since 0.22
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-final class CachedAuthTest {
+final class CachedUsersTest {
     @Test
     void callsOriginOnlyOnce() {
         final String username = "usr";
         final AtomicInteger counter = new AtomicInteger();
         final String expected = "usr-1";
-        final CachedAuth target = new CachedAuth();
+        final CachedUsers target = new CachedUsers();
         target.invalidateAll();
         MatcherAssert.assertThat(
             "Wrong user on first cache call",
@@ -53,7 +53,7 @@ final class CachedAuthTest {
     void failsToGetUserWhenCacheContainsAnotherUser() {
         final String absent = "absent_user";
         final String cached = "cached_user";
-        final CachedAuth target = new CachedAuth();
+        final CachedUsers target = new CachedUsers();
         target.invalidateAll();
         target.user(
             cached, "", (usr, pass) -> Optional.of(new Authentication.User(cached))
@@ -67,7 +67,7 @@ final class CachedAuthTest {
     @Test
     void getsUserFromCache() {
         final String user = "super_user";
-        final CachedAuth target = new CachedAuth();
+        final CachedUsers target = new CachedUsers();
         target.invalidateAll();
         target.user(
             user, "", (usr, pass) -> Optional.of(new Authentication.User(user))

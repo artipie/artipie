@@ -66,7 +66,7 @@ public final class YamlSettings implements Settings {
             Users::auth
         ).thenApply(
             auth -> new Authentication.Joined(
-                new CachedAuthWrap(this.authcache, new GithubAuth()),
+                new Cached(this.authcache, new GithubAuth()),
                 auth
             )
         );
@@ -141,7 +141,7 @@ public final class YamlSettings implements Settings {
      * Wrapping for auth cache.
      * @since 0.22
      */
-    private static final class CachedAuthWrap implements Authentication {
+    private static final class Cached implements Authentication {
         /**
          * Auth cache.
          */
@@ -157,7 +157,7 @@ public final class YamlSettings implements Settings {
          * @param cache Auth cache
          * @param origin Auth provider
          */
-        CachedAuthWrap(final AuthCache cache, final Authentication origin) {
+        Cached(final AuthCache cache, final Authentication origin) {
             this.cache = cache;
             this.origin = origin;
         }

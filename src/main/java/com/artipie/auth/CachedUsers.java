@@ -19,9 +19,9 @@ import java.util.concurrent.TimeUnit;
  * It remembers the result of decorated authentication provider and returns it
  * instead of calling origin authentication.
  * </p>
- * @since 0.10
+ * @since 0.22
  */
-public final class CachedAuth implements AuthCache {
+public final class CachedUsers implements AuthCache {
     /**
      * Cache for users.
      */
@@ -33,7 +33,7 @@ public final class CachedAuth implements AuthCache {
             new ArtipieProperties().cachedAuthTimeout()
         );
         final int timeout = Integer.getInteger(ArtipieProperties.AUTH_TIMEOUT, 5 * 60 * 1000);
-        CachedAuth.users = CacheBuilder.newBuilder()
+        CachedUsers.users = CacheBuilder.newBuilder()
             .expireAfterAccess(timeout, TimeUnit.MILLISECONDS)
             .softValues()
             .build(
@@ -52,21 +52,21 @@ public final class CachedAuth implements AuthCache {
         final String password,
         final Authentication origin
     ) {
-        return CachedAuth.users.getUnchecked(
+        return CachedUsers.users.getUnchecked(
             new Data(username, password, origin)
         );
     }
 
     @Override
     public void invalidateAll() {
-        CachedAuth.users.invalidateAll();
+        CachedUsers.users.invalidateAll();
     }
 
     @Override
     public String toString() {
         return String.format(
             "%s(size=%d)",
-            this.getClass().getSimpleName(), CachedAuth.users.size()
+            this.getClass().getSimpleName(), CachedUsers.users.size()
         );
     }
 
