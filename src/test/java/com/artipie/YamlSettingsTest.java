@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.artipie.asto.SubStorage;
+import com.artipie.auth.AuthCache;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,7 +43,8 @@ class YamlSettingsTest {
                     "meta:\n",
                     "  storage:\n"
                 )
-            ).readYamlMapping()
+            ).readYamlMapping(),
+            new AuthCache.Fake()
         );
         MatcherAssert.assertThat(
             settings.layout(),
@@ -60,7 +62,8 @@ class YamlSettingsTest {
                     "  storage: []\n",
                     "  layout: org\n"
                 )
-            ).readYamlMapping()
+            ).readYamlMapping(),
+            new AuthCache.Fake()
         );
         MatcherAssert.assertThat(
             settings.layout(),
@@ -71,7 +74,8 @@ class YamlSettingsTest {
     @Test
     void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", "env", Optional.empty())
+            this.config("some/path", "env", Optional.empty()),
+            new AuthCache.Fake()
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -96,7 +100,8 @@ class YamlSettingsTest {
                     "      accessKeyId: ***\n",
                     "      secretAccessKey: ***"
                 )
-            ).readYamlMapping()
+            ).readYamlMapping(),
+            new AuthCache.Fake()
         );
         MatcherAssert.assertThat(
             settings.storage(),
@@ -107,7 +112,8 @@ class YamlSettingsTest {
     @Test
     void shouldCreateAuthFromEnv() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", "env", Optional.empty())
+            this.config("some/path", "env", Optional.empty()),
+            new AuthCache.Fake()
         );
         MatcherAssert.assertThat(
             settings.auth().toCompletableFuture().get().toString(),
@@ -120,7 +126,8 @@ class YamlSettingsTest {
         throws Exception {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), "file", Optional.of(fname))
+            this.config(tmp.toString(), "file", Optional.of(fname)),
+            new AuthCache.Fake()
         );
         final Path yaml = tmp.resolve(fname);
         Files.writeString(yaml, this.credentials());
@@ -134,7 +141,8 @@ class YamlSettingsTest {
     void returnsCredentials(@TempDir final Path tmp) throws IOException {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), "file", Optional.of(fname))
+            this.config(tmp.toString(), "file", Optional.of(fname)),
+            new AuthCache.Fake()
         );
         final Path yaml = tmp.resolve(fname);
         Files.writeString(yaml, this.credentials());
@@ -147,8 +155,10 @@ class YamlSettingsTest {
     @Test
     void returnsRepoConfigs(@TempDir final Path tmp) {
         MatcherAssert.assertThat(
-            new YamlSettings(this.config(tmp.toString(), "file", Optional.empty()))
-                .repoConfigsStorage(),
+            new YamlSettings(
+                this.config(tmp.toString(), "file", Optional.empty()),
+                new AuthCache.Fake()
+            ).repoConfigsStorage(),
             new IsInstanceOf(SubStorage.class)
         );
     }
@@ -156,7 +166,8 @@ class YamlSettingsTest {
     @Test
     void shouldThrowExceptionWhenPathIsNotSet() {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", "file", Optional.empty())
+            this.config("some/path", "file", Optional.empty()),
+            new AuthCache.Fake()
         );
         MatcherAssert.assertThat(
             Assertions.assertThrows(
@@ -171,7 +182,8 @@ class YamlSettingsTest {
     @MethodSource("badYamls")
     void shouldFailProvideStorageFromBadYaml(final String yaml) throws IOException {
         final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlInput(yaml).readYamlMapping()
+            Yaml.createYamlInput(yaml).readYamlMapping(),
+            new AuthCache.Fake()
         );
         Assertions.assertThrows(RuntimeException.class, settings::storage);
     }
