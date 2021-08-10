@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * Obtain artipie settings by path.
- * @since 0.30
+ * @since 0.22
  */
 public final class SettingsFromPath {
 

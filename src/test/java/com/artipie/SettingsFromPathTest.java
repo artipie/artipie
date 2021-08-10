@@ -15,7 +15,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Test for {@link SettingsFromPath}.
- * @since 0.30
+ * @since 0.22
  */
 class SettingsFromPathTest {
 
