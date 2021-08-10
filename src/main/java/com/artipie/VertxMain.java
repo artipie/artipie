@@ -7,7 +7,6 @@ package com.artipie;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.auth.CachedUsers;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
