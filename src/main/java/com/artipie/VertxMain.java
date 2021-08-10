@@ -5,10 +5,8 @@
 
 package com.artipie;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -21,10 +19,8 @@ import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +81,7 @@ public final class VertxMain {
      * @throws IOException In case of error reading settings.
      */
     public int start() throws IOException {
-        final Settings settings = this.settings(this.config);
+        final Settings settings = new SettingsFromPath(this.config).find(this.port);
         final Metrics metrics = metrics(settings);
         final int main = this.listenOn(new MainSlice(settings), metrics, this.port);
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
@@ -137,56 +133,6 @@ public final class VertxMain {
             new ArtipieProperties().version()
         );
         new VertxMain(config, vertx, port).start();
-    }
-
-    /**
-     * Find artipie settings.
-     * @param path Settings path
-     * @return Settings instance
-     * @throws IOException On read error
-     * @todo #284:30min Extract this method to separate class and write proper unit tests
-     *  for that. Also add tests for `JavaResource` class which is used to copy resources.
-     */
-    private Settings settings(final Path path) throws IOException {
-        boolean initialize = Boolean.parseBoolean(System.getenv("ARTIPIE_INIT"));
-        if (!Files.exists(path)) {
-            new JavaResource("example/artipie.yaml").copy(path);
-            initialize = true;
-        }
-        final Settings settings = new YamlSettings(
-            Yaml.createYamlInput(path.toFile()).readYamlMapping()
-        );
-        final BlockingStorage bsto = new BlockingStorage(settings.storage());
-        final Key init = new Key.From(".artipie", "initialized");
-        if (initialize && !bsto.exists(init)) {
-            final List<String> resources = Arrays.asList(
-                "_credentials.yaml", StorageAliases.FILE_NAME, "_permissions.yaml"
-            );
-            for (final String res : resources) {
-                final Path tmp = Files.createTempFile(res, ".tmp");
-                new JavaResource(String.format("example/repo/%s", res)).copy(tmp);
-                bsto.save(new Key.From(res), Files.readAllBytes(tmp));
-                Files.delete(tmp);
-            }
-            bsto.save(init, "true".getBytes());
-            Logger.info(
-                VertxMain.class,
-                String.join(
-                    "\n",
-                    "", "", "\t+===============================================================+",
-                    "\t\t\t\t\tHello!",
-                    "\t\tArtipie configuration was not found, created default.",
-                    "\t\t\tDefault username/password: `artipie`/`artipie`. ",
-                    "\t\t\t\t   Check the dashboard at:",
-                    String.format(
-                        "\t\t\thttp://localhost:%d/dashboard/artipie",
-                        this.port
-                    ),
-                    "\t-===============================================================-", ""
-                )
-            );
-        }
-        return settings;
     }
 
     /**
