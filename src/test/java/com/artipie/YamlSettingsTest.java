@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
@@ -118,6 +119,28 @@ class YamlSettingsTest {
         MatcherAssert.assertThat(
             settings.auth().toCompletableFuture().get().toString(),
             new StringContains("AuthFromEnv")
+        );
+    }
+
+    @Test
+    void authorizesWithoutCredentialsSection() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlMappingBuilder().add(
+                "meta",
+                Yaml.createYamlMappingBuilder().add(
+                    "storage",
+                    Yaml.createYamlMappingBuilder()
+                        .add("type", "fs")
+                        .add("path", "path/storage").build()
+                ).build()
+            ).build(),
+            new AuthCache.Fake()
+        );
+        MatcherAssert.assertThat(
+            settings.auth().toCompletableFuture().get()
+                .user("any_name", "any_password")
+                .get().name(),
+            new IsEqual<>("anonymous")
         );
     }
 
