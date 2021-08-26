@@ -21,6 +21,7 @@ import com.artipie.http.rt.RtPath;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
+import com.artipie.http.slice.SliceOptional;
 import com.artipie.metrics.MetricSlice;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -68,7 +69,7 @@ public final class MainSlice extends Slice.Wrap {
                         new ByMethodsRule(RqMethod.GET),
                         new RtRule.ByPath("/.metrics")
                     ),
-                    new OptionalSlice<>(
+                    new SliceOptional<>(
                         metricsStorage(settings),
                         Optional::isPresent,
                         yaml -> new MetricSlice(
