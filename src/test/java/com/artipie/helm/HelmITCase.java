@@ -14,8 +14,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.RandomFreePort;
 import com.artipie.test.RepositoryUrl;
 import com.artipie.test.TestContainer;
-import com.google.common.io.ByteStreams;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
@@ -219,12 +217,8 @@ final class HelmITCase {
                 }
             );
         }
-        ByteStreams.copy(
-            new ByteArrayInputStream(
-                new TestResource(String.format("helm/%s", HelmITCase.CHART)).asBytes()
-            ),
-            con.getOutputStream()
-        );
+        new TestResource(String.format("helm/%s", HelmITCase.CHART)).asInputStream()
+            .transferTo(con.getOutputStream());
         return con;
     }
 
