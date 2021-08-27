@@ -280,6 +280,11 @@ SOFTWARE.
       <version>0.4.2</version>
     </dependency>
     <dependency>
+      <groupId>wtf.g4s8</groupId>
+      <artifactId>tuples</artifactId>
+      <version>0.1.2</version>
+    </dependency>
+    <dependency>
       <groupId>com.github.jknack</groupId>
       <artifactId>handlebars</artifactId>
       <version>4.2.0</version>

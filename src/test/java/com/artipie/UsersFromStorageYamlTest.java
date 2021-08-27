@@ -13,8 +13,6 @@ import com.artipie.management.Users;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.cactoos.set.SetOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -23,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import wtf.g4s8.tuples.Pair;
 
 /**
  * Test for {@link UsersFromStorageYaml}.
@@ -58,7 +57,7 @@ class UsersFromStorageYamlTest {
         );
         final Users.PasswordFormat sha = Users.PasswordFormat.SHA256;
         final String pass = "111";
-        this.creds(sha, new ImmutablePair<>(jane, pass), new ImmutablePair<>(john, pass));
+        this.creds(sha, Pair.of(jane, pass), Pair.of(john, pass));
         MatcherAssert.assertThat(
             new UsersFromStorageYaml(this.storage, this.key).list()
                 .toCompletableFuture().join(),
@@ -92,7 +91,7 @@ class UsersFromStorageYamlTest {
         );
         final String pass = "abc";
         final Users.PasswordFormat sha = Users.PasswordFormat.SHA256;
-        this.creds(sha, new ImmutablePair<>(maria, pass));
+        this.creds(sha, Pair.of(maria, pass));
         new UsersFromStorageYaml(this.storage, this.key)
             .add(olga, DigestUtils.sha256Hex(pass), sha).toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -101,8 +100,8 @@ class UsersFromStorageYamlTest {
             new IsEqual<>(
                 this.getYamlWithEmailAndGroups(
                     sha,
-                    new ImmutablePair<>(maria, pass),
-                    new ImmutablePair<>(olga, pass)
+                    Pair.of(maria, pass),
+                    Pair.of(olga, pass)
                 )
             )
         );
@@ -117,7 +116,7 @@ class UsersFromStorageYamlTest {
         final String old = "345";
         final String newpass = "000";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
-        this.creds(plain, new ImmutablePair<>(jack, old), new ImmutablePair<>(silvia, old));
+        this.creds(plain, Pair.of(jack, old), Pair.of(silvia, old));
         new UsersFromStorageYaml(this.storage, this.key)
             .add(silvia, newpass, Users.PasswordFormat.PLAIN).toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -126,8 +125,8 @@ class UsersFromStorageYamlTest {
             new IsEqual<>(
                 this.getYamlWithEmailAndGroups(
                     plain,
-                    new ImmutablePair<>(jack, old),
-                    new ImmutablePair<>(silvia, newpass)
+                    Pair.of(jack, old),
+                    Pair.of(silvia, newpass)
                 )
             )
         );
@@ -139,13 +138,13 @@ class UsersFromStorageYamlTest {
         final Users.User ann = new Users.User("ann");
         final String pass = "123";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
-        this.creds(plain, new ImmutablePair<>(mark, pass), new ImmutablePair<>(ann, pass));
+        this.creds(plain, Pair.of(mark, pass), Pair.of(ann, pass));
         new UsersFromStorageYaml(this.storage, this.key).remove(ann.name())
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
                 .asciiString().toCompletableFuture().join(),
-            new IsEqual<>(this.getYamlWithEmailAndGroups(plain, new ImmutablePair<>(mark, pass)))
+            new IsEqual<>(this.getYamlWithEmailAndGroups(plain, Pair.of(mark, pass)))
         );
     }
 
@@ -155,7 +154,7 @@ class UsersFromStorageYamlTest {
         final Users.User alex = new Users.User("alex");
         final String pass = "098";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
-        this.creds(plain, new ImmutablePair<>(ted, pass), new ImmutablePair<>(alex, pass));
+        this.creds(plain, Pair.of(ted, pass), Pair.of(alex, pass));
         new UsersFromStorageYaml(this.storage, this.key).remove("alice")
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -164,7 +163,7 @@ class UsersFromStorageYamlTest {
             new IsEqual<>(
                 this.getYamlWithEmailAndGroups(
                     plain,
-                    new ImmutablePair<>(ted, pass), new ImmutablePair<>(alex, pass)
+                    Pair.of(ted, pass), Pair.of(alex, pass)
                 )
             )
         );
@@ -182,10 +181,13 @@ class UsersFromStorageYamlTest {
     private String getYamlWithEmailAndGroups(final Users.PasswordFormat format,
         final Pair<Users.User, String>... users) {
         final CredsConfigYaml creds = new CredsConfigYaml();
-        for (final Pair<Users.User, String> user : users) {
-            creds.withFullInfo(
-                user.getKey().name(), format,
-                user.getValue(), this.email(user.getKey().name()).get(), user.getKey().groups()
+        for (final Pair<Users.User, String> pair : users) {
+            pair.accept(
+                (user, pass) -> creds.withFullInfo(
+                    user.name(), format, pass,
+                    this.email(user.name()).get(),
+                    user.groups()
+                )
             );
         }
         return creds.toString();
