@@ -42,7 +42,7 @@ final class YamlCacheStorage implements CacheStorage {
      * @param storage Cache storage
      */
     YamlCacheStorage(final Storage storage) {
-        this(storage, Long.MAX_VALUE, Duration.ofHours(Long.MAX_VALUE));
+        this(storage, Long.MAX_VALUE, Duration.ofMillis(Long.MAX_VALUE));
     }
 
     /**
