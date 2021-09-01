@@ -17,12 +17,12 @@ final class YamlCacheStorage implements CacheStorage {
     /**
      * Cache storage.
      */
-    private final Storage cstorage;
+    private final Storage asto;
 
     /**
      * Max available size.
      */
-    private final Long cmaxsize;
+    private final Long size;
 
     /**
      * Time to live.
@@ -47,24 +47,24 @@ final class YamlCacheStorage implements CacheStorage {
 
     /**
      * Ctor.
-     * @param cstorage Cache storage
+     * @param storage Cache storage
      * @param maxsize Max available size
      * @param ttl Time to live
      */
-    YamlCacheStorage(final Storage cstorage, final Long maxsize, final Duration ttl) {
-        this.cstorage = cstorage;
-        this.cmaxsize = maxsize;
+    YamlCacheStorage(final Storage storage, final Long maxsize, final Duration ttl) {
+        this.asto = storage;
+        this.size = maxsize;
         this.ttl = ttl;
     }
 
     @Override
     public Storage storage() {
-        return this.cstorage;
+        return this.asto;
     }
 
     @Override
     public Long maxSize() {
-        return this.cmaxsize;
+        return this.size;
     }
 
     @Override
