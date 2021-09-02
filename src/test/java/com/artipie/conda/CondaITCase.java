@@ -77,8 +77,6 @@ public final class CondaITCase {
                         "The following packages will be downloaded:",
                         "http://artipie:8080/my-conda",
                         "linux-64::snappy-1.1.3-0",
-                        "Preparing transaction: ...working... done",
-                        "Verifying transaction: ...working... done",
                         "Executing transaction: ...working... done"
                     )
                 )
