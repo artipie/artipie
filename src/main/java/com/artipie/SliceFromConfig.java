@@ -9,6 +9,7 @@ import com.artipie.asto.SubStorage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.AstoRepository;
 import com.artipie.composer.http.PhpComposer;
+import com.artipie.conda.http.CondaSlice;
 import com.artipie.debian.Config;
 import com.artipie.debian.http.DebianSlice;
 import com.artipie.docker.Docker;
@@ -304,6 +305,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                         cfg.storage(), permissions, auth,
                         new Config.FromYaml(cfg.name(), cfg.settings(), settings.storage())
                     )
+                );
+                break;
+            case "conda":
+                slice = trimIfNotStandalone(
+                    settings, standalone,
+                    new CondaSlice(cfg.storage(), permissions, auth, cfg.url().toString())
                 );
                 break;
             default:
