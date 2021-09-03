@@ -58,7 +58,9 @@ public final class MavenProxy implements Slice {
                     this.client,
                     URI.create(remote.url()),
                     remote.auth(),
-                    remote.cache().<Cache>map(FromStorageCache::new).orElse(Cache.NOP)
+                    remote.cache().<Cache>map(
+                        cache -> new FromStorageCache(cache.storage())
+                    ).orElse(Cache.NOP)
                 )
             ).collect(Collectors.toList())
         ).response(line, headers, body);

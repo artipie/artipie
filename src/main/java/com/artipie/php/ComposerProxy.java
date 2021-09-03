@@ -58,12 +58,12 @@ public final class ComposerProxy implements Slice {
         }
         final ProxyConfig.Remote remote = remotes.iterator().next();
         return remote.cache().map(
-            storage -> new ComposerProxySlice(
+            cache -> new ComposerProxySlice(
                 this.client,
                 URI.create(remote.url()),
                 new AstoRepository(this.cfg.storage()),
                 remote.auth(),
-                new ComposerStorageCache(new AstoRepository(storage))
+                new ComposerStorageCache(new AstoRepository(cache.storage()))
             )
         ).orElseGet(
             () -> new ComposerProxySlice(

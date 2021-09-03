@@ -10,7 +10,6 @@ import com.artipie.MeasuredStorage;
 import com.artipie.SliceFromConfig;
 import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import java.util.Collection;
@@ -130,13 +129,15 @@ public final class YamlProxyConfig implements ProxyConfig {
         }
 
         @Override
-        public Optional<Storage> cache() {
+        public Optional<CacheStorage> cache() {
             return Optional.ofNullable(this.source.yamlMapping("cache")).flatMap(
                 root -> Optional.ofNullable(root.value("storage")).map(
-                    node -> new MeasuredStorage(
-                        new StorageYamlConfig(
-                            node, YamlProxyConfig.this.storages
-                        ).subStorage(YamlProxyConfig.this.prefix)
+                    node -> new YamlCacheStorage(
+                        new MeasuredStorage(
+                            new StorageYamlConfig(
+                                node, YamlProxyConfig.this.storages
+                            ).subStorage(YamlProxyConfig.this.prefix)
+                        )
                     )
                 )
             );
