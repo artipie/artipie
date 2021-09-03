@@ -12,6 +12,7 @@
 --exclude src/test/resources/gem/*
 --exclude src/test/resources/debian/*
 --exclude src/test/resources/nuget/**/*
+--exclude src/test/resources/conda/**/*
 --exclude .idea/**/*
 --exclude examples/**/*
 --exclude examples/helm/tomcat-0.4.1.tgz
