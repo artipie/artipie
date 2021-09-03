@@ -60,7 +60,7 @@ public final class PypiProxy implements Slice {
             remote.auth(),
             remote.cache().orElseThrow(
                 () -> new IllegalStateException("Python proxy requires proxy storage to be set")
-            )
+            ).storage()
         ).response(line, headers, body);
     }
 }
