@@ -8,9 +8,9 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
-import org.cactoos.list.ListOf;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.text.StringContainsInOrder;
+import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -72,13 +72,9 @@ public final class CondaITCase {
             "Package snappy-1.1.3-0 was not installed successfully",
             new ContainerResultMatcher(
                 new IsEqual<>(0),
-                new StringContainsInOrder(
-                    new ListOf<String>(
-                        "The following packages will be downloaded:",
-                        "http://artipie:8080/my-conda",
-                        "linux-64::snappy-1.1.3-0",
-                        "Executing transaction: ...working... done"
-                    )
+                Matchers.allOf(
+                    new StringContains("http://artipie:8080/my-conda"),
+                    new StringContains("linux-64::snappy-1.1.3-0")
                 )
             ),
             "conda", "install", "--verbose", "-y", "snappy"
