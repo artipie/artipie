@@ -140,9 +140,9 @@ public final class DockerProxy implements Slice {
             new AuthClientSlice(slices.https(remote.url()), remote.auth())
         );
         return remote.cache().<Docker>map(
-            storage -> new CacheDocker(
+            cache -> new CacheDocker(
                 proxy,
-                new AstoDocker(new SubStorage(RegistryRoot.V2, storage))
+                new AstoDocker(new SubStorage(RegistryRoot.V2, cache.storage()))
             )
         ).orElse(proxy);
     }
