@@ -5,6 +5,7 @@
 package com.artipie;
 
 import com.artipie.asto.Key;
+import com.artipie.conda.CondaRqPath;
 import com.artipie.repo.PathPattern;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -63,7 +64,9 @@ public interface Layout {
         public Optional<Key> keyFromPath(final String path) {
             final String[] parts = splitPath(path);
             final Optional<Key> key;
-            if (parts.length >= 1 && !parts[0].isBlank()) {
+            if (new CondaRqPath().test(path)) {
+                key = Optional.of(new Key.From(parts[2]));
+            } else if (parts.length >= 1 && !parts[0].isBlank()) {
                 key = Optional.of(new Key.From(parts[0]));
             } else {
                 key = Optional.empty();
@@ -93,7 +96,10 @@ public interface Layout {
         public Optional<Key> keyFromPath(final String path) {
             final String[] parts = splitPath(path);
             final Optional<Key> key;
-            if (parts.length >= 2) {
+            if (new CondaRqPath().test(path)) {
+                // @checkstyle MagicNumberCheck (1 line)
+                key = Optional.of(new Key.From(parts[2], parts[3]));
+            } else if (parts.length >= 2) {
                 key = Optional.of(new Key.From(parts[0], parts[1]));
             } else {
                 key = Optional.empty();
