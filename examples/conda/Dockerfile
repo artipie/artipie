@@ -1,6 +1,5 @@
 FROM continuumio/miniconda3:4.10.3
 
-WORKDIR /test
 RUN conda install -y conda-build
 RUN conda install -y conda-verify
 RUN conda install -y anaconda-client
