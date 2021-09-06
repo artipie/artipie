@@ -63,7 +63,9 @@ public interface Layout {
         public Optional<Key> keyFromPath(final String path) {
             final String[] parts = splitPath(path);
             final Optional<Key> key;
-            if (parts.length >= 1 && !parts[0].isBlank()) {
+            if (RqPath.CONDA.test(path)) {
+                key = Optional.of(new Key.From(parts[2]));
+            } else if (parts.length >= 1 && !parts[0].isBlank()) {
                 key = Optional.of(new Key.From(parts[0]));
             } else {
                 key = Optional.empty();
@@ -78,7 +80,15 @@ public interface Layout {
     }
 
     /**
-     * Org layout. Consists of two parts.
+     * Org layout. Consists of two parts: user name and repository name. Normally,
+     * request path has the following form:
+     * <code>/username/repo-name/other/parts</code>
+     * <p>Thus key can be obtained from first two parts on the path:
+     * <code>new Key.From(parts[0], parts[1])</code>.
+     * In case of anaconda repository, client can send requests of the following form:
+     * <code>/t/conda-user-token/username/repo-name/other/parts</code>
+     * <p>In this case key can be obtained as third and forth parts of the path:
+     * <code>new Key.From(parts[2], parts[3])</code>
      *
      * @since 0.14
      */
@@ -93,7 +103,10 @@ public interface Layout {
         public Optional<Key> keyFromPath(final String path) {
             final String[] parts = splitPath(path);
             final Optional<Key> key;
-            if (parts.length >= 2) {
+            if (RqPath.CONDA.test(path)) {
+                // @checkstyle MagicNumberCheck (1 line)
+                key = Optional.of(new Key.From(parts[2], parts[3]));
+            } else if (parts.length >= 2) {
                 key = Optional.of(new Key.From(parts[0], parts[1]));
             } else {
                 key = Optional.empty();
