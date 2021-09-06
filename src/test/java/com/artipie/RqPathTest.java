@@ -2,7 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie.conda;
+package com.artipie;
 
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -10,10 +10,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 /**
- * Test for {@link CondaRqPath}.
+ * Test for {@link RqPath}.
  * @since 0.23
  */
-class CondaRqPathTest {
+class RqPathTest {
 
     @ParameterizedTest
     @CsvSource({
@@ -25,7 +25,7 @@ class CondaRqPathTest {
     })
     void testsPath(final String path, final boolean res) {
         MatcherAssert.assertThat(
-            new CondaRqPath().test(path),
+            RqPath.CONDA.test(path),
             new IsEqual<>(res)
         );
     }
