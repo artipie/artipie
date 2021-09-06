@@ -10,6 +10,8 @@ import com.artipie.test.TestDeployment;
 import java.io.IOException;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.IsNull;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,7 @@ import org.testcontainers.containers.BindMode;
 /**
  * Conda IT case.
  * @since 0.23
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -38,6 +41,8 @@ public final class CondaITCase {
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
                 "conda/condarc", "/w/.condarc", BindMode.READ_ONLY
+            ).withClasspathResourceMapping(
+                "conda/example-project", "/w/example-project", BindMode.READ_ONLY
             )
     );
 
@@ -78,6 +83,49 @@ public final class CondaITCase {
                 )
             ),
             "conda", "install", "--verbose", "-y", "snappy"
+        );
+    }
+
+    @Test
+    void canUploadToArtipie() throws IOException {
+        this.moveCondarc();
+        this.containers.assertExec(
+            "Failed to set anaconda upload url",
+            new ContainerResultMatcher(),
+            "anaconda", "config", "--set", "url", "http://artipie:8080/my-conda/", "-s"
+        );
+        this.containers.assertExec(
+            "Failed to set anaconda upload flag",
+            new ContainerResultMatcher(),
+            "conda", "config", "--set", "anaconda_upload", "yes"
+        );
+        this.containers.assertExec(
+            "Login was not successful",
+            new ContainerResultMatcher(),
+            "anaconda", "login", "--username", "any", "--password", "any"
+        );
+        this.containers.assertExec(
+            "Package was not installed successfully",
+            new ContainerResultMatcher(
+                new IsEqual<>(0),
+                Matchers.allOf(
+                    new StringContains("Using Anaconda API: http://artipie:8080/my-conda/"),
+                    // @checkstyle LineLengthCheck (1 line)
+                    new StringContains("Uploading file \"any/example-package/0.0.1/linux-64/example-package-0.0.1-0.tar.bz2\""),
+                    new StringContains("Upload complete")
+                )
+            ),
+            "conda", "build", "--output-folder", "/w/conda-out/", "/w/example-project/conda/"
+        );
+        this.containers.assertArtipieContent(
+            "Package was not uploaded to artipie",
+            "/var/artipie/data/my-conda/linux-64/example-package-0.0.1-0.tar.bz2",
+            new IsNot<>(new IsNull<>())
+        );
+        this.containers.assertArtipieContent(
+            "Package was not uploaded to artipie",
+            "/var/artipie/data/my-conda/linux-64/repodata.json",
+            new IsNot<>(new IsNull<>())
         );
     }
 

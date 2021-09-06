@@ -82,7 +82,8 @@ public final class ContainerResultMatcher extends TypeSafeMatcher<Container.Exec
 
     @Override
     public boolean matchesSafely(final Container.ExecResult item) {
-        return this.status.matches(item.getExitCode()) && this.stdout.matches(item.getStdout());
+        return this.status.matches(item.getExitCode())
+            && this.stdout.matches(String.format("%s\n%s", item.getStdout(), item.getStderr()));
     }
 
     @Override
