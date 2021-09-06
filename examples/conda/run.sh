@@ -13,4 +13,4 @@ anaconda login --username any --password any
 conda build --output-folder ./conda-out/ ./example-package/conda/
 
 # Install the package.
-conda install -y example-project
+conda install -y example-package
