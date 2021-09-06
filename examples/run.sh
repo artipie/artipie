@@ -153,7 +153,7 @@ create_network
 create_volume
 start_artipie
 
-declare -a tests=(binary debian docker go helm maven npm nuget php rpm)
+declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda)
 # FIXME: pypi repository doesn't work
 # FIXME: gem doesn't work, it tryes to access parent directory of data dir
 
