@@ -82,7 +82,7 @@ public interface Layout {
     /**
      * Org layout. Consists of two parts: user name and repository name. Normally,
      * request path has the following form:
-     * </p><code>/username/repo-name/other/parts</code>
+     * <code>/username/repo-name/other/parts</code>
      * <p>Thus key can be obtained from first two parts on the path:
      * <code>new Key.From(parts[0], parts[1])</code>.
      * In case of anaconda repository, client can send requests of the following form:
