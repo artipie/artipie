@@ -7,7 +7,7 @@ set -x
 anaconda login --username any --password any
 
 # Build and push package.
-conda build --output-folder ./conda-out/ ./example-project/conda/
+conda build --output-folder ./conda-out/ ./example-package/conda/
 
 # Install the package.
 conda install -y example-project

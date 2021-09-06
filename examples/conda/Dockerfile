@@ -5,6 +5,6 @@ RUN anaconda config --set url "http://artipie:8080/my-conda/" -s && \
    conda config --set anaconda_upload yes && \
    echo "channels:\r\n  - http://artipie:8080/my-conda" > /root/.condarc
 COPY ./run.sh /test/run.sh
-ADD sample-project /test/sample-project
+COPY ./example-package /test/example-package
 WORKDIR /test
 CMD "/test/run.sh"
