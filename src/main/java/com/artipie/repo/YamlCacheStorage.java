@@ -8,12 +8,23 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.YamlStorage;
 import com.artipie.asto.Storage;
 import java.time.Duration;
+import java.util.Optional;
 
 /**
  * Proxy cache storage config from YAML.
  * @since 0.23
  */
 final class YamlCacheStorage implements CacheStorage {
+    /**
+     * Max size key in proxy config.
+     */
+    static final String MAX_SIZE = "max-size";
+
+    /**
+     * Time to live key in proxy config.
+     */
+    static final String TTL = "time-to-live";
+
     /**
      * Cache storage.
      */
@@ -34,7 +45,16 @@ final class YamlCacheStorage implements CacheStorage {
      * @param source Source YAML with only cache section
      */
     YamlCacheStorage(final YamlMapping source) {
-        this(new YamlStorage(source).storage());
+        this(
+            new YamlStorage(
+                Optional.ofNullable(source.value("storage"))
+                    .orElseThrow(
+                        () -> new IllegalStateException("'storage' key is absent in proxy config")
+                    ).asMapping()
+            ).storage(),
+            YamlCacheStorage.valueOf(YamlCacheStorage.MAX_SIZE, source),
+            Duration.ofMillis(YamlCacheStorage.valueOf(YamlCacheStorage.TTL, source))
+        );
     }
 
     /**
@@ -70,5 +90,17 @@ final class YamlCacheStorage implements CacheStorage {
     @Override
     public Duration timeToLive() {
         return this.ttl;
+    }
+
+    /**
+     * Obtains value of node from yaml config.
+     * @param key Node key
+     * @param yaml Yaml config
+     * @return Value of node from yaml config or default value.
+     */
+    private static long valueOf(final String key, final YamlMapping yaml) {
+        return Optional.ofNullable(yaml.value(key)).map(
+            node -> Long.valueOf(node.asScalar().value())
+        ).orElse(Long.MAX_VALUE);
     }
 }
