@@ -13,4 +13,4 @@ anaconda login --username any --password any
 anaconda upload ./snappy-1.1.3-0.tar.bz2
 
 # Install the package.
-conda install -y snappy
+conda install --verbose -y snappy
