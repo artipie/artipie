@@ -21,7 +21,7 @@ public enum RqPath implements Predicate<String> {
      * then follows conda repository architecture (for example: noarch, linux-64, win-64 etc).
      * This {@link Predicate} implementation tests whether path is such conda path.
      */
-    CONDA(Pattern.compile("/t/.*repodata\\.json")) {
+    CONDA(Pattern.compile("/t/.*(repodata\\.json|\\.conda|\\.tar\\.bz2)")) {
 
         @Override
         public boolean test(final String path) {
