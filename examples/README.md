@@ -18,3 +18,4 @@ Repository examples:
 | [PyPi](./pypi) | [![](https://github.com/artipie/artipie/workflows/Proof::pypi/badge.svg)](./pypi) |
 | [Go](./go) | [![](https://github.com/artipie/artipie/workflows/Proof::go/badge.svg)](./go) |
 | [Debian](./debian) | [![](https://github.com/artipie/artipie/workflows/Proof::debian/badge.svg)](./debian) |
+| [Debian](./conda) | [![](https://github.com/artipie/artipie/workflows/Proof::conda/badge.svg)](./conda) |
