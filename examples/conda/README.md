@@ -40,5 +40,6 @@ conda config --set anaconda_upload yes
 ``` 
 
 Now you can install packages from Artipie anaconda repository using `conda install` command and 
-build and upload packages with `conda build`.
+build and upload packages with `conda build`, or, if the package is already build, 
+use `anaconda upload` command to publish package to Artipie.
 
