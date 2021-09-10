@@ -157,15 +157,15 @@ create_volume
 start_artipie
 
 if [[ -z "$1" ]]; then
-  declare -a tests=(binary debian docker go helm maven npm nuget php rpm)
+  declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda)
 else
   declare -a tests=("$1")
 fi
 
 log_debug "tests: ${tests[@]}"
 
-# FIXME: pypi repository doesn't work
-# FIXME: gem doesn't work, it tryes to access parent directory of data dir
+# FIXME: some repository tests don't work, fix them:
+#     binary debian go nuget binary debian go nuget
 
 rm -fr "${basedir}/out.log" "${basedir}/results.txt"
 touch "${basedir}/out.log"
