@@ -114,14 +114,13 @@ function rm_network {
 
 function create_volume {
   rm_volume
-  log_debug "creating volume artipie-data"
-  docker volume create artipie-data
+  log_debug "creating volume $(docker volume create artipie-data)"
   log_debug "fill out volume data"
   docker run --rm --name=artipie-volume-maker \
     -v ${basedir}/.data:/data-src \
     --mount source=artipie-data,destination=/data-dst \
     alpine:3.13 \
-    /bin/sh -c 'addgroup -S -g 2020 artipie && adduser -S -g 2020 -u 2021 artipie && cp -vr /data-src/* /data-dst && chown -Rv 2020:2021 /data-dst'
+    /bin/sh -c 'addgroup -S -g 2020 artipie && adduser -S -g 2020 -u 2021 artipie && cp -r /data-src/* /data-dst && chown -R 2020:2021 /data-dst'
   if [[ -z "$ARTIPIE_NOSTOP" ]]; then
     trap rm_volume EXIT
   fi
@@ -131,8 +130,8 @@ function create_volume {
 function rm_volume {
   local img=$(docker volume ls -q --filter name=artipie-data)
   if [[ -n "${img}" ]]; then
-    log_debug "removing artipie-data volume"
-    docker volume rm "${img}"
+    log_debug "removing volume "
+    docker volume rm ${img}
   fi
 }
 
@@ -145,25 +144,36 @@ function run_test {
   docker run --name="smoke-${name}" --rm \
     --net=artipie \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    "test/${name}" | tee -a "${basedir}/out.log" || \
-    echo "TEST_ERROR: '${name} failed'" tee -a "${basedir}/out.og"
+    "test/${name}" | tee -a "${basedir}/out.log"
+  if [[ "${PIPESTATUS[0]}" == "0" ]]; then
+    echo "test ${name} - PASSED" | tee -a "${basedir}/results.txt"
+  else
+    echo "test ${name} - FAILED" | tee -a "${basedir}/results.txt"
+  fi
 }
 
 create_network
 create_volume
 start_artipie
 
-declare -a tests=(binary debian docker go helm maven npm nuget php rpm)
+if [[ -z "$1" ]]; then
+  declare -a tests=(binary debian docker go helm maven npm nuget php rpm)
+else
+  declare -a tests=("$1")
+fi
+
+log_debug "tests: ${tests[@]}"
+
 # FIXME: pypi repository doesn't work
 # FIXME: gem doesn't work, it tryes to access parent directory of data dir
 
-rm -fr "${basedir}/out.log"
+rm -fr "${basedir}/out.log" "${basedir}/results.txt"
 touch "${basedir}/out.log"
 
 for t in "${tests[@]}"; do
   run_test $t || echo "test $t failed"
 done
 
-grep "TEST_ERROR" "${basedir}/out.log" && die "test failed"
-
-echo "all test finished successfully"
+echo "all tests finished:"
+cat "${basedir}/results.txt"
+grep "FAILED" "${basedir}/results.txt" && die "One or more tests failed"
