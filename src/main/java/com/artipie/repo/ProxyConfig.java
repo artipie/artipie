@@ -4,7 +4,6 @@
  */
 package com.artipie.repo;
 
-import com.artipie.asto.Storage;
 import com.artipie.http.client.auth.Authenticator;
 import java.util.Collection;
 import java.util.Optional;
@@ -49,6 +48,6 @@ public interface ProxyConfig {
          *
          * @return Cache storage, empty if not configured.
          */
-        Optional<Storage> cache();
+        Optional<CacheStorage> cache();
     }
 }

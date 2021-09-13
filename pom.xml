@@ -170,12 +170,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>v0.21</version>
+      <version>v0.22</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>1.2.0</version>
+      <version>v1.3.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -280,6 +280,11 @@ SOFTWARE.
       <version>0.4.2</version>
     </dependency>
     <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>conda-adapter</artifactId>
+      <version>0.4.1</version>
+    </dependency>
+    <dependency>
       <groupId>wtf.g4s8</groupId>
       <artifactId>tuples</artifactId>
       <version>0.1.2</version>
@@ -343,6 +348,16 @@ SOFTWARE.
       <artifactId>matchers-json</artifactId>
       <version>1.0.3</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>auth</artifactId>
+      <version>2.14.7</version>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+      <version>2.14.7</version>
     </dependency>
   </dependencies>
   <build>
@@ -469,6 +484,23 @@ SOFTWARE.
             <artifactId>maven-deploy-plugin</artifactId>
             <configuration>
               <skip>true</skip>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.gaul</groupId>
+            <artifactId>modernizer-maven-plugin</artifactId>
+            <version>2.3.0</version>
+            <executions>
+              <execution>
+                <id>modernizer</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>modernizer</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <javaVersion>${maven.compiler.source}</javaVersion>
             </configuration>
           </plugin>
         </plugins>
