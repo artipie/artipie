@@ -6,6 +6,7 @@ package com.artipie.test;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
@@ -71,7 +72,7 @@ public final class ContainerResultMatcher extends TypeSafeMatcher<Container.Exec
      * New default matcher with expected status 0.
      */
     public ContainerResultMatcher() {
-        this(new IsEqual<>(ContainerResultMatcher.SUCCESS), new StringContains(""));
+        this(new IsEqual<>(ContainerResultMatcher.SUCCESS), Matchers.any(String.class));
     }
 
     @Override

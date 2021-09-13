@@ -6,7 +6,10 @@
 package com.artipie.test;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
@@ -36,6 +39,7 @@ import org.testcontainers.utility.MountableFile;
  *  A workaround was added with custom consumer for system stdout frame printing as
  *  lambda. Properly configure SLf4j consumer and remove this workaround.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class TestDeployment implements BeforeEachCallback, AfterEachCallback {
 
     /**
@@ -69,6 +73,16 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     private ClientContainer client;
 
     /**
+     * Artipie loggers.
+     */
+    private final ConcurrentMap<String, ContainerLogger> aloggers;
+
+    /**
+     * Client logger.
+     */
+    private final ContainerLogger clilogger;
+
+    /**
      * New container test.
      * @param artipie Artipie container definition
      * @param client Client container definition
@@ -87,38 +101,43 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         final Supplier<ClientContainer> client) {
         this.asup = artipie;
         this.csup = client;
+        this.clilogger = new ContainerLogger();
+        this.aloggers = new ConcurrentHashMap<>();
     }
 
     @Override
-    @SuppressWarnings("PMD.SystemPrintln")
     public void beforeEach(final ExtensionContext context) throws Exception {
         this.net = Network.newNetwork();
-        this.artipie = this.asup.entrySet().stream().map(
-            entry -> new MapEntry<>(
-                entry.getKey(),
-                entry.getValue().get().withNetwork(this.net).withNetworkAliases(entry.getKey())
-            )
-        ).collect(Collectors.toMap(MapEntry::getKey, MapEntry::getValue));
-        this.artipie = this.artipie.entrySet().stream().map(
-            entry -> new MapEntry<>(
-                entry.getKey(),
-                entry.getValue().withLogConsumer(
-                    frame -> System.out.printf(
-                        "%s - %s: %s", entry.getValue().getDockerImageName(), entry.getKey(),
-                        frame.getUtf8String()
-                    )
+        this.artipie = this.asup.entrySet().stream()
+            .map(entry -> new MapEntry<>(entry.getKey(), entry.getValue().get()))
+            .map(
+                entry -> new MapEntry<>(
+                    entry.getKey(),
+                    entry.getValue()
+                        .withNetwork(this.net).withNetworkAliases(entry.getKey())
+                        .withLogConsumer(
+                            this.aloggers.computeIfAbsent(
+                                entry.getKey(),
+                                name -> new ContainerLogger()
+                            )
+                        )
                 )
-            )
-        ).collect(Collectors.toMap(MapEntry::getKey, MapEntry::getValue));
+            ).collect(Collectors.toMap(MapEntry::getKey, MapEntry::getValue));
         this.client = this.csup.get()
             .withNetwork(this.net)
+            .withLogConsumer(this.clilogger)
             .withCommand("tail", "-f", "/dev/null");
         this.artipie.values().forEach(GenericContainer::start);
         this.client.start();
     }
 
     @Override
+    @SuppressWarnings("PMD.SystemPrintln")
     public void afterEach(final ExtensionContext context) throws Exception {
+        this.aloggers.forEach(
+            (name, log) -> System.out.printf("Artipie '%s' logs:\n%s\n", name, log)
+        );
+        System.out.printf("Client logs:\n%s\n", this.clilogger);
         if (this.artipie != null) {
             this.artipie.values().forEach(GenericContainer::stop);
             this.artipie.values().forEach(Startable::close);
@@ -165,7 +184,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
      * Exec command in client container and assert result.
      * @param msg Assertion message on failure
      * @param matcher Exec result matcher
-     * @param cmd Command to execute
+     * @param cmd Commands to execute
      * @throws IOException In case of client exception
      */
     public void assertExec(final String msg, final Matcher<ExecResult> matcher,
@@ -178,6 +197,31 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
             return;
         }
         MatcherAssert.assertThat(msg, exec, matcher);
+    }
+
+    /**
+     * Exec command in client container and assert result.
+     * @param msg Assertion message on failure
+     * @param matcher Exec result matcher
+     * @param cmd Command list to execute
+     * @throws IOException In case of client exception
+     */
+    public void assertExec(final String msg, final Matcher<ExecResult> matcher,
+        final List<String> cmd) throws IOException {
+        this.assertExec(msg, matcher, cmd.toArray(new String[0]));
+    }
+
+    /**
+     * Just exec command in client container and fail on error.
+     * @param cmd Command list to execute
+     * @throws IOException In case of client exception
+     */
+    public void clientExec(final String... cmd) throws IOException {
+        this.assertExec(
+            String.format("Failed to run `%s`", String.join(" ", cmd)),
+            new ContainerResultMatcher(),
+            cmd
+        );
     }
 
     /**
