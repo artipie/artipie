@@ -45,9 +45,7 @@ import com.artipie.pypi.PypiProxy;
 import com.artipie.pypi.http.PySlice;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.Vertx;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
-import org.jruby.javasupport.JavaEmbedUtils;
 
 /**
  * Slice from repo config.
