@@ -242,7 +242,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>gem-adapter</artifactId>
-      <version>0.5.3</version>
+      <version>v1.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
