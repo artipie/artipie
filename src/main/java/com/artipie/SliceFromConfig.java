@@ -165,10 +165,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = trimIfNotStandalone(
                     settings, standalone,
                     new GemSlice(
-                        cfg.storage(),
-                        JavaEmbedUtils.initialize(new ArrayList<>(0)),
-                        permissions,
-                        auth
+                        cfg.storage()
                     )
                 );
                 break;
