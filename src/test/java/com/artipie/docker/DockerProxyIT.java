@@ -15,6 +15,7 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -44,6 +45,7 @@ import org.junit.jupiter.api.io.TempDir;
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs(OS.LINUX)
 @DockerClientSupport
+@Disabled("FIXME: migrate artipie to testcontainers")
 final class DockerProxyIT {
 
     /**

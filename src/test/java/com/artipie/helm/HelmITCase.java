@@ -28,6 +28,7 @@ import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
@@ -46,6 +47,7 @@ import org.testcontainers.containers.GenericContainer;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
+@Disabled(value = "FIXME: migrate artipie to testonctainers")
 final class HelmITCase {
 
     /**
