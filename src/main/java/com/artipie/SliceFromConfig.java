@@ -21,7 +21,7 @@ import com.artipie.docker.http.DockerSlice;
 import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.file.FileProxy;
 import com.artipie.files.FilesSlice;
-import com.artipie.gem.GemSlice;
+import com.artipie.gem.http.GemSlice;
 import com.artipie.helm.http.HelmSlice;
 import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.GoSlice;
@@ -45,9 +45,7 @@ import com.artipie.pypi.PypiProxy;
 import com.artipie.pypi.http.PySlice;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.Vertx;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
-import org.jruby.javasupport.JavaEmbedUtils;
 
 /**
  * Slice from repo config.
@@ -165,10 +163,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = trimIfNotStandalone(
                     settings, standalone,
                     new GemSlice(
-                        cfg.storage(),
-                        JavaEmbedUtils.initialize(new ArrayList<>(0)),
-                        permissions,
-                        auth
+                        cfg.storage()
                     )
                 );
                 break;

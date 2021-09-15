@@ -54,7 +54,7 @@ final class GemITCase {
             new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(
-                    new ListOf<String>("POST http://artipie:8080/my-gem/api/v1/gems", "200 OK")
+                    new ListOf<String>("POST http://artipie:8080/my-gem/api/v1/gems", "201 Created")
                 )
             ),
             "env", String.format("GEM_HOST_API_KEY=%s", new Base64Encoded("any:any").asString()),
