@@ -31,7 +31,6 @@ jobs:
       - run: mvn -B verify -Pitcase
         # @todo #855:30min Fix integration tests and remove `@Disabled` annotation.
         #  These tests were not migrated to testcontainers, fix them one by one:
-        #   src/test/java/com/artipie/helm/HelmITCase.java
         #   src/test/java/com/artipie/VertxMainITCase.java
         #   src/test/java/com/artipie/docker/DockerProxyIT.java
         #   src/test/java/com/artipie/docker/DockerOnPortIT.java

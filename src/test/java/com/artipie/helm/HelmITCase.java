@@ -26,19 +26,12 @@ import org.testcontainers.containers.BindMode;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
-//@Disabled(value = "FIXME: migrate artipie to testonctainers")
 final class HelmITCase {
 
     /**
      * Chart name.
      */
     private static final String CHART = "tomcat-0.4.1.tgz";
-//    private static final String CHART = "ark-1.0.1.tgz";
-
-    /**
-     * Repo name.
-     */
-    private static final String REPO = "my-helm";
 
     /**
      * Test deployments.
@@ -69,48 +62,25 @@ final class HelmITCase {
         );
     }
 
-    /**
-     * Repository url.
-     */
-    private String url = "http://artipie:8080/my-helm";
-
     @Test
     void uploadChartAndCreateIndexYaml() throws Exception {
-        final String chartrepo = "chartrepo";
-//        this.containers.putBinaryToArtipie(
-//            new TestResource("helm/tomcat-0.4.1.tgz").asBytes(),
-//            "/var/artipie/data/my-helm/tomcat-0.4.1.tgz"
-//        );
-//        this.containers.putBinaryToArtipie(
-////            new TestResource("helm/index.yaml").asBytes(),
-//            "apiVersion: v1".getBytes(),
-//            "/var/artipie/data/my-helm/index.yaml"
-//        );
-
+        final String url = "http://artipie:8080/my-helm";
         this.containers.assertExec(
             "Failed to upload helm archive",
             new ContainerResultMatcher(new IsEqual<>(0)),
-//            "curl", "-X", "PUT", String.format("http://artipie:8080/my-helm/%s", HelmITCase.CHART),
-            "curl", "-X", "PUT", String.format("http://artipie:8080/my-helm/%s", "tomcat"),
-//            "-H", "Content-Type: application/gzip",
-//            "-H", "Content-Type:application/json;charset=UTF-8",
-//            "--data-binary", String.format("/w/%s", HelmITCase.CHART),
-//            "--data-binary", "@<(echo \"Uncompressed data\" | gzip)",
-//            "--data-binary", HelmITCase.CHART,
-            "-F", String.format("file=@/w/%s", HelmITCase.CHART),
+            "curl", "-X", "PUT", String.format("%s/%s", url, "tomcat"),
+            "--upload-file", String.format("/w/%s", HelmITCase.CHART),
             "--verbose"
-//            "--data-binary", ""
-//            new String(new TestResource(String.format("helm/%s", HelmITCase.CHART)).asBytes()),
         );
         this.containers.assertExec(
             "Init failed",
             new ContainerResultMatcher(new IsEqual<>(0)),
-            "helm", "init", "--stable-repo-url", this.url, "--client-only"
+            "helm", "init", "--stable-repo-url", url, "--client-only"
         );
         this.containers.assertExec(
             "Chart repository was not added",
             new ContainerResultMatcher(new IsEqual<>(0)),
-            "helm", "repo", "add", chartrepo, this.url
+            "helm", "repo", "add", "chartrepo", url
         );
         this.containers.assertExec(
             "Repo update from chart repository failed",
