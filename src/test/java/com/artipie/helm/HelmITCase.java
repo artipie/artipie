@@ -55,11 +55,7 @@ final class HelmITCase {
 
     @BeforeEach
     void setUp() throws Exception {
-        this.containers.assertExec(
-            "Failed to install dependencies",
-            new ContainerResultMatcher(new IsEqual<>(0)),
-            "apk", "add", "--no-cache", "curl"
-        );
+        this.containers.clientExec("apk", "add", "--no-cache", "curl");
     }
 
     @Test
