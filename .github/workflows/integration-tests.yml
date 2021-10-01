@@ -9,29 +9,29 @@ name: Integation tests
       - master
 jobs:
   maven-it:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        java: [11, 13]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Download JDK
+        run: |
+          wget --no-verbose --directory-prefix ${{ runner.temp }} \
+            https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz
       - name: Set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: ${{ matrix.java }}
+          distribution: jdkfile
+          jdkFile: ${{ runner.temp }}/jdk-17_linux-x64_bin.tar.gz
+          java-version: 17
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-jdk-${{ matrix.java }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ubuntu-latest-jdk-17-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-jdk-${{ matrix.java }}-maven-
+            ubuntu-latest-jdk-17-maven-
       - run: mvn -B verify -Pitcase
-      # @todo #851:30min Fix integration tests. Integration tests should start Artipie docker
-      #  image built on package state (artipie/artipie:1.0-SNAPSHOT) using testcontainers,
-      #  and test it against different use cases. Update integration tests and enable
-      #  CI instruction below to run it on each push and PR. So we need some replacement for
-      #  `ArtipieServer` class to use it in integration tests.
-      
-      # - name: Build it with Maven
-      #   run: mvn -B verify -Pitcase,-qulice
+        # @todo #855:30min Fix integration tests and remove `@Disabled` annotation.
+        #  These tests were not migrated to testcontainers, fix them one by one:
+        #   src/test/java/com/artipie/VertxMainITCase.java
+        #   src/test/java/com/artipie/docker/DockerProxyIT.java
+        #   src/test/java/com/artipie/docker/DockerOnPortIT.java
+        #   src/test/java/com/artipie/maven/MavenMultiProxyIT.java
