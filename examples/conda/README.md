@@ -13,9 +13,17 @@ repo:
   storage:
     type: fs
     path: /var/artipie/my-debian
+  settings:
+    auth_token_ttl: P30D
+    clean_auth_token_at: 0 0 12 * * ?
 ```
 
-Do not forget to set repository `url`, it's required by anaconda client API.
+Do not forget to set repository `url`, it's required by anaconda client API. 
+Settings section contains two optional parameters: 
+ - `auth_token_ttl` is repository authentication tokens time to leave, format is 
+ compliant with ISO-8601 duration format PnDTnHnMn.nS. Default value is 365 days.
+ - `clean_auth_token_at` Time to clean expired auth tokens as a cron expression.
+Default value is `0 0 1 * * ?` - at 01 AM every night.
 
 Start Artipie Docker image:
 
