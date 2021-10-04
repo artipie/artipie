@@ -45,7 +45,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-jdk-17-maven-
       - name: Build it with Maven
-        run: mvn -B verify
+        run: mvn -B verify -Pqulice
   xcop-lint:
     runs-on: ubuntu-latest
     steps:
