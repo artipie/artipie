@@ -47,7 +47,7 @@ import org.testcontainers.containers.GenericContainer;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
-@Disabled(value = "FIXME: migrate artipie to testonctainers")
+@Disabled("FIXME: migrate artipie to testonctainers")
 final class HelmITCase {
 
     /**
