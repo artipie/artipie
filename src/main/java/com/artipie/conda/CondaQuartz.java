@@ -5,7 +5,6 @@
 package com.artipie.conda;
 
 import com.artipie.RepoConfig;
-import com.artipie.asto.Storage;
 import com.artipie.conda.asto.AuthTokensMaid;
 import com.jcabi.log.Logger;
 import org.quartz.CronScheduleBuilder;
@@ -23,22 +22,15 @@ import org.quartz.TriggerBuilder;
 public final class CondaQuartz {
 
     /**
-     * Abstract storage.
-     */
-    private final Storage asto;
-
-    /**
      * Repository configuration.
      */
     private final RepoConfig config;
 
     /**
      * Ctor.
-     * @param asto Abstract storage
      * @param config Repository configuration
      */
-    public CondaQuartz(final Storage asto, final RepoConfig config) {
-        this.asto = asto;
+    public CondaQuartz(final RepoConfig config) {
         this.config = config;
     }
 
@@ -71,7 +63,8 @@ public final class CondaQuartz {
 
         @Override
         public void execute(final JobExecutionContext context) {
-            new AuthTokensMaid(CondaQuartz.this.asto).clean().toCompletableFuture().join();
+            new AuthTokensMaid(CondaQuartz.this.config.storage()).clean()
+                .toCompletableFuture().join();
         }
     }
 }

@@ -4,8 +4,7 @@
  */
 package com.artipie;
 
-import com.artipie.asto.Storage;
-import com.artipie.conda.CondaQuartz;
+import com.artipie.repo.QuartzRepoJob;
 import com.artipie.rpm.misc.UncheckedConsumer;
 import com.jcabi.log.Logger;
 import java.util.Collection;
@@ -20,29 +19,22 @@ import org.quartz.impl.StdSchedulerFactory;
 public final class QuartzScheduler {
 
     /**
-     * Abstract storage.
-     */
-    private final Storage asto;
-
-    /**
      * Repository configurations.
      */
     private final Collection<RepoConfig> config;
 
     /**
      * Ctor.
-     * @param asto Abstract storage
      * @param config Repositories
      */
-    public QuartzScheduler(final Storage asto, final Collection<RepoConfig> config) {
-        this.asto = asto;
+    public QuartzScheduler(final Collection<RepoConfig> config) {
         this.config = config;
     }
 
     /**
      * Start scheduler, add shutdown hook and schedule the jobs.
      */
-    void setup() {
+    void start() {
         try {
             final Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             Runtime.getRuntime().addShutdownHook(
@@ -58,12 +50,10 @@ public final class QuartzScheduler {
                 )
             );
             scheduler.start();
-            this.config.stream().filter(repo -> repo.type().equals("conda"))
-                .forEach(
-                    new UncheckedConsumer<>(
-                        conda -> new CondaQuartz(this.asto, conda).triggerJob(scheduler)
-                    )
-            );
+            for (final QuartzRepoJob item : QuartzRepoJob.values()) {
+                this.config.stream().filter(item)
+                    .forEach(new UncheckedConsumer<>(cnfg -> item.schedule(cnfg, scheduler)));
+            }
         } catch (final SchedulerException err) {
             throw new ArtipieException(err);
         }
