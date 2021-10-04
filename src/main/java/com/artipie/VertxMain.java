@@ -174,7 +174,7 @@ public final class VertxMain {
                 );
             }
         }
-        new QuartzScheduler(storage, configs).start();
+        new QuartzScheduler(configs).start();
     }
 
     /**
