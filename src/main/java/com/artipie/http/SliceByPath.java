@@ -6,6 +6,7 @@ package com.artipie.http;
 
 import com.artipie.Settings;
 import com.artipie.asto.Key;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
@@ -23,15 +24,23 @@ import org.reactivestreams.Publisher;
 final class SliceByPath implements Slice {
 
     /**
+     * HTTP client.
+     */
+    private final ClientSlices http;
+
+    /**
      * Artipie settings.
      */
     private final Settings settings;
 
     /**
      * New slice from settings.
+     *
+     * @param http HTTP client
      * @param settings Artipie settings
      */
-    SliceByPath(final Settings settings) {
+    SliceByPath(final ClientSlices http, final Settings settings) {
+        this.http = http;
         this.settings = settings;
     }
 
@@ -50,7 +59,7 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
-        return new ArtipieRepositories(this.settings).slice(key.get(), false)
+        return new ArtipieRepositories(this.http, this.settings).slice(key.get(), false)
             .response(line, headers, body);
     }
 }

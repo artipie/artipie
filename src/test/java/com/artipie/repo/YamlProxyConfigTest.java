@@ -6,8 +6,10 @@ package com.artipie.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.JettyClientSlicesAutoStarted;
 import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import java.util.Collection;
 import org.hamcrest.MatcherAssert;
@@ -24,6 +26,18 @@ import org.junit.jupiter.api.Test;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class YamlProxyConfigTest {
+
+    /**
+     * HTTP client instance.
+     */
+    private final ClientSlices http;
+
+    /**
+     * Ctor.
+     */
+    public YamlProxyConfigTest() {
+        this.http = new JettyClientSlicesAutoStarted();
+    }
 
     @Test
     public void parsesConfig() {
@@ -193,6 +207,7 @@ public final class YamlProxyConfigTest {
 
     private Collection<YamlProxyConfig.YamlRemote> remotes(final YamlMapping yaml) {
         return new YamlProxyConfig(
+            this.http,
             StorageAliases.EMPTY, Key.ROOT, yaml
         ).remotes();
     }

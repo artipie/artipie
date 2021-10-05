@@ -11,6 +11,7 @@ import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
 import com.artipie.http.Slice;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.nop.NopMetrics;
@@ -42,6 +43,11 @@ import org.apache.commons.cli.ParseException;
 public final class VertxMain {
 
     /**
+     * HTTP client.
+     */
+    private final ClientSlices http;
+
+    /**
      * The Vert.x instance.
      */
     private final Vertx vertx;
@@ -67,7 +73,11 @@ public final class VertxMain {
      * @param vertx The Vert.x instance.
      * @param port HTTP port
      */
-    public VertxMain(final Path config, final Vertx vertx, final int port) {
+    public VertxMain(
+        final Path config,
+        final Vertx vertx, final int port
+    ) {
+        this.http = new JettyClientSlicesAutoStarted();
         this.config = config;
         this.vertx = vertx;
         this.port = port;
@@ -83,7 +93,7 @@ public final class VertxMain {
     public int start() throws IOException {
         final Settings settings = new SettingsFromPath(this.config).find(this.port);
         final Metrics metrics = metrics(settings);
-        final int main = this.listenOn(new MainSlice(settings), metrics, this.port);
+        final int main = this.listenOn(new MainSlice(this.http, settings), metrics, this.port);
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
         this.startRepos(settings, metrics);
         return main;
@@ -147,7 +157,7 @@ public final class VertxMain {
             keys -> keys.stream().map(key -> new ConfigFile(key))
                 .filter(Predicate.not(ConfigFile::isSystem).and(ConfigFile::isYamlOrYml))
                 .map(ConfigFile::name)
-                .map(name -> new RepositoriesFromStorage(storage).config(name))
+                .map(name -> new RepositoriesFromStorage(this.http, storage).config(name))
                 .map(stage -> stage.toCompletableFuture().join())
                 .collect(Collectors.toList())
         ).toCompletableFuture().join();
@@ -157,7 +167,7 @@ public final class VertxMain {
                     prt -> {
                         final String name = new ConfigFile(repo.name()).name();
                         this.listenOn(
-                            new ArtipieRepositories(settings).slice(new Key.From(name), true),
+                            new ArtipieRepositories(this.http, settings).slice(new Key.From(name), true),
                             metrics, prt
                         );
                         Logger.info(

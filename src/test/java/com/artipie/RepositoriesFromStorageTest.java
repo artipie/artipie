@@ -10,6 +10,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ValueNotFoundException;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.client.ClientSlices;
 import java.nio.file.Path;
 import java.util.concurrent.CompletionException;
 import org.hamcrest.MatcherAssert;
@@ -40,9 +41,21 @@ final class RepositoriesFromStorageTest {
     private static final String TYPE = "maven";
 
     /**
+     * HTTP client instance.
+     */
+    private final ClientSlices http;
+
+    /**
      * Storage.
      */
     private Storage storage;
+
+    /**
+     * Ctor.
+     */
+    public RepositoriesFromStorageTest() {
+        this.http = new JettyClientSlicesAutoStarted();
+    }
 
     @BeforeEach
     void setUp() {
@@ -156,7 +169,7 @@ final class RepositoriesFromStorageTest {
     }
 
     private RepoConfig repoConfig() {
-        return new RepositoriesFromStorage(this.storage)
+        return new RepositoriesFromStorage(this.http, this.storage)
             .config(RepositoriesFromStorageTest.REPO)
             .toCompletableFuture().join();
     }
