@@ -4,153 +4,79 @@
  */
 package com.artipie.maven;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.asto.Key;
-import com.artipie.asto.fs.FileStorage;
-import com.artipie.asto.test.TestResource;
-import com.artipie.test.TestContainer;
-import java.io.IOException;
-import java.nio.file.Path;
-import org.hamcrest.MatcherAssert;
+import com.artipie.test.ContainerResultMatcher;
+import com.artipie.test.TestDeployment;
+import org.cactoos.map.MapEntry;
+import org.cactoos.map.MapOf;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.testcontainers.containers.BindMode;
 
 /**
  * Integration test for maven proxy with multiple remotes.
  *
  * @since 0.12
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
-@Disabled("FIXME: migrate artipie to testcontainers")
 final class MavenMultiProxyIT {
 
     /**
-     * Temporary directory for all tests.
-     *
-     * @checkstyle VisibilityModifierCheck (3 lines)
+     * Test deployments.
+     * @checkstyle VisibilityModifierCheck (10 lines)
      */
-    @TempDir
-    Path tmp;
-
-    /**
-     * Artipie empty.
-     */
-    private ArtipieServer empty;
-
-    /**
-     * Artipie origin.
-     */
-    private ArtipieServer origin;
-
-    /**
-     * Artipie proxy.
-     */
-    private ArtipieServer proxy;
-
-    /**
-     * Container for local server.
-     */
-    private TestContainer cntn;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        this.startEmpty();
-        this.startOrigin();
-        this.startProxy();
-        new MavenSettings(this.proxy.port())
-            .writeTo(this.tmp);
-        this.cntn = new TestContainer("centos:centos8", this.tmp);
-        this.cntn.start(this.proxy.port());
-        this.cntn.execStdout("yum", "-y", "install", "maven");
-    }
-
-    @AfterEach
-    void tearDown() {
-        this.cntn.close();
-        this.proxy.stop();
-        this.origin.stop();
-        this.empty.stop();
-    }
+    @RegisterExtension
+    final TestDeployment containers = new TestDeployment(
+        new MapOf<>(
+            new MapEntry<>(
+                "artipie",
+                () -> TestDeployment.ArtipieContainer.defaultDefinition()
+                    .withRepoConfig("maven/maven-multi-proxy.yml", "my-maven")
+            ),
+            new MapEntry<>(
+                "artipie-empty",
+                () -> TestDeployment.ArtipieContainer.defaultDefinition()
+                    .withRepoConfig("maven/maven.yml", "empty-maven")
+            ),
+            new MapEntry<>(
+                "artipie-origin",
+                () -> TestDeployment.ArtipieContainer.defaultDefinition()
+                    .withRepoConfig("maven/maven.yml", "origin-maven")
+            )
+        ),
+        () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
+            .withWorkingDirectory("/w")
+            .withClasspathResourceMapping(
+                "maven/maven-settings.xml", "/w/settings.xml", BindMode.READ_ONLY
+            )
+    );
 
     @Test
     void shouldGetDependency() throws Exception {
-        MatcherAssert.assertThat(
-            this.cntn.execStdout(
-                "mvn",
-                "-s", "/home/settings.xml",
-                "dependency:get", "-Dartifact=com.artipie:helloworld:0.1:jar"
-            ),
-            new StringContains("BUILD SUCCESS")
+        this.containers.putResourceToArtipie(
+            "artipie-origin",
+            "com/artipie/helloworld/maven-metadata.xml",
+            "/var/artipie/data/origin-maven/com/artipie/helloworld/maven-metadata.xml"
         );
-    }
-
-    private void startEmpty() throws IOException {
-        final Path root = this.tmp.resolve("empty");
-        root.toFile().mkdirs();
-        final Path repos = root.resolve("repos");
-        this.empty = new ArtipieServer(
-            root,
-            "maven-empty",
-            new RepoConfigYaml("maven").withFileStorage(repos)
-        );
-        this.empty.start();
-    }
-
-    private void startOrigin() throws IOException {
-        final Path root = this.tmp.resolve("origin");
-        root.toFile().mkdirs();
-        final Path repos = root.resolve("repos");
-        new TestResource("com/artipie/helloworld").addFilesTo(
-            new FileStorage(repos),
-            new Key.From("maven-origin/com/artipie/helloworld")
-        );
-        this.origin = new ArtipieServer(
-            root,
-            "maven-origin",
-            new RepoConfigYaml("maven").withFileStorage(repos)
-        );
-        this.origin.start();
-    }
-
-    private void startProxy() throws IOException {
-        final Path root = this.tmp.resolve("proxy");
-        root.toFile().mkdirs();
-        this.proxy = new ArtipieServer(
-            root,
-            "my-maven",
-            new RepoConfigYaml("maven-proxy")
-                .withFileStorage(root.resolve("repos"))
-                .withRemotes(
-                    Yaml.createYamlSequenceBuilder().add(
-                        Yaml.createYamlMappingBuilder().add(
-                            "url",
-                            String.format(
-                                "http://localhost:%s/maven-origin",
-                                this.origin.port()
-                            )
-                        ).build()
-                    ).add(
-                        Yaml.createYamlMappingBuilder().add(
-                            "url",
-                            String.format(
-                                "http://localhost:%s/maven-empty",
-                                this.empty.port()
-                            )
-                        ).build()
-                    )
+        MavenITCase.getResourceFiles("com/artipie/helloworld/0.1")
+            .stream().map(item -> String.join("/", "com/artipie/helloworld/0.1", item))
+            .forEach(
+                item -> this.containers.putResourceToArtipie(
+                    "artipie-origin", item, String.join("/", "/var/artipie/data/origin-maven", item)
                 )
+            );
+        this.containers.assertExec(
+            "Artifact wasn't downloaded",
+            new ContainerResultMatcher(
+                new IsEqual<>(0), new StringContains("BUILD SUCCESS")
+            ),
+            "mvn", "-s", "settings.xml", "dependency:get",
+            "-Dartifact=com.artipie:helloworld:0.1:jar"
         );
-        this.proxy.start();
     }
 
 }
