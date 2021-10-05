@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.CsvSource;
  * Tests for {@link RepositoriesFromStorage}.
  *
  * @since 0.14
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class RepositoriesFromStorageTest {
@@ -53,7 +54,7 @@ final class RepositoriesFromStorageTest {
     /**
      * Ctor.
      */
-    public RepositoriesFromStorageTest() {
+    RepositoriesFromStorageTest() {
         this.http = new JettyClientSlicesAutoStarted();
     }
 

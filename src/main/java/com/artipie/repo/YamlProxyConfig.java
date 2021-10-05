@@ -51,6 +51,7 @@ public final class YamlProxyConfig implements ProxyConfig {
      * @param storages Storages.
      * @param prefix Cache storage prefix.
      * @param yaml Source YAML.
+     * @checkstyle ParameterNumberCheck (10 lines)
      */
     public YamlProxyConfig(
         final ClientSlices http,

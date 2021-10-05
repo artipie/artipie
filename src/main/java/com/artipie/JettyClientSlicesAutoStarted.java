@@ -12,6 +12,7 @@ import com.artipie.http.client.jetty.JettyClientSlices;
  * Jetty client slice started right now.
  * @since 1.0
  */
+@SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.StaticAccessToStaticFields"})
 public final class JettyClientSlicesAutoStarted implements ClientSlices {
 
     /**
@@ -27,25 +28,29 @@ public final class JettyClientSlicesAutoStarted implements ClientSlices {
     }
 
     @Override
-    public Slice http(String host) {
+    public Slice http(final String host) {
         return this.origin.http(host);
     }
 
     @Override
-    public Slice http(String host, int port) {
+    public Slice http(final String host, final int port) {
         return this.http(host, port);
     }
 
     @Override
-    public Slice https(String host) {
-        return this.https(host);
+    public Slice https(final String host) {
+        return this.origin.https(host);
     }
 
     @Override
-    public Slice https(String host, int port) {
-        return this.https(host, port);
+    public Slice https(final String host, final int port) {
+        return this.origin.https(host, port);
     }
 
+    /**
+     * Builds an HTTP client instance.
+     * @return HTTP client.
+     */
     private static JettyClientSlices build() {
         final JettyClientSlices http = new JettyClientSlices(new HttpClientSettings());
         try {

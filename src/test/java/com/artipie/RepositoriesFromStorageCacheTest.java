@@ -11,7 +11,6 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.client.ClientSlices;
-
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +36,7 @@ final class RepositoriesFromStorageCacheTest {
     /**
      * Ctor.
      */
-    public RepositoriesFromStorageCacheTest() {
+    RepositoriesFromStorageCacheTest() {
         this.http = new JettyClientSlicesAutoStarted();
     }
 

@@ -167,7 +167,10 @@ public final class VertxMain {
                     prt -> {
                         final String name = new ConfigFile(repo.name()).name();
                         this.listenOn(
-                            new ArtipieRepositories(this.http, settings).slice(new Key.From(name), true),
+                            new ArtipieRepositories(this.http, settings).slice(
+                                new Key.From(name),
+                                true
+                            ),
                             metrics, prt
                         );
                         Logger.info(

@@ -32,6 +32,7 @@ import org.reactivestreams.Publisher;
  * Repository config.
  * @since 0.2
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ParameterNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class RepoConfig {

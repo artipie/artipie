@@ -9,7 +9,6 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.client.ClientSlices;
-
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
 import java.util.Optional;
