@@ -165,7 +165,7 @@ fi
 log_debug "tests: ${tests[@]}"
 
 # FIXME: some repository tests don't work, fix them:
-#     binary debian go nuget binary debian go nuget
+#     go nuget
 
 rm -fr "${basedir}/out.log" "${basedir}/results.txt"
 touch "${basedir}/out.log"
