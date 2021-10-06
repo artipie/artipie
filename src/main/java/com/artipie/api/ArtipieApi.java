@@ -10,6 +10,7 @@ import com.artipie.Settings;
 import com.artipie.YamlPermissions;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
@@ -61,12 +62,13 @@ public final class ArtipieApi extends Slice.Wrap {
 
     /**
      * New Artipie API.
+     * @param http HTTP client
      * @param settings Artipie settings
      * @todo #444:30min Constructor decomposition
      *  This constructor is very huge, difficult to read and understand: extract some methods,
      *  wrappers, classes, etc from it to make it more elegant.
      */
-    public ArtipieApi(final Settings settings) {
+    public ArtipieApi(final ClientSlices http, final Settings settings) {
         // @checkstyle LineLengthCheck (500 lines)
         super(
             new AsyncSlice(
@@ -239,7 +241,7 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new ByMethodsRule(RqMethod.GET)
                                 ),
                                 new GetStorageSlice(
-                                    new ArtipieStorages(settings.storage()),
+                                    new ArtipieStorages(http, settings.storage()),
                                     settings.layout().pattern()
                                 )
                             )

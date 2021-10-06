@@ -12,6 +12,7 @@ import com.artipie.api.ArtipieApi;
 import com.artipie.api.DashboardSlice;
 import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
@@ -54,9 +55,10 @@ public final class MainSlice extends Slice.Wrap {
 
     /**
      * Artipie entry point.
+     * @param http HTTP client
      * @param settings Artipie settings
      */
-    public MainSlice(final Settings settings) {
+    public MainSlice(final ClientSlices http, final Settings settings) {
         super(
             new SliceRoute(
                 MainSlice.EMPTY_PATH,
@@ -89,7 +91,7 @@ public final class MainSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.ByPath(Pattern.compile("/api/?.*")),
-                    new ArtipieApi(settings)
+                    new ArtipieApi(http, settings)
                 ),
                 new RtRulePath(
                     new RtIsDashboard(settings),
@@ -97,7 +99,7 @@ public final class MainSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new AllRepositoriesSlice(settings)
+                    new AllRepositoriesSlice(http, settings)
                 )
             )
         );
