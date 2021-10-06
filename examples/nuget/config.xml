@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <packageSources>
+        <add key="artipie-nuget-test" value="http://artipie.artipie:8080/my-nuget/index.json" />
+    </packageSources>
+    <packageSourceCredentials>
+        <artipie-nuget-test>
+            <add key="Username" value="artipie"/>
+            <add key="ClearTextPassword" value="artipie"/>
+        </artipie-nuget-test>
+    </packageSourceCredentials>
+</configuration>
