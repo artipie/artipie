@@ -31,7 +31,7 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Permissions;
-import com.artipie.http.client.jetty.JettyClientSlices;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.http.group.GroupSlice;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.MavenProxy;
@@ -57,37 +57,18 @@ import java.util.stream.Collectors;
  * @checkstyle CyclomaticComplexityCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
-@SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.StaticAccessToStaticFields"})
 public final class SliceFromConfig extends Slice.Wrap {
 
     /**
-     * Http client.
-     * @todo #213:30min HTTP client should not be a singleton.
-     *  HTTP client now is a singleton within application.
-     *  It's instance is stored in static variable.
-     *  It should be refactored so it's only instance is built on start of app
-     *  and passed from top level to this class and other usages.
-     */
-    public static final JettyClientSlices HTTP;
-
-    static {
-        HTTP = new JettyClientSlices(new HttpClientSettings());
-        try {
-            SliceFromConfig.HTTP.start();
-            // @checkstyle IllegalCatchCheck (1 line)
-        } catch (final Exception err) {
-            throw new IllegalStateException(err);
-        }
-    }
-
-    /**
      * Ctor.
+     * @param http HTTP client
      * @param settings Artipie settings
      * @param config Repo config
      * @param aliases Storage aliases
      * @param standalone Standalone flag
      */
     public SliceFromConfig(
+        final ClientSlices http,
         final Settings settings, final RepoConfig config,
         final StorageAliases aliases,
         final boolean standalone) {
@@ -95,7 +76,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             new AsyncSlice(
                 settings.auth().thenApply(
                     auth -> SliceFromConfig.build(
-                        settings, new LoggingAuth(auth),
+                        http, settings, new LoggingAuth(auth),
                         config, aliases, standalone
                     )
                 )
@@ -106,6 +87,7 @@ public final class SliceFromConfig extends Slice.Wrap {
     /**
      * Find a slice implementation for config.
      *
+     * @param http HTTP client
      * @param settings Artipie settings
      * @param auth Authentication
      * @param cfg Repository config
@@ -130,6 +112,7 @@ public final class SliceFromConfig extends Slice.Wrap {
         }
     )
     static Slice build(
+        final ClientSlices http,
         final Settings settings, final Authentication auth,
         final RepoConfig cfg, final StorageAliases aliases, final boolean standalone) {
         final Slice slice;
@@ -146,7 +129,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "file-proxy":
                 slice = trimIfNotStandalone(
                     settings, standalone,
-                    new FileProxy(SliceFromConfig.HTTP, cfg)
+                    new FileProxy(http, cfg)
                 );
                 break;
             case "npm":
@@ -197,7 +180,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = trimIfNotStandalone(
                     settings,
                     standalone,
-                    new ComposerProxy(SliceFromConfig.HTTP, cfg)
+                    new ComposerProxy(http, cfg)
                 );
                 break;
             case "nuget":
@@ -221,7 +204,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "maven-proxy":
                 slice = trimIfNotStandalone(
                     settings, standalone,
-                    new MavenProxy(SliceFromConfig.HTTP, cfg)
+                    new MavenProxy(http, cfg)
                 );
                 break;
             case "maven-group":
@@ -232,10 +215,10 @@ public final class SliceFromConfig extends Slice.Wrap {
                             .stream().map(node -> node.asScalar().value())
                             .map(
                                 name -> new AsyncSlice(
-                                    new RepositoriesFromStorage(settings.storage()).config(name)
+                                    new RepositoriesFromStorage(http, settings.storage()).config(name)
                                         .thenApply(
                                             sub -> new SliceFromConfig(
-                                                settings, sub, aliases, standalone
+                                                http, settings, sub, aliases, standalone
                                             )
                                         )
                                 )
@@ -268,7 +251,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "pypi-proxy":
                 slice = trimIfNotStandalone(
                     settings, standalone,
-                    new PypiProxy(SliceFromConfig.HTTP, cfg)
+                    new PypiProxy(http, cfg)
                 );
                 break;
             case "docker":
@@ -292,7 +275,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 }
                 break;
             case "docker-proxy":
-                slice = new DockerProxy(SliceFromConfig.HTTP, standalone, cfg, permissions, auth);
+                slice = new DockerProxy(http, standalone, cfg, permissions, auth);
                 break;
             case "deb":
                 slice = trimIfNotStandalone(

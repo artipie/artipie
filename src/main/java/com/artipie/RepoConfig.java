@@ -12,6 +12,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.http.auth.Permissions;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.repo.ProxyConfig;
 import com.artipie.repo.StorageYamlConfig;
 import com.artipie.repo.YamlProxyConfig;
@@ -31,9 +32,15 @@ import org.reactivestreams.Publisher;
  * Repository config.
  * @since 0.2
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ParameterNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class RepoConfig {
+
+    /**
+     * HTTP client.
+     */
+    private final ClientSlices http;
 
     /**
      * Storages.
@@ -52,12 +59,14 @@ public final class RepoConfig {
 
     /**
      * Ctor.
+     * @param http HTTP client
      * @param storages Repository storage aliases
      * @param prefix Storage prefix
      * @param yaml Config yaml
      */
-    public RepoConfig(final StorageAliases storages, final Key prefix,
-        final YamlMapping yaml) {
+    public RepoConfig(final ClientSlices http, final StorageAliases storages,
+        final Key prefix, final YamlMapping yaml) {
+        this.http = http;
         this.prefix = prefix;
         this.yaml = yaml;
         this.storages = storages;
@@ -165,13 +174,15 @@ public final class RepoConfig {
 
     /**
      * Create async yaml config from content publisher.
+     * @param http HTTP client
      * @param storages Storage aliases
      * @param prefix Repository prefix
      * @param pub Yaml content publisher
      * @return Completion stage of yaml
      */
     @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
-    public static CompletionStage<RepoConfig> fromPublisher(final StorageAliases storages,
+    public static CompletionStage<RepoConfig> fromPublisher(
+        final ClientSlices http, final StorageAliases storages,
         final Key prefix, final Publisher<ByteBuffer> pub) {
         return new Concatenation(pub).single()
             .map(buf -> new Remaining(buf).bytes())
@@ -179,7 +190,7 @@ public final class RepoConfig {
             .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config:\n%s", yaml))
             .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
             .to(SingleInterop.get())
-            .thenApply(yaml -> new RepoConfig(storages, prefix, yaml));
+            .thenApply(yaml -> new RepoConfig(http, storages, prefix, yaml));
     }
 
     /**
@@ -199,7 +210,7 @@ public final class RepoConfig {
      * @return Proxy config.
      */
     public ProxyConfig proxy() {
-        return new YamlProxyConfig(this.storages, this.prefix, this.repoConfig());
+        return new YamlProxyConfig(this.http, this.storages, this.prefix, this.repoConfig());
     }
 
     @Override

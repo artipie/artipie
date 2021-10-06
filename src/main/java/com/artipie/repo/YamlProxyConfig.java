@@ -7,9 +7,9 @@ package com.artipie.repo;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.MeasuredStorage;
-import com.artipie.SliceFromConfig;
 import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import java.util.Collection;
@@ -23,6 +23,11 @@ import java.util.stream.StreamSupport;
  * @since 0.12
  */
 public final class YamlProxyConfig implements ProxyConfig {
+
+    /**
+     * HTTP client.
+     */
+    private final ClientSlices http;
 
     /**
      * Storages.
@@ -42,15 +47,19 @@ public final class YamlProxyConfig implements ProxyConfig {
     /**
      * Ctor.
      *
+     * @param http HTTP client
      * @param storages Storages.
      * @param prefix Cache storage prefix.
      * @param yaml Source YAML.
+     * @checkstyle ParameterNumberCheck (10 lines)
      */
     public YamlProxyConfig(
+        final ClientSlices http,
         final StorageAliases storages,
         final Key prefix,
         final YamlMapping yaml
     ) {
+        this.http = http;
         this.storages = storages;
         this.prefix = prefix;
         this.yaml = yaml;
@@ -111,7 +120,7 @@ public final class YamlProxyConfig implements ProxyConfig {
             final String username = this.source.string("username");
             final String password = this.source.string("password");
             if (username == null && password == null) {
-                result = new GenericAuthenticator(SliceFromConfig.HTTP);
+                result = new GenericAuthenticator(YamlProxyConfig.this.http);
             } else {
                 if (username == null) {
                     throw new IllegalStateException(
@@ -123,7 +132,7 @@ public final class YamlProxyConfig implements ProxyConfig {
                         "`password` is not specified for proxy remote"
                     );
                 }
-                result = new GenericAuthenticator(SliceFromConfig.HTTP, username, password);
+                result = new GenericAuthenticator(YamlProxyConfig.this.http, username, password);
             }
             return result;
         }

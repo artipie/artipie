@@ -11,6 +11,7 @@ import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.async.AsyncSlice;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
@@ -26,15 +27,22 @@ import java.util.concurrent.CompletionStage;
 public final class ArtipieRepositories {
 
     /**
+     * HTTP client.
+     */
+    private final ClientSlices http;
+
+    /**
      * Artipie settings.
      */
     private final Settings settings;
 
     /**
      * New Artipie repositories.
+     * @param http HTTP client
      * @param settings Artipie settings
      */
-    public ArtipieRepositories(final Settings settings) {
+    public ArtipieRepositories(final ClientSlices http, final Settings settings) {
+        this.http = http;
         this.settings = settings;
     }
 
@@ -76,9 +84,12 @@ public final class ArtipieRepositories {
         final Key name,
         final boolean standalone
     ) {
-        return new RepositoriesFromStorage(storage).config(name.string()).thenCombine(
+        return new RepositoriesFromStorage(this.http, storage).config(name.string()).thenCombine(
             StorageAliases.find(storage, name),
-            (config, aliases) -> new SliceFromConfig(this.settings, config, aliases, standalone)
+            (config, aliases) -> new SliceFromConfig(
+                this.http, this.settings,
+                config, aliases, standalone
+            )
         );
     }
 
