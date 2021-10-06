@@ -21,7 +21,7 @@ import java.util.Optional;
  *
  * @since 0.10
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.AvoidCatchingGenericException"})
 public class ArtipieServer {
 
     /**
