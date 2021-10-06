@@ -8,7 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.client.ClientSlices;
+import com.artipie.http.client.jetty.JettyClientSlices;
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -26,18 +26,6 @@ import org.junit.jupiter.api.Test;
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 public final class RepoConfigTest {
-
-    /**
-     * HTTP client instance.
-     */
-    private final ClientSlices http;
-
-    /**
-     * Ctor.
-     */
-    public RepoConfigTest() {
-        this.http = new JettyClientSlicesAutoStarted();
-    }
 
     @Test
     public void readsCustom() throws Exception {
@@ -170,7 +158,7 @@ public final class RepoConfigTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new RepoConfig(
-                this.http,
+                new JettyClientSlices(),
                 StorageAliases.EMPTY,
                 new Key.From("key"),
                 Yaml.createYamlMappingBuilder().add(
@@ -198,7 +186,7 @@ public final class RepoConfigTest {
 
     private RepoConfig repoCustom(final String name, final String value) {
         return new RepoConfig(
-            this.http,
+            new JettyClientSlices(),
             StorageAliases.EMPTY,
             new Key.From("repo-custom.yml"),
             Yaml.createYamlMappingBuilder().add(
@@ -213,7 +201,7 @@ public final class RepoConfigTest {
     private RepoConfig readFromResource(final String name)
         throws ExecutionException, InterruptedException {
         return RepoConfig.fromPublisher(
-            this.http,
+            new JettyClientSlices(),
             StorageAliases.EMPTY,
             new Key.From(name),
             Flowable.just(

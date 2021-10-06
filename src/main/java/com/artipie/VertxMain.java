@@ -12,6 +12,7 @@ import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
+import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.nop.NopMetrics;
@@ -31,7 +32,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 /**
  * Vertx server entry point.
@@ -69,15 +69,17 @@ public final class VertxMain {
 
     /**
      * Ctor.
+     * @param http HTTP client
      * @param config Config file path.
      * @param vertx The Vert.x instance.
      * @param port HTTP port
+     * @checkstyle ParameterNumberCheck (10 lines)
      */
     public VertxMain(
-        final Path config,
+        final ClientSlices http, final Path config,
         final Vertx vertx, final int port
     ) {
-        this.http = new JettyClientSlicesAutoStarted();
+        this.http = http;
         this.config = config;
         this.vertx = vertx;
         this.port = port;
@@ -111,10 +113,9 @@ public final class VertxMain {
     /**
      * Entry point.
      * @param args CLI args
-     * @throws IOException If fails
-     * @throws ParseException If fails
+     * @throws Exception If fails
      */
-    public static void main(final String... args) throws IOException, ParseException {
+    public static void main(final String... args) throws Exception {
         final Vertx vertx = Vertx.vertx();
         final Path config;
         final int port;
@@ -142,7 +143,9 @@ public final class VertxMain {
             "Used version of Artipie: %s",
             new ArtipieProperties().version()
         );
-        new VertxMain(config, vertx, port).start();
+        final JettyClientSlices http = new JettyClientSlices(new HttpClientSettings());
+        http.start();
+        new VertxMain(http, config, vertx, port).start();
     }
 
     /**
