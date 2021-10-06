@@ -11,7 +11,6 @@ import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -55,7 +54,6 @@ final class MavenProxyAuthIT {
     );
 
     @Test
-    @Disabled
     void shouldGetDependency() throws Exception {
         this.containers.putResourceToArtipie(
             "artipie",

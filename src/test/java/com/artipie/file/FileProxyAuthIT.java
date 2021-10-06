@@ -11,7 +11,6 @@ import org.cactoos.map.MapOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -63,7 +62,6 @@ final class FileProxyAuthIT {
     }
 
     @Test
-    @Disabled
     void shouldGetAndCacheFile() throws Exception {
         final byte[] data = "Hello world!".getBytes();
         this.containers.putBinaryToArtipie(
