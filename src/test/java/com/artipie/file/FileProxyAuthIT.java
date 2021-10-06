@@ -20,10 +20,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * Integration test for files proxy.
  *
  * @since 0.11
- * @todo #787:30min After removing HTTP client singleton, we notice that
- *  three (3) IT tests don't work (FileProxyAuthIT.shouldGetAndCacheFile,
- *  MavenMultiProxyIT.shouldGetDependency, MavenMultiProxyIT.shouldGetDependency).
- *  Please, fix them and enable them.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
