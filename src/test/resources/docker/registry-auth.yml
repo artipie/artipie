@@ -1,0 +1,11 @@
+repo:
+  type: docker
+  storage:
+    type: fs
+    path: /var/artipie/data/
+  permissions:
+    alice:
+      - read
+      - write
+    bob:
+      - read

@@ -4,25 +4,18 @@
  */
 package com.artipie.docker;
 
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.RepoPerms;
-import com.artipie.docker.junit.DockerClient;
-import com.artipie.docker.junit.DockerClientSupport;
-import com.artipie.management.RepoPermissions;
-import java.nio.file.Path;
-import java.util.Arrays;
-import org.cactoos.list.ListOf;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.AllOf;
+import com.artipie.test.ContainerResultMatcher;
+import com.artipie.test.TestDeployment;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.List;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import wtf.g4s8.tuples.Pair;
 
 /**
  * Integration test for auth in local Docker repositories.
@@ -31,183 +24,212 @@ import org.junit.jupiter.api.io.TempDir;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-@DockerClientSupport
-@Disabled
+@DisabledOnOs(OS.WINDOWS)
 final class DockerLocalAuthIT {
 
     /**
-     * Example docker image to use in tests.
+     * Deployment for tests.
+     * @checkstyle VisibilityModifierCheck (5 lines)
      */
-    private Image image;
-
-    /**
-     * Docker client.
-     */
-    private DockerClient client;
-
-    /**
-     * Tested Artipie server.
-     */
-    private ArtipieServer server;
-
-    /**
-     * Docker repository.
-     */
-    private String repository;
+    @RegisterExtension
+    final TestDeployment deployment = new TestDeployment(
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withRepoConfig("docker/registry-auth.yml", "registry")
+            .withCredentials("_credentials.yaml"),
+        () -> new TestDeployment.ClientContainer("alpine:3.11")
+            .withPrivilegedMode(true)
+            .withWorkingDirectory("/w")
+    );
 
     @BeforeEach
-    void setUp(@TempDir final Path root) throws Exception {
-        this.server = new ArtipieServer(
-            root, "my-docker",
-            new RepoConfigYaml("docker").withFileStorage(root.resolve("data"))
-                .withPermissions(
-                    new RepoPerms(
-                        new ListOf<>(
-                            new RepoPermissions.PermissionItem(
-                                ArtipieServer.ALICE.name(), new ListOf<>("read", "write")
-                            ),
-                            new RepoPermissions.PermissionItem(
-                                ArtipieServer.BOB.name(), new ListOf<>("read")
-                            )
-                        )
-                    )
-                )
-        );
-        final int port = this.server.start();
-        this.repository = String.format("localhost:%d", port);
-        this.image = this.prepareImage();
-    }
-
-    @AfterEach
-    void tearDown() {
-        this.server.stop();
+    void setUp() throws Exception {
+        // @checkstyle MethodBodyCommentsCheck (10 lines)
+        // @checkstyle LineLengthCheck (10 lines)
+        this.deployment.clientExec("apk", "add", "--update", "--no-cache", "openrc", "docker");
+        // needs this command to initialize openrc directories on first call
+        this.deployment.clientExec("rc-status");
+        // this flag file is needed to tell openrc working in non-boot mode
+        this.deployment.clientExec("touch", "/run/openrc/softlevel");
+        // allow artipie:8080 insecure connection before starting docker daemon
+        this.deployment.clientExec("sed", "-i", "s/DOCKER_OPTS=\"\"/DOCKER_OPTS=\"--insecure-registry=artipie:8080\"/g", "/etc/conf.d/docker");
+        this.deployment.clientExec("rc-service", "docker", "start");
+        // docker daemon needs some time to start after previous command
+        this.deployment.clientExec("sleep", "3");
     }
 
     @Test
-    void shouldPush() throws Exception {
-        this.login(ArtipieServer.ALICE);
-        final String output = this.client.run("push", this.image.remote());
-        MatcherAssert.assertThat(
-            output,
-            new AllOf<>(
-                Arrays.asList(
-                    new StringContains(String.format("%s: Pushed", this.image.layer())),
-                    new StringContains(String.format("latest: digest: %s", this.image.digest()))
+    void aliceCanPullAndPush() {
+        final String image = "artipie:8080/registry/alpine:3.11";
+        List.of(
+            Pair.of(
+                "Failed to login to Artipie",
+                List.of(
+                    "docker", "login",
+                    "--username", "alice",
+                    "--password", "123",
+                    "artipie:8080"
                 )
+            ),
+            Pair.of("Failed to pull origin image", List.of("docker", "pull", "alpine:3.11")),
+            Pair.of("Failed to tag origin image", List.of("docker", "tag", "alpine:3.11", image)),
+            Pair.of("Failed to push image to Artipie", List.of("docker", "push", image)),
+            Pair.of("Failed to remove local image", List.of("docker", "image", "rm", image)),
+            Pair.of("Failed to pull image from Artipie", List.of("docker", "pull", image))
+        ).forEach(
+            pair -> pair.accept(
+                (msg, cmds) -> {
+                    try {
+                        this.deployment.assertExec(
+                            msg, new ContainerResultMatcher(), cmds
+                        );
+                    } catch (final IOException err) {
+                        throw new UncheckedIOException(err);
+                    }
+                }
+            )
+        );
+    }
+
+    @Test
+    void canPullWithReadPermission() {
+        final String image = "artipie:8080/registry/alpine:3.11";
+        List.of(
+            Pair.of(
+                "Failed to login to Artipie as alice",
+                List.of(
+                    "docker", "login",
+                    "--username", "alice",
+                    "--password", "123",
+                    "artipie:8080"
+                )
+            ),
+            Pair.of("Failed to pull origin image", List.of("docker", "pull", "alpine:3.11")),
+            Pair.of("Failed to tag origin image", List.of("docker", "tag", "alpine:3.11", image)),
+            Pair.of("Failed to push image to Artipie", List.of("docker", "push", image)),
+            Pair.of("Failed to remove local image", List.of("docker", "image", "rm", image)),
+            Pair.of("Failed to logout from Artipie", List.of("docker", "logout", "artipie:8080")),
+            Pair.of(
+                "Failed to login to Artipie as bob",
+                List.of(
+                    "docker", "login",
+                    "--username", "bob",
+                    "--password", "qwerty",
+                    "artipie:8080"
+                )
+            ),
+            Pair.of("Failed to pull image from Artipie", List.of("docker", "pull", image))
+        ).forEach(
+            pair -> pair.accept(
+                (msg, cmds) -> {
+                    try {
+                        this.deployment.assertExec(
+                            msg, new ContainerResultMatcher(), cmds
+                        );
+                    } catch (final IOException err) {
+                        throw new UncheckedIOException(err);
+                    }
+                }
             )
         );
     }
 
     @Test
     void shouldFailPushIfNoWritePermission() throws Exception {
-        this.login(ArtipieServer.BOB);
-        final DockerClient.Result result = this.client.runUnsafe("push", this.image.remote());
-        MatcherAssert.assertThat(
-            "Return code is not 0",
-            result.returnCode(),
-            new IsNot<>(new IsEqual<>(0))
-        );
-        MatcherAssert.assertThat(
-            "Error reported",
-            result.output(),
-            new StringContains("denied")
-        );
-    }
-
-    @Test
-    void shouldFailPushIfAnonymous() throws Exception {
-        this.logout();
-        final DockerClient.Result result = this.client.runUnsafe("push", this.image.remote());
-        MatcherAssert.assertThat(
-            "Return code is not 0",
-            result.returnCode(),
-            new IsNot<>(new IsEqual<>(0))
-        );
-        MatcherAssert.assertThat(
-            "Error reported",
-            result.output(),
-            new StringContains("no basic auth credentials")
-        );
-    }
-
-    @Test
-    @Disabled
-    void shouldPullPushed() throws Exception {
-        this.login(ArtipieServer.ALICE);
-        this.client.run("push", this.image.remote());
-        this.client.run("image", "rm", this.image.name());
-        this.client.run("image", "rm", this.image.remote());
-        this.login(ArtipieServer.BOB);
-        final String output = this.client.run("pull", this.image.remote());
-        MatcherAssert.assertThat(
-            output,
-            new StringContains(
-                String.format("Status: Downloaded newer image for %s", this.image.remote())
+        final String image = "artipie:8080/registry/alpine:3.11";
+        List.of(
+            Pair.of(
+                "Failed to login to Artipie",
+                List.of(
+                    "docker", "login",
+                    "--username", "bob",
+                    "--password", "qwerty",
+                    "artipie:8080"
+                )
+            ),
+            Pair.of("Failed to pull origin image", List.of("docker", "pull", "alpine:3.11")),
+            Pair.of("Failed to tag origin image", List.of("docker", "tag", "alpine:3.11", image))
+        ).forEach(
+            pair -> pair.accept(
+                (msg, cmds) -> {
+                    try {
+                        this.deployment.assertExec(
+                            msg, new ContainerResultMatcher(), cmds
+                        );
+                    } catch (final IOException err) {
+                        throw new UncheckedIOException(err);
+                    }
+                }
             )
         );
-    }
-
-    @Test
-    void shouldFailPullIfNoReadPermission() throws Exception {
-        this.login(ArtipieServer.ALICE);
-        this.client.run("push", this.image.remote());
-        this.client.run("image", "rm", this.image.name());
-        this.client.run("image", "rm", this.image.remote());
-        this.login(ArtipieServer.CAROL);
-        final DockerClient.Result result = this.client.runUnsafe("pull", this.image.remote());
-        MatcherAssert.assertThat(
-            "Return code is not 0",
-            result.returnCode(),
-            new IsNot<>(new IsEqual<>(0))
-        );
-        MatcherAssert.assertThat(
-            "Error reported",
-            result.output(),
-            new StringContains("denied")
+        this.deployment.assertExec(
+            "Push failed with unexpected status, should be 1",
+            new ContainerResultMatcher(new IsEqual<>(1)),
+            "docker", "push", image
         );
     }
 
     @Test
-    void shouldFailPullIfAnonymous() throws Exception {
-        this.login(ArtipieServer.ALICE);
-        this.client.run("push", this.image.remote());
-        this.client.run("image", "rm", this.image.name());
-        this.client.run("image", "rm", this.image.remote());
-        this.logout();
-        final DockerClient.Result result = this.client.runUnsafe("pull", this.image.remote());
-        MatcherAssert.assertThat(
-            "Return code is not 0",
-            result.returnCode(),
-            new IsNot<>(new IsEqual<>(0))
+    void shouldFailPushIfAnonymous() throws IOException {
+        final String image = "artipie:8080/registry/alpine:3.11";
+        List.of(
+            Pair.of("Failed to pull origin image", List.of("docker", "pull", "alpine:3.11")),
+            Pair.of("Failed to tag origin image", List.of("docker", "tag", "alpine:3.11", image))
+        ).forEach(
+            pair -> pair.accept(
+                (msg, cmds) -> {
+                    try {
+                        this.deployment.assertExec(
+                            msg, new ContainerResultMatcher(), cmds
+                        );
+                    } catch (final IOException err) {
+                        throw new UncheckedIOException(err);
+                    }
+                }
+            )
         );
-        MatcherAssert.assertThat(
-            "Error reported",
-            result.output(),
-            new StringContains("no basic auth credentials")
+        this.deployment.assertExec(
+            "Push failed with unexpected status, should be 1",
+            new ContainerResultMatcher(new IsEqual<>(1)),
+            "docker", "push", image
         );
     }
 
-    private Image prepareImage() throws Exception {
-        this.login(ArtipieServer.ALICE);
-        final Image source = new Image.ForOs();
-        this.client.run("pull", source.remoteByDigest());
-        final String local = "my-docker/my-test";
-        this.client.run("tag", source.remoteByDigest(), String.format("%s:latest", local));
-        final Image img = new Image.From(
-            this.repository,
-            local,
-            source.digest(),
-            source.layer()
+    @Test
+    void shouldFailPullIfAnonymous() throws IOException {
+        final String image = "artipie:8080/registry/alpine:3.11";
+        List.of(
+            Pair.of(
+                "Failed to login to Artipie",
+                List.of(
+                    "docker", "login",
+                    "--username", "alice",
+                    "--password", "123",
+                    "artipie:8080"
+                )
+            ),
+            Pair.of("Failed to pull origin image", List.of("docker", "pull", "alpine:3.11")),
+            Pair.of("Failed to tag origin image", List.of("docker", "tag", "alpine:3.11", image)),
+            Pair.of("Failed to push image to Artipie", List.of("docker", "push", image)),
+            Pair.of("Failed to remove local image", List.of("docker", "image", "rm", image)),
+            Pair.of("Failed to logout", List.of("docker", "logout", "artipie:8080"))
+        ).forEach(
+            pair -> pair.accept(
+                (msg, cmds) -> {
+                    try {
+                        this.deployment.assertExec(
+                            msg, new ContainerResultMatcher(), cmds
+                        );
+                    } catch (final IOException err) {
+                        throw new UncheckedIOException(err);
+                    }
+                }
+            )
         );
-        this.client.run("tag", source.remoteByDigest(), img.remote());
-        return img;
+        this.deployment.assertExec(
+            "Pull failed with unexpected status, should be 1",
+            new ContainerResultMatcher(new IsEqual<>(1)),
+            "docker", "pull", image
+        );
     }
 
-    private void login(final ArtipieServer.User user) throws Exception {
-        this.client.login(user.name(), user.password(), this.repository);
-    }
-
-    private void logout() throws Exception {
-        this.client.run("logout", this.repository);
-    }
 }
