@@ -1,1 +1,0 @@
-A data to be deployed inside a Nuget package

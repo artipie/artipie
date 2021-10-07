@@ -1,4 +1,4 @@
-FROM debian:jessie-20210208-slim
+FROM debian:10.8-slim
 
 WORKDIR /test
 RUN apt-get update && apt-get install -y curl
