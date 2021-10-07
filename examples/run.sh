@@ -165,7 +165,7 @@ fi
 log_debug "tests: ${tests[@]}"
 
 # FIXME: some repository tests don't work, fix them:
-#     go nuget
+# conda
 
 rm -fr "${basedir}/out.log" "${basedir}/results.txt"
 touch "${basedir}/out.log"
