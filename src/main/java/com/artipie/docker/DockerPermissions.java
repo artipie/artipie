@@ -40,6 +40,7 @@ public final class DockerPermissions implements Permissions {
                 translated = Action.Standard.READ;
                 break;
             case "push":
+            case "overwrite":
                 translated = Action.Standard.WRITE;
                 break;
             default:

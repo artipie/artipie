@@ -5,6 +5,7 @@
 
 package com.artipie.test;
 
+import com.artipie.rpm.misc.UncheckedConsumer;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ import org.testcontainers.utility.MountableFile;
  *  A workaround was added with custom consumer for system stdout frame printing as
  *  lambda. Properly configure SLf4j consumer and remove this workaround.
  */
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 public final class TestDeployment implements BeforeEachCallback, AfterEachCallback {
 
     /**
@@ -129,6 +130,10 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
             .withCommand("tail", "-f", "/dev/null");
         this.artipie.values().forEach(GenericContainer::start);
         this.client.start();
+        this.client.execInContainer("sleep", "3");
+        this.artipie.values().forEach(
+            new UncheckedConsumer<>(cnt -> cnt.execInContainer("sleep", "3"))
+        );
     }
 
     @Override
@@ -271,6 +276,25 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
      */
     public void putBinaryToClient(final byte[] bin, final String path) {
         this.client.copyFileToContainer(Transferable.of(bin), path);
+    }
+
+    /**
+     * Sets up client environment for docker tests.
+     * @throws IOException On error
+     */
+    public void setUpForDockerTests() throws IOException {
+        // @checkstyle MethodBodyCommentsCheck (10 lines)
+        // @checkstyle LineLengthCheck (10 lines)
+        this.clientExec("apk", "add", "--update", "--no-cache", "openrc", "docker");
+        // needs this command to initialize openrc directories on first call
+        this.clientExec("rc-status");
+        // this flag file is needed to tell openrc working in non-boot mode
+        this.clientExec("touch", "/run/openrc/softlevel");
+        // allow artipie:8080 insecure connection before starting docker daemon
+        this.clientExec("sed", "-i", "s/DOCKER_OPTS=\"\"/DOCKER_OPTS=\"--insecure-registry=artipie:8080\"/g", "/etc/conf.d/docker");
+        this.clientExec("rc-service", "docker", "start");
+        // docker daemon needs some time to start after previous command
+        this.clientExec("sleep", "3");
     }
 
     /**
