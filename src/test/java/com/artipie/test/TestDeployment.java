@@ -5,6 +5,7 @@
 
 package com.artipie.test;
 
+import com.artipie.rpm.misc.UncheckedConsumer;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ import org.testcontainers.utility.MountableFile;
  *  A workaround was added with custom consumer for system stdout frame printing as
  *  lambda. Properly configure SLf4j consumer and remove this workaround.
  */
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 public final class TestDeployment implements BeforeEachCallback, AfterEachCallback {
 
     /**
@@ -129,6 +130,10 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
             .withCommand("tail", "-f", "/dev/null");
         this.artipie.values().forEach(GenericContainer::start);
         this.client.start();
+        this.client.execInContainer("sleep", "3");
+        this.artipie.values().forEach(
+            new UncheckedConsumer<>(cnt -> cnt.execInContainer("sleep", "3"))
+        );
     }
 
     @Override
