@@ -38,18 +38,7 @@ final class DockerLocalITCase {
 
     @BeforeEach
     void setUp() throws Exception {
-        // @checkstyle MethodBodyCommentsCheck (10 lines)
-        // @checkstyle LineLengthCheck (10 lines)
-        this.deployment.clientExec("apk", "add", "--update", "--no-cache", "openrc", "docker");
-        // needs this command to initialize openrc directories on first call
-        this.deployment.clientExec("rc-status");
-        // this flag file is needed to tell openrc working in non-boot mode
-        this.deployment.clientExec("touch", "/run/openrc/softlevel");
-        // allow artipie:8080 insecure connection before starting docker daemon
-        this.deployment.clientExec("sed", "-i", "s/DOCKER_OPTS=\"\"/DOCKER_OPTS=\"--insecure-registry=artipie:8080\"/g", "/etc/conf.d/docker");
-        this.deployment.clientExec("rc-service", "docker", "start");
-        // docker daemon needs some time to start after previous command
-        this.deployment.clientExec("sleep", "3");
+        this.deployment.setUpForDockerTests();
     }
 
     @Test
