@@ -7,6 +7,7 @@ package com.artipie;
 import com.artipie.asto.Content;
 import com.artipie.http.AllRepositoriesSlice;
 import com.artipie.http.Headers;
+import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
@@ -26,7 +27,10 @@ public final class AllRepositoriesSliceTest {
     @Test
     public void unexistingRepoReturnNotFound() {
         MatcherAssert.assertThat(
-            new AllRepositoriesSlice(new Settings.Fake()).response(
+            new AllRepositoriesSlice(
+                new JettyClientSlices(),
+                new Settings.Fake()
+            ).response(
                 new RequestLine(RqMethod.GET, "/repo/foo").toString(),
                 Headers.EMPTY,
                 Content.EMPTY
@@ -39,7 +43,10 @@ public final class AllRepositoriesSliceTest {
     @ValueSource(strings = {"/favicon.ico", "robots.txt"})
     void requestThatNotDirectedToRepoReturnNotFound(final String uri) {
         MatcherAssert.assertThat(
-            new AllRepositoriesSlice(new Settings.Fake()).response(
+            new AllRepositoriesSlice(
+                new JettyClientSlices(),
+                new Settings.Fake()
+            ).response(
                 new RequestLine(RqMethod.GET, uri).toString(),
                 Headers.EMPTY,
                 Content.EMPTY

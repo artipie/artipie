@@ -8,6 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.repo.ConfigFile;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -65,6 +66,11 @@ public final class RepositoriesFromStorage implements Repositories {
     }
 
     /**
+     * HTTP client.
+     */
+    private final ClientSlices http;
+
+    /**
      * Storage.
      */
     private final Storage storage;
@@ -72,9 +78,11 @@ public final class RepositoriesFromStorage implements Repositories {
     /**
      * Ctor.
      *
+     * @param http HTTP client
      * @param storage Storage.
      */
-    public RepositoriesFromStorage(final Storage storage) {
+    public RepositoriesFromStorage(final ClientSlices http, final Storage storage) {
+        this.http =  http;
         this.storage = storage;
     }
 
@@ -85,7 +93,10 @@ public final class RepositoriesFromStorage implements Repositories {
             RepositoriesFromStorage.configs.getUnchecked(pair),
             RepositoriesFromStorage.aliases.getUnchecked(pair),
             (data, alias) -> SingleInterop.fromFuture(
-                RepoConfig.fromPublisher(alias, pair.key, new Content.From(data.getBytes()))
+                RepoConfig.fromPublisher(
+                    this.http, alias, pair.key,
+                    new Content.From(data.getBytes())
+                )
             )
         ).flatMap(self -> self).to(SingleInterop.get());
     }

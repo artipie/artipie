@@ -34,7 +34,7 @@ public final class DebianITCase {
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("debian/debian.yml", "my-debian"),
-        () -> new TestDeployment.ClientContainer("debian:10.8")
+        () -> new TestDeployment.ClientContainer("debian:10.8-slim")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
                 "debian/sources.list", "/w/sources.list", BindMode.READ_ONLY

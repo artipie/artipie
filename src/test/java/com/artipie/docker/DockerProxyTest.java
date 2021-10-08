@@ -10,6 +10,7 @@ import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Permissions;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
@@ -75,10 +76,12 @@ class DockerProxyTest {
     }
 
     private static DockerProxy dockerProxy(final String yaml) throws IOException {
+        final ClientSlices http = new JettyClientSlices();
         return new DockerProxy(
-            new JettyClientSlices(),
+            http,
             false,
             new RepoConfig(
+                http,
                 alias -> {
                     throw new UnsupportedOperationException();
                 },

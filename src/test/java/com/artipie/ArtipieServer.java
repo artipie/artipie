@@ -7,6 +7,7 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.artipie.asto.Key;
+import com.artipie.http.client.jetty.JettyClientSlices;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +21,7 @@ import java.util.Optional;
  *
  * @since 0.10
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.AvoidCatchingGenericException"})
 public class ArtipieServer {
 
     /**
@@ -231,8 +232,15 @@ public class ArtipieServer {
             repos.resolve(ArtipieServer.CREDENTIALS_FILE),
             credentials().getBytes()
         );
+        final JettyClientSlices http = new JettyClientSlices(new HttpClientSettings());
+        try {
+            http.start();
+            // @checkstyle IllegalCatchCheck (1 line)
+        } catch (final Exception err) {
+            throw new IllegalStateException(err);
+        }
         this.vertx = Vertx.vertx();
-        this.server = new VertxMain(cfg, this.vertx, this.freeport);
+        this.server = new VertxMain(http, cfg, this.vertx, this.freeport);
         this.prt = this.server.start();
         return this.prt;
     }

@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
+import com.artipie.http.client.jetty.JettyClientSlices;
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -157,6 +158,7 @@ public final class RepoConfigTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new RepoConfig(
+                new JettyClientSlices(),
                 StorageAliases.EMPTY,
                 new Key.From("key"),
                 Yaml.createYamlMappingBuilder().add(
@@ -184,6 +186,7 @@ public final class RepoConfigTest {
 
     private RepoConfig repoCustom(final String name, final String value) {
         return new RepoConfig(
+            new JettyClientSlices(),
             StorageAliases.EMPTY,
             new Key.From("repo-custom.yml"),
             Yaml.createYamlMappingBuilder().add(
@@ -198,6 +201,7 @@ public final class RepoConfigTest {
     private RepoConfig readFromResource(final String name)
         throws ExecutionException, InterruptedException {
         return RepoConfig.fromPublisher(
+            new JettyClientSlices(),
             StorageAliases.EMPTY,
             new Key.From(name),
             Flowable.just(

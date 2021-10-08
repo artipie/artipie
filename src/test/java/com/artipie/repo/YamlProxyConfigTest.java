@@ -9,6 +9,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
 import com.artipie.http.client.auth.GenericAuthenticator;
+import com.artipie.http.client.jetty.JettyClientSlices;
 import java.util.Collection;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyCollection;
@@ -193,6 +194,7 @@ public final class YamlProxyConfigTest {
 
     private Collection<YamlProxyConfig.YamlRemote> remotes(final YamlMapping yaml) {
         return new YamlProxyConfig(
+            new JettyClientSlices(),
             StorageAliases.EMPTY, Key.ROOT, yaml
         ).remotes();
     }
