@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
@@ -21,10 +22,13 @@ import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container.ExecResult;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.output.OutputFrame;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.utility.DockerImageName;
@@ -35,10 +39,6 @@ import org.testcontainers.utility.MountableFile;
  * Artipie container can be accessed from client container by {@code artipie} hostname.
  * To run a command in client container and match a result use {@code assertExec} method.
  * @since 0.19
- * @todo #855:30min Add Slf4j logging consumer for artipie container
- *  It's not working for some reason and prints nothing to the test output.
- *  A workaround was added with custom consumer for system stdout frame printing as
- *  lambda. Properly configure SLf4j consumer and remove this workaround.
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 public final class TestDeployment implements BeforeEachCallback, AfterEachCallback {
@@ -76,12 +76,12 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     /**
      * Artipie loggers.
      */
-    private final ConcurrentMap<String, ContainerLogger> aloggers;
+    private final ConcurrentMap<String, Consumer<OutputFrame>> aloggers;
 
     /**
      * Client logger.
      */
-    private final ContainerLogger clilogger;
+    private final Consumer<OutputFrame> clilogger;
 
     /**
      * New container test.
@@ -102,7 +102,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         final Supplier<ClientContainer> client) {
         this.asup = artipie;
         this.csup = client;
-        this.clilogger = new ContainerLogger();
+        this.clilogger = TestDeployment.slfjLog(TestDeployment.ClientContainer.class, "client");
         this.aloggers = new ConcurrentHashMap<>();
     }
 
@@ -119,7 +119,9 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
                         .withLogConsumer(
                             this.aloggers.computeIfAbsent(
                                 entry.getKey(),
-                                name -> new ContainerLogger()
+                                name -> TestDeployment.slfjLog(
+                                    TestDeployment.ArtipieContainer.class, entry.getKey()
+                                )
                             )
                         )
                 )
@@ -295,6 +297,18 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         this.clientExec("rc-service", "docker", "start");
         // docker daemon needs some time to start after previous command
         this.clientExec("sleep", "3");
+    }
+
+    /**
+     * Returns a logger named corresponding to the class passed as parameter.
+     * @param clazz Class type of container
+     * @param prefix Prefix for output logs
+     * @return Logger.
+     */
+    private static Consumer<OutputFrame> slfjLog(final Class<?> clazz, final String prefix) {
+        return new Slf4jLogConsumer(
+            LoggerFactory.getLogger(clazz)
+        ).withPrefix(prefix);
     }
 
     /**
