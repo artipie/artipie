@@ -25,6 +25,11 @@ public final class ArtipieProperties {
     public static final String AUTH_TIMEOUT = "artipie.cached.auth.timeout";
 
     /**
+     * Expiration time for cache of storage setting.
+     */
+    public static final String STORAGE_TIMEOUT = "artipie.storage.cache.timeout";
+
+    /**
      * Expiration time for cache of configuration files.
      */
     static final String CONFIG_TIMEOUT = "artipie.config.cache.timeout";
@@ -78,6 +83,14 @@ public final class ArtipieProperties {
      */
     public String cachedAuthTimeout() {
         return this.properties.getProperty(ArtipieProperties.AUTH_TIMEOUT);
+    }
+
+    /**
+     * Obtains timeout of caching settings of the storage in milliseconds.
+     * @return Timeout of caching settings of the storage.
+     */
+    public String storageCacheTimeout() {
+        return this.properties.getProperty(ArtipieProperties.STORAGE_TIMEOUT);
     }
 
     /**
