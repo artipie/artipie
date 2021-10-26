@@ -28,11 +28,18 @@ public final class CachedUsers implements AuthCache {
     private static LoadingCache<Data, Optional<Authentication.User>> users;
 
     static {
-        System.setProperty(
-            ArtipieProperties.AUTH_TIMEOUT,
-            new ArtipieProperties().cachedAuthTimeout()
+        final int timeout = Optional.ofNullable(
+            Integer.getInteger(System.getProperty(ArtipieProperties.AUTH_TIMEOUT))
+        ).orElseGet(
+            () -> {
+                System.setProperty(
+                    ArtipieProperties.AUTH_TIMEOUT,
+                    new ArtipieProperties().cachedAuthTimeout()
+                );
+                // @checkstyle MagicNumberCheck (1 line)
+                return Integer.getInteger(ArtipieProperties.AUTH_TIMEOUT, 5 * 60 * 1000);
+            }
         );
-        final int timeout = Integer.getInteger(ArtipieProperties.AUTH_TIMEOUT, 5 * 60 * 1000);
         CachedUsers.users = CacheBuilder.newBuilder()
             .expireAfterAccess(timeout, TimeUnit.MILLISECONDS)
             .softValues()
