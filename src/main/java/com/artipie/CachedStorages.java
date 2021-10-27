@@ -25,18 +25,21 @@ final class CachedStorages implements StorageConfigCache {
     private static LoadingCache<Metadata, Storage> storages;
 
     static {
-        final int timeout = Optional.ofNullable(
-            Integer.getInteger(System.getProperty(ArtipieProperties.STORAGE_TIMEOUT))
-        ).orElseGet(
-            () -> {
-                System.setProperty(
-                    ArtipieProperties.STORAGE_TIMEOUT,
-                    new ArtipieProperties().storageCacheTimeout()
-                );
-                // @checkstyle MagicNumberCheck (1 line)
-                return Integer.getInteger(ArtipieProperties.STORAGE_TIMEOUT, 3 * 60 * 1000);
-            }
-        );
+        final int timeout;
+        try {
+            timeout = Integer.parseInt(
+                Optional.ofNullable(
+                    Optional.ofNullable(
+                        System.getProperty(ArtipieProperties.STORAGE_TIMEOUT)
+                    ).orElse(new ArtipieProperties().storageCacheTimeout())
+                ).orElse("180000")
+            );
+        } catch (final NumberFormatException exc) {
+            throw new ArtipieException(
+                String.format("Failed to read property '%s'", ArtipieProperties.STORAGE_TIMEOUT),
+                exc
+            );
+        }
         CachedStorages.storages = CacheBuilder.newBuilder()
             .expireAfterAccess(timeout, TimeUnit.MILLISECONDS)
             .softValues()

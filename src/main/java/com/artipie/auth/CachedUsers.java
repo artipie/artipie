@@ -4,6 +4,7 @@
  */
 package com.artipie.auth;
 
+import com.artipie.ArtipieException;
 import com.artipie.ArtipieProperties;
 import com.artipie.http.auth.Authentication;
 import com.google.common.cache.CacheBuilder;
@@ -28,18 +29,21 @@ public final class CachedUsers implements AuthCache {
     private static LoadingCache<Data, Optional<Authentication.User>> users;
 
     static {
-        final int timeout = Optional.ofNullable(
-            Integer.getInteger(System.getProperty(ArtipieProperties.AUTH_TIMEOUT))
-        ).orElseGet(
-            () -> {
-                System.setProperty(
-                    ArtipieProperties.AUTH_TIMEOUT,
-                    new ArtipieProperties().cachedAuthTimeout()
-                );
-                // @checkstyle MagicNumberCheck (1 line)
-                return Integer.getInteger(ArtipieProperties.AUTH_TIMEOUT, 5 * 60 * 1000);
-            }
-        );
+        final int timeout;
+        try {
+            timeout = Integer.parseInt(
+                Optional.ofNullable(
+                    Optional.ofNullable(
+                        System.getProperty(ArtipieProperties.AUTH_TIMEOUT)
+                    ).orElse(new ArtipieProperties().cachedAuthTimeout())
+                ).orElse("300000")
+            );
+        } catch (final NumberFormatException exc) {
+            throw new ArtipieException(
+                String.format("Failed to read property '%s'", ArtipieProperties.AUTH_TIMEOUT),
+                exc
+            );
+        }
         CachedUsers.users = CacheBuilder.newBuilder()
             .expireAfterAccess(timeout, TimeUnit.MILLISECONDS)
             .softValues()
