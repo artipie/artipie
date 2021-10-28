@@ -6,6 +6,7 @@ package com.artipie;
 
 import com.artipie.asto.ArtipieIOException;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -23,6 +24,11 @@ public final class ArtipieProperties {
      * Expiration time for cached auth.
      */
     public static final String AUTH_TIMEOUT = "artipie.cached.auth.timeout";
+
+    /**
+     * Expiration time for cache of storage setting.
+     */
+    public static final String STORAGE_TIMEOUT = "artipie.storage.cache.timeout";
 
     /**
      * Expiration time for cache of configuration files.
@@ -68,16 +74,30 @@ public final class ArtipieProperties {
      * Obtains timeout of caching configuration files in milliseconds.
      * @return Timeout of caching files with configuration.
      */
-    public String configCacheTimeout() {
-        return this.properties.getProperty(ArtipieProperties.CONFIG_TIMEOUT);
+    public Optional<String> configCacheTimeout() {
+        return Optional.ofNullable(
+            this.properties.getProperty(ArtipieProperties.CONFIG_TIMEOUT)
+        );
     }
 
     /**
      * Obtains timeout of caching users in milliseconds.
      * @return Timeout of caching users.
      */
-    public String cachedAuthTimeout() {
-        return this.properties.getProperty(ArtipieProperties.AUTH_TIMEOUT);
+    public Optional<String> cachedAuthTimeout() {
+        return Optional.ofNullable(
+            this.properties.getProperty(ArtipieProperties.AUTH_TIMEOUT)
+        );
+    }
+
+    /**
+     * Obtains timeout of caching settings of the storage in milliseconds.
+     * @return Timeout of caching settings of the storage.
+     */
+    public Optional<String> storageCacheTimeout() {
+        return Optional.ofNullable(
+            this.properties.getProperty(ArtipieProperties.STORAGE_TIMEOUT)
+        );
     }
 
     /**
