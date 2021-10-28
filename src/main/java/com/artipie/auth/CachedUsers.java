@@ -33,10 +33,9 @@ public final class CachedUsers implements AuthCache {
         try {
             timeout = Integer.parseInt(
                 Optional.ofNullable(
-                    Optional.ofNullable(
-                        System.getProperty(ArtipieProperties.AUTH_TIMEOUT)
-                    ).orElse(new ArtipieProperties().cachedAuthTimeout())
-                ).orElse("300000")
+                    System.getProperty(ArtipieProperties.AUTH_TIMEOUT)
+                ).flatMap(ignored -> new ArtipieProperties().cachedAuthTimeout())
+                .orElse("300000")
             );
         } catch (final NumberFormatException exc) {
             throw new ArtipieException(

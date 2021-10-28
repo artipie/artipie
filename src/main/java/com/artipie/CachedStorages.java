@@ -29,10 +29,9 @@ final class CachedStorages implements StorageConfigCache {
         try {
             timeout = Integer.parseInt(
                 Optional.ofNullable(
-                    Optional.ofNullable(
-                        System.getProperty(ArtipieProperties.STORAGE_TIMEOUT)
-                    ).orElse(new ArtipieProperties().storageCacheTimeout())
-                ).orElse("180000")
+                    System.getProperty(ArtipieProperties.STORAGE_TIMEOUT)
+                ).flatMap(ignored -> new ArtipieProperties().storageCacheTimeout())
+                .orElse("180000")
             );
         } catch (final NumberFormatException exc) {
             throw new ArtipieException(
