@@ -46,7 +46,9 @@ final class CachedStorages implements StorageConfigCache {
                 new CacheLoader<>() {
                     @Override
                     public Storage load(final Metadata meta) {
-                        return meta.settings().storage();
+                        return new MeasuredStorage(
+                            new YamlStorage(meta.storageMeta()).storage()
+                        );
                     }
                 }
             );
@@ -98,10 +100,7 @@ final class CachedStorages implements StorageConfigCache {
                 res = false;
             } else {
                 final Metadata meta = (Metadata) obj;
-                res = Objects.equals(
-                    this.storageMeta(),
-                    meta.settings().meta().yamlMapping("storage")
-                );
+                res = Objects.equals(this.storageMeta(), meta.storageMeta());
             }
             return res;
         }
