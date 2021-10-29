@@ -159,3 +159,20 @@ For #123 - description of the commit goes
 to PR description. It could be multiline `and` include
 *markdown* formatting.
 ```
+
+## Repository maintaining
+
+Each repository in Artipie has one responsible maintainer person. Maintainer responsibilities are:
+ 1. Discuss requirements with customers and open-source users via internal and public channels. Discuss deadlines for important changes, and provide releases for milestones.
+ 3. Track all bugs and features via ticket system. Track important changes via pull-requests.
+ 4. Maintain the quality of all contributions in repository, as discussed in this document previously; including code, commits, tickets, PRs, wikis.
+ 5. Keep CI/CD working in repository. Require build, test runs, minimum test-coverage on PR merge via branch-protection rules. Automate releases.
+ 6. Track all changes for release, provide changelogs, release tags and descriptions. Obey [semver](https://semver.org/) convention, update version components properly.
+ 7. Keep dependencies up to date.
+ 8. Perform review process for pull requests.
+
+Maintainers are:
+ - @g4s8 - artipie/artipie artipie/asto artipie/http artipie/docker-adapter artipy/files-adapter artipie/central artipie/artipie-cli artipie/gem-adapter artipie/helm-charts artipie/ppom artipie/http-client
+ - @olenagerasimova - artipie/rpm-adapter artipie/debian-adapter artipie/conda-adapter artipie/go-adapter artipie/management-api artipie/maven-adapter artipie/nuget-adapter artipie/pypi-adapter
+ - @genryxy - artipie/composer-adapter artipie/benchmarks artipie/helm-adapter artipie/npm-adapter artipie/p2-adapter
+ - @chgen - artipie/conan-adapter
