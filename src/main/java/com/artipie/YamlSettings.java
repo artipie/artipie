@@ -128,6 +128,11 @@ public final class YamlSettings implements Settings {
         return res;
     }
 
+    @Override
+    public String toString() {
+        return String.format("YamlSettings{\n%s\n}", this.content.toString());
+    }
+
     /**
      * Check that yaml has `type: file` mapping in the credentials setting.
      * @param cred Credentials yaml section

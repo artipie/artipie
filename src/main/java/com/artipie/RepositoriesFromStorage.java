@@ -16,6 +16,7 @@ import com.google.common.cache.LoadingCache;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
@@ -36,11 +37,20 @@ public final class RepositoriesFromStorage implements Repositories {
     private static LoadingCache<FilesContent, Single<StorageAliases>> aliases;
 
     static {
-        System.setProperty(
-            ArtipieProperties.CONFIG_TIMEOUT,
-            new ArtipieProperties().configCacheTimeout()
-        );
-        final int timeout = Integer.getInteger(ArtipieProperties.CONFIG_TIMEOUT, 2 * 60 * 1000);
+        final int timeout;
+        try {
+            timeout = Integer.parseInt(
+                Optional.ofNullable(
+                    System.getProperty(ArtipieProperties.CONFIG_TIMEOUT)
+                ).flatMap(ignored -> new ArtipieProperties().configCacheTimeout())
+                .orElse("120000")
+            );
+        } catch (final NumberFormatException exc) {
+            throw new ArtipieException(
+                String.format("Failed to read property '%s'", ArtipieProperties.CONFIG_TIMEOUT),
+                exc
+            );
+        }
         RepositoriesFromStorage.configs = CacheBuilder.newBuilder()
             .expireAfterWrite(timeout, TimeUnit.MILLISECONDS)
             .softValues()

@@ -139,12 +139,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     }
 
     @Override
-    @SuppressWarnings("PMD.SystemPrintln")
-    public void afterEach(final ExtensionContext context) throws Exception {
-        this.aloggers.forEach(
-            (name, log) -> System.out.printf("Artipie '%s' logs:\n%s\n", name, log)
-        );
-        System.out.printf("Client logs:\n%s\n", this.clilogger);
+    public void afterEach(final ExtensionContext context) {
         if (this.artipie != null) {
             this.artipie.values().forEach(GenericContainer::stop);
             this.artipie.values().forEach(Startable::close);
