@@ -38,26 +38,23 @@ public final class YamlSettings implements Settings {
     private final YamlMapping content;
 
     /**
-     * Authentication cache.
+     * A set of caches for settings.
      */
-    private final AuthCache authcache;
+    private final SettingsCaches caches;
 
     /**
      * Ctor.
      * @param content YAML file content.
-     * @param authcache Auth cache
+     * @param caches Settings caches
      */
-    public YamlSettings(final YamlMapping content, final AuthCache authcache) {
+    public YamlSettings(final YamlMapping content, final SettingsCaches caches) {
         this.content = content;
-        this.authcache = authcache;
+        this.caches = caches;
     }
 
     @Override
     public Storage storage() {
-        return new MeasuredStorage(
-            new YamlStorage(this.meta().yamlMapping("storage"))
-                .storage()
-        );
+        return this.caches.storageConfig().storage(this);
     }
 
     @Override
@@ -66,7 +63,7 @@ public final class YamlSettings implements Settings {
             Users::auth
         ).thenApply(
             auth -> new Authentication.Joined(
-                new Cached(this.authcache, new GithubAuth()),
+                new Cached(this.caches.auth(), new GithubAuth()),
                 auth
             )
         );

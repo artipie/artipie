@@ -6,7 +6,6 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Storage;
-import com.artipie.auth.CachedUsers;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
@@ -67,13 +66,13 @@ final class CachedStoragesTest {
                     Yaml.createYamlMappingBuilder()
                         .add("meta", Yaml.createYamlMappingBuilder().build())
                         .build(),
-                    new CachedUsers()
+                    new SettingsCaches.Fake()
                 )
             )
         );
     }
 
-    private static YamlSettings config(final String stpath) {
+    private static Settings config(final String stpath) {
         return new YamlSettings(
             Yaml.createYamlMappingBuilder()
                 .add(
@@ -85,7 +84,7 @@ final class CachedStoragesTest {
                             .add("path", stpath).build()
                     ).build()
                 ).build(),
-            new CachedUsers()
+            new SettingsCaches.Fake()
         );
     }
 }

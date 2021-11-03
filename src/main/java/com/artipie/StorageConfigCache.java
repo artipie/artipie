@@ -5,6 +5,7 @@
 package com.artipie;
 
 import com.artipie.asto.Storage;
+import com.artipie.asto.memory.InMemoryStorage;
 
 /**
  * Cache for storages with similar configurations in Artipie settings.
@@ -23,4 +24,33 @@ interface StorageConfigCache {
      * Invalidate all items in cache.
      */
     void invalidateAll();
+
+    /**
+     * Fake implementation of {@link StorageConfigCache} which
+     * always return in-memory storage.
+     * @since 0.22
+     */
+    class Fake implements StorageConfigCache {
+        /**
+         * Storage.
+         */
+        private final Storage storage;
+
+        /**
+         * Ctor.
+         */
+        Fake() {
+            this.storage = new InMemoryStorage();
+        }
+
+        @Override
+        public Storage storage(final Settings ignored) {
+            return this.storage;
+        }
+
+        @Override
+        public void invalidateAll() {
+            // do nothing
+        }
+    }
 }
