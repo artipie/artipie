@@ -33,7 +33,8 @@ final class CachedStorages implements StorageConfigCache {
     static {
         CachedStorages.storages = CacheBuilder.newBuilder()
             .expireAfterAccess(
-                new Property(ArtipieProperties.STORAGE_TIMEOUT).asLongOrDefault("180000"),
+                //@checkstyle MagicNumberCheck (1 line)
+                new Property(ArtipieProperties.STORAGE_TIMEOUT).asLongOrDefault(180_000L),
                 TimeUnit.MILLISECONDS
             ).softValues()
             .build(

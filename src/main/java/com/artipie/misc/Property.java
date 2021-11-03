@@ -27,19 +27,20 @@ public final class Property {
     }
 
     /**
-     * Obtains long value of the property set properties or file
-     * with values of the properties.
+     * Obtains long value of the property from already set properties or
+     * from the file with values of the properties.
      * @param defval Default value for property
-     * @return Long value of or default value.
+     * @return Long value of property or default value.
      * @throws ArtipieException In case of problem with parsing value of the property
      */
-    public long asLongOrDefault(final String defval) {
+    public long asLongOrDefault(final long defval) {
         final long val;
         try {
             val = Long.parseLong(
                 Optional.ofNullable(System.getProperty(this.name))
                     .orElse(
-                        new ArtipieProperties().valueBy(this.name).orElse(defval)
+                        new ArtipieProperties().valueBy(this.name)
+                            .orElse(String.valueOf(defval))
                     )
             );
         } catch (final NumberFormatException exc) {

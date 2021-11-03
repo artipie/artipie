@@ -31,7 +31,8 @@ final class CachedUsers implements AuthCache {
     static {
         CachedUsers.users = CacheBuilder.newBuilder()
             .expireAfterAccess(
-                new Property(ArtipieProperties.AUTH_TIMEOUT).asLongOrDefault("300000"),
+                //@checkstyle MagicNumberCheck (1 line)
+                new Property(ArtipieProperties.AUTH_TIMEOUT).asLongOrDefault(300_000L),
                 TimeUnit.MILLISECONDS
             ).softValues()
             .build(

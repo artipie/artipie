@@ -13,14 +13,15 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link Property}.
  * @since 0.23
+ * @checkstyle MagicNumberCheck (500 lines)
  */
 final class PropertyTest {
     @Test
     void readsDefaultValue() {
-        final long defval = 500;
+        final long defval = 500L;
         MatcherAssert.assertThat(
             new Property("not.existed.value.so.use.default")
-                .asLongOrDefault(String.valueOf(defval)),
+                .asLongOrDefault(defval),
             new IsEqual<>(defval)
         );
     }
@@ -29,8 +30,7 @@ final class PropertyTest {
     void readsValueFromArtipieProperties() {
         MatcherAssert.assertThat(
             new Property(ArtipieProperties.STORAGE_TIMEOUT)
-                .asLongOrDefault("123"),
-            //@checkstyle MagicNumberCheck (1 line)
+                .asLongOrDefault(123L),
             new IsEqual<>(180_000L)
         );
     }
@@ -41,7 +41,7 @@ final class PropertyTest {
         System.setProperty(ArtipieProperties.AUTH_TIMEOUT, String.valueOf(val));
         MatcherAssert.assertThat(
             new Property(ArtipieProperties.AUTH_TIMEOUT)
-                .asLongOrDefault("345"),
+                .asLongOrDefault(345L),
             new IsEqual<>(val)
         );
     }
@@ -52,7 +52,7 @@ final class PropertyTest {
         System.setProperty(key, "can't be parsed");
         Assertions.assertThrows(
             ArtipieException.class,
-            () -> new Property(key).asLongOrDefault("50")
+            () -> new Property(key).asLongOrDefault(50L)
         );
     }
 
@@ -61,7 +61,7 @@ final class PropertyTest {
         Assertions.assertThrows(
             ArtipieException.class,
             () -> new Property(ArtipieProperties.VERSION_KEY)
-                .asLongOrDefault("567")
+                .asLongOrDefault(567L)
         );
     }
 }
