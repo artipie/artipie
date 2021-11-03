@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.artipie.asto.SubStorage;
+import com.artipie.cache.SettingsCaches;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

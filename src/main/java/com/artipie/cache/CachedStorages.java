@@ -2,10 +2,16 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie;
+package com.artipie.cache;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.ArtipieException;
+import com.artipie.MeasuredStorage;
+import com.artipie.Settings;
+import com.artipie.YamlStorage;
 import com.artipie.asto.Storage;
+import com.artipie.misc.ArtipieProperties;
+import com.artipie.misc.Property;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -25,23 +31,11 @@ final class CachedStorages implements StorageConfigCache {
     private static LoadingCache<Metadata, Storage> storages;
 
     static {
-        final int timeout;
-        try {
-            timeout = Integer.parseInt(
-                Optional.ofNullable(
-                    System.getProperty(ArtipieProperties.STORAGE_TIMEOUT)
-                ).flatMap(ignored -> new ArtipieProperties().storageCacheTimeout())
-                .orElse("180000")
-            );
-        } catch (final NumberFormatException exc) {
-            throw new ArtipieException(
-                String.format("Failed to read property '%s'", ArtipieProperties.STORAGE_TIMEOUT),
-                exc
-            );
-        }
         CachedStorages.storages = CacheBuilder.newBuilder()
-            .expireAfterAccess(timeout, TimeUnit.MILLISECONDS)
-            .softValues()
+            .expireAfterAccess(
+                new Property(ArtipieProperties.STORAGE_TIMEOUT).asLongOrDefault("180000"),
+                TimeUnit.MILLISECONDS
+            ).softValues()
             .build(
                 new CacheLoader<>() {
                     @Override

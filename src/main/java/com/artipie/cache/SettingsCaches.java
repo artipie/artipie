@@ -2,16 +2,13 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie;
-
-import com.artipie.auth.AuthCache;
-import com.artipie.auth.CachedUsers;
+package com.artipie.cache;
 
 /**
  * Encapsulates caches which are possible to use in settings of Artipie server.
  * @since 0.23
  */
-interface SettingsCaches {
+public interface SettingsCaches {
     /**
      * Obtains cache for configurations of storages.
      * @return Cache for configurations of storages.
@@ -42,7 +39,7 @@ interface SettingsCaches {
         /**
          * Ctor with all initialized caches.
          */
-        All() {
+        public All() {
             this.authcache = new CachedUsers();
             this.strgcache = new CachedStorages();
         }
@@ -76,7 +73,7 @@ interface SettingsCaches {
         /**
          * Ctor with all fake initialized caches.
          */
-        Fake() {
+        public Fake() {
             this.authcache = new AuthCache.Fake();
             this.strgcache = new StorageConfigCache.Fake();
         }

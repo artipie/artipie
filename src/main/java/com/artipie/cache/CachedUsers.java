@@ -2,11 +2,11 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie.auth;
+package com.artipie.cache;
 
-import com.artipie.ArtipieException;
-import com.artipie.ArtipieProperties;
 import com.artipie.http.auth.Authentication;
+import com.artipie.misc.ArtipieProperties;
+import com.artipie.misc.Property;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -22,30 +22,18 @@ import java.util.concurrent.TimeUnit;
  * </p>
  * @since 0.22
  */
-public final class CachedUsers implements AuthCache {
+final class CachedUsers implements AuthCache {
     /**
      * Cache for users.
      */
     private static LoadingCache<Data, Optional<Authentication.User>> users;
 
     static {
-        final int timeout;
-        try {
-            timeout = Integer.parseInt(
-                Optional.ofNullable(
-                    System.getProperty(ArtipieProperties.AUTH_TIMEOUT)
-                ).flatMap(ignored -> new ArtipieProperties().cachedAuthTimeout())
-                .orElse("300000")
-            );
-        } catch (final NumberFormatException exc) {
-            throw new ArtipieException(
-                String.format("Failed to read property '%s'", ArtipieProperties.AUTH_TIMEOUT),
-                exc
-            );
-        }
         CachedUsers.users = CacheBuilder.newBuilder()
-            .expireAfterAccess(timeout, TimeUnit.MILLISECONDS)
-            .softValues()
+            .expireAfterAccess(
+                new Property(ArtipieProperties.AUTH_TIMEOUT).asLongOrDefault("300000"),
+                TimeUnit.MILLISECONDS
+            ).softValues()
             .build(
                 new CacheLoader<>() {
                     @Override
