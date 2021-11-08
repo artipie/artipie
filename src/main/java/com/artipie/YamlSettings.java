@@ -12,7 +12,6 @@ import com.artipie.auth.GithubAuth;
 import com.artipie.cache.AuthCache;
 import com.artipie.cache.SettingsCaches;
 import com.artipie.http.auth.Authentication;
-import com.artipie.http.slice.KeyFromPath;
 import com.artipie.management.Users;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -99,20 +98,9 @@ public final class YamlSettings implements Settings {
         final YamlMapping cred = this.meta()
             .yamlMapping("credentials");
         final CompletionStage<Users> res;
-        final String path = "path";
-        if (YamlSettings.hasTypeFile(cred) && cred.string(path) != null) {
-            final Storage strg = this.storage();
-            final KeyFromPath key = new KeyFromPath(cred.string(path));
-            res = strg.exists(key).thenApply(
-                exists -> {
-                    final Users creds;
-                    if (exists) {
-                        creds = new UsersFromStorageYaml(strg, key);
-                    } else {
-                        creds = new UsersFromEnv();
-                    }
-                    return creds;
-                }
+        if (YamlSettings.hasTypeFile(cred) && cred.string("path") != null) {
+            res = CompletableFuture.completedFuture(
+                this.caches.credsConfig().credentials(this)
             );
         } else if (YamlSettings.hasTypeFile(cred)) {
             res = CompletableFuture.failedFuture(

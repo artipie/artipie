@@ -8,11 +8,13 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.artipie.asto.SubStorage;
+import com.artipie.asto.ValueNotFoundException;
 import com.artipie.cache.SettingsCaches;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
@@ -172,6 +174,26 @@ class YamlSettingsTest {
         MatcherAssert.assertThat(
             settings.credentials().toCompletableFuture().join(),
             new IsInstanceOf(UsersFromStorageYaml.class)
+        );
+    }
+
+    @Test
+    void failsToGetCredentialsWhenFileIsAbsent(@TempDir final Path tmp) throws IOException {
+        final YamlSettings settings = new YamlSettings(
+            this.config(tmp.toString(), "file", Optional.of("_cred.yml")),
+            new SettingsCaches.All()
+        );
+        Files.writeString(tmp.resolve("_cred_another.yml"), this.credentials());
+        final Exception exc = Assertions.assertThrows(
+            CompletionException.class,
+            () -> settings.credentials()
+                .toCompletableFuture().join()
+                .list()
+                .toCompletableFuture().join()
+        );
+        MatcherAssert.assertThat(
+            exc.getCause(),
+            new IsInstanceOf(ValueNotFoundException.class)
         );
     }
 
