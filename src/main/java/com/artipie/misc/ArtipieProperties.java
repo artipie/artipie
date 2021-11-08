@@ -2,7 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie;
+package com.artipie.misc;
 
 import com.artipie.asto.ArtipieIOException;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public final class ArtipieProperties {
     /**
      * Expiration time for cache of configuration files.
      */
-    static final String CONFIG_TIMEOUT = "artipie.config.cache.timeout";
+    public static final String CONFIG_TIMEOUT = "artipie.config.cache.timeout";
 
     /**
      * Name of file with properties.
@@ -71,32 +71,13 @@ public final class ArtipieProperties {
     }
 
     /**
-     * Obtains timeout of caching configuration files in milliseconds.
-     * @return Timeout of caching files with configuration.
+     * Obtains a value by specified key from properties file.
+     * @param key Key for obtaining value
+     * @return A value by specified key from properties file.
      */
-    public Optional<String> configCacheTimeout() {
+    public Optional<String> valueBy(final String key) {
         return Optional.ofNullable(
-            this.properties.getProperty(ArtipieProperties.CONFIG_TIMEOUT)
-        );
-    }
-
-    /**
-     * Obtains timeout of caching users in milliseconds.
-     * @return Timeout of caching users.
-     */
-    public Optional<String> cachedAuthTimeout() {
-        return Optional.ofNullable(
-            this.properties.getProperty(ArtipieProperties.AUTH_TIMEOUT)
-        );
-    }
-
-    /**
-     * Obtains timeout of caching settings of the storage in milliseconds.
-     * @return Timeout of caching settings of the storage.
-     */
-    public Optional<String> storageCacheTimeout() {
-        return Optional.ofNullable(
-            this.properties.getProperty(ArtipieProperties.STORAGE_TIMEOUT)
+            this.properties.getProperty(key)
         );
     }
 

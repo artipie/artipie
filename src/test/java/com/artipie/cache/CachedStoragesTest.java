@@ -2,9 +2,12 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie;
+package com.artipie.cache;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.ArtipieException;
+import com.artipie.Settings;
+import com.artipie.YamlSettings;
 import com.artipie.asto.Storage;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;

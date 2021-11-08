@@ -9,6 +9,8 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.client.ClientSlices;
+import com.artipie.misc.ArtipieProperties;
+import com.artipie.misc.Property;
 import com.artipie.repo.ConfigFile;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -16,7 +18,6 @@ import com.google.common.cache.LoadingCache;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
@@ -37,22 +38,11 @@ public final class RepositoriesFromStorage implements Repositories {
     private static LoadingCache<FilesContent, Single<StorageAliases>> aliases;
 
     static {
-        final int timeout;
-        try {
-            timeout = Integer.parseInt(
-                Optional.ofNullable(
-                    System.getProperty(ArtipieProperties.CONFIG_TIMEOUT)
-                ).flatMap(ignored -> new ArtipieProperties().configCacheTimeout())
-                .orElse("120000")
-            );
-        } catch (final NumberFormatException exc) {
-            throw new ArtipieException(
-                String.format("Failed to read property '%s'", ArtipieProperties.CONFIG_TIMEOUT),
-                exc
-            );
-        }
+        final long duration;
+        //@checkstyle MagicNumberCheck (1 line)
+        duration = new Property(ArtipieProperties.CONFIG_TIMEOUT).asLongOrDefault(120_000L);
         RepositoriesFromStorage.configs = CacheBuilder.newBuilder()
-            .expireAfterWrite(timeout, TimeUnit.MILLISECONDS)
+            .expireAfterWrite(duration, TimeUnit.MILLISECONDS)
             .softValues()
             .build(
                 new CacheLoader<>() {
@@ -63,7 +53,7 @@ public final class RepositoriesFromStorage implements Repositories {
                 }
             );
         RepositoriesFromStorage.aliases = CacheBuilder.newBuilder()
-            .expireAfterWrite(timeout, TimeUnit.MILLISECONDS)
+            .expireAfterWrite(duration, TimeUnit.MILLISECONDS)
             .softValues()
             .build(
                 new CacheLoader<>() {

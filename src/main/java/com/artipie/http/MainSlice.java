@@ -5,7 +5,6 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.ArtipieProperties;
 import com.artipie.Settings;
 import com.artipie.YamlStorage;
 import com.artipie.api.ArtipieApi;
@@ -24,6 +23,7 @@ import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.http.slice.SliceOptional;
 import com.artipie.metrics.MetricSlice;
+import com.artipie.misc.ArtipieProperties;
 import java.util.Optional;
 import java.util.regex.Pattern;
 

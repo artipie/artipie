@@ -7,6 +7,7 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.cache.SettingsCaches;
 import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.file.Files;

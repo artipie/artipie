@@ -4,8 +4,8 @@
  */
 package com.artipie.http;
 
-import com.artipie.ArtipieProperties;
 import com.artipie.http.rs.common.RsJson;
+import com.artipie.misc.ArtipieProperties;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import javax.json.Json;
