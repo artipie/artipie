@@ -98,7 +98,7 @@ public interface SettingsCaches {
         public Fake() {
             this.authcache = new AuthCache.Fake();
             this.strgcache = new StorageConfigCache.Fake();
-            this.credscache = new CredsConfigCache.FromEnv();
+            this.credscache = new CredsConfigCache.Fake();
         }
 
         @Override

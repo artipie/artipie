@@ -4,9 +4,12 @@
  */
 package com.artipie.cache;
 
-import com.artipie.Settings;
-import com.artipie.UsersFromEnv;
-import com.artipie.management.Users;
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Cache for credentials with similar configurations in Artipie settings.
@@ -16,10 +19,11 @@ public interface CredsConfigCache {
     /**
      * Finds credentials by specified in settings configuration cache or creates
      * a new item and caches it.
-     * @param settings Artipie settings
-     * @return Storage
+     * @param storage Storage
+     * @param path Path to the credentials file
+     * @return Yaml credentials
      */
-    Users credentials(Settings settings);
+    CompletionStage<YamlMapping> credentials(Storage storage, Key path);
 
     /**
      * Invalidate all items in cache.
@@ -27,25 +31,24 @@ public interface CredsConfigCache {
     void invalidateAll();
 
     /**
-     * Fake implementation of {@link CredsConfigCache} which
-     * always returns credentials from env.
+     * Fake implementation of {@link CredsConfigCache}.
      * @since 0.23
      */
-    class FromEnv implements CredsConfigCache {
+    class Fake implements CredsConfigCache {
         /**
          * Users credentials.
          */
-        private final Users creds;
+        private final CompletionStage<YamlMapping> creds;
 
         /**
          * Ctor.
          */
-        FromEnv() {
-            this.creds = new UsersFromEnv();
+        public Fake() {
+            this.creds = CompletableFuture.completedFuture(Yaml.createYamlMappingBuilder().build());
         }
 
         @Override
-        public Users credentials(final Settings settings) {
+        public CompletionStage<YamlMapping> credentials(final Storage storage, final Key path) {
             return this.creds;
         }
 

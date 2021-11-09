@@ -4,18 +4,19 @@
  */
 package com.artipie.cache;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.ArtipieException;
-import com.artipie.Settings;
-import com.artipie.YamlSettings;
-import com.artipie.management.Users;
+import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Content;
+import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
+import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.asto.test.TestResource;
+import java.nio.charset.StandardCharsets;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Tests for {@link CachedCreds}.
@@ -23,122 +24,86 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CachedCredsTest {
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "/some/path/with/prefix", "only/some/path"
-    })
-    void getsValueFromCache(final String path) {
-        final String stpath = "any/storage/path";
+    /**
+     * Storage.
+     */
+    private Storage storage;
+
+    @BeforeEach
+    void setUp() {
+        this.storage = new InMemoryStorage();
+    }
+
+    @Test
+    void getsValueFromCache() {
+        final Key path = new Key.From("creds.yaml");
         final CredsConfigCache cache = new CachedCreds();
         cache.invalidateAll();
-        final Users creds = cache.credentials(CachedCredsTest.config(path, stpath));
-        final Users same = cache.credentials(CachedCredsTest.config(path, stpath));
+        this.storage.save(path, Content.EMPTY).join();
+        final YamlMapping creds = cache.credentials(this.storage, path)
+            .toCompletableFuture().join();
+        final YamlMapping same = cache.credentials(this.storage, path)
+            .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Obtained configurations were different",
             creds.equals(same),
             new IsEqual<>(true)
         );
         MatcherAssert.assertThat(
-            "Storage configuration was not cached",
+            "Credentials configuration was not cached",
             cache.toString(),
             new StringContains("size=1")
         );
     }
 
     @Test
-    void getsOriginForDifferentConfiguration() {
-        final String stpath = "any/storage/path/also";
+    void getsOriginForDifferentConfigurations() {
         final CredsConfigCache cache = new CachedCreds();
         cache.invalidateAll();
-        final Users frst = cache.credentials(CachedCredsTest.config("first", stpath));
-        final Users scnd = cache.credentials(CachedCredsTest.config("second", stpath));
+        final Key onekey = new Key.From("first.yml");
+        final Key twokey = new Key.From("credentials.yml");
+        final BlockingStorage blck = new BlockingStorage(this.storage);
+        blck.save(onekey, "credentials: val".getBytes(StandardCharsets.UTF_8));
+        blck.save(twokey, "credentials: another val".getBytes(StandardCharsets.UTF_8));
+        final YamlMapping frst = cache.credentials(this.storage, onekey)
+            .toCompletableFuture().join();
+        final YamlMapping scnd = cache.credentials(this.storage, twokey)
+            .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Obtained configurations were the same",
             frst.equals(scnd),
             new IsEqual<>(false)
         );
         MatcherAssert.assertThat(
-            "Storage configuration was not cached",
+            "Credentials configuration was not cached",
             cache.toString(),
             new StringContains("size=2")
-        );
-    }
-
-    @Test
-    void failsToGetCredentialsWhenSectionIsAbsent() {
-        final CredsConfigCache cache = new CachedCreds();
-        cache.invalidateAll();
-        Assertions.assertThrows(
-            ArtipieException.class,
-            () -> cache.credentials(
-                new YamlSettings(
-                    Yaml.createYamlMappingBuilder()
-                        .add("meta", Yaml.createYamlMappingBuilder().build())
-                        .build(),
-                    new SettingsCaches.Fake()
-                )
-            )
         );
     }
 
     @Test
     void getsOriginForSameConfigurationButDifferentStorages() {
-        final String crpath = "any/creds/path";
+        final String path = "_credentials.yaml";
+        final Key key = new Key.From(path);
         final CredsConfigCache cache = new CachedCreds();
         cache.invalidateAll();
-        final Users frst = cache.credentials(CachedCredsTest.config(crpath, "first/strg"));
-        final Users scnd = cache.credentials(CachedCredsTest.config(crpath, "second/strg"));
+        final Storage another = new InMemoryStorage();
+        new TestResource(path).saveTo(this.storage);
+        new BlockingStorage(another)
+            .save(key, "credentials: another val".getBytes(StandardCharsets.UTF_8));
+        final YamlMapping frst = cache.credentials(this.storage, key)
+            .toCompletableFuture().join();
+        final YamlMapping scnd = cache.credentials(another, key)
+            .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Obtained configurations were the same",
             frst.equals(scnd),
             new IsEqual<>(false)
         );
         MatcherAssert.assertThat(
-            "Storage configuration was not cached",
+            "Credentials configuration was not cached",
             cache.toString(),
             new StringContains("size=2")
-        );
-    }
-
-    @Test
-    void failsToGetCredentialsWhenPathIsAbsent() {
-        final CredsConfigCache cache = new CachedCreds();
-        cache.invalidateAll();
-        Assertions.assertThrows(
-            ArtipieException.class,
-            () -> cache.credentials(
-                new YamlSettings(
-                    Yaml.createYamlMappingBuilder()
-                        .add(
-                            "meta", Yaml.createYamlMappingBuilder()
-                                .add("credentials", Yaml.createYamlMappingBuilder().build())
-                                .build()
-                        ).build(),
-                    new SettingsCaches.Fake()
-                )
-            )
-        );
-    }
-
-    private static Settings config(final String crpath, final String stpath) {
-        return new YamlSettings(
-            Yaml.createYamlMappingBuilder()
-                .add(
-                    "meta",
-                    Yaml.createYamlMappingBuilder().add(
-                        "credentials",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "file")
-                            .add("path", crpath).build()
-                    ).add(
-                        "storage",
-                        Yaml.createYamlMappingBuilder()
-                            .add("type", "fs")
-                            .add("path", stpath)
-                            .build()
-                    ).build()
-                ).build(),
-            new SettingsCaches.All()
         );
     }
 }

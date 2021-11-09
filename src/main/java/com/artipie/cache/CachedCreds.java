@@ -4,33 +4,33 @@
  */
 package com.artipie.cache;
 
-import com.artipie.ArtipieException;
-import com.artipie.Settings;
-import com.artipie.UsersFromStorageYaml;
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlInput;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.slice.KeyFromPath;
-import com.artipie.management.Users;
+import com.artipie.asto.ext.PublisherAs;
+import com.artipie.asto.misc.UncheckedIOFunc;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
+import com.artipie.repo.ConfigFile;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Implementation of cache for credentials with similar configurations
  * in Artipie settings using {@link LoadingCache}.
  * @since 0.23
  */
-final class CachedCreds implements CredsConfigCache {
+public final class CachedCreds implements CredsConfigCache {
     /**
      * Cache for storages settings.
      */
-    private static LoadingCache<Metadata, Users> creds;
+    private static LoadingCache<Metadata, CompletionStage<YamlMapping>> creds;
 
     static {
         CachedCreds.creds = CacheBuilder.newBuilder()
@@ -42,17 +42,20 @@ final class CachedCreds implements CredsConfigCache {
             .build(
                 new CacheLoader<>() {
                     @Override
-                    public Users load(final Metadata meta) {
-                        final Pair<Key, Storage> pair = meta.credsMeta();
-                        return new UsersFromStorageYaml(pair.getRight(), pair.getLeft());
+                    public CompletionStage<YamlMapping> load(final Metadata meta) {
+                        return new ConfigFile(meta.path()).valueFrom(meta.storage())
+                            .thenApply(PublisherAs::new)
+                            .thenCompose(PublisherAs::asciiString)
+                            .thenApply(Yaml::createYamlInput)
+                            .thenApply(new UncheckedIOFunc<>(YamlInput::readYamlMapping));
                     }
                 }
             );
     }
 
     @Override
-    public Users credentials(final Settings settings) {
-        return CachedCreds.creds.getUnchecked(new Metadata(settings));
+    public CompletionStage<YamlMapping> credentials(final Storage storage, final Key path) {
+        return CachedCreds.creds.getUnchecked(new Metadata(storage, path));
     }
 
     @Override
@@ -79,16 +82,23 @@ final class CachedCreds implements CredsConfigCache {
     @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     private static final class Metadata {
         /**
-         * Settings of Artipie server.
+         * Storage.
          */
-        private final Settings csettings;
+        private final Storage cstorage;
+
+        /**
+         * Path to the credentials file.
+         */
+        private final Key cpath;
 
         /**
          * Ctor.
-         * @param settings Settings
+         * @param storage Storage
+         * @param path Path to the credentials file
          */
-        Metadata(final Settings settings) {
-            this.csettings = settings;
+        Metadata(final Storage storage, final Key path) {
+            this.cstorage = storage;
+            this.cpath = path;
         }
 
         @Override
@@ -99,41 +109,34 @@ final class CachedCreds implements CredsConfigCache {
             } else if (obj == null || this.getClass() != obj.getClass()) {
                 res = false;
             } else {
-                final Pair<Key, Storage> meta = ((Metadata) obj).credsMeta();
-                final Pair<Key, Storage> curr = this.credsMeta();
+                final Metadata meta = (Metadata) obj;
                 final boolean keys = Key.CMP_STRING.compare(
-                    curr.getLeft(), meta.getLeft()
+                    this.cpath, meta.cpath
                 ) == 0;
-                res = keys && meta.getRight().equals(curr.getRight());
+                res = keys && this.cstorage.equals(meta.cstorage);
             }
             return res;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.credsMeta().getLeft().string());
+            return Objects.hash(this.cstorage, this.cpath.string());
         }
 
         /**
-         * Obtains meta information about credentials configuration.
-         * @return Information about credentials configuration.
+         * Obtains storage.
+         * @return Storage.
          */
-        Pair<Key, Storage> credsMeta() {
-            return Pair.of(
-                new KeyFromPath(
-                    Optional.ofNullable(
-                        this.csettings.meta().yamlMapping("credentials")
-                    ).flatMap(meta -> Optional.ofNullable(meta.string("path")))
-                    .orElseThrow(
-                        () -> new ArtipieException(
-                            String.format(
-                                "Failed to read credentials configuration in \n%s", this.csettings
-                            )
-                        )
-                    )
-                ),
-                this.csettings.storage()
-            );
+        public Storage storage() {
+            return this.cstorage;
+        }
+
+        /**
+         * Obtains path to credentials file.
+         * @return Path to credentials file.
+         */
+        public Key path() {
+            return this.cpath;
         }
     }
 }
