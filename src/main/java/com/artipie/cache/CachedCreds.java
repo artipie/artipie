@@ -30,11 +30,16 @@ public final class CachedCreds implements CredsConfigCache {
     /**
      * Cache for storages settings.
      */
-    private static LoadingCache<Metadata, CompletionStage<YamlMapping>> creds;
+    private final LoadingCache<Metadata, CompletionStage<YamlMapping>> creds;
 
-    static {
-        CachedCreds.creds = CacheBuilder.newBuilder()
-            .expireAfterAccess(
+    /**
+     * Ctor.
+     * Here an instance of cache is created. It is important that cache
+     * is a local variable.
+     */
+    public CachedCreds() {
+        this.creds = CacheBuilder.newBuilder()
+            .expireAfterWrite(
                 //@checkstyle MagicNumberCheck (1 line)
                 new Property(ArtipieProperties.CREDS_TIMEOUT).asLongOrDefault(180_000L),
                 TimeUnit.MILLISECONDS
@@ -55,19 +60,19 @@ public final class CachedCreds implements CredsConfigCache {
 
     @Override
     public CompletionStage<YamlMapping> credentials(final Storage storage, final Key path) {
-        return CachedCreds.creds.getUnchecked(new Metadata(storage, path));
+        return this.creds.getUnchecked(new Metadata(storage, path));
     }
 
     @Override
     public void invalidateAll() {
-        CachedCreds.creds.invalidateAll();
+        this.creds.invalidateAll();
     }
 
     @Override
     public String toString() {
         return String.format(
             "%s(size=%d)",
-            this.getClass().getSimpleName(), CachedCreds.creds.size()
+            this.getClass().getSimpleName(), this.creds.size()
         );
     }
 
