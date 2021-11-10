@@ -176,6 +176,33 @@ class YamlSettingsTest {
     }
 
     @Test
+    void getsCredentialsFromCache(@TempDir final Path tmp) throws IOException {
+        final String fname = "_cred.yml";
+        final SettingsCaches cache = new SettingsCaches.All();
+        final YamlSettings settings = new YamlSettings(
+            this.config(tmp.toString(), "file", Optional.of(fname)),
+            cache
+        );
+        Files.writeString(tmp.resolve(fname), this.credentials());
+        settings.credentials().toCompletableFuture().join()
+            .list().toCompletableFuture().join();
+        Files.writeString(tmp.resolve(fname), "not valid yaml file");
+        MatcherAssert.assertThat(
+            "Storage configuration was not cached",
+            cache.credsConfig().toString(),
+            new StringContains("size=1")
+        );
+        MatcherAssert.assertThat(
+            settings.credentials()
+                .toCompletableFuture().join()
+                .list()
+                .toCompletableFuture().join()
+                .size(),
+            new IsEqual<>(1)
+        );
+    }
+
+    @Test
     void returnsRepoConfigs(@TempDir final Path tmp) {
         MatcherAssert.assertThat(
             new YamlSettings(

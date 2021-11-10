@@ -18,7 +18,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -113,8 +112,8 @@ final class CachedCredsTest {
         );
         MatcherAssert.assertThat(
             "Credentials configuration was not cached",
-            configs.toString(),
-            new StringContains("size=2")
+            this.cache.size(),
+            new IsEqual<>(2L)
         );
     }
 }
