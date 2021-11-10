@@ -5,21 +5,17 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlInput;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
-import com.artipie.asto.Concatenation;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.auth.AuthFromYaml;
+import com.artipie.cache.CredsConfigCache;
 import com.artipie.http.auth.Authentication;
 import com.artipie.management.Users;
-import com.artipie.repo.ConfigFile;
-import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -60,13 +56,22 @@ public final class UsersFromStorageYaml implements Users {
     private final Key key;
 
     /**
+     * Credentials configuration cache.
+     */
+    private final CredsConfigCache cache;
+
+    /**
      * Ctor.
      * @param storage Storage
      * @param key Credentials key
+     * @param cache Credentials configuration cache
      */
-    public UsersFromStorageYaml(final Storage storage, final Key key) {
+    public UsersFromStorageYaml(
+        final Storage storage, final Key key, final CredsConfigCache cache
+    ) {
         this.storage = storage;
         this.key = key;
+        this.cache = cache;
     }
 
     @Override
@@ -144,14 +149,7 @@ public final class UsersFromStorageYaml implements Users {
      *  figure out why, make necessary corrections and use `ContentAs` here.
      */
     public CompletionStage<YamlMapping> yaml() {
-        return SingleInterop.fromFuture(
-            new ConfigFile(this.key).valueFrom(this.storage)
-        ).flatMap(content -> new Concatenation(content).single())
-        .map(Remaining::new)
-        .map(Remaining::bytes)
-        .map(bytes -> Yaml.createYamlInput(new String(bytes, StandardCharsets.US_ASCII)))
-        .map(YamlInput::readYamlMapping)
-        .to(SingleInterop.get());
+        return this.cache.credentials(this.storage, this.key);
     }
 
     /**

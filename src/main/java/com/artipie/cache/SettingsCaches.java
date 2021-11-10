@@ -16,6 +16,12 @@ public interface SettingsCaches {
     StorageConfigCache storageConfig();
 
     /**
+     * Obtains cache for configurations of credentials.
+     * @return Cache for configurations of credentials.
+     */
+    CredsConfigCache credsConfig();
+
+    /**
      * Obtains cache for user logins.
      * @return Cache for user logins.
      */
@@ -37,16 +43,27 @@ public interface SettingsCaches {
         private final StorageConfigCache strgcache;
 
         /**
+         * Cache for configurations of credentials.
+         */
+        private final CredsConfigCache credscache;
+
+        /**
          * Ctor with all initialized caches.
          */
         public All() {
             this.authcache = new CachedUsers();
             this.strgcache = new CachedStorages();
+            this.credscache = new CachedCreds();
         }
 
         @Override
         public StorageConfigCache storageConfig() {
             return this.strgcache;
+        }
+
+        @Override
+        public CredsConfigCache credsConfig() {
+            return this.credscache;
         }
 
         @Override
@@ -71,16 +88,27 @@ public interface SettingsCaches {
         private final StorageConfigCache strgcache;
 
         /**
+         * Cache for configurations of credentials.
+         */
+        private final CredsConfigCache credscache;
+
+        /**
          * Ctor with all fake initialized caches.
          */
         public Fake() {
             this.authcache = new AuthCache.Fake();
             this.strgcache = new StorageConfigCache.Fake();
+            this.credscache = new CredsConfigCache.Fake();
         }
 
         @Override
         public StorageConfigCache storageConfig() {
             return this.strgcache;
+        }
+
+        @Override
+        public CredsConfigCache credsConfig() {
+            return this.credscache;
         }
 
         @Override

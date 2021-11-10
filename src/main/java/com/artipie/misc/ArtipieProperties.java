@@ -28,12 +28,17 @@ public final class ArtipieProperties {
     /**
      * Expiration time for cache of storage setting.
      */
-    public static final String STORAGE_TIMEOUT = "artipie.storage.cache.timeout";
+    public static final String STORAGE_TIMEOUT = "artipie.storage.file.cache.timeout";
 
     /**
      * Expiration time for cache of configuration files.
      */
     public static final String CONFIG_TIMEOUT = "artipie.config.cache.timeout";
+
+    /**
+     * Expiration time for cache of credential setting.
+     */
+    public static final String CREDS_TIMEOUT = "artipie.credentials.file.cache.timeout";
 
     /**
      * Name of file with properties.

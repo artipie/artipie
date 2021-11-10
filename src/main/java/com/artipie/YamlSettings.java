@@ -107,7 +107,7 @@ public final class YamlSettings implements Settings {
                 exists -> {
                     final Users creds;
                     if (exists) {
-                        creds = new UsersFromStorageYaml(strg, key);
+                        creds = new UsersFromStorageYaml(strg, key, this.caches.credsConfig());
                     } else {
                         creds = new UsersFromEnv();
                     }
