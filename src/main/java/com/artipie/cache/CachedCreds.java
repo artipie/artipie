@@ -11,11 +11,12 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.misc.UncheckedIOFunc;
+import com.artipie.asto.misc.UncheckedScalar;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
 import com.artipie.repo.ConfigFile;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
@@ -30,7 +31,7 @@ public final class CachedCreds implements CredsConfigCache {
     /**
      * Cache for storages settings.
      */
-    private final LoadingCache<Metadata, CompletionStage<YamlMapping>> creds;
+    private final Cache<Metadata, CompletionStage<YamlMapping>> creds;
 
     /**
      * Ctor.
@@ -38,29 +39,37 @@ public final class CachedCreds implements CredsConfigCache {
      * is a local variable.
      */
     public CachedCreds() {
-        this.creds = CacheBuilder.newBuilder()
-            .expireAfterWrite(
-                //@checkstyle MagicNumberCheck (1 line)
-                new Property(ArtipieProperties.CREDS_TIMEOUT).asLongOrDefault(180_000L),
-                TimeUnit.MILLISECONDS
-            ).softValues()
-            .build(
-                new CacheLoader<>() {
-                    @Override
-                    public CompletionStage<YamlMapping> load(final Metadata meta) {
-                        return new ConfigFile(meta.path()).valueFrom(meta.storage())
-                            .thenApply(PublisherAs::new)
-                            .thenCompose(PublisherAs::asciiString)
-                            .thenApply(Yaml::createYamlInput)
-                            .thenApply(new UncheckedIOFunc<>(YamlInput::readYamlMapping));
-                    }
-                }
-            );
+        this(
+            CacheBuilder.newBuilder()
+                .expireAfterWrite(
+                    //@checkstyle MagicNumberCheck (1 line)
+                    new Property(ArtipieProperties.CREDS_TIMEOUT).asLongOrDefault(180_000L),
+                    TimeUnit.MILLISECONDS
+                ).softValues()
+                .build()
+        );
+    }
+
+    /**
+     * Ctor.
+     * @param cache Credentials configuration cache
+     */
+    public CachedCreds(final Cache<Metadata, CompletionStage<YamlMapping>> cache) {
+        this.creds = cache;
     }
 
     @Override
     public CompletionStage<YamlMapping> credentials(final Storage storage, final Key path) {
-        return this.creds.getUnchecked(new Metadata(storage, path));
+        return new UncheckedScalar<>(
+            () -> this.creds.get(
+                new Metadata(storage, path),
+                () -> new ConfigFile(path).valueFrom(storage)
+                    .thenApply(PublisherAs::new)
+                    .thenCompose(PublisherAs::asciiString)
+                    .thenApply(Yaml::createYamlInput)
+                    .thenApply(new UncheckedIOFunc<>(YamlInput::readYamlMapping))
+            )
+        ).value();
     }
 
     @Override
@@ -85,7 +94,7 @@ public final class CachedCreds implements CredsConfigCache {
      * @since 0.23
      */
     @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-    private static final class Metadata {
+    static final class Metadata {
         /**
          * Storage.
          */

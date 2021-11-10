@@ -11,7 +11,11 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
@@ -29,19 +33,27 @@ final class CachedCredsTest {
      */
     private Storage storage;
 
+    /**
+     * Cache for storages settings.
+     */
+    private Cache<CachedCreds.Metadata, CompletionStage<YamlMapping>> cache;
+
     @BeforeEach
     void setUp() {
         this.storage = new InMemoryStorage();
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES)
+            .softValues().build();
     }
 
     @Test
     void getsValueFromCache() {
         final Key path = new Key.From("creds.yaml");
-        final CredsConfigCache cache = new CachedCreds();
+        final CredsConfigCache configs = new CachedCreds(this.cache);
+        configs.invalidateAll();
         this.storage.save(path, Content.EMPTY).join();
-        final YamlMapping creds = cache.credentials(this.storage, path)
+        final YamlMapping creds = configs.credentials(this.storage, path)
             .toCompletableFuture().join();
-        final YamlMapping same = cache.credentials(this.storage, path)
+        final YamlMapping same = configs.credentials(this.storage, path)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Obtained configurations were different",
@@ -50,22 +62,23 @@ final class CachedCredsTest {
         );
         MatcherAssert.assertThat(
             "Credentials configuration was not cached",
-            cache.toString(),
-            new StringContains("size=1")
+            this.cache.size(),
+            new IsEqual<>(1L)
         );
     }
 
     @Test
     void getsOriginForDifferentConfigurations() {
-        final CredsConfigCache cache = new CachedCreds();
+        final CredsConfigCache configs = new CachedCreds(this.cache);
+        configs.invalidateAll();
         final Key onekey = new Key.From("first.yml");
         final Key twokey = new Key.From("credentials.yml");
         final BlockingStorage blck = new BlockingStorage(this.storage);
         blck.save(onekey, "credentials: val".getBytes(StandardCharsets.UTF_8));
         blck.save(twokey, "credentials: another val".getBytes(StandardCharsets.UTF_8));
-        final YamlMapping frst = cache.credentials(this.storage, onekey)
+        final YamlMapping frst = configs.credentials(this.storage, onekey)
             .toCompletableFuture().join();
-        final YamlMapping scnd = cache.credentials(this.storage, twokey)
+        final YamlMapping scnd = configs.credentials(this.storage, twokey)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Obtained configurations were the same",
@@ -74,8 +87,8 @@ final class CachedCredsTest {
         );
         MatcherAssert.assertThat(
             "Credentials configuration was not cached",
-            cache.toString(),
-            new StringContains("size=2")
+            this.cache.size(),
+            new IsEqual<>(2L)
         );
     }
 
@@ -83,14 +96,15 @@ final class CachedCredsTest {
     void getsOriginForSameConfigurationButDifferentStorages() {
         final String path = "_credentials.yaml";
         final Key key = new Key.From(path);
-        final CredsConfigCache cache = new CachedCreds();
+        final CredsConfigCache configs = new CachedCreds(this.cache);
+        configs.invalidateAll();
         final Storage another = new InMemoryStorage();
         new TestResource(path).saveTo(this.storage);
         new BlockingStorage(another)
             .save(key, "credentials: another val".getBytes(StandardCharsets.UTF_8));
-        final YamlMapping frst = cache.credentials(this.storage, key)
+        final YamlMapping frst = configs.credentials(this.storage, key)
             .toCompletableFuture().join();
-        final YamlMapping scnd = cache.credentials(another, key)
+        final YamlMapping scnd = configs.credentials(another, key)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Obtained configurations were the same",
@@ -99,7 +113,7 @@ final class CachedCredsTest {
         );
         MatcherAssert.assertThat(
             "Credentials configuration was not cached",
-            cache.toString(),
+            configs.toString(),
             new StringContains("size=2")
         );
     }
