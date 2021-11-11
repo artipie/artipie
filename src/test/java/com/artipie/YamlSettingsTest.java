@@ -193,6 +193,7 @@ class YamlSettingsTest {
             new StringContains("size=1")
         );
         MatcherAssert.assertThat(
+            "Invalid yaml file was used, although credentials from cache should be used",
             settings.credentials()
                 .toCompletableFuture().join()
                 .list()
