@@ -9,10 +9,13 @@ import com.artipie.ArtipieException;
 import com.artipie.Settings;
 import com.artipie.YamlSettings;
 import com.artipie.asto.Storage;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import java.util.concurrent.TimeUnit;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -21,13 +24,23 @@ import org.junit.jupiter.api.Test;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CachedStoragesTest {
+    /**
+     * Cache for users.
+     */
+    private Cache<CachedStorages.Metadata, Storage> cache;
+
+    @BeforeEach
+    void setUp() {
+        this.cache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES)
+            .softValues().build();
+    }
+
     @Test
     void getsValueFromCache() {
         final String path = "same/path/for/storage";
-        final CachedStorages cache = new CachedStorages();
-        cache.invalidateAll();
-        final Storage strg = cache.storage(CachedStoragesTest.config(path));
-        final Storage same = cache.storage(CachedStoragesTest.config(path));
+        final CachedStorages storages = new CachedStorages(this.cache);
+        final Storage strg = storages.storage(CachedStoragesTest.config(path));
+        final Storage same = storages.storage(CachedStoragesTest.config(path));
         MatcherAssert.assertThat(
             "Obtained configurations were different",
             strg.equals(same),
@@ -35,17 +48,16 @@ final class CachedStoragesTest {
         );
         MatcherAssert.assertThat(
             "Storage configuration was not cached",
-            cache.toString(),
-            new StringContains("size=1")
+            this.cache.size(),
+            new IsEqual<>(1L)
         );
     }
 
     @Test
     void getsOriginForDifferentConfiguration() {
-        final CachedStorages cache = new CachedStorages();
-        cache.invalidateAll();
-        final Storage frst = cache.storage(CachedStoragesTest.config("first"));
-        final Storage scnd = cache.storage(CachedStoragesTest.config("second"));
+        final CachedStorages storages = new CachedStorages(this.cache);
+        final Storage frst = storages.storage(CachedStoragesTest.config("first"));
+        final Storage scnd = storages.storage(CachedStoragesTest.config("second"));
         MatcherAssert.assertThat(
             "Obtained configurations were the same",
             frst.equals(scnd),
@@ -53,18 +65,16 @@ final class CachedStoragesTest {
         );
         MatcherAssert.assertThat(
             "Storage configuration was not cached",
-            cache.toString(),
-            new StringContains("size=2")
+            this.cache.size(),
+            new IsEqual<>(2L)
         );
     }
 
     @Test
     void failsToGetStorageWhenSectionIsAbsent() {
-        final CachedStorages cache = new CachedStorages();
-        cache.invalidateAll();
         Assertions.assertThrows(
             ArtipieException.class,
-            () -> cache.storage(
+            () -> new CachedStorages(this.cache).storage(
                 new YamlSettings(
                     Yaml.createYamlMappingBuilder()
                         .add("meta", Yaml.createYamlMappingBuilder().build())

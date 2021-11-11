@@ -49,7 +49,6 @@ final class CachedCredsTest {
     void getsValueFromCache() {
         final Key path = new Key.From("creds.yaml");
         final CredsConfigCache configs = new CachedCreds(this.cache);
-        configs.invalidateAll();
         this.storage.save(path, Content.EMPTY).join();
         final YamlMapping creds = configs.credentials(this.storage, path)
             .toCompletableFuture().join();
@@ -70,7 +69,6 @@ final class CachedCredsTest {
     @Test
     void getsOriginForDifferentConfigurations() {
         final CredsConfigCache configs = new CachedCreds(this.cache);
-        configs.invalidateAll();
         final Key onekey = new Key.From("first.yml");
         final Key twokey = new Key.From("credentials.yml");
         final BlockingStorage blck = new BlockingStorage(this.storage);
@@ -97,7 +95,6 @@ final class CachedCredsTest {
         final String path = "_credentials.yaml";
         final Key key = new Key.From(path);
         final CredsConfigCache configs = new CachedCreds(this.cache);
-        configs.invalidateAll();
         final Storage another = new InMemoryStorage();
         new TestResource(path).saveTo(this.storage);
         new BlockingStorage(another)
