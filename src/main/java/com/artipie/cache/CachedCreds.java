@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  */
 public final class CachedCreds implements CredsConfigCache {
     /**
-     * Cache for storages settings.
+     * Cache for credentials settings.
      */
     private final Cache<Metadata, CompletionStage<YamlMapping>> creds;
 
