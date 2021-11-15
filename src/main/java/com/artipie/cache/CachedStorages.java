@@ -10,10 +10,11 @@ import com.artipie.MeasuredStorage;
 import com.artipie.Settings;
 import com.artipie.YamlStorage;
 import com.artipie.asto.Storage;
+import com.artipie.asto.misc.UncheckedScalar;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,42 +29,56 @@ final class CachedStorages implements StorageConfigCache {
     /**
      * Cache for storages settings.
      */
-    private static LoadingCache<Metadata, Storage> storages;
+    private final Cache<Metadata, Storage> storages;
 
-    static {
-        CachedStorages.storages = CacheBuilder.newBuilder()
-            .expireAfterAccess(
-                //@checkstyle MagicNumberCheck (1 line)
-                new Property(ArtipieProperties.STORAGE_TIMEOUT).asLongOrDefault(180_000L),
-                TimeUnit.MILLISECONDS
-            ).softValues()
-            .build(
-                new CacheLoader<>() {
-                    @Override
-                    public Storage load(final Metadata meta) {
-                        return new MeasuredStorage(
-                            new YamlStorage(meta.storageMeta()).storage()
-                        );
-                    }
-                }
-            );
+    /**
+     * Ctor.
+     * Here an instance of cache is created. It is important that cache
+     * is a local variable.
+     */
+    CachedStorages() {
+        this(
+            CacheBuilder.newBuilder()
+                .expireAfterWrite(
+                    //@checkstyle MagicNumberCheck (1 line)
+                    new Property(ArtipieProperties.STORAGE_TIMEOUT).asLongOrDefault(180_000L),
+                    TimeUnit.MILLISECONDS
+                ).softValues()
+                .build()
+        );
+    }
+
+    /**
+     * Ctor.
+     * @param cache Cache for storages settings
+     */
+    CachedStorages(final Cache<Metadata, Storage> cache) {
+        this.storages = cache;
     }
 
     @Override
     public Storage storage(final Settings settings) {
-        return CachedStorages.storages.getUnchecked(new Metadata(settings));
+        final Metadata meta = new Metadata(settings);
+        return new UncheckedScalar<>(
+            () -> this.storages.get(
+                meta,
+                () -> new MeasuredStorage(
+                    new YamlStorage(meta.storageMeta()).storage()
+                )
+            )
+        ).value();
     }
 
     @Override
     public void invalidateAll() {
-        CachedStorages.storages.invalidateAll();
+        this.storages.invalidateAll();
     }
 
     @Override
     public String toString() {
         return String.format(
             "%s(size=%d)",
-            this.getClass().getSimpleName(), CachedStorages.storages.size()
+            this.getClass().getSimpleName(), this.storages.size()
         );
     }
 
@@ -72,7 +87,7 @@ final class CachedStorages implements StorageConfigCache {
      * @since 0.22
      */
     @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-    private static final class Metadata {
+    static final class Metadata {
         /**
          * Settings of Artipie server.
          */
