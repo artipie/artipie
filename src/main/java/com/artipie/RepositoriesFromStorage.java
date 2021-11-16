@@ -9,6 +9,8 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.client.ClientSlices;
+import com.artipie.misc.ArtipieProperties;
+import com.artipie.misc.Property;
 import com.artipie.repo.ConfigFile;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -36,13 +38,11 @@ public final class RepositoriesFromStorage implements Repositories {
     private static LoadingCache<FilesContent, Single<StorageAliases>> aliases;
 
     static {
-        System.setProperty(
-            ArtipieProperties.CONFIG_TIMEOUT,
-            new ArtipieProperties().configCacheTimeout()
-        );
-        final int timeout = Integer.getInteger(ArtipieProperties.CONFIG_TIMEOUT, 2 * 60 * 1000);
+        final long duration;
+        //@checkstyle MagicNumberCheck (1 line)
+        duration = new Property(ArtipieProperties.CONFIG_TIMEOUT).asLongOrDefault(120_000L);
         RepositoriesFromStorage.configs = CacheBuilder.newBuilder()
-            .expireAfterWrite(timeout, TimeUnit.MILLISECONDS)
+            .expireAfterWrite(duration, TimeUnit.MILLISECONDS)
             .softValues()
             .build(
                 new CacheLoader<>() {
@@ -53,7 +53,7 @@ public final class RepositoriesFromStorage implements Repositories {
                 }
             );
         RepositoriesFromStorage.aliases = CacheBuilder.newBuilder()
-            .expireAfterWrite(timeout, TimeUnit.MILLISECONDS)
+            .expireAfterWrite(duration, TimeUnit.MILLISECONDS)
             .softValues()
             .build(
                 new CacheLoader<>() {

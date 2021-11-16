@@ -4,11 +4,15 @@
  */
 package com.artipie;
 
+import com.amihaiemil.eoyaml.Scalar;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.asto.test.TestResource;
+import com.artipie.cache.CachedCreds;
 import com.artipie.management.Users;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -57,9 +61,9 @@ class UsersFromStorageYamlTest {
         );
         final Users.PasswordFormat sha = Users.PasswordFormat.SHA256;
         final String pass = "111";
-        this.creds(sha, Pair.of(jane, pass), Pair.of(john, pass));
+        this.saveCreds(sha, Pair.of(jane, pass), Pair.of(john, pass));
         MatcherAssert.assertThat(
-            new UsersFromStorageYaml(this.storage, this.key).list()
+            new UsersFromStorageYaml(this.storage, this.key, new CachedCreds()).list()
                 .toCompletableFuture().join(),
             Matchers.containsInAnyOrder(jane, john)
         );
@@ -74,7 +78,9 @@ class UsersFromStorageYamlTest {
             .saveTo(this.storage, this.key);
         MatcherAssert.assertThat(
             new UsersFromStorageYaml(
-                this.storage, new Key.From(String.format("_cred%s", extension))
+                this.storage,
+                new Key.From(String.format("_cred%s", extension)),
+                new CachedCreds()
             ).list()
             .toCompletableFuture().join(),
             Matchers.containsInAnyOrder(jane, john)
@@ -91,8 +97,8 @@ class UsersFromStorageYamlTest {
         );
         final String pass = "abc";
         final Users.PasswordFormat sha = Users.PasswordFormat.SHA256;
-        this.creds(sha, Pair.of(maria, pass));
-        new UsersFromStorageYaml(this.storage, this.key)
+        this.saveCreds(sha, Pair.of(maria, pass));
+        new UsersFromStorageYaml(this.storage, this.key, new CachedCreds())
             .add(olga, DigestUtils.sha256Hex(pass), sha).toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
@@ -116,8 +122,8 @@ class UsersFromStorageYamlTest {
         final String old = "345";
         final String newpass = "000";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
-        this.creds(plain, Pair.of(jack, old), Pair.of(silvia, old));
-        new UsersFromStorageYaml(this.storage, this.key)
+        this.saveCreds(plain, Pair.of(jack, old), Pair.of(silvia, old));
+        new UsersFromStorageYaml(this.storage, this.key, new CachedCreds())
             .add(silvia, newpass, Users.PasswordFormat.PLAIN).toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
@@ -138,8 +144,9 @@ class UsersFromStorageYamlTest {
         final Users.User ann = new Users.User("ann");
         final String pass = "123";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
-        this.creds(plain, Pair.of(mark, pass), Pair.of(ann, pass));
-        new UsersFromStorageYaml(this.storage, this.key).remove(ann.name())
+        this.saveCreds(plain, Pair.of(mark, pass), Pair.of(ann, pass));
+        new UsersFromStorageYaml(this.storage, this.key, new CachedCreds())
+            .remove(ann.name())
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
@@ -154,8 +161,9 @@ class UsersFromStorageYamlTest {
         final Users.User alex = new Users.User("alex");
         final String pass = "098";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
-        this.creds(plain, Pair.of(ted, pass), Pair.of(alex, pass));
-        new UsersFromStorageYaml(this.storage, this.key).remove("alice")
+        this.saveCreds(plain, Pair.of(ted, pass), Pair.of(alex, pass));
+        new UsersFromStorageYaml(this.storage, this.key, new CachedCreds())
+            .remove("alice")
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
@@ -169,7 +177,31 @@ class UsersFromStorageYamlTest {
         );
     }
 
-    private void creds(final Users.PasswordFormat format, final Pair<Users.User, String>... users) {
+    @Test
+    void readsCredentialsFromCache() {
+        final CachedCreds cache = new CachedCreds();
+        new TestResource("_credentials.yaml").saveTo(this.storage, this.key);
+        final UsersFromStorageYaml creds = new UsersFromStorageYaml(this.storage, this.key, cache);
+        creds.yaml().toCompletableFuture().join();
+        this.saveCreds(
+            Users.PasswordFormat.PLAIN,
+            Pair.of(new Users.User("pol"), "newpswd")
+        );
+        MatcherAssert.assertThat(
+            creds.yaml()
+                .toCompletableFuture().join()
+                .yamlMapping("credentials")
+                .keys().stream()
+                .map(YamlNode::asScalar)
+                .map(Scalar::value)
+                .toList(),
+            Matchers.containsInAnyOrder("bob", "alice")
+        );
+    }
+
+    private void saveCreds(
+        final Users.PasswordFormat format, final Pair<Users.User, String>... users
+    ) {
         this.storage.save(
             this.key,
             new Content.From(

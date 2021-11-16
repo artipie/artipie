@@ -2,13 +2,14 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie.auth;
+package com.artipie.cache;
 
-import com.artipie.ArtipieProperties;
+import com.artipie.asto.misc.UncheckedScalar;
 import com.artipie.http.auth.Authentication;
+import com.artipie.misc.ArtipieProperties;
+import com.artipie.misc.Property;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -21,29 +22,35 @@ import java.util.concurrent.TimeUnit;
  * </p>
  * @since 0.22
  */
-public final class CachedUsers implements AuthCache {
+final class CachedUsers implements AuthCache {
     /**
      * Cache for users.
      */
-    private static LoadingCache<Data, Optional<Authentication.User>> users;
+    private final Cache<Data, Optional<Authentication.User>> users;
 
-    static {
-        System.setProperty(
-            ArtipieProperties.AUTH_TIMEOUT,
-            new ArtipieProperties().cachedAuthTimeout()
+    /**
+     * Ctor.
+     * Here an instance of cache is created. It is important that cache
+     * is a local variable.
+     */
+    CachedUsers() {
+        this(
+            CacheBuilder.newBuilder()
+                .expireAfterAccess(
+                    //@checkstyle MagicNumberCheck (1 line)
+                    new Property(ArtipieProperties.AUTH_TIMEOUT).asLongOrDefault(300_000L),
+                    TimeUnit.MILLISECONDS
+                ).softValues()
+                .build()
         );
-        final int timeout = Integer.getInteger(ArtipieProperties.AUTH_TIMEOUT, 5 * 60 * 1000);
-        CachedUsers.users = CacheBuilder.newBuilder()
-            .expireAfterAccess(timeout, TimeUnit.MILLISECONDS)
-            .softValues()
-            .build(
-                new CacheLoader<>() {
-                    @Override
-                    public Optional<Authentication.User> load(final Data data) {
-                        return data.user();
-                    }
-                }
-            );
+    }
+
+    /**
+     * Ctor.
+     * @param cache Cache for users
+     */
+    CachedUsers(final Cache<Data, Optional<Authentication.User>> cache) {
+        this.users = cache;
     }
 
     @Override
@@ -52,21 +59,22 @@ public final class CachedUsers implements AuthCache {
         final String password,
         final Authentication origin
     ) {
-        return CachedUsers.users.getUnchecked(
-            new Data(username, password, origin)
-        );
+        final Data data = new Data(username, password, origin);
+        return new UncheckedScalar<>(
+            () -> this.users.get(data, data::user)
+        ).value();
     }
 
     @Override
     public void invalidateAll() {
-        CachedUsers.users.invalidateAll();
+        this.users.invalidateAll();
     }
 
     @Override
     public String toString() {
         return String.format(
             "%s(size=%d)",
-            this.getClass().getSimpleName(), CachedUsers.users.size()
+            this.getClass().getSimpleName(), this.users.size()
         );
     }
 
@@ -74,7 +82,7 @@ public final class CachedUsers implements AuthCache {
      * Extra class for using instance field in static section.
      * @since 0.22
      */
-    private static class Data {
+    static class Data {
         /**
          * Username.
          */
