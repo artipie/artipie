@@ -75,8 +75,9 @@ final class ArtipieApiITCase {
             "Artipie failed to return list of the users",
             new ContainerResultMatcher(
                 Matchers.is(0),
-                new StringContainsInOrder(
-                    new ListOf<String>("\"name\":\"alice\"", "\"name\":\"bob\"")
+                Matchers.allOf(
+                    Matchers.containsString("\"name\":\"alice\""),
+                    Matchers.containsString("\"name\":\"bob\"")
                 )
             ),
             "curl", "-X", "GET", "http://artipie:8080/api/security/users", "-u", "alice:123"
