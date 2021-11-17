@@ -71,6 +71,18 @@ final class ArtipieApiITCase {
 
     @Test
     @Disabled
+    void returnBadRequestWhenNewUserPasswordIsNotPresent() throws Exception {
+        this.deployment.assertExec(
+            "Failed to create a new repo",
+            new ContainerResultMatcher(Matchers.is(0)),
+            "curl", "-X", "POST", "http://artipie:8080/api/security/users/ann",
+            "-u", "alice:123",
+            "--data", "{\"email\":\"test@test.com\"}"
+        );
+    }
+
+    @Test
+    @Disabled
     void createRepository() throws Exception {
         final String repo = "repo1";
         final String config = this.config();
