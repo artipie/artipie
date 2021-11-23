@@ -70,6 +70,21 @@ final class ArtipieApiITCase {
     }
 
     @Test
+    void getUsers() throws IOException {
+        this.deployment.assertExec(
+            "Artipie failed to return list of the users",
+            new ContainerResultMatcher(
+                Matchers.is(0),
+                Matchers.allOf(
+                    Matchers.containsString("\"name\":\"alice\""),
+                    Matchers.containsString("\"name\":\"bob\"")
+                )
+            ),
+            "curl", "-X", "GET", "http://artipie:8080/api/security/users", "-u", "alice:123"
+        );
+    }
+
+    @Test
     @Disabled
     void createRepository() throws Exception {
         final String repo = "repo1";
