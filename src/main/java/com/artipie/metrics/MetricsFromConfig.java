@@ -57,6 +57,14 @@ public final class MetricsFromConfig {
                                 )
                             );
                             break;
+                        case "promu":
+                            output = new StorageMetricsOutput(
+                                new SubStorage(
+                                    new Key.From(".meta", "metrics"),
+                                    new YamlStorage(this.settings.yamlMapping("cache_storage")).storage()
+                                )
+                            );
+                            break;
                         default:
                             throw new IllegalArgumentException(
                                 String.format("Unsupported metrics type: %s", type)

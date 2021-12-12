@@ -85,6 +85,22 @@ public final class MainSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new ByMethodsRule(RqMethod.GET),
+                        new RtRule.ByPath("/prometheus/metrics")
+                    ),
+                    new SliceOptional<>(
+                        metricsCacheStorage(settings),
+                        Optional::isPresent,
+                        yaml -> new PromuSlice(
+                            new SubStorage(
+                                new Key.From(".meta", "metrics"),
+                                new YamlStorage(yaml.orElseThrow()).storage()
+                            )
+                        )
+                    )
+                ),
+                new RtRulePath(
+                    new RtRule.All(
+                        new ByMethodsRule(RqMethod.GET),
                         new RtRule.ByPath("/.version")
                     ),
                     new VersionSlice(new ArtipieProperties())
@@ -113,5 +129,15 @@ public final class MainSlice extends Slice.Wrap {
     private static Optional<YamlMapping> metricsStorage(final Settings settings) {
         return Optional.ofNullable(settings.meta().yamlMapping("metrics"))
             .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("storage")));
+    }
+
+    /**
+     * Metrics cache storage.
+     * @param settings Artipie settings
+     * @return Yaml node, could be null
+     */
+    private static Optional<YamlMapping> metricsCacheStorage(final Settings settings) {
+        return Optional.ofNullable(settings.meta().yamlMapping("metrics"))
+                .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("cache_storage")));
     }
 }
