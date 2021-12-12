@@ -33,6 +33,11 @@ import org.reactivestreams.Publisher;
  * Slice that allows Prometheus to collect metrics (pull way).
  * @see <a href="https://prometheus.io/docs/practices/instrumentation/#offline-processing"/>
  * @since 0.23
+ * @todo #889:30min Test that {@link PromuSlice}'s response is correct.
+ *  We implemented {@link PromuSlice} in a way that Prometheus can pull
+ *  model via that. Now, we should check that its response is correct.
+ *  We should also add an integration test to be sure that configuration
+ *  is taken into account.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class PromuSlice implements Slice {
