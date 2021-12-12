@@ -19,7 +19,6 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.exporter.common.TextFormat;
 import io.reactivex.Observable;
-import org.reactivestreams.Publisher;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -28,11 +27,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.reactivestreams.Publisher;
 
 /**
  * Slice that allows Prometheus to collect metrics (pull way).
  * @see <a href="https://prometheus.io/docs/practices/instrumentation/#offline-processing"/>
  * @since 0.23
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class PromuSlice implements Slice {
 
@@ -60,6 +61,7 @@ public final class PromuSlice implements Slice {
                 .flatMapSingle(
                     key -> rxsto.value(key).to(ContentAs.LONG).map(
                         val -> {
+                            // @checkstyle MethodBodyCommentsCheck (1 line)
                             // @see https://github.com/prometheus/client_java#counter
                             Counter.build()
                                 .name(key.string())
@@ -73,6 +75,8 @@ public final class PromuSlice implements Slice {
                 )
                 .map(
                     reg -> {
+                        // @checkstyle MethodBodyCommentsCheck (3 lines)
+                        // @checkstyle LineLengthCheck (1 line)
                         // @see https://github.com/prometheus/client_java/blob/65ca8bd19382c4f35f7f8d10e2cc462faf3adf3c/simpleclient_vertx/src/main/java/io/prometheus/client/vertx/MetricsHandler.java#L73
                         final String ctype = new Accept(headers).values().get(0);
                         final StringWriter writer = new StringWriter();

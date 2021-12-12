@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
  * Metrics from config.
  * @since 0.9
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class MetricsFromConfig {
 
     /**
@@ -61,7 +62,9 @@ public final class MetricsFromConfig {
                             output = new StorageMetricsOutput(
                                 new SubStorage(
                                     new Key.From(".meta", "metrics"),
-                                    new YamlStorage(this.settings.yamlMapping("cache_storage")).storage()
+                                    new YamlStorage(
+                                        this.settings.yamlMapping("cache_storage")
+                                    ).storage()
                                 )
                             );
                             break;

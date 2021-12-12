@@ -138,6 +138,6 @@ public final class MainSlice extends Slice.Wrap {
      */
     private static Optional<YamlMapping> metricsCacheStorage(final Settings settings) {
         return Optional.ofNullable(settings.meta().yamlMapping("metrics"))
-                .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("cache_storage")));
+            .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("cache_storage")));
     }
 }
