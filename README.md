@@ -232,6 +232,17 @@ meta:
     interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
+To collect metrics via `Prometheus`, we configure metrics like this :
+
+```yaml
+metrics :
+  type : promu
+  interval : 60
+  cache_storage : # set a storage to cache metrics. Prometheus will use it to pull metrics model
+    type: fs
+    path: /urs/local/aripie/data
+```
+
 ## Artipie REST API
 
 Artipie provides a set of APIs to manage repositories and users.  The current APIs are fully documented [here](./REST_API.md).
