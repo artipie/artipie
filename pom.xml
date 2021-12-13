@@ -93,6 +93,18 @@ SOFTWARE.
       <timezone>+3</timezone>
     </developer>
   </developers>
+  <contributors>
+    <contributor>
+      <name>Olivier B. OURA</name>
+      <email>baudoliver7@gmail.com</email>
+      <organization>baudoliver7.com</organization>
+      <organizationUrl>https://www.baudoliver7.com</organizationUrl>
+      <roles>
+        <role>Developer</role>
+      </roles>
+      <timezone>+0</timezone>
+    </contributor>
+  </contributors>
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/artipie/artipie/issues</url>
@@ -168,19 +180,24 @@ SOFTWARE.
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>v0.25</version>
+      <version>v0.26.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>v1.7.0</version>
+      <version>v1.9.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>management-api</artifactId>
-      <version>0.4.8</version>
+      <version>v0.4.9</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
