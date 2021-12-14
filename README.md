@@ -236,7 +236,7 @@ To collect metrics via `Prometheus`, we configure metrics like this :
 
 ```yaml
 metrics :
-  type : promu
+  type : prometheus
   interval : 60
   cache_storage : # set a storage to cache metrics. Prometheus will use it to pull metrics model
     type: fs

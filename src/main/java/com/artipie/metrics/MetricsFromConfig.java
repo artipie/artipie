@@ -58,7 +58,7 @@ public final class MetricsFromConfig {
                                 )
                             );
                             break;
-                        case "promu":
+                        case "prometheus":
                             output = new StorageMetricsOutput(
                                 new SubStorage(
                                     new Key.From(".meta", "metrics"),
