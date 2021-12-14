@@ -96,7 +96,10 @@ public final class VertxMain {
     public int start() throws IOException {
         final Settings settings = new SettingsFromPath(this.config).find(this.port);
         final Metrics metrics = metrics(settings);
-        final int main = this.listenOn(new MainSlice(this.http, settings), metrics, this.port);
+        final int main = this.listenOn(
+            new MainSlice(this.http, settings, metrics),
+            metrics, this.port
+        );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
         this.startRepos(settings, metrics);
         return main;

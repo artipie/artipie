@@ -232,15 +232,12 @@ meta:
     interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
-To collect metrics via `Prometheus`, we configure metrics like this :
+To collect metrics via `Prometheus`, simply configure `metrics` like this :
 
 ```yaml
-metrics :
-  type : prometheus
-  interval : 60
-  cache_storage : # set a storage to cache metrics. Prometheus will use it to pull metrics model
-    type: fs
-    path: /urs/local/aripie/data
+meta :
+  metrics :
+    type : prometheus
 ```
 
 ## Artipie REST API

@@ -8,7 +8,6 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.YamlStorage;
 import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
-import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.metrics.memory.InMemoryMetrics;
 import com.artipie.metrics.publish.MetricsLogOutput;
 import com.artipie.metrics.publish.MetricsOutput;
@@ -22,8 +21,12 @@ import org.slf4j.LoggerFactory;
  * Metrics from config.
  * @since 0.9
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class MetricsFromConfig {
+
+    /**
+     * Key word to identify Prometheus.
+     */
+    public static final String PROMETHEUS = "prometheus";
 
     /**
      * Metrics section from settings.
@@ -46,31 +49,32 @@ public final class MetricsFromConfig {
         return Optional.ofNullable(this.settings.string("type"))
             .map(
                 type -> {
-                    final MetricsOutput output;
-                    switch (type) {
-                        case "log":
-                            output = new MetricsLogOutput(LoggerFactory.getLogger(Metrics.class));
-                            break;
-                        case "asto":
-                            output = new StorageMetricsOutput(
-                                new SubStorage(
-                                    new Key.From(".meta", "metrics"),
-                                    new YamlStorage(this.settings.yamlMapping("storage")).storage()
-                                )
-                            );
-                            break;
-                        case "prometheus":
-                            output = new StorageMetricsOutput(
-                                new InMemoryStorage()
-                            );
-                            break;
-                        default:
-                            throw new IllegalArgumentException(
-                                String.format("Unsupported metrics type: %s", type)
-                            );
-                    }
                     final Metrics metrics = new InMemoryMetrics();
-                    new MetricsPublisher(metrics, this.interval()).start(output);
+                    if (!type.equals(MetricsFromConfig.PROMETHEUS)) {
+                        final MetricsOutput output;
+                        switch (type) {
+                            case "log":
+                                output = new MetricsLogOutput(
+                                    LoggerFactory.getLogger(Metrics.class)
+                                );
+                                break;
+                            case "asto":
+                                output = new StorageMetricsOutput(
+                                    new SubStorage(
+                                        new Key.From(".meta", "metrics"),
+                                        new YamlStorage(
+                                            this.settings.yamlMapping("storage")
+                                        ).storage()
+                                    )
+                                );
+                                break;
+                            default:
+                                throw new IllegalArgumentException(
+                                    String.format("Unsupported metrics type: %s", type)
+                                );
+                        }
+                        new MetricsPublisher(metrics, this.interval()).start(output);
+                    }
                     return metrics;
                 }
             ).orElseThrow(() -> new IllegalArgumentException("Metrics type is not specified"));

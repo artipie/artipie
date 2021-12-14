@@ -23,6 +23,8 @@ import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.http.slice.SliceOptional;
 import com.artipie.metrics.MetricSlice;
+import com.artipie.metrics.Metrics;
+import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.misc.ArtipieProperties;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -57,8 +59,11 @@ public final class MainSlice extends Slice.Wrap {
      * Artipie entry point.
      * @param http HTTP client
      * @param settings Artipie settings
+     * @param metrics Metrics
      */
-    public MainSlice(final ClientSlices http, final Settings settings) {
+    public MainSlice(
+        final ClientSlices http, final Settings settings,
+        final Metrics metrics) {
         super(
             new SliceRoute(
                 MainSlice.EMPTY_PATH,
@@ -88,14 +93,9 @@ public final class MainSlice extends Slice.Wrap {
                         new RtRule.ByPath("/prometheus/metrics")
                     ),
                     new SliceOptional<>(
-                        metricsCacheStorage(settings),
-                        Optional::isPresent,
-                        yaml -> new PromuSlice(
-                            new SubStorage(
-                                new Key.From(".meta", "metrics"),
-                                new YamlStorage(yaml.orElseThrow()).storage()
-                            )
-                        )
+                        settings,
+                        MainSlice::isPrometheusConfigAvailable,
+                        available -> new PromuSlice(metrics)
                     )
                 ),
                 new RtRulePath(
@@ -132,12 +132,20 @@ public final class MainSlice extends Slice.Wrap {
     }
 
     /**
-     * Metrics cache storage.
+     * Checks that metrics are collected by Prometheus.
      * @param settings Artipie settings
      * @return Yaml node, could be null
      */
-    private static Optional<YamlMapping> metricsCacheStorage(final Settings settings) {
-        return Optional.ofNullable(settings.meta().yamlMapping("metrics"))
-            .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("cache_storage")));
+    private static boolean isPrometheusConfigAvailable(final Settings settings) {
+        final Optional<YamlMapping> myml =
+            Optional.ofNullable(settings.meta().yamlMapping("metrics"));
+        final boolean available;
+        if (myml.isPresent()) {
+            final String type = myml.get().string("type");
+            available = MetricsFromConfig.PROMETHEUS.equals(type);
+        } else {
+            available = false;
+        }
+        return available;
     }
 }
