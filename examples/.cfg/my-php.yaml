@@ -1,6 +1,9 @@
 repo:
-  path: "/my-php"
   type: php
   storage:
     type: fs
     path: /var/artipie/data
+  # for 'org' layout
+  url: http://cental.artipie.com/artipie/artipie
+  # for 'flat' layout
+  #url: http://localhost:8080/repo_name

@@ -46,6 +46,7 @@ import com.artipie.pypi.PypiProxy;
 import com.artipie.pypi.http.PySlice;
 import com.artipie.rpm.http.RpmSlice;
 import io.vertx.reactivex.core.Vertx;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -173,7 +174,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "php":
                 slice = trimIfNotStandalone(
-                    settings, standalone, new PhpComposer(new AstoRepository(cfg.storage()))
+                    settings, standalone, new PhpComposer(
+                        new AstoRepository(cfg.storage(), Optional.of(cfg.url().toString()))
+                    )
                 );
                 break;
             case "php-proxy":
