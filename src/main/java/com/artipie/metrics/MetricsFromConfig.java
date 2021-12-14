@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.YamlStorage;
 import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
+import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.metrics.memory.InMemoryMetrics;
 import com.artipie.metrics.publish.MetricsLogOutput;
 import com.artipie.metrics.publish.MetricsOutput;
@@ -60,12 +61,7 @@ public final class MetricsFromConfig {
                             break;
                         case "prometheus":
                             output = new StorageMetricsOutput(
-                                new SubStorage(
-                                    new Key.From(".meta", "metrics"),
-                                    new YamlStorage(
-                                        this.settings.yamlMapping("cache_storage")
-                                    ).storage()
-                                )
+                                new InMemoryStorage()
                             );
                             break;
                         default:
