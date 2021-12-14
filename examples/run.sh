@@ -157,7 +157,7 @@ create_volume
 start_artipie
 
 if [[ -z "$1" ]]; then
-  declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda)
+  declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda composer)
 else
   declare -a tests=("$1")
 fi

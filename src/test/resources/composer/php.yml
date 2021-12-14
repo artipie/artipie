@@ -1,0 +1,6 @@
+repo:
+  type: php
+  storage:
+    type: fs
+    path: /var/artipie/data
+  url: http://artipie:8080/php/
