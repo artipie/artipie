@@ -7,6 +7,7 @@ package com.artipie.metrics.publish;
 import com.artipie.ArtipieException;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
+import io.prometheus.client.Gauge;
 import io.prometheus.client.exporter.common.TextFormat;
 import java.io.IOException;
 import java.io.Writer;
@@ -55,19 +56,6 @@ public final class PrometheusOutput implements MetricsOutput {
 
     @Override
     public void counters(final Map<String, Long> data) {
-        this.write(data);
-    }
-
-    @Override
-    public void gauges(final Map<String, Long> data) {
-        this.write(data);
-    }
-
-    /**
-     * Writes metrics in Prometheus format.
-     * @param data Metrics to write
-     */
-    private void write(final Map<String, Long> data) {
         for (final Map.Entry<String, Long> metric : data.entrySet()) {
             // @checkstyle MethodBodyCommentsCheck (1 line)
             // @see https://github.com/prometheus/client_java#counter
@@ -76,6 +64,26 @@ public final class PrometheusOutput implements MetricsOutput {
                 .register(this.registry)
                 .inc(metric.getValue());
         }
+        this.write();
+    }
+
+    @Override
+    public void gauges(final Map<String, Long> data) {
+        for (final Map.Entry<String, Long> metric : data.entrySet()) {
+            // @checkstyle MethodBodyCommentsCheck (1 line)
+            // @see https://github.com/prometheus/client_java#gauge
+            Gauge.build()
+                .name(metric.getKey())
+                .register(this.registry)
+                .set(metric.getValue());
+        }
+        this.write();
+    }
+
+    /**
+     * Writes metrics in Prometheus format.
+     */
+    private void write() {
         try {
             // @checkstyle MethodBodyCommentsCheck (3 lines)
             // @checkstyle LineLengthCheck (1 line)
