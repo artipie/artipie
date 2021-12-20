@@ -47,7 +47,7 @@ public final class InMemoryMetrics implements Metrics {
         out.counters(counters);
         final Map<String, Long> gauges = new HashMap<>(this.ggs.size());
         for (final Map.Entry<String, InMemoryGauge> entry : this.ggs.entrySet()) {
-            counters.put(entry.getKey(), entry.getValue().value());
+            gauges.put(entry.getKey(), entry.getValue().value());
         }
         out.gauges(gauges);
     }
