@@ -13,11 +13,13 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Prometheus metrics output.
  * @since 0.23
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class PrometheusOutput implements MetricsOutput {
 
     /**
@@ -36,11 +38,6 @@ public final class PrometheusOutput implements MetricsOutput {
     private final Set<String> filters;
 
     /**
-     * Registry.
-     */
-    private final CollectorRegistry registry;
-
-    /**
      * Ctor.
      * @param writer Writer
      * @param mtype Output content mime type
@@ -51,50 +48,74 @@ public final class PrometheusOutput implements MetricsOutput {
         this.writer = writer;
         this.mtype = mtype;
         this.filters = filters;
-        this.registry = new CollectorRegistry();
     }
 
     @Override
     public void counters(final Map<String, Long> data) {
-        for (final Map.Entry<String, Long> metric : data.entrySet()) {
+        if (!data.isEmpty()) {
             // @checkstyle MethodBodyCommentsCheck (1 line)
             // @see https://github.com/prometheus/client_java#counter
-            Counter.build()
-                .name(metric.getKey())
-                .register(this.registry)
-                .inc(metric.getValue());
+            final CollectorRegistry registry = new CollectorRegistry();
+            for (final Map.Entry<String, Long> metric : data.entrySet()) {
+                Counter.build(name(metric.getKey()), help(metric.getKey()))
+                    .register(registry)
+                    .inc(metric.getValue());
+            }
+            this.write(registry);
         }
-        this.write();
     }
 
     @Override
     public void gauges(final Map<String, Long> data) {
-        for (final Map.Entry<String, Long> metric : data.entrySet()) {
+        if (!data.isEmpty()) {
             // @checkstyle MethodBodyCommentsCheck (1 line)
             // @see https://github.com/prometheus/client_java#gauge
-            Gauge.build()
-                .name(metric.getKey())
-                .register(this.registry)
-                .set(metric.getValue());
+            final CollectorRegistry registry = new CollectorRegistry();
+            for (final Map.Entry<String, Long> metric : data.entrySet()) {
+                Gauge.build(name(metric.getKey()), help(metric.getKey()))
+                    .register(registry)
+                    .set(metric.getValue());
+            }
+            this.write(registry);
         }
-        this.write();
     }
 
     /**
      * Writes metrics in Prometheus format.
+     * @param registry Collector registry
      */
-    private void write() {
+    private void write(final CollectorRegistry registry) {
         try {
             // @checkstyle MethodBodyCommentsCheck (3 lines)
             // @checkstyle LineLengthCheck (1 line)
             // @see https://github.com/prometheus/client_java/blob/65ca8bd19382c4f35f7f8d10e2cc462faf3adf3c/simpleclient_vertx/src/main/java/io/prometheus/client/vertx/MetricsHandler.java#L73
             TextFormat.writeFormat(
-                this.mtype,
+                TextFormat.chooseContentType(this.mtype),
                 this.writer,
-                this.registry.filteredMetricFamilySamples(this.filters)
+                registry.filteredMetricFamilySamples(this.filters)
             );
         } catch (final IOException ioe) {
             throw new ArtipieException(ioe);
         }
+    }
+
+    /**
+     * Normalizes metrics name.
+     * @param name Name
+     * @return Normalized name
+     */
+    private static String name(final String name) {
+        return name.replaceAll("\\.", "_");
+    }
+
+    /**
+     * Builds help from name.
+     * @param name Name
+     * @return Help
+     */
+    private static String help(final String name) {
+        return StringUtils.capitalize(
+            name.replaceAll("\\.", " ")
+        );
     }
 }
