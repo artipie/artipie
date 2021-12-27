@@ -23,6 +23,8 @@ import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.http.slice.SliceOptional;
 import com.artipie.metrics.MetricSlice;
+import com.artipie.metrics.Metrics;
+import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.misc.ArtipieProperties;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -57,8 +59,11 @@ public final class MainSlice extends Slice.Wrap {
      * Artipie entry point.
      * @param http HTTP client
      * @param settings Artipie settings
+     * @param metrics Metrics
      */
-    public MainSlice(final ClientSlices http, final Settings settings) {
+    public MainSlice(
+        final ClientSlices http, final Settings settings,
+        final Metrics metrics) {
         super(
             new SliceRoute(
                 MainSlice.EMPTY_PATH,
@@ -80,6 +85,17 @@ public final class MainSlice extends Slice.Wrap {
                                 new YamlStorage(yaml.orElseThrow()).storage()
                             )
                         )
+                    )
+                ),
+                new RtRulePath(
+                    new RtRule.All(
+                        new ByMethodsRule(RqMethod.GET),
+                        new RtRule.ByPath("/prometheus/metrics")
+                    ),
+                    new SliceOptional<>(
+                        settings,
+                        MainSlice::isPrometheusConfigAvailable,
+                        available -> new PromuSlice(metrics)
                     )
                 ),
                 new RtRulePath(
@@ -113,5 +129,23 @@ public final class MainSlice extends Slice.Wrap {
     private static Optional<YamlMapping> metricsStorage(final Settings settings) {
         return Optional.ofNullable(settings.meta().yamlMapping("metrics"))
             .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("storage")));
+    }
+
+    /**
+     * Checks that metrics are collected by Prometheus.
+     * @param settings Artipie settings
+     * @return Yaml node, could be null
+     */
+    private static boolean isPrometheusConfigAvailable(final Settings settings) {
+        final Optional<YamlMapping> myml =
+            Optional.ofNullable(settings.meta().yamlMapping("metrics"));
+        final boolean available;
+        if (myml.isPresent()) {
+            final String type = myml.get().string("type");
+            available = MetricsFromConfig.PROMETHEUS.equals(type);
+        } else {
+            available = false;
+        }
+        return available;
     }
 }

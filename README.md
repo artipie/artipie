@@ -232,6 +232,14 @@ meta:
     interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
+To collect metrics via `Prometheus`, simply configure `metrics` like this :
+
+```yaml
+meta :
+  metrics :
+    type : prometheus
+```
+
 ## Artipie REST API
 
 Artipie provides a set of APIs to manage repositories and users.  The current APIs are fully documented [here](./REST_API.md).

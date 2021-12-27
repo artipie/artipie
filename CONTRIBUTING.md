@@ -77,7 +77,10 @@ MatcherAssert.assertThat("Reason two", target2, matcher2);
 
 Primary PR rule: it's the responsibility of PR author to bring the changes to the master branch.
 
-Other important mandatory rule - it should refer to some ticket. The only exception is a minor type fix in documentation.
+Other important mandatory rule - it should refer to some ticket. The only exception is a minor fixes.
+
+Pull request should follow [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0.0/) specificaction
+to be ready for squasing as single commit: 
 
 Pull request should consist of two mandatory parts:
  - "Title" - says **what** is the change, it should be one small and full enough sentence with only necessary information
@@ -85,15 +88,18 @@ Pull request should consist of two mandatory parts:
 
 ### Title
 
-Title should be as small as possible but provide full enough information to understand what was done (not a process),
-and where from this sentence.
-It could be capitalized If needed, started from capital letter, and should not include links or references
-(including tickets numbers).
+Title format: `<type>[optional scope]: <description>`, where type is one of `conventionalcommits` type, optional scope
+could be added as a context, and description should be as small as possible but provide full enough information to
+understand what was done (not a process).
+
+According to [git standards](https://git-scm.com/book/en/v2), commit messages uses present simple tence.
+
+Title should not include links or references.
 
 Good PR titles examples:
- - Fixed Maven artifact upload - describes what was done: fixed, the what was the fixed: artifact upload, and where: Maven
- - Implemented GET blobs API for Docker - done: implemented, what: GET blobs API, where: Docker
- - Added integration test for Maven deploy - done: added, what: integration test for deploy, where: Maven
+ - fix: maven artifact upload - describes what was done: fix(ed), the what was the fixed: artifact upload, and where: Maven
+ - feat: GET blobs API for Docker - feat: new feature implemented, what: GET blobs API, where: Docker
+ - test: add integration test for Maven deploy - done: add(ed), what: integration test for deploy, where: Maven
 
 Bad PR titles:
  - Fixed NPE - not clear WHAT was the problem, and where; good title could be: "Fixed NPE on Maven artifact download"
@@ -102,13 +108,33 @@ Bad PR titles:
 
 ### Description
 
-Description starts with a ticket number prefixed with one of these keywords: (Fixed, Closes, For, Part of),
-then a hyphen, and a description of the changes.
-Changes description provides information about **how** the problem from title was fixed.
+Description provides information about **how** the problem from title was fixed.
 It should be a short summary of all changes to increase readability of changes before looking to code,
-and provide some context. The format is
-`(<keyword>For|Closes|Fixes|Part of) #(<ticket>\d+) - (<details>.+)`,
-e.g.: `For #123 - check if the file exists before accessing it and return 404 code if doesn't`.
+and provide some context.
+
+Description may contain a footers separated by blank line:
+```
+<body>
+
+<footers>
+```
+Footer is a colon-separated key-value pair in standard form. It's supposed to be both: human-readable and machine parserable.
+Common footers are:
+```
+Close: #1
+Fix: #2
+Reviewer: @github
+Ref: https://external-tracker/issues/1
+```
+
+Each pull-request must include ticket reference (either `Close`, `Fix` or `Ticket`).
+
+Example:
+```
+Check if the file exists before accessing it and return 404 code if doesn't
+
+Fix: #123
+```
 
 Good description describes the solution provided and may have technical details, it isn't just a copy of the title.
 Examples of good descriptions:
@@ -118,18 +144,23 @@ Examples of good descriptions:
 ### Merging
 
 We merge PR only if all required CI checks passed and after approval of repository maintainers.
-We merge using squash merge, where commit messages consists of two parts:
+If commit messages are not well-formatted or PR consists of many (greater than 3) commits, then
+we merge using squash merge, where commit messages consists of two parts:
 ```
-<PR title>
+<PR title> (#<PR number>)
 
 <PR description>
-PR: <PR number>
+[PR: <PR number>]
 ```
-GitHub automatically inserts title and description as commit messages, the only manual work is a PR number.
+
+GitHub usually automatically inserts title and description as commit messages.
+
+If PR consists of small amount of well-formatted commits (commit messages follows all the rules of PR best practices),
+then PR could be merged with merge commit.
 
 ### Review
 
-It's recommended to request review from `@artipie/contributors` if possible.
+It's recommended to request review from `@artipie/maintainers` if possible.
 When the reviewers starts the review it should assign the PR to themselves,
 when the review is completed and some changes are requested, then it should be assigned back to the author.
 On approve: if reviewer and repository maintainer are two different persons,
@@ -150,14 +181,26 @@ When addressing review changes, two possible strategies could be used:
 
 ### Commit style
 
+We use https://www.conventionalcommits.org/en/v1.0.0/ for commit messages, it is:
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
 Commit styles are similar to PR, PR could be created from commit message: first line goes to the title,
 other lines to description:
 ```
-Commit title - same as PR title
+type(some-context): short title
 
-For #123 - description of the commit goes
+Description of the commit goes
 to PR description. It could be multiline `and` include
 *markdown* formatting.
+
+Close: #234
+Ref: #123
 ```
 
 ## Repository maintaining
@@ -172,7 +215,7 @@ Each repository in Artipie has one responsible maintainer person. Maintainer res
  8. Perform review process for pull requests.
 
 Maintainers are:
- - @g4s8 - artipie/artipie artipie/asto artipie/http artipie/docker-adapter artipy/files-adapter artipie/central artipie/artipie-cli artipie/gem-adapter artipie/helm-charts artipie/ppom artipie/http-client
- - @olenagerasimova - artipie/rpm-adapter artipie/debian-adapter artipie/conda-adapter artipie/go-adapter artipie/management-api artipie/maven-adapter artipie/nuget-adapter artipie/pypi-adapter
+ - @g4s8 - artipie/artipie artipie/asto artipie/http artipie/docker-adapter artipy/files-adapter artipie/central artipie/artipie-cli artipie/gem-adapter artipie/helm-charts artipie/ppom artipie/http-client artipie/git-adapter
+ - @olenagerasimova - artipie/rpm-adapter artipie/debian-adapter artipie/conda-adapter artipie/go-adapter artipie/management-api artipie/maven-adapter artipie/nuget-adapter artipie/pypi-adapter artipie/cargo-adapter
  - @genryxy - artipie/composer-adapter artipie/benchmarks artipie/helm-adapter artipie/npm-adapter artipie/p2-adapter
  - @chgen - artipie/conan-adapter
