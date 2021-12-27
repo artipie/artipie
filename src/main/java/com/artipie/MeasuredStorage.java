@@ -171,7 +171,13 @@ public final class MeasuredStorage implements Storage {
 
     @Override
     public CompletableFuture<? extends Meta> metadata(final Key key) {
-        return this.origin.metadata(key);
+        final long start = System.nanoTime();
+        return this.origin.metadata(key).thenApply(
+            res -> {
+                this.log("metadata(%s): %s", key.string(), millisMessage(start));
+                return res;
+            }
+        );
     }
 
     @Override
