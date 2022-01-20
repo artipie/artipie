@@ -23,10 +23,6 @@ import org.reactivestreams.Publisher;
  * Returned response reported to metrics as success or error if it's status code is 4xx or 5xx.
  *
  * @since 0.9
- * @todo #231:30min Report exceptions as errors in `ResponseMetricsSlice`.
- *  In case of exceptions in origin slice handling or sending to `Connection` nothing is reported
- *  to `Metrics`. It needs to be fixed, so if origin slice fails or we failed to send response
- *  then error is sent to `Metrics`.
  */
 public final class ResponseMetricsSlice implements Slice {
 
