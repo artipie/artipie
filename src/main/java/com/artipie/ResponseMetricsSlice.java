@@ -4,6 +4,7 @@
  */
 package com.artipie;
 
+import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Authorization;
@@ -51,16 +52,25 @@ public final class ResponseMetricsSlice implements Slice {
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public Response response(
         final String rqline,
         final Iterable<Map.Entry<String, String>> rqheaders,
         final Publisher<ByteBuffer> rqbody) {
-        return connection -> this.origin.response(rqline, rqheaders, rqbody).send(
-            (rsstatus, rsheaders, rsbody) -> {
-                this.report(rqline, rqheaders, rsstatus);
-                return connection.accept(rsstatus, rsheaders, rsbody);
+        return connection -> {
+            try {
+                return this.origin.response(rqline, rqheaders, rqbody).send(
+                    (rsstatus, rsheaders, rsbody) -> {
+                        this.report(rqline, rqheaders, rsstatus);
+                        return connection.accept(rsstatus, rsheaders, rsbody);
+                    }
+                );
+            // @checkstyle IllegalCatchCheck (1 line)
+            } catch (final Exception exc) {
+                this.report(rqline, rqheaders, RsStatus.INTERNAL_ERROR);
+                throw new ArtipieHttpException(RsStatus.INTERNAL_ERROR, exc);
             }
-        );
+        };
     }
 
     /**
@@ -76,9 +86,16 @@ public final class ResponseMetricsSlice implements Slice {
         final RsStatus rsstatus
     ) {
         if (rsstatus.error()) {
-            this.report(rqline, "error");
-            if (rsstatus.equals(RsStatus.UNAUTHORIZED)) {
-                this.reportUnauthorized(rqline, rqheaders);
+            switch (rsstatus) {
+                case UNAUTHORIZED:
+                    this.reportUnauthorized(rqline, rqheaders);
+                    break;
+                case INTERNAL_ERROR:
+                    this.report(rqline, "error.internal");
+                    break;
+                default:
+                    this.report(rqline, "error");
+                    break;
             }
         } else {
             this.report(rqline, "success");
