@@ -34,7 +34,7 @@ import org.reactivestreams.Publisher;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ParameterNumberCheck (500 lines)
  */
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 public final class RepoConfig {
 
     /**
@@ -199,8 +199,10 @@ public final class RepoConfig {
      * @return Async YAML mapping
      */
     public YamlMapping repoConfig() {
-        return Optional.ofNullable(this.yaml.yamlMapping("repo")).orElseThrow(
-            () -> new IllegalStateException("Invalid repo configuration")
+        return Optional.ofNullable(this.yaml.yamlMapping("repo")).orElse(
+            Yaml.createYamlMappingBuilder()
+                .add("type", "file")
+                .add("storage", "default").build()
         );
     }
 
