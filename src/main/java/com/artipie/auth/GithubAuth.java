@@ -13,6 +13,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.cactoos.scalar.Not;
+import org.cactoos.scalar.Unchecked;
+import org.cactoos.text.Contains;
 
 /**
  * GitHub authentication uses username prefixed by provider name {@code github.com}
@@ -64,11 +67,23 @@ public final class GithubAuth implements Authentication {
         Optional<Authentication.User> result = Optional.empty();
         final Matcher matcher = GithubAuth.PTN_NAME.matcher(username);
         if (matcher.matches()) {
-            final String login = this.github.apply(password).toLowerCase(Locale.US);
-            if (
-                Objects.equals(login, matcher.group(1).toLowerCase(Locale.US))
-            ) {
-                result = Optional.of(new Authentication.User(login));
+            try {
+                final String login = this.github.apply(password).toLowerCase(Locale.US);
+                if (
+                    Objects.equals(login, matcher.group(1).toLowerCase(Locale.US))
+                ) {
+                    result = Optional.of(new Authentication.User(login));
+                }
+            } catch (final AssertionError error) {
+                if (
+                    new Unchecked<>(
+                        new Not(
+                            new Contains(error.getMessage(), "401 Unauthorized")
+                        )
+                    ).value()
+                ) {
+                    throw error;
+                }
             }
         }
         return result;
