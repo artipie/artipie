@@ -58,7 +58,7 @@ final class PromuSliceITCase {
                 ContainerResultMatcher.SUCCESS,
                 new StringContains("HTTP/1.1 200 OK")
             ),
-            "curl", "-X", "GET", "http://artipie-prometheus:8080/prometheus/metrics"
+            "curl", "-i", "-X", "GET", "http://artipie-prometheus:8080/prometheus/metrics"
         );
     }
 
@@ -70,7 +70,7 @@ final class PromuSliceITCase {
                 ContainerResultMatcher.SUCCESS,
                 new StringContains("HTTP/1.1 404 Not Found")
             ),
-            "curl", "-X", "GET", "http://simple-artipie:8080/prometheus/metrics"
+            "curl", "-i", "-X", "GET", "http://simple-artipie:8080/prometheus/metrics"
         );
     }
 
