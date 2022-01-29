@@ -199,10 +199,8 @@ public final class RepoConfig {
      * @return Async YAML mapping
      */
     public YamlMapping repoConfig() {
-        return Optional.ofNullable(this.yaml.yamlMapping("repo")).orElse(
-            Yaml.createYamlMappingBuilder()
-                .add("type", "file")
-                .add("storage", "default").build()
+        return Optional.ofNullable(this.yaml.yamlMapping("repo")).orElseThrow(
+            () -> new IllegalStateException("Invalid repo configuration")
         );
     }
 
