@@ -15,7 +15,7 @@ import java.util.concurrent.CompletionStage;
  * Credentials from GitHub.
  * @since 0.12.2
  */
-public class UsersFromGithub implements Users {
+public final class UsersFromGithub implements Users {
     @Override
     public CompletionStage<List<User>> list() {
         return CompletableFuture.failedFuture(

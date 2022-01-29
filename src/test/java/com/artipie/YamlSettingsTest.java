@@ -75,7 +75,7 @@ class YamlSettingsTest {
     @Test
     void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", credentials("env")),
+            this.config("some/path", this.credentials("env")),
             new SettingsCaches.All()
         );
         MatcherAssert.assertThat(
@@ -113,7 +113,7 @@ class YamlSettingsTest {
     @Test
     void shouldCreateAuthFromEnv() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", credentials("env")),
+            this.config("some/path", this.credentials("env")),
             new SettingsCaches.All()
         );
         MatcherAssert.assertThat(
@@ -125,7 +125,7 @@ class YamlSettingsTest {
     @Test
     void shouldCreateGithub() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", credentials("github")),
+            this.config("some/path", this.credentials("github")),
             new SettingsCaches.All()
         );
         MatcherAssert.assertThat(
@@ -141,7 +141,7 @@ class YamlSettingsTest {
         final YamlSettings settings = new YamlSettings(
             this.config(
                 tmp.toString(),
-                credentials("env")
+                this.credentials("env")
                     .add(
                         "alternative_auth",
                         Yaml.createYamlMappingBuilder()
@@ -197,7 +197,7 @@ class YamlSettingsTest {
         throws Exception {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), credentials("file", Optional.of(fname))),
+            this.config(tmp.toString(), this.credentials("file", Optional.of(fname))),
             new SettingsCaches.All()
         );
         final Path yaml = tmp.resolve(fname);
@@ -212,7 +212,7 @@ class YamlSettingsTest {
     void returnsCredentials(@TempDir final Path tmp) throws IOException {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), credentials("file", Optional.of(fname))),
+            this.config(tmp.toString(), this.credentials("file", Optional.of(fname))),
             new SettingsCaches.All()
         );
         final Path yaml = tmp.resolve(fname);
@@ -228,7 +228,7 @@ class YamlSettingsTest {
         final String fname = "_cred.yml";
         final SettingsCaches cache = new SettingsCaches.All();
         final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), credentials("file", Optional.of(fname))),
+            this.config(tmp.toString(), this.credentials("file", Optional.of(fname))),
             cache
         );
         Files.writeString(tmp.resolve(fname), this.credentials());
@@ -255,7 +255,7 @@ class YamlSettingsTest {
     void returnsRepoConfigs(@TempDir final Path tmp) {
         MatcherAssert.assertThat(
             new YamlSettings(
-                this.config(tmp.toString(), credentials("file")),
+                this.config(tmp.toString(), this.credentials("file")),
                 new SettingsCaches.Fake()
             ).repoConfigsStorage(),
             new IsInstanceOf(SubStorage.class)
@@ -265,7 +265,7 @@ class YamlSettingsTest {
     @Test
     void shouldThrowExceptionWhenPathIsNotSet() {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", credentials("file", Optional.empty())),
+            this.config("some/path", this.credentials("file", Optional.empty())),
             new SettingsCaches.Fake()
         );
         MatcherAssert.assertThat(
@@ -322,7 +322,7 @@ class YamlSettingsTest {
     }
 
     private YamlMappingBuilder credentials(final String type) {
-        return credentials(type, Optional.empty());
+        return this.credentials(type, Optional.empty());
     }
 
     private YamlMappingBuilder credentials(
@@ -343,7 +343,8 @@ class YamlSettingsTest {
         return Yaml.createYamlMappingBuilder()
             .add(
                 "meta",
-                Yaml.createYamlMappingBuilder().add(
+                Yaml.createYamlMappingBuilder()
+                    .add(
                         "storage",
                         Yaml.createYamlMappingBuilder()
                             .add("type", "fs")

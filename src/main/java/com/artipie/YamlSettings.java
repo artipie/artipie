@@ -14,9 +14,11 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.management.Users;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiFunction;
 
 /**
  * Settings built from YAML.
@@ -87,72 +89,7 @@ public final class YamlSettings implements Settings {
 
     @Override
     public CompletionStage<Users> credentials() {
-        return this.credentials(this.meta().yamlMapping("credentials"));
-    }
-
-    private CompletionStage<Users> credentials(final YamlMapping cred) {
-        return this.typeFile(cred)
-            .orElseGet(
-                () -> this.typeGithub(cred)
-                    .orElseGet(
-                        () -> CompletableFuture.completedStage(
-                            new UsersFromEnv()
-                        )
-                    )
-            );
-    }
-
-    private Optional<CompletionStage<Users>> typeFile(final YamlMapping cred) {
-        final Optional<CompletionStage<Users>> res;
-        if (cred != null && "file".equals(cred.string("type"))) {
-            final String path = "path";
-            if (cred.string(path) != null) {
-                final Storage strg = this.storage();
-                final KeyFromPath key = new KeyFromPath(cred.string(path));
-                res = Optional.of(
-                    strg.exists(key).thenApply(
-                        exists -> {
-                            final Users users;
-                            if (exists) {
-                                users = new UsersFromStorageYaml(
-                                    strg,
-                                    key,
-                                    this.caches.credsConfig()
-                                );
-                            } else {
-                                users = new UsersFromEnv();
-                            }
-                            return users;
-                        }
-                    )
-                );
-            } else {
-                res = Optional.of(
-                    CompletableFuture.failedFuture(
-                        new RuntimeException(
-                            "Invalid credentials configuration: type `file` requires `path`!"
-                        )
-                    )
-                );
-            }
-        } else {
-            res = Optional.empty();
-        }
-        return res;
-    }
-
-    private Optional<CompletionStage<Users>> typeGithub(final YamlMapping cred) {
-        final Optional<CompletionStage<Users>> res;
-        if (cred != null && "github".equals(cred.string("type"))) {
-            res = Optional.of(
-                CompletableFuture.completedStage(
-                    new UsersWithCachedAuth(this.caches.auth(), new UsersFromGithub())
-                )
-            );
-        } else {
-            res = Optional.empty();
-        }
-        return res;
+        return this.credentials(this.credentialsYaml());
     }
 
     @Override
@@ -160,13 +97,38 @@ public final class YamlSettings implements Settings {
         return String.format("YamlSettings{\n%s\n}", this.content.toString());
     }
 
+    /**
+     * Get credentials yaml mapping.
+     *
+     * @return Credentials yaml mapping.
+     */
+    private YamlMapping credentialsYaml() {
+        return this.meta().yamlMapping("credentials");
+    }
+
+    /**
+     * Parse credentials from yaml.
+     *
+     * @param cred Credentials yaml mapping
+     * @return Completion action with users.
+     */
+    private CompletionStage<Users> credentials(final YamlMapping cred) {
+        return CredentialsType.valueOf(cred).users(this, cred);
+    }
+
+    /**
+     * Full chain of authentication.
+     *
+     * @param auth Authentication from credentials.
+     * @return Completion action with {@code Authentication}.
+     */
     private CompletionStage<Authentication> withAlternative(
         final Authentication auth
     ) {
         CompletionStage<Authentication> res = CompletableFuture
             .completedStage(auth);
         final String alternative = "alternative_auth";
-        final YamlMapping cred = this.meta().yamlMapping("credentials");
+        final YamlMapping cred = this.credentialsYaml();
         if (cred != null) {
             YamlMapping alt = cred.yamlMapping(alternative);
             while (alt != null) {
@@ -180,6 +142,105 @@ public final class YamlSettings implements Settings {
             }
         }
         return res;
+    }
+
+    /**
+     * Credentials types.
+     *
+     * @since 0.22
+     */
+    enum CredentialsType {
+
+        /**
+         * Credentials type: file.
+         */
+        FILE((settings, mapping) -> {
+            CompletionStage<Users> res = CompletableFuture.failedFuture(
+                new RuntimeException(
+                    "Invalid credentials configuration: type `file` requires `path`!"
+                )
+            );
+            final String path = mapping.string("path");
+            if (path != null) {
+                final Storage storage = settings.storage();
+                final KeyFromPath key = new KeyFromPath(path);
+                res = storage.exists(key).thenApply(
+                    exists -> {
+                        final Users users;
+                        if (exists) {
+                            users = new UsersFromStorageYaml(
+                                storage,
+                                key,
+                                settings.caches.credsConfig()
+                            );
+                        } else {
+                            users = new UsersFromEnv();
+                        }
+                        return users;
+                    }
+                );
+            }
+            return res;
+        }),
+
+        /**
+         * Credentials type: github.
+         */
+        GITHUB((settings, mapping) -> CompletableFuture.completedStage(
+            new UsersWithCachedAuth(settings.caches.auth(), new UsersFromGithub())
+        )),
+
+        /**
+         * Credentials type: env.
+         */
+        ENV((settings, mapping) -> CompletableFuture.completedStage(
+            new UsersFromEnv()
+        ));
+
+        /**
+         * Transform yaml to completion action with users.
+         */
+        private final BiFunction<YamlSettings, YamlMapping, CompletionStage<Users>> map;
+
+        /**
+         * Ctor.
+         *
+         * @param map Transform yaml to completion action with users.
+         */
+        CredentialsType(final BiFunction<YamlSettings, YamlMapping, CompletionStage<Users>> map) {
+            this.map = map;
+        }
+
+        /**
+         * Get {@code CredentialsType} that corresponds to type from credentials
+         * yaml mapping or {@code ENV} if {@code yaml} is null.
+         *
+         * @param yaml Credentials yaml mapping.
+         * @return CredentialsType.
+         */
+        static CredentialsType valueOf(final YamlMapping yaml) {
+            CredentialsType res = ENV;
+            if (yaml != null) {
+                res = CredentialsType.valueOf(
+                    yaml.string("type").toUpperCase(Locale.getDefault())
+                );
+            }
+            return res;
+        }
+
+        /**
+         * Transform yaml to completion action with users.
+         *
+         * @param settings YamlSettings.
+         * @param yaml Credentials yaml mapping.
+         * @return Completion action with users.
+         */
+        CompletionStage<Users> users(
+            final YamlSettings settings,
+            final YamlMapping yaml
+        ) {
+            return this.map.apply(settings, yaml);
+        }
     }
 
     /**
@@ -226,6 +287,11 @@ public final class YamlSettings implements Settings {
         }
     }
 
+    /**
+     * Wrapping for artipie credentials that produce a cached authentication.
+     *
+     * @since 0.22
+     */
     private static final class UsersWithCachedAuth implements Users {
         /**
          * Auth cache.
@@ -237,7 +303,13 @@ public final class YamlSettings implements Settings {
          */
         private final Users users;
 
-        public UsersWithCachedAuth(final AuthCache cache, final Users users) {
+        /**
+         * Ctor.
+         *
+         * @param cache Auth cache.
+         * @param users Artipie credentials.
+         */
+        UsersWithCachedAuth(final AuthCache cache, final Users users) {
             this.cache = cache;
             this.users = users;
         }
@@ -263,7 +335,7 @@ public final class YamlSettings implements Settings {
 
         @Override
         public CompletionStage<Authentication> auth() {
-            return this.users.auth().thenApply(auth -> new Cached(cache, auth));
+            return this.users.auth().thenApply(auth -> new Cached(this.cache, auth));
         }
     }
 }
