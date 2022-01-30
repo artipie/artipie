@@ -5,6 +5,8 @@ meta:
   credentials:
     type: file
     path: _credentials.yaml
+    alternative_auth:
+      type: github
   layout: org
   base_url: http://central.artipie.com/
   metrics:
