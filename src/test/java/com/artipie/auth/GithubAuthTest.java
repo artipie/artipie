@@ -4,6 +4,7 @@
  */
 package com.artipie.auth;
 
+import com.artipie.ArtipieException;
 import com.artipie.http.auth.Authentication;
 import java.util.Optional;
 import org.cactoos.text.Joined;
@@ -56,7 +57,7 @@ final class GithubAuthTest {
     @Test
     void shouldThrownExceptionWhenAssertionErrorIsHappened() {
         Assertions.assertThrows(
-            AssertionError.class,
+            ArtipieException.class,
             () -> new GithubAuth(
                 token -> {
                     throw new AssertionError("Any error");

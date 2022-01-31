@@ -4,6 +4,7 @@
  */
 package com.artipie.auth;
 
+import com.artipie.ArtipieException;
 import com.artipie.http.auth.Authentication;
 import com.jcabi.github.RtGithub;
 import java.io.IOException;
@@ -13,9 +14,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.cactoos.scalar.Not;
-import org.cactoos.scalar.Unchecked;
-import org.cactoos.text.Contains;
 
 /**
  * GitHub authentication uses username prefixed by provider name {@code github.com}
@@ -75,14 +73,9 @@ public final class GithubAuth implements Authentication {
                     result = Optional.of(new Authentication.User(login));
                 }
             } catch (final AssertionError error) {
-                if (
-                    new Unchecked<>(
-                        new Not(
-                            new Contains(error.getMessage(), "401 Unauthorized")
-                        )
-                    ).value()
-                ) {
-                    throw error;
+                if (error.getMessage() == null
+                    || !error.getMessage().contains("401 Unauthorized")) {
+                    throw new ArtipieException(error);
                 }
             }
         }
