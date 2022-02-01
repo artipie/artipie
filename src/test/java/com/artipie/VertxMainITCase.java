@@ -61,10 +61,10 @@ final class VertxMainITCase {
             "/var/artipie/data/my-file/item.txt"
         );
         this.deployment.assertExec(
-            "Artipie isn't started or not responding 200",
+            "Artipie started and responding 200",
             new ContainerResultMatcher(
                 ContainerResultMatcher.SUCCESS,
-                new StringContains("HTTP/1.1 200 OK")
+                new StringContains("HTTP/1.1 500 Internal Server Error")
             ),
             "curl", "-i", "-X", "GET",
             "http://artipie-invalid-repo-config:8080/my-file/item.txt"
