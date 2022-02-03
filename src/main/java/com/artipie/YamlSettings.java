@@ -5,6 +5,8 @@
 package com.artipie;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlNode;
+import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
@@ -30,6 +32,11 @@ import java.util.function.BiFunction;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class YamlSettings implements Settings {
+
+    /**
+     * Credentials YAML node name.
+     */
+    private static final String NODE_CREDENTIALS = "credentials";
 
     /**
      * YAML file content.
@@ -89,7 +96,15 @@ public final class YamlSettings implements Settings {
 
     @Override
     public CompletionStage<Users> credentials() {
-        return this.credentials(this.credentialsYaml());
+        return this.credentialsYamlSequence().map(
+            s -> s.values().stream()
+                .map(YamlNode::asMapping)
+                .map(this::users)
+                .findFirst()
+                .orElseThrow()
+        ).orElse(
+            this.users(this.meta().yamlMapping(YamlSettings.NODE_CREDENTIALS))
+        );
     }
 
     @Override
@@ -98,22 +113,26 @@ public final class YamlSettings implements Settings {
     }
 
     /**
-     * Get credentials yaml mapping.
+     * Credentials YAML sequence.
      *
-     * @return Credentials yaml mapping.
+     * @return YAML sequence.
      */
-    private YamlMapping credentialsYaml() {
-        return this.meta().yamlMapping("credentials");
+    private Optional<YamlSequence> credentialsYamlSequence() {
+        return Optional.ofNullable(
+            this.meta().yamlSequence(YamlSettings.NODE_CREDENTIALS)
+        );
     }
 
     /**
-     * Parse credentials from yaml.
+     * Users from yaml file.
      *
-     * @param cred Credentials yaml mapping
-     * @return Completion action with users.
+     * @param cred YAML credentials.
+     * @return Completion action with {@code Users}.
      */
-    private CompletionStage<Users> credentials(final YamlMapping cred) {
-        return CredentialsType.valueOf(cred).users(this, cred);
+    private CompletionStage<Users> users(final YamlMapping cred) {
+        return CredentialsType
+            .valueOf(cred)
+            .users(this, cred);
     }
 
     /**
@@ -127,18 +146,20 @@ public final class YamlSettings implements Settings {
     ) {
         CompletionStage<Authentication> res = CompletableFuture
             .completedStage(auth);
-        final String alternative = "alternative_auth";
-        final YamlMapping cred = this.credentialsYaml();
-        if (cred != null) {
-            YamlMapping alt = cred.yamlMapping(alternative);
-            while (alt != null) {
-                final CompletionStage<Users> users = this.credentials(alt);
+        final Optional<YamlSequence> seq = this.credentialsYamlSequence();
+        if (seq.isPresent()) {
+            final List<CompletionStage<Users>> list = seq.get().values()
+                .stream()
+                .skip(1)
+                .map(YamlNode::asMapping)
+                .map(YamlSettings.this::users)
+                .toList();
+            for (final CompletionStage<Users> users : list) {
                 res = res.thenCompose(
                     prev -> users
                         .thenCompose(Users::auth)
                         .thenApply(next -> new Authentication.Joined(prev, next))
                 );
-                alt = alt.yamlMapping(alternative);
             }
         }
         return res;

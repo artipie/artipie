@@ -6,7 +6,7 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.SubStorage;
 import com.artipie.cache.SettingsCaches;
 import java.io.IOException;
@@ -141,20 +141,23 @@ class YamlSettingsTest {
         final YamlSettings settings = new YamlSettings(
             this.config(
                 tmp.toString(),
-                this.credentials("env")
+                Yaml.createYamlSequenceBuilder()
                     .add(
-                        "alternative_auth",
                         Yaml.createYamlMappingBuilder()
-                            .add("type", "github")
-                            .add(
-                                "alternative_auth",
-                                Yaml.createYamlMappingBuilder()
-                                    .add("type", "file")
-                                    .add("path", fname)
-                                    .build()
-                            )
+                            .add("type", "file")
+                            .add("path", fname)
                             .build()
                     )
+                    .add(
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "env")
+                            .build()
+                    )
+                    .add(
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "github")
+                            .build()
+                    ).build()
             ),
             new SettingsCaches.All()
         );
@@ -321,11 +324,11 @@ class YamlSettingsTest {
         );
     }
 
-    private YamlMappingBuilder credentials(final String type) {
+    private YamlNode credentials(final String type) {
         return this.credentials(type, Optional.empty());
     }
 
-    private YamlMappingBuilder credentials(
+    private YamlNode credentials(
         final String type,
         final Optional<String> path
     ) {
@@ -333,12 +336,12 @@ class YamlSettingsTest {
             val -> Yaml.createYamlMappingBuilder()
                 .add("type", type)
                 .add("path", val)
-        ).orElse(Yaml.createYamlMappingBuilder().add("type", type));
+        ).orElse(Yaml.createYamlMappingBuilder().add("type", type)).build();
     }
 
     private YamlMapping config(
         final String stpath,
-        final YamlMappingBuilder creds
+        final YamlNode creds
     ) {
         return Yaml.createYamlMappingBuilder()
             .add(
@@ -350,7 +353,7 @@ class YamlSettingsTest {
                             .add("type", "fs")
                             .add("path", stpath).build()
                     )
-                    .add("credentials", creds.build())
+                    .add("credentials", creds)
                     .add("repo_configs", "repos")
                     .build()
             ).build();
