@@ -61,6 +61,9 @@ public final class ResponseMetricsSlice implements Slice {
                         return connection.accept(rsstatus, rsheaders, rsbody);
                     }
                 );
+            } catch (final ArtipieHttpException exc) {
+                this.report(rqline, rqheaders, exc.status());
+                throw exc;
             // @checkstyle IllegalCatchCheck (1 line)
             } catch (final Exception exc) {
                 this.report(rqline, rqheaders, RsStatus.INTERNAL_ERROR);
