@@ -11,6 +11,7 @@ import org.cactoos.list.ListOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -23,6 +24,7 @@ import org.testcontainers.containers.BindMode;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
+@Disabled
 public final class RpmITCase {
 
     /**
