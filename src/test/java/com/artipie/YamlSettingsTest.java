@@ -6,7 +6,7 @@ package com.artipie;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.SubStorage;
 import com.artipie.cache.SettingsCaches;
 import java.io.IOException;
@@ -75,7 +75,7 @@ class YamlSettingsTest {
     @Test
     void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", "env", Optional.empty()),
+            this.config("some/path", this.credentials("env")),
             new SettingsCaches.All()
         );
         MatcherAssert.assertThat(
@@ -113,12 +113,63 @@ class YamlSettingsTest {
     @Test
     void shouldCreateAuthFromEnv() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", "env", Optional.empty()),
+            this.config("some/path", this.credentials("env")),
             new SettingsCaches.All()
         );
         MatcherAssert.assertThat(
             settings.auth().toCompletableFuture().get().toString(),
             new StringContains("AuthFromEnv")
+        );
+    }
+
+    @Test
+    void shouldCreateGithub() throws Exception {
+        final YamlSettings settings = new YamlSettings(
+            this.config("some/path", this.credentials("github")),
+            new SettingsCaches.All()
+        );
+        MatcherAssert.assertThat(
+            settings.auth().toCompletableFuture().get().toString(),
+            new StringContains("GithubAuth")
+        );
+    }
+
+    @Test
+    void shouldCreateAuthFromEnvWithAlternativeAuths(@TempDir final Path tmp)
+        throws Exception {
+        final String fname = "_cred.yml";
+        final YamlSettings settings = new YamlSettings(
+            this.config(
+                tmp.toString(),
+                Yaml.createYamlSequenceBuilder()
+                    .add(
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "file")
+                            .add("path", fname)
+                            .build()
+                    )
+                    .add(
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "env")
+                            .build()
+                    )
+                    .add(
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "github")
+                            .build()
+                    ).build()
+            ),
+            new SettingsCaches.All()
+        );
+        final Path yaml = tmp.resolve(fname);
+        Files.writeString(yaml, this.credentials());
+        MatcherAssert.assertThat(
+            settings.auth().toCompletableFuture().get().toString(),
+            Matchers.allOf(
+                new StringContains("AuthFromEnv"),
+                new StringContains("GithubAuth"),
+                new StringContains("AuthFromYaml")
+            )
         );
     }
 
@@ -149,7 +200,7 @@ class YamlSettingsTest {
         throws Exception {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), "file", Optional.of(fname)),
+            this.config(tmp.toString(), this.credentials("file", Optional.of(fname))),
             new SettingsCaches.All()
         );
         final Path yaml = tmp.resolve(fname);
@@ -164,7 +215,7 @@ class YamlSettingsTest {
     void returnsCredentials(@TempDir final Path tmp) throws IOException {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), "file", Optional.of(fname)),
+            this.config(tmp.toString(), this.credentials("file", Optional.of(fname))),
             new SettingsCaches.All()
         );
         final Path yaml = tmp.resolve(fname);
@@ -180,7 +231,7 @@ class YamlSettingsTest {
         final String fname = "_cred.yml";
         final SettingsCaches cache = new SettingsCaches.All();
         final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), "file", Optional.of(fname)),
+            this.config(tmp.toString(), this.credentials("file", Optional.of(fname))),
             cache
         );
         Files.writeString(tmp.resolve(fname), this.credentials());
@@ -207,7 +258,7 @@ class YamlSettingsTest {
     void returnsRepoConfigs(@TempDir final Path tmp) {
         MatcherAssert.assertThat(
             new YamlSettings(
-                this.config(tmp.toString(), "file", Optional.empty()),
+                this.config(tmp.toString(), this.credentials("file")),
                 new SettingsCaches.Fake()
             ).repoConfigsStorage(),
             new IsInstanceOf(SubStorage.class)
@@ -217,7 +268,7 @@ class YamlSettingsTest {
     @Test
     void shouldThrowExceptionWhenPathIsNotSet() {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", "file", Optional.empty()),
+            this.config("some/path", this.credentials("file", Optional.empty())),
             new SettingsCaches.Fake()
         );
         MatcherAssert.assertThat(
@@ -273,21 +324,36 @@ class YamlSettingsTest {
         );
     }
 
-    private YamlMapping config(final String stpath, final String type,
-        final Optional<String> path) {
-        final YamlMappingBuilder creds = path.map(
-            val -> Yaml.createYamlMappingBuilder().add("type", type).add("path", val)
-        ).orElse(Yaml.createYamlMappingBuilder().add("type", type));
+    private YamlNode credentials(final String type) {
+        return this.credentials(type, Optional.empty());
+    }
+
+    private YamlNode credentials(
+        final String type,
+        final Optional<String> path
+    ) {
+        return path.map(
+            val -> Yaml.createYamlMappingBuilder()
+                .add("type", type)
+                .add("path", val)
+        ).orElse(Yaml.createYamlMappingBuilder().add("type", type)).build();
+    }
+
+    private YamlMapping config(
+        final String stpath,
+        final YamlNode creds
+    ) {
         return Yaml.createYamlMappingBuilder()
             .add(
                 "meta",
-                Yaml.createYamlMappingBuilder().add(
-                    "storage",
-                    Yaml.createYamlMappingBuilder()
-                        .add("type", "fs")
-                        .add("path", stpath).build()
-                )
-                    .add("credentials", creds.build())
+                Yaml.createYamlMappingBuilder()
+                    .add(
+                        "storage",
+                        Yaml.createYamlMappingBuilder()
+                            .add("type", "fs")
+                            .add("path", stpath).build()
+                    )
+                    .add("credentials", creds)
                     .add("repo_configs", "repos")
                     .build()
             ).build();
