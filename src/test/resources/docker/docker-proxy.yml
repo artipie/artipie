@@ -1,0 +1,5 @@
+repo:
+  type: docker-proxy
+  remotes:
+    - url: registry-1.docker.io
+    - url: mcr.microsoft.com

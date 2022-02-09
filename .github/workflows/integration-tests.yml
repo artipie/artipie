@@ -29,8 +29,6 @@ jobs:
           restore-keys: |
             ubuntu-latest-jdk-17-maven-
       - run: mvn -B verify -Pitcase
-        # @todo #977:30min Fix integration tests and remove `@Disabled` annotation.
-        #  These tests were not migrated to testcontainers, fix them one by one:
-        #  src/test/java/com/artipie/docker/DockerProxyIT.java
+        # @todo #996:30min Fix integration test and remove `@Disabled` annotation.
+        #  This test is not migrated to testcontainers:
         #  src/test/java/com/artipie/docker/DockerOnPortIT.java
-        #  src/test/java/com/artipie/maven/MavenMultiProxyIT.java
