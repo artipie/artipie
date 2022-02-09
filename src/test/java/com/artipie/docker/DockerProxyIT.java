@@ -51,7 +51,7 @@ final class DockerProxyIT {
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("docker/docker-proxy.yml", "registry"),
+            .withRepoConfig("docker/docker-proxy.yml", "my-docker"),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
             .withPrivilegedMode(true)
             .withWorkingDirectory("/w")
@@ -67,7 +67,7 @@ final class DockerProxyIT {
         final Image image = new Image.ForOs();
         final String img = new Image.From(
             "artipie:8080",
-            String.format("registry/%s", image.name()),
+            String.format("my-docker/%s", image.name()),
             image.digest(),
             image.layer()
         ).remoteByDigest();
