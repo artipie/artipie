@@ -6,6 +6,7 @@ package com.artipie;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.jcabi.log.Logger;
 import java.nio.ByteBuffer;
@@ -23,6 +24,7 @@ import org.reactivestreams.Subscription;
  * @since 0.10
  * @checkstyle AnonInnerLengthCheck (500 lines)
  */
+@SuppressWarnings("deprecation")
 public final class MeasuredStorage implements Storage {
 
     /**
@@ -180,6 +182,17 @@ public final class MeasuredStorage implements Storage {
     }
 
     @Override
+    public CompletableFuture<? extends Meta> metadata(final Key key) {
+        final long start = System.nanoTime();
+        return this.origin.metadata(key).thenApply(
+            res -> {
+                this.log("metadata(%s): %s", key.string(), millisMessage(start));
+                return res;
+            }
+        );
+    }
+
+    @Override
     public CompletableFuture<Content> value(final Key key) {
         final long start = System.nanoTime();
         return this.origin.value(key).thenApply(
@@ -244,6 +257,17 @@ public final class MeasuredStorage implements Storage {
         return this.origin.delete(key).thenApply(
             res -> {
                 this.log("delete(%s): %s", key.string(), millisMessage(start));
+                return res;
+            }
+        );
+    }
+
+    @Override
+    public CompletableFuture<Void> deleteAll(final Key prefix) {
+        final long start = System.nanoTime();
+        return this.origin.deleteAll(prefix).thenApply(
+            res -> {
+                this.log("deleteAll(%s): %s", prefix.string(), millisMessage(start));
                 return res;
             }
         );

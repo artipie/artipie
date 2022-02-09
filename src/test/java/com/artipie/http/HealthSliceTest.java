@@ -7,6 +7,7 @@ package com.artipie.http;
 import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
@@ -90,7 +91,7 @@ final class HealthSliceTest {
         }
 
         @Override
-        public CompletableFuture<Long> size(final Key key) {
+        public CompletableFuture<? extends Meta> metadata(Key key) {
             throw new UnsupportedOperationException();
         }
 
