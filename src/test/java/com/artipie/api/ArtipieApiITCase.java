@@ -7,6 +7,8 @@ package com.artipie.api;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.cactoos.list.ListOf;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -113,16 +115,38 @@ final class ArtipieApiITCase {
         );
         config = config.replace("/var/artipie/repo/1", "/var/artipie/repo/one");
         this.deployment.assertExec(
-            "Failed to create a new repo",
+            "Failed to update a repo",
             new ContainerResultMatcher(Matchers.is(0), new StringContains("<!DOCTYPE html>")),
             "curl", "-X", "POST", "http://artipie:8080/api/repos/alice",
             "-u", "alice:123",
-            "--data", String.format("repo=%s;config=%s", repo, config)
+            "--data",
+            String.format(
+                "repo=%s&config=%s&action=update",
+                repo,
+                URLEncoder.encode(config, StandardCharsets.UTF_8)
+            )
         );
         this.deployment.assertArtipieContent(
             "Repo config is wrong",
             String.format("/var/artipie/repo/alice/%s.yaml", repo),
             new IsEqual<>(config.getBytes())
+        );
+    }
+
+    @Test
+    @Disabled
+    void removesRepository() throws Exception {
+        final String repo = "repo";
+        this.deployment.putBinaryToArtipie(
+            this.config().getBytes(), String.format("/var/artipie/repo/alice/%s.yml", repo)
+        );
+        this.deployment.assertExec(
+            "Failed to delete a repo",
+            new ContainerResultMatcher(0, new StringContains("<!DOCTYPE html>")),
+            "curl", "-X", "POST", "http://artipie:8080/api/repos/alice",
+            "-u", "alice:123",
+            "--data",
+            String.format("action=delete&repo=%s", repo)
         );
     }
 
