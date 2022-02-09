@@ -4,6 +4,7 @@
  */
 package com.artipie.auth;
 
+import com.artipie.ArtipieException;
 import com.artipie.http.auth.Authentication;
 import com.jcabi.github.RtGithub;
 import java.io.IOException;
@@ -64,11 +65,18 @@ public final class GithubAuth implements Authentication {
         Optional<Authentication.User> result = Optional.empty();
         final Matcher matcher = GithubAuth.PTN_NAME.matcher(username);
         if (matcher.matches()) {
-            final String login = this.github.apply(password).toLowerCase(Locale.US);
-            if (
-                Objects.equals(login, matcher.group(1).toLowerCase(Locale.US))
-            ) {
-                result = Optional.of(new Authentication.User(login));
+            try {
+                final String login = this.github.apply(password).toLowerCase(Locale.US);
+                if (
+                    Objects.equals(login, matcher.group(1).toLowerCase(Locale.US))
+                ) {
+                    result = Optional.of(new Authentication.User(login));
+                }
+            } catch (final AssertionError error) {
+                if (error.getMessage() == null
+                    || !error.getMessage().contains("401 Unauthorized")) {
+                    throw new ArtipieException(error);
+                }
             }
         }
         return result;

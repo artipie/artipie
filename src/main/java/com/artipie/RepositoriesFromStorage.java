@@ -88,7 +88,9 @@ public final class RepositoriesFromStorage implements Repositories {
 
     @Override
     public CompletionStage<RepoConfig> config(final String name) {
-        final FilesContent pair = new FilesContent(new Key.From(name), this.storage);
+        final FilesContent pair = new FilesContent(
+            new Key.From(new ConfigFile(name).name()), this.storage
+        );
         return Single.zip(
             RepositoriesFromStorage.configs.getUnchecked(pair),
             RepositoriesFromStorage.aliases.getUnchecked(pair),

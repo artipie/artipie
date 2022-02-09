@@ -6,6 +6,7 @@ package com.artipie;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.jcabi.log.Logger;
 import java.nio.ByteBuffer;
@@ -169,11 +170,11 @@ public final class MeasuredStorage implements Storage {
     }
 
     @Override
-    public CompletableFuture<Long> size(final Key key) {
+    public CompletableFuture<? extends Meta> metadata(final Key key) {
         final long start = System.nanoTime();
-        return this.origin.size(key).thenApply(
+        return this.origin.metadata(key).thenApply(
             res -> {
-                this.log("size(%s): %s", key.string(), millisMessage(start));
+                this.log("metadata(%s): %s", key.string(), millisMessage(start));
                 return res;
             }
         );

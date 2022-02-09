@@ -55,4 +55,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: g4s8/pdd-action@v1.0.0
+      - uses: g4s8/pdd-action@master

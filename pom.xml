@@ -187,17 +187,17 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>v0.26.1</version>
+      <version>v1.1.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto</artifactId>
-      <version>v1.9.0</version>
+      <version>v1.11.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>management-api</artifactId>
-      <version>v0.4.9</version>
+      <version>v0.5.2</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>

@@ -17,6 +17,9 @@
 --exclude .idea/**/*
 --exclude examples/**/*
 --exclude examples/helm/tomcat-0.4.1.tgz
---rule min-words:20
+--exclude CHANGELOG.md
+--exclude CODE_OF_CONDUCT.md
+--exclude CONTRIBUTING.md
+--rule min-words:16
 --rule min-estimate:15
 --rule max-estimate:90
