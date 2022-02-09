@@ -95,9 +95,6 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param aliases Storage aliases
      * @param standalone Standalone flag
      * @return Slice completionStage
-     * @todo #90:30min This method still needs more refactoring.
-     *  We should test if the type exist in the constructed map. If the type does not exist,
-     *  we should throw an IllegalStateException with the message "Unsupported repository type '%s'"
      * @todo #738:30min Remove creating a Vert.x instance in npm-proxy case.
      *  Vertx.vertx() call creates a Vert.x instance, a very heavy object. It should be
      *  created only once for whole application on start and reused everywhere.

@@ -33,7 +33,7 @@ public final class RpmITCase {
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("rpm/my-rpm.yml", "my-rpm"),
-        () -> new TestDeployment.ClientContainer("centos:centos8")
+        () -> new TestDeployment.ClientContainer("fedora:35")
             .withClasspathResourceMapping(
                 "rpm/time-1.7-45.el7.x86_64.rpm", "/w/time-1.7-45.el7.x86_64.rpm",
                 BindMode.READ_ONLY
@@ -43,9 +43,7 @@ public final class RpmITCase {
     @BeforeEach
     void setUp() throws IOException {
         this.containers.assertExec(
-            "Yum install curl failed",
-            new ContainerResultMatcher(),
-            "yum", "-y", "install", "curl"
+            "Dnf install curl failed", new ContainerResultMatcher(), "dnf", "-y", "install", "curl"
         );
         this.containers.putBinaryToClient(
             String.join(
@@ -73,7 +71,7 @@ public final class RpmITCase {
                 new IsEqual<>(0),
                 new StringContainsInOrder(new ListOf<>("time-1.7-45.el7.x86_64", "Complete!"))
             ),
-            "yum", "-y", "repo-pkgs", "example", "install"
+            "dnf", "-y", "repository-packages", "example", "install"
         );
     }
 
