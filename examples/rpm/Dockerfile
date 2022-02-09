@@ -1,4 +1,6 @@
 FROM fedora:35
+
+WORKDIR /test
 RUN dnf install curl
 RUN printf "[example]\nname=Example Repository\nbaseurl=http://artipie.artipie:8080/my-rpm\nenabled=1\ngpgcheck=0" > \
   /etc/yum.repos.d/example.repo
