@@ -91,7 +91,7 @@ final class HealthSliceTest {
         }
 
         @Override
-        public CompletableFuture<? extends Meta> metadata(Key key) {
+        public CompletableFuture<? extends Meta> metadata(final Key key) {
             throw new UnsupportedOperationException();
         }
 

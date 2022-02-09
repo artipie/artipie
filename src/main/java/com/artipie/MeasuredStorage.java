@@ -24,7 +24,7 @@ import org.reactivestreams.Subscription;
  * @since 0.10
  * @checkstyle AnonInnerLengthCheck (500 lines)
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.TooManyMethods"})
 public final class MeasuredStorage implements Storage {
 
     /**
