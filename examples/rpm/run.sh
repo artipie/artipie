@@ -3,5 +3,5 @@
 set -x
 set -e
 
-dnf --skip-broken -y repository-packages example install wget
+dnf --skip-broken -y repository-packages example install time
 
