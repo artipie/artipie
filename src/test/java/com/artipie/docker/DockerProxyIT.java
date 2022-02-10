@@ -7,15 +7,13 @@ package com.artipie.docker;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.List;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import wtf.g4s8.tuples.Pair;
 
 /**
  * Integration test for {@link ProxyDocker}.
@@ -38,7 +36,21 @@ import wtf.g4s8.tuples.Pair;
  *  so it requires investigation.
  *  Similar `CachingProxyITCase` tests works well in docker-adapter module.
  *  @todo #996:30min Refactor set up of a test's steps.
- *   Consider creating a class to set up steps of test using less verbose way.
+ *   Consider creating a class of docker test to avoid code duplication in
+ *   DockerProxyIT and DockerLocalITCase tests.
+ *   So this test could be rewriting follow way:
+ *   {@code new DockerTest(this.deployment, "artipie:8080")
+ *             .login("alice", "123")
+ *             .pull(
+ *                 img,
+ *                 new ContainerResultMatcher(
+ *                     new IsEqual<>(ContainerResultMatcher.SUCCESS),
+ *                     new StringContains(
+ *                      String.format("Status: Downloaded newer image for %s", img)
+ *                     )
+ *                 )
+ *             )
+ *             .assertExec();}
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs(OS.LINUX)
@@ -63,7 +75,7 @@ final class DockerProxyIT {
     }
 
     @Test
-    void shouldPullRemote() {
+    void shouldPullRemote() throws Exception {
         final Image image = new Image.ForOs();
         final String img = new Image.From(
             "artipie:8080",
@@ -71,36 +83,21 @@ final class DockerProxyIT {
             image.digest(),
             image.layer()
         ).remoteByDigest();
-        List.of(
-            Pair.of(
-                "Failed to login to Artipie",
-                List.of(
-                    "docker", "login",
-                    "--username", "alice",
-                    "--password", "123",
-                    "artipie:8080"
-                )
+        this.deployment.assertExec(
+            "Failed to login to Artipie",
+            new ContainerResultMatcher(),
+            "docker", "login",
+            "--username", "alice",
+            "--password", "123",
+            "artipie:8080"
+        );
+        this.deployment.assertExec(
+            "Failed to pull image",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(String.format("Status: Downloaded newer image for %s", img))
             ),
-            Pair.of(
-                "Failed to pull image",
-                List.of(
-                    "docker", "pull", img
-                )
-            )
-        ).forEach(
-            p -> p.accept(
-                (msg, cmds) -> {
-                    try {
-                        this.deployment.assertExec(
-                            msg,
-                            new ContainerResultMatcher(),
-                            cmds
-                        );
-                    } catch (final IOException err) {
-                        throw new UncheckedIOException(err);
-                    }
-                }
-            )
+            "docker", "pull", img
         );
     }
 }
