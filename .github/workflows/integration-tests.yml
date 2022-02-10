@@ -30,5 +30,6 @@ jobs:
             ubuntu-latest-jdk-17-maven-
       - run: mvn -B verify -Pitcase
         # @todo #996:30min Fix integration test and remove `@Disabled` annotation.
-        #  This test is not migrated to testcontainers:
+        #  The test DockerOnPortIT is not migrated to testcontainers,
+        #  we should fix it.
         #  src/test/java/com/artipie/docker/DockerOnPortIT.java
