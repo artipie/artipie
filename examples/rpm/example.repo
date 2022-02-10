@@ -1,0 +1,5 @@
+[example]
+name=Example Repository
+baseurl=http://artipie.artipie:8080/my-rpm
+enabled=1
+gpgcheck=0

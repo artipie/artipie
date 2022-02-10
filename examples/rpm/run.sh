@@ -3,6 +3,6 @@
 set -x
 set -e
 
-yum-config-manager --add-repo http://artipie.artipie:8080/my-rpm/
-yum --skip-broken --disablerepo='*' --enablerepo='artipie.artipie_8080_my-rpm_' install wget
+curl -i -X PUT --data-binary "@time-1.7-45.el7.x86_64.rpm" http://artipie.artipie:8080/my-rpm/time-1.7-45.el7.x86_64.rpm
+dnf -y repository-packages example install
 
