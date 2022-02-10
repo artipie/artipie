@@ -25,7 +25,7 @@ import com.artipie.management.api.ApiAuthSlice;
 import com.artipie.management.api.ApiChangeUserPassword;
 import com.artipie.management.api.ApiRepoGetSlice;
 import com.artipie.management.api.ApiRepoListSlice;
-import com.artipie.management.api.ApiRepoUpdateSlice;
+import com.artipie.management.api.ApiRepoPostRtSlice;
 import com.artipie.management.api.ContentAsYaml;
 import com.artipie.management.api.CookiesAuthScheme;
 import com.artipie.management.api.artifactory.AddUpdatePermissionSlice;
@@ -146,7 +146,10 @@ public final class ArtipieApi extends Slice.Wrap {
                                     new RtRule.ByPath(Pattern.compile("/api/repos/(?:[^/.]+)")),
                                     new ByMethodsRule(RqMethod.POST)
                                 ),
-                                new ApiRepoUpdateSlice(new ConfigFileApi(settings.storage()))
+                                new ApiRepoPostRtSlice(
+                                    new ArtipieStorages(http, settings.storage()),
+                                    new ConfigFileApi(settings.storage())
+                                )
                             ),
                             new RtRulePath(
                                 new RtRule.All(
