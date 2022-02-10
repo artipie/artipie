@@ -37,9 +37,6 @@ import org.junit.jupiter.params.provider.CsvSource;
  *
  * @see <a href="https://sysdig.com/blog/prometheus-metrics/"/>
  * @since 0.23
- * @todo #978:30min Add an IT test for PromuSlice.
- *  We should add an integration test to be sure that meta configuration
- *  of Prometheus is taken into account.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ParameterNumberCheck (500 lines)
  * @checkstyle MagicNumberCheck (500 lines)
