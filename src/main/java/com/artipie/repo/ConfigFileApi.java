@@ -43,6 +43,11 @@ public final class ConfigFileApi implements ConfigFiles {
     }
 
     @Override
+    public CompletionStage<Void> delete(final Key filename) {
+        return new ConfigFile(filename).delete(this.storage);
+    }
+
+    @Override
     public CompletableFuture<Void> save(final Key key, final Content content) {
         return this.storage.save(key, content);
     }
