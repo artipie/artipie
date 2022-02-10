@@ -57,7 +57,7 @@ class ResponseMetricsSliceTest {
         this.send(RqMethod.POST, new RsWithStatus(RsStatus.INTERNAL_ERROR));
         this.send(RqMethod.POST, new RsWithStatus(RsStatus.INTERNAL_ERROR));
         MatcherAssert.assertThat(
-            this.metrics.counter("post.error").value(),
+            this.metrics.counter("post.error.internal").value(),
             new IsEqual<>(2L)
         );
     }

@@ -84,6 +84,34 @@ public final class ConfigFile {
     }
 
     /**
+     * Deletes value from the storage.
+     * @param storage Storage where the file with different extensions is checked for existence
+     * @return Result of completion.
+     */
+    public CompletionStage<Void> delete(final Storage storage) {
+        final CompletionStage<Void> res;
+        if (this.isYamlOrYml() || this.extension().isEmpty()) {
+            final String name = this.name();
+            final Key yaml = Extension.YAML.key(name);
+            res = storage.exists(yaml)
+                .thenCompose(
+                    exist -> {
+                        final CompletionStage<Void> result;
+                        if (exist) {
+                            result = storage.delete(yaml);
+                        } else {
+                            result = storage.delete(Extension.YML.key(name));
+                        }
+                        return result;
+                    }
+                );
+        } else {
+            res = CompletableFuture.allOf();
+        }
+        return res;
+    }
+
+    /**
      * Obtains contents from the specified storage. If files with both extensions
      * exists, the file with `.yaml` extension will be obtained.
      * @param storage Storage from which the file is obtained
