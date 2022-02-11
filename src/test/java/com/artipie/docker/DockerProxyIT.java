@@ -100,4 +100,60 @@ final class DockerProxyIT {
             "docker", "pull", img
         );
     }
+
+    @Test
+    void shouldPushAndPull() throws Exception {
+        final String image = "artipie:8080/my-docker/alpine:3.11";
+        this.deployment.assertExec(
+            "Failed to login to Artipie",
+            new ContainerResultMatcher(),
+            "docker", "login",
+            "--username", "alice",
+            "--password", "123",
+            "artipie:8080"
+        );
+        this.deployment.assertExec(
+            "Failed to pull origin image",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(
+                    "Status: Downloaded newer image for alpine:3.11"
+                )
+            ),
+            "docker", "pull", "alpine:3.11"
+        );
+        this.deployment.assertExec(
+            "Failed to tag origin image",
+            new ContainerResultMatcher(),
+            "docker", "tag", "alpine:3.11", image
+        );
+        this.deployment.assertExec(
+            "Failed to push image to Artipie",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(
+                    "The push refers to repository [artipie:8080/my-docker/alpine]"
+                )
+            ),
+            "docker", "push", image
+        );
+        this.deployment.assertExec(
+            "Failed to remove local image",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains("Untagged: artipie:8080/my-docker/alpine:3.11")
+            ),
+            "docker", "image", "rm", image
+        );
+        this.deployment.assertExec(
+            "Failed to pull image from Artipie",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(
+                    "Downloaded newer image for artipie:8080/my-docker/alpine:3.11"
+                )
+            ),
+            "docker", "pull", image
+        );
+    }
 }
