@@ -25,9 +25,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  *  Cache is populated when image is downloaded asynchronously
  *  and later used if remote repository is unavailable.
  *  This feature should be tested.
- * @todo #499:30min Add integration test for Docker proxy push feature.
- *  Docker proxy supports pushing to local storage if such storage is specified.
- *  It should be verified that an image can be pushed to proxy repository and pulled later.
  * @todo #449:30min Support running DockerProxyIT test on Windows.
  *  Running test on Windows uses `mcr.microsoft.com/dotnet/core/runtime` image.
  *  Loading this image manifest fails with
@@ -98,6 +95,62 @@ final class DockerProxyIT {
                 new StringContains(String.format("Status: Downloaded newer image for %s", img))
             ),
             "docker", "pull", img
+        );
+    }
+
+    @Test
+    void shouldPushAndPull() throws Exception {
+        final String image = "artipie:8080/my-docker/alpine:3.11";
+        this.deployment.assertExec(
+            "Failed to login to Artipie",
+            new ContainerResultMatcher(),
+            "docker", "login",
+            "--username", "alice",
+            "--password", "123",
+            "artipie:8080"
+        );
+        this.deployment.assertExec(
+            "Failed to pull origin image",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(
+                    "Status: Downloaded newer image for alpine:3.11"
+                )
+            ),
+            "docker", "pull", "alpine:3.11"
+        );
+        this.deployment.assertExec(
+            "Failed to tag origin image",
+            new ContainerResultMatcher(),
+            "docker", "tag", "alpine:3.11", image
+        );
+        this.deployment.assertExec(
+            "Failed to push image to Artipie",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(
+                    "The push refers to repository [artipie:8080/my-docker/alpine]"
+                )
+            ),
+            "docker", "push", image
+        );
+        this.deployment.assertExec(
+            "Failed to remove local image",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains("Untagged: artipie:8080/my-docker/alpine:3.11")
+            ),
+            "docker", "image", "rm", image
+        );
+        this.deployment.assertExec(
+            "Failed to pull image from Artipie",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(
+                    "Downloaded newer image for artipie:8080/my-docker/alpine:3.11"
+                )
+            ),
+            "docker", "pull", image
         );
     }
 }
