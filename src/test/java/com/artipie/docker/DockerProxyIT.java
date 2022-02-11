@@ -25,9 +25,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  *  Cache is populated when image is downloaded asynchronously
  *  and later used if remote repository is unavailable.
  *  This feature should be tested.
- * @todo #499:30min Add integration test for Docker proxy push feature.
- *  Docker proxy supports pushing to local storage if such storage is specified.
- *  It should be verified that an image can be pushed to proxy repository and pulled later.
  * @todo #449:30min Support running DockerProxyIT test on Windows.
  *  Running test on Windows uses `mcr.microsoft.com/dotnet/core/runtime` image.
  *  Loading this image manifest fails with
