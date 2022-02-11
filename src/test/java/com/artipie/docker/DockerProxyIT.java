@@ -29,7 +29,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  *  Running test on Windows uses `mcr.microsoft.com/dotnet/core/runtime` image.
  *  Loading this image manifest fails with
  *  "java.lang.IllegalStateException: multiple subscribers not supported" error.
- *  It seems that body is being read by some other entity in Artipie,
+ *  It seems that body is being read by some other entity i`n Artipie,
  *  so it requires investigation.
  *  Similar `CachingProxyITCase` tests works well in docker-adapter module.
  *  @todo #996:30min Refactor set up of a test's steps.
