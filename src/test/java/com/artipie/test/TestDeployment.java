@@ -7,6 +7,9 @@ package com.artipie.test;
 
 import com.artipie.rpm.misc.UncheckedConsumer;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -321,6 +324,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
 
         /**
          * New artipie container with image name.
+         *
          * @param name Image name
          */
         public ArtipieContainer(final DockerImageName name) {
@@ -328,7 +332,18 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         }
 
         /**
+         * New defaut definition.
+         *
+         * @return Default container definition
+         */
+        @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+        public static ArtipieContainer defaultDefinition() {
+            return new ArtipieContainer().withConfig("artipie.yaml");
+        }
+
+        /**
          * With artipie config file.
+         *
          * @param res Config resource name
          * @return Self
          */
@@ -339,7 +354,46 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         }
 
         /**
+         * With artipie config.
+         *
+         * @param temp Temp directory
+         * @param cfg Config
+         * @return Self
+         */
+        public ArtipieContainer withConfig(
+            final Path temp,
+            final String cfg
+        ) {
+            return this.withFileSystemBind(
+                write(temp, cfg, "artipie"),
+                "/etc/artipie/artipie.yml",
+                BindMode.READ_ONLY
+            );
+        }
+
+        /**
          * With repository configuration.
+         *
+         * @param temp Temp directory
+         * @param config Repo config
+         * @param repo Repository name
+         * @return Self
+         */
+        public ArtipieContainer withRepoConfig(
+            final Path temp,
+            final String config,
+            final String repo
+        ) {
+            return this.withFileSystemBind(
+                write(temp, config, repo),
+                String.format("/var/artipie/repo/%s.yaml", repo),
+                BindMode.READ_ONLY
+            );
+        }
+
+        /**
+         * With repository configuration.
+         *
          * @param res Config resource path
          * @param repo Repository name
          * @return Self
@@ -351,8 +405,27 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         }
 
         /**
-         * With repository configuration.
-         * @param res Config resource path
+         * With credentials.
+         *
+         * @param temp Temp directory
+         * @param cred Credentials
+         * @return Self
+         */
+        public ArtipieContainer withCredentials(
+            final Path temp,
+            final String cred
+        ) {
+            return this.withFileSystemBind(
+                write(temp, cred, "_credentials.yaml"),
+                "/var/artipie/repo/_credentials.yaml",
+                BindMode.READ_ONLY
+            );
+        }
+
+        /**
+         * With credentials.
+         *
+         * @param res Credentials resource path
          * @return Self
          */
         public ArtipieContainer withCredentials(final String res) {
@@ -363,6 +436,25 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
 
         /**
          * With repository permissions.
+         *
+         * @param temp Temp directory
+         * @param perms Permissions
+         * @return Self
+         */
+        public ArtipieContainer withPermissions(
+            final Path temp,
+            final String perms
+        ) {
+            return this.withFileSystemBind(
+                write(temp, perms, "_permissions.yaml"),
+                "/var/artipie/repo/_permissions.yaml",
+                BindMode.READ_ONLY
+            );
+        }
+
+        /**
+         * With repository permissions.
+         *
          * @param res Config resource path
          * @return Self
          */
@@ -373,12 +465,32 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         }
 
         /**
-         * New defaut definition.
-         * @return Default container definition
+         * Write yaml to a file in the temp directory.
+         *
+         * @param temp Temp directory
+         * @param yaml Yaml content
+         * @param name File name prefix
+         * @return Path to the yaml resource
          */
-        @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
-        public static ArtipieContainer defaultDefinition() {
-            return new ArtipieContainer().withConfig("artipie.yaml");
+        private static String write(
+            final Path temp,
+            final String yaml,
+            final String name
+        ) {
+            try {
+                final Path res = temp.resolve(
+                    String.format("%s%d.yaml", name, yaml.hashCode())
+                );
+                if (res.toFile().exists()) {
+                    Files.delete(res);
+                }
+                return Files.write(
+                    res,
+                    yaml.getBytes()
+                ).toString();
+            } catch (final IOException err) {
+                throw new UncheckedIOException(err);
+            }
         }
     }
 
