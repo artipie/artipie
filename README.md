@@ -201,6 +201,25 @@ docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
   artipie/artipie:latest
 ```
 
+There is an ability to use GitHub credentials to authenticate users. 
+You should specify `type` as `github` to do this.
+
+You can specify several types of credentials; in that case, authentication will 
+process until success with one of them. 
+For example, the config may look like the following:
+```yaml
+meta:
+  layout: org
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-docker
+  credentials:
+    - type: env
+    - type: github
+```
+If `env` is not successful, `github` will be applied to authenticate a user. 
+If `github` is not successful, user authentication is failed.
+
 ## Single repository on port
 
 Artipie repositories may run on separate ports if configured.
