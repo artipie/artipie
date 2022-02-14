@@ -4,22 +4,16 @@
  */
 package com.artipie.docker;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.ArtipieServer;
-import com.artipie.RepoConfigYaml;
-import com.artipie.docker.junit.DockerClient;
-import com.artipie.docker.junit.DockerClientSupport;
 import com.artipie.docker.proxy.ProxyDocker;
-import java.nio.file.Path;
-import org.hamcrest.MatcherAssert;
+import com.artipie.test.ContainerResultMatcher;
+import com.artipie.test.TestDeployment;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Integration test for {@link ProxyDocker}.
@@ -31,9 +25,6 @@ import org.junit.jupiter.api.io.TempDir;
  *  Cache is populated when image is downloaded asynchronously
  *  and later used if remote repository is unavailable.
  *  This feature should be tested.
- * @todo #499:30min Add integration test for Docker proxy push feature.
- *  Docker proxy supports pushing to local storage if such storage is specified.
- *  It should be verified that an image can be pushed to proxy repository and pulled later.
  * @todo #449:30min Support running DockerProxyIT test on Windows.
  *  Running test on Windows uses `mcr.microsoft.com/dotnet/core/runtime` image.
  *  Loading this image manifest fails with
@@ -41,75 +32,125 @@ import org.junit.jupiter.api.io.TempDir;
  *  It seems that body is being read by some other entity in Artipie,
  *  so it requires investigation.
  *  Similar `CachingProxyITCase` tests works well in docker-adapter module.
+ *  @todo #996:30min Refactor set up of a test's steps.
+ *   Consider creating a class of docker test to avoid code duplication in
+ *   DockerProxyIT and DockerLocalITCase tests.
+ *   So this test could be rewriting follow way:
+ *   {@code new DockerTest(this.deployment, "artipie:8080")
+ *             .login("alice", "123")
+ *             .pull(
+ *                 img,
+ *                 new ContainerResultMatcher(
+ *                     new IsEqual<>(ContainerResultMatcher.SUCCESS),
+ *                     new StringContains(
+ *                      String.format("Status: Downloaded newer image for %s", img)
+ *                     )
+ *                 )
+ *             )
+ *             .assertExec();}
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs(OS.LINUX)
-@DockerClientSupport
-@Disabled("FIXME: migrate artipie to testcontainers")
 final class DockerProxyIT {
 
     /**
-     * Example image to use in tests.
+     * Deployment for tests.
+     * @checkstyle VisibilityModifierCheck (5 lines)
      */
-    private Image image;
-
-    /**
-     * Docker client.
-     */
-    private DockerClient client;
-
-    /**
-     * Tested Artipie server.
-     */
-    private ArtipieServer server;
-
-    /**
-     * Docker repository.
-     */
-    private String repository;
+    @RegisterExtension
+    final TestDeployment deployment = new TestDeployment(
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withRepoConfig("docker/docker-proxy.yml", "my-docker"),
+        () -> new TestDeployment.ClientContainer("alpine:3.11")
+            .withPrivilegedMode(true)
+            .withWorkingDirectory("/w")
+    );
 
     @BeforeEach
-    void setUp(@TempDir final Path root) throws Exception {
-        this.server = new ArtipieServer(
-            root, "my-docker",
-            new RepoConfigYaml("docker-proxy").withRemotes(
-                Yaml.createYamlSequenceBuilder()
-                    .add(
-                        Yaml.createYamlMappingBuilder()
-                            .add("url", "registry-1.docker.io")
-                            .build()
-                    )
-                    .add(
-                        Yaml.createYamlMappingBuilder()
-                            .add("url", "mcr.microsoft.com")
-                            .build()
-                    )
-            )
-        );
-        final int port = this.server.start();
-        this.repository = String.format("localhost:%d", port);
-        this.image = new Image.ForOs();
-        final ArtipieServer.User user = ArtipieServer.ALICE;
-        this.client.login(user.name(), user.password(), this.repository);
-    }
-
-    @AfterEach
-    void tearDown() {
-        this.server.stop();
+    void setUp() throws Exception {
+        this.deployment.setUpForDockerTests();
     }
 
     @Test
     void shouldPullRemote() throws Exception {
+        final Image image = new Image.ForOs();
         final String img = new Image.From(
-            this.repository,
-            String.format("my-docker/%s", this.image.name()),
-            this.image.digest(),
-            this.image.layer()
+            "artipie:8080",
+            String.format("my-docker/%s", image.name()),
+            image.digest(),
+            image.layer()
         ).remoteByDigest();
-        final String output = this.client.run("pull", img);
-        MatcherAssert.assertThat(
-            output,
-            new StringContains(String.format("Status: Downloaded newer image for %s", img))
+        this.deployment.assertExec(
+            "Failed to login to Artipie",
+            new ContainerResultMatcher(),
+            "docker", "login",
+            "--username", "alice",
+            "--password", "123",
+            "artipie:8080"
+        );
+        this.deployment.assertExec(
+            "Failed to pull image",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(String.format("Status: Downloaded newer image for %s", img))
+            ),
+            "docker", "pull", img
+        );
+    }
+
+    @Test
+    void shouldPushAndPull() throws Exception {
+        final String image = "artipie:8080/my-docker/alpine:3.11";
+        this.deployment.assertExec(
+            "Failed to login to Artipie",
+            new ContainerResultMatcher(),
+            "docker", "login",
+            "--username", "alice",
+            "--password", "123",
+            "artipie:8080"
+        );
+        this.deployment.assertExec(
+            "Failed to pull origin image",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(
+                    "Status: Downloaded newer image for alpine:3.11"
+                )
+            ),
+            "docker", "pull", "alpine:3.11"
+        );
+        this.deployment.assertExec(
+            "Failed to tag origin image",
+            new ContainerResultMatcher(),
+            "docker", "tag", "alpine:3.11", image
+        );
+        this.deployment.assertExec(
+            "Failed to push image to Artipie",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(
+                    "The push refers to repository [artipie:8080/my-docker/alpine]"
+                )
+            ),
+            "docker", "push", image
+        );
+        this.deployment.assertExec(
+            "Failed to remove local image",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains("Untagged: artipie:8080/my-docker/alpine:3.11")
+            ),
+            "docker", "image", "rm", image
+        );
+        this.deployment.assertExec(
+            "Failed to pull image from Artipie",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(
+                    "Downloaded newer image for artipie:8080/my-docker/alpine:3.11"
+                )
+            ),
+            "docker", "pull", image
         );
     }
 }
