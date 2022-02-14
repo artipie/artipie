@@ -283,7 +283,18 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
      * @throws IOException On error
      */
     public void setUpForDockerTests() throws IOException {
-        // @checkstyle MethodBodyCommentsCheck (10 lines)
+        // @checkstyle MagicNumberCheck (2 lines)
+        this.setUpForDockerTests(8080);
+    }
+
+    /**
+     * Sets up client environment for docker tests.
+     *
+     * @param port Artipie port
+     * @throws IOException On error
+     */
+    public void setUpForDockerTests(final int port) throws IOException {
+        // @checkstyle MethodBodyCommentsCheck (18 lines)
         // @checkstyle LineLengthCheck (10 lines)
         this.clientExec("apk", "add", "--update", "--no-cache", "openrc", "docker");
         // needs this command to initialize openrc directories on first call
@@ -291,7 +302,14 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         // this flag file is needed to tell openrc working in non-boot mode
         this.clientExec("touch", "/run/openrc/softlevel");
         // allow artipie:8080 insecure connection before starting docker daemon
-        this.clientExec("sed", "-i", "s/DOCKER_OPTS=\"\"/DOCKER_OPTS=\"--insecure-registry=artipie:8080\"/g", "/etc/conf.d/docker");
+        this.clientExec(
+            "sed", "-i",
+            String.format(
+                "s/DOCKER_OPTS=\"\"/DOCKER_OPTS=\"--insecure-registry=artipie:%d\"/g",
+                port
+            ),
+            "/etc/conf.d/docker"
+        );
         this.clientExec("rc-service", "docker", "start");
         // docker daemon needs some time to start after previous command
         this.clientExec("sleep", "3");

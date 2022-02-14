@@ -4,32 +4,38 @@
  */
 package com.artipie.docker;
 
-import com.artipie.ArtipieServer;
 import com.artipie.RepoConfigYaml;
-import com.artipie.docker.junit.DockerClient;
-import com.artipie.docker.junit.DockerClientSupport;
-import java.io.IOException;
-import java.net.ServerSocket;
+import com.artipie.test.ContainerResultMatcher;
+import com.artipie.test.TestDeployment;
 import java.nio.file.Path;
-import java.util.Arrays;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Integration test for local Docker repository running on port.
  *
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.10
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-@DockerClientSupport
-@Disabled("FIXME: migrate artipie to testcontainers")
 final class DockerOnPortIT {
+
+    /**
+     * Temp directory.
+     * @checkstyle VisibilityModifierCheck (5 lines)
+     */
+    @TempDir
+    static Path temp;
+
+    /**
+     * Repository port.
+     */
+    private static final int PORT = 8085;
 
     /**
      * Example docker image to use in tests.
@@ -37,92 +43,87 @@ final class DockerOnPortIT {
     private Image image;
 
     /**
-     * Docker client.
-     */
-    private DockerClient client;
-
-    /**
-     * Tested Artipie server.
-     */
-    private ArtipieServer server;
-
-    /**
      * Docker repository.
      */
     private String repository;
 
-    @BeforeEach
-    void setUp(@TempDir final Path root) throws Exception {
-        final int port = freePort();
-        this.server = new ArtipieServer(
-            root, "my-docker",
-            new RepoConfigYaml("docker")
-                .withFileStorage(root.resolve("data"))
-                .withPort(port)
-        );
-        this.server.start();
-        this.repository = String.format("localhost:%d", port);
-        this.image = this.prepareImage();
-        final ArtipieServer.User user = ArtipieServer.ALICE;
-        this.client.login(user.name(), user.password(), this.repository);
-    }
+    /**
+     * Deployment for tests.
+     *
+     * @checkstyle VisibilityModifierCheck (5 lines)
+     */
+    @RegisterExtension
+    final TestDeployment deployment = new TestDeployment(
+        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withRepoConfig(
+                DockerOnPortIT.temp,
+                new RepoConfigYaml("docker")
+                    .withFileStorage(Path.of("/var/artipie/data/"))
+                    .withPort(DockerOnPortIT.PORT)
+                    .toString(),
+                "my-docker"
+            ),
+        () -> new TestDeployment.ClientContainer("alpine:3.11")
+            .withPrivilegedMode(true)
+            .withWorkingDirectory("/w")
+    );
 
-    @AfterEach
-    void tearDown() {
-        this.server.stop();
+    @BeforeEach
+    void setUp() throws Exception {
+        this.deployment.setUpForDockerTests(DockerOnPortIT.PORT);
+        this.repository = String.format("artipie:%d", DockerOnPortIT.PORT);
+        this.image = this.prepareImage();
+        this.deployment.clientExec(
+            "docker", "login",
+            "--username", "alice",
+            "--password", "123",
+            this.repository
+        );
     }
 
     @Test
     void shouldPush() throws Exception {
-        final String output = this.client.run("push", this.image.remote());
-        MatcherAssert.assertThat(
-            output,
-            new AllOf<>(
-                Arrays.asList(
+        this.deployment.assertExec(
+            "Failed to push image",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new AllOf<>(
                     new StringContains(String.format("%s: Pushed", this.image.layer())),
                     new StringContains(String.format("latest: digest: %s", this.image.digest()))
                 )
-            )
+            ),
+            "docker", "push", this.image.remote()
         );
     }
 
     @Test
     void shouldPullPushed() throws Exception {
-        this.client.run("push", this.image.remote());
-        this.client.run("image", "rm", this.image.name());
-        this.client.run("image", "rm", this.image.remote());
-        final String output = this.client.run("pull", this.image.remote());
-        MatcherAssert.assertThat(
-            output,
-            new StringContains(
-                String.format("Status: Downloaded newer image for %s", this.image.remote())
-            )
+        this.deployment.clientExec("docker", "push", this.image.remote());
+        this.deployment.clientExec("docker", "image", "rm", this.image.name());
+        this.deployment.clientExec("docker", "image", "rm", this.image.remote());
+        this.deployment.assertExec(
+            "Filed to pull image",
+            new ContainerResultMatcher(
+                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                new StringContains(
+                    String.format("Status: Downloaded newer image for %s", this.image.remote())
+                )
+            ),
+            "docker", "pull", this.image.remote()
         );
     }
 
     private Image prepareImage() throws Exception {
         final Image source = new Image.ForOs();
-        this.client.run("pull", source.remoteByDigest());
-        final String local = "my-test";
-        this.client.run("tag", source.remoteByDigest(), String.format("%s:latest", local));
+        this.deployment.clientExec("docker", "pull", source.remoteByDigest());
+        this.deployment.clientExec("docker", "tag", source.remoteByDigest(), "my-test:latest");
         final Image img = new Image.From(
             this.repository,
-            local,
+            "my-test",
             source.digest(),
             source.layer()
         );
-        this.client.run("tag", source.remoteByDigest(), img.remote());
+        this.deployment.clientExec("docker", "tag", source.remoteByDigest(), img.remote());
         return img;
-    }
-
-    /**
-     * Obtain free port.
-     *
-     * @return Free port.
-     */
-    private static int freePort() throws IOException {
-        try (ServerSocket socket = new ServerSocket(0)) {
-            return socket.getLocalPort();
-        }
     }
 }
