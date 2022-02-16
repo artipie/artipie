@@ -5,9 +5,7 @@
 package com.artipie.docker;
 
 import com.artipie.docker.proxy.ProxyDocker;
-import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,22 +30,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  *  It seems that body is being read by some other entity in Artipie,
  *  so it requires investigation.
  *  Similar `CachingProxyITCase` tests works well in docker-adapter module.
- *  @todo #996:30min Refactor set up of a test's steps.
- *   Consider creating a class of docker test to avoid code duplication in
- *   DockerProxyIT and DockerLocalITCase tests.
- *   So this test could be rewriting follow way:
- *   {@code new DockerTest(this.deployment, "artipie:8080")
- *             .login("alice", "123")
- *             .pull(
- *                 img,
- *                 new ContainerResultMatcher(
- *                     new IsEqual<>(ContainerResultMatcher.SUCCESS),
- *                     new StringContains(
- *                      String.format("Status: Downloaded newer image for %s", img)
- *                     )
- *                 )
- *             )
- *             .assertExec();}
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs(OS.LINUX)
@@ -80,77 +62,45 @@ final class DockerProxyIT {
             image.digest(),
             image.layer()
         ).remoteByDigest();
-        this.deployment.assertExec(
-            "Failed to login to Artipie",
-            new ContainerResultMatcher(),
-            "docker", "login",
-            "--username", "alice",
-            "--password", "123",
-            "artipie:8080"
-        );
-        this.deployment.assertExec(
-            "Failed to pull image",
-            new ContainerResultMatcher(
-                new IsEqual<>(ContainerResultMatcher.SUCCESS),
-                new StringContains(String.format("Status: Downloaded newer image for %s", img))
-            ),
-            "docker", "pull", img
-        );
+        new TestDeployment.DockerTest(this.deployment, "artipie:8080")
+            .loginAsAlice()
+            .pull(
+                img,
+                new StringContains(
+                    String.format("Status: Downloaded newer image for %s", img)
+                )
+            )
+            .assertExec();
     }
 
     @Test
     void shouldPushAndPull() throws Exception {
         final String image = "artipie:8080/my-docker/alpine:3.11";
-        this.deployment.assertExec(
-            "Failed to login to Artipie",
-            new ContainerResultMatcher(),
-            "docker", "login",
-            "--username", "alice",
-            "--password", "123",
-            "artipie:8080"
-        );
-        this.deployment.assertExec(
-            "Failed to pull origin image",
-            new ContainerResultMatcher(
-                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+        new TestDeployment.DockerTest(this.deployment, "artipie:8080")
+            .loginAsAlice()
+            .pull(
+                "alpine:3.11",
                 new StringContains(
                     "Status: Downloaded newer image for alpine:3.11"
                 )
-            ),
-            "docker", "pull", "alpine:3.11"
-        );
-        this.deployment.assertExec(
-            "Failed to tag origin image",
-            new ContainerResultMatcher(),
-            "docker", "tag", "alpine:3.11", image
-        );
-        this.deployment.assertExec(
-            "Failed to push image to Artipie",
-            new ContainerResultMatcher(
-                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+            )
+            .tag("alpine:3.11", image)
+            .push(
+                image,
                 new StringContains(
                     "The push refers to repository [artipie:8080/my-docker/alpine]"
                 )
-            ),
-            "docker", "push", image
-        );
-        this.deployment.assertExec(
-            "Failed to remove local image",
-            new ContainerResultMatcher(
-                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+            )
+            .remove(
+                image,
                 new StringContains("Untagged: artipie:8080/my-docker/alpine:3.11")
-            ),
-            "docker", "image", "rm", image
-        );
-        this.deployment.assertExec(
-            "Failed to pull image from Artipie",
-            new ContainerResultMatcher(
-                new IsEqual<>(ContainerResultMatcher.SUCCESS),
+            )
+            .pull(
+                image,
                 new StringContains(
                     "Downloaded newer image for artipie:8080/my-docker/alpine:3.11"
                 )
-            ),
-            "docker", "pull", image
-        );
+            )
+            .assertExec();
     }
 }
