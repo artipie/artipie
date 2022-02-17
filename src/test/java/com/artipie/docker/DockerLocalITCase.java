@@ -4,15 +4,10 @@
  */
 package com.artipie.docker;
 
-import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import wtf.g4s8.tuples.Pair;
 
 /**
  * Integration test for local Docker repositories.
@@ -44,33 +39,13 @@ final class DockerLocalITCase {
     @Test
     void pushAndPull() throws Exception {
         final String image = "artipie:8080/registry/alpine:3.11";
-        List.of(
-            Pair.of(
-                "Failed to login to Artipie",
-                List.of(
-                    "docker", "login",
-                    "--username", "alice",
-                    "--password", "123",
-                    "artipie:8080"
-                )
-            ),
-            Pair.of("Failed to pull origin image", List.of("docker", "pull", "alpine:3.11")),
-            Pair.of("Failed to tag origin image", List.of("docker", "tag", "alpine:3.11", image)),
-            Pair.of("Failed to push image to Artipie", List.of("docker", "push", image)),
-            Pair.of("Failed to remove local image", List.of("docker", "image", "rm", image)),
-            Pair.of("Failed to pull image from Artipie", List.of("docker", "pull", image))
-        ).forEach(
-            pair -> pair.accept(
-                (msg, cmds) -> {
-                    try {
-                        this.deployment.assertExec(
-                            msg, new ContainerResultMatcher(), cmds
-                        );
-                    } catch (final IOException err) {
-                        throw new UncheckedIOException(err);
-                    }
-                }
-            )
-        );
+        new TestDeployment.DockerTest(this.deployment, "artipie:8080")
+            .loginAsAlice()
+            .pull("alpine:3.11")
+            .tag("alpine:3.11", image)
+            .push(image)
+            .remove(image)
+            .pull(image)
+            .assertExec();
     }
 }

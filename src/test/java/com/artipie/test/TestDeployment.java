@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +23,8 @@ import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsAnything;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -520,10 +523,283 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
 
         /**
          * New client container with name.
+         *
          * @param name Image name
          */
         public ClientContainer(final String name) {
             super(DockerImageName.parse(name));
+        }
+    }
+
+    /**
+     * Docker test builder.
+     *
+     * @since 0.24
+     */
+    public static final class DockerTest {
+        /**
+         * Deployment for tests.
+         */
+        private final TestDeployment deployment;
+
+        /**
+         * Registry.
+         */
+        private final String registry;
+
+        /**
+         * List of test commands.
+         */
+        private final List<DockerCommand> commands;
+
+        /**
+         * Ctor.
+         *
+         * @param deployment Deployment for tests
+         * @param registry Registry
+         */
+        public DockerTest(final TestDeployment deployment, final String registry) {
+            this(deployment, registry, new ArrayList<>(0));
+        }
+
+        /**
+         * Ctor.
+         *
+         * @param deployment Deployment for tests
+         * @param registry Registry
+         * @param commands List of test commands
+         */
+        public DockerTest(
+            final TestDeployment deployment,
+            final String registry,
+            final List<DockerCommand> commands
+        ) {
+            this.deployment = deployment;
+            this.registry = registry;
+            this.commands = commands;
+        }
+
+        /**
+         * Exec command and assert result.
+         *
+         * @throws IOException In case of exception
+         */
+        public void assertExec() throws IOException {
+            for (final DockerCommand cmd : this.commands) {
+                cmd.assertExec();
+            }
+        }
+
+        /**
+         * Login to Artipie as the user with name 'alice'.
+         *
+         * @return Self
+         */
+        public DockerTest loginAsAlice() {
+            return this.login("alice", "123");
+        }
+
+        /**
+         * Login to Artipie.
+         *
+         * @param user User name
+         * @param pwd Password
+         * @return Self
+         */
+        public DockerTest login(final String user, final String pwd) {
+            this.commands.add(
+                new DockerCommand(
+                    this.deployment,
+                    "Failed to login to Artipie",
+                    List.of(
+                        "docker", "login",
+                        "--username", user,
+                        "--password", pwd,
+                        this.registry
+                    ),
+                    new ContainerResultMatcher()
+                )
+            );
+            return this;
+        }
+
+        /**
+         * Pull image.
+         *
+         * @param img Image
+         * @return Self
+         */
+        public DockerTest pull(final String img) {
+            return this.pull(img, new IsAnything<>());
+        }
+
+        /**
+         * Pull image.
+         *
+         * @param img Image
+         * @param stdout Expected message in stdout
+         * @return Self
+         */
+        public DockerTest pull(final String img, final Matcher<String> stdout) {
+            this.commands.add(
+                new DockerCommand(
+                    this.deployment,
+                    String.format("Failed to pull image [image=%s]", img),
+                    List.of("docker", "pull", img),
+                    new ContainerResultMatcher(
+                        new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                        stdout
+                    )
+                )
+            );
+            return this;
+        }
+
+        /**
+         * Push image.
+         *
+         * @param img Image
+         * @return Self
+         */
+        public DockerTest push(final String img) {
+            return this.push(img, new IsAnything<>());
+        }
+
+        /**
+         * Push image.
+         *
+         * @param img Image.
+         * @param stdout Expected message in stdout
+         * @return Self
+         */
+        public DockerTest push(final String img, final Matcher<String> stdout) {
+            this.commands.add(
+                new DockerCommand(
+                    this.deployment,
+                    String.format(
+                        "Failed to push image to Artipie [image=%s]", img
+                    ),
+                    List.of("docker", "push", img),
+                    new ContainerResultMatcher(
+                        new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                        stdout
+                    )
+                )
+            );
+            return this;
+        }
+
+        /**
+         * Create a tag {@code target} that refers to {@code source}.
+         *
+         * @param source Source image
+         * @param target Target image
+         * @return Self
+         */
+        public DockerTest tag(final String source, final String target) {
+            this.commands.add(
+                new DockerCommand(
+                    this.deployment,
+                    String.format(
+                        "Failed to tag image [source=%s, target=%s]",
+                        source, target
+                    ),
+                    List.of("docker", "tag", source, target),
+                    new ContainerResultMatcher()
+                )
+            );
+            return this;
+        }
+
+        /**
+         * Remove image.
+         *
+         * @param img Image
+         * @return Self
+         */
+        public DockerTest remove(final String img) {
+            return this.remove(img, new IsAnything<>());
+        }
+
+        /**
+         * Remove image.
+         *
+         * @param img Image
+         * @param stdout Expected message in stdout
+         * @return Self
+         */
+        public DockerTest remove(final String img, final Matcher<String> stdout) {
+            this.commands.add(
+                new DockerCommand(
+                    this.deployment,
+                    String.format(
+                        "Failed to remove image from Artipie [image=%s]", img
+                    ),
+                    List.of("docker", "image", "rm", img),
+                    new ContainerResultMatcher(
+                        new IsEqual<>(ContainerResultMatcher.SUCCESS),
+                        stdout
+                    )
+                )
+            );
+            return this;
+        }
+    }
+
+    /**
+     * Docker test command.
+     *
+     * @since 0.24
+     */
+    static final class DockerCommand {
+        /**
+         * Deployment for tests.
+         */
+        private final TestDeployment deployment;
+
+        /**
+         * Assertion message on failure.
+         */
+        private final String msg;
+
+        /**
+         * Command list to execute.
+         */
+        private final List<String> cmd;
+
+        /**
+         * Exec result matcher.
+         */
+        private final Matcher<ExecResult> matcher;
+
+        /**
+         * Ctor.
+         *
+         * @param deployment Deployment for tests
+         * @param msg Assertion message on failure
+         * @param cmd Command list to execute
+         * @param matcher Exec result matcher
+         * @checkstyle ParameterNumberCheck (2 lines)
+         */
+        DockerCommand(
+            final TestDeployment deployment,
+            final String msg,
+            final List<String> cmd,
+            final Matcher<ExecResult> matcher
+        ) {
+            this.deployment = deployment;
+            this.msg = msg;
+            this.cmd = cmd;
+            this.matcher = matcher;
+        }
+
+        /**
+         * Exec command and assert result.
+         *
+         * @throws IOException In case of exception
+         */
+        void assertExec() throws IOException {
+            this.deployment.assertExec(this.msg, this.matcher, this.cmd);
         }
     }
 }
