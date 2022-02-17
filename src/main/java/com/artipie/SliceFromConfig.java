@@ -38,14 +38,13 @@ import com.artipie.maven.MavenProxy;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.http.NpmSlice;
 import com.artipie.npm.proxy.NpmProxy;
-import com.artipie.npm.proxy.NpmProxyConfig;
 import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.php.ComposerProxy;
 import com.artipie.pypi.PypiProxy;
 import com.artipie.pypi.http.PySlice;
 import com.artipie.rpm.http.RpmSlice;
-import io.vertx.reactivex.core.Vertx;
+import java.net.URI;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -95,9 +94,6 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param aliases Storage aliases
      * @param standalone Standalone flag
      * @return Slice completionStage
-     * @todo #738:30min Remove creating a Vert.x instance in npm-proxy case.
-     *  Vertx.vertx() call creates a Vert.x instance, a very heavy object. It should be
-     *  created only once for whole application on start and reused everywhere.
      * @checkstyle LineLengthCheck (150 lines)
      * @checkstyle ExecutableStatementCountCheck (100 lines)
      * @checkstyle JavaNCSSCheck (500 lines)
@@ -236,9 +232,11 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new NpmProxySlice(
                     cfg.path(),
                     new NpmProxy(
-                        new NpmProxyConfig(cfg.settings().orElseThrow()),
-                        Vertx.vertx(),
-                        cfg.storage()
+                        URI.create(
+                            cfg.settings().orElseThrow().yamlMapping("remote").string("url")
+                        ),
+                        cfg.storage(),
+                        http
                     )
                 );
                 break;

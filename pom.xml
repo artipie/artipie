@@ -228,7 +228,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>npm-adapter</artifactId>
-      <version>0.9.1</version>
+      <version>v0.10.2</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
