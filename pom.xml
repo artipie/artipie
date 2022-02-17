@@ -299,7 +299,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>conda-adapter</artifactId>
-      <version>v0.5.1</version>
+      <version>v0.5.2</version>
     </dependency>
     <dependency>
       <groupId>wtf.g4s8</groupId>
