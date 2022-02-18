@@ -56,3 +56,29 @@ a SHA256 hash-sum of user's password, `plain` validator has a plain
 password string data.
 Also, users can be assigned to groups, all permissions granted to the group
 in repository are applied to the users participating in this group.
+
+If the `type` is set to `env`, the following environment variables are expected:
+`ARTIPIE_USER_NAME` and `ARTIPIE_USER_PASS`. For example, you start
+Docker container with the `-e` option:
+```bash
+docker run -d -v /var/artipie:/var/artipie` -p 80:80 \
+  -e ARTIPIE_USER_NAME=artipie -e ARTIPIE_USER_PASS=qwerty \
+  artipie/artipie:latest
+```
+There is an ability to use GitHub credentials to authenticate users. 
+You should specify `type` as `github` to do this.
+You can specify several types of credentials; in that case, authentication will 
+process until one of them is successful. 
+For example, the config may look like following:
+```yaml
+meta:
+  layout: org
+  storage:
+    type: fs
+    path: /tmp/artipie/data/my-docker
+  credentials:
+    - type: env
+    - type: github
+```
+If `env` is not successful, `github` will be applied to authenticate a user. 
+If `github` is not successful, user authentication will fail.
