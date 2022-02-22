@@ -24,6 +24,7 @@ import org.reactivestreams.Subscription;
  * @since 0.10
  * @checkstyle AnonInnerLengthCheck (500 lines)
  */
+@SuppressWarnings({"deprecation", "PMD.TooManyMethods"})
 public final class MeasuredStorage implements Storage {
 
     /**
@@ -245,6 +246,17 @@ public final class MeasuredStorage implements Storage {
         return this.origin.delete(key).thenApply(
             res -> {
                 this.log("delete(%s): %s", key.string(), millisMessage(start));
+                return res;
+            }
+        );
+    }
+
+    @Override
+    public CompletableFuture<Void> deleteAll(final Key prefix) {
+        final long start = System.nanoTime();
+        return this.origin.deleteAll(prefix).thenApply(
+            res -> {
+                this.log("deleteAll(%s): %s", prefix.string(), millisMessage(start));
                 return res;
             }
         );

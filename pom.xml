@@ -187,7 +187,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>v1.1.0</version>
+      <version>v1.1.2-d</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -279,7 +279,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>0.7.4</version>
+      <version>v0.8.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -299,7 +299,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>conda-adapter</artifactId>
-      <version>0.5.0</version>
+      <version>v0.5.2</version>
     </dependency>
     <dependency>
       <groupId>wtf.g4s8</groupId>

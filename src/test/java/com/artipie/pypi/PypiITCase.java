@@ -106,14 +106,13 @@ final class PypiITCase {
                 Matchers.is(0),
                 new StringContainsInOrder(
                     new ListOf<>(
-                        "Uploading artipietestpkg-0.0.3-py2-none-any.whl", "100%",
                         "Uploading artipietestpkg-0.0.3.tar.gz", "100%"
                     )
                 )
             ),
             "python3", "-m", "twine", "upload", "--repository-url",
             "http://artipie:8080/my-python/", "-u", "alice", "-p", "123",
-            "/var/artipie/data/artipie/pypi/example-pckg/dist/*"
+            "/var/artipie/data/artipie/pypi/example-pckg/dist/artipietestpkg-0.0.3.tar.gz"
         );
         this.containers.assertArtipieContent(
             "Bad content after upload",
