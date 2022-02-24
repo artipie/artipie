@@ -1,14 +1,14 @@
 #!/bin/bash
-set -e
-
-basedir="$(dirname $(readlink -f $0))"
+set -eo pipefail
+cd ${0%/*}
+echo "running in $PWD"
+workdir=$PWD
 
 # environment variables:
 #  - ARTIPIE_NOSTOP - don't stop docker containers
 #       don't remove docker network on finish
 #  - DEBUG - show debug messages
 #  - CI - enable CI mode (debug and `set -x`)
-#  - DEBUG_NOX - don't enable `set -x` mode
 #  - ARTIPIE_IMAGE - docker image name for artipie
 #       (default artipie/artipie:1.0-SNAPSHOT)
 
@@ -18,16 +18,17 @@ function die {
   exit 1
 }
 
-# check if environment variable is present or die
-function require_env {
-  local name="$1"
-  local val=$(eval "echo \${$name}")
-  if [[ -z "$val" ]]; then
-    die "${name} env should be set"
-  fi
-}
-
-require_env basedir
+# set pidfile to prevent parallel runs
+pidfile=/tmp/test-artipie.pid
+if [[ -f $pidfile ]]; then
+  pid=$(cat $pidfile)
+  set +e
+  ps -p $pid > /dev/null 2>&1
+  [[ $? -eq 0 ]] || die "script is already running"
+  set -e
+fi
+echo $$ > $pidfile
+trap "rm -v $pidfile" EXIT
 
 # set debug on CI builds
 if [[ -n "$CI" ]]; then
@@ -47,7 +48,6 @@ function assert {
 }
 
 if [[ -n "$DEBUG" ]]; then
-  [[ -z "$DEBUG_NOX" ]] && set -x
   log_debug "debug enabled"
 fi
 
@@ -70,8 +70,8 @@ function start_artipie {
   [[ -z "$image" || -z "$port" ]] && die "invalid image or port params"
   stop_artipie
   docker run --rm --detach --name artipie \
-    -v "${basedir}/artipie.yml:/etc/artipie/artipie.yml" \
-    -v "${basedir}/.cfg:/var/artipie/cfg" \
+    -v "$PWD/artipie.yml:/etc/artipie/artipie.yml" \
+    -v "$PWD/.cfg:/var/artipie/cfg" \
     --mount source=artipie-data,destination=/var/artipie/data \
     --user 2020:2021 \
     --net=artipie \
@@ -117,7 +117,7 @@ function create_volume {
   log_debug "creating volume $(docker volume create artipie-data)"
   log_debug "fill out volume data"
   docker run --rm --name=artipie-volume-maker \
-    -v ${basedir}/.data:/data-src \
+    -v "$PWD/.data:/data-src" \
     --mount source=artipie-data,destination=/data-dst \
     alpine:3.13 \
     /bin/sh -c 'addgroup -S -g 2020 artipie && adduser -S -g 2020 -u 2021 artipie && cp -r /data-src/* /data-dst && chown -R 2020:2021 /data-dst'
@@ -139,16 +139,16 @@ function rm_volume {
 function run_test {
   local name=$1
   log_debug "running smoke test $name"
-  cd "${basedir}/${name}"
+  cd "./${name}"
   docker build -t "test/${name}" .
   docker run --name="smoke-${name}" --rm \
     --net=artipie \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    "test/${name}" | tee -a "${basedir}/out.log"
+    "test/${name}" | tee -a "$workdir/out.log"
   if [[ "${PIPESTATUS[0]}" == "0" ]]; then
-    echo "test ${name} - PASSED" | tee -a "${basedir}/results.txt"
+    echo "test ${name} - PASSED" | tee -a "$workdir/results.txt"
   else
-    echo "test ${name} - FAILED" | tee -a "${basedir}/results.txt"
+    echo "test ${name} - FAILED" | tee -a "$workdir/results.txt"
   fi
 }
 
@@ -167,13 +167,13 @@ log_debug "tests: ${tests[@]}"
 # FIXME: some repository tests don't work, fix them:
 # conda
 
-rm -fr "${basedir}/out.log" "${basedir}/results.txt"
-touch "${basedir}/out.log"
+rm -fr "$workdir/out.log" "$workdir/results.txt"
+touch "$workdir/out.log"
 
 for t in "${tests[@]}"; do
   run_test $t || echo "test $t failed"
 done
 
 echo "all tests finished:"
-cat "${basedir}/results.txt"
-grep "FAILED" "${basedir}/results.txt" && die "One or more tests failed"
+cat "$workdir/results.txt"
+grep "FAILED" "$workdir/results.txt" && die "One or more tests failed"
