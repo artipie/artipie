@@ -14,7 +14,6 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -25,11 +24,6 @@ import org.testcontainers.containers.BindMode;
  * Conda IT case.
  * @since 0.23
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @todo #321:30min Enable conda install IT case.
- *  After bumping asto from v1.10.0 to v1.11.0 conda install IT case started to fail
- *  with out of storage exception (https://github.com/artipie/artipie/runs/4641400517?check_suite_focus=true#step:6:2241),
- *  therefore this test was disabled.
- *  It is necessary to fix this problem and enable test.
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -93,7 +87,6 @@ public final class CondaITCase {
     }
 
     @Test
-    @Disabled
     void canUploadToArtipie() throws IOException {
         this.moveCondarc();
         this.containers.assertExec(
