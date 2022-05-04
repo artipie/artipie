@@ -7,8 +7,6 @@ package com.artipie.http;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.Settings;
 import com.artipie.YamlStorage;
-import com.artipie.api.ArtipieApi;
-import com.artipie.api.DashboardSlice;
 import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
 import com.artipie.http.client.ClientSlices;
@@ -104,14 +102,6 @@ public final class MainSlice extends Slice.Wrap {
                         new RtRule.ByPath("/.version")
                     ),
                     new VersionSlice(new ArtipieProperties())
-                ),
-                new RtRulePath(
-                    new RtRule.ByPath(Pattern.compile("/api/?.*")),
-                    new ArtipieApi(http, settings)
-                ),
-                new RtRulePath(
-                    new RtIsDashboard(settings),
-                    new DashboardSlice(settings)
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
