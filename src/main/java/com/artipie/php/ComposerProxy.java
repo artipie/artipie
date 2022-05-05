@@ -4,7 +4,6 @@
  */
 package com.artipie.php;
 
-import com.artipie.RepoConfig;
 import com.artipie.composer.AstoRepository;
 import com.artipie.composer.http.proxy.ComposerProxySlice;
 import com.artipie.composer.http.proxy.ComposerStorageCache;
@@ -12,6 +11,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.repo.ProxyConfig;
+import com.artipie.repo.RepoConfig;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Collection;

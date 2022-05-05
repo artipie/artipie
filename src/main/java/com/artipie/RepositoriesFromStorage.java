@@ -12,6 +12,7 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
 import com.artipie.repo.ConfigFile;
+import com.artipie.repo.RepoConfig;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;

@@ -8,7 +8,6 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.CredsConfigYaml;
 import com.artipie.http.auth.Authentication;
-import com.artipie.management.Users;
 import java.util.List;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cactoos.list.ListOf;

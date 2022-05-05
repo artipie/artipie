@@ -4,7 +4,6 @@
  */
 package com.artipie.repo;
 
-import com.artipie.RepoConfig;
 import com.artipie.conda.CondaQuartz;
 import java.util.function.Predicate;
 import org.quartz.Scheduler;

@@ -4,7 +4,6 @@
  */
 package com.artipie.docker;
 
-import com.artipie.RepoConfig;
 import com.artipie.asto.SubStorage;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.RegistryRoot;
@@ -23,6 +22,7 @@ import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.repo.ProxyConfig;
+import com.artipie.repo.RepoConfig;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.stream.Collectors;

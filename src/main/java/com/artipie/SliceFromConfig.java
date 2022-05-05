@@ -43,6 +43,7 @@ import com.artipie.nuget.http.NuGet;
 import com.artipie.php.ComposerProxy;
 import com.artipie.pypi.PypiProxy;
 import com.artipie.pypi.http.PySlice;
+import com.artipie.repo.RepoConfig;
 import com.artipie.rpm.http.RpmSlice;
 import java.net.URI;
 import java.util.Optional;

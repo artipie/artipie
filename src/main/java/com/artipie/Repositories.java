@@ -4,6 +4,7 @@
  */
 package com.artipie;
 
+import com.artipie.repo.RepoConfig;
 import java.util.concurrent.CompletionStage;
 
 /**

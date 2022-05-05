@@ -5,7 +5,6 @@
 package com.artipie.docker;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.RepoConfig;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
@@ -16,6 +15,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.repo.RepoConfig;
 import io.reactivex.Flowable;
 import java.io.IOException;
 import java.util.Optional;

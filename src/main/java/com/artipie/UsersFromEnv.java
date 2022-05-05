@@ -5,8 +5,8 @@
 package com.artipie;
 
 import com.artipie.auth.AuthFromEnv;
+import com.artipie.auth.Users;
 import com.artipie.http.auth.Authentication;
-import com.artipie.management.Users;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

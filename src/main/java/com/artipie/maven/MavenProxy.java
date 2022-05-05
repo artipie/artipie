@@ -4,7 +4,6 @@
  */
 package com.artipie.maven;
 
-import com.artipie.RepoConfig;
 import com.artipie.asto.cache.Cache;
 import com.artipie.asto.cache.FromStorageCache;
 import com.artipie.http.Response;
@@ -12,6 +11,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.group.GroupSlice;
 import com.artipie.maven.http.MavenProxySlice;
+import com.artipie.repo.RepoConfig;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Map;

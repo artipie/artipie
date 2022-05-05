@@ -2,17 +2,16 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie;
+package com.artipie.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.RepoConfigYaml;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.management.RepoPermissions;
-import com.artipie.repo.ConfigFile;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;

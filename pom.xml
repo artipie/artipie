@@ -195,11 +195,6 @@ SOFTWARE.
       <version>v1.11.0</version>
     </dependency>
     <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>management-api</artifactId>
-      <version>v0.5.2</version>
-    </dependency>
-    <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-github</artifactId>
       <version>1.1.2</version>
