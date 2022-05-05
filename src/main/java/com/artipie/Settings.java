@@ -8,8 +8,8 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.auth.Users;
 import com.artipie.http.auth.Authentication;
-import com.artipie.management.Users;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 

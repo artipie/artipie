@@ -3,19 +3,19 @@
  * https://github.com/artipie/artipie/LICENSE.txt
  */
 
-package com.artipie;
+package com.artipie.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.MeasuredStorage;
+import com.artipie.StorageAliases;
+import com.artipie.YamlPermissions;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.ClientSlices;
-import com.artipie.repo.ProxyConfig;
-import com.artipie.repo.StorageYamlConfig;
-import com.artipie.repo.YamlProxyConfig;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.net.MalformedURLException;

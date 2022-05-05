@@ -18,6 +18,7 @@ import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.nop.NopMetrics;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.repo.ConfigFile;
+import com.artipie.repo.RepoConfig;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;

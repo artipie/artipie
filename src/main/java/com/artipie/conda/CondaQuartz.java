@@ -4,8 +4,8 @@
  */
 package com.artipie.conda;
 
-import com.artipie.RepoConfig;
 import com.artipie.conda.asto.AuthTokensMaid;
+import com.artipie.repo.RepoConfig;
 import com.jcabi.log.Logger;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;

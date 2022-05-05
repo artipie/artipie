@@ -2,14 +2,13 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie;
+package com.artipie.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
-import com.artipie.management.RepoPermissions;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;

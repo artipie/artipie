@@ -7,7 +7,7 @@ package com.artipie;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.management.api.ContentAsYaml;
+import com.artipie.misc.ContentAsYaml;
 import com.artipie.repo.ConfigFile;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.util.Optional;

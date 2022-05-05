@@ -11,7 +11,7 @@ import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.management.Users;
+import com.artipie.auth.Users;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;

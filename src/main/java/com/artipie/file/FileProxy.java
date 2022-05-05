@@ -4,12 +4,12 @@
  */
 package com.artipie.file;
 
-import com.artipie.RepoConfig;
 import com.artipie.files.FileProxySlice;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.repo.ProxyConfig;
+import com.artipie.repo.RepoConfig;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Collection;

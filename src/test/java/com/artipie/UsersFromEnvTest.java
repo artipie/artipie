@@ -5,7 +5,7 @@
 package com.artipie;
 
 import com.artipie.auth.AuthFromEnv;
-import com.artipie.management.Users;
+import com.artipie.auth.Users;
 import java.util.Optional;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;

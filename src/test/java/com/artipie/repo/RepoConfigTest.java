@@ -2,10 +2,12 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie;
+package com.artipie.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.StorageAliases;
+import com.artipie.YamlPermissions;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.client.jetty.JettyClientSlices;

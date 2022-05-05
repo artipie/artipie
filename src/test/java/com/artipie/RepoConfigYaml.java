@@ -11,6 +11,7 @@ import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.repo.ConfigFile;
+import com.artipie.repo.RepoPerms;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
