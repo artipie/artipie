@@ -72,13 +72,13 @@ public final class YamlPermissions implements Permissions {
     }
 
     /**
-     * Quotes asterisks * with double quotes
+     * Quotes asterisks * with double quotes.
      * @param val Value
      * @return Quotes value if it was * sign
      */
     private static String quoteAsterisks(final String val) {
         String res = val;
-        if ("*".equals(val)) {
+        if (YamlPermissions.WILDCARD.equals(val)) {
             res = "\"*\"";
         }
         return res;

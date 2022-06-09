@@ -5,7 +5,6 @@
 package com.artipie.docker;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
@@ -78,7 +77,6 @@ class DockerProxyTest {
 
     private static DockerProxy dockerProxy(final String yaml) throws IOException {
         final ClientSlices http = new JettyClientSlices();
-        final YamlMapping yaml1 = Yaml.createYamlInput(yaml).readYamlMapping();
         return new DockerProxy(
             http,
             false,
@@ -88,7 +86,7 @@ class DockerProxyTest {
                     throw new UnsupportedOperationException();
                 },
                 Key.ROOT,
-                yaml1
+                Yaml.createYamlInput(yaml).readYamlMapping()
             ),
             Permissions.FREE,
             (username, password) -> Optional.empty()
