@@ -24,6 +24,11 @@ public final class YamlPermissions implements Permissions {
     private static final String WILDCARD = "*";
 
     /**
+     * Quoted asterisk wildcard.
+     */
+    private static final String Q_WILDCARD = "\"*\"";
+
+    /**
      * YAML storage settings.
      */
     private final YamlMapping yaml;
@@ -39,7 +44,7 @@ public final class YamlPermissions implements Permissions {
     @Override
     public boolean allowed(final Authentication.User user, final String action) {
         return check(this.yaml.yamlSequence(user.name()), action)
-            || check(this.yaml.yamlSequence(YamlPermissions.WILDCARD), action)
+            || check(this.yaml.yamlSequence(YamlPermissions.Q_WILDCARD), action)
             || this.checkGroups(user.groups(), action);
     }
 
@@ -63,7 +68,10 @@ public final class YamlPermissions implements Permissions {
      */
     private static boolean check(final YamlSequence seq, final String action) {
         return seq != null && seq.values().stream().map(node -> Scalar.class.cast(node).value())
-            .anyMatch(item -> item.equals(action) || item.equals(YamlPermissions.WILDCARD));
+            .anyMatch(
+                item -> item.equals(action) || item.equals(YamlPermissions.WILDCARD)
+                    || item.equals(YamlPermissions.Q_WILDCARD)
+            );
     }
 
 }
