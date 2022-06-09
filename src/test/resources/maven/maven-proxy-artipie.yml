@@ -2,7 +2,8 @@
 repo:
   type: maven-proxy
   remotes:
-    - url: http://artipie:8080/my-maven
+    -
+      url: http://artipie:8080/my-maven
       username: alice
       password: 123
       cache:

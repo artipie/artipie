@@ -24,11 +24,6 @@ public final class YamlPermissions implements Permissions {
     private static final String WILDCARD = "*";
 
     /**
-     * Quoted asterisk wildcard.
-     */
-    private static final String Q_WILDCARD = "\"*\"";
-
-    /**
      * YAML storage settings.
      */
     private final YamlMapping yaml;
@@ -43,9 +38,11 @@ public final class YamlPermissions implements Permissions {
 
     @Override
     public boolean allowed(final Authentication.User user, final String action) {
-        return check(this.yaml.yamlSequence(user.name()), action)
-            || check(this.yaml.yamlSequence(YamlPermissions.Q_WILDCARD), action)
-            || this.checkGroups(user.groups(), action);
+        return check(this.yaml.yamlSequence(YamlPermissions.quoteAsterisks(user.name())), action)
+            || check(
+                this.yaml.yamlSequence(YamlPermissions.quoteAsterisks(YamlPermissions.WILDCARD)),
+                action
+            ) || this.checkGroups(user.groups(), action);
     }
 
     /**
@@ -70,8 +67,21 @@ public final class YamlPermissions implements Permissions {
         return seq != null && seq.values().stream().map(node -> Scalar.class.cast(node).value())
             .anyMatch(
                 item -> item.equals(action) || item.equals(YamlPermissions.WILDCARD)
-                    || item.equals(YamlPermissions.Q_WILDCARD)
+                    || item.equals(YamlPermissions.quoteAsterisks(YamlPermissions.WILDCARD))
             );
+    }
+
+    /**
+     * Quotes asterisks * with double quotes
+     * @param val Value
+     * @return Quotes value if it was * sign
+     */
+    private static String quoteAsterisks(final String val) {
+        String res = val;
+        if ("*".equals(val)) {
+            res = "\"*\"";
+        }
+        return res;
     }
 
 }

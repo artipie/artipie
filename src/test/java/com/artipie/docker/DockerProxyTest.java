@@ -5,6 +5,7 @@
 package com.artipie.docker;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
@@ -77,6 +78,7 @@ class DockerProxyTest {
 
     private static DockerProxy dockerProxy(final String yaml) throws IOException {
         final ClientSlices http = new JettyClientSlices();
+        final YamlMapping yaml1 = Yaml.createYamlInput(yaml).readYamlMapping();
         return new DockerProxy(
             http,
             false,
@@ -86,7 +88,7 @@ class DockerProxyTest {
                     throw new UnsupportedOperationException();
                 },
                 Key.ROOT,
-                Yaml.createYamlInput(yaml).readYamlMapping()
+                yaml1
             ),
             Permissions.FREE,
             (username, password) -> Optional.empty()
@@ -96,20 +98,22 @@ class DockerProxyTest {
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static Stream<String> goodConfigs() {
         return Stream.of(
-            "repo:\n  remotes:\n    - url: registry-1.docker.io",
+            "repo:\n  remotes:\n    - url: registry1.docker.io",
             String.join(
                 "\n",
                 "repo:",
                 "  type: docker-proxy",
                 "  remotes:",
-                "    - url: registry-1.docker.io",
+                "    -",
+                "      url: registry-1.docker.io",
                 "      username: admin",
                 "      password: qwerty",
                 "      cache:",
                 "        storage:",
                 "          type: fs",
                 "          path: /var/artipie/data/cache",
-                "    - url: \"another-registry.org:54321\"",
+                "    -",
+                "      url: another-registry.org:54321",
                 "    - url: mcr.microsoft.com",
                 "      cache:",
                 "        storage:",

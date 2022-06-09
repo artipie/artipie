@@ -1,8 +1,10 @@
 repo:
   type: docker-proxy
   remotes:
-    - url: registry-1.docker.io
-    - url: mcr.microsoft.com
+    -
+      url: registry-1.docker.io
+    -
+      url: mcr.microsoft.com
   storage:
     type: fs
     path: /var/artipie/data/

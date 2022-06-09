@@ -1,7 +1,8 @@
 repo:
   type: file-proxy
   remotes:
-    - url: http://artipie:8080/my-bin
+    -
+      url: http://artipie:8080/my-bin
       username: alice
       password: 123
 
