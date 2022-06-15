@@ -1,0 +1,30 @@
+version: "3.3"
+services:
+  artipie:
+    image: artipie/artipie:latest
+    container_name: artipie
+    restart: unless-stopped
+    environment:
+      - ARTIPIE_USER_NAME=artipie
+      - ARTIPIE_USER_PASS=artipie
+    networks:
+      - artipie-net
+  front:
+    image: artipie/front:latest
+    container_name: front
+    restart: unless-stopped
+    networks:
+      - artipie-net
+    environment:
+      - ARTIPIE_USER_NAME=artipie
+      - ARTIPIE_USER_PASS=artipie
+      - TKN_KEY=abc123
+    volumes:
+      - configs:/var/artipie/repo
+
+volumes:
+  configs:
+
+networks:
+  artipie-net:
+    driver: bridge

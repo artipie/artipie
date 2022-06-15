@@ -44,31 +44,35 @@ The following set of features makes Artipie unique among all others:
 # Quickstart
 
 The fastest way to start using Artipie is via
-[Docker](https://docs.docker.com/get-docker/):
+[Docker-compose](https://docs.docker.com/compose/), use 
+[`docker-compose.yaml`](https://github.com/artipie/artipie/blob/master/docker-compose.yaml) to run 
+the service:
 
 ```bash
-docker run --rm --name artipie -p 8080:8080 --user=artipie:artipie artipie/artipie:latest
+docker-compose up
 ```
 
-It'll start a new Docker container with latest Artipie image. A new image generates
-default server config if not found at `/etc/artipie/artipie.yml`, prints initial
+It'll start a new Docker container with latest Artipie and Artipie dashboard service image. 
+A new image generate default configuration if not found at `/etc/artipie/artipie.yml`, prints initial
 credentials to console and prints a link to the dashboard. If started on localhost with command
-above, the dashboard URI is http://localhost:8080/dashboard/artipie.
+above, the dashboard URI is http://localhost:8080/dashboard/artipie and default username and password 
+are `artipie/artipie`.
 
 
 To create a new artifact repository:
  1. Go to the dashboard
  2. Enter the name of a new repository, choose a type, and click button "Add"
- 3. Artipie generates standard configuration for this kind of repository, and
+ 3. Artipie generates standard configuration for selected kind of repository, and
   asks for review or edit. You can ignore this step for now.
  4. Below the repository configuration, the page will have a simple configuration
   for your client, and usage examples, e.g. the code for `pom.xml` for Maven repository.
 
 Default server configuration refers to `/var/artipie/repos` to look up for repository configurations.
-You may want to mount local configurations here to edit it manually by adding `docker run` mount option:
-`-v <your-local-config-dir>:/var/artipie/repo`, where `<your-local-config-dir>` is you local config directory.<br/>
-**Important:** check that `<your-local-config-dir>` has correct permissions, it should be `2020:2021`, to change it correctly use
-`chown -R 2020:2021 <your-local-config-dir>`.
+You may want to mount local configurations to `/var/artipie/repos` to edit it manually by changing
+`volumes` values inside `docker-compose` script.
+
+**Important:** check that `<your-local-config-dir>` has correct permissions, it should be `2020:2021`, 
+to change it correctly use `chown -R 2020:2021 <your-local-config-dir>`.
 
 
 More examples are [here](./examples).
