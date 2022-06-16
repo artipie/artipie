@@ -35,10 +35,7 @@ The following set of features makes Artipie unique among all others:
     [Rpm](./examples/rpm),
     and [others](./examples)
   * It is database-free
-  * It can host the data in the file system,
-    [Amazon S3](https://aws.amazon.com/s3/),
-    [Google Cloud](https://cloud.google.com/products/storage/),
-    [HuaweiCloud OBS](https://www.huaweicloud.com/en-us/product/obs.html) etc.
+  * It can host the data in the file system or [Amazon S3](https://aws.amazon.com/s3/)
   * Its quality of Java code is extraordinary high :)
 
 # Quickstart
