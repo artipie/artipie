@@ -52,8 +52,10 @@ docker-compose up
 It'll start a new Docker container with latest Artipie and Artipie dashboard service image. 
 A new image generate default configuration if not found at `/etc/artipie/artipie.yml`, prints initial
 credentials to console and prints a link to the dashboard. If started on localhost with command
-above, the dashboard URI is http://localhost:8080/dashboard/artipie and default username and password 
-are `artipie/artipie`.
+above, the dashboard URI is `http://localhost:8080/dashboard/artipie` and default username and password 
+are `artipie/artipie`. Artipie server side (repositories) are served on `8081` port and are 
+available on URI `http://localhost:8081/artipie/{reponame}`, where `{reponame}` is the name of the
+repository.
 
 
 To create a new artifact repository:

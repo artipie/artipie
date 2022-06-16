@@ -9,6 +9,8 @@ services:
       - ARTIPIE_USER_PASS=artipie
     networks:
       - artipie-net
+    ports:
+      - "8081:8080"
   front:
     image: artipie/front:latest
     container_name: front
@@ -21,6 +23,8 @@ services:
       - TKN_KEY=abc123
     volumes:
       - configs:/var/artipie/repo
+    ports:
+      - "8080:8080"
 
 volumes:
   configs:
