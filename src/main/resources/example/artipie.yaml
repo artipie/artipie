@@ -3,8 +3,13 @@ meta:
     type: fs
     path: /var/artipie/repo
   credentials:
-    type: file
-    path: _credentials.yaml
+    -
+      type: env
+    -
+      type: github
+    -
+      type: file
+      path: _credentials.yml
   layout: org
   base_url: http://central.artipie.com/
   metrics:

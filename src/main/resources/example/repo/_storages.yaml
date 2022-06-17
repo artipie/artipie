@@ -1,4 +1,4 @@
 storages:
   default:
     type: fs
-    path: ./.storage/data
+    path: /var/artipie/repo/data
