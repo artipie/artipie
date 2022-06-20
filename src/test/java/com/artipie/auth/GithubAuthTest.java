@@ -33,7 +33,7 @@ final class GithubAuthTest {
                     return "";
                 }
             ).user("github.com/UsEr", secret).orElseThrow(),
-            new IsEqual<>(new Authentication.User("user"))
+            new IsEqual<>(new Authentication.User("UsEr"))
         );
     }
 

@@ -70,7 +70,7 @@ public final class GithubAuth implements Authentication {
                 if (
                     Objects.equals(login, matcher.group(1).toLowerCase(Locale.US))
                 ) {
-                    result = Optional.of(new Authentication.User(login));
+                    result = Optional.of(new Authentication.User(matcher.group(1)));
                 }
             } catch (final AssertionError error) {
                 if (error.getMessage() == null
