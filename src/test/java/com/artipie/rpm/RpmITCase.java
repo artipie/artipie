@@ -65,6 +65,7 @@ public final class RpmITCase {
             "curl", "http://artipie:8080/my-rpm/time-1.7-45.el7.x86_64.rpm",
             "--upload-file", "/w/time-1.7-45.el7.x86_64.rpm"
         );
+        // @checkstyle MagicNumberCheck (1 line)
         Thread.sleep(2000);
         this.containers.assertExec(
             "Failed to install time package",
