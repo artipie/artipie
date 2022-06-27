@@ -249,7 +249,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>rpm-adapter</artifactId>
-      <version>1.9.18</version>
+      <version>1.10.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
