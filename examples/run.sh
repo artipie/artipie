@@ -139,7 +139,7 @@ function rm_volume {
 function run_test {
   local name=$1
   log_debug "running smoke test $name"
-  cd "./${name}"
+  pushd "./${name}"
   docker build -t "test/${name}" .
   docker run --name="smoke-${name}" --rm \
     --net=artipie \
@@ -150,16 +150,19 @@ function run_test {
   else
     echo "test ${name} - FAILED" | tee -a "$workdir/results.txt"
   fi
+  popd
 }
 
 create_network
 create_volume
 start_artipie
 
+sleep 1 #sometimes artipie container needs extra time to load
+
 if [[ -z "$1" ]]; then
   declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda)
 else
-  declare -a tests=("$1")
+  declare -a tests=("$@")
 fi
 
 log_debug "tests: ${tests[@]}"
@@ -176,4 +179,13 @@ done
 
 echo "all tests finished:"
 cat "$workdir/results.txt"
-grep "FAILED" "$workdir/results.txt" && die "One or more tests failed"
+r=0
+grep "FAILED" "$workdir/results.txt" > /dev/null || r="$?"
+if [ "$r" -eq 0 ] ; then
+  rm -fv "$pidfile"
+  die "One or more tests failed"
+else
+  rm -fv "$pidfile"
+  echo "SUCCESS"
+fi
+
