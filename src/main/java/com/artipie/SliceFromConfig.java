@@ -116,16 +116,12 @@ public final class SliceFromConfig extends Slice.Wrap {
         );
         switch (cfg.type()) {
             case "file":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new FilesSlice(cfg.storage(), permissions, auth)
+                slice = new TrimPathSlice(
+                    new FilesSlice(cfg.storage(), permissions, auth), settings.layout().pattern()
                 );
                 break;
             case "file-proxy":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new FileProxy(http, cfg)
-                );
+                slice = new TrimPathSlice(new FileProxy(http, cfg), settings.layout().pattern());
                 break;
             case "npm":
                 slice = trimIfNotStandalone(

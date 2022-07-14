@@ -11,10 +11,11 @@ import org.cactoos.map.MapOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Integration test for files proxy.
@@ -42,6 +43,7 @@ final class FileProxyAuthIT {
                 "artipie-proxy",
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()
                     .withRepoConfig("binary/bin-proxy.yml", "my-bin-proxy")
+                    .withRepoConfig("binary/bin-proxy-port.yml", "my-bin-proxy-port")
             )
         ),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
@@ -57,8 +59,9 @@ final class FileProxyAuthIT {
         );
     }
 
-    @Test
-    void shouldGetAndCacheFile() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"8080/my-bin-proxy", "8081/my-bin-proxy-port"})
+    void shouldGetFileFromOrigin(final String repo) throws Exception {
         final byte[] data = "Hello world!".getBytes();
         this.containers.putBinaryToArtipie(
             "artipie", data,
@@ -69,7 +72,7 @@ final class FileProxyAuthIT {
             new ContainerResultMatcher(
                 new IsEqual<>(0), new StringContains("HTTP/1.1 200 OK")
             ),
-            "curl", "-i", "-X", "GET", "http://artipie-proxy:8080/my-bin-proxy/foo/bar.txt"
+            "curl", "-i", "-X", "GET", String.format("http://artipie-proxy:%s/foo/bar.txt", repo)
         );
     }
 }

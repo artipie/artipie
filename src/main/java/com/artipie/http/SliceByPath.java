@@ -59,7 +59,8 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
-        return new ArtipieRepositories(this.http, this.settings).slice(key.get(), false)
+        return new ArtipieRepositories(this.http, this.settings)
+            .slice(key.get(), new RequestLineFrom(line).uri().getPort())
             .response(line, headers, body);
     }
 }
