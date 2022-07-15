@@ -29,6 +29,7 @@ final class FileProxyAuthIT {
     /**
      * Test deployments.
      * @checkstyle VisibilityModifierCheck (10 lines)
+     * @checkstyle MagicNumberCheck (20 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
@@ -44,6 +45,7 @@ final class FileProxyAuthIT {
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()
                     .withRepoConfig("binary/bin-proxy.yml", "my-bin-proxy")
                     .withRepoConfig("binary/bin-proxy-port.yml", "my-bin-proxy-port")
+                    .withExposedPorts(8081)
             )
         ),
         () -> new TestDeployment.ClientContainer("alpine:3.11")

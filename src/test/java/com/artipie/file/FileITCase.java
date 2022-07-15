@@ -27,12 +27,14 @@ final class FileITCase {
     /**
      * Deployment for tests.
      * @checkstyle VisibilityModifierCheck (5 lines)
+     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("binary/bin.yml", "bin")
-            .withRepoConfig("binary/bin-port.yml", "bin-port"),
+            .withRepoConfig("binary/bin-port.yml", "bin-port")
+            .withExposedPorts(8081),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
             .withWorkingDirectory("/w")
     );

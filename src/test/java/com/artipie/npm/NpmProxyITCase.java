@@ -21,6 +21,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * Integration test for {@link com.artipie.npm.proxy.http.NpmProxySlice}.
  * @since 0.13
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @todo #1041:30min Add test cases with proxy repository on individual port: create one more
+ *  repository with `port` settings and start it in Artipie container exposing the port with
+ *  `withExposedPorts` method. Then, parameterize test cases to check repositories with different
+ *  ports. Check `FileProxyAuthIT` as an example.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})

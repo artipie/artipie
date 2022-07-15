@@ -20,6 +20,10 @@ import org.testcontainers.containers.BindMode;
  * Integration test for maven proxy with multiple remotes.
  *
  * @since 0.12
+ * @todo #1041:30min Add test cases with proxy repository on individual port: create one more
+ *  repository with `port` settings and start it in Artipie container exposing the port with
+ *  `withExposedPorts` method. Then, parameterize test cases to check repositories with different
+ *  ports. Check `FileProxyAuthIT` as an example.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)

@@ -26,63 +26,81 @@ import org.testcontainers.containers.BindMode;
  * Integration tests for Maven repository.
  * @since 0.11
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ParameterNumberCheck (500 lines)
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseObjectForClearerAPI"})
 @DisabledOnOs(OS.WINDOWS)
 public final class MavenITCase {
 
     /**
      * Test deployments.
      * @checkstyle VisibilityModifierCheck (10 lines)
+     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("maven/maven.yml", "my-maven"),
+            .withRepoConfig("maven/maven.yml", "my-maven")
+            .withRepoConfig("maven/maven-port.yml", "my-maven-port")
+            .withExposedPorts(8081),
         () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
                 "maven/maven-settings.xml", "/w/settings.xml", BindMode.READ_ONLY
             )
+            .withClasspathResourceMapping(
+                "maven/maven-settings-port.xml", "/w/settings-port.xml", BindMode.READ_ONLY
+            )
     );
 
     @ParameterizedTest
-    @CsvSource({"helloworld,0.1", "snapshot,1.0-SNAPSHOT"})
-    void downloadsArtifact(final String type, final String vers) throws Exception {
+    @CsvSource({
+        "helloworld,0.1,settings.xml,my-maven",
+        "snapshot,1.0-SNAPSHOT,settings.xml,my-maven",
+        "helloworld,0.1,settings-port.xml,my-maven-port",
+        "snapshot,1.0-SNAPSHOT,settings-port.xml,my-maven-port"
+    })
+    void downloadsArtifact(final String type, final String vers, final String stn,
+        final String repo) throws Exception {
         final String meta = String.format("com/artipie/%s/maven-metadata.xml", type);
         this.containers.putResourceToArtipie(
-            meta, String.join("/", "/var/artipie/data/my-maven", meta)
+            meta, String.format("/var/artipie/data/%s/%s", repo, meta)
         );
         final String base = String.format("com/artipie/%s/%s", type, vers);
         MavenITCase.getResourceFiles(base).stream().map(r -> String.join("/", base, r)).forEach(
             item -> this.containers.putResourceToArtipie(
-                item, String.join("/", "/var/artipie/data/my-maven", item)
+                item, String.format("/var/artipie/data/%s/%s", repo, item)
             )
         );
         this.containers.assertExec(
             "Failed to get dependency",
             new ContainerResultMatcher(),
-            "mvn", "-B", "-q", "-s", "settings.xml", "-e", "dependency:get",
+            "mvn", "-B", "-q", "-s", stn, "-e", "dependency:get",
             String.format("-Dartifact=com.artipie:%s:%s", type, vers)
         );
     }
 
     @ParameterizedTest
-    @CsvSource({"helloworld,0.1,0.1", "snapshot,1.0-SNAPSHOT"})
-    void deploysArtifact(final String type, final String vers) throws Exception {
+    @CsvSource({
+        "helloworld,0.1,settings.xml,pom.xml",
+        "snapshot,1.0-SNAPSHOT,settings.xml,pom.xml",
+        "helloworld,0.1,settings-port.xml,pom-port.xml",
+        "snapshot,1.0-SNAPSHOT,settings-port.xml,pom-port.xml"
+    })
+    void deploysArtifact(final String type, final String vers, final String stn, final String pom)
+        throws Exception {
         this.containers.putBinaryToClient(
-            new TestResource(String.format("%s-src/pom.xml", type)).asBytes(), "/w/pom.xml"
+            new TestResource(String.format("%s-src/%s", type, pom)).asBytes(), "/w/pom.xml"
         );
         this.containers.assertExec(
             "Deploy failed",
             new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
-            "mvn", "-B", "-q", "-s", "settings.xml",
-            "deploy", "-Dmaven.install.skip=true"
+            "mvn", "-B", "-q", "-s", stn, "deploy", "-Dmaven.install.skip=true"
         );
         this.containers.assertExec(
             "Download failed",
             new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
-            "mvn", "-B", "-q", "-s", "settings.xml", "-U", "dependency:get",
+            "mvn", "-B", "-q", "-s", stn, "-U", "dependency:get",
             String.format("-Dartifact=com.artipie:%s:%s", type, vers)
         );
     }

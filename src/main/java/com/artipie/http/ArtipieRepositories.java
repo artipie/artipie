@@ -87,12 +87,14 @@ public final class ArtipieRepositories {
         return new RepositoriesFromStorage(this.http, storage).config(name.string()).thenCombine(
             StorageAliases.find(storage, name),
             (config, aliases) -> {
-                Slice res = new SliceSimple(new RsRepoNotFound(name));
+                final Slice res;
                 if (config.port().isEmpty() || config.port().getAsInt() == port) {
                     res = new SliceFromConfig(
                         this.http, this.settings,
                         config, aliases, config.port().isPresent()
                     );
+                } else {
+                    res = new SliceSimple(new RsRepoNotFound(name));
                 }
                 return res;
             }
