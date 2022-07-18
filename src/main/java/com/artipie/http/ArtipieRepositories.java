@@ -49,17 +49,17 @@ public final class ArtipieRepositories {
     /**
      * Find slice by name.
      * @param name Repository name
-     * @param standalone Standalone flag
+     * @param port Repository port
      * @return Repository slice
      */
-    public Slice slice(final Key name, final boolean standalone) {
+    public Slice slice(final Key name, final int port) {
         final Storage storage = this.settings.repoConfigsStorage();
         return new AsyncSlice(
             new ConfigFile(name).existsIn(storage).thenCompose(
                 exists -> {
                     final CompletionStage<Slice> res;
                     if (exists) {
-                        res = this.resolve(storage, name, standalone);
+                        res = this.resolve(storage, name, port);
                     } else {
                         res = CompletableFuture.completedFuture(
                             new SliceSimple(new RsRepoNotFound(name))
@@ -75,21 +75,29 @@ public final class ArtipieRepositories {
      * Resolve async {@link Slice} by provided configuration.
      * @param storage Artipie config storage
      * @param name Repository name
-     * @param standalone Standalone flag
+     * @param port Repository port
      * @return Async slice for repo
      * @checkstyle ParameterNumberCheck (2 lines)
      */
     private CompletionStage<Slice> resolve(
         final Storage storage,
         final Key name,
-        final boolean standalone
+        final int port
     ) {
         return new RepositoriesFromStorage(this.http, storage).config(name.string()).thenCombine(
             StorageAliases.find(storage, name),
-            (config, aliases) -> new SliceFromConfig(
-                this.http, this.settings,
-                config, aliases, standalone
-            )
+            (config, aliases) -> {
+                final Slice res;
+                if (config.port().isEmpty() || config.port().getAsInt() == port) {
+                    res = new SliceFromConfig(
+                        this.http, this.settings,
+                        config, aliases, config.port().isPresent()
+                    );
+                } else {
+                    res = new SliceSimple(new RsRepoNotFound(name));
+                }
+                return res;
+            }
         );
     }
 

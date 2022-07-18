@@ -1,0 +1,8 @@
+repo:
+  type: file-proxy
+  port: 8081
+  remotes:
+    - url: http://artipie:8080/my-bin
+      username: alice
+      password: 123
+

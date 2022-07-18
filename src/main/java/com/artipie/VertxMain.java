@@ -176,23 +176,16 @@ public final class VertxMain {
                         final String name = new ConfigFile(repo.name()).name();
                         this.listenOn(
                             new ArtipieRepositories(this.http, settings).slice(
-                                new Key.From(name),
-                                true
-                            ),
-                            metrics, prt
+                                new Key.From(name), prt
+                            ), metrics, prt
                         );
                         Logger.info(
-                            VertxMain.class,
-                            "Artipie repo '%s' was started on port %d", name, prt
+                            VertxMain.class, "Artipie repo '%s' was started on port %d", name, prt
                         );
                     }
                 );
             } catch (final IllegalStateException err) {
-                Logger.error(
-                    this,
-                    "Invalid repo config file %s: %[exception]s", repo.name(),
-                    err
-                );
+                Logger.error(this, "Invalid repo config file %s: %[exception]s", repo.name(), err);
             }
         }
         new QuartzScheduler(configs).start();

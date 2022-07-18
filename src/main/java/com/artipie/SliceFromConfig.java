@@ -116,97 +116,71 @@ public final class SliceFromConfig extends Slice.Wrap {
         );
         switch (cfg.type()) {
             case "file":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new FilesSlice(cfg.storage(), permissions, auth)
+                slice = new TrimPathSlice(
+                    new FilesSlice(cfg.storage(), permissions, auth), settings.layout().pattern()
                 );
                 break;
             case "file-proxy":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new FileProxy(http, cfg)
-                );
+                slice = new TrimPathSlice(new FileProxy(http, cfg), settings.layout().pattern());
                 break;
             case "npm":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new NpmSlice(
-                        cfg.url(),
-                        cfg.storage(),
-                        permissions,
-                        auth
-                    )
+                slice = new TrimPathSlice(
+                    new NpmSlice(cfg.url(), cfg.storage(), permissions, auth),
+                    settings.layout().pattern()
                 );
                 break;
             case "gem":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new GemSlice(
-                        cfg.storage()
-                    )
-                );
+                slice = new TrimPathSlice(new GemSlice(cfg.storage()), settings.layout().pattern());
                 break;
             case "helm":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new HelmSlice(
-                        cfg.storage(),
-                        cfg.path(),
-                        permissions,
-                        auth
-                    )
+                slice = new TrimPathSlice(
+                    new HelmSlice(cfg.storage(), cfg.path(), permissions, auth),
+                    settings.layout().pattern()
                 );
                 break;
             case "rpm":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
+                slice = new TrimPathSlice(
                     new RpmSlice(
                         cfg.storage(), permissions, auth,
                         new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings())
-                    )
+                    ),
+                    settings.layout().pattern()
                 );
                 break;
             case "php":
-                slice = trimIfNotStandalone(
-                    settings, standalone, new PhpComposer(
+                slice = new TrimPathSlice(
+                    new PhpComposer(
                         new AstoRepository(cfg.storage(), Optional.of(cfg.url().toString()))
-                    )
+                    ),
+                    settings.layout().pattern()
                 );
                 break;
             case "php-proxy":
-                slice = trimIfNotStandalone(
-                    settings,
-                    standalone,
-                    new ComposerProxy(http, cfg)
+                slice = new TrimPathSlice(
+                    new ComposerProxy(http, cfg), settings.layout().pattern()
                 );
                 break;
             case "nuget":
-                slice = trimIfNotStandalone(
-                    settings,
-                    standalone,
+                slice = new TrimPathSlice(
                     new NuGet(
                         cfg.url(),
                         new com.artipie.nuget.AstoRepository(cfg.storage()),
                         permissions,
                         auth
-                    )
+                    ),
+                    settings.layout().pattern()
                 );
                 break;
             case "maven":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new MavenSlice(cfg.storage(), permissions, auth)
+                slice = new TrimPathSlice(
+                    new MavenSlice(cfg.storage(), permissions, auth), settings.layout().pattern()
                 );
                 break;
             case "maven-proxy":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new MavenProxy(http, cfg)
-                );
+                slice = new TrimPathSlice(new MavenProxy(http, cfg), settings.layout().pattern());
                 break;
             case "maven-group":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
+                slice = new TrimPathSlice(
                     new GroupSlice(
                         cfg.settings().orElseThrow().yamlSequence("repositories").values()
                             .stream().map(node -> node.asScalar().value())
@@ -220,13 +194,13 @@ public final class SliceFromConfig extends Slice.Wrap {
                                         )
                                 )
                             ).collect(Collectors.toList())
-                    )
+                    ),
+                    settings.layout().pattern()
                 );
                 break;
             case "go":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new GoSlice(cfg.storage(), permissions, auth)
+                slice = new TrimPathSlice(
+                    new GoSlice(cfg.storage(), permissions, auth), settings.layout().pattern()
                 );
                 break;
             case "npm-proxy":
@@ -242,16 +216,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "pypi":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new PySlice(cfg.storage(), permissions, auth)
+                slice = new TrimPathSlice(
+                    new PySlice(cfg.storage(), permissions, auth), settings.layout().pattern()
                 );
                 break;
             case "pypi-proxy":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
-                    new PypiProxy(http, cfg)
-                );
+                slice = new TrimPathSlice(new PypiProxy(http, cfg), settings.layout().pattern());
                 break;
             case "docker":
                 final Docker docker = new AstoDocker(
@@ -277,21 +247,21 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new DockerProxy(http, standalone, cfg, permissions, auth);
                 break;
             case "deb":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
+                slice = new TrimPathSlice(
                     new DebianSlice(
                         cfg.storage(), permissions, auth,
                         new Config.FromYaml(cfg.name(), cfg.settings(), settings.storage())
-                    )
+                    ),
+                    settings.layout().pattern()
                 );
                 break;
             case "conda":
-                slice = trimIfNotStandalone(
-                    settings, standalone,
+                slice = new TrimPathSlice(
                     new CondaSlice(
                         cfg.storage(), permissions, auth, cfg.url().toString(),
                         new CondaConfig(cfg.settings()).authTokenTtl()
-                    )
+                    ),
+                    settings.layout().pattern()
                 );
                 break;
             default:
@@ -304,25 +274,5 @@ public final class SliceFromConfig extends Slice.Wrap {
                 .<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
                 .orElse(slice)
         );
-    }
-
-    /**
-     * Wraps origin slice if into TrimPathSlice if it is not standalone.
-     *
-     * @param settings Artipie settings
-     * @param standalone Standalone flag
-     * @param origin Origin slice
-     * @return Origin slice wrapped if needed
-     */
-    private static Slice trimIfNotStandalone(
-        final Settings settings, final boolean standalone, final Slice origin
-    ) {
-        final Slice result;
-        if (standalone) {
-            result = origin;
-        } else {
-            result = new TrimPathSlice(origin, settings.layout().pattern());
-        }
-        return result;
     }
 }

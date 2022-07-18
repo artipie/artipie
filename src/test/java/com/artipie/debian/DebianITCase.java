@@ -21,6 +21,10 @@ import org.testcontainers.containers.BindMode;
  * Debian integration test.
  * @since 0.15
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @todo #1041:30min DebianIT: Add test cases with repository on individual port: create one more
+ *  repository with `port` settings and start it in Artipie container exposing the port with
+ *  `withExposedPorts` method. Then, parameterize test cases to check repositories with different
+ *  ports. Check `FileITCase` as an example.
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
