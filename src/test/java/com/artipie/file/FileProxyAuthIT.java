@@ -6,11 +6,13 @@ package com.artipie.file;
 
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
+import java.io.IOException;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -44,6 +46,7 @@ final class FileProxyAuthIT {
                 "artipie-proxy",
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()
                     .withRepoConfig("binary/bin-proxy.yml", "my-bin-proxy")
+                    .withRepoConfig("binary/bin-proxy-cache.yml", "my-bin-proxy-cache")
                     .withRepoConfig("binary/bin-proxy-port.yml", "my-bin-proxy-port")
                     .withExposedPorts(8081)
             )
@@ -75,6 +78,27 @@ final class FileProxyAuthIT {
                 new IsEqual<>(0), new StringContains("HTTP/1.1 200 OK")
             ),
             "curl", "-i", "-X", "GET", String.format("http://artipie-proxy:%s/foo/bar.txt", repo)
+        );
+    }
+
+    @Test
+    void cachesDataWhenCacheIsSet() throws IOException {
+        final byte[] data = "Hello world!".getBytes();
+        this.containers.putBinaryToArtipie(
+            "artipie", data,
+            "/var/artipie/data/my-bin/foo/bar.txt"
+        );
+        this.containers.assertExec(
+            "File was not downloaded",
+            new ContainerResultMatcher(
+                new IsEqual<>(0), new StringContains("HTTP/1.1 200 OK")
+            ),
+            "curl", "-i", "-X", "GET", "http://artipie-proxy:8080/my-bin-proxy-cache/foo/bar.txt"
+        );
+        this.containers.assertArtipieContent(
+            "artipie-proxy", "Proxy cached data",
+            "/var/artipie/data/my-bin-proxy-cache/foo/bar.txt",
+            new IsEqual<>(data)
         );
     }
 }
