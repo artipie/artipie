@@ -11,20 +11,18 @@ import org.cactoos.list.ListOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.BindMode;
 
 /**
  * Debian integration test.
  * @since 0.15
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @todo #1041:30min DebianIT: Add test cases with repository on individual port: create one more
- *  repository with `port` settings and start it in Artipie container exposing the port with
- *  `withExposedPorts` method. Then, parameterize test cases to check repositories with different
- *  ports. Check `FileITCase` as an example.
+ * @checkstyle MagicNumberCheck (500 lines)
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -37,12 +35,11 @@ public final class DebianITCase {
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("debian/debian.yml", "my-debian"),
+            .withRepoConfig("debian/debian.yml", "my-debian")
+            .withRepoConfig("debian/debian-port.yml", "my-debian-port")
+            .withExposedPorts(8081),
         () -> new TestDeployment.ClientContainer("debian:10.8-slim")
             .withWorkingDirectory("/w")
-            .withClasspathResourceMapping(
-                "debian/sources.list", "/w/sources.list", BindMode.READ_ONLY
-            )
             .withClasspathResourceMapping(
                 "debian/aglfn_1.7-3_amd64.deb", "/w/aglfn_1.7-3_amd64.deb", BindMode.READ_ONLY
             )
@@ -60,19 +57,24 @@ public final class DebianITCase {
             new ContainerResultMatcher(),
             "apt-get", "install", "-y", "curl"
         );
-        this.containers.assertExec(
-            "Failed to move debian sources.list",
-            new ContainerResultMatcher(),
-            "mv", "/w/sources.list", "/etc/apt/"
-        );
     }
 
-    @Test
-    void pushAndInstallWorks() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "8080,my-debian",
+        "8081,my-debian-port"
+    })
+    void pushAndInstallWorks(final String port, final String repo) throws Exception {
+        this.containers.putBinaryToClient(
+            String.format(
+                "deb [trusted=yes] http://artipie:%s/%s %s main", port, repo, repo
+            ).getBytes(),
+            "/etc/apt/sources.list"
+        );
         this.containers.assertExec(
             "Failed to upload deb package",
             new ContainerResultMatcher(),
-            "curl", "http://artipie:8080/my-debian/main/aglfn_1.7-3_amd64.deb",
+            "curl", String.format("http://artipie:%s/%s/main/aglfn_1.7-3_amd64.deb", port, repo),
             "--upload-file", "/w/aglfn_1.7-3_amd64.deb"
         );
         this.containers.assertExec(
