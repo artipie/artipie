@@ -1,0 +1,10 @@
+---
+repo:
+  type: deb
+  port: 8081
+  storage:
+    type: fs
+    path: /var/artipie/data/
+  settings:
+    Components: main
+    Architectures: amd64
