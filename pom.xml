@@ -218,7 +218,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>files-adapter</artifactId>
-      <version>0.6.2</version>
+      <version>v1.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>

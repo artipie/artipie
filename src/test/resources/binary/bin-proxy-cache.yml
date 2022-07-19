@@ -1,0 +1,11 @@
+repo:
+  type: file-proxy
+  remotes:
+    - url: http://artipie:8080/my-bin
+      username: alice
+      password: 123
+      cache:
+        storage:
+          type: fs
+          path: /var/artipie/data
+

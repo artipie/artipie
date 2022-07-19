@@ -4,6 +4,8 @@
  */
 package com.artipie.file;
 
+import com.artipie.asto.cache.Cache;
+import com.artipie.asto.cache.FromStorageCache;
 import com.artipie.files.FileProxySlice;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -61,7 +63,9 @@ public final class FileProxy implements Slice {
         return new FileProxySlice(
             this.client,
             URI.create(remote.url()),
-            remote.auth()
+            remote.auth(),
+            remote.cache().<Cache>map(cache -> new FromStorageCache(cache.storage()))
+                .orElse(Cache.NOP)
         ).response(line, headers, body);
     }
 }
