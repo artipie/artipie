@@ -1,17 +1,4 @@
 meta:
   storage:
     type: fs
-    path: /var/artipie/repo
-  credentials:
-    -
-      type: env
-    -
-      type: github
-    -
-      type: file
-      path: _credentials.yml
-  layout: org
-  base_url: http://central.artipie.com/
-  metrics:
-    type: log
-    interval: 60
+    path: /Users/alena/artipie/artipie/src/main/resources/example/repo/test

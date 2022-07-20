@@ -12,4 +12,5 @@ python3 -m twine upload --repository-url http://artipie.artipie:8080/my-pypi \
 cd ..
 
 # Install earlier uploaded python package from artipie.
-python3 -m pip install --index-url http://artipie.artipie:8080/my-pypi sample_project
+python3 -m pip install --trusted-host artipie \
+  --index-url http://artipie.artipie:8080/my-pypi sample_project
