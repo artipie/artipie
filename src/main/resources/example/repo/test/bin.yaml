@@ -1,6 +1,7 @@
 repo:
   type: file
-  port: 8082
-  storage:
-    type: fs
-    path: /Users/alena/artipie/artipie/src/main/resources/example/repo/data
+  storage: default
+  permissions:
+    artipie:
+      - upload
+      - download
