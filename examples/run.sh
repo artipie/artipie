@@ -160,15 +160,12 @@ start_artipie
 sleep 1 #sometimes artipie container needs extra time to load
 
 if [[ -z "$1" ]]; then
-  declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda)
+  declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda pypi)
 else
   declare -a tests=("$@")
 fi
 
 log_debug "tests: ${tests[@]}"
-
-# FIXME: some repository tests don't work, fix them:
-# conda
 
 rm -fr "$workdir/out.log" "$workdir/results.txt"
 touch "$workdir/out.log"

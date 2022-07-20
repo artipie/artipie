@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:4.10.3
+FROM continuumio/miniconda3:4.12.0
 
 RUN conda install -y conda-build && conda install -y conda-verify && conda install -y anaconda-client
 RUN anaconda config --set url "http://artipie.artipie:8080/my-conda/" -s && \
