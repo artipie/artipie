@@ -1,3 +1,21 @@
+## Single repository on port
+
+Artipie repositories may run on separate ports if configured.
+This feature may be especially useful for Docker repository,
+as it's API is not well suited to serve multiple repositories on single port.
+
+To run repository on its own port
+`port` parameter should be specified in repository configuration YAML as follows:
+
+```yaml
+repo:
+  type: <repository type>
+  port: 54321
+  ...
+```
+
+*NOTE: Artipie scans repositories for port configuration only on start,
+so server requires restart in order to apply changes made in runtime.*
 
 ## File
 
