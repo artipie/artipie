@@ -22,19 +22,85 @@ it's stored in storage as yaml files: for single-insance deployment it's
 usually a file-system files, for cluster it could be placed in etcd storage
 or S3-compatible storage.
 
-## How to start Artipie service
+To start Artipie Docker check [Quickstart](https://github.com/artipie/artipie#quickstart).
 
-To start Artipie Docker check [Quickstart](https://github.com/artipie/artipie#quickstart) section, here we focus on starting Artipie `jar` file with JMV. Executable file with dependencies can be found on each github release page. Before running the `jar`, it's necessary to create main Artipie config yaml (check [Configuration](https://github.com/artipie/artipie/wiki/Configuration) page for full description), the example configuration can be found in [resources example folder](https://github.com/artipie/artipie/tree/master/src/main/resources/example). Copy the folder into any convenient place on your file system and correct storage path in `artipie.yaml` to point to the `repo` subdirectory on your file system. Now, you can execute:
+## How to start Artipie service with a maven-proxy repository
+
+In this section we will start Artipie service with a `maven-proxy` repository using JVM. 
+Executable `jar` file can be found on the [releases page](https://github.com/artipie/artipie/releases). 
+Before running the `jar`, it's necessary to create main Artipie config `yaml` file and 
+add a repository config file. The simplest main Artipie config file 
+(call it, for example, `my-artipie.yaml`) may look the following:
+
+```yaml
+meta:
+  storage:
+    type: fs
+    path: /var/artipie/repo
+```
+
+- field `type` describes which type of storage Artipie will use to get configuration of repositories,
+in our example it's `fs` - the file system storage.
+- field `path` points to the directory in a file system where repositories config files will be stored.
+
+To get full description how to configure Artipie, please,
+check [Configuration](https://github.com/artipie/artipie/wiki/Configuration) page.
+
+It's time to add a `maven-proxy` repository config file, call it `my-maven.yaml`:
+
+```yaml
+repo:
+ type: maven-proxy
+ remotes:
+  - url: https://repo.maven.apache.org/maven2
+    cache:
+     storage:
+      type: fs
+      path: /var/artipie/data
+```
+- field `type` describes repository type, in our case it's `maven-proxy`.
+- field `url` points to a remote maven repository.
+- field `cache` describes storage to keep artifacts gotten from the remote maven repository.
+
+Detailed description for every supported repository type can be found [here](https://github.com/artipie/artipie/tree/master/examples).
+
+The file `my-maven.yaml` has to be placed on the path `/var/artipie/repo/my-maven.yaml`
+then Artipie service find it while startup and create repository with name `my-maven`.
+
+Now, you can execute:
+
+```bash
+java -jar ./artipie-latest-jar-with-dependencies.jar --config-file=/{path-to-config}/my-artipie.yaml --port=8085
+```
+
+- `--config-file` required parameter points to the Artipie main configuration file.
+- `--port` optional parameter defines port to start the service.
+If `--port` parameter is omitted, Artipie will use `8080` as default port.
+
+You should see the following in the console:
 
 ```
-java -jar ./artipie-latest-jar-with-dependencies.jar --config-file=/path-to-config/artipie.yaml --port=8081
+[main] INFO com.artipie.VertxMain - Artipie was started on port 8085
+[ForkJoinPool.commonPool-worker-1] INFO com.artipie.asto.fs.FileStorage - Found 1 objects by the prefix "" in /var/artipie/repo by /var/artipie/repo: [my-maven.yaml]
 ```
 
-Required parameter `--config-file` points into to the Artipie main configuration file, `--port` is optional and configures port to start the service. 
+If this is in the console, then everything is OK.
+Now, you have your own maven-proxy repository!
 
-Example configuration folder contains several yaml files: 
-- `_credentials.yaml` - this is the file with existing users and user's info, detailed description can be found [here](https://github.com/artipie/artipie#multitenancy)
-- `_storages.yaml` - storage aliases configuration, check [this](https://github.com/artipie/artipie/wiki/Configuration-Storage#aliases) page
-- several yamls files with different storages' configuration. Detailed description for every supported repository type can be found [here](https://github.com/artipie/artipie/tree/master/examples). 
+You can use this repository as regular maven repository, for example, 
+point it in pom file of your java project:
 
-To add or update any repository, you can simply modify or create repositories configuration yamls.
+```xml
+<repositories>
+    <repository>
+        <id>artipie</id>
+        <url>http://{host}:8085/my-maven/</url>
+    </repository>
+</repositories>
+```
+
+All artifacts obtained through this repository will store in the directory `/var/artipie/data/my-maven`
+using structure of folders as it does local maven.
+
+To add a new repository or update an existing repository, you have to simply create or modify repositories 
+configuration `yaml` files in the directory `/var/artipie/repo`.
