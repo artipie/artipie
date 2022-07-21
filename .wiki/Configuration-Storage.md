@@ -6,8 +6,10 @@ Artipie "Storage" is an abstraction on top of multiple key-value storage provide
  - etcd storage (see limitations)
  - in-memory
 
-The Storage is used for storing repository data, proxy/mirrors repository caching and for Artipie configuration. In configuration each storage
-is defined by `storage` yaml key, mandatory `type` parameter and provider dependent configuration parameters.
+The Storage is used for storing repository data, proxy/mirrors repository caching and for Artipie 
+configuration. Such storage can be configured in various config files and in various sections of 
+config files, but storage configuration structure is always the same: each storage is defined by 
+`storage` yaml key, mandatory `type` parameter and provider dependent configuration parameters.
 
 ## File System storage
 
@@ -46,17 +48,6 @@ storage:
     secretAccessKey: 9889sg8nas8ng
 ```
 
-## In memory storage
-
-In-memory storage is not persistent, it exists only while Artipie process is alive.
-It's not recommended to use it in production, it may be helpful for debugging and testing.
-
-*Example:*
-```yaml
-storage:
-  type: in-memory
-```
-
 ## Etcd storage
 
 Etcd storage uses etcd cluster as a back-end. It may be useful for configuration storage of Artipie server.
@@ -74,23 +65,43 @@ storage:
   timeout: 5000
 ```
 
-## Aliases
+## In memory storage
+
+In-memory storage is not persistent, it exists only while Artipie process is alive and is used in 
+Artipie tests, check the [implementation](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/memory/InMemoryStorage.java) 
+for more details. There is no possibility to use in memory storage from configuration, 
+it's for unit and integration tests only.
+
+# Storage Aliases
 
 Artipie has special configuration item for storage aliases: `_storages.yaml` located in configuration root.
-This file can define storages with names, then repository users can use alias instead of storage configuration.
+This file can define storages with names, then repository users can use alias instead of full storage configuration.
 Also, it allows to hide real storage configuration or credentials from repository or organization maintainers:
 Artipie server administrator can configure storage and provide alias to users, and users will set this alias
 for repositories instead of configuration.
 ```yaml
 # _storages.yaml
 storages:
-  default:
+  default: # storage alias name to use in repository configs
     type: fs
     path: /var/artipie/data
+  remote_s3: # storage alias name to use in repository configs
+     type: s3
+     bucket: artipie
+     region: east
+     endpoint: https://minio.selfhosted/s3
+     credentials:
+        type: basic
+        accessKeyId: asagn8as8f81
+        secretAccessKey: 9889sg8nas8ng
 ```
-```
+```yaml
 # repository configuration
 repo:
   type: file
   storage: default
+# or
+repo:
+   type: maven
+   storage: remote_s3
 ```
