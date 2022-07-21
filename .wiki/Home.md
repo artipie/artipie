@@ -29,8 +29,8 @@ To start Artipie Docker check [Quickstart](https://github.com/artipie/artipie#qu
 In this section we will start Artipie service with a `maven-proxy` repository using JVM. 
 Executable `jar` file can be found on the [releases page](https://github.com/artipie/artipie/releases). 
 Before running the `jar`, it's necessary to create main Artipie config `yaml` file and 
-add a repository config file. The simplest main Artipie config file 
-(call it, for example, `my-artipie.yaml`) may look the following:
+repository config file. The simplest main Artipie config file `my-artipie.yaml`
+has the following content:
 
 ```yaml
 meta:
@@ -39,8 +39,8 @@ meta:
     path: /var/artipie/repo
 ```
 
-- field `type` describes which type of storage Artipie will use to get configuration of repositories,
-in our example it's `fs` - the file system storage.
+- field `type` describes which type of [storage](https://github.com/artipie/artipie/wiki/Configuration-Storage#storage) 
+Artipie will use to get configuration of repositories, in our example it's `fs` - the file system storage.
 - field `path` points to the directory in a file system where repositories config files will be stored.
 
 To get full description how to configure Artipie, please,
@@ -64,8 +64,9 @@ repo:
 
 Detailed description for every supported repository type can be found [here](https://github.com/artipie/artipie/tree/master/examples).
 
-The file `my-maven.yaml` has to be placed on the path `/var/artipie/repo/my-maven.yaml`
-then Artipie service find it while startup and create repository with name `my-maven`.
+As long as we defined `/var/artipie/repo` as path for configuration file system storage,
+the file `my-maven.yaml` has to be placed on the path `/var/artipie/repo/my-maven.yaml`
+then Artipie service will find it while startup and create repository with name `my-maven`.
 
 Now, you can execute:
 
@@ -75,7 +76,7 @@ java -jar ./artipie-latest-jar-with-dependencies.jar --config-file=/{path-to-con
 
 - `--config-file` required parameter points to the Artipie main configuration file.
 - `--port` optional parameter defines port to start the service.
-If `--port` parameter is omitted, Artipie will use `8080` as default port.
+If `--port` parameter is omitted, Artipie will use `80` as default port.
 
 You should see the following in the console:
 
@@ -99,7 +100,9 @@ point it in pom file of your java project:
 </repositories>
 ```
 
-All artifacts obtained through this repository will store in the directory `/var/artipie/data/my-maven`
+Also, you can define our maven-proxy repository in the maven's settings.xml to use it for any project.
+
+All artifacts obtained through this repository will be stored in the directory `/var/artipie/data/my-maven`
 using structure of folders as it does local maven.
 
 To add a new repository or update an existing repository, you have to simply create or modify repositories 
