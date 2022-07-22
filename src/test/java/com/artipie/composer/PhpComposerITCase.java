@@ -7,17 +7,15 @@ package com.artipie.composer;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.BindMode;
 
 /**
  * Integration test for Composer repo.
  * @since 0.18
- * @todo #1041:30min PhpComposerITCase: Add test cases with repository on individual port: create
- *  one more repository with `port` settings and start it in Artipie container exposing the port
- *  with `withExposedPorts` method. Then, parameterize test cases to check repositories with
- *  different ports. Check `FileITCase` as an example.
+ * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class PhpComposerITCase {
@@ -33,7 +31,9 @@ final class PhpComposerITCase {
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("composer/php.yml", "php"),
+            .withRepoConfig("composer/php.yml", "php")
+            .withRepoConfig("composer/php-port.yml", "php-port")
+            .withExposedPorts(8081),
         () -> new TestDeployment.ClientContainer("composer:2.0.9")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
@@ -44,13 +44,19 @@ final class PhpComposerITCase {
                 "composer/composer.json",
                 "/w/repo/composer.json",
                 BindMode.READ_ONLY
+            ).withClasspathResourceMapping(
+                "composer/composer-port.json",
+                "/w/repo/composer-port.json",
+                BindMode.READ_ONLY
             )
-
     );
 
-    @Test
-    void canUploadAndInstall() throws IOException {
-        final String url = "http://artipie:8080/php";
+    @ParameterizedTest
+    @CsvSource({
+        "http://artipie:8080/php,composer.json",
+        "http://artipie:8081/php-port,composer-port.json"
+    })
+    void canUploadAndInstall(final String url, final String stn) throws IOException {
         this.containers.assertExec(
             "Failed to upload composer package archive",
             new ContainerResultMatcher(),
@@ -61,7 +67,7 @@ final class PhpComposerITCase {
         this.containers.assertExec(
             "Failed to install uploaded package",
             new ContainerResultMatcher(),
-            "env", "COMPOSER=/w/repo/composer.json",
+            "env", String.format("COMPOSER=/w/repo/%s", stn),
             "composer", "install", "--verbose", "--no-cache"
         );
     }
