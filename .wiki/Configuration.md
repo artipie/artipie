@@ -66,7 +66,7 @@ If the layout is `org`, then repository configurations will be located in organi
 │   │   │   go-repo.yaml
 │   │   │   docker-repo.yaml
 │   │   │   _storages.yaml
-│   │───seecond-org-name
+│   │───second-org-name
 │   │   │   maven-repo.yaml
 │   │   │   nuget-repo.yaml
 ```
