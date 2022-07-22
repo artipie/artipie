@@ -1,0 +1,8 @@
+{
+  "config": {"secure-http": false},
+  "repositories": [
+    {"type": "composer", "url": "http://artipie:8081/php-port"},
+    {"packagist.org": false}
+  ],
+  "require": {"psr/log": "1.1.4"}
+}

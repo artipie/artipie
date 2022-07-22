@@ -1,0 +1,8 @@
+repo:
+  type: helm
+  port: 8081
+  storage:
+    type: fs
+    path: /var/artipie/data
+  url: http://artipie:8081/my-helm-port
+  path: http://artipie:8081/my-helm-port
