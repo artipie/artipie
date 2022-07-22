@@ -67,6 +67,7 @@ Detailed description for every supported repository type can be found [here](htt
 As long as we defined `/var/artipie/repo` as path for configuration file system storage,
 the file `my-maven.yaml` has to be placed on the path `/var/artipie/repo/my-maven.yaml`
 then Artipie service will find it while startup and create repository with name `my-maven`.
+Repository name is used to get access to the repository, in our case `http://{host}:8085/my-maven`.
 
 Now, you can execute:
 
