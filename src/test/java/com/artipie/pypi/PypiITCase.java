@@ -11,10 +11,11 @@ import org.cactoos.list.ListOf;
 import org.hamcrest.Matchers;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.BindMode;
 
 /**
@@ -22,10 +23,6 @@ import org.testcontainers.containers.BindMode;
  *
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.12
- * @todo #1041:30min PypiITCase: Add test cases with repository on individual port: create one more
- *  repository with `port` settings and start it in Artipie container exposing the port with
- *  `withExposedPorts` method. Then, parameterize test cases to check repositories with different
- *  ports. Check `FileITCase` as an example.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
@@ -34,11 +31,15 @@ final class PypiITCase {
      * Test deployments.
      *
      * @checkstyle VisibilityModifierCheck (10 lines)
+     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("pypi-repo/pypi.yml", "my-python"),
+            .withRepoConfig("pypi-repo/pypi.yml", "my-python")
+            .withRepoConfig("pypi-repo/pypi-port.yml", "my-python-port")
+            .withExposedPorts(8081),
+
         () -> new TestDeployment.ClientContainer("python:3.7")
             .withWorkingDirectory("/var/artipie")
             .withClasspathResourceMapping(
@@ -67,11 +68,16 @@ final class PypiITCase {
         );
     }
 
-    @Test
-    void installPythonPackage() throws IOException {
+    @ParameterizedTest
+    @CsvSource({
+        "8080,my-python",
+        "8081,my-python-port"
+    })
+    void installPythonPackage(final String port, final String repo) throws IOException {
         final String meta = "pypi-repo/example-pckg/dist/artipietestpkg-0.0.3.tar.gz";
         this.containers.putResourceToArtipie(
-            meta, "/var/artipie/data/my-python/artipietestpkg/artipietestpkg-0.0.3.tar.gz"
+            meta,
+            String.format("/var/artipie/data/%s/artipietestpkg/artipietestpkg-0.0.3.tar.gz", repo)
         );
         this.containers.assertExec(
             "Failed to install package",
@@ -79,11 +85,11 @@ final class PypiITCase {
                 Matchers.equalTo(0),
                 new StringContainsInOrder(
                     new ListOf<>(
-                        "Looking in indexes: http://artipie:8080/my-python",
+                        String.format("Looking in indexes: http://artipie:%s/%s", port, repo),
                         "Collecting artipietestpkg",
                         String.format(
-                            "  Downloading http://artipie:8080/my-python/artipietestpkg/%s",
-                            "artipietestpkg-0.0.3.tar.gz"
+                            "  Downloading http://artipie:%s/%s/artipietestpkg/%s",
+                            port, repo, "artipietestpkg-0.0.3.tar.gz"
                         ),
                         "Building wheels for collected packages: artipietestpkg",
                         "  Building wheel for artipietestpkg (setup.py): started",
@@ -98,12 +104,17 @@ final class PypiITCase {
                 )
             ),
             "python", "-m", "pip", "install", "--trusted-host", "artipie", "--index-url",
-            "http://artipie:8080/my-python", "artipietestpkg"
+            String.format("http://artipie:%s/%s", port, repo),
+            "artipietestpkg"
         );
     }
 
-    @Test
-    void canUpload() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "8080,my-python",
+        "8081,my-python-port"
+    })
+    void canUpload(final String port, final String repo) throws Exception {
         this.containers.assertExec(
             "Failed to upload",
             new ContainerResultMatcher(
@@ -115,12 +126,13 @@ final class PypiITCase {
                 )
             ),
             "python3", "-m", "twine", "upload", "--repository-url",
-            "http://artipie:8080/my-python/", "-u", "alice", "-p", "123",
+            String.format("http://artipie:%s/%s/", port, repo),
+            "-u", "alice", "-p", "123",
             "/var/artipie/data/artipie/pypi/example-pckg/dist/artipietestpkg-0.0.3.tar.gz"
         );
         this.containers.assertArtipieContent(
             "Bad content after upload",
-            "/var/artipie/data/my-python/artipietestpkg/artipietestpkg-0.0.3.tar.gz",
+            String.format("/var/artipie/data/%s/artipietestpkg/artipietestpkg-0.0.3.tar.gz", repo),
             Matchers.not("123".getBytes())
         );
     }
