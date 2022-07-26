@@ -13,8 +13,9 @@ config files, but storage configuration structure is always the same: each stora
 
 ## File System storage
 
-The file system storage uses file-system as a back-end for binary key-value mapping - it save blobs in files using file paths as a keys.
-It requires the root path to be configured with `path` parameters.
+The file system storage uses file-system as a back-end for binary key-value mapping - it save blobs 
+in files using file paths as a keys. It requires the root path to be configured with `path` 
+parameters.
 
 *Example:*
 ```yaml
@@ -74,11 +75,12 @@ it's for unit and integration tests only.
 
 # Storage Aliases
 
-Artipie has special configuration item for storage aliases: `_storages.yaml` located in configuration root.
-This file can define storages with names, then repository users can use alias instead of full storage configuration.
-Also, it allows to hide real storage configuration or credentials from repository or organization maintainers:
-Artipie server administrator can configure storage and provide alias to users, and users will set this alias
-for repositories instead of configuration.
+Artipie has special configuration item for storage aliases: `_storages.yaml` file located in configuration root.
+This file can define storages with names, then repository configuration file can use these names (or aliases) 
+instead of full storage description. It allows to hide real storage configuration or 
+credentials from repository or organization maintainers:
+Artipie server administrator can configure storage and provide alias to users, and users will set 
+this alias for repositories instead of full configuration.
 ```yaml
 # _storages.yaml
 storages:
