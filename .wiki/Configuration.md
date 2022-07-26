@@ -28,14 +28,14 @@ meta:
     type: log
 ```
 
-Layout specifies the URI path layout for Artipie. In case of `flat`,
+Layout specifies the URI path layout for Artipie. In case of `flat` layout,
 Artipie provides repositories at first path level, e.g. `{host}:{port}/maven`,
-`{host}:{port}/repo2`. For `org` layouts URI path has two parts: `<org>/<repo>`,
-where `<org>` is organisation name, and `<repo>` the name of repository,
-e.g. `{host}:{port}/my-org-name/maven` - `maven` repository of `my-org-name` organisation.
-In `org` layout, organisation may have a maintainer who can manage
-repositories and permissions within organisation; the maintainer can add,
-delete and edit repositories, add granular permissions for users for each repository.
+`{host}:{port}/repo2`. For `org` layouts URI path has two parts: `<username>/<repo>`,
+where `<username>` is the name of the user who owns the repository, and `<repo>` the name of repository,
+e.g. `{host}:{port}/john/maven` - John's `maven` repository.
+In `org` layout, repositories have a maintainer (owner) who can manage
+repositories and permissions; the maintainer can add,
+delete and edit repositories, add granular permissions for other users for each repository.
 
 Storage - is a [storage configuration](https://github.com/artipie/artipie/wiki/Configuration-Storage)
 for [repository definitions](https://github.com/artipie/artipie/wiki/Configuration-Repository).
@@ -55,24 +55,24 @@ Here is the example of Artipie configuration files structure for `flat` layout b
 │   │   docker-registry.yaml
 ```
 
-If the layout is `org`, then repository configurations will be located in organization's subdirectories:
+If the layout is `org`, then repository configurations will be located in users' subdirectories:
 ```
 /tmp/artipie/configs
 │   _storages.yaml
 │   _credentials.yaml    
 │
 └───repo
-│   │───first-org-name
+│   │───john
 │   │   │   go-repo.yaml
 │   │   │   docker-repo.yaml
 │   │   │   _storages.yaml
-│   │───second-org-name
+│   │───mark
 │   │   │   maven-repo.yaml
 │   │   │   nuget-repo.yaml
 ```
 
 In the examples above `_storages.yaml` is a file for [storages aliases](./Configuration-Storage#storage-aliases)
-(note, that is the case of `org` layout it can be added for organization individually) and
+(note, that is the case of `org` layout it can be added for users individually) and
 `_credentials.yaml` describes Artipie [users](Configuration-Credentials.md). `repo` subdirectory
 (as configured with `configs` field in `/etc/artipie/artipie.yml`) contains configs for repositories. If `configs` 
 setting is omitted in `/etc/artipie/artipie.yml`, then repo configs will be located in `/tmp/artipie/configs`
