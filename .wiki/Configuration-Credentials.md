@@ -55,8 +55,8 @@ to the users participating in this group. More information about repository perm
 
 ### Credentials type `github`
 
-If the `type` is set to `github`, GitHub username with `github.com/` prefix and [personal access 
-token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) 
+If the `type` is set to `github`, GitHub username with `github.com/` prefix `github.com/{username}` 
+and [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) 
 can be used to login into Artipie service. GitHub token can be obtained in the section 
 "Developer settings" of personal settings page.
 
