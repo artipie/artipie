@@ -59,7 +59,7 @@ Containers should share same config directory, default local mount location is `
 you may need to correct it if docker client is running not on linux operating system.
 A new image generate default configuration if not found at `/etc/artipie/artipie.yml`, prints initial
 credentials to console and prints a link to the dashboard. If started on localhost with command
-above, the dashboard URI is `http://localhost:8080/dashboard/artipie` and default username and password 
+above, the dashboard URI is `http://localhost:8080/dashboard` and default username and password 
 are `artipie/artipie`. Artipie server side (repositories) is served on `8081` port and is 
 available on URI `http://localhost:8081/artipie/{reponame}`, where `{reponame}` is the name of the
 repository.
