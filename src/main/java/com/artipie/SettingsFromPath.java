@@ -59,7 +59,9 @@ public final class SettingsFromPath {
                 "artipie/my-bin.yaml", "artipie/my-docker.yaml", "artipie/my-maven.yaml"
             );
             for (final String res : resources) {
-                final Path tmp = Files.createTempFile(Path.of(res).getFileName().toString(), ".tmp");
+                final Path tmp = Files.createTempFile(
+                    Path.of(res).getFileName().toString(), ".tmp"
+                );
                 new JavaResource(String.format("example/repo/%s", res)).copy(tmp);
                 bsto.save(new Key.From(res), Files.readAllBytes(tmp));
                 Files.delete(tmp);
