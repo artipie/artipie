@@ -77,8 +77,8 @@ it's for unit and integration tests only.
 
 Artipie has special configuration item for storage aliases: `_storages.yaml` file located in configuration root.
 This file can define storages with names, then repository configuration file can use these names (or aliases) 
-instead of full storage description. It allows to hide real storage configuration or 
-credentials from repository or organization maintainers:
+instead of full storage description. It allows to avoid duplicates and to hide real storage configuration or 
+credentials from repository maintainers:
 Artipie server administrator can configure storage and provide alias to users, and users will set 
 this alias for repositories instead of full configuration.
 ```yaml
