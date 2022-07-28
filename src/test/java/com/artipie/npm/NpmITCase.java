@@ -14,30 +14,21 @@ import org.hamcrest.core.IsAnything;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.llorllale.cactoos.matchers.MatcherOf;
 
 /**
  * Integration tests for Npm repository.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.12
- * @todo #1041:30min NpmITCase: Add test cases with repository on individual port: create one more
- *  repository with `port` settings and start it in Artipie container exposing the port with
- *  `withExposedPorts` method. Then, parameterize test cases to check repositories with different
- *  ports. Check `FileITCase` as an example.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class NpmITCase {
-
-    /**
-     * Artipie url.
-     */
-    private static final String REPO = "http://artipie:8080/my-npm";
-
     /**
      * Project name.
      */
@@ -51,27 +42,34 @@ final class NpmITCase {
     /**
      * Test deployments.
      * @checkstyle VisibilityModifierCheck (10 lines)
+     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("npm/npm.yml", "my-npm"),
+            .withRepoConfig("npm/npm.yml", "my-npm")
+            .withRepoConfig("npm/npm-port.yml", "my-npm-port")
+            .withExposedPorts(8081),
         () -> new TestDeployment.ClientContainer("node:14-alpine")
             .withWorkingDirectory("/w")
     );
 
-    @Test
-    void npmInstall() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "8080,my-npm",
+        "8081,my-npm-port"
+    })
+    void npmInstall(final String port, final String repo) throws Exception {
         this.containers.putBinaryToArtipie(
             new TestResource(String.format("npm/storage/%s/meta.json", NpmITCase.PROJ)).asBytes(),
-            String.format("/var/artipie/data/my-npm/%s/meta.json", NpmITCase.PROJ)
+            String.format("/var/artipie/data/%s/%s/meta.json", repo, NpmITCase.PROJ)
         );
         this.containers.putBinaryToArtipie(
             new TestResource(
                 String.format("npm/storage/%s/-/%s-1.0.1.tgz", NpmITCase.PROJ, NpmITCase.PROJ)
             ).asBytes(),
             String.format(
-                "/var/artipie/data/my-npm/%s/-/%s-1.0.1.tgz", NpmITCase.PROJ, NpmITCase.PROJ
+                "/var/artipie/data/%s/%s/-/%s-1.0.1.tgz", repo, NpmITCase.PROJ, NpmITCase.PROJ
             )
         );
         this.containers.assertExec(
@@ -82,7 +80,7 @@ final class NpmITCase {
                     Arrays.asList(NpmITCase.ADDED_PROJ, "added 1 package")
                 )
             ),
-            "npm", "install", NpmITCase.PROJ, "--registry", NpmITCase.REPO
+            "npm", "install", NpmITCase.PROJ, "--registry", this.repoUrl(port, repo)
         );
         this.containers.assertExec(
             "Package was installed",
@@ -93,8 +91,12 @@ final class NpmITCase {
         );
     }
 
-    @Test
-    void npmPublish() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "8080,my-npm",
+        "8081,my-npm-port"
+    })
+    void npmPublish(final String port, final String repo) throws Exception {
         final String tgz = String.format("%s/-/%s-1.0.1.tgz", NpmITCase.PROJ, NpmITCase.PROJ);
         this.containers.putBinaryToClient(
             new TestResource("npm/simple-npm-project/index.js").asBytes(),
@@ -110,11 +112,11 @@ final class NpmITCase {
                 new IsEqual<>(0),
                 new StringContains(NpmITCase.ADDED_PROJ)
             ),
-            "npm", "publish", NpmITCase.PROJ, "--registry", NpmITCase.REPO
+            "npm", "publish", NpmITCase.PROJ, "--registry", this.repoUrl(port, repo)
         );
         this.containers.assertArtipieContent(
             "Meta json is incorrect",
-            String.format("/var/artipie/data/my-npm/%s/meta.json", NpmITCase.PROJ),
+            String.format("/var/artipie/data/%s/%s/meta.json", repo, NpmITCase.PROJ),
             new MatcherOf<>(
                 bytes -> {
                     return Json.createReader(new ByteArrayInputStream(bytes)).readObject()
@@ -127,9 +129,12 @@ final class NpmITCase {
         );
         this.containers.assertArtipieContent(
             "Tarball should be added to storage",
-            String.format("/var/artipie/data/my-npm/%s", tgz),
+            String.format("/var/artipie/data/%s/%s", repo, tgz),
             new IsAnything<>()
         );
     }
 
+    private String repoUrl(final String port, final String repo) {
+        return String.format("http://artipie:%s/%s", port, repo);
+    }
 }
