@@ -21,6 +21,7 @@ allows to provide upload or download access for users and groups. Name of the re
 the name of the repository.
 
 For now Artipie supports the following repository types:
+
 | Type  | Description   |
 |---|---|
 | [Files](./Configuration-Repository.md#file) | General purpose files repository |
@@ -60,8 +61,9 @@ repo:
   ...
 ```
 
-*NOTE: Artipie scans repositories for port configuration only on start,
-so server requires restart in order to apply changes made in runtime.*
+> **Warning**
+> Artipie scans repositories for port configuration only on start, 
+> so server requires restart in order to apply changes made in runtime.
 
 ## File
 
@@ -85,15 +87,18 @@ repo:
 In order to upload a binary file to the storage, send a `PUT` HTTP request with file contents:
 
 ```bash
-echo "hello world" > text.txt
-curl -X PUT --data-binary "@text.txt" http://localhost:8080/repo/text.txt
+echo "hello world" > test.txt
+curl -X PUT --data-binary "@test.txt" http://{host}:{port}/{repository-name}/test.txt
 ```
 
 In order to download a file, send a `GET` HTTP request:
 
 ```bash
-curl -X GET http://localhost:8080/repo/text.txt
+curl -X GET http://{host}:{port}/{repository-name}/text.txt
 ```
+
+In the examples above `{host}` and `{port}` Artipie service host and port, `{repository-name}` 
+is the name of files repository.
 
 ## File proxy (mirror)
 
@@ -123,9 +128,9 @@ repo:
 In order to download a file, send a `GET` HTTP request:
 
 ```bash
-curl -X GET http://localhost:8080/repo/text.txt
+curl -X GET http://{host}:{port}/{repository-name}/test.txt
 ```
-
-Files proxy repository will proxy the request to remote, cache data in storage (if configured) and 
-return the result.
+were `{host}` and `{port}` Artipie service host and port, `{repository-name}`
+is the name of repository. Files proxy repository will proxy the request to remote, cache data in 
+storage (if configured) and return the result.
 
