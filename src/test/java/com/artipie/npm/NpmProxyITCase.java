@@ -99,9 +99,9 @@ final class NpmProxyITCase {
         this.containers.assertArtipieContent(
             "artipie-proxy",
             "Package was not cached in proxy",
-            String.format("/var/artipie/data/%s", repo)
-            .concat(
-                String.format("/%s/-/%s-1.0.1.tgz", NpmProxyITCase.PROJ, NpmProxyITCase.PROJ)
+            String.format(
+                "/var/artipie/data/%s/%s/-/%s-1.0.1.tgz",
+                repo, NpmProxyITCase.PROJ, NpmProxyITCase.PROJ
             ),
             new IsEqual<>(tgz)
         );
