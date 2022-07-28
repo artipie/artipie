@@ -17,8 +17,10 @@ repo:
 ```
 `type` specifies the type of the repository (all supported types are listed below) and `storage` 
 [configures](./Configuration-Storage.md) a storage to store repository data. [Permissions section](./Configuration-Repository Permissions.md)
-allows to provide upload or download access for users and groups. Name of the repository configuration file is
-the name of the repository.
+allows to provide upload or download access for users and groups. 
+
+> **Warning**
+> Name of the repository configuration file is the name of the repository.
 
 For now Artipie supports the following repository types:
 
