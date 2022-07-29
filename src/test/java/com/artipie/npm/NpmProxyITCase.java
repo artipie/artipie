@@ -12,19 +12,16 @@ import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Integration test for {@link com.artipie.npm.proxy.http.NpmProxySlice}.
  * @since 0.13
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @todo #1041:30min NpmProxyITCase: Add test cases with proxy repository on individual port: create
- *  one more repository with `port` settings and start it in Artipie container exposing the port
- *  with `withExposedPorts` method. Then, parameterize test cases to check repositories with
- *  different ports. Check `FileProxyAuthIT` as an example.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
@@ -43,6 +40,7 @@ final class NpmProxyITCase {
     /**
      * Test deployments.
      * @checkstyle VisibilityModifierCheck (10 lines)
+     * @checkstyle MagicNumberCheck (15 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
@@ -56,14 +54,20 @@ final class NpmProxyITCase {
                 "artipie-proxy",
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()
                     .withRepoConfig("npm/npm-proxy.yml", "my-npm-proxy")
+                    .withRepoConfig("npm/npm-proxy-port.yml", "my-npm-proxy-port")
+                    .withExposedPorts(8081)
             )
         ),
         () -> new TestDeployment.ClientContainer("node:14-alpine")
             .withWorkingDirectory("/w")
     );
 
-    @Test
-    void installFromProxy() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "8080,my-npm-proxy",
+        "8081,my-npm-proxy-port"
+    })
+    void installFromProxy(final String port, final String repo) throws Exception {
         this.containers.putBinaryToArtipie(
             "artipie",
             new TestResource(
@@ -90,14 +94,14 @@ final class NpmProxyITCase {
                 )
             ),
             "npm", "install", NpmProxyITCase.PROJ, "--registry",
-            "http://artipie-proxy:8080/my-npm-proxy"
+            String.format("http://artipie-proxy:%s/%s", port, repo)
         );
         this.containers.assertArtipieContent(
             "artipie-proxy",
             "Package was not cached in proxy",
             String.format(
-                "/var/artipie/data/my-npm-proxy/%s/-/%s-1.0.1.tgz",
-                NpmProxyITCase.PROJ, NpmProxyITCase.PROJ
+                "/var/artipie/data/%s/%s/-/%s-1.0.1.tgz",
+                repo, NpmProxyITCase.PROJ, NpmProxyITCase.PROJ
             ),
             new IsEqual<>(tgz)
         );
