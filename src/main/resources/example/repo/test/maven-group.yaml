@@ -1,8 +1,0 @@
-repo:
-  type: maven-proxy
-  storage: default
-  remotes:
-    -
-      url: "http://artipie-empty:8080/empty-maven"
-    -
-      url: "http://artipie-origin:8080/origin-maven"

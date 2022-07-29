@@ -1,6 +1,0 @@
-repo:
-  type: maven-proxy
-  remotes:
-    - url: https://repo.maven.apache.org/maven2
-      cache:
-        - storage: default
