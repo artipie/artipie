@@ -1,0 +1,2 @@
+channels:
+  - http://artipie:8081/my-conda-port
