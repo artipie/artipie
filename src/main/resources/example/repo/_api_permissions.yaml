@@ -1,0 +1,8 @@
+endpoints:
+  ".*":
+    ".*":
+      - god
+
+users:
+  artipie:
+    - god
