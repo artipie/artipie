@@ -1,0 +1,10 @@
+---
+repo:
+  type: maven-proxy
+  port: 8081
+  remotes:
+    - url: https://repo.maven.apache.org/maven2
+      cache:
+        storage:
+          type: fs
+          path: /var/artipie/data/

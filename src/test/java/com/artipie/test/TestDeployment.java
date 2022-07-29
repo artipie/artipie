@@ -282,6 +282,16 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     }
 
     /**
+     * Put classpath resource into client container.
+     * @param res Classpath resource
+     * @param path Path in container
+     */
+    public void putClasspathResourceToClient(final String res, final String path) {
+        final MountableFile file = MountableFile.forClasspathResource(res);
+        this.client.copyFileToContainer(file, path);
+    }
+
+    /**
      * Sets up client environment for docker tests.
      * @throws IOException On error
      */
