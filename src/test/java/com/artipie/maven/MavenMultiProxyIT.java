@@ -10,20 +10,16 @@ import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.testcontainers.containers.BindMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Integration test for maven proxy with multiple remotes.
  *
  * @since 0.12
- * @todo #1041:30min MavenMultiProxyIT: Add test cases with proxy repository on individual port:
- *  create one more repository with `port` settings and start it in Artipie container
- *  exposing the port with `withExposedPorts` method. Then, parameterize test cases to check
- *  repositories with different ports. Check `FileProxyAuthIT` as an example.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
@@ -32,6 +28,7 @@ final class MavenMultiProxyIT {
     /**
      * Test deployments.
      * @checkstyle VisibilityModifierCheck (10 lines)
+     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
@@ -40,6 +37,8 @@ final class MavenMultiProxyIT {
                 "artipie",
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()
                     .withRepoConfig("maven/maven-multi-proxy.yml", "my-maven")
+                    .withRepoConfig("maven/maven-multi-proxy-port.yml", "my-maven-port")
+                    .withExposedPorts(8081)
             ),
             new MapEntry<>(
                 "artipie-empty",
@@ -54,13 +53,15 @@ final class MavenMultiProxyIT {
         ),
         () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
             .withWorkingDirectory("/w")
-            .withClasspathResourceMapping(
-                "maven/maven-settings.xml", "/w/settings.xml", BindMode.READ_ONLY
-            )
     );
 
-    @Test
-    void shouldGetDependency() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "maven/maven-settings.xml",
+        "maven/maven-settings-port.xml"
+    })
+    void shouldGetDependency(final String settings) throws Exception {
+        this.containers.putClasspathResourceToClient(settings, "/w/settings.xml");
         this.containers.putResourceToArtipie(
             "artipie-origin",
             "com/artipie/helloworld/maven-metadata.xml",
