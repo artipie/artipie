@@ -70,7 +70,7 @@ repo:
 ## File
 
 Files repository is a general purpose file storage which provides API for upload and download: `PUT` requests for upload and `GET` for download.
-To setup this repository, create config with `file` repository type and storage configuration. [Permissions configuration](./Configuration-Repository Permissions.md) 
+To set up this repository, create config with `file` repository type and storage configuration. [Permissions configuration](./Configuration-Repository Permissions.md) 
 can authorize users allowed to upload and download.
 
 *Example:*
