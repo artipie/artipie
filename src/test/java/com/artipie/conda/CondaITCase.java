@@ -14,20 +14,17 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.BindMode;
 
 /**
  * Conda IT case.
  * @since 0.23
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @todo #1041:30min CondaITCase: Add test cases with repository on individual port: create one more
- *  repository with `port` settings and start it in Artipie container exposing the port with
- *  `withExposedPorts` method. Then, parameterize test cases to check repositories with different
- *  ports. Check `FileITCase` as an example.
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -36,16 +33,17 @@ public final class CondaITCase {
     /**
      * Test deployments.
      * @checkstyle VisibilityModifierCheck (10 lines)
+     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("conda/conda.yml", "my-conda"),
+            .withRepoConfig("conda/conda.yml", "my-conda")
+            .withRepoConfig("conda/conda-port.yml", "my-conda-port")
+            .withExposedPorts(8081),
         () -> new TestDeployment.ClientContainer("continuumio/miniconda3:4.10.3")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
-                "conda/condarc", "/w/.condarc", BindMode.READ_ONLY
-            ).withClasspathResourceMapping(
                 "conda/example-project", "/w/example-project", BindMode.READ_ONLY
             )
     );
@@ -66,23 +64,31 @@ public final class CondaITCase {
         );
     }
 
-    @Test
-    void canInstallFromArtipie() throws IOException {
+    @ParameterizedTest
+    @CsvSource({
+        "8080,conda/condarc,my-conda",
+        "8081,conda/condarc-port,my-conda-port"
+    })
+    void canInstallFromArtipie(final String port, final String condarc, final String repo)
+        throws IOException {
+        this.containers.putClasspathResourceToClient(condarc, "/w/.condarc");
         this.moveCondarc();
         this.containers.putBinaryToArtipie(
             new TestResource("conda/packages.json").asBytes(),
-            "/var/artipie/data/my-conda/linux-64/repodata.json"
+            String.format("/var/artipie/data/%s/linux-64/repodata.json", repo)
         );
         this.containers.putBinaryToArtipie(
             new TestResource("conda/snappy-1.1.3-0.tar.bz2").asBytes(),
-            "/var/artipie/data/my-conda/linux-64/snappy-1.1.3-0.tar.bz2"
+            String.format("/var/artipie/data/%s/linux-64/snappy-1.1.3-0.tar.bz2", repo)
         );
         this.containers.assertExec(
             "Package snappy-1.1.3-0 was not installed successfully",
             new ContainerResultMatcher(
                 new IsEqual<>(0),
                 Matchers.allOf(
-                    new StringContains("http://artipie:8080/my-conda"),
+                    new StringContains(
+                        String.format("http://artipie:%s/%s", port, repo)
+                    ),
                     new StringContains("linux-64::snappy-1.1.3-0")
                 )
             ),
@@ -90,13 +96,20 @@ public final class CondaITCase {
         );
     }
 
-    @Test
-    void canUploadToArtipie() throws IOException {
+    @ParameterizedTest
+    @CsvSource({
+        "8080,conda/condarc,my-conda",
+        "8081,conda/condarc-port,my-conda-port"
+    })
+    void canUploadToArtipie(final String port, final String condarc, final String repo)
+        throws IOException {
+        this.containers.putClasspathResourceToClient(condarc, "/w/.condarc");
         this.moveCondarc();
         this.containers.assertExec(
             "Failed to set anaconda upload url",
             new ContainerResultMatcher(),
-            "anaconda", "config", "--set", "url", "http://artipie:8080/my-conda/", "-s"
+            "anaconda", "config", "--set", "url",
+            String.format("http://artipie:%s/%s/", port, repo), "-s"
         );
         this.containers.assertExec(
             "Failed to set anaconda upload flag",
@@ -113,7 +126,9 @@ public final class CondaITCase {
             new ContainerResultMatcher(
                 new IsEqual<>(0),
                 Matchers.allOf(
-                    new StringContains("Using Anaconda API: http://artipie:8080/my-conda/"),
+                    new StringContains(
+                        String.format("Using Anaconda API: http://artipie:%s/%s/", port, repo)
+                    ),
                     // @checkstyle LineLengthCheck (1 line)
                     new StringContains("Uploading file \"anonymous/example-package/0.0.1/linux-64/example-package-0.0.1-0.tar.bz2\""),
                     new StringContains("Upload complete")
@@ -123,12 +138,12 @@ public final class CondaITCase {
         );
         this.containers.assertArtipieContent(
             "Package was not uploaded to artipie",
-            "/var/artipie/data/my-conda/linux-64/example-package-0.0.1-0.tar.bz2",
+            String.format("/var/artipie/data/%s/linux-64/example-package-0.0.1-0.tar.bz2", repo),
             new IsNot<>(new IsNull<>())
         );
         this.containers.assertArtipieContent(
             "Package was not uploaded to artipie",
-            "/var/artipie/data/my-conda/linux-64/repodata.json",
+            String.format("/var/artipie/data/%s/linux-64/repodata.json", repo),
             new IsNot<>(new IsNull<>())
         );
     }
