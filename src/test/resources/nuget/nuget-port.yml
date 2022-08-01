@@ -1,0 +1,8 @@
+---
+repo:
+  type: nuget
+  port: 8081
+  url: http://artipie:8081/my-nuget-port
+  storage:
+    type: fs
+    path: /var/artipie/data/
