@@ -132,7 +132,7 @@ In order to download a file, send a `GET` HTTP request:
 ```bash
 curl -X GET http://{host}:{port}/{repository-name}/test.txt
 ```
-were `{host}` and `{port}` Artipie service host and port, `{repository-name}`
+where `{host}` and `{port}` Artipie service host and port, `{repository-name}`
 is the name of repository. Files proxy repository will proxy the request to remote, cache data in 
 storage (if configured) and return the result.
 
