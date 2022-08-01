@@ -33,7 +33,7 @@ meta:
 ```
 
 Storage metrics can be obtained via HTTP `GET` request by path `http://{host}:{port}/.metrics`, 
-were `{host}` and `{port}` Artipie service host and port accordingly. The response is a json object
+where `{host}` and `{port}` Artipie service host and port accordingly. The response is a json object
 with gathered statistics.
 
 ### Prometheus metrics
@@ -46,4 +46,4 @@ meta :
     type : prometheus
 ```
 Metrics in Prometheus compatible format will be available on `http://{host}:{port}/prometheus/metrics` path,
-were `{host}` and `{port}` Artipie service host and port. 
+where `{host}` and `{port}` Artipie service host and port. 
