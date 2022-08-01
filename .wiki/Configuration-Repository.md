@@ -70,8 +70,8 @@ repo:
 ## File
 
 Files repository is a general purpose file storage which provides API for upload and download: `PUT` requests for upload and `GET` for download.
-To setup this repository, create config with `file` repository type and storage configuration. Permissions configuration can authorize
-users allowed to upload and download.
+To set up this repository, create config with `file` repository type and storage configuration. [Permissions configuration](./Configuration-Repository Permissions.md) 
+can authorize users allowed to upload and download.
 
 *Example:*
 ```yaml
@@ -99,7 +99,7 @@ In order to download a file, send a `GET` HTTP request:
 curl -X GET http://{host}:{port}/{repository-name}/text.txt
 ```
 
-In the examples above `{host}` and `{port}` Artipie service host and port, `{repository-name}` 
+In the examples above `{host}` and `{port}` are Artipie service host and port, `{repository-name}` 
 is the name of files repository.
 
 ## File proxy (mirror)
@@ -132,7 +132,161 @@ In order to download a file, send a `GET` HTTP request:
 ```bash
 curl -X GET http://{host}:{port}/{repository-name}/test.txt
 ```
-were `{host}` and `{port}` Artipie service host and port, `{repository-name}`
+were `{host}` and `{port}` are Artipie service host and port, `{repository-name}`
 is the name of repository. Files proxy repository will proxy the request to remote, cache data in 
 storage (if configured) and return the result.
 
+## Maven
+
+To host a [Maven](https://maven.apache.org/) repository for Java artifacts and dependencies try the
+following configuration:
+
+```yaml
+repo:
+  type: maven
+  storage:
+    type: fs
+    path: /tmp/artipie/data
+  permissions:
+    alice:
+      - upload
+      - download
+    "*":
+      - download
+```
+
+To use this repository as regular maven repository in Java project, add the following configuration 
+into `pom` project file (alternatively [configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
+it via [`~/.m2/settings.xml`](https://maven.apache.org/settings.html)):
+
+```xml
+<repositories>
+    <repository>
+        <id>{artipie-server-id}</id>
+        <url>http://{host}:{port}/{repository-name}</url>
+    </repository>
+</repositories>
+```
+Then run `mvn install` (or `mvn install -U` to force download dependencies).
+
+To deploy the project into Artipie repository, add [`<distributionManagement>`](https://maven.apache.org/pom.html#Distribution_Management)
+section to [`pom.xml`](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html)
+project file (don't forget to specify authentication credentials in
+[`~/.m2/settings.xml`](https://maven.apache.org/settings.html#Servers)
+for `artipie` server):
+
+```xml
+<project>
+  [...]
+  <distributionManagement>
+    <snapshotRepository>
+      <id>artipie</id>
+      <url>http://{host}:{port}/{repository-name}</url>
+    </snapshotRepository>
+    <repository>
+      <id>artipie</id>
+      <url>http://{host}:{port}/{repository-name}</url>
+    </repository>
+  </distributionManagement>
+</project>
+```
+In the examples above `{host}` and `{port}` are Artipie service host and port, `{repository-name}`
+is the name of maven repository.
+
+## Maven proxy
+
+Maven proxy repository will redirect all the requests to the remotes. Repository configuration allows
+to specify several remotes, Artipie will try to obtain the artifact from the remotes list one by one
+while the artifact is not found. If caching is enabled, previously downloaded packages will be 
+available when source repository is down:
+
+```yaml
+repo:
+  type: maven-proxy
+  remotes:
+    - url: https://repo.maven.apache.org/maven2
+      username: Aladdin # optional
+      password: OpenSesame # optional
+      cache: # optional
+        storage:
+          type: fs
+          path: /tmp/artipie/maven-central-cache
+    - url: https://maven.example.com/
+  permissions:
+    "*":
+      - download
+```
+Only `download` permissions make sense here.
+
+To use this repository as regular maven repository in Java project, add the following configuration
+into `pom` project file (alternatively [configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
+it via [`~/.m2/settings.xml`](https://maven.apache.org/settings.html)):
+
+```xml
+<repositories>
+    <repository>
+        <id>{artipie-server-id}</id>
+        <url>http://{host}:{port}/{repository-name}</url>
+    </repository>
+</repositories>
+```
+where `{host}` and `{port}` are Artipie service host and port, `{repository-name}`
+is the name of maven repository.
+
+## RPM
+
+Rpm repository is a linux binary packages repository, which [`yum`](https://en.wikipedia.org/wiki/Yum_%28software%29) 
+and [`dnf`](https://en.wikipedia.org/wiki/DNF_%28software%29) can understand. Try the following 
+configuration to add rpm repository:
+
+```yaml
+repo:
+  type: rpm
+  storage:
+    type: fs
+    path: /var/artipie/centos
+  settings:
+    digest: sha256 # packages digest algorithm
+    naming-policy: sha1 # naming policy for metadata files
+    filelists: true # is filelist metadata file required
+    # repository update mode:
+    update:
+      # update metadata on package upload
+      on: upload
+      # or schedule the update
+      on:
+       cron: 0 2 * * *
+  permissions:
+    alice:
+      - upload
+      - download
+    "*":
+      - download
+```
+Section `setting` allows to configure repository-specific parameters and is not required:
+- `digest` - digest algorithm for rpm packages checksum calculation, sha256 (default) and sha1 are supported
+- `naming-policy` - naming policy for metadata files: plain, sha1 or sha256 (default) prefixed
+- `filelists` - Calculate metadata `filelists.xml`, true by default
+- `update` section allows to set update mode: either update the repository when the package is uploaded via HTTP 
+or schedule the update via cron
+
+[Permissions configuration](./Configuration-Repository Permissions.md) section specifies users who can upload and download from the repository.
+
+In order to use Artipie `rpm` repository with `yum` follow the steps:
+
+- Install `yum-utils` if needed: `yum install yum-utils`
+- Add Artipie repository: `yum-config-manager --add-repo=http://{host}:{port}/{repository-name}` where `{host}` and `{port}` are Artipie service host and port, `{repository-name}`
+  is the name of `rpm` repository
+- Refresh the local repository: `yum upgrade all`
+- Install the packages: `yum install package-name`
+
+No `yum` nether `dnf` support packages upload, but you can upload `rpm` file into Artipie `rpm` 
+repository with HTTP `PUT` request:
+```commandline
+curl -X PUT --data-binary "@my-pkg.rpm" http://{host}:{port}/{repository-name}/my-pkg.rpm?override=true&skip_update=true
+```
+
+The request supports the following parameters:
+- `override` allows to override existing `rpm` file in the repository, not required, false by default
+- `skip_update` can be used to skip repository metadata update, not required, false by default. 
+In update mode `cron` this parameter is ignored (as repository metadata are updated by schedule).
