@@ -1,6 +1,7 @@
+---
 repo:
   type: maven-proxy
-  storage: default
+  port: 8081
   remotes:
     -
       url: "http://artipie-empty:8080/empty-maven"
