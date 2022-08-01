@@ -13,18 +13,15 @@ import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Integration tests for Nuget repository.
  * @since 0.12
- * @todo #1041:30min NugetITCase: Add test cases with repository on individual port: create one more
- *  repository with `port` settings and start it in Artipie container exposing the port with
- *  `withExposedPorts` method. Then, parameterize test cases to check repositories with different
- *  ports. Check `FileITCase` as an example.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
@@ -33,11 +30,14 @@ final class NugetITCase {
     /**
      * Test deployments.
      * @checkstyle VisibilityModifierCheck (10 lines)
+     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("nuget/nuget.yml", "my-nuget"),
+            .withRepoConfig("nuget/nuget.yml", "my-nuget")
+            .withRepoConfig("nuget/nuget-port.yml", "my-nuget-port")
+            .withExposedPorts(8081),
         () -> new TestDeployment.ClientContainer("mcr.microsoft.com/dotnet/sdk:5.0")
             .withWorkingDirectory("/w")
     );
@@ -57,8 +57,12 @@ final class NugetITCase {
         );
     }
 
-    @Test
-    void shouldPushAndInstallPackage() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "8080,my-nuget",
+        "8081,my-nuget-port"
+    })
+    void shouldPushAndInstallPackage(final String port, final String repo) throws Exception {
         final String pckgname = UUID.randomUUID().toString();
         this.containers.putBinaryToClient(
             new TestResource("nuget/newtonsoft.json/12.0.3/newtonsoft.json.12.0.3.nupkg").asBytes(),
@@ -70,7 +74,8 @@ final class NugetITCase {
                 new IsEqual<>(0),
                 new StringContains("Your package was pushed.")
             ),
-            "dotnet", "nuget", "push", pckgname, "-s", "http://artipie:8080/my-nuget/index.json"
+            "dotnet", "nuget", "push", pckgname, "-s",
+            String.format("http://artipie:%s/%s/index.json", port, repo)
         );
         this.containers.assertExec(
             "New project was not created",
@@ -90,7 +95,8 @@ final class NugetITCase {
                 )
             ),
             "dotnet", "add", "TestProj", "package", "newtonsoft.json",
-            "--version", "12.0.3", "-s", "http://artipie:8080/my-nuget/index.json"
+            "--version", "12.0.3", "-s",
+            String.format("http://artipie:%s/%s/index.json", port, repo)
         );
     }
 
