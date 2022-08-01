@@ -1,8 +1,8 @@
 ## Metrics
 
-@todo #1031:30min Verify this configuration section: start Artipie locally, configure metrics (try 
-  each type) and check how they work. Check `com.artipie.metrics` package for all details. When checking,
-  extend this documentation with examples and details about gathered statistics.
+// @todo #1031:30min Verify this configuration section: start Artipie locally, configure metrics (try 
+//  each type) and check how they work. Check `com.artipie.metrics` package for all details. When checking,
+//  extend this documentation with examples and details about gathered statistics.
 
 Artipie metrics are meant to gather incoming HTTP requests statistic and publish it in the 
 configured format: it can be application log, [`Prometheus`](https://prometheus.io/) or data storage.
