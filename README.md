@@ -26,18 +26,18 @@ The following set of features makes Artipie unique among all others:
   * It is horizontally scalable, you can add servers easily
   * It is written in reactive Java (using [Vert.x](https://vertx.io/))
   * It supports
-    [Maven](./examples/maven),
-    [Docker](./examples/docker),
+    [Maven](https://github.com/artipie/artipie/wiki/repositories/maven),
+    [Docker](https://github.com/artipie/artipie/wiki/repositories/docker),
     [Rubygems](./examples/gem),
-    [Go](./examples/go),
-    [Helm](./examples/helm),
-    [Npm](./examples/npm),
-    [NuGet](./examples/nuget),
-    [Composer](./examples/php),
-    [Pip](./examples/pypi),
-    [Rpm](./examples/rpm),
-    [Debian](./examples/debian),
-    [Anaconda](./examples/conda)
+    [Go](https://github.com/artipie/artipie/wiki/repositories/go),
+    [Helm](https://github.com/artipie/artipie/wiki/repositories/helm),
+    [Npm](https://github.com/artipie/artipie/wiki/repositories/npm),
+    [NuGet](https://github.com/artipie/artipie/wiki/repositories/nuget),
+    [Composer](https://github.com/artipie/artipie/wiki/repositories/composer),
+    [Pip](https://github.com/artipie/artipie/wiki/repositories/pypi),
+    [Rpm](https://github.com/artipie/artipie/wiki/repositories/rpm),
+    [Debian](https://github.com/artipie/artipie/wiki/repositories/debian),
+    [Anaconda](https://github.com/artipie/artipie/wiki/repositories/anaconda)
     and [others](./examples)
   * It is database-free
   * It can host the data in the file system or [Amazon S3](https://aws.amazon.com/s3/)
