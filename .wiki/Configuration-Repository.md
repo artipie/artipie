@@ -16,7 +16,7 @@ repo:
       - download
 ```
 `type` specifies the type of the repository (all supported types are listed below) and `storage` 
-[configures](./Configuration-Storage.md) a storage to store repository data. [Permissions section](./Configuration-Repository Permissions.md)
+[configures](./Configuration-Storage.md) a storage to store repository data. [Permissions section](./Configuration-Repository-Permissions.md)
 allows to provide upload or download access for users and groups. 
 
 > **Warning**  

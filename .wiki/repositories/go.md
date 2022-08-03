@@ -13,7 +13,7 @@ repo:
     "*":
       - download
 ```
-Check [storage](../Configuration-Storage.md) and [permission](../Configuration-Repository%20Permissions.md)
+Check [storage](../Configuration-Storage.md) and [permission](../Configuration-Repository-Permissions.md)
 documentations to learn more about these settings.
 
 In order to use Artipie Go repository, declare the following environment variables:

@@ -14,7 +14,7 @@ repo:
     john:
       - upload
 ```
-Check [storage](../Configuration-Storage.md) and [permission](../Configuration-Repository%20Permissions.md)
+Check [storage](../Configuration-Storage.md) and [permission](../Configuration-Repository-Permissions.md)
 documentations to learn more about these settings.
 
 To publish the packages with [twine](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives)

@@ -16,7 +16,7 @@ repo:
     "*":
       - download
 ```
-Note, that Docker repository also supports [granular permissions](../Configuration-Repository%20Permissions.md#docker-repository-granular-permissions).
+Note, that Docker repository also supports [granular permissions](../Configuration-Repository-Permissions.md#docker-repository-granular-permissions).
 
 ### Usage example
 
