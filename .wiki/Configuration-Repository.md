@@ -19,7 +19,7 @@ repo:
 [configures](./Configuration-Storage.md) a storage to store repository data. [Permissions section](./Configuration-Repository Permissions.md)
 allows to provide upload or download access for users and groups. 
 
-> **Warning**
+> **Warning**  
 > Name of the repository configuration file is the name of the repository.
 
 For now Artipie supports the following repository types:
@@ -43,7 +43,7 @@ For now Artipie supports the following repository types:
 | [PyPI Proxy](./Configuration-Repository.md#pypi) | Proxy for Python repository |
 | [Go](./Configuration-Repository.md#go) | [Go packages storages](https://golang.org/cmd/go/#hdr-Module_proxy_protocol) |
 | [Debian](./Configuration-Repository.md#debian) | [Debian linux packages repository](https://wiki.debian.org/DebianRepository/Format) |
-| [Conda](./Configuration-Repository.md#conda) | [Built packages for data science](https://www.anaconda.com/) |
+| [Anaconda](./Configuration-Repository.md#anaconda) | [Built packages for data science](https://www.anaconda.com/) |
 
 Detailed configuration for each repository is provided in the corresponding subsection below.
 
@@ -63,7 +63,7 @@ repo:
   ...
 ```
 
-> **Warning**
+> **Warning**  
 > Artipie scans repositories for port configuration only on start, 
 > so server requires restart in order to apply changes made in runtime.
 
@@ -391,3 +391,128 @@ When `storage` section under `meta` section in configured, it is also possible t
 using `docker push` command to proxy repository and store them locally. 
 
 Find the example how to pull and push images into docker registry in [Docker repository section](./Configuration-Repository.md#usage-example).
+
+## NPM
+
+NPM repository is the [repository for JavaScript](https://www.npmjs.com/) code sharing, packages 
+store and management. Here is the configuration example for NPM repository:
+
+```yaml
+repo:
+  type: npm
+  url: http://{host}:{port}/{repository-name}
+  storage:
+    type: fs
+    path: /var/artipie/data/
+  permissions:
+    "*":
+      - download
+```
+
+The NPM repository configuration requires `url` field that contains repository full URL, 
+`{host}` and `{port}` are Artipie service host and port, `{repository-name}`
+is the name of the repository (and repository name is the name of the repo config yaml file). Check 
+[storage](./Configuration-Storage.md) and [permission](./Configuration-Repository%20Permissions.md) 
+documentations to learn more about these settings.
+
+To use NPM repository with `npm` client, you can specify Artipie NPM repository with `--registry` option:
+```bash
+# to install the package
+npm install @hello/my-project-name --registry http://{host}:{port}/{repository-name}
+# to publish the package
+npm publish @hello/my-project-name --registry http://{host}:{port}/{repository-name}
+```
+or it's possible to set Artipie as a default registry:
+```bash
+npm set registry http://{host}:{port}/{repository-name}
+```
+
+## NPM Proxy
+
+NPM proxy repository will proxy all the requests to configured remote and store all the downloaded
+packages into configured storage:
+
+```yaml
+repo:
+  type: npm-proxy
+  path: {repository-name}
+  storage:
+    type: fs
+    path: /var/artipie/data/
+  settings:
+    remote:
+      url: http://npmjs-repo/
+```
+
+All the fields of YAML config are required, `path` is the repository relative path, [storage section](./Configuration-Storage.md)
+configures storage to cache the packages, `settings` section sets remote repository url. 
+
+To use Artipie NPM proxy repository with `npm` client, specify the repository URL with `--registry` option:
+```bash
+npm install @hello/my-project-name --registry http://{host}:{port}/{repository-name}
+```
+or it's possible to set Artipie repository as a default registry:
+```bash
+npm set registry http://{host}:{port}/{repository-name}
+```
+
+In the examples above `{host}` and `{port}` are Artipie service host and port, `{repository-name}`
+is the name of the repository (and repository name is the name of the repo config yaml file).
+
+## Anaconda
+
+[Anaconda](https://repo.anaconda.com/) is a general purpose software repository for Python and other 
+(R, Ruby, Lua, Scala, Java, JavaScript, C/C++, FORTRAN) packages and utilities, repository short name
+is `conda`:
+```yaml
+repo:
+  type: conda
+  url: http://{host}:{port}/{repository-name}
+  storage:
+    type: fs
+    path: /var/artipie/my-conda
+  settings:
+    auth_token_ttl: P30D
+    clean_auth_token_at: 0 0 12 * * ?
+  permissions:
+    alice:
+      - upload
+      - download
+    "*":
+      - download
+```
+Configuration requires `url` field that contains repository full URL,
+`{host}` and `{port}` are Artipie service host and port, `{repository-name}`
+is the name of the repository (and repository name is the name of the repo config yaml file). 
+Anaconda client does not work without authentication and uses tokens to authorize users. That's why 
+the repository `settings` section contains two optional parameters:
+- `auth_token_ttl` is repository authentication tokens time to leave, format is
+  compliant with ISO-8601 duration format PnDTnHnMn.nS. Default value is 365 days.
+- `clean_auth_token_at` - time to clean expired auth tokens as a cron expression.
+  Default value is `0 0 1 * * ?` - at 01 AM every night.
+
+Find more information about permissions [here](./Configuration-Repository%20Permissions.md). 
+
+To use Artipie repository with `conda` command-line tool, add the repository to `conda` channels settings to `/root/.condarc` file
+(check [documentation](https://conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html) for more details):
+```yaml
+channels:
+  - http://{host}:{port}/{repository-name}
+```
+To install package from the repository, use `conda install`:
+```commandline
+conda install -y my-package
+```
+Set Artipie repository url for upload to `anaconda` config and enable automatic upload after building package:
+```commandline
+anaconda config --set url "http://{host}:{port}/{repository-name}" -s
+conda config --set anaconda_upload yes
+```
+To build and upload the package, login with `anaconda login` first and the then call `conda build` 
+(the command will build and upload the package to repository):
+```commandline
+anaconda login --useermane alice --password wanderland
+conda build /examle/my-project
+```
+In the examples above `{host}` and `{port}` are Artipie service host and port, `{repository-name}`
+is the name of the repository (and repository name is the name of the repo config yaml file).
