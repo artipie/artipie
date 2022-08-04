@@ -30,7 +30,7 @@ the repository `settings` section contains two optional parameters:
 - `clean_auth_token_at` - time to clean expired auth tokens as a cron expression.
   Default value is `0 0 1 * * ?` - at 01 AM every night.
 
-Find more information about permissions [here](../Configuration-Repository%20Permissions.md).
+Find more information about permissions [here](../Configuration-Repository-Permissions.md).
 
 To use Artipie repository with `conda` command-line tool, add the repository to `conda` channels settings to `/root/.condarc` file
 (check [documentation](https://conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html) for more details):

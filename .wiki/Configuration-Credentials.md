@@ -51,7 +51,7 @@ in the `pass` field.
 
 Users can be assigned to some groups, all repository permissions granted to the group are applied
 to the users participating in this group. More information about repository permissions can be found
-[here](./Configuration-Repository Permissions.md).
+[here](./Configuration-Repository-Permissions.md).
 
 ### Credentials type `github`
 
