@@ -134,7 +134,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "helm":
                 slice = new TrimPathSlice(
-                    new HelmSlice(cfg.storage(), cfg.path(), permissions, auth),
+                    new HelmSlice(cfg.storage(), cfg.url().toString(), permissions, auth),
                     settings.layout().pattern()
                 );
                 break;

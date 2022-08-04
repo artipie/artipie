@@ -1,5 +1,5 @@
 repo:
-  path: "http://localhost:8080/example_helm_repo/"
+  url: "http://localhost:8080/example_helm_repo/"
   type: helm
   storage:
     type: fs

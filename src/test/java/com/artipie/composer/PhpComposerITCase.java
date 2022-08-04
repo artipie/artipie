@@ -60,7 +60,7 @@ final class PhpComposerITCase {
         this.containers.assertExec(
             "Failed to upload composer package archive",
             new ContainerResultMatcher(),
-            "curl", "-X", "PUT", String.format("%s/%s", url, "log-1.1.4.zip"),
+            "curl", "-X", "PUT", String.format("%s/%s", url, PhpComposerITCase.PACK),
             "--upload-file", String.format("/w/%s", PhpComposerITCase.PACK),
             "--verbose"
         );

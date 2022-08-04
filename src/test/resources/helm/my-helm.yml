@@ -4,4 +4,3 @@ repo:
     type: fs
     path: /var/artipie/data
   url: http://artipie:8080/my-helm
-  path: http://artipie:8080/my-helm
