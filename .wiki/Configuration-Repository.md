@@ -27,7 +27,7 @@ For now Artipie supports the following repository types:
 | Type  | Description   |
 |---|---|
 | [Files](./repositories/file.md) | General purpose files repository |
-| [Files Proxy](./repositories/file-proxy-mirrow.md) | Files repository proxy |
+| [Files Proxy](./repositories/file-proxy-mirror.md) | Files repository proxy |
 | [Maven](./repositories/maven.md) | [Java artifacts and dependencies repository](https://maven.apache.org/what-is-maven.html) |
 | [Maven Proxy](./repositories/maven-proxy.md) | Proxy for maven repository |
 | [Rpm](./repositories/rpm.md) | `.rpm` ([linux binaries](https://rpm-packaging-guide.github.io/)) packages repository |
@@ -36,7 +36,7 @@ For now Artipie supports the following repository types:
 | [Helm](./repositories/helm.md) | [Helm charts repository](https://helm.sh/docs/topics/chart_repository/) |
 | [Npm](./repositories/npm.md) | [JavaScript code sharing and packages store](https://www.npmjs.com/) |
 | [Npm Proxy](./repositories/npm-proxy.md) | Proxy for NPM repository |
-| [Composer](./repositories/composer.md) | [Dependency manager PHP packages](https://getcomposer.org/) |
+| [Composer](./repositories/composer.md) | [Dependency manager for PHP packages](https://getcomposer.org/) |
 | [NuGet](./repositories/nuget.md) | [Hosting service for .NET packages](https://www.nuget.org/packages) |
 | [Gem](./repositories/gem.md) | [RubyGem hosting service](https://rubygems.org/) |
 | [PyPI](./repositories/pypi.md) | [Python packages index](https://pypi.org/) |
