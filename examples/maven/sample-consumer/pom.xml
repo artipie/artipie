@@ -1,21 +1,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.artipie</groupId>
+  <artifactId>sample-consumer</artifactId>
+  <version>1.0</version>
+  <packaging>jar</packaging>
+  <name>A sample project which consumes sample-for-deployment from artipie</name>
+  <dependencies>
+    <dependency>
     <groupId>com.artipie</groupId>
-    <artifactId>sample-consumer</artifactId>
+    <artifactId>sample-for-deployment</artifactId>
     <version>1.0</version>
-    <packaging>jar</packaging>
-    <name>A sample project which consumes sample-for-deployment from artipie</name>
-    <dependencies>
-        <dependency>
-            <groupId>com.artipie</groupId>
-            <artifactId>sample-for-deployment</artifactId>
-            <version>1.0</version>
-        </dependency>
-    </dependencies>
-    <repositories>
-        <repository>
-            <id>artipie</id>
-            <url>http://artipie.artipie:8080/my-maven</url>
-        </repository>
-    </repositories>
+    </dependency>
+  </dependencies>
+  <repositories>
+    <repository>
+      <id>artipie</id>
+      <url>http://artipie.artipie:8080/my-maven</url>
+    </repository>
+  </repositories>
 </project>
