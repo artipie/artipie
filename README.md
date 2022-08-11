@@ -45,9 +45,10 @@ The following set of features makes Artipie unique among all others:
 
 # Quickstart
 
-Make sure you have already installed both [Docker Engine](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/).
-Then, obtain [`docker-compose.yaml`](https://github.com/artipie/artipie/blob/master/docker-compose.yaml) file
-from the repository: you can [open it from the browser](https://github.com/artipie/artipie/blob/master/docker-compose.yaml), 
+Make sure you have already installed both [Docker Engine](https://docs.docker.com/get-docker/) and 
+[Docker Compose](https://docs.docker.com/compose/install/).
+Then, obtain `docker-compose.yaml` file from the repository: 
+you can [open it from the browser](https://github.com/artipie/artipie/blob/master/docker-compose.yaml), 
 copy content and save it locally or use [git](https://git-scm.com/) and [clone](https://git-scm.com/docs/git-clone) the repository. 
 As soon as Docker Compose is installed and `docker-compose.yaml` file is retrieved, open command line, 
 `cd` to the location with the compose file and run Artipie service:
@@ -63,8 +64,8 @@ A new image generate default configuration if not found at `/etc/artipie/artipie
 credentials to console and prints a link to the dashboard. If started on localhost with command
 above, the dashboard URI is `http://localhost:8080/dashboard` and default username and password 
 are `artipie/artipie`. Artipie server side (repositories) is served on `8081` port and is 
-available on URI `http://localhost:8081/artipie/{reponame}`, where `{reponame}` is the name of the
-repository.
+available on URI `http://localhost:8081/{username}/{reponame}`, where `{username}` is the name 
+of the user and `{reponame}` is the name of the repository.
 
 
 To create a new artifact repository:
@@ -79,7 +80,7 @@ Default server configuration refers to `/var/artipie/repos` to look up for repos
 You may want to mount local configurations `<your-local-config-dir>` to `/var/artipie/repos` to edit 
 it manually by changing `volumes` values inside `docker-compose.yaml` script.
 
-**Important:** check that `<your-local-config-dir>` has correct permissions, it should be `2020:2021`, 
+> **Important:** check that `<your-local-config-dir>` has correct permissions, it should be `2020:2021`,  
 to change it correctly use `chown -R 2020:2021 <your-local-config-dir>`.
 
 More configuration details and examples are available in our [Wiki](https://github.com/artipie/artipie/wiki).
