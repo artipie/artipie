@@ -23,18 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
 <settings>
-    <profiles>
-        <profile>
-            <id>artipie</id>
-            <repositories>
-                <repository>
-                    <id>my-maven</id>
-                    <url>http://artipie:8080/my-maven/</url>
-                </repository>
-            </repositories>
-        </profile>
-    </profiles>
-    <activeProfiles>
-        <activeProfile>artipie</activeProfile>
-    </activeProfiles>
+  <profiles>
+    <profile>
+      <id>artipie</id>
+      <repositories>
+        <repository>
+          <id>my-maven</id>
+          <url>http://artipie:8080/my-maven/</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>artipie</activeProfile>
+  </activeProfiles>
 </settings>
