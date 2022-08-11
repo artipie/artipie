@@ -77,7 +77,7 @@ it's for unit and integration tests only.
 ## Custom storage
 
 Artipie users have an option to implement and use a custom storage.
-If you want to make your storage, you need to define `asto-code` dependency in `pom` file of your project:
+If you want to make your storage, you need to define `asto-core` dependency in `pom` file of your project:
 ```xml
 <dependency>
    <groupId>com.artipie</groupId>
