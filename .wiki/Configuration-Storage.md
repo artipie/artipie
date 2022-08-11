@@ -101,7 +101,7 @@ that allows to define configuration as `yaml` file. It's also possible to use an
 
 To start Artipie with a custom storage, you have to:
 - provide a file with configuration of storage; this is done the same way as for other storage types.
-- put a jar file contained implementation classes and all needed libraries to classpath.
+- put a jar file that contains implementation classes and all needed libraries to classpath.
 
 If logging is switched to `info` level, you should see the following log record:
 ```
