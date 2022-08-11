@@ -5,6 +5,7 @@ Artipie "Storage" is an abstraction on top of multiple key-value storage provide
  - S3 storage
  - etcd storage (see limitations)
  - in-memory
+ - custom storage
 
 The Storage is used for storing repository data, proxy/mirrors repository caching and for Artipie 
 configuration. Such storage can be configured in various config files and in various sections of 
@@ -72,6 +73,43 @@ In-memory storage is not persistent, it exists only while Artipie process is ali
 Artipie tests, check the [implementation](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/memory/InMemoryStorage.java) 
 for more details. There is no possibility to use in memory storage from configuration, 
 it's for unit and integration tests only.
+
+## Custom storage
+
+Artipie users have an option to implement and use a custom storage.
+If you want to make your storage, you need to define `asto-core` dependency in `pom` file of your project:
+```xml
+<dependency>
+   <groupId>com.artipie</groupId>
+   <artifactId>asto-core</artifactId>
+   <version>...</version>
+</dependency>
+```
+On the next step, you have to implement interface 
+[Storage](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/Storage.java)
+to host data in the place which you need. The interface 
+[StorageFactory](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/factory/StorageFactory.java)
+is responsible for creating a new storage instance. You have to implement this interface and 
+mark the implementation with annotation [ArtipieStorageFactory](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/factory/ArtipieStorageFactory.java). 
+This annotation helps Artipie to find factory classes and provides a name of storage type. 
+Storage type name must be unique in the scope of one Artipie server. In the case of type name conflict, 
+Artipie will throw an exception on a start-up stage. Storage configuration is represented by an 
+interface [StorageConfig](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/factory/StorageConfig.java). 
+Currently, this interface has the single implementation 
+[YamlStorageConfig](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/factory/StorageConfig.java#L96) 
+that allows to define configuration as `yaml` file. It's also possible to use an own implementation of `StorageConfig`.
+
+To start Artipie with a custom storage, you have to:
+- provide a file with configuration of storage; this is done the same way as for other storage types.
+- put a jar file that contains implementation classes and all needed libraries to classpath.
+
+If logging is switched to `info` level, you should see the following log record:
+```
+Initiated storage factory [type={your-storage-type}, class={your-storage-factory-class-name}]
+```
+
+You can study [a storage implementation based on Redis java client Redisson](https://github.com/artipie/asto/tree/master/asto-redis/src/main/java/com/artipie/asto/redis)
+as a good example.
 
 # Storage Aliases
 

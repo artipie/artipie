@@ -21,7 +21,7 @@ meta:
   storage:
     type: fs
     path: /tmp/artipie/configs
-  congigs: repo
+  configs: repo
   credentials:
     type: file
     path: _credentials.yml

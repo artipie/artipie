@@ -19,7 +19,7 @@ Each item of `credentials` list has only one required field - `type`, which dete
 authentication:
 - `file` stands for auth by credentials from another YAML file (path to the file is specified by 
 `path` field value, it's relative to main configuration storage)
-- `github` is for auth via github
+- `github` is for auth via GitHub
 - `env` authenticates by credentials from environment
 
 When several credentials types are set, Artipie tries to authorize user via each method.
@@ -57,7 +57,7 @@ to the users participating in this group. More information about repository perm
 
 If the `type` is set to `github`, GitHub username with `github.com/` prefix `github.com/{username}` 
 and [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) 
-can be used to login into Artipie service. GitHub token can be obtained in the section 
+can be used to log in into Artipie service. GitHub token can be obtained in the section 
 "Developer settings" of personal settings page.
 
 ### Credentials type `env`
