@@ -76,7 +76,7 @@ it's for unit and integration tests only.
 
 ## Custom storage
 
-Artipie users have an option to implement and use an own storage.
+Artipie users have an option to implement and use a custom storage.
 If you want to make your storage, you need to define `asto-code` dependency in `pom` file of your project:
 ```xml
 <dependency>
@@ -90,7 +90,7 @@ On the next step, you have to implement interface
 to host data in the place which you need. The interface 
 [StorageFactory](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/factory/StorageFactory.java)
 is responsible for creating a new storage instance. You have to implement this interface and 
-mark the implementation by annotation [ArtipieStorageFactory](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/factory/ArtipieStorageFactory.java). 
+mark the implementation with annotation [ArtipieStorageFactory](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/factory/ArtipieStorageFactory.java). 
 This annotation helps Artipie to find factory classes and provides a name of storage type. 
 Storage type name must be unique in the scope of one Artipie server. In the case of type name conflict, 
 Artipie will throw an exception on a start-up stage. Storage configuration is represented by an 
@@ -108,7 +108,7 @@ If logging is switched to `info` level, you should see the following log record:
 Initiated storage factory [type={your-storage-type}, class={your-storage-factory-class-name}]
 ```
 
-You can study [a storage implementation based on Redisson](https://github.com/artipie/asto/tree/master/asto-redis/src/main/java/com/artipie/asto/redis)
+You can study [a storage implementation based on Redis java client Redisson](https://github.com/artipie/asto/tree/master/asto-redis/src/main/java/com/artipie/asto/redis)
 as a good example.
 
 # Storage Aliases
