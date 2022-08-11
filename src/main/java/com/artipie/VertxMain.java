@@ -102,7 +102,7 @@ public final class VertxMain {
             metrics, this.port
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
-        this.startRepos(settings, metrics);
+        this.startRepos(settings, metrics, this.port);
         return main;
     }
 
@@ -158,11 +158,12 @@ public final class VertxMain {
      *
      * @param settings Settings.
      * @param metrics Metrics.
+     * @param mport Artipie service main port
      */
-    private void startRepos(final Settings settings, final Metrics metrics) {
+    private void startRepos(final Settings settings, final Metrics metrics, final int mport) {
         final Storage storage = settings.repoConfigsStorage();
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
-            keys -> keys.stream().map(key -> new ConfigFile(key))
+            keys -> keys.stream().map(ConfigFile::new)
                 .filter(Predicate.not(ConfigFile::isSystem).and(ConfigFile::isYamlOrYml))
                 .map(ConfigFile::name)
                 .map(name -> new RepositoriesFromStorage(this.http, storage).config(name))
@@ -171,7 +172,7 @@ public final class VertxMain {
         ).toCompletableFuture().join();
         for (final RepoConfig repo : configs) {
             try {
-                repo.port().ifPresent(
+                repo.port().ifPresentOrElse(
                     prt -> {
                         final String name = new ConfigFile(repo.name()).name();
                         this.listenOn(
@@ -179,10 +180,9 @@ public final class VertxMain {
                                 new Key.From(name), prt
                             ), metrics, prt
                         );
-                        Logger.info(
-                            VertxMain.class, "Artipie repo '%s' was started on port %d", name, prt
-                        );
-                    }
+                        VertxMain.logRepo(prt, name);
+                    },
+                    () -> VertxMain.logRepo(mport, repo.name())
                 );
             } catch (final IllegalStateException err) {
                 Logger.error(this, "Invalid repo config file %s: %[exception]s", repo.name(), err);
@@ -220,5 +220,16 @@ public final class VertxMain {
             .map(meta -> meta.yamlMapping("metrics"))
             .<Metrics>map(root -> new MetricsFromConfig(root).metrics())
             .orElse(NopMetrics.INSTANCE);
+    }
+
+    /**
+     * Log repository on start.
+     * @param mport Repository port
+     * @param name Repository name
+     */
+    private static void logRepo(final int mport, final String name) {
+        Logger.info(
+            VertxMain.class, "Artipie repo '%s' was started on port %d", name, mport
+        );
     }
 }
