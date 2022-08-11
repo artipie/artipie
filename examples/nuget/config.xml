@@ -24,7 +24,7 @@ SOFTWARE.
 -->
 <configuration>
   <packageSources>
-    <add key="artipie-nuget-test" value="http://artipie.artipie:8080/my-nuget/index.json" />
+    <add key="artipie-nuget-test" value="http://artipie.artipie:8080/my-nuget/index.json"/>
   </packageSources>
   <packageSourceCredentials>
     <artipie-nuget-test>
