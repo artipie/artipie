@@ -12,6 +12,7 @@ services:
     ports:
       - "8081:8080"
     volumes:
+      # change /usr/local/artipie to any convenient location, this is the config folder
       - /usr/local/artipie:/var/artipie/repo
   front:
     image: artipie/front:latest
@@ -24,6 +25,7 @@ services:
       - ARTIPIE_USER_PASS=artipie
       - TKN_KEY=abc123
     volumes:
+      # change /usr/local/artipie to any convenient location, this is the config folder
       - /usr/local/artipie:/var/artipie/repo
     ports:
       - "8080:8080"
