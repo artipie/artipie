@@ -159,6 +159,14 @@ SOFTWARE.
           <groupId>com.jcabi</groupId>
           <artifactId>jcabi-xml</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-library</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-core</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -307,7 +315,12 @@ SOFTWARE.
       <artifactId>simpleclient_common</artifactId>
       <version>0.14.1</version>
     </dependency>
-    <!--Test scope-->
+    <!-- Test scope-->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-matchers</artifactId>
@@ -348,17 +361,6 @@ SOFTWARE.
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>wtf.g4s8</groupId>
-      <artifactId>matchers-json</artifactId>
-      <version>1.0.3</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.llorllale</groupId>
       <artifactId>cactoos-matchers</artifactId>
       <version>0.18</version>
@@ -373,13 +375,19 @@ SOFTWARE.
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-maven-service-factory</artifactId>
-      <version>${vertx.version}</version>
+      <version>3.9.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-api-mockito2</artifactId>
       <version>2.0.7</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>wtf.g4s8</groupId>
+      <artifactId>matchers-json</artifactId>
+      <version>1.0.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
