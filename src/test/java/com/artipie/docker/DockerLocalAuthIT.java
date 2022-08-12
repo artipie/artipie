@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  *
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle LineLengthCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
@@ -65,16 +66,6 @@ final class DockerLocalAuthIT {
             ImmutablePair.of("Failed to remove local image", List.of("docker", "image", "rm", image)),
             ImmutablePair.of("Failed to pull image from Artipie", List.of("docker", "pull", image))
         ).forEach(this::assertExec);
-    }
-
-    private void assertExec(ImmutablePair<String, List<String>> pair) {
-        try {
-            this.deployment.assertExec(
-                pair.getKey(), new ContainerResultMatcher(), pair.getValue()
-            );
-        } catch (final IOException err) {
-            throw new UncheckedIOException(err);
-        }
     }
 
     @Test
@@ -171,4 +162,13 @@ final class DockerLocalAuthIT {
         );
     }
 
+    private void assertExec(final ImmutablePair<String, List<String>> pair) {
+        try {
+            this.deployment.assertExec(
+                pair.getKey(), new ContainerResultMatcher(), pair.getValue()
+            );
+        } catch (final IOException err) {
+            throw new UncheckedIOException(err);
+        }
+    }
 }
