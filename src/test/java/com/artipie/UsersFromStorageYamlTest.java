@@ -17,6 +17,7 @@ import com.artipie.cache.CachedCreds;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.cactoos.set.SetOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import wtf.g4s8.tuples.Pair;
 
 /**
  * Test for {@link UsersFromStorageYaml}.
@@ -61,7 +61,7 @@ class UsersFromStorageYamlTest {
         );
         final Users.PasswordFormat sha = Users.PasswordFormat.SHA256;
         final String pass = "111";
-        this.saveCreds(sha, Pair.of(jane, pass), Pair.of(john, pass));
+        this.saveCreds(sha, ImmutablePair.of(jane, pass), ImmutablePair.of(john, pass));
         MatcherAssert.assertThat(
             new UsersFromStorageYaml(this.storage, this.key, new CachedCreds()).list()
                 .toCompletableFuture().join(),
@@ -97,7 +97,7 @@ class UsersFromStorageYamlTest {
         );
         final String pass = "abc";
         final Users.PasswordFormat sha = Users.PasswordFormat.SHA256;
-        this.saveCreds(sha, Pair.of(maria, pass));
+        this.saveCreds(sha, ImmutablePair.of(maria, pass));
         new UsersFromStorageYaml(this.storage, this.key, new CachedCreds())
             .add(olga, DigestUtils.sha256Hex(pass), sha).toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -106,8 +106,8 @@ class UsersFromStorageYamlTest {
             new IsEqual<>(
                 this.getYamlWithEmailAndGroups(
                     sha,
-                    Pair.of(maria, pass),
-                    Pair.of(olga, pass)
+                    ImmutablePair.of(maria, pass),
+                    ImmutablePair.of(olga, pass)
                 )
             )
         );
@@ -122,7 +122,7 @@ class UsersFromStorageYamlTest {
         final String old = "345";
         final String newpass = "000";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
-        this.saveCreds(plain, Pair.of(jack, old), Pair.of(silvia, old));
+        this.saveCreds(plain, ImmutablePair.of(jack, old), ImmutablePair.of(silvia, old));
         new UsersFromStorageYaml(this.storage, this.key, new CachedCreds())
             .add(silvia, newpass, Users.PasswordFormat.PLAIN).toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -131,8 +131,8 @@ class UsersFromStorageYamlTest {
             new IsEqual<>(
                 this.getYamlWithEmailAndGroups(
                     plain,
-                    Pair.of(jack, old),
-                    Pair.of(silvia, newpass)
+                    ImmutablePair.of(jack, old),
+                    ImmutablePair.of(silvia, newpass)
                 )
             )
         );
@@ -144,14 +144,14 @@ class UsersFromStorageYamlTest {
         final Users.User ann = new Users.User("ann");
         final String pass = "123";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
-        this.saveCreds(plain, Pair.of(mark, pass), Pair.of(ann, pass));
+        this.saveCreds(plain, ImmutablePair.of(mark, pass), ImmutablePair.of(ann, pass));
         new UsersFromStorageYaml(this.storage, this.key, new CachedCreds())
             .remove(ann.name())
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             new PublisherAs(this.storage.value(this.key).join())
                 .asciiString().toCompletableFuture().join(),
-            new IsEqual<>(this.getYamlWithEmailAndGroups(plain, Pair.of(mark, pass)))
+            new IsEqual<>(this.getYamlWithEmailAndGroups(plain, ImmutablePair.of(mark, pass)))
         );
     }
 
@@ -161,7 +161,7 @@ class UsersFromStorageYamlTest {
         final Users.User alex = new Users.User("alex");
         final String pass = "098";
         final Users.PasswordFormat plain = Users.PasswordFormat.PLAIN;
-        this.saveCreds(plain, Pair.of(ted, pass), Pair.of(alex, pass));
+        this.saveCreds(plain, ImmutablePair.of(ted, pass), ImmutablePair.of(alex, pass));
         new UsersFromStorageYaml(this.storage, this.key, new CachedCreds())
             .remove("alice")
             .toCompletableFuture().join();
@@ -171,7 +171,7 @@ class UsersFromStorageYamlTest {
             new IsEqual<>(
                 this.getYamlWithEmailAndGroups(
                     plain,
-                    Pair.of(ted, pass), Pair.of(alex, pass)
+                    ImmutablePair.of(ted, pass), ImmutablePair.of(alex, pass)
                 )
             )
         );
@@ -185,7 +185,7 @@ class UsersFromStorageYamlTest {
         creds.yaml().toCompletableFuture().join();
         this.saveCreds(
             Users.PasswordFormat.PLAIN,
-            Pair.of(new Users.User("pol"), "newpswd")
+            ImmutablePair.of(new Users.User("pol"), "newpswd")
         );
         MatcherAssert.assertThat(
             creds.yaml()
@@ -200,7 +200,7 @@ class UsersFromStorageYamlTest {
     }
 
     private void saveCreds(
-        final Users.PasswordFormat format, final Pair<Users.User, String>... users
+        final Users.PasswordFormat format, final ImmutablePair<Users.User, String>... users
     ) {
         this.storage.save(
             this.key,
@@ -211,15 +211,14 @@ class UsersFromStorageYamlTest {
     }
 
     private String getYamlWithEmailAndGroups(final Users.PasswordFormat format,
-        final Pair<Users.User, String>... users) {
+        final ImmutablePair<Users.User, String>... users) {
         final CredsConfigYaml creds = new CredsConfigYaml();
-        for (final Pair<Users.User, String> pair : users) {
-            pair.accept(
-                (user, pass) -> creds.withFullInfo(
-                    user.name(), format, pass,
-                    this.email(user.name()).get(),
-                    user.groups()
-                )
+        for (final ImmutablePair<Users.User, String> pair : users) {
+            final Users.User user = pair.getKey();
+            creds.withFullInfo(
+                user.name(), format, pair.getValue(),
+                this.email(user.name()).orElseThrow(),
+                user.groups()
             );
         }
         return creds.toString();

@@ -141,50 +141,6 @@ SOFTWARE.
       <artifactId>jcabi-log</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.jcabi</groupId>
-      <artifactId>jcabi-matchers</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
-      <version>1.15.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>1.15.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>mockserver</artifactId>
-      <version>1.15.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <version>${junit-platform.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
       <version>v1.1.3</version>
@@ -202,6 +158,14 @@ SOFTWARE.
         <exclusion>
           <groupId>com.jcabi</groupId>
           <artifactId>jcabi-xml</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-library</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-core</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -297,11 +261,6 @@ SOFTWARE.
       <version>v0.5.4</version>
     </dependency>
     <dependency>
-      <groupId>wtf.g4s8</groupId>
-      <artifactId>tuples</artifactId>
-      <version>0.1.2</version>
-    </dependency>
-    <dependency>
       <groupId>com.github.jknack</groupId>
       <artifactId>handlebars</artifactId>
       <version>4.2.0</version>
@@ -337,6 +296,71 @@ SOFTWARE.
       <version>2.3.2</version>
     </dependency>
     <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>auth</artifactId>
+      <version>2.14.7</version>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+      <version>2.14.7</version>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient</artifactId>
+      <version>0.14.1</version>
+    </dependency>
+    <dependency>
+      <groupId>io.prometheus</groupId>
+      <artifactId>simpleclient_common</artifactId>
+      <version>0.14.1</version>
+    </dependency>
+    <!-- Test scope-->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.jcabi</groupId>
+      <artifactId>jcabi-matchers</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>1.15.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>1.15.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mockserver</artifactId>
+      <version>1.15.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit-platform.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.llorllale</groupId>
       <artifactId>cactoos-matchers</artifactId>
       <version>0.18</version>
@@ -365,26 +389,6 @@ SOFTWARE.
       <artifactId>matchers-json</artifactId>
       <version>1.0.3</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>auth</artifactId>
-      <version>2.14.7</version>
-    </dependency>
-    <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>s3</artifactId>
-      <version>2.14.7</version>
-    </dependency>
-    <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient</artifactId>
-      <version>0.14.1</version>
-    </dependency>
-    <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient_common</artifactId>
-      <version>0.14.1</version>
     </dependency>
   </dependencies>
   <build>
