@@ -6,6 +6,7 @@
       * [[S3 storage|Configuration-Storage#s3-storage]]
       * [[Etcd storage|Configuration-Storage#etcd-storage]]
       * [[In memory storage|Configuration-Storage#in-memory-storage]]
+      * [[Custom storage|Configuration-Storage#custom-storage]]
     * [[Storage Aliases|Configuration-Storage#storage-aliases]]
     * [[Credentials|Configuration-Credentials]]
       * [[File credentials|Configuration-Credentials#credentials-type-file]]
