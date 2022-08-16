@@ -5,8 +5,6 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.Settings;
-import com.artipie.YamlStorage;
 import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
 import com.artipie.http.client.ClientSlices;
@@ -24,6 +22,8 @@ import com.artipie.metrics.MetricSlice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.misc.ArtipieProperties;
+import com.artipie.settings.Settings;
+import com.artipie.settings.YamlStorage;
 import java.util.Optional;
 import java.util.regex.Pattern;
 

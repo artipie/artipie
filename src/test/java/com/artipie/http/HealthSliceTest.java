@@ -4,7 +4,6 @@
  */
 package com.artipie.http;
 
-import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
@@ -15,6 +14,7 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.settings.Settings;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;

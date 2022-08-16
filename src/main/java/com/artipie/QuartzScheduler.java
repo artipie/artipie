@@ -4,9 +4,9 @@
  */
 package com.artipie;
 
-import com.artipie.repo.QuartzRepoJob;
-import com.artipie.repo.RepoConfig;
 import com.artipie.rpm.misc.UncheckedConsumer;
+import com.artipie.settings.repo.QuartzRepoJob;
+import com.artipie.settings.repo.RepoConfig;
 import com.jcabi.log.Logger;
 import java.util.Collection;
 import org.quartz.Scheduler;

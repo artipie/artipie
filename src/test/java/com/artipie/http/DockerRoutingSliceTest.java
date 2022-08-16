@@ -5,11 +5,8 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.Layout;
-import com.artipie.Settings;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
-import com.artipie.auth.Users;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.hm.AssertSlice;
@@ -20,6 +17,9 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.settings.Layout;
+import com.artipie.settings.Settings;
+import com.artipie.settings.users.Users;
 import io.reactivex.Flowable;
 import java.util.Arrays;
 import java.util.Collections;

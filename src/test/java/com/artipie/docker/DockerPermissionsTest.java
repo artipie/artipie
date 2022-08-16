@@ -4,6 +4,7 @@
  */
 package com.artipie.docker;
 
+import com.artipie.adapters.docker.DockerPermissions;
 import com.artipie.http.auth.Authentication;
 import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.MatcherAssert;

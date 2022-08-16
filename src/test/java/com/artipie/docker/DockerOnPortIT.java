@@ -4,7 +4,7 @@
  */
 package com.artipie.docker;
 
-import com.artipie.RepoConfigYaml;
+import com.artipie.settings.repo.RepoConfigYaml;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.nio.file.Path;

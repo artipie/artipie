@@ -4,13 +4,13 @@
  */
 package com.artipie.http;
 
-import com.artipie.Settings;
 import com.artipie.docker.http.BaseEntity;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.BasicAuthSlice;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.settings.Settings;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.regex.Matcher;

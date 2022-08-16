@@ -5,8 +5,6 @@
 package com.artipie.auth;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.CredsConfigYaml;
-import com.artipie.YamlPermissions;
 import com.artipie.http.auth.BasicAuthSlice;
 import com.artipie.http.auth.Permission;
 import com.artipie.http.headers.Authorization;
@@ -16,8 +14,9 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
-import com.artipie.repo.RepoPermissions;
-import com.artipie.repo.RepoPerms;
+import com.artipie.settings.CredsConfigYaml;
+import com.artipie.settings.repo.perms.RepoPermissions;
+import com.artipie.settings.repo.perms.RepoPerms;
 import io.reactivex.Flowable;
 import java.io.IOException;
 import java.util.Collections;
