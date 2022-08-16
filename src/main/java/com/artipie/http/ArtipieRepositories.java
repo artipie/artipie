@@ -4,10 +4,7 @@
  */
 package com.artipie.http;
 
-import com.artipie.RepositoriesFromStorage;
-import com.artipie.Settings;
 import com.artipie.SliceFromConfig;
-import com.artipie.StorageAliases;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.async.AsyncSlice;
@@ -15,7 +12,10 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
-import com.artipie.repo.ConfigFile;
+import com.artipie.settings.RepositoriesFromStorage;
+import com.artipie.settings.Settings;
+import com.artipie.settings.StorageAliases;
+import com.artipie.settings.repo.ConfigFile;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;

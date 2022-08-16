@@ -5,7 +5,6 @@
 package com.artipie.metrics;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.YamlStorage;
 import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
 import com.artipie.metrics.memory.InMemoryMetrics;
@@ -13,6 +12,7 @@ import com.artipie.metrics.publish.MetricsLogOutput;
 import com.artipie.metrics.publish.MetricsOutput;
 import com.artipie.metrics.publish.MetricsPublisher;
 import com.artipie.metrics.publish.StorageMetricsOutput;
+import com.artipie.settings.YamlStorage;
 import java.time.Duration;
 import java.util.Optional;
 import org.slf4j.LoggerFactory;

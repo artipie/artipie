@@ -5,6 +5,7 @@
 package com.artipie.conda;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.adapters.conda.CondaConfig;
 import java.time.Duration;
 import java.util.Optional;
 import org.hamcrest.MatcherAssert;

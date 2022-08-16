@@ -4,8 +4,8 @@
  */
 package com.artipie.http;
 
-import com.artipie.Settings;
 import com.artipie.http.client.ClientSlices;
+import com.artipie.settings.Settings;
 
 /**
  * Slice handles repository requests extracting repository name from URI path.

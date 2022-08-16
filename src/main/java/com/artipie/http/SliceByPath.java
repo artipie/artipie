@@ -4,13 +4,13 @@
  */
 package com.artipie.http;
 
-import com.artipie.Settings;
 import com.artipie.asto.Key;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
+import com.artipie.settings.Settings;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;

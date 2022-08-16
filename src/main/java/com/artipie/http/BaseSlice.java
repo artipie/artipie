@@ -5,7 +5,6 @@
 package com.artipie.http;
 
 import com.artipie.MeasuredSlice;
-import com.artipie.ResponseMetricsSlice;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.PrefixedMetrics;
