@@ -182,12 +182,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>files-adapter</artifactId>
-      <version>v1.0.1</version>
+      <version>v1.0.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>npm-adapter</artifactId>
-      <version>v0.10.2</version>
+      <version>v0.10.5</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -213,7 +213,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>rpm-adapter</artifactId>
-      <version>1.10.0</version>
+      <version>1.10.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -233,7 +233,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>nuget-adapter</artifactId>
-      <version>0.5</version>
+      <version>1.4.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -253,12 +253,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>debian-adapter</artifactId>
-      <version>0.4.2</version>
+      <version>v0.8.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>conda-adapter</artifactId>
-      <version>v0.5.4</version>
+      <version>v0.5.6</version>
     </dependency>
     <dependency>
       <groupId>com.github.jknack</groupId>
