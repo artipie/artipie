@@ -4,11 +4,8 @@
  */
 package com.artipie.settings.repo;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
-import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 
 /**
  * Layout pattern.
@@ -20,11 +17,9 @@ public final class PathPattern {
     /**
      * Patterns.
      */
-    private static final Map<String, Pattern> PATTERNS = Collections.unmodifiableMap(
-        new MapOf<>(
-            new MapEntry<>("flat", Pattern.compile("/(?:[^/.]+)(/.*)?")),
-            new MapEntry<>("org", Pattern.compile("/(?:[^/.]+)/(?:[^/.]+)(/.*)?"))
-        )
+    private static final Map<String, Pattern> PATTERNS = Map.of(
+        "flat", Pattern.compile("/(?:[^/.]+)(/.*)?"),
+        "org", Pattern.compile("/(?:[^/.]+)/(?:[^/.]+)(/.*)?")
     );
 
     /**

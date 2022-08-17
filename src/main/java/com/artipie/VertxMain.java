@@ -12,31 +12,23 @@ import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
-import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.metrics.Metrics;
 import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.metrics.nop.NopMetrics;
-import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.RepositoriesFromStorage;
 import com.artipie.settings.Settings;
-import com.artipie.settings.SettingsFromPath;
 import com.artipie.settings.repo.ConfigFile;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
 
 /**
  * Vertx server entry point.
@@ -60,7 +52,7 @@ public final class VertxMain {
     /**
      * Config file path.
      */
-    private final Path config;
+    private final Settings settings;
 
     /**
      * Server port.
@@ -81,11 +73,11 @@ public final class VertxMain {
      * @checkstyle ParameterNumberCheck (10 lines)
      */
     public VertxMain(
-        final ClientSlices http, final Path config,
+        final ClientSlices http, final Settings config,
         final Vertx vertx, final int port
     ) {
         this.http = http;
-        this.config = config;
+        this.settings = config;
         this.vertx = vertx;
         this.port = port;
         this.servers = new ArrayList<>(0);
@@ -98,14 +90,13 @@ public final class VertxMain {
      * @throws IOException In case of error reading settings.
      */
     public int start() throws IOException {
-        final Settings settings = new SettingsFromPath(this.config).find(this.port);
-        final Metrics metrics = metrics(settings);
+        final Metrics metrics = metrics(this.settings);
         final int main = this.listenOn(
-            new MainSlice(this.http, settings, metrics),
+            new MainSlice(this.http, this.settings, metrics),
             metrics, this.port
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
-        this.startRepos(settings, metrics, this.port);
+        this.startRepos(metrics);
         return main;
     }
 
@@ -119,52 +110,12 @@ public final class VertxMain {
     }
 
     /**
-     * Entry point.
-     * @param args CLI args
-     * @throws Exception If fails
-     */
-    public static void main(final String... args) throws Exception {
-        final Vertx vertx = Vertx.vertx();
-        final Path config;
-        final int port;
-        final int defp = 80;
-        final Options options = new Options();
-        final String popt = "p";
-        final String fopt = "f";
-        options.addOption(popt, "port", true, "The port to start artipie on");
-        options.addOption(fopt, "config-file", true, "The path to artipie configuration file");
-        final CommandLineParser parser = new DefaultParser();
-        final CommandLine cmd = parser.parse(options, args);
-        if (cmd.hasOption(popt)) {
-            port = Integer.parseInt(cmd.getOptionValue(popt));
-        } else {
-            Logger.info(VertxMain.class, "Using default port: %d", defp);
-            port = defp;
-        }
-        if (cmd.hasOption(fopt)) {
-            config = Path.of(cmd.getOptionValue(fopt));
-        } else {
-            throw new IllegalStateException("Storage is not configured");
-        }
-        Logger.info(
-            VertxMain.class,
-            "Used version of Artipie: %s",
-            new ArtipieProperties().version()
-        );
-        final JettyClientSlices http = new JettyClientSlices(new HttpClientSettings());
-        http.start();
-        new VertxMain(http, config, vertx, port).start();
-    }
-
-    /**
      * Start repository servers.
      *
-     * @param settings Settings.
      * @param metrics Metrics.
-     * @param mport Artipie service main port
      */
-    private void startRepos(final Settings settings, final Metrics metrics, final int mport) {
-        final Storage storage = settings.repoConfigsStorage();
+    private void startRepos(final Metrics metrics) {
+        final Storage storage = this.settings.repoConfigsStorage();
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
             keys -> keys.stream().map(ConfigFile::new)
                 .filter(Predicate.not(ConfigFile::isSystem).and(ConfigFile::isYamlOrYml))
@@ -179,13 +130,13 @@ public final class VertxMain {
                     prt -> {
                         final String name = new ConfigFile(repo.name()).name();
                         this.listenOn(
-                            new ArtipieRepositories(this.http, settings).slice(
+                            new ArtipieRepositories(this.http, this.settings).slice(
                                 new Key.From(name), prt
                             ), metrics, prt
                         );
                         VertxMain.logRepo(prt, name);
                     },
-                    () -> VertxMain.logRepo(mport, repo.name())
+                    () -> VertxMain.logRepo(this.port, repo.name())
                 );
             } catch (final IllegalStateException err) {
                 Logger.error(this, "Invalid repo config file %s: %[exception]s", repo.name(), err);

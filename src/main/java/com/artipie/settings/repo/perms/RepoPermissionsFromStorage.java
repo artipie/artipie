@@ -20,10 +20,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import org.cactoos.set.SetOf;
 
 /**
  * {@link RepoPermissions} from Artipie settings.
@@ -193,7 +193,7 @@ public final class RepoPermissionsFromStorage implements RepoPermissions {
         YamlMappingBuilder res = Yaml.createYamlMappingBuilder();
         final List<YamlNode> keep = mapping.keys().stream()
             .filter(
-                node -> !new SetOf<>(
+                node -> !Set.of(
                     RepoPermissionsFromStorage.PERMS,
                     RepoPermissionsFromStorage.INCLUDE_PATTERNS
                 ).contains(node.asScalar().value())

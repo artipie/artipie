@@ -24,11 +24,13 @@ SOFTWARE.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
-    <groupId>com.artipie</groupId>
-    <artifactId>ppom</artifactId>
-    <version>0.5.1</version>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.7.2</version>
   </parent>
+
   <artifactId>artipie</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -128,9 +130,41 @@ SOFTWARE.
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <docker.image.name>artipie/artipie</docker.image.name>
-    <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
+    <qulice.license>${basedir}/LICENSE.header</qulice.license>
+    <junit-platform.version>5.9.0</junit-platform.version>
   </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit-platform.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.springfox</groupId>
+      <artifactId>springfox-boot-starter</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.json</groupId>
+      <artifactId>javax.json-api</artifactId>
+      <version>1.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>1.1.4</version>
+      <scope>runtime</scope>
+    </dependency>
     <dependency>
       <groupId>com.amihaiemil.web</groupId>
       <artifactId>eo-yaml</artifactId>
@@ -139,6 +173,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-log</artifactId>
+      <version>0.22.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -172,12 +207,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>vertx-server</artifactId>
-      <version>0.4</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http-client</artifactId>
-      <version>0.3.5</version>
+      <version>0.3.9</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -277,18 +312,8 @@ SOFTWARE.
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
+      <artifactId>slf4j-simple</artifactId>
       <version>1.8.0-alpha2</version>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.quartz-scheduler</groupId>
@@ -315,6 +340,26 @@ SOFTWARE.
       <artifactId>simpleclient_common</artifactId>
       <version>0.14.1</version>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.13.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.13.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.13.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>2.13.1</version>
+    </dependency>
     <!-- Test scope-->
     <dependency>
       <groupId>org.hamcrest</groupId>
@@ -324,6 +369,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-matchers</artifactId>
+      <version>1.5.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -346,36 +392,20 @@ SOFTWARE.
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
       <version>${junit-platform.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.cactoos</groupId>
+      <artifactId>cactoos</artifactId>
+      <version>0.46</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.llorllale</groupId>
       <artifactId>cactoos-matchers</artifactId>
       <version>0.18</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-junit5</artifactId>
-      <version>${vertx.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-maven-service-factory</artifactId>
-      <version>3.9.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -410,13 +440,26 @@ SOFTWARE.
         <plugin>
           <groupId>com.qulice</groupId>
           <artifactId>qulice-maven-plugin</artifactId>
-          <version>0.19.0</version>
+          <version>0.21.1</version>
           <configuration>
+            <license>file:${qulice.license}</license>
             <excludes combine.children="append">
               <exclude>checkstyle:.*/src/test/resources/.*</exclude>
               <exclude>pmd:.*/src/test/resources/.*</exclude>
+              <exclude>pmd:.*/src/main/java/com/artipie/api/docs/Repository.java</exclude>
+              <exclude>checkstyle:.*/src/main/java/com/artipie/api/docs/Repository.java</exclude>
+              <exclude>findbugs:.*</exclude>
+              <exclude>duplicatefinder:.*</exclude>
+              <exclude>dependencies:.*</exclude>
             </excludes>
           </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>com.jcabi</groupId>
@@ -469,7 +512,7 @@ SOFTWARE.
             <configuration>
               <archive>
                 <manifest>
-                  <mainClass>com.artipie.VertxMain</mainClass>
+                  <mainClass>com.artipie.SBApplication</mainClass>
                 </manifest>
               </archive>
             </configuration>
@@ -554,7 +597,7 @@ SOFTWARE.
                 <configuration>
                   <archive>
                     <manifest>
-                      <mainClass>com.artipie.VertxMain</mainClass>
+                      <mainClass>com.artipie.SBApplication</mainClass>
                     </manifest>
                   </archive>
                   <descriptorRefs>

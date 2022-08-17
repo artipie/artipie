@@ -32,13 +32,6 @@ public interface Layout {
     Optional<Key> keyFromPath(String path);
 
     /**
-     * Check if layout allows dashboard.
-     *
-     * @return True if dashboard is supported, false - otherwise.
-     */
-    boolean hasDashboard();
-
-    /**
      * Split path into parts.
      *
      * @param path Path.
@@ -75,8 +68,8 @@ public interface Layout {
         }
 
         @Override
-        public boolean hasDashboard() {
-            return false;
+        public String toString() {
+            return "flat";
         }
     }
 
@@ -116,8 +109,8 @@ public interface Layout {
         }
 
         @Override
-        public boolean hasDashboard() {
-            return true;
+        public String toString() {
+            return "org";
         }
     }
 }

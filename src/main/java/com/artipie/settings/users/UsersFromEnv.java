@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.cactoos.list.ListOf;
 
 /**
  * Credentials from env.
@@ -44,7 +43,7 @@ public final class UsersFromEnv implements Users {
     public CompletionStage<List<User>> list() {
         return CompletableFuture.completedFuture(
             Optional.ofNullable(this.env.get(AuthFromEnv.ENV_NAME))
-                .<List<User>>map(name -> new ListOf<>(new User(name, Optional.empty())))
+                .<List<User>>map(name -> List.of(new User(name, Optional.empty())))
                 .orElse(Collections.emptyList())
         );
     }

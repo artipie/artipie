@@ -13,7 +13,6 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.llorllale.cactoos.matchers.IsTrue;
 
 /**
  * Tests for {@link Layout}.
@@ -21,14 +20,6 @@ import org.llorllale.cactoos.matchers.IsTrue;
  * @since 0.16
  */
 final class LayoutTest {
-
-    @Test
-    void alwaysAllowsDashboard() {
-        MatcherAssert.assertThat(
-            new Layout.Org().hasDashboard(),
-            new IsTrue()
-        );
-    }
 
     @Test
     void containsCorrectPattern() {
