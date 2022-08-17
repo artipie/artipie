@@ -17,8 +17,7 @@ COPY target/${JAR_FILE} /usr/lib/artipie/artipie.jar
 
 VOLUME /var/artipie /etc/artipie
 WORKDIR /var/artipie
-EXPOSE 8080
-EXPOSE 8085
+EXPOSE 8080 8085
 CMD [ \
   "java", \
   "--add-opens", "java.base/java.util=ALL-UNNAMED", \
