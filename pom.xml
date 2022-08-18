@@ -236,7 +236,24 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.9.7</version>
+      <version>1.0-SNAPSHOT</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.jcabi</groupId>
+          <artifactId>jcabi-xml</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!--cactoos is unfortunately required by jcabi-xml and maven adapter, do not use it in main scope-->
+    <dependency>
+      <groupId>org.cactoos</groupId>
+      <artifactId>cactoos</artifactId>
+      <version>0.46</version>
+    </dependency>
+    <dependency>
+      <groupId>com.jcabi</groupId>
+      <artifactId>jcabi-xml</artifactId>
+      <version>0.22.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -412,12 +429,6 @@ SOFTWARE.
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
       <version>${junit-platform.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.cactoos</groupId>
-      <artifactId>cactoos</artifactId>
-      <version>0.46</version>
       <scope>test</scope>
     </dependency>
     <dependency>
