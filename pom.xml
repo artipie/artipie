@@ -247,6 +247,12 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>rpm-adapter</artifactId>
       <version>1.10.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -307,11 +313,6 @@ SOFTWARE.
       <groupId>commons-cli</groupId>
       <artifactId>commons-cli</artifactId>
       <version>1.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.8.0-alpha2</version>
     </dependency>
     <dependency>
       <groupId>org.quartz-scheduler</groupId>
@@ -479,7 +480,7 @@ SOFTWARE.
       <build>
         <plugins>
           <plugin>
-<!--            <groupId>org.apache.maven.plugins</groupId>-->
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <version>3.0.0-M7</version>
             <configuration>
