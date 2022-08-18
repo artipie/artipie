@@ -229,11 +229,6 @@ SOFTWARE.
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.jcabi</groupId>
-      <artifactId>jcabi-xml</artifactId>
-      <version>0.22.2</version>
-    </dependency>
-    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>30.0-jre</version>
@@ -241,13 +236,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.8.1</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.jcabi</groupId>
-          <artifactId>jcabi-xml</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>0.9.7</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -305,7 +294,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>0.13.1</version>
+      <version>v0.17.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
