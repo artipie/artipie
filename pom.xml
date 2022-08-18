@@ -221,6 +221,12 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>npm-adapter</artifactId>
       <version>v0.10.5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-reload4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -258,6 +264,12 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>gem-adapter</artifactId>
       <version>v1.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-reload4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -278,6 +290,12 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
       <version>v0.8.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-reload4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -293,11 +311,23 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>debian-adapter</artifactId>
       <version>v0.8.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-reload4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>conda-adapter</artifactId>
       <version>v0.5.6</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-reload4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.github.jknack</groupId>
