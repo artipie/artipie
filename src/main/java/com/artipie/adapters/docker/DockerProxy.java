@@ -24,6 +24,7 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.proxy.ProxyConfig;
+import com.artipie.settings.repo.proxy.YamlProxyConfig;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -101,9 +102,9 @@ public final class DockerProxy implements Slice {
      */
     private Slice delegate() {
         final Docker proxies = new MultiReadDocker(
-            this.cfg.proxy().remotes().stream().map(
-                remote -> proxy(this.client, remote)
-            ).collect(Collectors.toList())
+            new YamlProxyConfig(this.client, this.cfg)
+                .remotes().stream().map(remote -> proxy(this.client, remote))
+                .collect(Collectors.toList())
         );
         Docker docker = this.cfg.storageOpt()
             .<Docker>map(

@@ -12,6 +12,7 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.http.group.GroupSlice;
 import com.artipie.maven.http.MavenProxySlice;
 import com.artipie.settings.repo.RepoConfig;
+import com.artipie.settings.repo.proxy.YamlProxyConfig;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -53,7 +54,7 @@ public final class MavenProxy implements Slice {
         final Publisher<ByteBuffer> body
     ) {
         return new GroupSlice(
-            this.cfg.proxy().remotes().stream().map(
+            new YamlProxyConfig(this.client, this.cfg).remotes().stream().map(
                 remote -> new MavenProxySlice(
                     this.client,
                     URI.create(remote.url()),

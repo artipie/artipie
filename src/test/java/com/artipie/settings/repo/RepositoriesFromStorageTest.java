@@ -10,7 +10,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ValueNotFoundException;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.settings.RepositoriesFromStorage;
 import com.artipie.settings.StorageAliases;
 import java.nio.file.Path;
@@ -160,7 +159,7 @@ final class RepositoriesFromStorageTest {
     }
 
     private RepoConfig repoConfig() {
-        return new RepositoriesFromStorage(new JettyClientSlices(), this.storage)
+        return new RepositoriesFromStorage(this.storage)
             .config(RepositoriesFromStorageTest.REPO)
             .toCompletableFuture().join();
     }

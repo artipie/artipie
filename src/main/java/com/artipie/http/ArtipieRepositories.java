@@ -84,7 +84,7 @@ public final class ArtipieRepositories {
         final Key name,
         final int port
     ) {
-        return new RepositoriesFromStorage(this.http, storage).config(name.string()).thenCombine(
+        return new RepositoriesFromStorage(storage).config(name.string()).thenCombine(
             StorageAliases.find(storage, name),
             (config, aliases) -> {
                 final Slice res;

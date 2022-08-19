@@ -169,7 +169,7 @@ public final class VertxMain {
             keys -> keys.stream().map(ConfigFile::new)
                 .filter(Predicate.not(ConfigFile::isSystem).and(ConfigFile::isYamlOrYml))
                 .map(ConfigFile::name)
-                .map(name -> new RepositoriesFromStorage(this.http, storage).config(name))
+                .map(name -> new RepositoriesFromStorage(storage).config(name))
                 .map(stage -> stage.toCompletableFuture().join())
                 .collect(Collectors.toList())
         ).toCompletableFuture().join();
