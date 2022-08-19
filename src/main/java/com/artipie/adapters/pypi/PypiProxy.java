@@ -10,6 +10,7 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.pypi.http.PyProxySlice;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.proxy.ProxyConfig;
+import com.artipie.settings.repo.proxy.YamlProxyConfig;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -46,7 +47,8 @@ public final class PypiProxy implements Slice {
     @Override
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Collection<? extends ProxyConfig.Remote> remotes = this.cfg.proxy().remotes();
+        final Collection<? extends ProxyConfig.Remote> remotes =
+            new YamlProxyConfig(this.client, this.cfg).remotes();
         if (remotes.isEmpty()) {
             throw new IllegalArgumentException("No remotes specified");
         }

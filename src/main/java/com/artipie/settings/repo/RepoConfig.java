@@ -5,30 +5,18 @@
 
 package com.artipie.settings.repo;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.MeasuredStorage;
-import com.artipie.asto.Concatenation;
 import com.artipie.asto.Key;
-import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.auth.YamlPermissions;
 import com.artipie.http.auth.Permissions;
-import com.artipie.http.client.ClientSlices;
 import com.artipie.settings.StorageAliases;
-import com.artipie.settings.repo.proxy.ProxyConfig;
-import com.artipie.settings.repo.proxy.YamlProxyConfig;
-import com.jcabi.log.Logger;
-import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
-import org.reactivestreams.Publisher;
 
 /**
  * Repository config.
@@ -38,11 +26,6 @@ import org.reactivestreams.Publisher;
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 public final class RepoConfig {
-
-    /**
-     * HTTP client.
-     */
-    private final ClientSlices http;
 
     /**
      * Storages.
@@ -61,14 +44,11 @@ public final class RepoConfig {
 
     /**
      * Ctor.
-     * @param http HTTP client
      * @param storages Repository storage aliases
      * @param prefix Storage prefix
      * @param yaml Config yaml
      */
-    public RepoConfig(final ClientSlices http, final StorageAliases storages,
-        final Key prefix, final YamlMapping yaml) {
-        this.http = http;
+    public RepoConfig(final StorageAliases storages, final Key prefix, final YamlMapping yaml) {
         this.prefix = prefix;
         this.yaml = yaml;
         this.storages = storages;
@@ -175,24 +155,11 @@ public final class RepoConfig {
     }
 
     /**
-     * Create async yaml config from content publisher.
-     * @param http HTTP client
-     * @param storages Storage aliases
-     * @param prefix Repository prefix
-     * @param pub Yaml content publisher
-     * @return Completion stage of yaml
+     * Storage aliases.
+     * @return Returns {@link StorageAliases} instance
      */
-    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
-    public static CompletionStage<RepoConfig> fromPublisher(
-        final ClientSlices http, final StorageAliases storages,
-        final Key prefix, final Publisher<ByteBuffer> pub) {
-        return new Concatenation(pub).single()
-            .map(buf -> new Remaining(buf).bytes())
-            .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
-            .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config:\n%s", yaml))
-            .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
-            .to(SingleInterop.get())
-            .thenApply(yaml -> new RepoConfig(http, storages, prefix, yaml));
+    public StorageAliases storageAliases() {
+        return this.storages;
     }
 
     /**
@@ -204,15 +171,6 @@ public final class RepoConfig {
         return Optional.ofNullable(this.yaml.yamlMapping("repo")).orElseThrow(
             () -> new IllegalStateException("Invalid repo configuration")
         );
-    }
-
-    /**
-     * Get proxy config.
-     *
-     * @return Proxy config.
-     */
-    public ProxyConfig proxy() {
-        return new YamlProxyConfig(this.http, this.storages, this.prefix, this.repoConfig());
     }
 
     @Override

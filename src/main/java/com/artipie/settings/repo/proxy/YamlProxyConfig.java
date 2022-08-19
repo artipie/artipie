@@ -12,6 +12,7 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.settings.StorageAliases;
+import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.StorageYamlConfig;
 import java.util.Collection;
 import java.util.Optional;
@@ -64,6 +65,16 @@ public final class YamlProxyConfig implements ProxyConfig {
         this.storages = storages;
         this.prefix = prefix;
         this.yaml = yaml;
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param http HTTP client
+     * @param repo Repo configuration.
+     */
+    public YamlProxyConfig(final ClientSlices http, final RepoConfig repo) {
+        this(http, repo.storageAliases(), new Key.From(repo.name()), repo.repoConfig());
     }
 
     @Override

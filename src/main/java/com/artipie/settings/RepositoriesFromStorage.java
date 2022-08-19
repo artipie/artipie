@@ -4,11 +4,13 @@
  */
 package com.artipie.settings;
 
+import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.asto.Concatenation;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
-import com.artipie.http.client.ClientSlices;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
 import com.artipie.settings.repo.ConfigFile;
@@ -16,16 +18,21 @@ import com.artipie.settings.repo.RepoConfig;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import org.reactivestreams.Publisher;
 
 /**
  * Artipie repositories created from {@link Settings}.
  *
  * @since 0.13
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class RepositoriesFromStorage implements Repositories {
     /**
@@ -67,11 +74,6 @@ public final class RepositoriesFromStorage implements Repositories {
     }
 
     /**
-     * HTTP client.
-     */
-    private final ClientSlices http;
-
-    /**
      * Storage.
      */
     private final Storage storage;
@@ -79,11 +81,9 @@ public final class RepositoriesFromStorage implements Repositories {
     /**
      * Ctor.
      *
-     * @param http HTTP client
      * @param storage Storage.
      */
-    public RepositoriesFromStorage(final ClientSlices http, final Storage storage) {
-        this.http =  http;
+    public RepositoriesFromStorage(final Storage storage) {
         this.storage = storage;
     }
 
@@ -96,12 +96,30 @@ public final class RepositoriesFromStorage implements Repositories {
             RepositoriesFromStorage.configs.getUnchecked(pair),
             RepositoriesFromStorage.aliases.getUnchecked(pair),
             (data, alias) -> SingleInterop.fromFuture(
-                RepoConfig.fromPublisher(
-                    this.http, alias, pair.key,
-                    new Content.From(data.getBytes())
+                RepositoriesFromStorage.fromPublisher(
+                    alias, pair.key, new Content.From(data.getBytes())
                 )
             )
         ).flatMap(self -> self).to(SingleInterop.get());
+    }
+
+    /**
+     * Create async yaml config from content publisher.
+     * @param storages Storage aliases
+     * @param prefix Repository prefix
+     * @param pub Yaml content publisher
+     * @return Completion stage of yaml
+     */
+    private static CompletionStage<RepoConfig> fromPublisher(
+        final StorageAliases storages, final Key prefix, final Publisher<ByteBuffer> pub
+    ) {
+        return new Concatenation(pub).single()
+            .map(buf -> new Remaining(buf).bytes())
+            .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
+            .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config:\n%s", yaml))
+            .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
+            .to(SingleInterop.get())
+            .thenApply(yaml -> new RepoConfig(storages, prefix, yaml));
     }
 
     /**

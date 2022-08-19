@@ -9,13 +9,10 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.auth.YamlPermissions;
-import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.settings.StorageAliases;
-import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.concurrent.ExecutionException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
@@ -160,7 +157,6 @@ public final class RepoConfigTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new RepoConfig(
-                new JettyClientSlices(),
                 StorageAliases.EMPTY,
                 new Key.From("key"),
                 Yaml.createYamlMappingBuilder().add(
@@ -188,7 +184,6 @@ public final class RepoConfigTest {
 
     private RepoConfig repoCustom(final String name, final String value) {
         return new RepoConfig(
-            new JettyClientSlices(),
             StorageAliases.EMPTY,
             new Key.From("repo-custom.yml"),
             Yaml.createYamlMappingBuilder().add(
@@ -201,14 +196,10 @@ public final class RepoConfigTest {
     }
 
     private RepoConfig readFromResource(final String name)
-        throws ExecutionException, InterruptedException {
-        return RepoConfig.fromPublisher(
-            new JettyClientSlices(),
-            StorageAliases.EMPTY,
-            new Key.From(name),
-            Flowable.just(
-                ByteBuffer.wrap(new TestResource(name).asBytes())
-            )
-        ).toCompletableFuture().get();
+        throws IOException {
+        return new RepoConfig(
+            StorageAliases.EMPTY, new Key.From(name),
+            Yaml.createYamlInput(new TestResource(name).asInputStream()).readYamlMapping()
+        );
     }
 }

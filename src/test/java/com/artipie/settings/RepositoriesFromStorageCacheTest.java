@@ -10,8 +10,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.client.ClientSlices;
-import com.artipie.http.client.jetty.JettyClientSlices;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,12 +38,11 @@ final class RepositoriesFromStorageCacheTest {
         final byte[] old = "some: data".getBytes();
         final byte[] upd = "some: new data".getBytes();
         new BlockingStorage(this.storage).save(key, old);
-        final ClientSlices http = new JettyClientSlices();
-        new RepositoriesFromStorage(http, this.storage).config(key.string())
+        new RepositoriesFromStorage(this.storage).config(key.string())
             .toCompletableFuture().join();
         new BlockingStorage(this.storage).save(key, upd);
         MatcherAssert.assertThat(
-            new RepositoriesFromStorage(http, this.storage).config(key.string())
+            new RepositoriesFromStorage(this.storage).config(key.string())
                 .toCompletableFuture().join()
                 .toString(),
             new IsEqual<>(new String(old))
@@ -58,12 +55,11 @@ final class RepositoriesFromStorageCacheTest {
         final Key config = new Key.From("bin.yaml");
         new TestResource(alias.string()).saveTo(this.storage);
         new BlockingStorage(this.storage).save(config, "repo:\n  storage: default".getBytes());
-        final ClientSlices http = new JettyClientSlices();
-        new RepositoriesFromStorage(http, this.storage).config(config.string())
+        new RepositoriesFromStorage(this.storage).config(config.string())
             .toCompletableFuture().join();
         this.storage.save(alias, Content.EMPTY).join();
         MatcherAssert.assertThat(
-            new RepositoriesFromStorage(http, this.storage).config(config.string())
+            new RepositoriesFromStorage(this.storage).config(config.string())
                 .toCompletableFuture().join()
                 .storageOpt().isPresent(),
             new IsEqual<>(true)
