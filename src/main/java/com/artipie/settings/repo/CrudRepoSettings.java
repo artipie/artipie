@@ -4,14 +4,15 @@
  */
 package com.artipie.settings.repo;
 
+import com.artipie.settings.repo.perms.CrudRepoPermissions;
 import java.util.Collection;
-import javax.json.JsonObject;
+import javax.json.JsonStructure;
 
 /**
- * Repository settings operation: list, delete, save operations.
+ * Create/Read/Update/Delete repository settings.
  * @since 0.26
  */
-public interface RepoSettingsOps {
+public interface CrudRepoSettings {
 
     /**
      * List all existing repositories.
@@ -40,7 +41,7 @@ public interface RepoSettingsOps {
      *  consist of two parts - username and repo name, for example john/maven-s3.
      * @return Json repository settings
      */
-    JsonObject value(String name);
+    Repo value(String name);
 
     /**
      * Add new repository.
@@ -48,7 +49,7 @@ public interface RepoSettingsOps {
      *  consist of two parts - username and repo name, for example john/maven-s3.
      * @param value New repository settings
      */
-    void save(String name, byte[] value);
+    void save(String name, Repo value);
 
     /**
      * Remove repository.
@@ -64,5 +65,61 @@ public interface RepoSettingsOps {
      * @param nname New repository name
      */
     void move(String name, String nname);
+
+    /**
+     * Repo data transfer object.
+     * @since 0.26
+     */
+    interface Repo {
+
+        /**
+         * Repository type, required.
+         * @return String type
+         */
+        String type();
+
+        /**
+         * Repository port.
+         * @return Integer port
+         */
+        int port();
+
+        /**
+         * Path (relative path of the repository).
+         * @return Path
+         */
+        String path();
+
+        /**
+         * Repository url.
+         * @return Url of the repository
+         */
+        String url();
+
+        /**
+         * Storage settings.
+         * @return Storage
+         */
+        JsonStructure storage();
+
+        /**
+         * Repository individual settings.
+         * @return The settings
+         */
+        JsonStructure settings();
+
+        /**
+         * Remotes settings.
+         * @return Remotes
+         */
+        JsonStructure remotes();
+
+        /**
+         * Repository permissions.
+         * @return Permissions
+         */
+        Collection<CrudRepoPermissions.Permissions> permissions();
+
+    }
 
 }
