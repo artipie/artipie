@@ -11,7 +11,6 @@ import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.settings.ConfigFile;
-import com.artipie.settings.repo.perms.RepoPerms;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
@@ -105,17 +104,6 @@ public final class RepoConfigYaml {
                     ).build()
                 ).build()
         );
-        return this;
-    }
-
-    /**
-     * Adds permissions section to config.
-     * @param perms Permissions
-     * @return Itself
-     */
-    public RepoConfigYaml withPermissions(final RepoPerms perms) {
-        this.builder = this.builder.add("permissions", perms.permsYaml())
-            .add("permissions_include_patterns", perms.patternsYaml());
         return this;
     }
 

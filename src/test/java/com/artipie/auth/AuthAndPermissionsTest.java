@@ -15,7 +15,6 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.settings.CredsConfigYaml;
-import com.artipie.settings.repo.perms.RepoPermissionsOps;
 import com.artipie.settings.repo.perms.RepoPerms;
 import io.reactivex.Flowable;
 import java.io.IOException;
@@ -200,9 +199,9 @@ public class AuthAndPermissionsTest {
         return new YamlPermissions(
             new RepoPerms(
                 new ListOf<>(
-                    new RepoPermissionsOps.PermissionItem("admin", "*"),
-                    new RepoPermissionsOps.PermissionItem("*", "download"),
-                    new RepoPermissionsOps.PermissionItem("john", new ListOf<>("delete", "deploy"))
+                    new RepoPerms.PermissionItem("admin", "*"),
+                    new RepoPerms.PermissionItem("*", "download"),
+                    new RepoPerms.PermissionItem("john", new ListOf<>("delete", "deploy"))
                 )
             ).permsYaml()
         );
