@@ -14,7 +14,7 @@ import com.artipie.asto.misc.UncheckedIOFunc;
 import com.artipie.asto.misc.UncheckedScalar;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
-import com.artipie.settings.repo.ConfigFile;
+import com.artipie.settings.ConfigFile;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;

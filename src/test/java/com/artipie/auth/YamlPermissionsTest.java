@@ -8,7 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.auth.Authentication;
-import com.artipie.settings.repo.perms.RepoPermissions;
+import com.artipie.settings.repo.perms.RepoPermissionsOps;
 import com.artipie.settings.repo.perms.RepoPerms;
 import java.io.IOException;
 import org.cactoos.list.ListOf;
@@ -99,8 +99,8 @@ class YamlPermissionsTest {
         final String groups, final boolean res) {
         final YamlMapping settings = new RepoPerms(
             new ListOf<>(
-                new RepoPermissions.PermissionItem(name, "write"),
-                new RepoPermissions.PermissionItem("/readers", "read")
+                new RepoPermissionsOps.PermissionItem(name, "write"),
+                new RepoPermissionsOps.PermissionItem("/readers", "read")
             )
         ).permsYaml();
         MatcherAssert.assertThat(

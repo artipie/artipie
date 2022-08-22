@@ -10,7 +10,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ValueNotFoundException;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.settings.RepositoriesFromStorage;
 import com.artipie.settings.StorageAliases;
 import java.nio.file.Path;
 import java.util.concurrent.CompletionException;

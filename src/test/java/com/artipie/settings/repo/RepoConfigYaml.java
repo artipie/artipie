@@ -10,6 +10,7 @@ import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
+import com.artipie.settings.ConfigFile;
 import com.artipie.settings.repo.perms.RepoPerms;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
