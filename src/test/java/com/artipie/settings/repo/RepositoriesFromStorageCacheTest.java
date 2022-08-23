@@ -2,7 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie.settings;
+package com.artipie.settings.repo;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;

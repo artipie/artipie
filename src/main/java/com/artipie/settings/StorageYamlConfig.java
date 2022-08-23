@@ -2,7 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie.settings.repo;
+package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.YamlMapping;
@@ -11,8 +11,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.LoggingStorage;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
-import com.artipie.settings.StorageAliases;
-import com.artipie.settings.YamlStorage;
 import java.util.logging.Level;
 
 /**

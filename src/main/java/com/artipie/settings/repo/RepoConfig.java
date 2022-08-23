@@ -12,6 +12,7 @@ import com.artipie.asto.Storage;
 import com.artipie.auth.YamlPermissions;
 import com.artipie.http.auth.Permissions;
 import com.artipie.settings.StorageAliases;
+import com.artipie.settings.StorageYamlConfig;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
