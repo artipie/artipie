@@ -1,0 +1,8 @@
+# Get all pets
+curl -i -X GET localhost:8080/pets
+
+# Create pet:
+curl -i -H "Accept: application/json" -H "Content-type: application/json" -X POST --data '{"id": 1, "name": "Tom"}' localhost:8080/pets
+
+# Get pet by id
+curl -i -X GET localhost:8080/pets/1
