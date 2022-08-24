@@ -8,7 +8,12 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
 
 public class PetsOpenAPIServer extends AbstractVerticle {
     public static void main(String[] args) {
@@ -16,11 +21,11 @@ public class PetsOpenAPIServer extends AbstractVerticle {
         vertx.deployVerticle(new PetsOpenAPIServer());
     }
 
-    private JsonArray pets = new JsonArray();
+    final private JsonArray pets = new JsonArray();
 
     @Override
     public void start() {
-        RouterBuilder.create(vertx, "petstore.yaml")
+        RouterBuilder.create(vertx, "swagger-ui/petstore.yaml")
             .onSuccess(rb -> {
                 rb.operation("listPets")
                     .handler(this::listPets)
@@ -35,6 +40,10 @@ public class PetsOpenAPIServer extends AbstractVerticle {
                     .failureHandler(errorHandler(500));
 
                 final Router router = rb.createRouter();
+
+                //expose swagger api
+                router.route("/api/*").handler(StaticHandler.create(asPath("swagger-ui").toUri().getPath()));
+
                 final HttpServer server = vertx.createHttpServer();
                 server.requestHandler(router)
                     .listen(8080)
@@ -85,5 +94,22 @@ public class PetsOpenAPIServer extends AbstractVerticle {
                 .end();
             System.err.println(routingContext.failure().getMessage());
         };
+    }
+
+    /**
+     * Obtains resources from context loader.
+     *
+     * @return File path
+     */
+    public static Path asPath(String name) {
+        try {
+            return Paths.get(
+                Objects.requireNonNull(
+                    Thread.currentThread().getContextClassLoader().getResource(name)
+                ).toURI()
+            );
+        } catch (final URISyntaxException ex) {
+            throw new IllegalStateException("Failed to obtain recourse", ex);
+        }
     }
 }
