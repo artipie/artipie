@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.FileSystemAccess;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.net.URISyntaxException;
@@ -42,7 +43,7 @@ public class PetsOpenAPIServer extends AbstractVerticle {
                 final Router router = rb.createRouter();
 
                 //expose swagger api
-                router.route("/api/*").handler(StaticHandler.create(asPath("swagger-ui").toUri().getPath()));
+                router.route("/api/*").handler(StaticHandler.create(FileSystemAccess.ROOT, asPath("swagger-ui").toUri().getPath()));
 
                 final HttpServer server = vertx.createHttpServer();
                 server.requestHandler(router)
