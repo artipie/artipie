@@ -8,7 +8,6 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.misc.ContentAsYaml;
-import com.artipie.settings.repo.ConfigFile;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

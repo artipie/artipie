@@ -2,7 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie.settings;
+package com.artipie.settings.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Concatenation;
@@ -13,8 +13,9 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
-import com.artipie.settings.repo.ConfigFile;
-import com.artipie.settings.repo.RepoConfig;
+import com.artipie.settings.ConfigFile;
+import com.artipie.settings.Settings;
+import com.artipie.settings.StorageAliases;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
