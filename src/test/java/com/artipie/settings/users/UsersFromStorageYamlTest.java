@@ -195,7 +195,7 @@ class UsersFromStorageYamlTest {
                 .map(YamlNode::asScalar)
                 .map(Scalar::value)
                 .toList(),
-            Matchers.containsInAnyOrder("bob", "alice")
+            Matchers.containsInAnyOrder("bob", "alice", "john")
         );
     }
 
