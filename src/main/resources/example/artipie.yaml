@@ -1,7 +1,7 @@
 meta:
   storage:
     type: fs
-    path: /var/artipie/repo
+    path: /Users/alena/artipie/artipie/src/main/resources/example/repo
   credentials:
     -
       type: env

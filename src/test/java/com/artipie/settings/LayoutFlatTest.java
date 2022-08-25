@@ -20,14 +20,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 final class LayoutFlatTest {
 
     @Test
-    void hasNoDashboard() {
-        MatcherAssert.assertThat(
-            new Layout.Flat().hasDashboard(),
-            new IsEqual<>(false)
-        );
-    }
-
-    @Test
     void usesFlatPattern() {
         MatcherAssert.assertThat(
             new Layout.Flat().pattern(),

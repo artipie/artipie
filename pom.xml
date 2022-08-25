@@ -129,6 +129,7 @@ SOFTWARE.
     <maven.compiler.target>17</maven.compiler.target>
     <docker.image.name>artipie/artipie</docker.image.name>
     <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
+    <vertx.version>4.3.3</vertx.version>
   </properties>
   <dependencies>
     <dependency>
@@ -390,6 +391,11 @@ SOFTWARE.
       <version>1.0.3</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-openapi</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <testResources>
@@ -414,7 +420,9 @@ SOFTWARE.
           <configuration>
             <excludes combine.children="append">
               <exclude>checkstyle:.*/src/test/resources/.*</exclude>
+              <exclude>checkstyle:.*/src/main/resources/swagger-ui/.*</exclude>
               <exclude>pmd:.*/src/test/resources/.*</exclude>
+              <exclude>pmd:.*/src/main/resources/swagger-ui/.*</exclude>
             </excludes>
           </configuration>
         </plugin>
