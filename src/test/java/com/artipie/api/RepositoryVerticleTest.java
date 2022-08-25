@@ -40,7 +40,8 @@ class RepositoryVerticleTest {
     private static int port;
 
     @BeforeAll
-    static void prepare(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+    static void prepare(final Vertx vertx, final VertxTestContext ctx) throws IOException,
+        InterruptedException {
         RepositoryVerticleTest.port = new RandomFreePort().value();
         RepositoryVerticleTest.ASTO.save(new Key.From("artipie/docker-repo.yaml"), new byte[]{});
         RepositoryVerticleTest.ASTO.save(new Key.From("alice/rpm-local.yml"), new byte[]{});
@@ -52,6 +53,7 @@ class RepositoryVerticleTest {
             ),
             ctx.succeedingThenComplete()
         );
+        Thread.sleep(3000);
     }
 
     @Test
