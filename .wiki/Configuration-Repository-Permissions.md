@@ -25,6 +25,21 @@ Operations names are case-sensitive. Also, there is a wildcard `*` which means
 "any user" if placed on username level of yaml mapping or  
 "any operation" if placed on operations yaml sequence level.
 
+To grant permissions to the user's group, add this group to `permissions` section starting with slash:
+```yaml
+repo:
+  ...
+  permissions:
+    /readers: # group "readers" can download
+      - read
+    /admin: # any operation is allowed for "admin" group
+      - "*"
+```
+Operations and their synonyms for users and groups are the same, users and groups can be mixed in 
+`permissions` section, the only rule here - groups names should start with `/` sign. Permissions granted 
+to the group are applied to the users participating in this group. Check [Credentials](./Configuration-Credentials.md) 
+section to find out how to add users group.
+
 If `permissions` section is absent in repo config, then any supported operation is allowed for everyone,
 empty `permissions` section restricts any operations for anyone. 
 

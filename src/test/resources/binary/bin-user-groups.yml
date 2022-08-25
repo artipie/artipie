@@ -1,0 +1,11 @@
+repo:
+  type: file
+  storage:
+    type: fs
+    path: /var/artipie/data/
+  permissions:
+    /readers:
+      - read
+    /admin:
+      - read
+      - write
