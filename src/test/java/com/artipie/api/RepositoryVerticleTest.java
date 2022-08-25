@@ -7,11 +7,13 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.nuget.RandomFreePort;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.io.IOException;
 import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -35,17 +37,18 @@ class RepositoryVerticleTest {
     /**
      * Service port.
      */
-    private static final int PORT = 8089;
+    private static int port;
 
     @BeforeAll
-    static void prepare(final Vertx vertx, final VertxTestContext ctx) {
+    static void prepare(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+        RepositoryVerticleTest.port = new RandomFreePort().value();
         RepositoryVerticleTest.ASTO.save(new Key.From("artipie/docker-repo.yaml"), new byte[]{});
         RepositoryVerticleTest.ASTO.save(new Key.From("alice/rpm-local.yml"), new byte[]{});
         RepositoryVerticleTest.ASTO.save(new Key.From("alice/conda.yml"), new byte[]{});
         vertx.deployVerticle(
             new RepositoryVerticle(
                 new ManageRepoSettings(RepositoryVerticleTest.ASTO), "org",
-                RepositoryVerticleTest.PORT
+                RepositoryVerticleTest.port
             ),
             ctx.succeedingThenComplete()
         );
@@ -54,7 +57,7 @@ class RepositoryVerticleTest {
     @Test
     void listsAllRepos(final Vertx vertx, final VertxTestContext ctx) {
         vertx.createHttpClient().request(
-            HttpMethod.GET, RepositoryVerticleTest.PORT, "localhost", "/api/v1/repository/list"
+            HttpMethod.GET, RepositoryVerticleTest.port, "localhost", "/api/v1/repository/list"
         )
             .compose(req -> req.send().compose(HttpClientResponse::body))
             .onComplete(
@@ -77,7 +80,7 @@ class RepositoryVerticleTest {
     @Test
     void listsUserRepos(final Vertx vertx, final VertxTestContext ctx) {
         vertx.createHttpClient().request(
-            HttpMethod.GET, RepositoryVerticleTest.PORT,
+            HttpMethod.GET, RepositoryVerticleTest.port,
             "localhost", "/api/v1/repository/list/alice"
         )
             .compose(req -> req.send().compose(HttpClientResponse::body))
