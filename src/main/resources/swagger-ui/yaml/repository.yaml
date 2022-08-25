@@ -5,7 +5,7 @@ info:
   license:
     name: MIT
 paths:
-  /repository/list:
+  /api/v1/repository/list:
     get:
       summary: List all repositories.
       operationId: listAll
@@ -26,7 +26,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /repository/list/{uname}:
+  /api/v1/repository/list/{uname}:
     get:
       summary: List repositories of the user.
       operationId: list
@@ -54,7 +54,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /repository/{uname}/{rname}:
+  /api/v1/repository/{uname}/{rname}:
     get:
       summary: Get repository seettings
       operationId: getRepo

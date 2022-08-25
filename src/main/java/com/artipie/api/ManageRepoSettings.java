@@ -6,6 +6,7 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.settings.StorageAliases;
 import com.artipie.settings.repo.CrudRepoSettings;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,7 +85,7 @@ public final class ManageRepoSettings implements CrudRepoSettings {
             final String name = item.string();
             // @checkstyle BooleanExpressionComplexityCheck (5 lines)
             if ((name.endsWith(".yaml") || name.endsWith(".yml"))
-                && !name.contains("_storages")
+                && !name.contains(StorageAliases.FILE_NAME)
                 && !name.contains("_permissions")
                 && !name.contains("_credentials")) {
                 res.add(name.replaceAll("\\.yaml|\\.yml", ""));
