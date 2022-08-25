@@ -16,7 +16,6 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.FileSystemAccess;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
-import java.util.Optional;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -64,10 +63,10 @@ public final class RepositoryVerticle extends AbstractVerticle {
             .onSuccess(
                 rb -> {
                     rb.operation("listAll")
-                        .handler(this::list)
+                        .handler(this::listAll)
                         .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
                     rb.operation("list")
-                        .handler(this::list)
+                        .handler(this::listUserRepos)
                         .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
                     rb.operation("getRepo")
                         .handler(this::getRepo)
@@ -101,16 +100,22 @@ public final class RepositoryVerticle extends AbstractVerticle {
     }
 
     /**
-     * List existing repositories.
+     * List all existing repositories.
      * @param context Routing context
      */
-    private void list(final RoutingContext context) {
-        final Optional<String> uname =
-            Optional.ofNullable(context.pathParam(RepositoryVerticle.UNAME));
+    private void listAll(final RoutingContext context) {
         context.response().setStatusCode(HttpStatus.OK_200).end(
-            JsonArray.of(
-                uname.map(this.crs::list).orElse(this.crs.listAll()).toArray()
-            ).encode()
+            JsonArray.of(this.crs.listAll().toArray()).encode()
+        );
+    }
+
+    /**
+     * List all existing repositories.
+     * @param context Routing context
+     */
+    private void listUserRepos(final RoutingContext context) {
+        context.response().setStatusCode(HttpStatus.OK_200).end(
+            JsonArray.of(this.crs.list(context.pathParam(RepositoryVerticle.UNAME))).encode()
         );
     }
 
