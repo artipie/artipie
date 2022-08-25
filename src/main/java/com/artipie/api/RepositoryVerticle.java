@@ -16,9 +16,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.FileSystemAccess;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Function;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -111,8 +109,7 @@ public final class RepositoryVerticle extends AbstractVerticle {
             Optional.ofNullable(context.pathParam(RepositoryVerticle.UNAME));
         context.response().setStatusCode(HttpStatus.OK_200).end(
             JsonArray.of(
-                uname.map((Function<String, Collection>) this.crs::list)
-                    .orElse(this.crs.listAll()).toArray()
+                uname.map(this.crs::list).orElse(this.crs.listAll()).toArray()
             ).encode()
         );
     }
