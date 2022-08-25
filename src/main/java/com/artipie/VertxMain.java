@@ -114,7 +114,7 @@ public final class VertxMain {
                 new ManageRepoSettings(new BlockingStorage(settings.repoConfigsStorage())),
                 settings.layout().toString(),
                 // @checkstyle MagicNumberCheck (1 line)
-                8081
+                8085
             )
         );
         return main;
