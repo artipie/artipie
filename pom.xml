@@ -173,7 +173,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>vertx-server</artifactId>
-      <version>0.4</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
