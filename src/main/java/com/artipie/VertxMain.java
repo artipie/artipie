@@ -5,8 +5,11 @@
 
 package com.artipie;
 
+import com.artipie.api.ManageRepoSettings;
+import com.artipie.api.RepositoryVerticle;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -106,6 +109,14 @@ public final class VertxMain {
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
         this.startRepos(settings, metrics, this.port);
+        this.vertx.deployVerticle(
+            new RepositoryVerticle(
+                new ManageRepoSettings(new BlockingStorage(settings.repoConfigsStorage())),
+                settings.layout().toString(),
+                // @checkstyle MagicNumberCheck (1 line)
+                8086
+            )
+        );
         return main;
     }
 

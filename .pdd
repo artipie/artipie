@@ -2,6 +2,7 @@
 --verbose
 --exclude logo.png
 --exclude target/**/*
+--exclude src/main/resources/swagger-ui/**/*
 --exclude src/main/resources/images/**/*
 --exclude src/test/resources/com/artipie/snapshot/1.0-SNAPSHOT/*
 --exclude src/test/resources/com/artipie/helloworld/0.1/*
