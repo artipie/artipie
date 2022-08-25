@@ -110,12 +110,13 @@ public final class RepositoryVerticle extends AbstractVerticle {
     }
 
     /**
-     * List all existing repositories.
+     * List user's repositories.
      * @param context Routing context
      */
     private void listUserRepos(final RoutingContext context) {
         context.response().setStatusCode(HttpStatus.OK_200).end(
-            JsonArray.of(this.crs.list(context.pathParam(RepositoryVerticle.UNAME))).encode()
+            JsonArray.of(this.crs.list(context.pathParam(RepositoryVerticle.UNAME)).toArray())
+                .encode()
         );
     }
 
