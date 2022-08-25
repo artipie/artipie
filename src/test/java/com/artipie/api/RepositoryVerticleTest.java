@@ -53,6 +53,7 @@ class RepositoryVerticleTest {
             ),
             ctx.succeedingThenComplete()
         );
+        // @checkstyle MagicNumberCheck (1 line)
         Thread.sleep(3000);
     }
 
