@@ -57,7 +57,7 @@ class RepositoryVerticleTest {
     /**
      * Sleep duration.
      */
-    private static final Duration SLEEP_DURATION = Duration.ofMillis(10);
+    private static final Duration SLEEP_DURATION = Duration.ofMillis(100);
 
     static {
         Assertions.assertTrue(MAX_WAIT.toMillis() > 0);
