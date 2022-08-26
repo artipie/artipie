@@ -4,7 +4,7 @@
  */
 
 /**
- * Artipie Rest API.
+ * Artipie Rest API test.
  *
  * @since 0.26
  */
