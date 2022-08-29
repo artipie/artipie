@@ -152,7 +152,12 @@ class RepositoryVerticleTest {
             }
         }
         if (!available.get()) {
-            Assertions.fail(String.format("Server's port %s:%s is not reachable", HOST, port));
+            Assertions.fail(
+                String.format(
+                    "Server's port %s:%s is not reachable",
+                    RepositoryVerticleTest.HOST, RepositoryVerticleTest.port
+                )
+            );
         }
     }
 }
