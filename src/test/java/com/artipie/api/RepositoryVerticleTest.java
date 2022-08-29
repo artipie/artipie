@@ -60,11 +60,6 @@ class RepositoryVerticleTest {
      */
     private static final long SLEEP_DURATION = Duration.ofMillis(100).toMillis();
 
-    static {
-        Assertions.assertTrue(RepositoryVerticleTest.MAX_WAIT > 0);
-        Assertions.assertTrue(RepositoryVerticleTest.SLEEP_DURATION > 0);
-    }
-
     @BeforeAll
     static void prepare(final Vertx vertx, final VertxTestContext ctx) throws IOException {
         RepositoryVerticleTest.port = new RandomFreePort().value();
