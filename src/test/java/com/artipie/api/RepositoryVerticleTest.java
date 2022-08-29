@@ -51,17 +51,18 @@ class RepositoryVerticleTest {
 
     /**
      * Maximum awaiting time duration of port availability.
+     * @checkstyle MagicNumberCheck (10 lines)
      */
-    private static final Duration MAX_WAIT = Duration.ofMinutes(10);
+    private static final long MAX_WAIT = Duration.ofMinutes(10).toMillis();
 
     /**
      * Sleep duration.
      */
-    private static final Duration SLEEP_DURATION = Duration.ofMillis(100);
+    private static final long SLEEP_DURATION = Duration.ofMillis(100).toMillis();
 
     static {
-        Assertions.assertTrue(MAX_WAIT.toMillis() > 0);
-        Assertions.assertTrue(SLEEP_DURATION.toMillis() > 0);
+        Assertions.assertTrue(RepositoryVerticleTest.MAX_WAIT > 0);
+        Assertions.assertTrue(RepositoryVerticleTest.SLEEP_DURATION > 0);
     }
 
     @BeforeAll
@@ -133,7 +134,7 @@ class RepositoryVerticleTest {
     private static void waitServer(final Vertx vertx) {
         final AtomicReference<Boolean> available = new AtomicReference<>(false);
         final NetClient client = vertx.createNetClient();
-        final long max = System.currentTimeMillis() + RepositoryVerticleTest.MAX_WAIT.toMillis();
+        final long max = System.currentTimeMillis() + RepositoryVerticleTest.MAX_WAIT;
         while (!available.get() && System.currentTimeMillis() < max) {
             client.connect(
                 RepositoryVerticleTest.port, RepositoryVerticleTest.HOST,
@@ -145,7 +146,7 @@ class RepositoryVerticleTest {
             );
             if (!available.get()) {
                 try {
-                    TimeUnit.MILLISECONDS.sleep(RepositoryVerticleTest.SLEEP_DURATION.toMillis());
+                    TimeUnit.MILLISECONDS.sleep(RepositoryVerticleTest.SLEEP_DURATION);
                 } catch (final InterruptedException err) {
                     break;
                 }
