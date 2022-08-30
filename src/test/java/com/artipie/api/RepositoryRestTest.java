@@ -11,7 +11,9 @@ import com.artipie.nuget.RandomFreePort;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.NetClient;
+import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.IOException;
@@ -23,21 +25,23 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * Test for {@link RepositoryVerticle}.
+ * Test for {@link RepositoryRest}.
  * @since 0.26
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-class RepositoryVerticleTest {
+class RepositoryRestTest {
 
     /**
      * Test storage.
      */
-    private static final BlockingStorage ASTO = new BlockingStorage(new InMemoryStorage());
+    private static BlockingStorage asto;
 
     /**
      * Service host.
@@ -62,24 +66,30 @@ class RepositoryVerticleTest {
 
     @BeforeAll
     static void prepare(final Vertx vertx, final VertxTestContext ctx) throws IOException {
-        RepositoryVerticleTest.port = new RandomFreePort().value();
-        RepositoryVerticleTest.ASTO.save(new Key.From("artipie/docker-repo.yaml"), new byte[]{});
-        RepositoryVerticleTest.ASTO.save(new Key.From("alice/rpm-local.yml"), new byte[]{});
-        RepositoryVerticleTest.ASTO.save(new Key.From("alice/conda.yml"), new byte[]{});
+        RepositoryRestTest.port = new RandomFreePort().value();
+        RepositoryRestTest.asto = new BlockingStorage(new InMemoryStorage());
         vertx.deployVerticle(
-            new RepositoryVerticle(
-                new ManageRepoSettings(RepositoryVerticleTest.ASTO), "org",
-                RepositoryVerticleTest.port
+            new RestApi(
+                new ManageRepoSettings(RepositoryRestTest.asto), "org",
+                RepositoryRestTest.port
             ),
             ctx.succeedingThenComplete()
         );
         waitServer(vertx);
     }
 
+    @BeforeEach
+    void setUp() {
+        RepositoryRestTest.asto.deleteAll(Key.ROOT);
+    }
+
     @Test
     void listsAllRepos(final Vertx vertx, final VertxTestContext ctx) {
+        RepositoryRestTest.asto.save(new Key.From("artipie/docker-repo.yaml"), new byte[0]);
+        RepositoryRestTest.asto.save(new Key.From("alice/rpm-local.yml"), new byte[0]);
+        RepositoryRestTest.asto.save(new Key.From("alice/conda.yml"), new byte[0]);
         vertx.createHttpClient().request(
-            HttpMethod.GET, RepositoryVerticleTest.port, "localhost", "/api/v1/repository/list"
+            HttpMethod.GET, RepositoryRestTest.port, "localhost", "/api/v1/repository/list"
         )
             .compose(req -> req.send().compose(HttpClientResponse::body))
             .onComplete(
@@ -101,8 +111,11 @@ class RepositoryVerticleTest {
 
     @Test
     void listsUserRepos(final Vertx vertx, final VertxTestContext ctx) {
+        RepositoryRestTest.asto.save(new Key.From("artipie/docker-repo.yaml"), new byte[0]);
+        RepositoryRestTest.asto.save(new Key.From("alice/rpm-local.yml"), new byte[0]);
+        RepositoryRestTest.asto.save(new Key.From("alice/conda.yml"), new byte[0]);
         vertx.createHttpClient().request(
-            HttpMethod.GET, RepositoryVerticleTest.port,
+            HttpMethod.GET, RepositoryRestTest.port,
             "localhost", "/api/v1/repository/list/alice"
         )
             .compose(req -> req.send().compose(HttpClientResponse::body))
@@ -121,6 +134,70 @@ class RepositoryVerticleTest {
         );
     }
 
+    @Test
+    void createRepo(final Vertx vertx, final VertxTestContext ctx) {
+        final JsonObject json = new JsonObject()
+            .put(
+                "repo", new JsonObject()
+                    .put("type", "fs")
+                    .put("storage", new JsonObject())
+            );
+        WebClient.create(vertx)
+            .put(
+                RepositoryRestTest.port,
+                RepositoryRestTest.HOST,
+                "/api/v1/repository/newrepo"
+            )
+            .sendJsonObject(json)
+            .onSuccess(
+                res -> {
+                    MatcherAssert.assertThat(
+                        res.statusCode(),
+                        // @checkstyle MagicNumberCheck (1 line)
+                        Matchers.is(200)
+                    );
+                    MatcherAssert.assertThat(
+                        RepositoryRestTest.asto.exists(new Key.From("newrepo.yml")),
+                        Matchers.is(true)
+                    );
+                    ctx.completeNow();
+                }
+            )
+            .onFailure(ctx::failNow);
+    }
+
+    @Test
+    void createUserRepo(final Vertx vertx, final VertxTestContext ctx) {
+        final JsonObject json = new JsonObject()
+            .put(
+                "repo", new JsonObject()
+                    .put("type", "fs")
+                    .put("storage", new JsonObject())
+            );
+        WebClient.create(vertx)
+            .put(
+                RepositoryRestTest.port,
+                RepositoryRestTest.HOST,
+                "/api/v1/repository/alice/newrepo"
+            )
+            .sendJsonObject(json)
+            .onSuccess(
+                res -> {
+                    MatcherAssert.assertThat(
+                        res.statusCode(),
+                        // @checkstyle MagicNumberCheck (1 line)
+                        Matchers.is(200)
+                    );
+                    MatcherAssert.assertThat(
+                        RepositoryRestTest.asto.exists(new Key.From("alice/newrepo.yml")),
+                        Matchers.is(true)
+                    );
+                    ctx.completeNow();
+                }
+            )
+            .onFailure(ctx::failNow);
+    }
+
     /**
      * Waits until server port available.
      *
@@ -129,10 +206,10 @@ class RepositoryVerticleTest {
     private static void waitServer(final Vertx vertx) {
         final AtomicReference<Boolean> available = new AtomicReference<>(false);
         final NetClient client = vertx.createNetClient();
-        final long max = System.currentTimeMillis() + RepositoryVerticleTest.MAX_WAIT;
+        final long max = System.currentTimeMillis() + RepositoryRestTest.MAX_WAIT;
         while (!available.get() && System.currentTimeMillis() < max) {
             client.connect(
-                RepositoryVerticleTest.port, RepositoryVerticleTest.HOST,
+                RepositoryRestTest.port, RepositoryRestTest.HOST,
                 ar -> {
                     if (ar.succeeded()) {
                         available.set(true);
@@ -141,7 +218,7 @@ class RepositoryVerticleTest {
             );
             if (!available.get()) {
                 try {
-                    TimeUnit.MILLISECONDS.sleep(RepositoryVerticleTest.SLEEP_DURATION);
+                    TimeUnit.MILLISECONDS.sleep(RepositoryRestTest.SLEEP_DURATION);
                 } catch (final InterruptedException err) {
                     break;
                 }
@@ -151,7 +228,7 @@ class RepositoryVerticleTest {
             Assertions.fail(
                 String.format(
                     "Server's port %s:%s is not reachable",
-                    RepositoryVerticleTest.HOST, RepositoryVerticleTest.port
+                    RepositoryRestTest.HOST, RepositoryRestTest.port
                 )
             );
         }

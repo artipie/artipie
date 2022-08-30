@@ -4,8 +4,8 @@
  */
 package com.artipie.settings.repo;
 
+import io.vertx.core.json.JsonObject;
 import java.util.Collection;
-import javax.json.JsonStructure;
 
 /**
  * Create/Read/Update/Delete repository settings.
@@ -28,27 +28,48 @@ public interface CrudRepoSettings {
 
     /**
      * Check if the repository exists.
-     * @param name Repository name. The name can be composite: in the case of org layout it will
-     *  consist of two parts - username and repo name, for example john/maven-s3.
+     * @param rname Repository name, for example maven-s3.
      * @return True if repository exists
      */
-    boolean exists(String name);
+    boolean exists(String rname);
+
+    /**
+     * Check if the repository exists for org layout.
+     * @param uname User name.
+     * @param rname Repository name.
+     * @return True if repository exists
+     */
+    boolean exists(String uname, String rname);
 
     /**
      * Get repository settings as json.
-     * @param name Repository name. The name can be composite: in the case of org layout it will
-     *  consist of two parts - username and repo name, for example john/maven-s3.
+     * @param rname Repository name.
      * @return Json repository settings
      */
-    JsonStructure value(String name);
+    JsonObject value(String rname);
+
+    /**
+     * Get repository settings as json for org layout.
+     * @param uname User name.
+     * @param rname Repository name.
+     * @return Json repository settings
+     */
+    JsonObject value(String uname, String rname);
 
     /**
      * Add new repository.
-     * @param name Repository name. The name can be composite: in the case of org layout it will
-     *  consist of two parts - username and repo name, for example john/maven-s3.
+     * @param rname Repository name.
      * @param value New repository settings
      */
-    void save(String name, JsonStructure value);
+    void save(String rname, JsonObject value);
+
+    /**
+     * Add new user repository for org layout.
+     * @param uname User name.
+     * @param rname Repository name.
+     * @param value New repository settings
+     */
+    void save(String uname, String rname, JsonObject value);
 
     /**
      * Remove repository.

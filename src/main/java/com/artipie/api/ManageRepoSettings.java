@@ -6,20 +6,20 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.settings.StorageAliases;
+import com.artipie.settings.ConfigFile;
 import com.artipie.settings.repo.CrudRepoSettings;
+import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.json.Json;
-import javax.json.JsonStructure;
+import java.util.function.Function;
 import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Manage repository settings.
  * @since 0.26
  */
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 public final class ManageRepoSettings implements CrudRepoSettings {
-
     /**
      * Not implemented error.
      */
@@ -50,18 +50,41 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     }
 
     @Override
-    public boolean exists(final String name) {
-        throw ManageRepoSettings.NOT_IMPLEMENTED;
+    public boolean exists(final String rname) {
+        return this.exists(rname, ext -> ext.key(rname));
     }
 
     @Override
-    public JsonStructure value(final String name) {
-        return Json.createObjectBuilder().add("type", "maven").add("storage", "def").build();
+    public boolean exists(final String uname, final String rname) {
+        return this.exists(rname, ext -> ext.key(String.format("%s/%s", uname, rname)));
     }
 
     @Override
-    public void save(final String name, final JsonStructure value) {
-        throw ManageRepoSettings.NOT_IMPLEMENTED;
+    public JsonObject value(final String rname) {
+        final byte[] value = this.asto.value(ManageRepoSettings.key(rname));
+        return new JsonObject(new String(value));
+    }
+
+    @Override
+    public JsonObject value(final String uname, final String rname) {
+        final byte[] value = this.asto.value(ManageRepoSettings.key(uname, rname));
+        return new JsonObject(new String(value));
+    }
+
+    @Override
+    public void save(final String rname, final JsonObject value) {
+        this.asto.save(
+            key(rname),
+            value.toBuffer().getBytes()
+        );
+    }
+
+    @Override
+    public void save(final String uname, final String rname, final JsonObject value) {
+        this.asto.save(
+            ManageRepoSettings.key(uname, rname),
+            value.toBuffer().getBytes()
+        );
     }
 
     @Override
@@ -75,6 +98,24 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     }
 
     /**
+     * Check if the repository exists.
+     * @param rname Repository name.
+     * @param key Key producer function.
+     * @return True if repository exists
+     */
+    private boolean exists(final String rname, final Function<ConfigFile.Extension, Key> key) {
+        boolean exists = false;
+        if (allowedReponame(rname)) {
+            for (final ConfigFile.Extension ext : ConfigFile.Extension.values()) {
+                if (this.asto.exists(key.apply(ext))) {
+                    exists = true;
+                }
+            }
+        }
+        return exists;
+    }
+
+    /**
      * List existing repositories.
      * @param key Key (ROOT or user name)
      * @return List of the repositories
@@ -84,13 +125,40 @@ public final class ManageRepoSettings implements CrudRepoSettings {
         for (final Key item : this.asto.list(key)) {
             final String name = item.string();
             // @checkstyle BooleanExpressionComplexityCheck (5 lines)
-            if ((name.endsWith(".yaml") || name.endsWith(".yml"))
-                && !name.contains(StorageAliases.FILE_NAME)
-                && !name.contains("_permissions")
-                && !name.contains("_credentials")) {
+            if ((name.endsWith(".yaml") || name.endsWith(".yml")) && allowedReponame(name)) {
                 res.add(name.replaceAll("\\.yaml|\\.yml", ""));
             }
         }
         return res;
+    }
+
+    /**
+     * Check if the repository name is allowed.
+     * @param rname Repository name.
+     * @return True if repository name is allowed
+     */
+    private static boolean allowedReponame(final String rname) {
+        return !rname.contains("_storages")
+            && !rname.contains("_permissions")
+            && !rname.contains("_credentials");
+    }
+
+    /**
+     * Key.
+     * @param uname User name.
+     * @param rname Repository name.
+     * @return Key for user' repository
+     */
+    private static Key key(final String uname, final String rname) {
+        return ConfigFile.Extension.YML.key(String.format("%s/%s", uname, rname));
+    }
+
+    /**
+     * Key.
+     * @param rname Repository name.
+     * @return Key for repository
+     */
+    private static Key key(final String rname) {
+        return ConfigFile.Extension.YML.key(rname);
     }
 }
