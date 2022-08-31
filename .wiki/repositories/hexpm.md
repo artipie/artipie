@@ -57,14 +57,14 @@ mix hex.repo add <repo_name> http://<artipie_host>:<artipie_port>/<repo_name>
 mix hex.repo add my_hexpm http://artipie:8080/my_hexpm
 ```
 
-To verify that repo has been added, use this command:
+To verify that repo has been added, use the following command:
 ```bash
 mix hex.repo list
 ```
 
 ### Fetch dependency
 
-1. To download a package(e.g. **my_artifact** with version **1.0.0**) from `my_hexpm` you can this command:
+1. To download a package(e.g. **my_artifact** with version **1.0.0**) from `my_hexpm` you can use the command:
 ```bash
 mix hex.package fetch <artifact_name> <version> --repo=<repo_name>
 ```
@@ -137,7 +137,7 @@ For publish package in your HexPM repository you must change `api_url` in `mix.e
 ```
 You can also [override](https://hexdocs.pm/hex/Mix.Tasks.Hex.Config.html#module-config-overrides) it with an environment variable(**HEX_API_URL**) or with `mix hex.config`.
 
-Then you can use the following command for publish artifact of your mix project:
+Then you can use the following command to publish artifact of your mix project:
 ```bash
 mix hex.publish package
 ```
