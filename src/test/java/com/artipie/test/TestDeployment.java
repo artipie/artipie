@@ -363,7 +363,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         }
 
         /**
-         * New defaut definition.
+         * New default definition.
          *
          * @return Default container definition
          */
