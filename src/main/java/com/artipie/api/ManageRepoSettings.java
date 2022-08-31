@@ -6,20 +6,20 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.settings.ConfigFile;
 import com.artipie.settings.repo.CrudRepoSettings;
 import io.vertx.core.json.JsonObject;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.function.Function;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Manage repository settings.
  * @since 0.26
  */
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings("PMD.TooManyMethods")
 public final class ManageRepoSettings implements CrudRepoSettings {
     /**
      * Not implemented error.
@@ -51,39 +51,48 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     }
 
     @Override
-    public boolean exists(final String rname) {
-        return this.exists(rname, ext -> ext.key(rname));
+    public boolean exists(final RepositoryName rname) {
+        return allowedReponame(rname)
+            &&
+            (
+                this.asto.exists(keys(rname.string()).getLeft())
+                    ||
+                    this.asto.exists(keys(rname.string()).getRight())
+            );
     }
 
     @Override
-    public boolean exists(final String uname, final String rname) {
-        return this.exists(rname, ext -> ext.key(String.format("%s/%s", uname, rname)));
+    public JsonObject value(final RepositoryName rname) {
+        final JsonObject json;
+        if (allowedReponame(rname)) {
+            final Pair<Key, Key> keys = keys(rname.string());
+            if (this.asto.exists(keys.getLeft())) {
+                json = new JsonObject(
+                    new String(
+                        this.asto.value(keys.getLeft()),
+                        StandardCharsets.UTF_8
+                    )
+                );
+            } else if (this.asto.exists(keys.getRight())) {
+                json = new JsonObject(
+                    new String(
+                        this.asto.value(keys.getLeft()),
+                        StandardCharsets.UTF_8
+                    )
+                );
+            } else {
+                json = null;
+            }
+        } else {
+            json = null;
+        }
+        return json;
     }
 
     @Override
-    public JsonObject value(final String rname) {
-        final byte[] value = this.asto.value(ManageRepoSettings.key(rname));
-        return new JsonObject(new String(value, StandardCharsets.UTF_8));
-    }
-
-    @Override
-    public JsonObject value(final String uname, final String rname) {
-        final byte[] value = this.asto.value(ManageRepoSettings.key(uname, rname));
-        return new JsonObject(new String(value, StandardCharsets.UTF_8));
-    }
-
-    @Override
-    public void save(final String rname, final JsonObject value) {
+    public void save(final RepositoryName rname, final JsonObject value) {
         this.asto.save(
-            key(rname),
-            value.toBuffer().getBytes()
-        );
-    }
-
-    @Override
-    public void save(final String uname, final String rname, final JsonObject value) {
-        this.asto.save(
-            ManageRepoSettings.key(uname, rname),
+            keys(rname.string()).getRight(),
             value.toBuffer().getBytes()
         );
     }
@@ -96,24 +105,6 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     @Override
     public void move(final String name, final String nname) {
         throw ManageRepoSettings.NOT_IMPLEMENTED;
-    }
-
-    /**
-     * Check if the repository exists.
-     * @param rname Repository name.
-     * @param key Key producer function.
-     * @return True if repository exists
-     */
-    private boolean exists(final String rname, final Function<ConfigFile.Extension, Key> key) {
-        boolean exists = false;
-        if (allowedReponame(rname)) {
-            for (final ConfigFile.Extension ext : ConfigFile.Extension.values()) {
-                if (this.asto.exists(key.apply(ext))) {
-                    exists = true;
-                }
-            }
-        }
-        return exists;
     }
 
     /**
@@ -138,28 +129,30 @@ public final class ManageRepoSettings implements CrudRepoSettings {
      * @param rname Repository name.
      * @return True if repository name is allowed
      */
-    private static boolean allowedReponame(final String rname) {
-        return !rname.contains("_storages")
-            && !rname.contains("_permissions")
-            && !rname.contains("_credentials");
+    private static boolean allowedReponame(final RepositoryName rname) {
+        return allowedReponame(rname.string());
     }
 
     /**
-     * Key.
-     * @param uname User name.
-     * @param rname Repository name.
-     * @return Key for user' repository
+     * Check if the repository name is allowed.
+     * @param name Repository name.
+     * @return True if repository name is allowed
      */
-    private static Key key(final String uname, final String rname) {
-        return ConfigFile.Extension.YML.key(String.format("%s/%s", uname, rname));
+    private static boolean allowedReponame(final String name) {
+        return !name.contains("_storages")
+            && !name.contains("_permissions")
+            && !name.contains("_credentials");
     }
 
     /**
-     * Key.
-     * @param rname Repository name.
-     * @return Key for repository
+     * Returns a pair of keys, these keys are possible repository settings names.
+     * @param name Key name
+     * @return Pair of keys
      */
-    private static Key key(final String rname) {
-        return ConfigFile.Extension.YML.key(rname);
+    private static Pair<Key, Key> keys(final String name) {
+        return new ImmutablePair<>(
+            new Key.From(String.format("%s.yaml", name)),
+            new Key.From(String.format("%s.yml", name))
+        );
     }
 }

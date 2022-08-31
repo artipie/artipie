@@ -4,6 +4,7 @@
  */
 package com.artipie.settings.repo;
 
+import com.artipie.api.RepositoryName;
 import io.vertx.core.json.JsonObject;
 import java.util.Collection;
 
@@ -27,49 +28,25 @@ public interface CrudRepoSettings {
     Collection<String> list(String uname);
 
     /**
-     * Check if the repository exists.
-     * @param rname Repository name, for example maven-s3.
-     * @return True if repository exists
+     * Checks if repository settings exists by repository name.
+     * @param rname Repository name
+     * @return True if found
      */
-    boolean exists(String rname);
-
-    /**
-     * Check if the repository exists for org layout.
-     * @param uname User name.
-     * @param rname Repository name.
-     * @return True if repository exists
-     */
-    boolean exists(String uname, String rname);
+    boolean exists(RepositoryName rname);
 
     /**
      * Get repository settings as json.
-     * @param rname Repository name.
+     * @param name Repository name.
      * @return Json repository settings
      */
-    JsonObject value(String rname);
-
-    /**
-     * Get repository settings as json for org layout.
-     * @param uname User name.
-     * @param rname Repository name.
-     * @return Json repository settings
-     */
-    JsonObject value(String uname, String rname);
+    JsonObject value(RepositoryName name);
 
     /**
      * Add new repository.
      * @param rname Repository name.
      * @param value New repository settings
      */
-    void save(String rname, JsonObject value);
-
-    /**
-     * Add new user repository for org layout.
-     * @param uname User name.
-     * @param rname Repository name.
-     * @param value New repository settings
-     */
-    void save(String uname, String rname, JsonObject value);
+    void save(RepositoryName rname, JsonObject value);
 
     /**
      * Remove repository.

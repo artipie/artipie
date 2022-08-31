@@ -65,13 +65,13 @@ public final class RepositoryRest extends BaseRest {
             .handler(this::getRepo)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("getUserRepo")
-            .handler(this::getUserRepo)
+            .handler(this::getRepo)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("createRepo")
             .handler(this::createRepo)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("createUserRepo")
-            .handler(this::createUserRepo)
+            .handler(this::createRepo)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         final Router router = rbr.createRouter();
         router.route("/api/*").handler(
@@ -87,7 +87,17 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void getRepo(final RoutingContext context) {
-        final String rname = context.pathParam(RepositoryRest.RNAME);
+        final RepositoryName rname;
+        if ("flat".equals(this.layout)) {
+            rname = new RepositoryName.FlatRepositoryName(
+                context.pathParam(RepositoryRest.RNAME)
+            );
+        } else {
+            rname = new RepositoryName.OrgRepositoryName(
+                context.pathParam(RepositoryRest.UNAME),
+                context.pathParam(RepositoryRest.RNAME)
+            );
+        }
         if (!this.crs.exists(rname)) {
             context.response()
                 .setStatusCode(HttpStatus.NOT_FOUND_404)
@@ -96,36 +106,6 @@ public final class RepositoryRest extends BaseRest {
         }
         context.response().setStatusCode(HttpStatus.OK_200).end(
             this.crs.value(rname).toBuffer()
-        );
-    }
-
-    /**
-     * Get a repository settings json.
-     * @param context Routing context
-     * @checkstyle ReturnCountCheck (20 lines)
-     */
-    private void getUserRepo(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryRest.UNAME);
-        final String rname = context.pathParam(RepositoryRest.RNAME);
-        if ("flat".equals(this.layout)) {
-            context.response()
-                .setStatusCode(HttpStatus.CONFLICT_409)
-                .end(
-                    String.format(
-                        "Get repository %s for user %s is not allowed for 'flat' layout",
-                        rname, uname
-                    )
-                );
-            return;
-        }
-        if (!this.crs.exists(uname, rname)) {
-            context.response()
-                .setStatusCode(HttpStatus.NOT_FOUND_404)
-                .end(String.format("Repository %s does not exist for user %s", rname, uname));
-            return;
-        }
-        context.response().setStatusCode(HttpStatus.OK_200).end(
-            this.crs.value(uname, rname).toBuffer()
         );
     }
 
@@ -161,50 +141,26 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void createRepo(final RoutingContext context) {
-        final String rname = context.pathParam(RepositoryRest.RNAME);
+        final RepositoryName rname;
+        if ("flat".equals(this.layout)) {
+            rname = new RepositoryName.FlatRepositoryName(
+                context.pathParam(RepositoryRest.RNAME)
+            );
+        } else {
+            rname = new RepositoryName.OrgRepositoryName(
+                context.pathParam(RepositoryRest.UNAME),
+                context.pathParam(RepositoryRest.RNAME)
+            );
+        }
         if (this.crs.exists(rname)) {
             context.response()
                 .setStatusCode(HttpStatus.CONFLICT_409)
-                .end(String.format("Repository %s already exists", rname));
+                .end(String.format("Repository %s already exists", rname.string()));
             return;
         }
         final JsonObject json = context.body().asJsonObject();
         if (RepositoryRest.validateRepo(context, json)) {
             this.crs.save(rname, json);
-            context.response()
-                .setStatusCode(HttpStatus.OK_200)
-                .end();
-        }
-    }
-
-    /**
-     * Create a user repository.
-     * @param context Routing context
-     * @checkstyle ReturnCountCheck (20 lines)
-     */
-    private void createUserRepo(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryRest.UNAME);
-        final String rname = context.pathParam(RepositoryRest.RNAME);
-        if ("flat".equals(this.layout)) {
-            context.response()
-                .setStatusCode(HttpStatus.CONFLICT_409)
-                .end(
-                    String.format(
-                        "Create repository %s for user %s is not allowed for 'flat' layout",
-                        rname, uname
-                    )
-                );
-            return;
-        }
-        if (this.crs.exists(uname, rname)) {
-            context.response()
-                .setStatusCode(HttpStatus.CONFLICT_409)
-                .end(String.format("Repository %s for user %s already exists", rname, uname));
-            return;
-        }
-        final JsonObject json = context.body().asJsonObject();
-        if (RepositoryRest.validateRepo(context, json)) {
-            this.crs.save(uname, rname, json);
             context.response()
                 .setStatusCode(HttpStatus.OK_200)
                 .end();

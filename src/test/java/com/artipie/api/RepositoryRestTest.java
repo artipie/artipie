@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -57,20 +55,20 @@ class RepositoryRestTest {
      * Maximum awaiting time duration of port availability.
      * @checkstyle MagicNumberCheck (10 lines)
      */
-    private static final long MAX_WAIT = Duration.ofMinutes(10).toMillis();
+    private static final long MAX_WAIT = Duration.ofMinutes(1).toMillis();
 
     /**
      * Sleep duration.
      */
     private static final long SLEEP_DURATION = Duration.ofMillis(100).toMillis();
 
-    @BeforeAll
-    static void prepare(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+    static void prepare(final Vertx vertx, final VertxTestContext ctx, final String layout)
+        throws IOException {
         RepositoryRestTest.port = new RandomFreePort().value();
         RepositoryRestTest.asto = new BlockingStorage(new InMemoryStorage());
         vertx.deployVerticle(
             new RestApi(
-                new ManageRepoSettings(RepositoryRestTest.asto), "org",
+                new ManageRepoSettings(RepositoryRestTest.asto), layout,
                 RepositoryRestTest.port
             ),
             ctx.succeedingThenComplete()
@@ -78,13 +76,9 @@ class RepositoryRestTest {
         waitServer(vertx);
     }
 
-    @BeforeEach
-    void setUp() {
-        RepositoryRestTest.asto.deleteAll(Key.ROOT);
-    }
-
     @Test
-    void listsAllRepos(final Vertx vertx, final VertxTestContext ctx) {
+    void listsAllRepos(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+        prepare(vertx, ctx, "org");
         RepositoryRestTest.asto.save(new Key.From("artipie/docker-repo.yaml"), new byte[0]);
         RepositoryRestTest.asto.save(new Key.From("alice/rpm-local.yml"), new byte[0]);
         RepositoryRestTest.asto.save(new Key.From("alice/conda.yml"), new byte[0]);
@@ -110,7 +104,8 @@ class RepositoryRestTest {
     }
 
     @Test
-    void listsUserRepos(final Vertx vertx, final VertxTestContext ctx) {
+    void listsUserRepos(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+        prepare(vertx, ctx, "org");
         RepositoryRestTest.asto.save(new Key.From("artipie/docker-repo.yaml"), new byte[0]);
         RepositoryRestTest.asto.save(new Key.From("alice/rpm-local.yml"), new byte[0]);
         RepositoryRestTest.asto.save(new Key.From("alice/conda.yml"), new byte[0]);
@@ -135,7 +130,8 @@ class RepositoryRestTest {
     }
 
     @Test
-    void createRepo(final Vertx vertx, final VertxTestContext ctx) {
+    void createRepo(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+        prepare(vertx, ctx, "flat");
         final JsonObject json = new JsonObject()
             .put(
                 "repo", new JsonObject()
@@ -167,7 +163,8 @@ class RepositoryRestTest {
     }
 
     @Test
-    void createUserRepo(final Vertx vertx, final VertxTestContext ctx) {
+    void createUserRepo(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+        prepare(vertx, ctx, "org");
         final JsonObject json = new JsonObject()
             .put(
                 "repo", new JsonObject()
