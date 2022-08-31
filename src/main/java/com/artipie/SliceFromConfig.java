@@ -28,6 +28,7 @@ import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.files.FilesSlice;
 import com.artipie.gem.http.GemSlice;
 import com.artipie.helm.http.HelmSlice;
+import com.artipie.hex.http.HexSlice;
 import com.artipie.http.ContentLengthRestriction;
 import com.artipie.http.ContinueSlice;
 import com.artipie.http.DockerRoutingSlice;
@@ -267,6 +268,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                         cfg.storage(), permissions, auth, cfg.url().toString(),
                         new CondaConfig(cfg.settings()).authTokenTtl()
                     ),
+                    settings.layout().pattern()
+                );
+                break;
+            case "hexpm":
+                slice = new TrimPathSlice(
+                    new HexSlice(cfg.storage(), permissions, auth),
                     settings.layout().pattern()
                 );
                 break;
