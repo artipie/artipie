@@ -5,8 +5,8 @@
 package com.artipie.settings.repo;
 
 import com.artipie.api.RepositoryName;
-import io.vertx.core.json.JsonObject;
 import java.util.Collection;
+import javax.json.JsonStructure;
 
 /**
  * Create/Read/Update/Delete repository settings.
@@ -39,14 +39,14 @@ public interface CrudRepoSettings {
      * @param name Repository name.
      * @return Json repository settings
      */
-    JsonObject value(RepositoryName name);
+    JsonStructure value(RepositoryName name);
 
     /**
      * Add new repository.
      * @param rname Repository name.
      * @param value New repository settings
      */
-    void save(RepositoryName rname, JsonObject value);
+    void save(RepositoryName rname, JsonStructure value);
 
     /**
      * Remove repository.

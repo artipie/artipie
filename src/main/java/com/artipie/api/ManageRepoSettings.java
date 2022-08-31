@@ -6,11 +6,13 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.misc.Json2Yaml;
+import com.artipie.misc.Yaml2Json;
 import com.artipie.settings.repo.CrudRepoSettings;
-import io.vertx.core.json.JsonObject;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.json.JsonStructure;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -62,38 +64,34 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     }
 
     @Override
-    public JsonObject value(final RepositoryName rname) {
-        final JsonObject json;
+    public JsonStructure value(final RepositoryName rname) {
+        JsonStructure json = null;
         if (allowedReponame(rname)) {
             final Pair<Key, Key> keys = keys(rname.string());
             if (this.asto.exists(keys.getLeft())) {
-                json = new JsonObject(
+                json = new Yaml2Json().apply(
                     new String(
                         this.asto.value(keys.getLeft()),
                         StandardCharsets.UTF_8
                     )
-                );
+                ).asJsonObject();
             } else if (this.asto.exists(keys.getRight())) {
-                json = new JsonObject(
+                json = new Yaml2Json().apply(
                     new String(
-                        this.asto.value(keys.getLeft()),
+                        this.asto.value(keys.getRight()),
                         StandardCharsets.UTF_8
                     )
-                );
-            } else {
-                json = null;
+                ).asJsonObject().getJsonObject("repo");
             }
-        } else {
-            json = null;
         }
         return json;
     }
 
     @Override
-    public void save(final RepositoryName rname, final JsonObject value) {
+    public void save(final RepositoryName rname, final JsonStructure value) {
         this.asto.save(
             keys(rname.string()).getRight(),
-            value.toBuffer().getBytes()
+            new Json2Yaml().apply(value.toString()).toString().getBytes(StandardCharsets.UTF_8)
         );
     }
 

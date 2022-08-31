@@ -7,12 +7,15 @@ package com.artipie.api;
 import com.artipie.misc.JavaResource;
 import com.artipie.settings.repo.CrudRepoSettings;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.FileSystemAccess;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.io.StringReader;
+import javax.json.JsonObject;
+import javax.json.JsonStructure;
+import javax.json.spi.JsonProvider;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -105,7 +108,7 @@ public final class RepositoryRest extends BaseRest {
             return;
         }
         context.response().setStatusCode(HttpStatus.OK_200).end(
-            this.crs.value(rname).toBuffer()
+            this.crs.value(rname).toString()
         );
     }
 
@@ -158,8 +161,10 @@ public final class RepositoryRest extends BaseRest {
                 .end(String.format("Repository %s already exists", rname.string()));
             return;
         }
-        final JsonObject json = context.body().asJsonObject();
-        if (RepositoryRest.validateRepo(context, json)) {
+        final JsonStructure json = JsonProvider.provider().createReader(
+            new StringReader(context.body().asString())
+        ).read();
+        if (RepositoryRest.validateRepo(context, (JsonObject) json)) {
             this.crs.save(rname, json);
             context.response()
                 .setStatusCode(HttpStatus.OK_200)
@@ -187,30 +192,23 @@ public final class RepositoryRest extends BaseRest {
                 .end("Section `repo` is required");
             return false;
         }
-        final Object obj = json.getValue("repo");
-        if (!(obj instanceof JsonObject)) {
+        final JsonObject repo = json.getJsonObject("repo");
+        if (repo == null) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end("Section `repo` should be in json format");
+                .end("Section `repo` is required");
             return false;
         }
-        final JsonObject repo = (JsonObject) obj;
-        if (repo.getString("type") == null) {
+        if (!repo.containsKey("type")) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end("Section `type` is required");
+                .end("Repository type is required");
             return false;
         }
         if (!repo.containsKey("storage")) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end("Section `storage` is required");
-            return false;
-        }
-        if (!(repo.getValue("storage") instanceof JsonObject)) {
-            context.response()
-                .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end("Section `storage` should be in json format");
+                .end("Repository storage is required");
             return false;
         }
         return true;
