@@ -33,6 +33,7 @@
         * [[Helm|helm]]
         * [[Gem|gem]]
         * [[Composer|composer]]
+        * [[Hexpm|hexpm]]
     * [[Repository Permissions|Configuration-Repository Permissions]]
       * [[Docker repository granular permissions|Configuration-Repository Permissions#docker-repository-granular-permissions]]
     * [[Metrics|Configuration-Metrics]]
