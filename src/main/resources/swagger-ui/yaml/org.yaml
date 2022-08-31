@@ -62,66 +62,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /api/v1/repository/{rname}:
-    get:
-      summary: Get repository settings
-      operationId: getRepo
-      tags:
-        - repository
-      parameters:
-        - name: rname
-          in: path
-          required: true
-          description: Name of the repository
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Full repository settings
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/AliasRepository'
-                  - $ref: '#/components/schemas/FullRepository'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-    put:
-      summary: Create repository
-      operationId: createRepo
-      tags:
-        - repository
-      parameters:
-        - name: rname
-          in: path
-          required: true
-          description: Name of the repository
-          schema:
-            type: string
-      requestBody:
-        description: Create a new repository
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Repository'
-        required: true
-      responses:
-        '200':
-          description: Creates a new repository with name {rname}
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FullRepository'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
   /api/v1/repository/{uname}/{rname}:
     get:
       summary: Get user repository settings

@@ -48,17 +48,20 @@ public final class RestApi extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
-        RouterBuilder.create(this.vertx, "swagger-ui/yaml/repository.yaml")
+        RouterBuilder.create(this.vertx, String.format("swagger-ui/yaml/%s.yaml", this.layout))
             .onSuccess(
                 rb -> {
                     new RepositoryRest(this.crs, this.layout).init(rb);
                     final Router router = rb.createRouter();
-                    router.route("/api/*").handler(
-                        StaticHandler.create(
-                            FileSystemAccess.ROOT,
-                            new JavaResource("swagger-ui").uri().getPath()
-                        )
-                    );
+                    router.route("/api/*")
+                        .handler(
+                            StaticHandler
+                                .create(
+                                    FileSystemAccess.ROOT,
+                                    new JavaResource("swagger-ui").uri().getPath()
+                                )
+                                .setIndexPage(String.format("index-%s.html", this.layout))
+                        );
                     final HttpServer server = this.vertx.createHttpServer();
                     server.requestHandler(router)
                         .listen(this.port)

@@ -5,11 +5,23 @@
 
 package com.artipie.api;
 
+import io.vertx.ext.web.RoutingContext;
+
 /**
  * Repository name.
  * @since 0.26
  */
 public interface RepositoryName {
+    /**
+     * Username path parameter name.
+     */
+    String UNAME = "uname";
+
+    /**
+     * Repository path parameter name.
+     */
+    String RNAME = "rname";
+
     /**
      * String representation of repository name.
      * For flat layout consists of 'reponame'
@@ -17,6 +29,41 @@ public interface RepositoryName {
      * @return Repository name as string
      */
     String string();
+
+    /**
+     * Decorator based on request and layout.
+     * @since 0.26
+     */
+    @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
+    class FromRequest implements RepositoryName {
+        /**
+         * Decorated repository name.
+         */
+        private final RepositoryName origin;
+
+        /**
+         * Ctor.
+         * @param ctx RoutingContext
+         * @param layout Layout
+         */
+        public FromRequest(final RoutingContext ctx, final String layout) {
+            if ("flat".equals(layout)) {
+                this.origin = new RepositoryName.FlatRepositoryName(
+                    ctx.pathParam(RepositoryName.RNAME)
+                );
+            } else {
+                this.origin = new RepositoryName.OrgRepositoryName(
+                    ctx.pathParam(RepositoryName.UNAME),
+                    ctx.pathParam(RepositoryName.RNAME)
+                );
+            }
+        }
+
+        @Override
+        public String string() {
+            return this.origin.string();
+        }
+    }
 
     /**
      * Repository name for 'flat' layout.

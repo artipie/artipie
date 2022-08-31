@@ -25,17 +25,6 @@ import org.eclipse.jetty.http.HttpStatus;
  */
 @SuppressWarnings({"PMD.OnlyOneReturn", "PMD.AvoidDuplicateLiterals"})
 public final class RepositoryRest extends BaseRest {
-
-    /**
-     * Username path parameter name.
-     */
-    private static final String UNAME = "uname";
-
-    /**
-     * Repository path parameter name.
-     */
-    private static final String RNAME = "rname";
-
     /**
      * Repository settings create/read/update/delete.
      */
@@ -61,21 +50,24 @@ public final class RepositoryRest extends BaseRest {
         rbr.operation("listAll")
             .handler(this::listAll)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        rbr.operation("list")
-            .handler(this::listUserRepos)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        rbr.operation("getRepo")
-            .handler(this::getRepo)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        rbr.operation("getUserRepo")
-            .handler(this::getRepo)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        rbr.operation("createRepo")
-            .handler(this::createRepo)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        rbr.operation("createUserRepo")
-            .handler(this::createRepo)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        if ("flat".equals(this.layout)) {
+            rbr.operation("getRepo")
+                .handler(this::getRepo)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rbr.operation("createRepo")
+                .handler(this::createRepo)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        } else {
+            rbr.operation("list")
+                .handler(this::listUserRepos)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rbr.operation("getUserRepo")
+                .handler(this::getRepo)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rbr.operation("createUserRepo")
+                .handler(this::createRepo)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        }
         final Router router = rbr.createRouter();
         router.route("/api/*").handler(
             StaticHandler.create(
@@ -90,17 +82,7 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void getRepo(final RoutingContext context) {
-        final RepositoryName rname;
-        if ("flat".equals(this.layout)) {
-            rname = new RepositoryName.FlatRepositoryName(
-                context.pathParam(RepositoryRest.RNAME)
-            );
-        } else {
-            rname = new RepositoryName.OrgRepositoryName(
-                context.pathParam(RepositoryRest.UNAME),
-                context.pathParam(RepositoryRest.RNAME)
-            );
-        }
+        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
         if (!this.crs.exists(rname)) {
             context.response()
                 .setStatusCode(HttpStatus.NOT_FOUND_404)
@@ -127,13 +109,7 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void listUserRepos(final RoutingContext context) {
-        if ("flat".equals(this.layout)) {
-            context.response()
-                .setStatusCode(HttpStatus.CONFLICT_409)
-                .end("List user repositories is not allowed for 'flat' layout");
-            return;
-        }
-        final String uname = context.pathParam(RepositoryRest.UNAME);
+        final String uname = context.pathParam(RepositoryName.UNAME);
         context.response().setStatusCode(HttpStatus.OK_200).end(
             JsonArray.of(this.crs.list(uname).toArray()).encode()
         );
@@ -144,17 +120,7 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void createRepo(final RoutingContext context) {
-        final RepositoryName rname;
-        if ("flat".equals(this.layout)) {
-            rname = new RepositoryName.FlatRepositoryName(
-                context.pathParam(RepositoryRest.RNAME)
-            );
-        } else {
-            rname = new RepositoryName.OrgRepositoryName(
-                context.pathParam(RepositoryRest.UNAME),
-                context.pathParam(RepositoryRest.RNAME)
-            );
-        }
+        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
         if (this.crs.exists(rname)) {
             context.response()
                 .setStatusCode(HttpStatus.CONFLICT_409)
