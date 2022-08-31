@@ -1,0 +1,5 @@
+repo:
+  type: hexpm
+  storage:
+    type: fs
+    path: /var/artipie/data
