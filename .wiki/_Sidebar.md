@@ -14,7 +14,7 @@
       * [[Environment credentials|Configuration-Credentials#credentials-type-env]]
     * [[Repository|Configuration-Repository]]
       * [[Single repository on port|Configuration-Repository#single-repository-on-port]]
-      * Repositories types
+      *  [[Repositories types|Configuration-Repository#supported-repository-types]]
         * [[File|file]]
         * [[File proxy (mirror)|file-proxy-mirror]]
         * [[Maven|maven]]

@@ -14,7 +14,7 @@
 ![Docker Image Version (latest by date)](https://img.shields.io/docker/v/artipie/artipie?label=DockerHub&sort=date)
 [![PDD status](http://www.0pdd.com/svg?name=artipie/artipie)](http://www.0pdd.com/p?name=artipie/artipie)
 
-Artipie is an experimental binary artifact management tool, similar to
+Artipie is a binary artifact management tool, similar to
 [Artifactory](https://jfrog.com/artifactory/),
 [Nexus](https://www.sonatype.com/product-nexus-repository),
 [Archiva](https://archiva.apache.org/),
@@ -38,10 +38,12 @@ The following set of features makes Artipie unique among all others:
     [Rpm](https://github.com/artipie/artipie/wiki/repositories/rpm),
     [Debian](https://github.com/artipie/artipie/wiki/repositories/debian),
     [Anaconda](https://github.com/artipie/artipie/wiki/repositories/anaconda)
-    and [others](./examples)
+    and [others](https://github.com/artipie/artipie/wiki/Configuration-Repository#supported-repository-types)
   * It is database-free
-  * It can host the data in the file system or [Amazon S3](https://aws.amazon.com/s3/)
+  * It can host the data in the file system, [Amazon S3](https://aws.amazon.com/s3/) or in a storage defined by user
   * Its quality of Java code is extraordinary high :)
+
+Learn more about Artipie in our [Wiki](https://github.com/artipie/artipie/wiki).
 
 # Quickstart
 

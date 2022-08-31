@@ -22,6 +22,8 @@ allows to provide upload or download access for users and groups.
 > **Warning**  
 > Name of the repository configuration file is the name of the repository.
 
+# Supported repository types
+
 For now Artipie supports the following repository types:
 
 | Type  | Description   |
