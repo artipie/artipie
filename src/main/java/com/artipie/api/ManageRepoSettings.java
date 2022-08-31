@@ -9,6 +9,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.repo.CrudRepoSettings;
 import io.vertx.core.json.JsonObject;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Function;
@@ -62,13 +63,13 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     @Override
     public JsonObject value(final String rname) {
         final byte[] value = this.asto.value(ManageRepoSettings.key(rname));
-        return new JsonObject(new String(value));
+        return new JsonObject(new String(value, StandardCharsets.UTF_8));
     }
 
     @Override
     public JsonObject value(final String uname, final String rname) {
         final byte[] value = this.asto.value(ManageRepoSettings.key(uname, rname));
-        return new JsonObject(new String(value));
+        return new JsonObject(new String(value, StandardCharsets.UTF_8));
     }
 
     @Override
