@@ -5,6 +5,7 @@
 package com.artipie.api;
 
 import io.vertx.ext.web.RoutingContext;
+import java.util.Set;
 
 /**
  * Repository name.
@@ -21,6 +22,13 @@ public class RepositoryName {
      * Repository path parameter name.
      */
     public static final String RNAME = "rname";
+
+    /**
+     * Words that should not be present inside repository name.
+     */
+    public static final Set<String> RESTRICTED_REPOS = Set.of(
+        "_storages", "_permissions", "_credentials"
+    );
 
     /**
      * Layout.
@@ -47,6 +55,26 @@ public class RepositoryName {
         this.layout = layout;
         this.rname = ctx.pathParam(RepositoryName.RNAME);
         this.uname = ctx.pathParam(RepositoryName.UNAME);
+    }
+
+    /**
+     * Check if the repository name is allowed.
+     * @param rname Repository name.
+     * @return True if repository name is allowed
+     */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static boolean allowedReponame(final RepositoryName rname) {
+        return allowedReponame(rname.toString());
+    }
+
+    /**
+     * Check if the repository name is allowed.
+     * @param name Repository name.
+     * @return True if repository name is allowed
+     */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static boolean allowedReponame(final String name) {
+        return RESTRICTED_REPOS.stream().filter(name::contains).findAny().isEmpty();
     }
 
     /**

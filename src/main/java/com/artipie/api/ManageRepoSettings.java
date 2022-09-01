@@ -12,7 +12,6 @@ import com.artipie.settings.repo.CrudRepoSettings;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 import javax.json.JsonStructure;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -24,13 +23,6 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class ManageRepoSettings implements CrudRepoSettings {
-    /**
-     * Words that should not be present inside repository name.
-     */
-    public static final Set<String> RESTRICTED_REPOS = Set.of(
-        "_storages", "_permissions", "_credentials"
-    );
-
     /**
      * Not implemented error.
      */
@@ -62,35 +54,29 @@ public final class ManageRepoSettings implements CrudRepoSettings {
 
     @Override
     public boolean exists(final RepositoryName rname) {
-        return allowedReponame(rname.toString())
-            &&
-            (
-                this.asto.exists(keys(rname.toString()).getLeft())
-                    ||
-                    this.asto.exists(keys(rname.toString()).getRight())
-            );
+        return this.asto.exists(keys(rname.toString()).getLeft())
+            ||
+            this.asto.exists(keys(rname.toString()).getRight());
     }
 
     @Override
     public JsonStructure value(final RepositoryName rname) {
         JsonStructure json = null;
-        if (allowedReponame(rname.toString())) {
-            final Pair<Key, Key> keys = keys(rname.toString());
-            if (this.asto.exists(keys.getLeft())) {
-                json = new Yaml2Json().apply(
-                    new String(
-                        this.asto.value(keys.getLeft()),
-                        StandardCharsets.UTF_8
-                    )
-                ).asJsonObject();
-            } else if (this.asto.exists(keys.getRight())) {
-                json = new Yaml2Json().apply(
-                    new String(
-                        this.asto.value(keys.getRight()),
-                        StandardCharsets.UTF_8
-                    )
-                ).asJsonObject().getJsonObject("repo");
-            }
+        final Pair<Key, Key> keys = keys(rname.toString());
+        if (this.asto.exists(keys.getLeft())) {
+            json = new Yaml2Json().apply(
+                new String(
+                    this.asto.value(keys.getLeft()),
+                    StandardCharsets.UTF_8
+                )
+            ).asJsonObject();
+        } else if (this.asto.exists(keys.getRight())) {
+            json = new Yaml2Json().apply(
+                new String(
+                    this.asto.value(keys.getRight()),
+                    StandardCharsets.UTF_8
+                )
+            ).asJsonObject().getJsonObject("repo");
         }
         return json;
     }
@@ -122,21 +108,11 @@ public final class ManageRepoSettings implements CrudRepoSettings {
         final Collection<String> res = new ArrayList<>(5);
         for (final Key item : this.asto.list(key)) {
             final String name = item.string();
-            // @checkstyle BooleanExpressionComplexityCheck (5 lines)
-            if ((name.endsWith(".yaml") || name.endsWith(".yml")) && allowedReponame(name)) {
+            if (yamlFilename(name) && RepositoryName.allowedReponame(name)) {
                 res.add(name.replaceAll("\\.yaml|\\.yml", ""));
             }
         }
         return res;
-    }
-
-    /**
-     * Check if the repository name is allowed.
-     * @param name Repository name.
-     * @return True if repository name is allowed
-     */
-    private static boolean allowedReponame(final String name) {
-        return RESTRICTED_REPOS.stream().filter(name::contains).findAny().isEmpty();
     }
 
     /**
@@ -149,5 +125,14 @@ public final class ManageRepoSettings implements CrudRepoSettings {
             new Key.From(String.format("%s.yaml", name)),
             new Key.From(String.format("%s.yml", name))
         );
+    }
+
+    /**
+     * Checks whether name is yaml-file name.
+     * @param name Key name
+     * @return True if name has yaml-file extension
+     */
+    private static boolean yamlFilename(final String name) {
+        return name.endsWith(".yaml") || name.endsWith(".yml");
     }
 }

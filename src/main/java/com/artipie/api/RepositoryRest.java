@@ -23,8 +23,13 @@ import org.eclipse.jetty.http.HttpStatus;
  * (create/read/update/delete) operations.
  * @since 0.26
  */
-@SuppressWarnings({"PMD.OnlyOneReturn", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings("PMD.OnlyOneReturn")
 public final class RepositoryRest extends BaseRest {
+    /**
+     * Key 'repo' inside json-object.
+     */
+    private static final String REPO = "repo";
+
     /**
      * Repository settings create/read/update/delete.
      */
@@ -80,18 +85,25 @@ public final class RepositoryRest extends BaseRest {
     /**
      * Get a repository settings json.
      * @param context Routing context
+     * @checkstyle ReturnCountCheck (20 lines)
      */
     private void getRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName(context, this.layout);
+        if (!RepositoryName.allowedReponame(rname)) {
+            context.response()
+                .setStatusCode(HttpStatus.BAD_REQUEST_400)
+                .end(wrongReponame(rname));
+            return;
+        }
         if (!this.crs.exists(rname)) {
             context.response()
                 .setStatusCode(HttpStatus.NOT_FOUND_404)
-                .end(repoNotfound(rname.toString()));
+                .end(String.format("Repository %s does not exist. ", rname));
             return;
         }
-        context.response().setStatusCode(HttpStatus.OK_200).end(
-            this.crs.value(rname).toString()
-        );
+        context.response()
+            .setStatusCode(HttpStatus.OK_200)
+            .end(this.crs.value(rname).toString());
     }
 
     /**
@@ -118,9 +130,16 @@ public final class RepositoryRest extends BaseRest {
     /**
      * Create a repository.
      * @param context Routing context
+     * @checkstyle ReturnCountCheck (20 lines)
      */
     private void createRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName(context, this.layout);
+        if (!RepositoryName.allowedReponame(rname)) {
+            context.response()
+                .setStatusCode(HttpStatus.BAD_REQUEST_400)
+                .end(wrongReponame(rname));
+            return;
+        }
         if (this.crs.exists(rname)) {
             context.response()
                 .setStatusCode(HttpStatus.CONFLICT_409)
@@ -152,17 +171,18 @@ public final class RepositoryRest extends BaseRest {
                 .end("JSON body is expected");
             return false;
         }
-        if (!json.containsKey("repo")) {
+        final String repomsg = "Section `repo` is required";
+        if (!json.containsKey(RepositoryRest.REPO)) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end("Section `repo` is required");
+                .end(repomsg);
             return false;
         }
-        final JsonObject repo = json.getJsonObject("repo");
+        final JsonObject repo = json.getJsonObject(RepositoryRest.REPO);
         if (repo == null) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end("Section `repo` is required");
+                .end(repomsg);
             return false;
         }
         if (!repo.containsKey("type")) {
@@ -181,16 +201,16 @@ public final class RepositoryRest extends BaseRest {
     }
 
     /**
-     * Error message for 'repository not found'.
+     * Message for 'wrong repository name'.
      * @param rname Repository name
      * @return Message description
      */
-    private static String repoNotfound(final String rname) {
+    private static String wrongReponame(final RepositoryName rname) {
         return
             new StringBuilder()
-                .append(String.format("Repository %s does not exist. ", rname))
-                .append("Repository name should not include extensions('.yaml', '.yml') or words ")
-                .append(ManageRepoSettings.RESTRICTED_REPOS)
+                .append(String.format("Wrong repository name '%s'. ", rname))
+                .append("Repository name should not include following words: ")
+                .append(RepositoryName.RESTRICTED_REPOS)
                 .toString();
     }
 }
