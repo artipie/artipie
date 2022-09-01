@@ -34,12 +34,21 @@ public interface RepositoryName {
      * Decorator based on request and layout.
      * @since 0.26
      */
-    @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
     class FromRequest implements RepositoryName {
         /**
-         * Decorated repository name.
+         * Layout.
          */
-        private final RepositoryName origin;
+        private final String layout;
+
+        /**
+         * Repository name.
+         */
+        private final String rname;
+
+        /**
+         * User name.
+         */
+        private final String uname;
 
         /**
          * Ctor.
@@ -47,76 +56,20 @@ public interface RepositoryName {
          * @param layout Layout
          */
         public FromRequest(final RoutingContext ctx, final String layout) {
-            if ("flat".equals(layout)) {
-                this.origin = new RepositoryName.FlatRepositoryName(
-                    ctx.pathParam(RepositoryName.RNAME)
-                );
+            this.layout = layout;
+            this.rname = ctx.pathParam(RepositoryName.RNAME);
+            this.uname = ctx.pathParam(RepositoryName.UNAME);
+        }
+
+        @Override
+        public String string() {
+            final String reponame;
+            if ("flat".equals(this.layout)) {
+                reponame = this.rname;
             } else {
-                this.origin = new RepositoryName.OrgRepositoryName(
-                    ctx.pathParam(RepositoryName.UNAME),
-                    ctx.pathParam(RepositoryName.RNAME)
-                );
+                reponame = String.format("%s/%s", this.uname, this.rname);
             }
-        }
-
-        @Override
-        public String string() {
-            return this.origin.string();
-        }
-    }
-
-    /**
-     * Repository name for 'flat' layout.
-     * @since 0.26
-     */
-    class FlatRepositoryName implements RepositoryName {
-        /**
-         * Repository name.
-         */
-        private final String rname;
-
-        /**
-         * Ctor.
-         * @param rname Repository name
-         */
-        public FlatRepositoryName(final String rname) {
-            this.rname = rname;
-        }
-
-        @Override
-        public String string() {
-            return this.rname;
-        }
-    }
-
-    /**
-     * Repository name for 'org' layout.
-     * @since 0.26
-     */
-    class OrgRepositoryName implements RepositoryName {
-        /**
-         * User name.
-         */
-        private final String uname;
-
-        /**
-         * Repository name.
-         */
-        private final String rname;
-
-        /**
-         * Ctor.
-         * @param uname User name
-         * @param rname Repository name
-         */
-        public OrgRepositoryName(final String uname, final String rname) {
-            this.uname = uname;
-            this.rname = rname;
-        }
-
-        @Override
-        public String string() {
-            return String.format("%s/%s", this.uname, this.rname);
+            return reponame;
         }
     }
 }
