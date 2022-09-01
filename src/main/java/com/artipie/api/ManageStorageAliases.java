@@ -83,7 +83,7 @@ public final class ManageStorageAliases implements CrudStorageAliases {
     }
 
     @Override
-    public Collection<? extends Storage> list() {
+    public Collection<? extends StorageAlias> list() {
         final Optional<YamlMapping> storages = this.storages();
         return storages.map(
             nodes -> nodes.keys().stream().map(node -> node.asScalar().value()).map(
@@ -178,10 +178,10 @@ public final class ManageStorageAliases implements CrudStorageAliases {
     }
 
     /**
-     * Implementation of {@link com.artipie.settings.CrudStorageAliases.Storage} from Yaml.
+     * Implementation of {@link StorageAlias} from Yaml.
      * @since 0.1
      */
-    static final class YamlStorage implements Storage {
+    static final class YamlStorage implements StorageAlias {
 
         /**
          * Storage alias name.

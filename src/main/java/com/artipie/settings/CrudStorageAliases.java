@@ -15,9 +15,9 @@ public interface CrudStorageAliases {
 
     /**
      * List artipie storages.
-     * @return Collection of {@link Storage} instances
+     * @return Collection of {@link StorageAlias} instances
      */
-    Collection<? extends Storage> list();
+    Collection<? extends StorageAlias> list();
 
     /**
      * Add storage to artipie storages.
@@ -36,7 +36,7 @@ public interface CrudStorageAliases {
      * Artipie storage.
      * @since 0.1
      */
-    interface Storage {
+    interface StorageAlias {
 
         /**
          * Storage alias.
