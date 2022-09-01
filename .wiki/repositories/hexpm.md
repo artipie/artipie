@@ -98,6 +98,11 @@ mix deps.get
 
 1. Via rest api
 
+You can create tar archive of your mix project with the next command:
+```bash
+mix hex.build
+```
+
 If you have completed tar archive, you can upload it to your HexPM repository with the next command:
 ```bash
 curl -X POST --data-binary "@<path_to_tar>/<tar>" http://<artipie_host>:<artipie_port>/<repo_name>/publish?replace=false
