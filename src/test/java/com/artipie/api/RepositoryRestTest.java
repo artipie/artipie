@@ -18,7 +18,9 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
@@ -62,6 +64,12 @@ class RepositoryRestTest {
      */
     private static final long SLEEP_DURATION = Duration.ofMillis(100).toMillis();
 
+    /**
+     * Wait test completion.
+     * @checkstyle MagicNumberCheck (3 lines)
+     */
+    private static final long TEST_TIMEOUT = Duration.ofSeconds(3).toSeconds();
+
     static void prepare(final Vertx vertx, final VertxTestContext ctx, final String layout)
         throws IOException {
         RepositoryRestTest.port = new RandomFreePort().value();
@@ -77,14 +85,16 @@ class RepositoryRestTest {
     }
 
     @Test
-    void listsAllRepos(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+    void listsAllRepos(final Vertx vertx, final VertxTestContext ctx)
+        throws IOException, ExecutionException, InterruptedException, TimeoutException {
         prepare(vertx, ctx, "org");
         RepositoryRestTest.asto.save(new Key.From("artipie/docker-repo.yaml"), new byte[0]);
         RepositoryRestTest.asto.save(new Key.From("alice/rpm-local.yml"), new byte[0]);
         RepositoryRestTest.asto.save(new Key.From("alice/conda.yml"), new byte[0]);
-        vertx.createHttpClient().request(
-            HttpMethod.GET, RepositoryRestTest.port, "localhost", "/api/v1/repository/list"
-        )
+        vertx.createHttpClient()
+            .request(
+                HttpMethod.GET, RepositoryRestTest.port, "localhost", "/api/v1/repository/list"
+            )
             .compose(req -> req.send().compose(HttpClientResponse::body))
             .onComplete(
                 ctx.succeeding(
@@ -100,11 +110,15 @@ class RepositoryRestTest {
                         }
                     )
                 )
-        );
+            )
+            .onFailure(ctx::failNow)
+            .toCompletionStage().toCompletableFuture()
+            .get(RepositoryRestTest.TEST_TIMEOUT, TimeUnit.SECONDS);
     }
 
     @Test
-    void listsUserRepos(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+    void listsUserRepos(final Vertx vertx, final VertxTestContext ctx)
+        throws IOException, ExecutionException, InterruptedException, TimeoutException {
         prepare(vertx, ctx, "org");
         RepositoryRestTest.asto.save(new Key.From("artipie/docker-repo.yaml"), new byte[0]);
         RepositoryRestTest.asto.save(new Key.From("alice/rpm-local.yml"), new byte[0]);
@@ -126,11 +140,15 @@ class RepositoryRestTest {
                         }
                     )
                 )
-        );
+            )
+            .onFailure(ctx::failNow)
+            .toCompletionStage().toCompletableFuture()
+            .get(RepositoryRestTest.TEST_TIMEOUT, TimeUnit.SECONDS);
     }
 
     @Test
-    void createRepo(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+    void createRepo(final Vertx vertx, final VertxTestContext ctx)
+        throws IOException, ExecutionException, InterruptedException, TimeoutException {
         prepare(vertx, ctx, "flat");
         final JsonObject json = new JsonObject()
             .put(
@@ -159,11 +177,47 @@ class RepositoryRestTest {
                     ctx.completeNow();
                 }
             )
-            .onFailure(ctx::failNow);
+            .onFailure(ctx::failNow)
+            .toCompletionStage().toCompletableFuture()
+            .get(RepositoryRestTest.TEST_TIMEOUT, TimeUnit.SECONDS);
     }
 
     @Test
-    void createUserRepo(final Vertx vertx, final VertxTestContext ctx) throws IOException {
+    void createDuplicateRepo(final Vertx vertx, final VertxTestContext ctx)
+        throws IOException, ExecutionException, InterruptedException, TimeoutException {
+        prepare(vertx, ctx, "flat");
+        RepositoryRestTest.asto.save(new Key.From("newrepo.yaml"), new byte[0]);
+        final JsonObject json = new JsonObject()
+            .put(
+                "repo", new JsonObject()
+                    .put("type", "fs")
+                    .put("storage", new JsonObject())
+            );
+        WebClient.create(vertx)
+            .put(
+                RepositoryRestTest.port,
+                RepositoryRestTest.HOST,
+                "/api/v1/repository/newrepo"
+            )
+            .sendJsonObject(json)
+            .onSuccess(
+                res -> {
+                    MatcherAssert.assertThat(
+                        res.statusCode(),
+                        // @checkstyle MagicNumberCheck (1 line)
+                        Matchers.is(409)
+                    );
+                    ctx.completeNow();
+                }
+            )
+            .onFailure(ctx::failNow)
+            .toCompletionStage().toCompletableFuture()
+            .get(RepositoryRestTest.TEST_TIMEOUT, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void createUserRepo(final Vertx vertx, final VertxTestContext ctx)
+        throws IOException, ExecutionException, InterruptedException, TimeoutException {
         prepare(vertx, ctx, "org");
         final JsonObject json = new JsonObject()
             .put(
@@ -192,7 +246,42 @@ class RepositoryRestTest {
                     ctx.completeNow();
                 }
             )
-            .onFailure(ctx::failNow);
+            .onFailure(ctx::failNow)
+            .toCompletionStage().toCompletableFuture()
+            .get(RepositoryRestTest.TEST_TIMEOUT, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void createDuplicateUserRepo(final Vertx vertx, final VertxTestContext ctx)
+        throws IOException, ExecutionException, InterruptedException, TimeoutException {
+        prepare(vertx, ctx, "org");
+        RepositoryRestTest.asto.save(new Key.From("alice/newrepo.yaml"), new byte[0]);
+        final JsonObject json = new JsonObject()
+            .put(
+                "repo", new JsonObject()
+                    .put("type", "fs")
+                    .put("storage", new JsonObject())
+            );
+        WebClient.create(vertx)
+            .put(
+                RepositoryRestTest.port,
+                RepositoryRestTest.HOST,
+                "/api/v1/repository/alice/newrepo"
+            )
+            .sendJsonObject(json)
+            .onSuccess(
+                res -> {
+                    MatcherAssert.assertThat(
+                        res.statusCode(),
+                        // @checkstyle MagicNumberCheck (1 line)
+                        Matchers.is(409)
+                    );
+                    ctx.completeNow();
+                }
+            )
+            .onFailure(ctx::failNow)
+            .toCompletionStage().toCompletableFuture()
+            .get(RepositoryRestTest.TEST_TIMEOUT, TimeUnit.SECONDS);
     }
 
     /**

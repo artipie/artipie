@@ -82,11 +82,11 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void getRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final RepositoryName rname = new RepositoryName(context, this.layout);
         if (!this.crs.exists(rname)) {
             context.response()
                 .setStatusCode(HttpStatus.NOT_FOUND_404)
-                .end(String.format("Repository %s does not exist", rname));
+                .end(repoNotfound(rname.toString()));
             return;
         }
         context.response().setStatusCode(HttpStatus.OK_200).end(
@@ -120,11 +120,11 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void createRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final RepositoryName rname = new RepositoryName(context, this.layout);
         if (this.crs.exists(rname)) {
             context.response()
                 .setStatusCode(HttpStatus.CONFLICT_409)
-                .end(String.format("Repository %s already exists", rname.string()));
+                .end(String.format("Repository %s already exists", rname));
             return;
         }
         final JsonStructure json = JsonProvider.provider().createReader(
@@ -178,5 +178,19 @@ public final class RepositoryRest extends BaseRest {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Error message for 'repository not found'.
+     * @param rname Repository name
+     * @return Message description
+     */
+    private static String repoNotfound(final String rname) {
+        return
+            new StringBuilder()
+                .append(String.format("Repository %s does not exist. ", rname))
+                .append("Repository name should not include extensions('.yaml', '.yml') or words ")
+                .append(ManageRepoSettings.RESTRICTED_REPOS)
+                .toString();
     }
 }

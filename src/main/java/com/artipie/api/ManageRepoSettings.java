@@ -12,6 +12,7 @@ import com.artipie.settings.repo.CrudRepoSettings;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import javax.json.JsonStructure;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -23,6 +24,13 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class ManageRepoSettings implements CrudRepoSettings {
+    /**
+     * Words that should not be present inside repository name.
+     */
+    public static final Set<String> RESTRICTED_REPOS = Set.of(
+        "_storages", "_permissions", "_credentials"
+    );
+
     /**
      * Not implemented error.
      */
@@ -54,20 +62,20 @@ public final class ManageRepoSettings implements CrudRepoSettings {
 
     @Override
     public boolean exists(final RepositoryName rname) {
-        return allowedReponame(rname)
+        return allowedReponame(rname.toString())
             &&
             (
-                this.asto.exists(keys(rname.string()).getLeft())
+                this.asto.exists(keys(rname.toString()).getLeft())
                     ||
-                    this.asto.exists(keys(rname.string()).getRight())
+                    this.asto.exists(keys(rname.toString()).getRight())
             );
     }
 
     @Override
     public JsonStructure value(final RepositoryName rname) {
         JsonStructure json = null;
-        if (allowedReponame(rname)) {
-            final Pair<Key, Key> keys = keys(rname.string());
+        if (allowedReponame(rname.toString())) {
+            final Pair<Key, Key> keys = keys(rname.toString());
             if (this.asto.exists(keys.getLeft())) {
                 json = new Yaml2Json().apply(
                     new String(
@@ -90,7 +98,7 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     @Override
     public void save(final RepositoryName rname, final JsonStructure value) {
         this.asto.save(
-            keys(rname.string()).getRight(),
+            keys(rname.toString()).getRight(),
             new Json2Yaml().apply(value.toString()).toString().getBytes(StandardCharsets.UTF_8)
         );
     }
@@ -124,22 +132,11 @@ public final class ManageRepoSettings implements CrudRepoSettings {
 
     /**
      * Check if the repository name is allowed.
-     * @param rname Repository name.
-     * @return True if repository name is allowed
-     */
-    private static boolean allowedReponame(final RepositoryName rname) {
-        return allowedReponame(rname.string());
-    }
-
-    /**
-     * Check if the repository name is allowed.
      * @param name Repository name.
      * @return True if repository name is allowed
      */
     private static boolean allowedReponame(final String name) {
-        return !name.contains("_storages")
-            && !name.contains("_permissions")
-            && !name.contains("_credentials");
+        return RESTRICTED_REPOS.stream().filter(name::contains).findAny().isEmpty();
     }
 
     /**
