@@ -29,16 +29,14 @@ import javax.json.JsonObject;
 public final class ManageStorageAliases implements CrudStorageAliases {
 
     /**
-     * Settings file name.
+     * Key for the settings file with .YAML extension.
      */
-    public static final String FILE_NAME = "_storages";
+    private static final Key YAML = new Key.From("_storages.yaml");
 
     /**
-     * Key for the settings file with .yaml extension.
+     * Key for the settings file with .YML extension.
      */
-    private static final Key YAML = new Key.From(
-        String.format("%s.yaml", ManageStorageAliases.FILE_NAME)
-    );
+    private static final Key YML = new Key.From("_storages.yml");
 
     /**
      * Yaml storages section name.
@@ -166,9 +164,9 @@ public final class ManageStorageAliases implements CrudStorageAliases {
                 .orElse(ManageStorageAliases.YAML)
         );
         if (!this.blsto.exists(res.get())) {
-            final String yml = String.format("%s.yml", ManageStorageAliases.FILE_NAME);
             res = Optional.of(
-                this.key.map(val -> new Key.From(val, yml)).orElse(new Key.From(yml))
+                this.key.map(val -> new Key.From(val, ManageStorageAliases.YML))
+                    .orElse(new Key.From(ManageStorageAliases.YML))
             );
             if (!this.blsto.exists(res.get())) {
                 res = Optional.empty();
