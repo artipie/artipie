@@ -6,20 +6,23 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.settings.StorageAliases;
+import com.artipie.misc.Json2Yaml;
+import com.artipie.misc.Yaml2Json;
 import com.artipie.settings.repo.CrudRepoSettings;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import javax.json.Json;
 import javax.json.JsonStructure;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Manage repository settings.
  * @since 0.26
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class ManageRepoSettings implements CrudRepoSettings {
-
     /**
      * Not implemented error.
      */
@@ -50,18 +53,40 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     }
 
     @Override
-    public boolean exists(final String name) {
-        throw ManageRepoSettings.NOT_IMPLEMENTED;
+    public boolean exists(final RepositoryName rname) {
+        return this.asto.exists(keys(rname.toString()).getLeft())
+            ||
+            this.asto.exists(keys(rname.toString()).getRight());
     }
 
     @Override
-    public JsonStructure value(final String name) {
-        return Json.createObjectBuilder().add("type", "maven").add("storage", "def").build();
+    public JsonStructure value(final RepositoryName rname) {
+        JsonStructure json = null;
+        final Pair<Key, Key> keys = keys(rname.toString());
+        if (this.asto.exists(keys.getLeft())) {
+            json = new Yaml2Json().apply(
+                new String(
+                    this.asto.value(keys.getLeft()),
+                    StandardCharsets.UTF_8
+                )
+            ).asJsonObject();
+        } else if (this.asto.exists(keys.getRight())) {
+            json = new Yaml2Json().apply(
+                new String(
+                    this.asto.value(keys.getRight()),
+                    StandardCharsets.UTF_8
+                )
+            ).asJsonObject().getJsonObject("repo");
+        }
+        return json;
     }
 
     @Override
-    public void save(final String name, final JsonStructure value) {
-        throw ManageRepoSettings.NOT_IMPLEMENTED;
+    public void save(final RepositoryName rname, final JsonStructure value) {
+        this.asto.save(
+            keys(rname.toString()).getRight(),
+            new Json2Yaml().apply(value.toString()).toString().getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     @Override
@@ -83,14 +108,31 @@ public final class ManageRepoSettings implements CrudRepoSettings {
         final Collection<String> res = new ArrayList<>(5);
         for (final Key item : this.asto.list(key)) {
             final String name = item.string();
-            // @checkstyle BooleanExpressionComplexityCheck (5 lines)
-            if ((name.endsWith(".yaml") || name.endsWith(".yml"))
-                && !name.contains(StorageAliases.FILE_NAME)
-                && !name.contains("_permissions")
-                && !name.contains("_credentials")) {
+            if (yamlFilename(name) && RepositoryName.allowedReponame(name)) {
                 res.add(name.replaceAll("\\.yaml|\\.yml", ""));
             }
         }
         return res;
+    }
+
+    /**
+     * Returns a pair of keys, these keys are possible repository settings names.
+     * @param name Key name
+     * @return Pair of keys
+     */
+    private static Pair<Key, Key> keys(final String name) {
+        return new ImmutablePair<>(
+            new Key.From(String.format("%s.yaml", name)),
+            new Key.From(String.format("%s.yml", name))
+        );
+    }
+
+    /**
+     * Checks whether name is yaml-file name.
+     * @param name Key name
+     * @return True if name has yaml-file extension
+     */
+    private static boolean yamlFilename(final String name) {
+        return name.endsWith(".yaml") || name.endsWith(".yml");
     }
 }

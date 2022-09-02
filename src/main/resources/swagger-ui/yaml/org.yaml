@@ -1,9 +1,17 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Swagger Petstore
+  title: Artipie - OpenAPI 3.0
+  description:
+    This is Atripie Server based on the OpenAPI 3.0 specification.
   license:
     name: MIT
+externalDocs:
+  description: Find out more about Artipie
+  url: https://github.com/artipie
+tags:
+  - name: repository
+    description: Operations about repository
 paths:
   /api/v1/repository/list:
     get:
@@ -56,8 +64,8 @@ paths:
                 $ref: "#/components/schemas/Error"
   /api/v1/repository/{uname}/{rname}:
     get:
-      summary: Get repository seettings
-      operationId: getRepo
+      summary: Get user repository settings
+      operationId: getUserRepo
       tags:
         - repository
       parameters:
@@ -88,6 +96,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    put:
+      summary: Create user repository
+      operationId: createUserRepo
+      tags:
+        - repository
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: Name of the user
+          schema:
+            type: string
+        - name: rname
+          in: path
+          required: true
+          description: Name of the repository
+          schema:
+            type: string
+      requestBody:
+        description: Create a new user repository
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Repository'
+        required: true
+      responses:
+        '200':
+          description: Creates a new repository with name {rname} for user {uname}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullRepository'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Error:
@@ -101,6 +147,13 @@ components:
           format: int32
         message:
           type: string
+    Repository:
+      type: object
+      required:
+        - repo
+      properties:
+        repo:
+          type: object
     FullRepository:
       type: object
       required:

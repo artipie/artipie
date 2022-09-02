@@ -6,7 +6,7 @@
 package com.artipie;
 
 import com.artipie.api.ManageRepoSettings;
-import com.artipie.api.RepositoryVerticle;
+import com.artipie.api.RestApi;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
@@ -110,7 +110,7 @@ public final class VertxMain {
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
         this.startRepos(settings, metrics, this.port);
         this.vertx.deployVerticle(
-            new RepositoryVerticle(
+            new RestApi(
                 new ManageRepoSettings(new BlockingStorage(settings.repoConfigsStorage())),
                 settings.layout().toString(),
                 // @checkstyle MagicNumberCheck (1 line)

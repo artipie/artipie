@@ -406,6 +406,11 @@ SOFTWARE.
       <artifactId>vertx-web-openapi</artifactId>
       <version>${vertx.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>2.13.1</version>
+    </dependency>
   </dependencies>
   <build>
     <testResources>
