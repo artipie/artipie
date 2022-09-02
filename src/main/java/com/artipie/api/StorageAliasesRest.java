@@ -6,6 +6,7 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.settings.Layout;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -24,21 +25,30 @@ public final class StorageAliasesRest extends BaseRest {
     private final BlockingStorage asto;
 
     /**
+     * Artipie layout.
+     */
+    private final String layout;
+
+    /**
      * Ctor.
      * @param asto Artipie settings storage
+     * @param layout Artipie layout
      */
-    public StorageAliasesRest(final BlockingStorage asto) {
+    public StorageAliasesRest(final BlockingStorage asto, final String layout) {
         this.asto = asto;
+        this.layout = layout;
     }
 
     @Override
     public void init(final RouterBuilder rtrb) {
-        rtrb.operation("getAliases")
-            .handler(this::getAliases)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        rtrb.operation("getRepoAliases")
-            .handler(this::getRepoAliases)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        if (new Layout.Flat().toString().equals(this.layout)) {
+            rtrb.operation("getAliases")
+                .handler(this::getAliases)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rtrb.operation("getRepoAliases")
+                .handler(this::getRepoAliases)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        }
     }
 
     /**

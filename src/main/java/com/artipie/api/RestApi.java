@@ -52,7 +52,7 @@ public final class RestApi extends AbstractVerticle {
             .onSuccess(
                 rb -> {
                     new RepositoryRest(new ManageRepoSettings(this.asto), this.layout).init(rb);
-                    new StorageAliasesRest(this.asto).init(rb);
+                    new StorageAliasesRest(this.asto, this.layout).init(rb);
                     final Router router = rb.createRouter();
                     router.route("/api/*")
                         .handler(
