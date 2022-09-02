@@ -7,10 +7,10 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.settings.Layout;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -56,12 +56,9 @@ public final class StorageAliasesRest extends BaseRest {
      * @param context Routing context
      */
     private void getAliases(final RoutingContext context) {
-        context.response().setStatusCode(HttpStatus.OK_200).end(
-            JsonArray.of(
-                new ManageStorageAliases(this.asto).list().stream()
-                    .map(item -> new JsonObject(item.toString())).toArray()
-            ).encode()
-        );
+        final JsonArrayBuilder builder = Json.createArrayBuilder();
+        new ManageStorageAliases(this.asto).list().forEach(builder::add);
+        context.response().setStatusCode(HttpStatus.OK_200).end(builder.build().toString());
     }
 
     /**
@@ -69,12 +66,12 @@ public final class StorageAliasesRest extends BaseRest {
      * @param context Routing context
      */
     private void getRepoAliases(final RoutingContext context) {
+        final JsonArrayBuilder builder = Json.createArrayBuilder();
+        new ManageStorageAliases(
+            new Key.From(context.pathParam(RepositoryName.RNAME)), this.asto
+        ).list().forEach(builder::add);
         context.response().setStatusCode(HttpStatus.OK_200).end(
-            JsonArray.of(
-                new ManageStorageAliases(
-                    new Key.From(context.pathParam(RepositoryName.RNAME)), this.asto
-                ).list().stream().map(item -> new JsonObject(item.toString())).toArray()
-            ).encode()
+            builder.build().toString()
         );
     }
 }
