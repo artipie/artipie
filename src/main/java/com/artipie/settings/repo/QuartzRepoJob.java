@@ -5,6 +5,7 @@
 package com.artipie.settings.repo;
 
 import com.artipie.adapters.conda.CondaQuartz;
+import com.jcabi.log.Logger;
 import java.util.function.Predicate;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -22,7 +23,14 @@ public enum QuartzRepoJob implements Predicate<RepoConfig> {
 
         @Override
         public boolean test(final RepoConfig cnfg) {
-            return cnfg.type().equals("conda");
+            boolean res;
+            try {
+                res = cnfg.type().equals("conda");
+            } catch (final IllegalStateException err) {
+                Logger.error(this, err.getMessage());
+                res = false;
+            }
+            return res;
         }
 
         @Override

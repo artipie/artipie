@@ -4,8 +4,8 @@
  */
 package com.artipie.api;
 
+import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.misc.JavaResource;
-import com.artipie.settings.repo.CrudRepoSettings;
 import com.jcabi.log.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpServer;
@@ -20,9 +20,9 @@ import io.vertx.ext.web.openapi.RouterBuilder;
  */
 public final class RestApi extends AbstractVerticle {
     /**
-     * Repository settings create/read/update/delete.
+     * Artipie settings storage.
      */
-    private final CrudRepoSettings crs;
+    private final BlockingStorage asto;
 
     /**
      * Artipie layout.
@@ -36,12 +36,12 @@ public final class RestApi extends AbstractVerticle {
 
     /**
      * Ctor.
-     * @param crs Repository settings create/read/update/delete
+     * @param asto Artipie settings storage.
      * @param layout Artipie layout
      * @param port Port to start verticle on
      */
-    public RestApi(final CrudRepoSettings crs, final String layout, final int port) {
-        this.crs = crs;
+    public RestApi(final BlockingStorage asto, final String layout, final int port) {
+        this.asto = asto;
         this.layout = layout;
         this.port = port;
     }
@@ -51,7 +51,8 @@ public final class RestApi extends AbstractVerticle {
         RouterBuilder.create(this.vertx, String.format("swagger-ui/yaml/%s.yaml", this.layout))
             .onSuccess(
                 rb -> {
-                    new RepositoryRest(this.crs, this.layout).init(rb);
+                    new RepositoryRest(new ManageRepoSettings(this.asto), this.layout).init(rb);
+                    new StorageAliasesRest(this.asto).init(rb);
                     final Router router = rb.createRouter();
                     router.route("/api/*")
                         .handler(
