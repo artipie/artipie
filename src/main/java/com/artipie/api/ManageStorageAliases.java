@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.json.Json;
 import javax.json.JsonObject;
 
 /**
@@ -81,11 +82,17 @@ public final class ManageStorageAliases implements CrudStorageAliases {
     }
 
     @Override
-    public Collection<? extends StorageAlias> list() {
+    public Collection<JsonObject> list() {
         final Optional<YamlMapping> storages = this.storages();
         return storages.map(
             nodes -> nodes.keys().stream().map(node -> node.asScalar().value()).map(
-                alias -> new YamlStorage(alias, storages.get().yamlMapping(alias))
+                alias -> Json.createObjectBuilder()
+                    .add("alias", alias)
+                    .add(
+                        "storage",
+                        new Yaml2Json().apply(storages.get().yamlMapping(alias).toString())
+                            .asJsonObject()
+                    ).build()
             ).collect(Collectors.toList())
         ).orElse(Collections.emptyList());
     }
@@ -173,42 +180,5 @@ public final class ManageStorageAliases implements CrudStorageAliases {
             }
         }
         return res;
-    }
-
-    /**
-     * Implementation of {@link StorageAlias} from Yaml.
-     * @since 0.1
-     */
-    static final class YamlStorage implements StorageAlias {
-
-        /**
-         * Storage alias name.
-         */
-        private final String name;
-
-        /**
-         * Storage yaml mapping.
-         */
-        private final YamlMapping yaml;
-
-        /**
-         * Ctor.
-         * @param name Storage alias name
-         * @param yaml Storage yaml mapping
-         */
-        YamlStorage(final String name, final YamlMapping yaml) {
-            this.name = name;
-            this.yaml = yaml;
-        }
-
-        @Override
-        public String alias() {
-            return this.name;
-        }
-
-        @Override
-        public JsonObject info() {
-            return new Yaml2Json().apply(this.yaml.toString()).asJsonObject();
-        }
     }
 }

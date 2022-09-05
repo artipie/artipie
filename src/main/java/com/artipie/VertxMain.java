@@ -5,7 +5,6 @@
 
 package com.artipie;
 
-import com.artipie.api.ManageRepoSettings;
 import com.artipie.api.RestApi;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
@@ -111,7 +110,7 @@ public final class VertxMain {
         this.startRepos(settings, metrics, this.port);
         this.vertx.deployVerticle(
             new RestApi(
-                new ManageRepoSettings(new BlockingStorage(settings.repoConfigsStorage())),
+                new BlockingStorage(settings.repoConfigsStorage()),
                 settings.layout().toString(),
                 // @checkstyle MagicNumberCheck (1 line)
                 8086

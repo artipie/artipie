@@ -15,9 +15,9 @@ public interface CrudStorageAliases {
 
     /**
      * List artipie storages.
-     * @return Collection of {@link StorageAlias} instances
+     * @return Collection of {@link JsonObject} instances
      */
-    Collection<? extends StorageAlias> list();
+    Collection<JsonObject> list();
 
     /**
      * Add storage to artipie storages.
@@ -32,22 +32,4 @@ public interface CrudStorageAliases {
      */
     void remove(String alias);
 
-    /**
-     * Artipie storage.
-     * @since 0.1
-     */
-    interface StorageAlias {
-
-        /**
-         * Storage alias.
-         * @return Alias
-         */
-        String alias();
-
-        /**
-         * Storage settings.
-         * @return Settings in json format
-         */
-        JsonObject info();
-    }
 }

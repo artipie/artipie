@@ -94,6 +94,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/repository/{rname}/storages:
+    get:
+      summary: Get repository storage aliases
+      operationId: getRepoAliases
+      tags:
+        - storage aliases
+      parameters:
+        - name: rname
+          in: path
+          required: true
+          description: Name of the repository
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full storage alias settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StorageAlias'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/storages:
+    get:
+      summary: Get common Artipie storage aliases
+      operationId: getAliases
+      tags:
+        - storage aliases
+      responses:
+        '200':
+          description: Full aliases settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StorageAlias'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Error:
@@ -134,3 +183,13 @@ components:
           type: string
         storage:
           type: string
+    StorageAlias:
+      type: object
+      required:
+        - alias
+        - storage
+      properties:
+        alias:
+          type: string
+        storage:
+          type: object
