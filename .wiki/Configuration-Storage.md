@@ -1,11 +1,11 @@
 # Storage
 
 Artipie "Storage" is an abstraction on top of multiple key-value storage providers. Artipie supports:
- - file system storage
- - S3 storage
- - etcd storage (see limitations)
- - in-memory
- - custom storage
+ - [file system storage](#file-system-storage)
+ - [S3 storage](#s3-storage)
+ - [etcd storage](#etcd-storage) (see limitations)
+ - [in-memory](#in-memory-storage)
+ - [custom storage](#custom-storage)
 
 The Storage is used for storing repository data, proxy/mirrors repository caching and for Artipie 
 configuration. Such storage can be configured in various config files and in various sections of 
