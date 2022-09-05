@@ -53,7 +53,7 @@ class ManageStorageAliasesTest {
         );
         MatcherAssert.assertThat(
             new ManageStorageAliases(key, this.blsto).list().stream()
-                .map(CrudStorageAliases.StorageAlias::alias).collect(Collectors.toList()),
+                .map(item -> item.getString("alias")).collect(Collectors.toList()),
             Matchers.containsInAnyOrder(aliases)
         );
     }
@@ -74,7 +74,7 @@ class ManageStorageAliasesTest {
         final CrudStorageAliases storages = new ManageStorageAliases(key, this.blsto);
         storages.remove("two");
         MatcherAssert.assertThat(
-            storages.list().stream().map(CrudStorageAliases.StorageAlias::alias)
+            storages.list().stream().map(item -> item.getString("alias"))
                 .collect(Collectors.toList()),
             Matchers.containsInAnyOrder("one", "three")
         );
@@ -95,7 +95,7 @@ class ManageStorageAliasesTest {
         final String another = "newOne";
         storages.add(another, Json.createObjectBuilder().add("type", "s3").build());
         MatcherAssert.assertThat(
-            storages.list().stream().map(CrudStorageAliases.StorageAlias::alias)
+            storages.list().stream().map(item -> item.getString("alias"))
                 .collect(Collectors.toList()),
             Matchers.containsInAnyOrder(def, another)
         );
@@ -112,7 +112,7 @@ class ManageStorageAliasesTest {
         final String another = "newOne";
         storages.add(another, Json.createObjectBuilder().add("type", "file").build());
         MatcherAssert.assertThat(
-            storages.list().stream().map(CrudStorageAliases.StorageAlias::alias)
+            storages.list().stream().map(item -> item.getString("alias"))
                 .collect(Collectors.toList()),
             Matchers.containsInAnyOrder(another)
         );

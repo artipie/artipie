@@ -4,18 +4,14 @@
  */
 package com.artipie.api;
 
-import com.artipie.misc.JavaResource;
 import com.artipie.settings.repo.CrudRepoSettings;
 import io.vertx.core.json.JsonArray;
-import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.FileSystemAccess;
-import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.io.StringReader;
+import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
-import javax.json.spi.JsonProvider;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -73,13 +69,6 @@ public final class RepositoryRest extends BaseRest {
                 .handler(this::createRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         }
-        final Router router = rbr.createRouter();
-        router.route("/api/*").handler(
-            StaticHandler.create(
-                FileSystemAccess.ROOT,
-                new JavaResource("swagger-ui").uri().getPath()
-            )
-        );
     }
 
     /**
@@ -121,9 +110,8 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void listUserRepos(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryName.UNAME);
         context.response().setStatusCode(HttpStatus.OK_200).end(
-            JsonArray.of(this.crs.list(uname).toArray()).encode()
+            JsonArray.of(this.crs.list(context.pathParam(RepositoryName.UNAME)).toArray()).encode()
         );
     }
 
@@ -146,7 +134,7 @@ public final class RepositoryRest extends BaseRest {
                 .end(String.format("Repository %s already exists", rname));
             return;
         }
-        final JsonStructure json = JsonProvider.provider().createReader(
+        final JsonStructure json = Json.createReader(
             new StringReader(context.body().asString())
         ).read();
         if (RepositoryRest.validateRepo(context, (JsonObject) json)) {

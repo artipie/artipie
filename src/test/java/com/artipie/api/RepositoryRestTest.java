@@ -75,10 +75,7 @@ class RepositoryRestTest {
         RepositoryRestTest.port = new RandomFreePort().value();
         RepositoryRestTest.asto = new BlockingStorage(new InMemoryStorage());
         vertx.deployVerticle(
-            new RestApi(
-                new ManageRepoSettings(RepositoryRestTest.asto), layout,
-                RepositoryRestTest.port
-            ),
+            new RestApi(RepositoryRestTest.asto, layout, RepositoryRestTest.port),
             ctx.succeedingThenComplete()
         );
         waitServer(vertx);
