@@ -102,10 +102,7 @@ public abstract class RestApiServerBase {
         this.prt = new RandomFreePort().value();
         this.asto = new BlockingStorage(new InMemoryStorage());
         vertx.deployVerticle(
-            new RestApi(
-                new ManageRepoSettings(this.asto), this.layout(),
-                this.prt
-            ),
+            new RestApi(this.asto, this.layout(), this.prt),
             context.succeedingThenComplete()
         );
         this.waitServer(vertx);
