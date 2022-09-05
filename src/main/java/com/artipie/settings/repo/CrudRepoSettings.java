@@ -4,7 +4,10 @@
  */
 package com.artipie.settings.repo;
 
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.RepositoryName;
+import com.artipie.asto.blocking.BlockingStorage;
+import java.io.IOException;
 import java.util.Collection;
 import javax.json.JsonStructure;
 
@@ -42,6 +45,20 @@ public interface CrudRepoSettings {
     JsonStructure value(RepositoryName name);
 
     /**
+     * Get repository settings as yaml.
+     * @param name Repository name.
+     * @return Yaml repository settings
+     * @throws IOException On IO error
+     */
+    YamlMapping valueAsYaml(RepositoryName name) throws IOException;
+
+    /**
+     * Repositories configuration storage.
+     * @return Repo configs {@link BlockingStorage}
+     */
+    BlockingStorage repoConfigsStorage();
+
+    /**
      * Add new repository.
      * @param rname Repository name.
      * @param value New repository settings
@@ -50,10 +67,9 @@ public interface CrudRepoSettings {
 
     /**
      * Remove repository.
-     * @param name Repository name. The name can be composite: in the case of org layout it will
-     *  consist of two parts - username and repo name, for example john/maven-s3.
+     * @param rname Repository name
      */
-    void delete(String name);
+    void delete(RepositoryName rname);
 
     /**
      * Move repository and all data.

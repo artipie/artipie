@@ -12,6 +12,7 @@ import java.util.Set;
  *
  * @since 0.26
  */
+@SuppressWarnings("PMD.DataClass")
 public class RepositoryName {
     /**
      * Username path parameter name.
@@ -22,6 +23,11 @@ public class RepositoryName {
      * Repository path parameter name.
      */
     public static final String RNAME = "rname";
+
+    /**
+     * Repository path parameter name.
+     */
+    public static final String FLAT = "flat";
 
     /**
      * Words that should not be present inside repository name.
@@ -47,14 +53,39 @@ public class RepositoryName {
 
     /**
      * Ctor.
-     *
-     * @param ctx RoutingContext
+     * @param rname Repository name
+     * @param uname User name
      * @param layout Layout
      */
-    public RepositoryName(final RoutingContext ctx, final String layout) {
+    public RepositoryName(final String rname, final String uname, final String layout) {
         this.layout = layout;
-        this.rname = ctx.pathParam(RepositoryName.RNAME);
-        this.uname = ctx.pathParam(RepositoryName.UNAME);
+        this.rname = rname;
+        this.uname = uname;
+    }
+
+    /**
+     * Creates {@link RepositoryName} instance.
+     * @param ctx RoutingContext
+     * @param layout Layout
+     * @return RepositoryName
+     */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static RepositoryName create(final RoutingContext ctx, final String layout) {
+        return new RepositoryName(
+            ctx.pathParam(RepositoryName.RNAME),
+            ctx.pathParam(RepositoryName.UNAME),
+            layout
+        );
+    }
+
+    /**
+     * Creates {@link RepositoryName} instance for 'flat' layout.
+     * @param rname Repository name
+     * @return RepositoryName
+     */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static RepositoryName create(final String rname) {
+        return new RepositoryName(rname, null, RepositoryName.FLAT);
     }
 
     /**
@@ -88,7 +119,7 @@ public class RepositoryName {
     @Override
     public String toString() {
         final String reponame;
-        if ("flat".equals(this.layout)) {
+        if (RepositoryName.FLAT.equals(this.layout)) {
             reponame = this.rname;
         } else {
             reponame = String.format("%s/%s", this.uname, this.rname);

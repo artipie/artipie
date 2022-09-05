@@ -4,11 +4,14 @@
  */
 package com.artipie.api;
 
+import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.misc.Json2Yaml;
 import com.artipie.misc.Yaml2Json;
 import com.artipie.settings.repo.CrudRepoSettings;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,9 +79,39 @@ public final class ManageRepoSettings implements CrudRepoSettings {
                     this.asto.value(keys.getRight()),
                     StandardCharsets.UTF_8
                 )
-            ).asJsonObject().getJsonObject("repo");
+            ).asJsonObject().getJsonObject(BaseRest.REPO);
         }
         return json;
+    }
+
+    @Override
+    public YamlMapping valueAsYaml(final RepositoryName rname) throws IOException {
+        YamlMapping yaml = null;
+        final Pair<Key, Key> keys = keys(rname.toString());
+        if (this.asto.exists(keys.getLeft())) {
+            yaml = Yaml.createYamlInput(
+                new String(
+                    this.asto.value(keys.getLeft()),
+                    StandardCharsets.UTF_8
+                )
+            ).readYamlMapping().yamlMapping(BaseRest.REPO);
+        } else if (this.asto.exists(keys.getRight())) {
+            yaml = Yaml.createYamlInput(
+                new String(
+                    this.asto.value(keys.getRight()),
+                    StandardCharsets.UTF_8
+                )
+            ).readYamlMapping().yamlMapping(BaseRest.REPO);
+        }
+        return yaml;
+    }
+
+    /**
+     * Repositories configuration storage.
+     * @return Repo configs {@link BlockingStorage}
+     */
+    public BlockingStorage repoConfigsStorage() {
+        return this.asto;
     }
 
     @Override
@@ -90,8 +123,13 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     }
 
     @Override
-    public void delete(final String name) {
-        throw ManageRepoSettings.NOT_IMPLEMENTED;
+    public void delete(final RepositoryName rname) {
+        final Pair<Key, Key> keys = keys(rname.toString());
+        if (this.asto.exists(keys.getLeft())) {
+            this.asto.delete(keys.getLeft());
+        } else if (this.asto.exists(keys.getRight())) {
+            this.asto.delete(keys.getLeft());
+        }
     }
 
     @Override

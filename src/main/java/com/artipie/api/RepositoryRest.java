@@ -22,11 +22,6 @@ import org.eclipse.jetty.http.HttpStatus;
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class RepositoryRest extends BaseRest {
     /**
-     * Key 'repo' inside json-object.
-     */
-    private static final String REPO = "repo";
-
-    /**
      * Repository settings create/read/update/delete.
      */
     private final CrudRepoSettings crs;
@@ -77,7 +72,7 @@ public final class RepositoryRest extends BaseRest {
      * @checkstyle ReturnCountCheck (20 lines)
      */
     private void getRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName(context, this.layout);
+        final RepositoryName rname = RepositoryName.create(context, this.layout);
         if (!RepositoryName.allowedReponame(rname)) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
@@ -121,7 +116,7 @@ public final class RepositoryRest extends BaseRest {
      * @checkstyle ReturnCountCheck (20 lines)
      */
     private void createRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName(context, this.layout);
+        final RepositoryName rname = RepositoryName.create(context, this.layout);
         if (!RepositoryName.allowedReponame(rname)) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
