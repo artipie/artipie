@@ -9,12 +9,17 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.nuget.RandomFreePort;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.net.NetClient;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -109,6 +114,31 @@ public abstract class RestApiServerBase {
     }
 
     /**
+     * Perform the request and check the result.
+     * @param vertx Text vertx server instance
+     * @param ctx Vertx Test Context
+     * @param rqs Request parameters: method and path
+     * @param assertion Test assertion
+     * @throws Exception On error
+     * @checkstyle ParameterNumberCheck (5 lines)
+     */
+    final void requestAndAssert(final Vertx vertx, final VertxTestContext ctx,
+        final Request rqs, final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
+        WebClient.create(vertx)
+            .request(rqs.method, this.port(), RestApiServerBase.HOST, rqs.path)
+            .send()
+            .onSuccess(
+                res -> {
+                    assertion.accept(res);
+                    ctx.completeNow();
+                }
+            )
+            .onFailure(ctx::failNow)
+            .toCompletionStage().toCompletableFuture()
+            .get(RestApiServerBase.TEST_TIMEOUT, TimeUnit.SECONDS);
+    }
+
+    /**
      * Waits until server port available.
      *
      * @param vertx Vertx instance
@@ -141,6 +171,41 @@ public abstract class RestApiServerBase {
                     RestApiServerBase.HOST, this.prt
                 )
             );
+        }
+    }
+
+    /**
+     * Test request.
+     * @since 0.27
+     */
+    static final class Request {
+
+        /**
+         * Http method.
+         */
+        private final HttpMethod method;
+
+        /**
+         * Request path.
+         */
+        private final String path;
+
+        /**
+         * Ctor.
+         * @param method Http method
+         * @param path Request path
+         */
+        Request(final HttpMethod method, final String path) {
+            this.method = method;
+            this.path = path;
+        }
+
+        /**
+         * Ctor with default GET method.
+         * @param path Request path
+         */
+        Request(final String path) {
+            this(HttpMethod.GET, path);
         }
     }
 }
