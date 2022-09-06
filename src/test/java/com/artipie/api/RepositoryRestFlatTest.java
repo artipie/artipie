@@ -6,18 +6,15 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -30,74 +27,46 @@ import org.junit.jupiter.api.extension.ExtendWith;
 final class RepositoryRestFlatTest extends RestApiServerBase {
 
     @Test
-    void listsRepos(final Vertx vertx, final VertxTestContext ctx) throws ExecutionException,
-        InterruptedException, TimeoutException {
+    void listsRepos(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(new Key.From("docker-repo.yaml"), new byte[0]);
         this.save(new Key.From("rpm-local.yml"), new byte[0]);
         this.save(new Key.From("conda-remote.yml"), new byte[0]);
-        vertx.createHttpClient()
-            .request(
-                HttpMethod.GET, this.port(), RestApiServerBase.HOST, "/api/v1/repository/list"
-            )
-            .compose(req -> req.send().compose(HttpClientResponse::body))
-            .onComplete(
-                ctx.succeeding(
-                    buffer -> ctx.verify(
-                        () -> {
-                            MatcherAssert.assertThat(
-                                buffer.toJsonArray().stream().collect(Collectors.toList()),
-                                Matchers.containsInAnyOrder(
-                                    "rpm-local", "docker-repo", "conda-remote"
-                                )
-                            );
-                            ctx.completeNow();
-                        }
-                    )
+        this.requestAndAssert(
+            vertx, ctx, new Request("/api/v1/repository/list"),
+            resp -> MatcherAssert.assertThat(
+                resp.body().toJsonArray().stream().collect(Collectors.toList()),
+                Matchers.containsInAnyOrder(
+                    "rpm-local", "docker-repo", "conda-remote"
                 )
             )
-            .onFailure(ctx::failNow)
-            .toCompletionStage().toCompletableFuture()
-            .get(RestApiServerBase.TEST_TIMEOUT, TimeUnit.SECONDS);
+        );
     }
 
     @Test
-    void createRepo(final Vertx vertx, final VertxTestContext ctx)
-        throws ExecutionException, InterruptedException, TimeoutException {
+    void createRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         final JsonObject json = new JsonObject()
             .put(
                 "repo", new JsonObject()
                     .put("type", "fs")
                     .put("storage", new JsonObject())
             );
-        WebClient.create(vertx)
-            .put(
-                this.port(),
-                RestApiServerBase.HOST,
-                "/api/v1/repository/newrepo"
-            )
-            .sendJsonObject(json)
-            .onSuccess(
-                res -> {
-                    MatcherAssert.assertThat(
-                        res.statusCode(),
-                        // @checkstyle MagicNumberCheck (1 line)
-                        Matchers.is(200)
-                    );
-                    MatcherAssert.assertThat(
-                        this.storage().exists(new Key.From("newrepo.yml")),
-                        Matchers.is(true)
-                    );
-                    ctx.completeNow();
-                }
-            )
-            .onFailure(ctx::failNow)
-            .toCompletionStage().toCompletableFuture()
-            .get(RestApiServerBase.TEST_TIMEOUT, TimeUnit.SECONDS);
+        this.requestAndAssert(
+            vertx, ctx, new Request(HttpMethod.PUT, "/api/v1/repository/newrepo", json),
+            res -> {
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                );
+                MatcherAssert.assertThat(
+                    this.storage().exists(new Key.From("newrepo.yml")),
+                    new IsEqual<>(true)
+                );
+            }
+        );
     }
 
     @Test
-    void createDuplicateRepo(final Vertx vertx, final VertxTestContext ctx)
-        throws ExecutionException, InterruptedException, TimeoutException {
+    void createDuplicateRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(new Key.From("newrepo.yaml"), new byte[0]);
         final JsonObject json = new JsonObject()
             .put(
@@ -105,26 +74,14 @@ final class RepositoryRestFlatTest extends RestApiServerBase {
                     .put("type", "fs")
                     .put("storage", new JsonObject())
             );
-        WebClient.create(vertx)
-            .put(
-                this.port(),
-                RestApiServerBase.HOST,
-                "/api/v1/repository/newrepo"
-            )
-            .sendJsonObject(json)
-            .onSuccess(
-                res -> {
-                    MatcherAssert.assertThat(
-                        res.statusCode(),
-                        // @checkstyle MagicNumberCheck (1 line)
-                        Matchers.is(409)
-                    );
-                    ctx.completeNow();
-                }
-            )
-            .onFailure(ctx::failNow)
-            .toCompletionStage().toCompletableFuture()
-            .get(RestApiServerBase.TEST_TIMEOUT, TimeUnit.SECONDS);
+        this.requestAndAssert(
+            vertx, ctx, new Request(HttpMethod.PUT, "/api/v1/repository/newrepo", json),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.CONFLICT_409)
+                )
+        );
     }
 
     @Override

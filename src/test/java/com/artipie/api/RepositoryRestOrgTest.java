@@ -6,18 +6,15 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -30,98 +27,62 @@ import org.junit.jupiter.api.extension.ExtendWith;
 final class RepositoryRestOrgTest extends RestApiServerBase {
 
     @Test
-    void listsAllRepos(final Vertx vertx, final VertxTestContext ctx) throws ExecutionException,
-        InterruptedException, TimeoutException {
+    void listsAllRepos(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(new Key.From("artipie/docker-repo.yaml"), new byte[0]);
         this.save(new Key.From("alice/rpm-local.yml"), new byte[0]);
         this.save(new Key.From("alice/conda.yml"), new byte[0]);
-        vertx.createHttpClient()
-            .request(
-                HttpMethod.GET, this.port(), RestApiServerBase.HOST, "/api/v1/repository/list"
-            )
-            .compose(req -> req.send().compose(HttpClientResponse::body))
-            .onComplete(
-                ctx.succeeding(
-                    buffer -> ctx.verify(
-                        () -> {
-                            MatcherAssert.assertThat(
-                                buffer.toJsonArray().stream().collect(Collectors.toList()),
-                                Matchers.containsInAnyOrder(
-                                    "alice/rpm-local", "artipie/docker-repo", "alice/conda"
-                                )
-                            );
-                            ctx.completeNow();
-                        }
+        this.requestAndAssert(
+            vertx, ctx, new Request("/api/v1/repository/list"),
+            resp ->
+                MatcherAssert.assertThat(
+                    resp.body().toJsonArray().stream().collect(Collectors.toList()),
+                    Matchers.containsInAnyOrder(
+                        "alice/rpm-local", "artipie/docker-repo", "alice/conda"
                     )
                 )
-            )
-            .onFailure(ctx::failNow)
-            .toCompletionStage().toCompletableFuture()
-            .get(RestApiServerBase.TEST_TIMEOUT, TimeUnit.SECONDS);
+        );
     }
 
     @Test
-    void listsUserRepos(final Vertx vertx, final VertxTestContext ctx)
-        throws ExecutionException, InterruptedException, TimeoutException {
+    void listsUserRepos(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(new Key.From("artipie/docker-repo.yaml"), new byte[0]);
         this.save(new Key.From("alice/rpm-local.yml"), new byte[0]);
         this.save(new Key.From("alice/conda.yml"), new byte[0]);
-        vertx.createHttpClient().request(
-            HttpMethod.GET, this.port(), RestApiServerBase.HOST, "/api/v1/repository/list/alice"
-        )
-            .compose(req -> req.send().compose(HttpClientResponse::body))
-            .onComplete(
-                ctx.succeeding(
-                    buffer -> ctx.verify(
-                        () -> {
-                            MatcherAssert.assertThat(
-                                buffer.toJsonArray().stream().collect(Collectors.toList()),
-                                Matchers.containsInAnyOrder("alice/rpm-local", "alice/conda")
-                            );
-                            ctx.completeNow();
-                        }
-                    )
+        this.requestAndAssert(
+            vertx, ctx, new Request("/api/v1/repository/list/alice"),
+            resp ->
+                MatcherAssert.assertThat(
+                    resp.body().toJsonArray().stream().collect(Collectors.toList()),
+                    Matchers.containsInAnyOrder("alice/rpm-local", "alice/conda")
                 )
-            )
-            .onFailure(ctx::failNow)
-            .toCompletionStage().toCompletableFuture()
-            .get(RestApiServerBase.TEST_TIMEOUT, TimeUnit.SECONDS);
+        );
     }
 
     @Test
-    void createUserRepo(final Vertx vertx, final VertxTestContext ctx)
-        throws ExecutionException, InterruptedException, TimeoutException {
+    void createUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         final JsonObject json = new JsonObject()
             .put(
                 "repo", new JsonObject()
                     .put("type", "fs")
                     .put("storage", new JsonObject())
             );
-        WebClient.create(vertx)
-            .put(this.port(), RestApiServerBase.HOST, "/api/v1/repository/alice/newrepo")
-            .sendJsonObject(json)
-            .onSuccess(
-                res -> {
-                    MatcherAssert.assertThat(
-                        res.statusCode(),
-                        // @checkstyle MagicNumberCheck (1 line)
-                        Matchers.is(200)
-                    );
-                    MatcherAssert.assertThat(
-                        this.storage().exists(new Key.From("alice/newrepo.yml")),
-                        Matchers.is(true)
-                    );
-                    ctx.completeNow();
-                }
-            )
-            .onFailure(ctx::failNow)
-            .toCompletionStage().toCompletableFuture()
-            .get(RestApiServerBase.TEST_TIMEOUT, TimeUnit.SECONDS);
+        this.requestAndAssert(
+            vertx, ctx, new Request(HttpMethod.PUT, "/api/v1/repository/alice/newrepo", json),
+            resp -> {
+                MatcherAssert.assertThat(
+                    resp.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                );
+                MatcherAssert.assertThat(
+                    this.storage().exists(new Key.From("alice/newrepo.yml")),
+                    new IsEqual<>(true)
+                );
+            }
+        );
     }
 
     @Test
-    void createDuplicateUserRepo(final Vertx vertx, final VertxTestContext ctx)
-        throws ExecutionException, InterruptedException, TimeoutException {
+    void createDuplicateUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(new Key.From("alice/newrepo.yaml"), new byte[0]);
         final JsonObject json = new JsonObject()
             .put(
@@ -129,22 +90,14 @@ final class RepositoryRestOrgTest extends RestApiServerBase {
                     .put("type", "fs")
                     .put("storage", new JsonObject())
             );
-        WebClient.create(vertx)
-            .put(this.port(), RestApiServerBase.HOST, "/api/v1/repository/alice/newrepo")
-            .sendJsonObject(json)
-            .onSuccess(
-                res -> {
-                    MatcherAssert.assertThat(
-                        res.statusCode(),
-                        // @checkstyle MagicNumberCheck (1 line)
-                        Matchers.is(409)
-                    );
-                    ctx.completeNow();
-                }
-            )
-            .onFailure(ctx::failNow)
-            .toCompletionStage().toCompletableFuture()
-            .get(RestApiServerBase.TEST_TIMEOUT, TimeUnit.SECONDS);
+        this.requestAndAssert(
+            vertx, ctx, new Request(HttpMethod.PUT, "/api/v1/repository/alice/newrepo", json),
+            resp ->
+                MatcherAssert.assertThat(
+                    resp.statusCode(),
+                    new IsEqual<>(HttpStatus.CONFLICT_409)
+                )
+        );
     }
 
     @Override
