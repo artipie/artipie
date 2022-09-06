@@ -5,17 +5,17 @@
 package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlInput;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.RepositoryName;
 import com.artipie.asto.Copy;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
-import com.artipie.settings.repo.CrudRepoSettings;
+import com.artipie.asto.ext.PublisherAs;
+import com.artipie.asto.misc.UncheckedIOFunc;
 import com.jcabi.log.Logger;
-import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
@@ -24,19 +24,23 @@ import java.util.stream.Stream;
  * Repository data management.
  * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RepoData {
     /**
-     * Repository settings create/read/update/delete.
+     * Key 'storage' inside json-object.
      */
-    private final CrudRepoSettings crs;
+    private static final String STORAGE = "storage";
+
+    /**
+     * Repository settings storage.
+     */
+    private final Storage storage;
 
     /**
      * Ctor.
-     * @param crs Repository settings create/read/update/delete
+     * @param storage Repository settings storage.
      */
-    public RepoData(final CrudRepoSettings crs) {
-        this.crs = crs;
+    public RepoData(final Storage storage) {
+        this.storage = storage;
     }
 
     /**
@@ -78,16 +82,24 @@ public final class RepoData {
      * @throws UncheckedIOException On IO errors
      */
     private Storage asto(final RepositoryName rname) {
-        try {
-            final YamlMapping yaml = this.crs.valueAsYaml(rname);
-            YamlMapping res = yaml.yamlMapping("storage");
-            if (res == null) {
-                res = this.storageYamlByAlias(rname, yaml.string("storage"));
-            }
-            return new YamlStorage(res).storage();
-        } catch (final IOException err) {
-            throw new UncheckedIOException(err);
-        }
+        return new ConfigFile(String.format("%s.yaml", rname.toString()))
+            .valueFrom(this.storage)
+            .thenApply(PublisherAs::new)
+            .thenCompose(PublisherAs::asciiString)
+            .thenApply(Yaml::createYamlInput)
+            .thenApply(new UncheckedIOFunc<>(YamlInput::readYamlMapping))
+            .thenApply(yaml -> yaml.yamlMapping("repo"))
+            .thenApply(
+                yaml -> {
+                    YamlMapping res = yaml.yamlMapping(RepoData.STORAGE);
+                    if (res == null) {
+                        res = this.storageYamlByAlias(rname, yaml.string(RepoData.STORAGE));
+                    }
+                    return res;
+                }
+            )
+            .thenApply(yaml -> new YamlStorage(yaml).storage())
+            .toCompletableFuture().join();
     }
 
     /**
@@ -97,7 +109,6 @@ public final class RepoData {
      * @return Yaml storage settings found by provided alias
      * @throws IllegalStateException If storage with given alias not found
      * @throws UncheckedIOException On IO errors
-     * @checkstyle LineLengthCheck (2 lines)
      */
     private YamlMapping storageYamlByAlias(final RepositoryName rname, final String alias) {
         final Key repo = new Key.From(rname.toString());
@@ -108,20 +119,17 @@ public final class RepoData {
             new Key.From(repo, yaml), new Key.From(repo, yml),
             repo.parent().<Key>map(item -> new Key.From(item, yaml)).orElse(yaml),
             repo.parent().<Key>map(item -> new Key.From(item, yml)).orElse(yml)
-        ).filter(this.crs.repoConfigsStorage()::exists).findFirst();
+        ).filter(key -> this.storage.exists(key).join()).findFirst();
         if (location.isPresent()) {
-            try {
-                res = Optional.of(
-                    Yaml.createYamlInput(
-                        new String(
-                            this.crs.repoConfigsStorage().value(location.get()),
-                            StandardCharsets.UTF_8
-                        )
-                    ).readYamlMapping().yamlMapping("storages").yamlMapping(alias)
-                );
-            } catch (final IOException err) {
-                throw new UncheckedIOException(err);
-            }
+            res = Optional.of(
+                this.storage.value(location.get())
+                .thenApply(PublisherAs::new)
+                .thenCompose(PublisherAs::asciiString)
+                .thenApply(Yaml::createYamlInput)
+                .thenApply(new UncheckedIOFunc<>(YamlInput::readYamlMapping))
+                .thenApply(s -> s.yamlMapping("storages").yamlMapping(alias))
+                .toCompletableFuture().join()
+            );
         }
         return res.orElseThrow(
             () -> new IllegalStateException(String.format("Storage alias %s not found", alias))

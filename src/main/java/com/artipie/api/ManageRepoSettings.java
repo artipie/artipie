@@ -4,17 +4,15 @@
  */
 package com.artipie.api;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.misc.Json2Yaml;
 import com.artipie.misc.Yaml2Json;
 import com.artipie.settings.repo.CrudRepoSettings;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import javax.json.JsonStructure;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -85,31 +83,6 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     }
 
     @Override
-    public YamlMapping valueAsYaml(final RepositoryName rname) throws IOException {
-        YamlMapping yaml = null;
-        final Pair<Key, Key> keys = keys(rname.toString());
-        if (this.asto.exists(keys.getLeft())) {
-            yaml = Yaml.createYamlInput(
-                new String(
-                    this.asto.value(keys.getLeft()),
-                    StandardCharsets.UTF_8
-                )
-            ).readYamlMapping().yamlMapping(BaseRest.REPO);
-        } else if (this.asto.exists(keys.getRight())) {
-            yaml = Yaml.createYamlInput(
-                new String(
-                    this.asto.value(keys.getRight()),
-                    StandardCharsets.UTF_8
-                )
-            ).readYamlMapping().yamlMapping(BaseRest.REPO);
-        }
-        return yaml;
-    }
-
-    /**
-     * Repositories configuration storage.
-     * @return Repo configs {@link BlockingStorage}
-     */
     public BlockingStorage repoConfigsStorage() {
         return this.asto;
     }
@@ -124,12 +97,7 @@ public final class ManageRepoSettings implements CrudRepoSettings {
 
     @Override
     public void delete(final RepositoryName rname) {
-        final Pair<Key, Key> keys = keys(rname.toString());
-        if (this.asto.exists(keys.getLeft())) {
-            this.asto.delete(keys.getLeft());
-        } else if (this.asto.exists(keys.getRight())) {
-            this.asto.delete(keys.getLeft());
-        }
+        this.repoKey(rname).ifPresent(this.asto::delete);
     }
 
     @Override
@@ -146,11 +114,27 @@ public final class ManageRepoSettings implements CrudRepoSettings {
         final Collection<String> res = new ArrayList<>(5);
         for (final Key item : this.asto.list(key)) {
             final String name = item.string();
-            if (yamlFilename(name) && RepositoryName.allowedReponame(name)) {
+            if (yamlFilename(name) && new ValidRepositoryName(name).isValid()) {
                 res.add(name.replaceAll("\\.yaml|\\.yml", ""));
             }
         }
         return res;
+    }
+
+    /**
+     * Obtains existing key of repository settings for given repository name.
+     * @param rname Repository name
+     * @return Existing key for repository name
+     */
+    private Optional<Key> repoKey(final RepositoryName rname) {
+        Key result = null;
+        final Pair<Key, Key> keys = keys(rname.toString());
+        if (this.asto.exists(keys.getLeft())) {
+            result = keys.getLeft();
+        } else if (this.asto.exists(keys.getRight())) {
+            result = keys.getRight();
+        }
+        return Optional.ofNullable(result);
     }
 
     /**

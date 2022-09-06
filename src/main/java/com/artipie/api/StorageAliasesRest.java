@@ -71,7 +71,9 @@ public final class StorageAliasesRest extends BaseRest {
     private void getRepoAliases(final RoutingContext context) {
         context.response().setStatusCode(HttpStatus.OK_200).end(
             this.aliases(
-                Optional.of(new Key.From(new RepositoryName(context, this.layout).toString()))
+                Optional.of(
+                    new Key.From(new RepositoryName.FromRequest(context, this.layout).toString())
+                )
             )
         );
     }

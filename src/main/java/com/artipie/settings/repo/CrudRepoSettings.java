@@ -4,10 +4,8 @@
  */
 package com.artipie.settings.repo;
 
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.RepositoryName;
 import com.artipie.asto.blocking.BlockingStorage;
-import java.io.IOException;
 import java.util.Collection;
 import javax.json.JsonStructure;
 
@@ -43,14 +41,6 @@ public interface CrudRepoSettings {
      * @return Json repository settings
      */
     JsonStructure value(RepositoryName name);
-
-    /**
-     * Get repository settings as yaml.
-     * @param name Repository name.
-     * @return Yaml repository settings
-     * @throws IOException On IO error
-     */
-    YamlMapping valueAsYaml(RepositoryName name) throws IOException;
 
     /**
      * Repositories configuration storage.
