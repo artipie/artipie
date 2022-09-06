@@ -142,7 +142,12 @@ For publish package in your HexPM repository you must change `api_url` in `mix.e
 ```
 You can also [override](https://hexdocs.pm/hex/Mix.Tasks.Hex.Config.html#module-config-overrides) it with an environment variable(**HEX_API_URL**) or with `mix hex.config`.
 
-Then you can use the following command to publish artifact of your mix project:
+Then you can use the following [command to publish](https://hexdocs.pm/hex/Mix.Tasks.Hex.Publish.html) artifact of your mix project:
 ```bash
 mix hex.publish package
+```
+
+If version already exist in your HexPM repository, and you want to replace it, add `--replace` to [command](https://hexdocs.pm/hex/Mix.Tasks.Hex.Publish.html#module-command-line-options):
+```bash
+mix hex.publish package --replace
 ```
