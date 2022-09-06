@@ -4,6 +4,7 @@
  */
 package com.artipie.settings.repo;
 
+import com.artipie.api.RepositoryName;
 import java.util.Collection;
 import javax.json.JsonStructure;
 
@@ -27,28 +28,25 @@ public interface CrudRepoSettings {
     Collection<String> list(String uname);
 
     /**
-     * Check if the repository exists.
-     * @param name Repository name. The name can be composite: in the case of org layout it will
-     *  consist of two parts - username and repo name, for example john/maven-s3.
-     * @return True if repository exists
+     * Checks if repository settings exists by repository name.
+     * @param rname Repository name
+     * @return True if found
      */
-    boolean exists(String name);
+    boolean exists(RepositoryName rname);
 
     /**
      * Get repository settings as json.
-     * @param name Repository name. The name can be composite: in the case of org layout it will
-     *  consist of two parts - username and repo name, for example john/maven-s3.
+     * @param name Repository name.
      * @return Json repository settings
      */
-    JsonStructure value(String name);
+    JsonStructure value(RepositoryName name);
 
     /**
      * Add new repository.
-     * @param name Repository name. The name can be composite: in the case of org layout it will
-     *  consist of two parts - username and repo name, for example john/maven-s3.
+     * @param rname Repository name.
      * @param value New repository settings
      */
-    void save(String name, JsonStructure value);
+    void save(RepositoryName rname, JsonStructure value);
 
     /**
      * Remove repository.

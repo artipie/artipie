@@ -1,0 +1,195 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Artipie - OpenAPI 3.0
+  description:
+    This is Atripie Server based on the OpenAPI 3.0 specification.
+  license:
+    name: MIT
+externalDocs:
+  description: Find out more about Artipie
+  url: https://github.com/artipie
+tags:
+  - name: repository
+    description: Operations about repository
+paths:
+  /api/v1/repository/list:
+    get:
+      summary: List all repositories.
+      operationId: listAll
+      tags:
+        - repository
+      responses:
+        '200':
+          description: A list of the existing repositories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/repository/{rname}:
+    get:
+      summary: Get repository settings
+      operationId: getRepo
+      tags:
+        - repository
+      parameters:
+        - name: rname
+          in: path
+          required: true
+          description: Name of the repository
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full repository settings
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/AliasRepository'
+                  - $ref: '#/components/schemas/FullRepository'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Create repository
+      operationId: createRepo
+      tags:
+        - repository
+      parameters:
+        - name: rname
+          in: path
+          required: true
+          description: Name of the repository
+          schema:
+            type: string
+      requestBody:
+        description: Create a new repository
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Repository'
+        required: true
+      responses:
+        '200':
+          description: Creates a new repository with name {rname}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullRepository'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/repository/{rname}/storages:
+    get:
+      summary: Get repository storage aliases
+      operationId: getRepoAliases
+      tags:
+        - storage aliases
+      parameters:
+        - name: rname
+          in: path
+          required: true
+          description: Name of the repository
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full storage alias settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StorageAlias'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/storages:
+    get:
+      summary: Get common Artipie storage aliases
+      operationId: getAliases
+      tags:
+        - storage aliases
+      responses:
+        '200':
+          description: Full aliases settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StorageAlias'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    Repository:
+      type: object
+      required:
+        - repo
+      properties:
+        repo:
+          type: object
+    FullRepository:
+      type: object
+      required:
+        - type
+        - storage
+      properties:
+        type:
+          type: string
+        storage:
+          type: object
+    AliasRepository:
+      type: object
+      required:
+        - type
+        - storage
+      properties:
+        type:
+          type: string
+        storage:
+          type: string
+    StorageAlias:
+      type: object
+      required:
+        - alias
+        - storage
+      properties:
+        alias:
+          type: string
+        storage:
+          type: object

@@ -321,6 +321,11 @@ SOFTWARE.
       <artifactId>simpleclient_common</artifactId>
       <version>0.14.1</version>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>2.13.1</version>
+    </dependency>
     <!-- Test scope-->
     <dependency>
       <groupId>org.hamcrest</groupId>
@@ -400,6 +405,11 @@ SOFTWARE.
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web-openapi</artifactId>
       <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>2.13.1</version>
     </dependency>
   </dependencies>
   <build>
