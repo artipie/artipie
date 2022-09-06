@@ -9,6 +9,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.settings.Layout;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import org.eclipse.jetty.http.HttpStatus;
@@ -41,37 +42,58 @@ public final class StorageAliasesRest extends BaseRest {
 
     @Override
     public void init(final RouterBuilder rtrb) {
-        if (new Layout.Flat().toString().equals(this.layout)) {
-            rtrb.operation("getAliases")
-                .handler(this::getAliases)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rtrb.operation("getRepoAliases")
-                .handler(this::getRepoAliases)
+        rtrb.operation("getAliases")
+            .handler(this::getAliases)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rtrb.operation("getRepoAliases")
+            .handler(this::getRepoAliases)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        if (new Layout.Org().toString().equals(this.layout)) {
+            rtrb.operation("getUserAliases")
+                .handler(this::getUserAliases)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         }
-    }
-
-    /**
-     * Get repository aliases.
-     * @param context Routing context
-     */
-    private void getAliases(final RoutingContext context) {
-        final JsonArrayBuilder builder = Json.createArrayBuilder();
-        new ManageStorageAliases(this.asto).list().forEach(builder::add);
-        context.response().setStatusCode(HttpStatus.OK_200).end(builder.build().toString());
     }
 
     /**
      * Get common artipie aliases.
      * @param context Routing context
      */
+    private void getAliases(final RoutingContext context) {
+        context.response().setStatusCode(HttpStatus.OK_200)
+            .end(this.aliases(Optional.empty()));
+    }
+
+    /**
+     * Get repository aliases.
+     * @param context Routing context
+     */
     private void getRepoAliases(final RoutingContext context) {
-        final JsonArrayBuilder builder = Json.createArrayBuilder();
-        new ManageStorageAliases(
-            new Key.From(context.pathParam(RepositoryName.RNAME)), this.asto
-        ).list().forEach(builder::add);
         context.response().setStatusCode(HttpStatus.OK_200).end(
-            builder.build().toString()
+            this.aliases(
+                Optional.of(new Key.From(new RepositoryName(context, this.layout).toString()))
+            )
         );
+    }
+
+    /**
+     * Get user aliases.
+     * @param context Routing context
+     */
+    private void getUserAliases(final RoutingContext context) {
+        context.response().setStatusCode(HttpStatus.OK_200).end(
+            this.aliases(Optional.of(new Key.From(context.pathParam(RepositoryName.UNAME))))
+        );
+    }
+
+    /**
+     * Get aliases as json array string.
+     * @param key Aliases key
+     * @return Json array string
+     */
+    private String aliases(final Optional<Key> key) {
+        final JsonArrayBuilder builder = Json.createArrayBuilder();
+        new ManageStorageAliases(key, this.asto).list().forEach(builder::add);
+        return builder.build().toString();
     }
 }
