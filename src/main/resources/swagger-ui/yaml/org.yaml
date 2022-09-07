@@ -168,6 +168,47 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/repository/{uname}/{rname}/storages/{aname}:
+    put:
+      summary: Add or update repository storage alias
+      operationId: addRepoAlias
+      tags:
+        - storage aliases
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: Username
+          schema:
+            type: string
+        - name: rname
+          in: path
+          required: true
+          description: Name of the repository
+          schema:
+            type: string
+        - name: aname
+          in: path
+          required: true
+          description: Name of the storage alias
+          schema:
+            type: string
+      requestBody:
+        description: Create a new storage alias
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Storage'
+        required: true
+      responses:
+        '201':
+          description: Alias added successfully
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /api/v1/storages:
     get:
       summary: Get common Artipie storage aliases
@@ -183,6 +224,35 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/StorageAlias'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/storages/{aname}:
+    put:
+      summary: Add or update common Artipie storage alias
+      operationId: addAlias
+      tags:
+        - storage aliases
+      parameters:
+        - name: aname
+          in: path
+          required: true
+          description: Name of the storage alias
+          schema:
+            type: string
+      requestBody:
+        description: Create a new storage alias
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Storage'
+        required: true
+      responses:
+        '201':
+          description: Alias added successfully
         default:
           description: unexpected error
           content:
@@ -211,6 +281,41 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/StorageAlias'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/storages/{uname}/{aname}:
+    put:
+      summary: Add or update user's storage alias
+      operationId: addUserAlias
+      tags:
+        - storage aliases
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: Username
+          schema:
+            type: string
+        - name: aname
+          in: path
+          required: true
+          description: Name of the storage alias
+          schema:
+            type: string
+      requestBody:
+        description: Create or update storage alias
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Storage'
+        required: true
+      responses:
+        '201':
+          description: Alias added successfully
         default:
           description: unexpected error
           content:
@@ -267,3 +372,10 @@ components:
           type: string
         storage:
           type: object
+    Storage:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
