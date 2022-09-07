@@ -83,11 +83,6 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     }
 
     @Override
-    public BlockingStorage repoConfigsStorage() {
-        return this.asto;
-    }
-
-    @Override
     public void save(final RepositoryName rname, final JsonStructure value) {
         this.asto.save(
             keys(rname.toString()).getRight(),

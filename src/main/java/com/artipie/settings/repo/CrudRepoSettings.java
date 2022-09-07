@@ -5,7 +5,6 @@
 package com.artipie.settings.repo;
 
 import com.artipie.api.RepositoryName;
-import com.artipie.asto.blocking.BlockingStorage;
 import java.util.Collection;
 import javax.json.JsonStructure;
 
@@ -41,12 +40,6 @@ public interface CrudRepoSettings {
      * @return Json repository settings
      */
     JsonStructure value(RepositoryName name);
-
-    /**
-     * Repositories configuration storage.
-     * @return Repo configs {@link BlockingStorage}
-     */
-    BlockingStorage repoConfigsStorage();
 
     /**
      * Add new repository.

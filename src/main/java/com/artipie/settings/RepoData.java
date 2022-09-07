@@ -15,10 +15,8 @@ import com.artipie.asto.SubStorage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.misc.UncheckedIOFunc;
 import com.jcabi.log.Logger;
-import java.io.UncheckedIOException;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Stream;
 
 /**
  * Repository data management.
@@ -50,9 +48,19 @@ public final class RepoData {
      */
     public CompletionStage<Void> remove(final RepositoryName rname) {
         final String repo = rname.toString();
-        return this.asto(rname).deleteAll(new Key.From(repo)).thenAccept(
-            nothing -> Logger.info(this, String.format("Removed data from repository %s", repo))
-        );
+        return this.repoStorage(rname)
+            .thenAccept(
+                asto ->
+                    asto
+                        .deleteAll(new Key.From(repo))
+                        .thenAccept(
+                            nothing ->
+                                Logger.info(
+                                    this,
+                                    String.format("Removed data from repository %s", repo)
+                                )
+                        )
+            );
     }
 
     /**
@@ -65,23 +73,35 @@ public final class RepoData {
     public CompletionStage<Void> move(final RepositoryName rname, final RepositoryName nname) {
         final Key repo = new Key.From(rname.toString());
         final Key nrepo = new Key.From(nname.toString());
-        final Storage asto = this.asto(rname);
-        return new SubStorage(repo, asto).list(Key.ROOT).thenCompose(
-            list -> new Copy(new SubStorage(repo, asto), list)
-                .copy(new SubStorage(nrepo, asto))
-        ).thenCompose(nothing -> asto.deleteAll(new Key.From(repo))).thenAccept(
-            nothing ->
-                Logger.info(this, String.format("Moved data from repository %s to %s", repo, nrepo))
-        );
+        return this.repoStorage(rname)
+            .thenCompose(
+                asto ->
+                    new SubStorage(repo, asto)
+                        .list(Key.ROOT)
+                        .thenCompose(
+                            list ->
+                                new Copy(new SubStorage(repo, asto), list)
+                                    .copy(new SubStorage(nrepo, asto))
+                        ).thenCompose(nothing -> asto.deleteAll(new Key.From(repo))).thenAccept(
+                            nothing ->
+                                Logger.info(
+                                    this,
+                                    String.format(
+                                        "Moved data from repository %s to %s",
+                                        repo,
+                                        nrepo
+                                    )
+                                )
+                        )
+            );
     }
 
     /**
      * Obtain storage from repository settings.
      * @param rname Repository name
      * @return Abstract storage
-     * @throws UncheckedIOException On IO errors
      */
-    private Storage asto(final RepositoryName rname) {
+    private CompletionStage<Storage> repoStorage(final RepositoryName rname) {
         return new ConfigFile(String.format("%s.yaml", rname.toString()))
             .valueFrom(this.storage)
             .thenApply(PublisherAs::new)
@@ -89,50 +109,22 @@ public final class RepoData {
             .thenApply(Yaml::createYamlInput)
             .thenApply(new UncheckedIOFunc<>(YamlInput::readYamlMapping))
             .thenApply(yaml -> yaml.yamlMapping("repo"))
-            .thenApply(
+            .thenCompose(
                 yaml -> {
-                    YamlMapping res = yaml.yamlMapping(RepoData.STORAGE);
+                    final CompletableFuture<Storage> ret;
+                    final YamlMapping res = yaml.yamlMapping(RepoData.STORAGE);
                     if (res == null) {
-                        res = this.storageYamlByAlias(rname, yaml.string(RepoData.STORAGE));
+                        ret = StorageAliases.find(this.storage, new Key.From(rname.toString()))
+                            .thenApply(
+                                aliases ->
+                                    new StorageYamlConfig(yaml.value(RepoData.STORAGE), aliases)
+                                        .storage()
+                            );
+                    } else {
+                        ret = CompletableFuture.completedFuture(new YamlStorage(res).storage());
                     }
-                    return res;
+                    return ret;
                 }
-            )
-            .thenApply(yaml -> new YamlStorage(yaml).storage())
-            .toCompletableFuture().join();
-    }
-
-    /**
-     * Find storage settings by alias, considering two file extensions and two locations.
-     * @param rname Repository name
-     * @param alias Storage settings yaml by alias
-     * @return Yaml storage settings found by provided alias
-     * @throws IllegalStateException If storage with given alias not found
-     * @throws UncheckedIOException On IO errors
-     */
-    private YamlMapping storageYamlByAlias(final RepositoryName rname, final String alias) {
-        final Key repo = new Key.From(rname.toString());
-        final Key yml = new Key.From("_storage.yaml");
-        final Key yaml = new Key.From("_storage.yml");
-        Optional<YamlMapping> res = Optional.empty();
-        final Optional<Key> location = Stream.of(
-            new Key.From(repo, yaml), new Key.From(repo, yml),
-            repo.parent().<Key>map(item -> new Key.From(item, yaml)).orElse(yaml),
-            repo.parent().<Key>map(item -> new Key.From(item, yml)).orElse(yml)
-        ).filter(key -> this.storage.exists(key).join()).findFirst();
-        if (location.isPresent()) {
-            res = Optional.of(
-                this.storage.value(location.get())
-                .thenApply(PublisherAs::new)
-                .thenCompose(PublisherAs::asciiString)
-                .thenApply(Yaml::createYamlInput)
-                .thenApply(new UncheckedIOFunc<>(YamlInput::readYamlMapping))
-                .thenApply(s -> s.yamlMapping("storages").yamlMapping(alias))
-                .toCompletableFuture().join()
             );
-        }
-        return res.orElseThrow(
-            () -> new IllegalStateException(String.format("Storage alias %s not found", alias))
-        );
     }
 }

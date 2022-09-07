@@ -12,9 +12,12 @@ import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,7 +28,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Test for {@link RepoData}.
  * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class RepoDataTest {
 
     /**
@@ -74,7 +77,7 @@ class RepoDataTest {
             .remove(new RepositoryName.Flat(RepoDataTest.REPO)).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are removed",
-            this.data.list(Key.ROOT).isEmpty()
+            this.waitCondition(() -> this.data.list(Key.ROOT).isEmpty())
         );
     }
 
@@ -91,15 +94,18 @@ class RepoDataTest {
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
-            this.data.list(Key.ROOT).stream().map(Key::string)
-                .collect(Collectors.toList()),
-            Matchers.contains("new-repo/first.txt", "new-repo/second.txt")
+            this.waitCondition(
+                () ->
+                    this.data.list(Key.ROOT).stream()
+                        .map(Key::string).collect(Collectors.toList())
+                        .containsAll(List.of("new-repo/first.txt", "new-repo/second.txt"))
+            )
         );
     }
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"_storage.yaml", "_storage.yml", "my-repo/_storage.yaml", "my-repo/_storage.yml"}
+        strings = {"_storages.yaml", "my-repo/_storages.yaml"}
     )
     void movesDataWithAliasAndFlatLayout(final String key) {
         this.stngs.save(
@@ -117,14 +123,18 @@ class RepoDataTest {
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
-            this.data.list(Key.ROOT).stream().map(Key::string).collect(Collectors.toList()),
-            Matchers.contains("new-repo/first.txt", "new-repo/second.txt")
+            this.waitCondition(
+                () ->
+                    this.data.list(Key.ROOT).stream()
+                        .map(Key::string).collect(Collectors.toList())
+                        .containsAll(List.of("new-repo/first.txt", "new-repo/second.txt"))
+            )
         );
     }
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"_storage.yaml", "_storage.yml", "my-repo/_storage.yaml", "my-repo/_storage.yml"}
+        strings = {"_storages.yaml", "my-repo/_storages.yaml"}
     )
     void movesDataWithAliasAndOrgLayout(final String key) {
         final String uid = "john";
@@ -147,14 +157,18 @@ class RepoDataTest {
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
-            this.data.list(Key.ROOT).stream().map(Key::string).collect(Collectors.toList()),
-            Matchers.contains("john/new-repo/first.txt", "john/new-repo/second.txt")
+            this.waitCondition(
+                () ->
+                    this.data.list(Key.ROOT).stream()
+                        .map(Key::string).collect(Collectors.toList())
+                        .containsAll(List.of("john/new-repo/first.txt", "john/new-repo/second.txt"))
+            )
         );
     }
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"_storage.yaml", "_storage.yml", "my-repo/_storage.yaml", "my-repo/_storage.yml"}
+        strings = {"_storages.yaml", "my-repo/_storages.yaml"}
     )
     void removesDataWithAliasAndFlatLayout(final String key) {
         this.stngs.save(
@@ -171,13 +185,13 @@ class RepoDataTest {
             .remove(new RepositoryName.Flat(RepoDataTest.REPO)).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
-            this.data.list(Key.ROOT).isEmpty()
+            this.waitCondition(() -> this.data.list(Key.ROOT).isEmpty())
         );
     }
 
     @ParameterizedTest
     @ValueSource(
-        strings = {"_storage.yaml", "_storage.yml", "my-repo/_storage.yaml", "my-repo/_storage.yml"}
+        strings = {"_storages.yaml", "my-repo/_storages.yaml"}
     )
     void removesDataWithAliasAndOrgLayout(final String key) {
         final String uid = "john";
@@ -195,7 +209,7 @@ class RepoDataTest {
             .remove(new RepositoryName.Org(RepoDataTest.REPO, uid)).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository is empty",
-            this.data.list(Key.ROOT).isEmpty()
+            this.waitCondition(() -> this.data.list(Key.ROOT).isEmpty())
         );
     }
 
@@ -230,5 +244,33 @@ class RepoDataTest {
             "    type: fs",
             String.format("    path: %s", this.temp.toString())
         );
+    }
+
+    /**
+     * Awaiting of action during maximum 5 seconds.
+     * Allows to wait result of action during period of time.
+     * @param action Action
+     * @return Result of action
+     * @checkstyle MagicNumberCheck (15 lines)
+     */
+    private Boolean waitCondition(final Supplier<Boolean> action) {
+        final long max = System.currentTimeMillis() + Duration.ofSeconds(5).toMillis();
+        boolean res;
+        do {
+            res = action.get();
+            if (res) {
+                break;
+            } else {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(100);
+                } catch (final InterruptedException exc) {
+                    break;
+                }
+            }
+        } while (System.currentTimeMillis() < max);
+        if (!res) {
+            res = action.get();
+        }
+        return res;
     }
 }

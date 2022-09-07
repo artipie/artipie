@@ -77,7 +77,7 @@ public final class StorageAliasesRest extends BaseRest {
      */
     private void addRepoAlias(final RoutingContext context) {
         new ManageStorageAliases(
-            new Key.From(new RepositoryName(context, this.layout).toString()), this.asto
+            new Key.From(new RepositoryName.FromRequest(context, this.layout).toString()), this.asto
         ).add(
             context.pathParam(StorageAliasesRest.ANAME),
             StorageAliasesRest.jsonFromRequest(context)
