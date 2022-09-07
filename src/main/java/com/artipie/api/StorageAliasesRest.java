@@ -9,9 +9,11 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.settings.Layout;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.io.StringReader;
 import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -19,6 +21,11 @@ import org.eclipse.jetty.http.HttpStatus;
  * @since 0.27
  */
 public final class StorageAliasesRest extends BaseRest {
+
+    /**
+     * Alias name path parameter.
+     */
+    private static final String ANAME = "aname";
 
     /**
      * Artipie settings storage.
@@ -45,14 +52,63 @@ public final class StorageAliasesRest extends BaseRest {
         rtrb.operation("getAliases")
             .handler(this::getAliases)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rtrb.operation("addRepoAlias")
+            .handler(this::addRepoAlias)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("getRepoAliases")
             .handler(this::getRepoAliases)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rtrb.operation("addAlias")
+            .handler(this::addAlias)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         if (new Layout.Org().toString().equals(this.layout)) {
             rtrb.operation("getUserAliases")
                 .handler(this::getUserAliases)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rtrb.operation("addUserAlias")
+                .handler(this::addUserAlias)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         }
+    }
+
+    /**
+     * Add repository alias.
+     * @param context Routing context
+     */
+    private void addRepoAlias(final RoutingContext context) {
+        new ManageStorageAliases(
+            new Key.From(new RepositoryName(context, this.layout).toString()), this.asto
+        ).add(
+            context.pathParam(StorageAliasesRest.ANAME),
+            StorageAliasesRest.jsonFromRequest(context)
+        );
+        context.response().setStatusCode(HttpStatus.CREATED_201).end();
+    }
+
+    /**
+     * Add common Artipie alias.
+     * @param context Routing context
+     */
+    private void addAlias(final RoutingContext context) {
+        new ManageStorageAliases(this.asto).add(
+            context.pathParam(StorageAliasesRest.ANAME),
+            StorageAliasesRest.jsonFromRequest(context)
+        );
+        context.response().setStatusCode(HttpStatus.CREATED_201).end();
+    }
+
+    /**
+     * Add repository alias.
+     * @param context Routing context
+     */
+    private void addUserAlias(final RoutingContext context) {
+        new ManageStorageAliases(
+            new Key.From(context.pathParam(RepositoryName.UNAME)), this.asto
+        ).add(
+            context.pathParam(StorageAliasesRest.ANAME),
+            StorageAliasesRest.jsonFromRequest(context)
+        );
+        context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
     /**
@@ -97,5 +153,14 @@ public final class StorageAliasesRest extends BaseRest {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
         new ManageStorageAliases(key, this.asto).list().forEach(builder::add);
         return builder.build().toString();
+    }
+
+    /**
+     * Read json object from request.
+     * @param context Request context
+     * @return Javax json object
+     */
+    private static JsonObject jsonFromRequest(final RoutingContext context) {
+        return Json.createReader(new StringReader(context.body().asString())).readObject();
     }
 }
