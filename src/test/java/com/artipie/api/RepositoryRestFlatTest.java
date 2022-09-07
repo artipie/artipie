@@ -32,7 +32,7 @@ final class RepositoryRestFlatTest extends RestApiServerBase {
         this.save(new Key.From("rpm-local.yml"), new byte[0]);
         this.save(new Key.From("conda-remote.yml"), new byte[0]);
         this.requestAndAssert(
-            vertx, ctx, new Request("/api/v1/repository/list"),
+            vertx, ctx, new TestRequest("/api/v1/repository/list"),
             resp -> MatcherAssert.assertThat(
                 resp.body().toJsonArray().stream().collect(Collectors.toList()),
                 Matchers.containsInAnyOrder(
@@ -51,7 +51,7 @@ final class RepositoryRestFlatTest extends RestApiServerBase {
                     .put("storage", new JsonObject())
             );
         this.requestAndAssert(
-            vertx, ctx, new Request(HttpMethod.PUT, "/api/v1/repository/newrepo", json),
+            vertx, ctx, new TestRequest(HttpMethod.PUT, "/api/v1/repository/newrepo", json),
             res -> {
                 MatcherAssert.assertThat(
                     res.statusCode(),
@@ -75,7 +75,7 @@ final class RepositoryRestFlatTest extends RestApiServerBase {
                     .put("storage", new JsonObject())
             );
         this.requestAndAssert(
-            vertx, ctx, new Request(HttpMethod.PUT, "/api/v1/repository/newrepo", json),
+            vertx, ctx, new TestRequest(HttpMethod.PUT, "/api/v1/repository/newrepo", json),
             res ->
                 MatcherAssert.assertThat(
                     res.statusCode(),

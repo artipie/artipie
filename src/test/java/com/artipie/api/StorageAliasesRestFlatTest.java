@@ -29,7 +29,7 @@ public final class StorageAliasesRestFlatTest extends RestApiServerBase {
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
-            vertx, ctx, new Request("/api/v1/storages"),
+            vertx, ctx, new TestRequest("/api/v1/storages"),
             new UncheckedConsumer<>(
                 response -> JSONAssert.assertEquals(
                     response.body().toJsonArray().encode(),
@@ -48,7 +48,7 @@ public final class StorageAliasesRestFlatTest extends RestApiServerBase {
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
-            vertx, ctx, new Request(String.format("/api/v1/repository/%s/storages", rname)),
+            vertx, ctx, new TestRequest(String.format("/api/v1/repository/%s/storages", rname)),
             new UncheckedConsumer<>(
                 response -> JSONAssert.assertEquals(
                     response.body().toJsonArray().encode(),
@@ -63,7 +63,7 @@ public final class StorageAliasesRestFlatTest extends RestApiServerBase {
     void returnsEmptyArrayIfAliasesDoNotExists(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         this.requestAndAssert(
-            vertx, ctx, new Request("/api/v1/storages"),
+            vertx, ctx, new TestRequest("/api/v1/storages"),
             resp ->
                 MatcherAssert.assertThat(
                     resp.body().toJsonArray().isEmpty(), new IsEqual<>(true)

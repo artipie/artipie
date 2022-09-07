@@ -32,7 +32,7 @@ final class RepositoryRestOrgTest extends RestApiServerBase {
         this.save(new Key.From("alice/rpm-local.yml"), new byte[0]);
         this.save(new Key.From("alice/conda.yml"), new byte[0]);
         this.requestAndAssert(
-            vertx, ctx, new Request("/api/v1/repository/list"),
+            vertx, ctx, new TestRequest("/api/v1/repository/list"),
             resp ->
                 MatcherAssert.assertThat(
                     resp.body().toJsonArray().stream().collect(Collectors.toList()),
@@ -49,7 +49,7 @@ final class RepositoryRestOrgTest extends RestApiServerBase {
         this.save(new Key.From("alice/rpm-local.yml"), new byte[0]);
         this.save(new Key.From("alice/conda.yml"), new byte[0]);
         this.requestAndAssert(
-            vertx, ctx, new Request("/api/v1/repository/list/alice"),
+            vertx, ctx, new TestRequest("/api/v1/repository/list/alice"),
             resp ->
                 MatcherAssert.assertThat(
                     resp.body().toJsonArray().stream().collect(Collectors.toList()),
@@ -67,7 +67,7 @@ final class RepositoryRestOrgTest extends RestApiServerBase {
                     .put("storage", new JsonObject())
             );
         this.requestAndAssert(
-            vertx, ctx, new Request(HttpMethod.PUT, "/api/v1/repository/alice/newrepo", json),
+            vertx, ctx, new TestRequest(HttpMethod.PUT, "/api/v1/repository/alice/newrepo", json),
             resp -> {
                 MatcherAssert.assertThat(
                     resp.statusCode(),
@@ -91,7 +91,7 @@ final class RepositoryRestOrgTest extends RestApiServerBase {
                     .put("storage", new JsonObject())
             );
         this.requestAndAssert(
-            vertx, ctx, new Request(HttpMethod.PUT, "/api/v1/repository/alice/newrepo", json),
+            vertx, ctx, new TestRequest(HttpMethod.PUT, "/api/v1/repository/alice/newrepo", json),
             resp ->
                 MatcherAssert.assertThat(
                     resp.statusCode(),
