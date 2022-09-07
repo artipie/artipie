@@ -8,8 +8,11 @@ import com.artipie.asto.Key;
 import com.artipie.asto.misc.UncheckedConsumer;
 import com.artipie.settings.StorageAliases;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxTestContext;
 import java.nio.charset.StandardCharsets;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -68,6 +71,78 @@ public final class StorageAliasesRestFlatTest extends RestApiServerBase {
                 MatcherAssert.assertThat(
                     resp.body().toJsonArray().isEmpty(), new IsEqual<>(true)
                 )
+        );
+    }
+
+    @Test
+    void addsNewCommonAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx,
+            new TestRequest(
+                HttpMethod.PUT, "/api/v1/storages/new-alias",
+                new JsonObject().put("type", "file").put("path", "new/alias/path")
+            ),
+            resp -> {
+                MatcherAssert.assertThat(
+                    resp.statusCode(), new IsEqual<>(HttpStatus.CREATED_201)
+                );
+                MatcherAssert.assertThat(
+                    new String(
+                        this.storage().value(new Key.From(StorageAliases.FILE_NAME)),
+                        StandardCharsets.UTF_8
+                    ),
+                    new IsEqual<>(
+                        String.join(
+                            System.lineSeparator(),
+                            "storages:",
+                            "  \"new-alias\":",
+                            "    type: file",
+                            "    path: new/alias/path"
+                        )
+                    )
+                );
+            }
+        );
+    }
+
+    @Test
+    void addsRepoAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        final String rname = "my-pypi";
+        this.save(
+            new Key.From(rname, StorageAliases.FILE_NAME),
+            this.yamlAliases().getBytes(StandardCharsets.UTF_8)
+        );
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.PUT, String.format("/api/v1/repository/%s/storages/new-alias", rname),
+                new JsonObject().put("type", "file").put("path", "new/alias/path")
+            ),
+            resp -> {
+                MatcherAssert.assertThat(
+                    resp.statusCode(), new IsEqual<>(HttpStatus.CREATED_201)
+                );
+                MatcherAssert.assertThat(
+                    new String(
+                        this.storage().value(new Key.From(rname, StorageAliases.FILE_NAME)),
+                        StandardCharsets.UTF_8
+                    ),
+                    new IsEqual<>(
+                        String.join(
+                            System.lineSeparator(),
+                            "storages:",
+                            "  default:",
+                            "    type: fs",
+                            "    path: /var/artipie/repo/data",
+                            "  \"redis-sto\":",
+                            "    type: redis",
+                            "    config: some",
+                            "  \"new-alias\":",
+                            "    type: file",
+                            "    path: new/alias/path"
+                        )
+                    )
+                );
+            }
         );
     }
 
