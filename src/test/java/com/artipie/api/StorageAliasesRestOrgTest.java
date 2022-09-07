@@ -27,7 +27,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
-            vertx, ctx, new Request("/api/v1/storages"),
+            vertx, ctx, new TestRequest("/api/v1/storages"),
             new UncheckedConsumer<>(
                 response -> JSONAssert.assertEquals(
                     response.body().toJsonArray().encode(),
@@ -46,7 +46,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
-            vertx, ctx, new Request(String.format("/api/v1/storages/%s", name)),
+            vertx, ctx, new TestRequest(String.format("/api/v1/storages/%s", name)),
             new UncheckedConsumer<>(
                 response -> JSONAssert.assertEquals(
                     response.body().toJsonArray().encode(),
@@ -65,7 +65,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
-            vertx, ctx, new Request(String.format("/api/v1/repository/%s/storages", name)),
+            vertx, ctx, new TestRequest(String.format("/api/v1/repository/%s/storages", name)),
             new UncheckedConsumer<>(
                 response -> JSONAssert.assertEquals(
                     response.body().toJsonArray().encode(),

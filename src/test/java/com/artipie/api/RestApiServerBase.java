@@ -11,12 +11,15 @@ import com.artipie.nuget.RandomFreePort;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.NetClient;
+import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -123,10 +126,11 @@ public abstract class RestApiServerBase {
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     final void requestAndAssert(final Vertx vertx, final VertxTestContext ctx,
-        final Request rqs, final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
-        WebClient.create(vertx)
-            .request(rqs.method, this.port(), RestApiServerBase.HOST, rqs.path)
-            .send()
+        final TestRequest rqs, final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
+        final HttpRequest<Buffer> request = WebClient.create(vertx)
+            .request(rqs.method, this.port(), RestApiServerBase.HOST, rqs.path);
+        rqs.body.map(request::sendJsonObject)
+            .orElse(request.send())
             .onSuccess(
                 res -> {
                     assertion.accept(res);
@@ -178,7 +182,7 @@ public abstract class RestApiServerBase {
      * Test request.
      * @since 0.27
      */
-    static final class Request {
+    static final class TestRequest {
 
         /**
          * Http method.
@@ -191,20 +195,46 @@ public abstract class RestApiServerBase {
         private final String path;
 
         /**
+         * Request json body.
+         */
+        private Optional<JsonObject> body;
+
+        /**
+         * Ctor.
+         * @param method Http method
+         * @param path Request path
+         * @param body Request body
+         */
+        TestRequest(final HttpMethod method, final String path, final Optional<JsonObject> body) {
+            this.method = method;
+            this.path = path;
+            this.body = body;
+        }
+
+        /**
+         * Ctor.
+         * @param method Http method
+         * @param path Request path
+         * @param body Request body
+         */
+        TestRequest(final HttpMethod method, final String path, final JsonObject body) {
+            this(method, path, Optional.of(body));
+        }
+
+        /**
          * Ctor.
          * @param method Http method
          * @param path Request path
          */
-        Request(final HttpMethod method, final String path) {
-            this.method = method;
-            this.path = path;
+        TestRequest(final HttpMethod method, final String path) {
+            this(method, path, Optional.empty());
         }
 
         /**
          * Ctor with default GET method.
          * @param path Request path
          */
-        Request(final String path) {
+        TestRequest(final String path) {
             this(HttpMethod.GET, path);
         }
     }
