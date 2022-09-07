@@ -93,7 +93,7 @@ public final class StorageAliasesRestFlatTest extends RestApiServerBase {
                     ),
                     new IsEqual<>(
                         String.join(
-                            "\n",
+                            System.lineSeparator(),
                             "storages:",
                             "  \"new-alias\":",
                             "    type: file",
@@ -128,7 +128,7 @@ public final class StorageAliasesRestFlatTest extends RestApiServerBase {
                     ),
                     new IsEqual<>(
                         String.join(
-                            "\n",
+                            System.lineSeparator(),
                             "storages:",
                             "  default:",
                             "    type: fs",

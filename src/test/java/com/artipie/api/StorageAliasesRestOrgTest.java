@@ -102,7 +102,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                     ),
                     new IsEqual<>(
                         String.join(
-                            "\n",
+                            System.lineSeparator(),
                             "storages:",
                             "  \"new-alias\":",
                             "    type: file",
@@ -134,7 +134,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                     new String(this.storage().value(key), StandardCharsets.UTF_8),
                     new IsEqual<>(
                         String.join(
-                            "\n",
+                            System.lineSeparator(),
                             "storages:",
                             "  local:",
                             "    type: file",
@@ -173,7 +173,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                     ),
                     new IsEqual<>(
                         String.join(
-                            "\n",
+                            System.lineSeparator(),
                             "storages:",
                             "  local:",
                             "    type: fs",
