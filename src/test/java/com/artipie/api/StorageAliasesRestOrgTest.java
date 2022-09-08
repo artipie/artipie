@@ -22,7 +22,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
  * Test for {@link StorageAliasesRest} with org layout.
  * @since 0.27
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public final class StorageAliasesRestOrgTest extends RestApiServerBase {
 
     @Test
@@ -186,6 +186,81 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                             "  \"new-alias\":",
                             "    type: file",
                             "    path: new/alias/path"
+                        )
+                    )
+                );
+            }
+        );
+    }
+
+    @Test
+    void returnsNotFoundIfAliasesDoNotExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(HttpMethod.DELETE, "/api/v1/storages/any"),
+            resp ->
+                MatcherAssert.assertThat(resp.statusCode(), new IsEqual<>(HttpStatus.NOT_FOUND_404))
+        );
+    }
+
+    @Test
+    void removesCommonAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.save(
+            new Key.From(StorageAliases.FILE_NAME),
+            this.yamlAliases().getBytes(StandardCharsets.UTF_8)
+        );
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(HttpMethod.DELETE, "/api/v1/storages/local"),
+            resp -> {
+                MatcherAssert.assertThat(resp.statusCode(), new IsEqual<>(HttpStatus.OK_200));
+                MatcherAssert.assertThat(
+                    new String(
+                        this.storage().value(new Key.From(StorageAliases.FILE_NAME)),
+                        StandardCharsets.UTF_8
+                    ),
+                    new IsEqual<>(
+                        String.join(
+                            System.lineSeparator(),
+                            "storages:",
+                            "  \"s3-sto\":",
+                            "    type: s3",
+                            "    bucket: any",
+                            "    region: east",
+                            "    endpoint: \"https://minio.selfhosted/s3\""
+                        )
+                    )
+                );
+            }
+        );
+    }
+
+    @Test
+    void removesRepoAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        final String uname = "max";
+        final String rname = "my-rpm";
+        this.save(
+            new Key.From(uname, rname, StorageAliases.FILE_NAME),
+            this.yamlAliases().getBytes(StandardCharsets.UTF_8)
+        );
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.DELETE,
+                String.format("/api/v1/repository/%s/%s/storages/s3-sto", uname, rname)
+            ),
+            resp -> {
+                MatcherAssert.assertThat(resp.statusCode(), new IsEqual<>(HttpStatus.OK_200));
+                MatcherAssert.assertThat(
+                    new String(
+                        this.storage().value(new Key.From(uname, rname, StorageAliases.FILE_NAME)),
+                        StandardCharsets.UTF_8
+                    ),
+                    new IsEqual<>(
+                        String.join(
+                            System.lineSeparator(),
+                            "storages:",
+                            "  local:",
+                            "    type: fs",
+                            "    path: /var/artipie/local/data"
                         )
                     )
                 );

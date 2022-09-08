@@ -209,6 +209,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete repository storage alias
+      operationId: deleteRepoAlias
+      tags:
+        - storage aliases
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: Username
+          schema:
+            type: string
+        - name: rname
+          in: path
+          required: true
+          description: Name of the repository
+          schema:
+            type: string
+        - name: aname
+          in: path
+          required: true
+          description: Name of the storage alias
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alias was removed successfully
+        '404':
+          description: Alias does not exis
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /api/v1/storages:
     get:
       summary: Get common Artipie storage aliases
@@ -253,6 +288,29 @@ paths:
       responses:
         '201':
           description: Alias added successfully
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete common Artipie storage alias
+      operationId: deleteAlias
+      tags:
+        - storage aliases
+      parameters:
+        - name: aname
+          in: path
+          required: true
+          description: Name of the storage alias
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alias was removed successfully
+        '404':
+          description: Alias does not exis
         default:
           description: unexpected error
           content:
@@ -316,6 +374,35 @@ paths:
       responses:
         '201':
           description: Alias added successfully
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete user's storage alias
+      operationId: deleteUserAlias
+      tags:
+        - storage aliases
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: Username
+          schema:
+            type: string
+        - name: aname
+          in: path
+          required: true
+          description: Name of the storage alias
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alias was removed successfully
+        '404':
+          description: Alias does not exis
         default:
           description: unexpected error
           content:
