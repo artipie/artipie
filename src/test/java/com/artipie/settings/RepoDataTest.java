@@ -37,6 +37,17 @@ class RepoDataTest {
     private static final String REPO = "my-repo";
 
     /**
+     * Maximum awaiting time duration of port availability.
+     * @checkstyle MagicNumberCheck (10 lines)
+     */
+    private static final long MAX_WAIT = Duration.ofMinutes(1).toMillis();
+
+    /**
+     * Sleep duration.
+     */
+    private static final long SLEEP_DURATION = Duration.ofMillis(100).toMillis();
+
+    /**
      * Temp dir.
      * @checkstyle VisibilityModifierCheck (500 lines)
      */
@@ -254,7 +265,7 @@ class RepoDataTest {
      * @checkstyle MagicNumberCheck (15 lines)
      */
     private Boolean waitCondition(final Supplier<Boolean> action) {
-        final long max = System.currentTimeMillis() + Duration.ofSeconds(5).toMillis();
+        final long max = System.currentTimeMillis() + RepoDataTest.MAX_WAIT;
         boolean res;
         do {
             res = action.get();
@@ -262,7 +273,7 @@ class RepoDataTest {
                 break;
             } else {
                 try {
-                    TimeUnit.MILLISECONDS.sleep(100);
+                    TimeUnit.MILLISECONDS.sleep(RepoDataTest.SLEEP_DURATION);
                 } catch (final InterruptedException exc) {
                     break;
                 }
