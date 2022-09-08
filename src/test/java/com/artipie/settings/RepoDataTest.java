@@ -37,7 +37,7 @@ class RepoDataTest {
     private static final String REPO = "my-repo";
 
     /**
-     * Maximum awaiting time duration of port availability.
+     * Maximum awaiting time duration.
      * @checkstyle MagicNumberCheck (10 lines)
      */
     private static final long MAX_WAIT = Duration.ofMinutes(1).toMillis();
