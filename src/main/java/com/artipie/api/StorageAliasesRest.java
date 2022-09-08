@@ -86,7 +86,9 @@ public final class StorageAliasesRest extends BaseRest {
      */
     private void deleteRepoAlias(final RoutingContext context) {
         this.delete(
-            context, Optional.of(new Key.From(new RepositoryName(context, this.layout).toString()))
+            context, Optional.of(
+                new Key.From(new RepositoryName.FromRequest(context, this.layout).toString())
+            )
         );
     }
 
