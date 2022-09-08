@@ -7,6 +7,7 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.misc.UncheckedConsumer;
 import com.artipie.settings.StorageAliases;
+import com.artipie.settings.cache.StorageConfigCache;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -110,6 +111,11 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                         )
                     )
                 );
+                MatcherAssert.assertThat(
+                    "Storages cache was invalidated",
+                    ((StorageConfigCache.Fake) this.settingsCaches().storageConfig())
+                        .wasInvalidated()
+                );
             }
         );
     }
@@ -146,6 +152,11 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                             "    endpoint: \"https://minio.selfhosted/s3\""
                         )
                     )
+                );
+                MatcherAssert.assertThat(
+                    "Storages cache was invalidated",
+                    ((StorageConfigCache.Fake) this.settingsCaches().storageConfig())
+                        .wasInvalidated()
                 );
             }
         );
@@ -189,6 +200,11 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                         )
                     )
                 );
+                MatcherAssert.assertThat(
+                    "Storages cache was invalidated",
+                    ((StorageConfigCache.Fake) this.settingsCaches().storageConfig())
+                        .wasInvalidated()
+                );
             }
         );
     }
@@ -230,6 +246,11 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                         )
                     )
                 );
+                MatcherAssert.assertThat(
+                    "Storages cache was invalidated",
+                    ((StorageConfigCache.Fake) this.settingsCaches().storageConfig())
+                        .wasInvalidated()
+                );
             }
         );
     }
@@ -263,6 +284,11 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                             "    path: /var/artipie/local/data"
                         )
                     )
+                );
+                MatcherAssert.assertThat(
+                    "Storages cache was invalidated",
+                    ((StorageConfigCache.Fake) this.settingsCaches().storageConfig())
+                        .wasInvalidated()
                 );
             }
         );

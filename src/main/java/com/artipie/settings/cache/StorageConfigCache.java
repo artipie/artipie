@@ -7,6 +7,7 @@ package com.artipie.settings.cache;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.settings.Settings;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Cache for storages with similar configurations in Artipie settings.
@@ -38,10 +39,16 @@ public interface StorageConfigCache {
         private final Storage storage;
 
         /**
+         * Counter for `invalidateAll()` method calls.
+         */
+        private final AtomicInteger cnt;
+
+        /**
          * Ctor.
          */
         Fake() {
             this.storage = new InMemoryStorage();
+            this.cnt = new AtomicInteger(0);
         }
 
         @Override
@@ -51,7 +58,16 @@ public interface StorageConfigCache {
 
         @Override
         public void invalidateAll() {
-            // do nothing
+            this.cnt.incrementAndGet();
         }
+
+        /**
+         * Was this case invalidated?
+         * @return True, if it was invalidated once
+         */
+        public boolean wasInvalidated() {
+            return this.cnt.get() == 1;
+        }
+
     }
 }

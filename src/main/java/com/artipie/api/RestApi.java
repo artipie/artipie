@@ -6,6 +6,7 @@ package com.artipie.api;
 
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.misc.JavaResource;
+import com.artipie.settings.cache.SettingsCaches;
 import com.jcabi.log.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpServer;
@@ -19,6 +20,12 @@ import io.vertx.ext.web.openapi.RouterBuilder;
  * @since 0.26
  */
 public final class RestApi extends AbstractVerticle {
+
+    /**
+     * Artipie setting cache.
+     */
+    private final SettingsCaches caches;
+
     /**
      * Artipie settings storage.
      */
@@ -36,11 +43,15 @@ public final class RestApi extends AbstractVerticle {
 
     /**
      * Ctor.
+     * @param caches Artipie settings caches
      * @param asto Artipie settings storage.
      * @param layout Artipie layout
      * @param port Port to start verticle on
+     * @checkstyle ParameterNumberCheck (5 lines)
      */
-    public RestApi(final BlockingStorage asto, final String layout, final int port) {
+    public RestApi(final SettingsCaches caches, final BlockingStorage asto, final String layout,
+        final int port) {
+        this.caches = caches;
         this.asto = asto;
         this.layout = layout;
         this.port = port;
@@ -52,7 +63,8 @@ public final class RestApi extends AbstractVerticle {
             .onSuccess(
                 rb -> {
                     new RepositoryRest(new ManageRepoSettings(this.asto), this.layout).init(rb);
-                    new StorageAliasesRest(this.asto, this.layout).init(rb);
+                    new StorageAliasesRest(this.caches.storageConfig(), this.asto, this.layout)
+                        .init(rb);
                     final Router router = rb.createRouter();
                     router.route("/api/*")
                         .handler(

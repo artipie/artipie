@@ -40,18 +40,18 @@ public final class SettingsFromPath {
      * Searches settings by the provided path, if no settings are found,
      * example setting set is used.
      * @param port Port for info logging
+     * @param caches Settings caches
      * @return Artipie settings
      * @throws IOException On IO error
      */
-    public Settings find(final int port) throws IOException {
+    public Settings find(final int port, final SettingsCaches caches) throws IOException {
         boolean initialize = Boolean.parseBoolean(System.getenv("ARTIPIE_INIT"));
         if (!Files.exists(this.path)) {
             new JavaResource("example/artipie.yaml").copy(this.path);
             initialize = true;
         }
         final Settings settings = new YamlSettings(
-            Yaml.createYamlInput(this.path.toFile()).readYamlMapping(),
-            new SettingsCaches.All()
+            Yaml.createYamlInput(this.path.toFile()).readYamlMapping(), caches
         );
         final BlockingStorage bsto = new BlockingStorage(settings.storage());
         final Key init = new Key.From(".artipie", "initialized");
