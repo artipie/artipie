@@ -16,6 +16,11 @@ import io.vertx.ext.web.openapi.RouterBuilder;
  */
 abstract class BaseRest {
     /**
+     * Key 'repo' inside json-object.
+     */
+    protected static final String REPO = "repo";
+
+    /**
      * Mount openapi operation implementations.
      * @param rbr RouterBuilder
      */

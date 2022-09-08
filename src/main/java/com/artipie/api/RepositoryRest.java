@@ -22,11 +22,6 @@ import org.eclipse.jetty.http.HttpStatus;
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class RepositoryRest extends BaseRest {
     /**
-     * Key 'repo' inside json-object.
-     */
-    private static final String REPO = "repo";
-
-    /**
      * Repository settings create/read/update/delete.
      */
     private final CrudRepoSettings crs;
@@ -77,11 +72,12 @@ public final class RepositoryRest extends BaseRest {
      * @checkstyle ReturnCountCheck (20 lines)
      */
     private void getRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName(context, this.layout);
-        if (!RepositoryName.allowedReponame(rname)) {
+        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final ValidRepositoryName validator = new ValidRepositoryName(rname);
+        if (!validator.isValid()) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end(wrongReponame(rname));
+                .end(validator.errorMessage());
             return;
         }
         if (!this.crs.exists(rname)) {
@@ -121,11 +117,12 @@ public final class RepositoryRest extends BaseRest {
      * @checkstyle ReturnCountCheck (20 lines)
      */
     private void createRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName(context, this.layout);
-        if (!RepositoryName.allowedReponame(rname)) {
+        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final ValidRepositoryName validator = new ValidRepositoryName(rname);
+        if (!validator.isValid()) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end(wrongReponame(rname));
+                .end(validator.errorMessage());
             return;
         }
         if (this.crs.exists(rname)) {
@@ -186,19 +183,5 @@ public final class RepositoryRest extends BaseRest {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Message for 'wrong repository name'.
-     * @param rname Repository name
-     * @return Message description
-     */
-    private static String wrongReponame(final RepositoryName rname) {
-        return
-            new StringBuilder()
-                .append(String.format("Wrong repository name '%s'. ", rname))
-                .append("Repository name should not include following words: ")
-                .append(RepositoryName.RESTRICTED_REPOS)
-                .toString();
     }
 }

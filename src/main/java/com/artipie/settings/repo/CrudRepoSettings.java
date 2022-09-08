@@ -50,10 +50,9 @@ public interface CrudRepoSettings {
 
     /**
      * Remove repository.
-     * @param name Repository name. The name can be composite: in the case of org layout it will
-     *  consist of two parts - username and repo name, for example john/maven-s3.
+     * @param rname Repository name
      */
-    void delete(String name);
+    void delete(RepositoryName rname);
 
     /**
      * Move repository and all data.

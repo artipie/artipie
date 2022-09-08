@@ -4,95 +4,137 @@
  */
 package com.artipie.api;
 
+import com.artipie.settings.Layout;
 import io.vertx.ext.web.RoutingContext;
-import java.util.Set;
 
 /**
  * Repository name.
  *
  * @since 0.26
  */
-public class RepositoryName {
+public interface RepositoryName {
     /**
      * Username path parameter name.
      */
-    public static final String UNAME = "uname";
+    String UNAME = "uname";
 
     /**
      * Repository path parameter name.
      */
-    public static final String RNAME = "rname";
+    String RNAME = "rname";
 
     /**
-     * Words that should not be present inside repository name.
+     * The name of the repository.
+     * @return String name
      */
-    public static final Set<String> RESTRICTED_REPOS = Set.of(
-        "_storages", "_permissions", "_credentials"
-    );
+    String toString();
 
     /**
-     * Layout.
+     * Repository name from request (from vertx {@link RoutingContext}).
+     * @since 0.26
      */
-    private final String layout;
+    class FromRequest implements RepositoryName {
 
-    /**
-     * Repository name.
-     */
-    private final String rname;
+        /**
+         * Layout.
+         */
+        private final String layout;
 
-    /**
-     * User name.
-     */
-    private final String uname;
+        /**
+         * Repository name.
+         */
+        private final RoutingContext context;
 
-    /**
-     * Ctor.
-     *
-     * @param ctx RoutingContext
-     * @param layout Layout
-     */
-    public RepositoryName(final RoutingContext ctx, final String layout) {
-        this.layout = layout;
-        this.rname = ctx.pathParam(RepositoryName.RNAME);
-        this.uname = ctx.pathParam(RepositoryName.UNAME);
-    }
-
-    /**
-     * Check if the repository name is allowed.
-     * @param rname Repository name.
-     * @return True if repository name is allowed
-     */
-    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
-    public static boolean allowedReponame(final RepositoryName rname) {
-        return allowedReponame(rname.toString());
-    }
-
-    /**
-     * Check if the repository name is allowed.
-     * @param name Repository name.
-     * @return True if repository name is allowed
-     */
-    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
-    public static boolean allowedReponame(final String name) {
-        return RESTRICTED_REPOS.stream().filter(name::contains).findAny().isEmpty();
-    }
-
-    /**
-     * Provides string representation of repository name in toString() method.
-     * <ul>
-     *     <li>'reponame' for flat layout</li>
-     *     <li>'username/reponame' for org layout</li>
-     * </ul>
-     * @checkstyle NoJavadocForOverriddenMethodsCheck (10 lines)
-     */
-    @Override
-    public String toString() {
-        final String reponame;
-        if ("flat".equals(this.layout)) {
-            reponame = this.rname;
-        } else {
-            reponame = String.format("%s/%s", this.uname, this.rname);
+        /**
+         * Ctor.
+         *
+         * @param context Context
+         * @param layout Layout
+         */
+        public FromRequest(final RoutingContext context, final String layout) {
+            this.context = context;
+            this.layout = layout;
         }
-        return reponame;
+
+        /**
+         * Provides string representation of repository name in toString() method.
+         * <ul>
+         *     <li>'reponame' for flat layout</li>
+         *     <li>'username/reponame' for org layout</li>
+         * </ul>
+         *
+         * @checkstyle NoJavadocForOverriddenMethodsCheck (10 lines)
+         */
+        @Override
+        public String toString() {
+            final String reponame;
+            if (new Layout.Flat().toString().equals(this.layout)) {
+                reponame = this.context.pathParam(RepositoryName.RNAME);
+            } else {
+                reponame = new Org(
+                    this.context.pathParam(RepositoryName.RNAME),
+                    this.context.pathParam(RepositoryName.UNAME)
+                ).toString();
+            }
+            return reponame;
+        }
+    }
+
+    /**
+     * Repository name for flat layout.
+     * @since 0.26
+     */
+    class Flat implements RepositoryName {
+
+        /**
+         * Repository name.
+         */
+        private final String name;
+
+        /**
+         * Ctor.
+         * @param name Name
+         */
+        public Flat(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
+    }
+
+    /**
+     * Repository name for org layout is combined from username and reponame:
+     * 'username/reponame'.
+     * @since 0.26
+     */
+    class Org implements RepositoryName {
+
+        /**
+         * Repository name.
+         */
+        private final String rname;
+
+        /**
+         * User name.
+         */
+        private final String uname;
+
+        /**
+         * Ctor.
+         * @param rname Repository name
+         * @param uname User name
+         */
+        public Org(final String rname, final String uname) {
+            this.rname = rname;
+            this.uname = uname;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s/%s", this.uname, this.rname);
+        }
     }
 }
