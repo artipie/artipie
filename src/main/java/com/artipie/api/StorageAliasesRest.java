@@ -49,17 +49,23 @@ public final class StorageAliasesRest extends BaseRest {
 
     @Override
     public void init(final RouterBuilder rtrb) {
-        rtrb.operation("getAliases")
-            .handler(this::getAliases)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("addRepoAlias")
             .handler(this::addRepoAlias)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("getRepoAliases")
             .handler(this::getRepoAliases)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rtrb.operation("deleteRepoAlias")
+            .handler(this::deleteRepoAlias)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rtrb.operation("getAliases")
+            .handler(this::getAliases)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("addAlias")
             .handler(this::addAlias)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rtrb.operation("deleteAlias")
+            .handler(this::deleteAlias)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         if (new Layout.Org().toString().equals(this.layout)) {
             rtrb.operation("getUserAliases")
@@ -68,7 +74,36 @@ public final class StorageAliasesRest extends BaseRest {
             rtrb.operation("addUserAlias")
                 .handler(this::addUserAlias)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rtrb.operation("deleteUserAlias")
+                .handler(this::deleteUserAlias)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         }
+    }
+
+    /**
+     * Add common Artipie alias.
+     * @param context Routing context
+     */
+    private void deleteRepoAlias(final RoutingContext context) {
+        this.delete(
+            context, Optional.of(new Key.From(new RepositoryName(context, this.layout).toString()))
+        );
+    }
+
+    /**
+     * Add common Artipie alias.
+     * @param context Routing context
+     */
+    private void deleteAlias(final RoutingContext context) {
+        this.delete(context, Optional.empty());
+    }
+
+    /**
+     * Add common Artipie alias.
+     * @param context Routing context
+     */
+    private void deleteUserAlias(final RoutingContext context) {
+        this.delete(context, Optional.of(new Key.From(context.pathParam(RepositoryName.UNAME))));
     }
 
     /**
@@ -151,6 +186,22 @@ public final class StorageAliasesRest extends BaseRest {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
         new ManageStorageAliases(key, this.asto).list().forEach(builder::add);
         return builder.build().toString();
+    }
+
+    /**
+     * Delete alias.
+     * @param context Request context
+     * @param key Aliases settings key, empty for common Artipie aliases
+     */
+    private void delete(final RoutingContext context, final Optional<Key> key) {
+        try {
+            new ManageStorageAliases(key, this.asto)
+                .remove(context.pathParam(StorageAliasesRest.ANAME));
+            context.response().setStatusCode(HttpStatus.OK_200).end();
+        } catch (final IllegalStateException err) {
+            context.response().setStatusCode(HttpStatus.NOT_FOUND_404)
+                .end(err.getMessage());
+        }
     }
 
     /**
