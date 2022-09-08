@@ -81,7 +81,7 @@ public final class StorageAliasesRest extends BaseRest {
     }
 
     /**
-     * Add common Artipie alias.
+     * Delete repository alias.
      * @param context Routing context
      */
     private void deleteRepoAlias(final RoutingContext context) {
@@ -91,7 +91,7 @@ public final class StorageAliasesRest extends BaseRest {
     }
 
     /**
-     * Add common Artipie alias.
+     * Delete common Artipie alias.
      * @param context Routing context
      */
     private void deleteAlias(final RoutingContext context) {
@@ -99,7 +99,7 @@ public final class StorageAliasesRest extends BaseRest {
     }
 
     /**
-     * Add common Artipie alias.
+     * Delete user alias.
      * @param context Routing context
      */
     private void deleteUserAlias(final RoutingContext context) {
