@@ -39,7 +39,7 @@ public final class YamlSettings implements Settings {
     /**
      * Credentials YAML node name.
      */
-    private static final String NODE_CREDENTIALS = "credentials";
+    public static final String NODE_CREDENTIALS = "credentials";
 
     /**
      * YAML file content.
