@@ -15,8 +15,6 @@ import java.util.Collection;
 import java.util.Optional;
 import javax.json.JsonStructure;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Manage repository settings.
@@ -55,26 +53,25 @@ public final class ManageRepoSettings implements CrudRepoSettings {
 
     @Override
     public boolean exists(final RepositoryName rname) {
-        return this.asto.exists(keys(rname.toString()).getLeft())
-            ||
-            this.asto.exists(keys(rname.toString()).getRight());
+        final ConfigKeys keys = new ConfigKeys(rname.toString());
+        return this.asto.exists(keys.yamlKey()) || this.asto.exists(keys.ymlKey());
     }
 
     @Override
     public JsonStructure value(final RepositoryName rname) {
+        final ConfigKeys keys = new ConfigKeys(rname.toString());
         JsonStructure json = null;
-        final Pair<Key, Key> keys = keys(rname.toString());
-        if (this.asto.exists(keys.getLeft())) {
+        if (this.asto.exists(keys.yamlKey())) {
             json = new Yaml2Json().apply(
                 new String(
-                    this.asto.value(keys.getLeft()),
+                    this.asto.value(keys.yamlKey()),
                     StandardCharsets.UTF_8
                 )
             ).asJsonObject();
-        } else if (this.asto.exists(keys.getRight())) {
+        } else if (this.asto.exists(keys.ymlKey())) {
             json = new Yaml2Json().apply(
                 new String(
-                    this.asto.value(keys.getRight()),
+                    this.asto.value(keys.ymlKey()),
                     StandardCharsets.UTF_8
                 )
             ).asJsonObject().getJsonObject(BaseRest.REPO);
@@ -84,8 +81,9 @@ public final class ManageRepoSettings implements CrudRepoSettings {
 
     @Override
     public void save(final RepositoryName rname, final JsonStructure value) {
+        final ConfigKeys keys = new ConfigKeys(rname.toString());
         this.asto.save(
-            keys(rname.toString()).getRight(),
+            keys.yamlKey(),
             new Json2Yaml().apply(value.toString()).toString().getBytes(StandardCharsets.UTF_8)
         );
     }
@@ -98,6 +96,12 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     @Override
     public void move(final String name, final String nname) {
         throw ManageRepoSettings.NOT_IMPLEMENTED;
+    }
+
+    @Override
+    public boolean hasSettingsDuplicates(final RepositoryName rname) {
+        final ConfigKeys keys = new ConfigKeys(rname.toString());
+        return this.asto.exists(keys.yamlKey()) && this.asto.exists(keys.ymlKey());
     }
 
     /**
@@ -123,25 +127,13 @@ public final class ManageRepoSettings implements CrudRepoSettings {
      */
     private Optional<Key> repoKey(final RepositoryName rname) {
         Key result = null;
-        final Pair<Key, Key> keys = keys(rname.toString());
-        if (this.asto.exists(keys.getLeft())) {
-            result = keys.getLeft();
-        } else if (this.asto.exists(keys.getRight())) {
-            result = keys.getRight();
+        final ConfigKeys keys = new ConfigKeys(rname.toString());
+        if (this.asto.exists(keys.yamlKey())) {
+            result = keys.yamlKey();
+        } else if (this.asto.exists(keys.ymlKey())) {
+            result = keys.ymlKey();
         }
         return Optional.ofNullable(result);
-    }
-
-    /**
-     * Returns a pair of keys, these keys are possible repository settings names.
-     * @param name Key name
-     * @return Pair of keys
-     */
-    private static Pair<Key, Key> keys(final String name) {
-        return new ImmutablePair<>(
-            new Key.From(String.format("%s.yaml", name)),
-            new Key.From(String.format("%s.yml", name))
-        );
     }
 
     /**

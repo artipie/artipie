@@ -86,6 +86,12 @@ public final class RepositoryRest extends BaseRest {
                 .end(String.format("Repository %s does not exist. ", rname));
             return;
         }
+        if (this.crs.hasSettingsDuplicates(rname)) {
+            context.response()
+                .setStatusCode(HttpStatus.CONFLICT_409)
+                .end(new SettingsDuplicatesMessage(rname).message());
+            return;
+        }
         context.response()
             .setStatusCode(HttpStatus.OK_200)
             .end(this.crs.value(rname).toString());
@@ -183,5 +189,38 @@ public final class RepositoryRest extends BaseRest {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Forms settings duplicates message by repository name.
+     * @since 0.26
+     */
+    static class SettingsDuplicatesMessage {
+        /**
+         * Repository name.
+         */
+        private final RepositoryName rname;
+
+        /**
+         * Ctor.
+         * @param rname Repository name
+         */
+        SettingsDuplicatesMessage(final RepositoryName rname) {
+            this.rname = rname;
+        }
+
+        /**
+         * Message for settings duplicates.
+         * @return Message
+         */
+        public String message() {
+            return String.format(
+                new StringBuilder()
+                    .append("Repository %s has settings duplicates. ")
+                    .append("Please remove repository and create it again.")
+                    .toString(),
+                this.rname
+            );
+        }
     }
 }

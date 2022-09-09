@@ -62,4 +62,10 @@ public interface CrudRepoSettings {
      */
     void move(String name, String nname);
 
+    /**
+     * Checks that stored repository has duplicates of settings names.
+     * @param rname Repository name
+     * @return True if has duplicates
+     */
+    boolean hasSettingsDuplicates(RepositoryName rname);
 }
