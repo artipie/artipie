@@ -7,6 +7,7 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.settings.Layout;
+import com.artipie.settings.cache.StorageConfigCache;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.io.StringReader;
@@ -28,6 +29,11 @@ public final class StorageAliasesRest extends BaseRest {
     private static final String ANAME = "aname";
 
     /**
+     * Artipie setting storage cache.
+     */
+    private final StorageConfigCache caches;
+
+    /**
      * Artipie settings storage.
      */
     private final BlockingStorage asto;
@@ -39,10 +45,13 @@ public final class StorageAliasesRest extends BaseRest {
 
     /**
      * Ctor.
+     * @param caches Artipie settings caches
      * @param asto Artipie settings storage
      * @param layout Artipie layout
      */
-    public StorageAliasesRest(final BlockingStorage asto, final String layout) {
+    public StorageAliasesRest(final StorageConfigCache caches, final BlockingStorage asto,
+        final String layout) {
+        this.caches = caches;
         this.asto = asto;
         this.layout = layout;
     }
@@ -119,6 +128,7 @@ public final class StorageAliasesRest extends BaseRest {
             context.pathParam(StorageAliasesRest.ANAME),
             StorageAliasesRest.jsonFromRequest(context)
         );
+        this.caches.invalidateAll();
         context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
@@ -131,6 +141,7 @@ public final class StorageAliasesRest extends BaseRest {
             context.pathParam(StorageAliasesRest.ANAME),
             StorageAliasesRest.jsonFromRequest(context)
         );
+        this.caches.invalidateAll();
         context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
@@ -145,6 +156,7 @@ public final class StorageAliasesRest extends BaseRest {
             context.pathParam(StorageAliasesRest.ANAME),
             StorageAliasesRest.jsonFromRequest(context)
         );
+        this.caches.invalidateAll();
         context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
@@ -201,6 +213,7 @@ public final class StorageAliasesRest extends BaseRest {
         try {
             new ManageStorageAliases(key, this.asto)
                 .remove(context.pathParam(StorageAliasesRest.ANAME));
+            this.caches.invalidateAll();
             context.response().setStatusCode(HttpStatus.OK_200).end();
         } catch (final IllegalStateException err) {
             context.response().setStatusCode(HttpStatus.NOT_FOUND_404)

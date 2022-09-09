@@ -8,6 +8,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.nuget.RandomFreePort;
+import com.artipie.settings.cache.SettingsCaches;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
@@ -68,6 +69,11 @@ public abstract class RestApiServerBase {
     private BlockingStorage asto;
 
     /**
+     * Test settings caches.
+     */
+    private SettingsCaches caches;
+
+    /**
      * Artipie layout.
      * @return String layout: org or flat.
      */
@@ -99,6 +105,14 @@ public abstract class RestApiServerBase {
     }
 
     /**
+     * Get settings caches.
+     * @return Instance of {@link SettingsCaches}
+     */
+    final SettingsCaches settingsCaches() {
+        return this.caches;
+    }
+
+    /**
      * Before each method searches for free port, creates test storage instance, starts and waits
      * for test verts server to be up and running.
      * @param vertx Vertx instance
@@ -109,8 +123,9 @@ public abstract class RestApiServerBase {
     final void beforeEach(final Vertx vertx, final VertxTestContext context) throws Exception {
         this.prt = new RandomFreePort().value();
         this.asto = new BlockingStorage(new InMemoryStorage());
+        this.caches = new SettingsCaches.Fake();
         vertx.deployVerticle(
-            new RestApi(this.asto, this.layout(), this.prt),
+            new RestApi(this.caches, this.asto, this.layout(), this.prt),
             context.succeedingThenComplete()
         );
         this.waitServer(vertx);

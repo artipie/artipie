@@ -22,6 +22,7 @@ import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.Settings;
 import com.artipie.settings.SettingsFromPath;
+import com.artipie.settings.cache.SettingsCaches;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import com.artipie.vertx.VertxSliceServer;
@@ -45,6 +46,7 @@ import org.apache.commons.cli.Options;
  * @since 1.0
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ExecutableStatementCountCheck (500 lines)
+ * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 @SuppressWarnings("PMD.PrematureDeclaration")
 public final class VertxMain {
@@ -100,7 +102,8 @@ public final class VertxMain {
      * @throws IOException In case of error reading settings.
      */
     public int start() throws IOException {
-        final Settings settings = new SettingsFromPath(this.config).find(this.port);
+        final SettingsCaches caches = new SettingsCaches.All();
+        final Settings settings = new SettingsFromPath(this.config).find(this.port, caches);
         final Metrics metrics = metrics(settings);
         final int main = this.listenOn(
             new MainSlice(this.http, settings, metrics),
@@ -110,6 +113,7 @@ public final class VertxMain {
         this.startRepos(settings, metrics, this.port);
         this.vertx.deployVerticle(
             new RestApi(
+                caches,
                 new BlockingStorage(settings.repoConfigsStorage()),
                 settings.layout().toString(),
                 // @checkstyle MagicNumberCheck (1 line)
