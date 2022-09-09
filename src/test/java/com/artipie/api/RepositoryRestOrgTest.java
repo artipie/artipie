@@ -74,7 +74,7 @@ final class RepositoryRestOrgTest extends RestApiServerBase {
                     new IsEqual<>(HttpStatus.OK_200)
                 );
                 MatcherAssert.assertThat(
-                    this.storage().exists(new Key.From("alice/newrepo.yml")),
+                    this.storage().exists(new Key.From("alice/newrepo.yaml")),
                     new IsEqual<>(true)
                 );
             }

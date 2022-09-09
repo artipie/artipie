@@ -58,7 +58,7 @@ final class RepositoryRestFlatTest extends RestApiServerBase {
                     new IsEqual<>(HttpStatus.OK_200)
                 );
                 MatcherAssert.assertThat(
-                    this.storage().exists(new Key.From("newrepo.yml")),
+                    this.storage().exists(new Key.From("newrepo.yaml")),
                     new IsEqual<>(true)
                 );
             }
@@ -76,6 +76,27 @@ final class RepositoryRestFlatTest extends RestApiServerBase {
             );
         this.requestAndAssert(
             vertx, ctx, new TestRequest(HttpMethod.PUT, "/api/v1/repository/newrepo", json),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.CONFLICT_409)
+                )
+        );
+    }
+
+    @Test
+    void getRepoWithDuplicatesSettings(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        this.save(new Key.From("duplicate.yaml"), new byte[0]);
+        this.save(new Key.From("duplicate.yml"), new byte[0]);
+        final JsonObject json = new JsonObject()
+            .put(
+                "repo", new JsonObject()
+                    .put("type", "fs")
+                    .put("storage", new JsonObject())
+            );
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(HttpMethod.GET, "/api/v1/repository/duplicate", json),
             res ->
                 MatcherAssert.assertThat(
                     res.statusCode(),
