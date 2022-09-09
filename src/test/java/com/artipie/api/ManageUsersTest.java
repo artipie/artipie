@@ -107,7 +107,7 @@ class ManageUsersTest {
         final String alice = "Alice";
         final String email = "Alice@example.com";
         final String pass = "xyz";
-        this.users.add(
+        this.users.addOrUpdate(
             Json.createObjectBuilder().add("type", "plain").add("pass", pass)
                 .add("email", email)
                 .add("groups", Json.createArrayBuilder().add("reader").add("creator").build())
@@ -115,6 +115,10 @@ class ManageUsersTest {
             alice
         );
         final JsonArray list = this.users.list();
+        MatcherAssert.assertThat(
+            "Failed to find added user",
+            list.stream().anyMatch(usr -> alice.equals(usr.asJsonObject().getString("name")))
+        );
         final JsonObject nuser = list.stream()
             .filter(usr -> alice.equals(usr.asJsonObject().getString("name")))
             .findFirst().get().asJsonObject();
@@ -125,7 +129,7 @@ class ManageUsersTest {
         );
         MatcherAssert.assertThat(
             "Failed to add password",
-            nuser.getString("pass").toString().equals(pass)
+            nuser.getString("pass").equals(pass)
         );
         MatcherAssert.assertThat(
             "Failed to add groups",

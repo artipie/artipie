@@ -23,7 +23,7 @@ public interface CrudUsers {
      * @param info User info (password, email, groups, etc)
      * @param uid User name
      */
-    void add(JsonObject info, String uid);
+    void addOrUpdate(JsonObject info, String uid);
 
     /**
      * Remove user by name.

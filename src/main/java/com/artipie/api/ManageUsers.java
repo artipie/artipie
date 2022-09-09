@@ -71,7 +71,7 @@ public final class ManageUsers implements CrudUsers {
     }
 
     @Override
-    public void add(final JsonObject info, final String uid) {
+    public void addOrUpdate(final JsonObject info, final String uid) {
         YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
         final Optional<YamlMapping> users = this.users();
         if (users.isPresent()) {
