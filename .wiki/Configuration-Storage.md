@@ -111,6 +111,20 @@ Initiated storage factory [type={your-storage-type}, class={your-storage-factory
 You can study [a storage implementation based on Redis java client Redisson](https://github.com/artipie/asto/tree/master/asto-redis/src/main/java/com/artipie/asto/redis)
 as a good example.
 
+# Storage Verification tests
+
+The `asto-core` module contains verification tests that designed to confirm correctness of a storage implementation.
+A storage verification test class have to extend the `StorageWhiteboxVerification` and provide the `newStorage` method,
+which returns a new instance of storage to check.
+
+> Note: To avoid affect one test to another, test environment should be returned to initial state before each test.
+
+> Note: If storage can't be used with [SubStorage](https://www.javadoc.io/static/com.artipie/asto-core/v1.13.0/com/artipie/asto/SubStorage.html),
+> in that case you should override `newBaseForSubStorage` or(and)
+> `newBaseForRootSubStorage` method(s) to return `Optional.empty()`.
+
+If a storage implementation passes all verification tests, it can be used by Artipie server to host binary data or configuration.
+
 # Storage Aliases
 
 Artipie has special configuration item for storage aliases: `_storages.yaml` file located in configuration root.
