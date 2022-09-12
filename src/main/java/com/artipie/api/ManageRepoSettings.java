@@ -12,7 +12,6 @@ import com.artipie.settings.repo.CrudRepoSettings;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
 import javax.json.JsonStructure;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -90,7 +89,14 @@ public final class ManageRepoSettings implements CrudRepoSettings {
 
     @Override
     public void delete(final RepositoryName rname) {
-        this.repoKey(rname).ifPresent(this.asto::delete);
+        new ConfigKeys(rname.toString()).keys()
+            .forEach(
+                key -> {
+                    if (this.asto.exists(key)) {
+                        this.asto.delete(key);
+                    }
+                }
+            );
     }
 
     @Override
@@ -113,27 +119,11 @@ public final class ManageRepoSettings implements CrudRepoSettings {
         final Collection<String> res = new ArrayList<>(5);
         for (final Key item : this.asto.list(key)) {
             final String name = item.string();
-            if (yamlFilename(name) && new ValidRepositoryName(name).isValid()) {
+            if (yamlFilename(name) && new RepositoryNameValidator(name).isValid()) {
                 res.add(name.replaceAll("\\.yaml|\\.yml", ""));
             }
         }
         return res;
-    }
-
-    /**
-     * Obtains existing key of repository settings for given repository name.
-     * @param rname Repository name
-     * @return Existing key for repository name
-     */
-    private Optional<Key> repoKey(final RepositoryName rname) {
-        Key result = null;
-        final ConfigKeys keys = new ConfigKeys(rname.toString());
-        if (this.asto.exists(keys.yamlKey())) {
-            result = keys.yamlKey();
-        } else if (this.asto.exists(keys.ymlKey())) {
-            result = keys.ymlKey();
-        }
-        return Optional.ofNullable(result);
     }
 
     /**

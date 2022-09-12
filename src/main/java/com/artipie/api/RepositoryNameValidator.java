@@ -10,7 +10,7 @@ import java.util.Set;
  * Valid repository name.
  * @since 0.26
  */
-public class ValidRepositoryName {
+public final class RepositoryNameValidator implements Validator {
     /**
      * Words that should not be present inside repository name.
      */
@@ -25,7 +25,7 @@ public class ValidRepositoryName {
      * Ctor.
      * @param name The name to test
      */
-    public ValidRepositoryName(final String name) {
+    public RepositoryNameValidator(final String name) {
         this.name = name;
         this.reserved = Set.of("_storages", "_permissions", "_credentials");
     }
@@ -34,16 +34,11 @@ public class ValidRepositoryName {
      * Ctor.
      * @param name The name to test
      */
-    public ValidRepositoryName(final RepositoryName name) {
+    public RepositoryNameValidator(final RepositoryName name) {
         this(name.toString());
     }
 
-    /**
-     * Checks if the repository name is valid. The name is considered valid if it does
-     * not contain reserved words `_storages, _permissions, _credentials` in it.
-     *
-     * @return True is the name is valid
-     */
+    @Override
     public boolean isValid() {
         return this.reserved.stream().filter(this.name::contains).findAny().isEmpty();
     }
@@ -56,10 +51,7 @@ public class ValidRepositoryName {
         return this.reserved;
     }
 
-    /**
-     * Error message for 'wrong repository name'.
-     * @return Message description
-     */
+    @Override
     public String errorMessage() {
         return
             new StringBuilder()

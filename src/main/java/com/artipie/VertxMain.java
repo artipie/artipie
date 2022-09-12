@@ -8,7 +8,6 @@ package com.artipie;
 import com.artipie.api.RestApi;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -114,7 +113,7 @@ public final class VertxMain {
         this.vertx.deployVerticle(
             new RestApi(
                 caches,
-                new BlockingStorage(settings.repoConfigsStorage()),
+                settings.repoConfigsStorage(),
                 settings.layout().toString(),
                 // @checkstyle MagicNumberCheck (1 line)
                 8086

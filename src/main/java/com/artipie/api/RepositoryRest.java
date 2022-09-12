@@ -4,6 +4,7 @@
  */
 package com.artipie.api;
 
+import com.artipie.settings.RepoData;
 import com.artipie.settings.repo.CrudRepoSettings;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
@@ -27,6 +28,11 @@ public final class RepositoryRest extends BaseRest {
     private final CrudRepoSettings crs;
 
     /**
+     * Repository data management.
+     */
+    private final RepoData data;
+
+    /**
      * Artipie layout.
      */
     private final String layout;
@@ -34,10 +40,12 @@ public final class RepositoryRest extends BaseRest {
     /**
      * Ctor.
      * @param crs Repository settings create/read/update/delete
+     * @param data Repository data management
      * @param layout Artipie layout
      */
-    public RepositoryRest(final CrudRepoSettings crs, final String layout) {
+    public RepositoryRest(final CrudRepoSettings crs, final RepoData data, final String layout) {
         this.crs = crs;
+        this.data = data;
         this.layout = layout;
     }
 
@@ -53,6 +61,9 @@ public final class RepositoryRest extends BaseRest {
             rbr.operation("createRepo")
                 .handler(this::createRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rbr.operation("removeRepo")
+                .handler(this::removeRepo)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         } else {
             rbr.operation("list")
                 .handler(this::listUserRepos)
@@ -62,6 +73,9 @@ public final class RepositoryRest extends BaseRest {
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("createUserRepo")
                 .handler(this::createRepo)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rbr.operation("removeUserRepo")
+                .handler(this::removeRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         }
     }
@@ -73,17 +87,20 @@ public final class RepositoryRest extends BaseRest {
      */
     private void getRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final ValidRepositoryName validator = new ValidRepositoryName(rname);
-        if (!validator.isValid()) {
+        final RepositoryNameValidator rnamecheck = new RepositoryNameValidator(rname);
+        if (!rnamecheck.isValid()) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end(validator.errorMessage());
+                .end(rnamecheck.errorMessage());
             return;
         }
-        if (!this.crs.exists(rname)) {
+        final RepositoryExistenceValidator existence = new RepositoryExistenceValidator(
+            this.crs, rname
+        );
+        if (!existence.isValid()) {
             context.response()
                 .setStatusCode(HttpStatus.NOT_FOUND_404)
-                .end(String.format("Repository %s does not exist. ", rname));
+                .end(existence.errorMessage());
             return;
         }
         if (this.crs.hasSettingsDuplicates(rname)) {
@@ -124,11 +141,11 @@ public final class RepositoryRest extends BaseRest {
      */
     private void createRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final ValidRepositoryName validator = new ValidRepositoryName(rname);
-        if (!validator.isValid()) {
+        final RepositoryNameValidator rnamecheck = new RepositoryNameValidator(rname);
+        if (!rnamecheck.isValid()) {
             context.response()
                 .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end(validator.errorMessage());
+                .end(rnamecheck.errorMessage());
             return;
         }
         if (this.crs.exists(rname)) {
@@ -146,6 +163,35 @@ public final class RepositoryRest extends BaseRest {
                 .setStatusCode(HttpStatus.OK_200)
                 .end();
         }
+    }
+
+    /**
+     * Remove a repository settings json and repository data.
+     * @param context Routing context
+     * @checkstyle ReturnCountCheck (20 lines)
+     */
+    private void removeRepo(final RoutingContext context) {
+        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final RepositoryNameValidator rnamecheck = new RepositoryNameValidator(rname);
+        if (!rnamecheck.isValid()) {
+            context.response()
+                .setStatusCode(HttpStatus.BAD_REQUEST_400)
+                .end(rnamecheck.errorMessage());
+            return;
+        }
+        final RepositoryExistenceValidator existence = new RepositoryExistenceValidator(
+            this.crs, rname
+        );
+        if (!existence.isValid()) {
+            context.response()
+                .setStatusCode(HttpStatus.NOT_FOUND_404)
+                .end(existence.errorMessage());
+            return;
+        }
+        this.data.remove(rname).thenRun(() -> this.crs.delete(rname));
+        context.response()
+            .setStatusCode(HttpStatus.OK_200)
+            .end();
     }
 
     /**

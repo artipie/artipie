@@ -10,6 +10,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
@@ -24,8 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  */
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-final class RepositoryRestFlatTest extends RestApiServerBase {
-
+final class RepositoryRestFlatTest extends RepositoryRestBaseTest {
     @Test
     void listsRepos(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(new Key.From("docker-repo.yaml"), new byte[0]);
@@ -102,6 +102,52 @@ final class RepositoryRestFlatTest extends RestApiServerBase {
                     res.statusCode(),
                     new IsEqual<>(HttpStatus.CONFLICT_409)
                 )
+        );
+    }
+
+    @Test
+    void deleteRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.save(
+            new Key.From("docker-repo.yaml"),
+            this.repoSettings().getBytes(StandardCharsets.UTF_8)
+        );
+        final Key.From alpine = new Key.From("docker-repo", "alpine.img");
+        this.data.save(alpine, new byte[]{});
+        final Key.From python = new Key.From("docker-repo", "python.img");
+        this.data.save(python, new byte[]{});
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(HttpMethod.DELETE, "/api/v1/repository/docker-repo"),
+            res -> {
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                );
+                MatcherAssert.assertThat(
+                    waitCondition(() -> !this.storage().exists(new Key.From("docker-repo.yaml"))),
+                    new IsEqual<>(true)
+                );
+                MatcherAssert.assertThat(
+                    waitCondition(() -> !this.data.exists(alpine)),
+                    new IsEqual<>(true)
+                );
+                MatcherAssert.assertThat(
+                    waitCondition(() -> !this.data.exists(python)),
+                    new IsEqual<>(true)
+                );
+            }
+        );
+    }
+
+    @Test
+    void deleteRepoNotfound(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(HttpMethod.DELETE, "/api/v1/repository/docker-repo"),
+            res -> {
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.NOT_FOUND_404)
+                );
+            }
         );
     }
 
