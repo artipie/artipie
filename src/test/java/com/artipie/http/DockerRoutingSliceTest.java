@@ -6,6 +6,7 @@ package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Content;
+import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
@@ -23,6 +24,7 @@ import com.artipie.settings.users.Users;
 import io.reactivex.Flowable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.hamcrest.MatcherAssert;
@@ -155,6 +157,11 @@ final class DockerRoutingSliceTest {
         @Override
         public CompletionStage<Users> credentials() {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Optional<Key> credentialsKey() {
+            return Optional.empty();
         }
     }
 }

@@ -48,7 +48,7 @@ class ManageUsersTest {
     /**
      * Test credentials key.
      */
-    private static final Key KEY = new Key.From("creds.yaml");
+    static final Key KEY = new Key.From("creds.yaml");
 
     /**
      * Test storage.

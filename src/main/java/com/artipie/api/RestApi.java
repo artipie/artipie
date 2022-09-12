@@ -4,6 +4,7 @@
  */
 package com.artipie.api;
 
+import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.misc.JavaResource;
 import com.artipie.settings.cache.SettingsCaches;
@@ -14,6 +15,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.FileSystemAccess;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.util.Optional;
 
 /**
  * Vert.x {@link io.vertx.core.Verticle} for exposing Rest API operations.
@@ -42,19 +44,26 @@ public final class RestApi extends AbstractVerticle {
     private final int port;
 
     /**
+     * Key to users credentials yaml file location.
+     */
+    private final Optional<Key> users;
+
+    /**
      * Ctor.
      * @param caches Artipie settings caches
      * @param asto Artipie settings storage.
      * @param layout Artipie layout
      * @param port Port to start verticle on
+     * @param users Key to users credentials yaml location
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     public RestApi(final SettingsCaches caches, final BlockingStorage asto, final String layout,
-        final int port) {
+        final int port, final Optional<Key> users) {
         this.caches = caches;
         this.asto = asto;
         this.layout = layout;
         this.port = port;
+        this.users = users;
     }
 
     @Override
@@ -82,5 +91,18 @@ public final class RestApi extends AbstractVerticle {
                         .onFailure(err -> Logger.error(this, err.getMessage()));
                 }
             ).onFailure(Throwable::printStackTrace);
+        if (this.users.isPresent()) {
+            RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").onSuccess(
+                rb -> {
+                    new UsersRest(new ManageUsers(this.users.get(), this.asto)).init(rb);
+                    this.vertx.createHttpServer().requestHandler(rb.createRouter())
+                        .listen(this.port)
+                        .onComplete(res -> Logger.info(this, "Users API started"))
+                        .onFailure(err -> Logger.error(this, err.getMessage()));
+                }
+            ).onFailure(Throwable::printStackTrace);
+        } else {
+            Logger.warn(this, "File credentials are not set, users API is not available");
+        }
     }
 }
