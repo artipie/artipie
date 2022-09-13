@@ -22,6 +22,7 @@ import java.util.Optional;
 /**
  * Vert.x {@link io.vertx.core.Verticle} for exposing Rest API operations.
  * @since 0.26
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class RestApi extends AbstractVerticle {
 
