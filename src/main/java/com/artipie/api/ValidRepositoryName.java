@@ -10,7 +10,7 @@ import java.util.Set;
  * Valid repository name.
  * @since 0.26
  */
-public class ValidRepositoryName {
+public final class ValidRepositoryName {
     /**
      * Words that should not be present inside repository name.
      */

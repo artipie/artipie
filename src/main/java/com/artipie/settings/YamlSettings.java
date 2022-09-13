@@ -29,17 +29,26 @@ import java.util.function.BiFunction;
  * Settings built from YAML.
  *
  * @since 0.1
- * @todo #337:30min Add a description of alternative authentication.
- *  Add a description of alternative authentication to the README file.
  * @checkstyle ReturnCountCheck (500 lines)
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class YamlSettings implements Settings {
 
     /**
-     * Credentials YAML node name.
+     * YAML node name `credentials` for credentials yaml section.
      */
     public static final String NODE_CREDENTIALS = "credentials";
+
+    /**
+     * YAML node name `type` for credentials type.
+     */
+    private static final String NODE_TYPE = "type";
+
+    /**
+     * YAML node name for `path` credentials type.
+     */
+    private static final String NODE_PATH = "path";
 
     /**
      * YAML file content.
@@ -108,6 +117,18 @@ public final class YamlSettings implements Settings {
         ).orElse(
             this.users(this.meta().yamlMapping(YamlSettings.NODE_CREDENTIALS))
         );
+    }
+
+    @Override
+    public Optional<Key> credentialsKey() {
+        return this.credentialsYamlSequence().map(
+            seq -> seq.values().stream()
+                .filter(
+                    node -> CredentialsType.FILE.toString()
+                        .equalsIgnoreCase(node.asMapping().string(YamlSettings.NODE_TYPE))
+                ).findFirst().map(YamlNode::asMapping)
+        ).orElse(Optional.ofNullable(this.meta().yamlMapping(YamlSettings.NODE_CREDENTIALS)))
+            .map(file -> new Key.From(file.string(YamlSettings.NODE_PATH)));
     }
 
     @Override
@@ -184,7 +205,7 @@ public final class YamlSettings implements Settings {
                     "Invalid credentials configuration: type `file` requires `path`!"
                 )
             );
-            final String path = mapping.string("path");
+            final String path = mapping.string(YamlSettings.NODE_PATH);
             if (path != null) {
                 final Storage storage = settings.storage();
                 final KeyFromPath key = new KeyFromPath(path);
@@ -246,7 +267,7 @@ public final class YamlSettings implements Settings {
             CredentialsType res = ENV;
             if (yaml != null) {
                 res = CredentialsType.valueOf(
-                    yaml.string("type").toUpperCase(Locale.getDefault())
+                    yaml.string(YamlSettings.NODE_TYPE).toUpperCase(Locale.getDefault())
                 );
             }
             return res;
