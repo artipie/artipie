@@ -113,15 +113,14 @@ as a good example.
 
 # Storage Verification tests
 
-The `asto-core` module contains verification tests that designed to confirm correctness of a storage implementation.
-A storage verification test class have to extend the `StorageWhiteboxVerification` and provide the `newStorage` method,
+The `asto-core` module contains verification tests which are designed to confirm correctness of a storage implementation.
+A storage verification test class has to extend the `StorageWhiteboxVerification` and implement the `newStorage` method,
 which returns a new instance of storage to check.
 
-> Note: To avoid affect one test to another, test environment should be returned to initial state before each test.
+> Note: To avoid possible mutual affects between tests methods, test environment should be returned to initial state before each test.
 
 > Note: If storage can't be used with [SubStorage](https://www.javadoc.io/static/com.artipie/asto-core/v1.13.0/com/artipie/asto/SubStorage.html),
-> in that case you should override `newBaseForSubStorage` or(and)
-> `newBaseForRootSubStorage` method(s) to return `Optional.empty()`.
+> you should override `newBaseForSubStorage` or(and) `newBaseForRootSubStorage` method(s) to return `Optional.empty()`.
 
 If a storage implementation passes all verification tests, it can be used by Artipie server to host binary data or configuration.
 
