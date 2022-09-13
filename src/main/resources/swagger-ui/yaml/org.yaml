@@ -157,7 +157,7 @@ paths:
           description: Remove a repository with name {rname} for user {uname}
         '400':
           description: Wrong repository name
-        '409':
+        '404':
           description: Repository not found
         default:
           description: unexpected error
