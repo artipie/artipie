@@ -69,40 +69,38 @@ public final class RestApi extends AbstractVerticle {
     @Override
     public void start() throws Exception {
         RouterBuilder.create(this.vertx, String.format("swagger-ui/yaml/%s.yaml", this.layout))
-            .onSuccess(
-                rb -> {
-                    new RepositoryRest(new ManageRepoSettings(this.asto), this.layout).init(rb);
-                    new StorageAliasesRest(this.caches.storageConfig(), this.asto, this.layout)
-                        .init(rb);
-                    final Router router = rb.createRouter();
-                    router.route("/api/*")
-                        .handler(
-                            StaticHandler
-                                .create(
-                                    FileSystemAccess.ROOT,
-                                    new JavaResource("swagger-ui").uri().getPath()
-                                )
-                                .setIndexPage(String.format("index-%s.html", this.layout))
-                        );
-                    final HttpServer server = this.vertx.createHttpServer();
-                    server.requestHandler(router)
-                        .listen(this.port)
-                        .onComplete(res -> Logger.info(this, "Repositories API started"))
-                        .onFailure(err -> Logger.error(this, err.getMessage()));
-                }
-            ).onFailure(Throwable::printStackTrace);
-        if (this.users.isPresent()) {
-            RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").onSuccess(
-                rb -> {
-                    new UsersRest(new ManageUsers(this.users.get(), this.asto)).init(rb);
-                    this.vertx.createHttpServer().requestHandler(rb.createRouter())
-                        .listen(this.port)
-                        .onComplete(res -> Logger.info(this, "Users API started"))
-                        .onFailure(err -> Logger.error(this, err.getMessage()));
-                }
-            ).onFailure(Throwable::printStackTrace);
-        } else {
-            Logger.warn(this, "File credentials are not set, users API is not available");
-        }
+            .compose(
+                rrb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").onSuccess(
+                    urb -> {
+                        new RepositoryRest(new ManageRepoSettings(this.asto), this.layout)
+                            .init(rrb);
+                        new StorageAliasesRest(this.caches.storageConfig(), this.asto, this.layout)
+                            .init(rrb);
+                        if (this.users.isPresent()) {
+                            new UsersRest(new ManageUsers(this.users.get(), this.asto)).init(urb);
+                        } else {
+                            Logger.warn(
+                                this, "File credentials are not set, users API is not available"
+                            );
+                        }
+                        final Router router = rrb.createRouter();
+                        router.route("/*").subRouter(urb.createRouter());
+                        router.route("/api/*")
+                            .handler(
+                                StaticHandler
+                                    .create(
+                                        FileSystemAccess.ROOT,
+                                        new JavaResource("swagger-ui").uri().getPath()
+                                    )
+                                    .setIndexPage(String.format("index-%s.html", this.layout))
+                            );
+                        final HttpServer server = this.vertx.createHttpServer();
+                        server.requestHandler(router)
+                            .listen(this.port)
+                            .onComplete(res -> Logger.info(this, "Rest API started"))
+                            .onFailure(err -> Logger.error(this, err.getMessage()));
+                    }
+                ).onFailure(Throwable::printStackTrace)
+            );
     }
 }
