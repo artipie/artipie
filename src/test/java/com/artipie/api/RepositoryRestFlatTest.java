@@ -112,9 +112,9 @@ final class RepositoryRestFlatTest extends RepositoryRestBaseTest {
             this.repoSettings().getBytes(StandardCharsets.UTF_8)
         );
         final Key.From alpine = new Key.From("docker-repo", "alpine.img");
-        this.data.save(alpine, new byte[]{});
+        this.getData().save(alpine, new byte[]{});
         final Key.From python = new Key.From("docker-repo", "python.img");
-        this.data.save(python, new byte[]{});
+        this.getData().save(python, new byte[]{});
         this.requestAndAssert(
             vertx, ctx, new TestRequest(HttpMethod.DELETE, "/api/v1/repository/docker-repo"),
             res -> {
@@ -127,11 +127,11 @@ final class RepositoryRestFlatTest extends RepositoryRestBaseTest {
                     new IsEqual<>(true)
                 );
                 MatcherAssert.assertThat(
-                    waitCondition(() -> !this.data.exists(alpine)),
+                    waitCondition(() -> !this.getData().exists(alpine)),
                     new IsEqual<>(true)
                 );
                 MatcherAssert.assertThat(
-                    waitCondition(() -> !this.data.exists(python)),
+                    waitCondition(() -> !this.getData().exists(python)),
                     new IsEqual<>(true)
                 );
             }

@@ -7,7 +7,9 @@ package com.artipie.api;
 import java.util.Set;
 
 /**
- * Valid repository name.
+ * Checks if the repository name is valid.
+ * The name is considered valid if it does not contain
+ * reserved words `_storages, _permissions, _credentials` in it.
  * @since 0.26
  */
 public final class RepositoryNameValidator implements Validator {

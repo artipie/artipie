@@ -29,7 +29,15 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
     /**
      * Test data storage.
      */
-    BlockingStorage data;
+    private BlockingStorage data;
+
+    /**
+     * Getter of test data storage.
+     * @return Test data storage
+     */
+    BlockingStorage getData() {
+        return this.data;
+    }
 
     /**
      * Before each method creates test data storage instance.
