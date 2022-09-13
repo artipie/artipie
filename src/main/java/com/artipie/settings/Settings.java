@@ -6,11 +6,13 @@ package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.settings.users.Users;
 import com.artipie.settings.users.UsersFromEnv;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -59,6 +61,12 @@ public interface Settings {
      * @return Completion action with credentials
      */
     CompletionStage<Users> credentials();
+
+    /**
+     * Key for credentials yaml settings.
+     * @return Key for credentials
+     */
+    Optional<Key> credentialsKey();
 
     /**
      * Fake {@link Settings} using a file storage.
@@ -211,6 +219,11 @@ public interface Settings {
         @Override
         public CompletionStage<Users> credentials() {
             return CompletableFuture.completedFuture(this.cred);
+        }
+
+        @Override
+        public Optional<Key> credentialsKey() {
+            return Optional.empty();
         }
     }
 }

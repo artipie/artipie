@@ -116,7 +116,8 @@ public final class VertxMain {
                 settings.repoConfigsStorage(),
                 settings.layout().toString(),
                 // @checkstyle MagicNumberCheck (1 line)
-                8086
+                8086,
+                settings.credentialsKey()
             )
         );
         return main;

@@ -1,0 +1,66 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Artipie - OpenAPI 3.0
+  description:
+    This is Atripie Server based on the OpenAPI 3.0 specification.
+  license:
+    name: MIT
+externalDocs:
+  description: Find out more about Artipie
+  url: https://github.com/artipie
+tags:
+  - name: users
+    description: Operations about users
+paths:
+  /api/v1/users:
+    get:
+      summary: List all users.
+      operationId: listAllUsers
+      tags:
+        - users
+      responses:
+        '200':
+          description: A list of the existing users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    User:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        pass:
+          type: string
+        type:
+          type: string
+        email:
+          type: string
+        groups:
+          type: array
+          items:
+            type: string

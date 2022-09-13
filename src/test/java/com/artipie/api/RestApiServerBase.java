@@ -127,7 +127,9 @@ public abstract class RestApiServerBase {
         this.asto = new BlockingStorage(storage);
         this.caches = new SettingsCaches.Fake();
         vertx.deployVerticle(
-            new RestApi(this.caches, storage, this.layout(), this.prt),
+            new RestApi(
+                this.caches, storage, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY)
+            ),
             context.succeedingThenComplete()
         );
         this.waitServer(vertx);
