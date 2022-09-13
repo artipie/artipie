@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
@@ -149,6 +150,23 @@ final class RepositoryRestFlatTest extends RepositoryRestBaseTest {
                 );
             }
         );
+    }
+
+    @Test
+    void deleteReservedRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+            this.requestAndAssert(
+                vertx, ctx, new TestRequest(
+                    HttpMethod.DELETE, String.format("/api/v1/repository/%s", name)
+                ),
+                res -> {
+                    MatcherAssert.assertThat(
+                        res.statusCode(),
+                        new IsEqual<>(HttpStatus.BAD_REQUEST_400)
+                    );
+                }
+            );
+        }
     }
 
     @Override
