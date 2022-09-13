@@ -87,31 +87,33 @@ public final class RepositoryRest extends BaseRest {
      */
     private void getRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final RepositoryNameValidator rnamecheck = new RepositoryNameValidator(rname);
-        if (!rnamecheck.isValid()) {
+        if (
+            validate(new RepositoryNameValidator(rname), HttpStatus.BAD_REQUEST_400, context)
+                &&
+                validate(
+                    () -> this.crs.exists(rname),
+                    String.format("Repository %s does not exist.", rname),
+                    HttpStatus.NOT_FOUND_404,
+                    context
+                )
+                &&
+                validate(
+                    () -> !this.crs.hasSettingsDuplicates(rname),
+                    String.format(
+                        new StringBuilder()
+                            .append("Repository %s has settings duplicates. ")
+                            .append("Please remove repository and create it again.")
+                            .toString(),
+                        rname
+                    ),
+                    HttpStatus.CONFLICT_409,
+                    context
+                )
+        ) {
             context.response()
-                .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end(rnamecheck.errorMessage());
-            return;
+                .setStatusCode(HttpStatus.OK_200)
+                .end(this.crs.value(rname).toString());
         }
-        final RepositoryExistenceValidator existence = new RepositoryExistenceValidator(
-            this.crs, rname
-        );
-        if (!existence.isValid()) {
-            context.response()
-                .setStatusCode(HttpStatus.NOT_FOUND_404)
-                .end(existence.errorMessage());
-            return;
-        }
-        if (this.crs.hasSettingsDuplicates(rname)) {
-            context.response()
-                .setStatusCode(HttpStatus.CONFLICT_409)
-                .end(new SettingsDuplicatesMessage(rname).message());
-            return;
-        }
-        context.response()
-            .setStatusCode(HttpStatus.OK_200)
-            .end(this.crs.value(rname).toString());
     }
 
     /**
@@ -137,28 +139,46 @@ public final class RepositoryRest extends BaseRest {
     /**
      * Create a repository.
      * @param context Routing context
-     * @checkstyle ReturnCountCheck (20 lines)
      */
     private void createRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final RepositoryNameValidator rnamecheck = new RepositoryNameValidator(rname);
-        if (!rnamecheck.isValid()) {
-            context.response()
-                .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end(rnamecheck.errorMessage());
-            return;
+        if (validate(new RepositoryNameValidator(rname), HttpStatus.BAD_REQUEST_400, context)
+            &&
+            validate(
+                () -> !this.crs.exists(rname),
+                String.format("Repository %s already exists", rname),
+                HttpStatus.CONFLICT_409,
+                context
+            )
+        ) {
+            final JsonStructure json = Json.createReader(
+                new StringReader(context.body().asString())
+            ).read();
+            if (RepositoryRest.validateRepo(context, (JsonObject) json)) {
+                this.crs.save(rname, json);
+                context.response()
+                    .setStatusCode(HttpStatus.OK_200)
+                    .end();
+            }
         }
-        if (this.crs.exists(rname)) {
-            context.response()
-                .setStatusCode(HttpStatus.CONFLICT_409)
-                .end(String.format("Repository %s already exists", rname));
-            return;
-        }
-        final JsonStructure json = Json.createReader(
-            new StringReader(context.body().asString())
-        ).read();
-        if (RepositoryRest.validateRepo(context, (JsonObject) json)) {
-            this.crs.save(rname, json);
+    }
+
+    /**
+     * Remove a repository settings json and repository data.
+     * @param context Routing context
+     */
+    private void removeRepo(final RoutingContext context) {
+        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        if (validate(new RepositoryNameValidator(rname), HttpStatus.BAD_REQUEST_400, context)
+            &&
+            validate(
+                () -> this.crs.exists(rname),
+                String.format("Repository %s does not exist. ", rname),
+                HttpStatus.NOT_FOUND_404,
+                context
+            )
+        ) {
+            this.data.remove(rname).thenRun(() -> this.crs.delete(rname));
             context.response()
                 .setStatusCode(HttpStatus.OK_200)
                 .end();
@@ -166,107 +186,48 @@ public final class RepositoryRest extends BaseRest {
     }
 
     /**
-     * Remove a repository settings json and repository data.
-     * @param context Routing context
-     * @checkstyle ReturnCountCheck (20 lines)
-     */
-    private void removeRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final RepositoryNameValidator rnamecheck = new RepositoryNameValidator(rname);
-        if (!rnamecheck.isValid()) {
-            context.response()
-                .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end(rnamecheck.errorMessage());
-            return;
-        }
-        final RepositoryExistenceValidator existence = new RepositoryExistenceValidator(
-            this.crs, rname
-        );
-        if (!existence.isValid()) {
-            context.response()
-                .setStatusCode(HttpStatus.NOT_FOUND_404)
-                .end(existence.errorMessage());
-            return;
-        }
-        this.data.remove(rname).thenRun(() -> this.crs.delete(rname));
-        context.response()
-            .setStatusCode(HttpStatus.OK_200)
-            .end();
-    }
-
-    /**
      * Validate new repository json.
      * @param context Routing context
      * @param json New repository json
      * @return True is json correct
-     * @checkstyle ReturnCountCheck (20 lines)
+     * @checkstyle BooleanExpressionComplexityCheck (50 lines)
      */
     private static boolean validateRepo(final RoutingContext context, final JsonObject json) {
-        if (json == null) {
-            context.response()
-                .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end("JSON body is expected");
-            return false;
-        }
         final String repomsg = "Section `repo` is required";
-        if (!json.containsKey(RepositoryRest.REPO)) {
-            context.response()
-                .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end(repomsg);
-            return false;
-        }
-        final JsonObject repo = json.getJsonObject(RepositoryRest.REPO);
-        if (repo == null) {
-            context.response()
-                .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end(repomsg);
-            return false;
-        }
-        if (!repo.containsKey("type")) {
-            context.response()
-                .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end("Repository type is required");
-            return false;
-        }
-        if (!repo.containsKey("storage")) {
-            context.response()
-                .setStatusCode(HttpStatus.BAD_REQUEST_400)
-                .end("Repository storage is required");
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Forms settings duplicates message by repository name.
-     * @since 0.26
-     */
-    static class SettingsDuplicatesMessage {
-        /**
-         * Repository name.
-         */
-        private final RepositoryName rname;
-
-        /**
-         * Ctor.
-         * @param rname Repository name
-         */
-        SettingsDuplicatesMessage(final RepositoryName rname) {
-            this.rname = rname;
-        }
-
-        /**
-         * Message for settings duplicates.
-         * @return Message
-         */
-        public String message() {
-            return String.format(
-                new StringBuilder()
-                    .append("Repository %s has settings duplicates. ")
-                    .append("Please remove repository and create it again.")
-                    .toString(),
-                this.rname
-            );
-        }
+        return
+            validate(
+                () -> json != null,
+                "JSON body is expected",
+                HttpStatus.BAD_REQUEST_400,
+                context
+            )
+                &&
+                validate(
+                    () -> json.containsKey(RepositoryRest.REPO),
+                    repomsg,
+                    HttpStatus.BAD_REQUEST_400,
+                    context
+                )
+                &&
+                validate(
+                    () -> json.getJsonObject(RepositoryRest.REPO) != null,
+                    repomsg,
+                    HttpStatus.BAD_REQUEST_400,
+                    context
+                )
+                &&
+                validate(
+                    () -> json.getJsonObject(RepositoryRest.REPO).containsKey("type"),
+                    "Repository type is required",
+                    HttpStatus.BAD_REQUEST_400,
+                    context
+                )
+                &&
+                validate(
+                    () -> json.getJsonObject(RepositoryRest.REPO).containsKey("storage"),
+                    "Repository storage is required",
+                    HttpStatus.BAD_REQUEST_400,
+                    context
+                );
     }
 }

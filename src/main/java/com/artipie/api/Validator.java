@@ -21,17 +21,4 @@ public interface Validator {
      * @return Error message
      */
     String errorMessage();
-
-    /**
-     * Validates and runs callback if not valid.
-     * @param callback Callback
-     * @return Result of validation
-     */
-    default boolean validate(Runnable callback) {
-        final boolean result = this.isValid();
-        if (result) {
-            callback.run();
-        }
-        return result;
-    }
 }
