@@ -41,7 +41,7 @@ final class UsersRestTest extends RestApiServerBase {
                     response.body().toString(),
                     // @checkstyle LineLengthCheck (1 line)
                     "[{\"name\":\"Alice\",\"groups\":[\"readers\"]},{\"name\":\"Bob\",\"email\":\"bob@example.com\",\"groups\":[\"admin\"]}]",
-                    true
+                    false
                 )
             )
         );
@@ -64,7 +64,7 @@ final class UsersRestTest extends RestApiServerBase {
                     response.body().toString(),
                     // @checkstyle LineLengthCheck (1 line)
                     "{\"name\":\"John\",\"email\":\"john@example.com\",\"groups\":[\"readers\",\"tags\"]}",
-                    true
+                    false
                 )
             )
         );
