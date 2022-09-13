@@ -7,6 +7,8 @@ package com.artipie.api;
 import com.artipie.settings.users.CrudUsers;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.util.Optional;
+import javax.json.JsonValue;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -33,6 +35,25 @@ public final class UsersRest extends BaseRest {
         rbr.operation("listAllUsers")
             .handler(this::listAllUsers)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rbr.operation("getUser")
+            .handler(this::getUser)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+    }
+
+    /**
+     * Get single user info.
+     * @param context Request context
+     */
+    private void getUser(final RoutingContext context) {
+        final Optional<JsonValue> usr = this.users.list().stream().filter(
+            item -> item.asJsonObject().getString("name")
+                .equals(context.pathParam(RepositoryName.UNAME))
+        ).findFirst();
+        if (usr.isPresent()) {
+            context.response().setStatusCode(HttpStatus.OK_200).end(usr.get().toString());
+        } else {
+            context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
+        }
     }
 
     /**
@@ -40,8 +61,7 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void listAllUsers(final RoutingContext context) {
-        context.response().setStatusCode(HttpStatus.OK_200)
-            .end(this.users.list().toString());
+        context.response().setStatusCode(HttpStatus.OK_200).end(this.users.list().toString());
     }
 
 }

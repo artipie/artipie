@@ -24,6 +24,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 /**
  * Users from yaml file.
@@ -59,12 +60,15 @@ public final class ManageUsers implements CrudUsers {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
         users.map(
             yaml -> yaml.keys().stream().map(node -> node.asScalar().value()).map(
-                name -> Json.createObjectBuilder().add("name", name).addAll(
-                    Json.createObjectBuilder(
+                name -> {
+                    final JsonObjectBuilder usr = Json.createObjectBuilder(
                         new Yaml2Json().apply(users.get().yamlMapping(name).toString())
                             .asJsonObject()
-                    )
-                ).build()
+                    );
+                    usr.remove("pass");
+                    usr.remove("type");
+                    return Json.createObjectBuilder().add("name", name).addAll(usr).build();
+                }
             ).collect(Collectors.toList())
         ).orElse(Collections.emptyList()).forEach(builder::add);
         return builder.build();

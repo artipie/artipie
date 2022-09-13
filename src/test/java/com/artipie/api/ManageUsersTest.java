@@ -16,18 +16,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.StringContains;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +75,7 @@ class ManageUsersTest {
         JSONAssert.assertEquals(
             this.users.list().toString(),
             // @checkstyle LineLengthCheck (1 line)
-            "[{\"name\":\"Alice\",\"pass\":123,\"type\":\"plain\",\"groups\":[\"readers\"]},{\"name\":\"Bob\",\"type\":\"plain\",\"pass\":\"xyz\",\"email\":\"bob@example.com\",\"groups\":[\"admin\"]}]",
+            "[{\"name\":\"Alice\",\"groups\":[\"readers\"]},{\"name\":\"Bob\",\"email\":\"bob@example.com\",\"groups\":[\"admin\"]}]",
             true
         );
     }
@@ -106,9 +103,8 @@ class ManageUsersTest {
         }
         final String alice = "Alice";
         final String email = "Alice@example.com";
-        final String pass = "xyz";
         this.users.addOrUpdate(
-            Json.createObjectBuilder().add("type", "plain").add("pass", pass)
+            Json.createObjectBuilder().add("type", "plain").add("pass", "xyz")
                 .add("email", email)
                 .add("groups", Json.createArrayBuilder().add("reader").add("creator").build())
                 .build(),
@@ -119,23 +115,21 @@ class ManageUsersTest {
             "Failed to find added user",
             list.stream().anyMatch(usr -> alice.equals(usr.asJsonObject().getString("name")))
         );
-        final JsonObject nuser = list.stream()
-            .filter(usr -> alice.equals(usr.asJsonObject().getString("name")))
-            .findFirst().get().asJsonObject();
         MatcherAssert.assertThat(
-            "Failed to add user email",
-            nuser.getString("email"),
-            new IsEqual<>(email)
-        );
-        MatcherAssert.assertThat(
-            "Failed to add password",
-            nuser.getString("pass").equals(pass)
-        );
-        MatcherAssert.assertThat(
-            "Failed to add groups",
-            nuser.get("groups").asJsonArray().stream().map(JsonValue::toString)
-                .map(item -> item.replace("\"", "")).collect(Collectors.toList()),
-            Matchers.containsInAnyOrder("reader", "creator")
+            "Failed to add user",
+            new String(this.blsto.value(ManageUsersTest.KEY), StandardCharsets.UTF_8),
+            new StringContains(
+                String.join(
+                    System.lineSeparator(),
+                    "  Alice:",
+                    "    type: plain",
+                    "    pass: xyz",
+                    "    email: Alice@example.com",
+                    "    groups:",
+                    "      - reader",
+                    "      - creator"
+                )
+            )
         );
     }
 
