@@ -85,12 +85,20 @@ public final class RepositoryRest extends BaseRest {
      */
     private void getRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final RepositoryNameCondition rnvalidator = new RepositoryNameCondition(rname);
-        // @checkstyle LineLengthCheck (4 lines)
+        final RepositoryNameValidator rnvalidator = new RepositoryNameValidator(rname);
         final Validator validator = validator(
             validator(rnvalidator::valid, rnvalidator::message, HttpStatus.BAD_REQUEST_400),
-            validator(() -> this.crs.exists(rname), () -> String.format("Repository %s does not exist.", rname), HttpStatus.NOT_FOUND_404),
-            validator(() -> !this.crs.hasSettingsDuplicates(rname), () -> String.format("Repository %s has settings duplicates. Please remove repository and create it again.", rname), HttpStatus.CONFLICT_409)
+            validator(
+                () -> this.crs.exists(rname),
+                () -> String.format("Repository %s does not exist.", rname),
+                HttpStatus.NOT_FOUND_404
+            ),
+            validator(
+                () -> !this.crs.hasSettingsDuplicates(rname),
+                // @checkstyle LineLengthCheck (1 line)
+                () -> String.format("Repository %s has settings duplicates. Please remove repository and create it again.", rname),
+                HttpStatus.CONFLICT_409
+            )
         );
         if (validator.validate(context)) {
             context.response()
@@ -125,24 +133,46 @@ public final class RepositoryRest extends BaseRest {
      */
     private void createRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final RepositoryNameCondition rnvalidator = new RepositoryNameCondition(rname);
-        // @checkstyle LineLengthCheck (3 lines)
+        final RepositoryNameValidator rnvalidator = new RepositoryNameValidator(rname);
         final Validator validator = validator(
             validator(rnvalidator::valid, rnvalidator::message, HttpStatus.BAD_REQUEST_400),
-            validator(() -> !this.crs.exists(rname), () -> String.format("Repository %s already exists", rname), HttpStatus.CONFLICT_409)
+            validator(
+                () -> !this.crs.exists(rname),
+                () -> String.format("Repository %s already exists", rname),
+                HttpStatus.CONFLICT_409
+            )
         );
         if (validator.validate(context)) {
             final JsonObject json = (JsonObject) (Json.createReader(
                 new StringReader(context.body().asString())
             ).read());
             final String repomsg = "Section `repo` is required";
-            // @checkstyle LineLengthCheck (6 lines)
             final Validator jsvalidator = validator(
-                validator(() -> json != null, () -> "JSON body is expected", HttpStatus.BAD_REQUEST_400),
-                validator(() -> json.containsKey(RepositoryRest.REPO), () -> repomsg, HttpStatus.BAD_REQUEST_400),
-                validator(() -> json.getJsonObject(RepositoryRest.REPO) != null, () -> repomsg, HttpStatus.BAD_REQUEST_400),
-                validator(() -> json.getJsonObject(RepositoryRest.REPO).containsKey("type"), () -> "Repository type is required", HttpStatus.BAD_REQUEST_400),
-                validator(() -> json.getJsonObject(RepositoryRest.REPO).containsKey("storage"), () -> "Repository storage is required", HttpStatus.BAD_REQUEST_400)
+                validator(
+                    () -> json != null,
+                    "JSON body is expected",
+                    HttpStatus.BAD_REQUEST_400
+                ),
+                validator(
+                    () -> json.containsKey(RepositoryRest.REPO),
+                    repomsg,
+                    HttpStatus.BAD_REQUEST_400
+                ),
+                validator(
+                    () -> json.getJsonObject(RepositoryRest.REPO) != null,
+                    repomsg,
+                    HttpStatus.BAD_REQUEST_400
+                ),
+                validator(
+                    () -> json.getJsonObject(RepositoryRest.REPO).containsKey("type"),
+                    "Repository type is required",
+                    HttpStatus.BAD_REQUEST_400
+                ),
+                validator(
+                    () -> json.getJsonObject(RepositoryRest.REPO).containsKey("storage"),
+                    "Repository storage is required",
+                    HttpStatus.BAD_REQUEST_400
+                )
             );
             if (jsvalidator.validate(context)) {
                 this.crs.save(rname, json);
@@ -159,11 +189,14 @@ public final class RepositoryRest extends BaseRest {
      */
     private void removeRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final RepositoryNameCondition rnvalidator = new RepositoryNameCondition(rname);
-        // @checkstyle LineLengthCheck (3 lines)
+        final RepositoryNameValidator rnvalidator = new RepositoryNameValidator(rname);
         final Validator validator = validator(
             validator(rnvalidator::valid, rnvalidator::message, HttpStatus.BAD_REQUEST_400),
-            validator(() -> this.crs.exists(rname), () -> String.format("Repository %s does not exist. ", rname), HttpStatus.NOT_FOUND_404)
+            validator(
+                () -> this.crs.exists(rname),
+                () -> String.format("Repository %s does not exist. ", rname),
+                HttpStatus.NOT_FOUND_404
+            )
         );
         if (validator.validate(context)) {
             this.data.remove(rname).thenRun(() -> this.crs.delete(rname));

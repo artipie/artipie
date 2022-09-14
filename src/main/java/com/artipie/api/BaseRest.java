@@ -49,6 +49,26 @@ abstract class BaseRest {
      * @return Validator instance
      */
     protected static Validator validator(final Supplier<Boolean> condition,
+        final String message, final int code) {
+        return context -> {
+            final boolean valid = condition.get();
+            if (!valid) {
+                context.response()
+                    .setStatusCode(code)
+                    .end(message);
+            }
+            return valid;
+        };
+    }
+
+    /**
+     * Builds validator instance from condition, error message and status code.
+     * @param condition Condition
+     * @param message Error message
+     * @param code Status code
+     * @return Validator instance
+     */
+    protected static Validator validator(final Supplier<Boolean> condition,
         final Supplier<String> message, final int code) {
         return context -> {
             final boolean valid = condition.get();

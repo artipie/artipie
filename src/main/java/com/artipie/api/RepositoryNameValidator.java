@@ -12,7 +12,7 @@ import java.util.Set;
  * reserved words `_storages, _permissions, _credentials` in it.
  * @since 0.26
  */
-public final class RepositoryNameCondition {
+public final class RepositoryNameValidator {
     /**
      * Words that should not be present inside repository name.
      */
@@ -27,7 +27,7 @@ public final class RepositoryNameCondition {
      * Ctor.
      * @param name The name to test
      */
-    public RepositoryNameCondition(final String name) {
+    public RepositoryNameValidator(final String name) {
         this.name = name;
     }
 
@@ -35,7 +35,7 @@ public final class RepositoryNameCondition {
      * Ctor.
      * @param name The name to test
      */
-    public RepositoryNameCondition(final RepositoryName name) {
+    public RepositoryNameValidator(final RepositoryName name) {
         this(name.toString());
     }
 
@@ -45,7 +45,7 @@ public final class RepositoryNameCondition {
      */
     @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     public static Set<String> reservedWords() {
-        return RepositoryNameCondition.RESERVED;
+        return RepositoryNameValidator.RESERVED;
     }
 
     /**
@@ -53,7 +53,7 @@ public final class RepositoryNameCondition {
      * @return True if valid
      */
     public boolean valid() {
-        return RepositoryNameCondition.RESERVED.stream()
+        return RepositoryNameValidator.RESERVED.stream()
             .filter(this.name::contains).findAny().isEmpty();
     }
 

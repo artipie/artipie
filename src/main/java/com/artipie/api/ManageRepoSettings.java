@@ -119,7 +119,7 @@ public final class ManageRepoSettings implements CrudRepoSettings {
         final Collection<String> res = new ArrayList<>(5);
         for (final Key item : this.asto.list(key)) {
             final String name = item.string();
-            if (yamlFilename(name) && new RepositoryNameCondition(name).valid()) {
+            if (yamlFilename(name) && new RepositoryNameValidator(name).valid()) {
                 res.add(name.replaceAll("\\.yaml|\\.yml", ""));
             }
         }
