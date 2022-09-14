@@ -91,10 +91,7 @@ final class UsersRestTest extends RestApiServerBase {
     void altersUser(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(
             new Key.From(ManageUsersTest.KEY),
-            new CredsConfigYaml().withFullInfo(
-                "John", Users.PasswordFormat.PLAIN, "231", "john@example.com",
-                Set.of("readers", "tags")
-            ).toString().getBytes(StandardCharsets.UTF_8)
+            new CredsConfigYaml().withUsers("Mark").toString().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
