@@ -6,6 +6,7 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import com.artipie.settings.ConfigFile;
+import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -62,11 +63,10 @@ public class ConfigKeys {
     }
 
     /**
-     * Returns a pair of keys, these keys are possible settings names.
-     * @param name Key name
-     * @return Pair of keys
+     * List of yaml-keys for setting name.
+     * @return List of keys
      */
-    public Pair<Key, Key> keys(final String name) {
-        return this.pair;
+    public List<Key> keys() {
+        return List.of(this.yamlKey(), this.ymlKey());
     }
 }

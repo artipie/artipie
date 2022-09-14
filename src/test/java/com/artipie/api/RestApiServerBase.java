@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -122,11 +123,12 @@ public abstract class RestApiServerBase {
     @BeforeEach
     final void beforeEach(final Vertx vertx, final VertxTestContext context) throws Exception {
         this.prt = new RandomFreePort().value();
-        this.asto = new BlockingStorage(new InMemoryStorage());
+        final InMemoryStorage storage = new InMemoryStorage();
+        this.asto = new BlockingStorage(storage);
         this.caches = new SettingsCaches.Fake();
         vertx.deployVerticle(
             new RestApi(
-                this.caches, this.asto, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY)
+                this.caches, storage, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY)
             ),
             context.succeedingThenComplete()
         );
@@ -164,7 +166,7 @@ public abstract class RestApiServerBase {
      *
      * @param vertx Vertx instance
      */
-    private void waitServer(final Vertx vertx) {
+    final void waitServer(final Vertx vertx) {
         final AtomicReference<Boolean> available = new AtomicReference<>(false);
         final NetClient client = vertx.createNetClient();
         final long max = System.currentTimeMillis() + RestApiServerBase.MAX_WAIT;
@@ -193,6 +195,35 @@ public abstract class RestApiServerBase {
                 )
             );
         }
+    }
+
+    /**
+     * Awaiting of action during maximum 5 seconds.
+     * Allows to wait result of action during period of time.
+     * @param action Action
+     * @return Result of action
+     * @checkstyle MagicNumberCheck (15 lines)
+     * @checkstyle NonStaticMethodCheck (15 lines)
+     */
+    final Boolean waitCondition(final Supplier<Boolean> action) {
+        final long max = System.currentTimeMillis() + RestApiServerBase.MAX_WAIT;
+        boolean res;
+        do {
+            res = action.get();
+            if (res) {
+                break;
+            } else {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(RestApiServerBase.SLEEP_DURATION);
+                } catch (final InterruptedException exc) {
+                    break;
+                }
+            }
+        } while (System.currentTimeMillis() < max);
+        if (!res) {
+            res = action.get();
+        }
+        return res;
     }
 
     /**

@@ -134,6 +134,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    delete:
+      summary: Remove user repository
+      operationId: removeUserRepo
+      tags:
+        - repository
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: Name of the user
+          schema:
+            type: string
+        - name: rname
+          in: path
+          required: true
+          description: Name of the repository
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Remove a repository with name {rname} for user {uname}
+        '400':
+          description: Wrong repository name
+        '404':
+          description: Repository not found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /api/v1/repository/{uname}/{rname}/storages:
     get:
       summary: Get repository storage aliases

@@ -5,8 +5,10 @@
 package com.artipie.api;
 
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.misc.JavaResource;
+import com.artipie.settings.RepoData;
 import com.artipie.settings.cache.SettingsCaches;
 import com.jcabi.log.Logger;
 import io.vertx.core.AbstractVerticle;
@@ -20,6 +22,7 @@ import java.util.Optional;
 /**
  * Vert.x {@link io.vertx.core.Verticle} for exposing Rest API operations.
  * @since 0.26
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class RestApi extends AbstractVerticle {
 
@@ -31,7 +34,7 @@ public final class RestApi extends AbstractVerticle {
     /**
      * Artipie settings storage.
      */
-    private final BlockingStorage asto;
+    private final Storage storage;
 
     /**
      * Artipie layout.
@@ -51,16 +54,16 @@ public final class RestApi extends AbstractVerticle {
     /**
      * Ctor.
      * @param caches Artipie settings caches
-     * @param asto Artipie settings storage.
+     * @param storage Artipie settings storage.
      * @param layout Artipie layout
      * @param port Port to start verticle on
      * @param users Key to users credentials yaml location
      * @checkstyle ParameterNumberCheck (5 lines)
      */
-    public RestApi(final SettingsCaches caches, final BlockingStorage asto, final String layout,
+    public RestApi(final SettingsCaches caches, final Storage storage, final String layout,
         final int port, final Optional<Key> users) {
         this.caches = caches;
-        this.asto = asto;
+        this.storage = storage;
         this.layout = layout;
         this.port = port;
         this.users = users;
@@ -72,13 +75,17 @@ public final class RestApi extends AbstractVerticle {
             .compose(
                 rrb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").onSuccess(
                     urb -> {
-                        new RepositoryRest(new ManageRepoSettings(this.asto), this.layout)
-                            .init(rrb);
-                        new StorageAliasesRest(this.caches.storageConfig(), this.asto, this.layout)
+                        final BlockingStorage asto = new BlockingStorage(this.storage);
+                        new RepositoryRest(
+                            new ManageRepoSettings(asto),
+                            new RepoData(this.storage),
+                            this.layout
+                        ).init(rrb);
+                        new StorageAliasesRest(this.caches.storageConfig(), asto, this.layout)
                             .init(rrb);
                         if (this.users.isPresent()) {
                             new UsersRest(
-                                new ManageUsers(this.users.get(), this.asto), this.caches.auth()
+                                new ManageUsers(this.users.get(), asto), this.caches.auth()
                             ).init(urb);
                         } else {
                             Logger.warn(
