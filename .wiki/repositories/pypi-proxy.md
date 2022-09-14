@@ -20,7 +20,7 @@ repo:
 In the settings `remotes` section should have one `url` item with cache storage (the cache storage is required),
 username and password are optional credentials for remote. Caching feature makes all previously accessed 
 indexes and packages available when remote repository is down.
-Check [storage](../Configuration-Storage.md) and [permission](../Configuration-Repository-Permissions.md)
+Check [storage](./Configuration-Storage.md) and [permission](./Configuration-Repository-Permissions.md)
 documentations to learn more about its properties.
 
 To install the package with `pip install` specify Artipie repository url with `--index-url` option:
