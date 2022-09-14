@@ -77,7 +77,9 @@ public final class RestApi extends AbstractVerticle {
                         new StorageAliasesRest(this.caches.storageConfig(), this.asto, this.layout)
                             .init(rrb);
                         if (this.users.isPresent()) {
-                            new UsersRest(new ManageUsers(this.users.get(), this.asto)).init(urb);
+                            new UsersRest(
+                                new ManageUsers(this.users.get(), this.asto), this.caches.auth()
+                            ).init(urb);
                         } else {
                             Logger.warn(
                                 this, "File credentials are not set, users API is not available"
