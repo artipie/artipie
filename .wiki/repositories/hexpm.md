@@ -19,7 +19,7 @@ repo:
        - download
 ```
 Repository name is the name of the repo config yaml file(e.g. `my_hexpm`).
-Check [storage](../Configuration-Storage.md) and [permission](../Configuration-Repository-Permissions.md) 
+Check [storage](./Configuration-Storage.md) and [permission](./Configuration-Repository-Permissions.md) 
 documentations to learn more about these settings.
 
 To use your HexPM repository in Elixir project with `mix` build tool, add the following configuration
