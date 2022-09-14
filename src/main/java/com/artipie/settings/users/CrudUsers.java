@@ -4,6 +4,7 @@
  */
 package com.artipie.settings.users;
 
+import java.util.Optional;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
@@ -17,6 +18,13 @@ public interface CrudUsers {
      * @return Artipie users
      */
     JsonArray list();
+
+    /**
+     * Get user info.
+     * @param uname Username
+     * @return User info if user is found
+     */
+    Optional<JsonObject> get(String uname);
 
     /**
      * Add user.

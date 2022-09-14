@@ -24,6 +24,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 /**
  * Users from yaml file.
@@ -59,15 +60,16 @@ public final class ManageUsers implements CrudUsers {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
         users.map(
             yaml -> yaml.keys().stream().map(node -> node.asScalar().value()).map(
-                name -> Json.createObjectBuilder().add("name", name).addAll(
-                    Json.createObjectBuilder(
-                        new Yaml2Json().apply(users.get().yamlMapping(name).toString())
-                            .asJsonObject()
-                    )
-                ).build()
+                name -> jsonFromYaml(name, users.get().yamlMapping(name))
             ).collect(Collectors.toList())
         ).orElse(Collections.emptyList()).forEach(builder::add);
         return builder.build();
+    }
+
+    @Override
+    public Optional<JsonObject> get(final String uname) {
+        return this.users().flatMap(yaml -> Optional.ofNullable(yaml.yamlMapping(uname)))
+            .map(yaml -> jsonFromYaml(uname, yaml));
     }
 
     @Override
@@ -129,5 +131,20 @@ public final class ManageUsers implements CrudUsers {
             }
         }
         return res;
+    }
+
+    /**
+     * Transform user info in yaml format to json.
+     * @param uname User name
+     * @param yaml Yaml info
+     * @return User info as json object
+     */
+    private static JsonObject jsonFromYaml(final String uname, final YamlMapping yaml) {
+        final JsonObjectBuilder usr = Json.createObjectBuilder(
+            new Yaml2Json().apply(yaml.toString()).asJsonObject()
+        );
+        usr.remove("pass");
+        usr.remove("type");
+        return Json.createObjectBuilder().add("name", uname).addAll(usr).build();
     }
 }

@@ -34,6 +34,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/users/{uname}:
+    get:
+      summary: Get user info.
+      operationId: getUser
+      tags:
+        - users
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: User name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '404':
+          description: User does not exist
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Error:
@@ -53,10 +81,6 @@ components:
         - name
       properties:
         name:
-          type: string
-        pass:
-          type: string
-        type:
           type: string
         email:
           type: string
