@@ -12,7 +12,7 @@ import java.util.Set;
  * reserved words `_storages, _permissions, _credentials` in it.
  * @since 0.26
  */
-public final class RepositoryNameCondition implements Condition, ErrorMessage {
+public final class RepositoryNameCondition {
     /**
      * Words that should not be present inside repository name.
      */
@@ -48,13 +48,19 @@ public final class RepositoryNameCondition implements Condition, ErrorMessage {
         return RepositoryNameCondition.RESERVED;
     }
 
-    @Override
+    /**
+     * Validate repository name.
+     * @return True if valid
+     */
     public boolean valid() {
         return RepositoryNameCondition.RESERVED.stream()
             .filter(this.name::contains).findAny().isEmpty();
     }
 
-    @Override
+    /**
+     * Get error message.
+     * @return Error message
+     */
     public String message() {
         return
             new StringBuilder()
