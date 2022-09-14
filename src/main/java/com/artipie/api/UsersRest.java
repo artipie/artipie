@@ -8,7 +8,7 @@ import com.artipie.settings.users.CrudUsers;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.util.Optional;
-import javax.json.JsonValue;
+import javax.json.JsonObject;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -45,10 +45,7 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void getUser(final RoutingContext context) {
-        final Optional<JsonValue> usr = this.users.list().stream().filter(
-            item -> item.asJsonObject().getString("name")
-                .equals(context.pathParam(RepositoryName.UNAME))
-        ).findFirst();
+        final Optional<JsonObject> usr = this.users.get(context.pathParam(RepositoryName.UNAME));
         if (usr.isPresent()) {
             context.response().setStatusCode(HttpStatus.OK_200).end(usr.get().toString());
         } else {
