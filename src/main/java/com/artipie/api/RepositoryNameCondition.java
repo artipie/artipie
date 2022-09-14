@@ -12,11 +12,11 @@ import java.util.Set;
  * reserved words `_storages, _permissions, _credentials` in it.
  * @since 0.26
  */
-public final class RepositoryNameValidator implements Validator {
+public final class RepositoryNameCondition implements Condition, ErrorMessage {
     /**
      * Words that should not be present inside repository name.
      */
-    private final Set<String> reserved;
+    private static final Set<String> RESERVED = Set.of("_storages", "_permissions", "_credentials");
 
     /**
      * The name to test.
@@ -27,39 +27,40 @@ public final class RepositoryNameValidator implements Validator {
      * Ctor.
      * @param name The name to test
      */
-    public RepositoryNameValidator(final String name) {
+    public RepositoryNameCondition(final String name) {
         this.name = name;
-        this.reserved = Set.of("_storages", "_permissions", "_credentials");
     }
 
     /**
      * Ctor.
      * @param name The name to test
      */
-    public RepositoryNameValidator(final RepositoryName name) {
+    public RepositoryNameCondition(final RepositoryName name) {
         this(name.toString());
-    }
-
-    @Override
-    public boolean isValid() {
-        return this.reserved.stream().filter(this.name::contains).findAny().isEmpty();
     }
 
     /**
      * Set of reserved words.
      * @return Reserved words
      */
-    public Set<String> reservedWords() {
-        return this.reserved;
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static Set<String> reservedWords() {
+        return RepositoryNameCondition.RESERVED;
     }
 
     @Override
-    public String errorMessage() {
+    public boolean valid() {
+        return RepositoryNameCondition.RESERVED.stream()
+            .filter(this.name::contains).findAny().isEmpty();
+    }
+
+    @Override
+    public String message() {
         return
             new StringBuilder()
                 .append(String.format("Wrong repository name '%s'. ", this.name))
                 .append("Repository name should not include following words: ")
-                .append(this.reservedWords())
+                .append(reservedWords())
                 .toString();
     }
 }

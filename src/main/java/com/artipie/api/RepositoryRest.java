@@ -12,7 +12,6 @@ import io.vertx.ext.web.openapi.RouterBuilder;
 import java.io.StringReader;
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonStructure;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -87,29 +86,31 @@ public final class RepositoryRest extends BaseRest {
      */
     private void getRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        if (
-            validate(new RepositoryNameValidator(rname), HttpStatus.BAD_REQUEST_400, context)
-                &&
-                validate(
-                    () -> this.crs.exists(rname),
-                    String.format("Repository %s does not exist.", rname),
-                    HttpStatus.NOT_FOUND_404,
-                    context
-                )
-                &&
-                validate(
-                    () -> !this.crs.hasSettingsDuplicates(rname),
-                    String.format(
-                        new StringBuilder()
-                            .append("Repository %s has settings duplicates. ")
-                            .append("Please remove repository and create it again.")
-                            .toString(),
-                        rname
-                    ),
-                    HttpStatus.CONFLICT_409,
-                    context
-                )
-        ) {
+        final RepositoryNameCondition rnvalidator = new RepositoryNameCondition(rname);
+        final Validator validator = validator(
+            validator(
+                rnvalidator,
+                rnvalidator,
+                HttpStatus.BAD_REQUEST_400
+            ),
+            validator(
+                () -> this.crs.exists(rname),
+                () -> String.format("Repository %s does not exist.", rname),
+                HttpStatus.NOT_FOUND_404
+            ),
+            validator(
+                () -> !this.crs.hasSettingsDuplicates(rname),
+                () -> String.format(
+                    new StringBuilder()
+                        .append("Repository %s has settings duplicates. ")
+                        .append("Please remove repository and create it again.")
+                        .toString(),
+                    rname
+                ),
+                HttpStatus.CONFLICT_409
+            )
+        );
+        if (validator.validate(context)) {
             context.response()
                 .setStatusCode(HttpStatus.OK_200)
                 .end(this.crs.value(rname).toString());
@@ -142,19 +143,52 @@ public final class RepositoryRest extends BaseRest {
      */
     private void createRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        if (validate(new RepositoryNameValidator(rname), HttpStatus.BAD_REQUEST_400, context)
-            &&
-            validate(
+        final RepositoryNameCondition rnvalidator = new RepositoryNameCondition(rname);
+        final Validator validator = validator(
+            validator(
+                rnvalidator,
+                rnvalidator,
+                HttpStatus.BAD_REQUEST_400
+            ),
+            validator(
                 () -> !this.crs.exists(rname),
-                String.format("Repository %s already exists", rname),
-                HttpStatus.CONFLICT_409,
-                context
+                () -> String.format("Repository %s already exists", rname),
+                HttpStatus.CONFLICT_409
             )
-        ) {
-            final JsonStructure json = Json.createReader(
+        );
+        if (validator.validate(context)) {
+            final JsonObject json = (JsonObject) (Json.createReader(
                 new StringReader(context.body().asString())
-            ).read();
-            if (RepositoryRest.validateRepo(context, (JsonObject) json)) {
+            ).read());
+            final String repomsg = "Section `repo` is required";
+            final Validator jsvalidator = validator(
+                validator(
+                    () -> json != null,
+                    () -> "JSON body is expected",
+                    HttpStatus.BAD_REQUEST_400
+                ),
+                validator(
+                    () -> json.containsKey(RepositoryRest.REPO),
+                    () -> repomsg,
+                    HttpStatus.BAD_REQUEST_400
+                ),
+                validator(
+                    () -> json.getJsonObject(RepositoryRest.REPO) != null,
+                    () -> repomsg,
+                    HttpStatus.BAD_REQUEST_400
+                ),
+                validator(
+                    () -> json.getJsonObject(RepositoryRest.REPO).containsKey("type"),
+                    () -> "Repository type is required",
+                    HttpStatus.BAD_REQUEST_400
+                ),
+                validator(
+                    () -> json.getJsonObject(RepositoryRest.REPO).containsKey("storage"),
+                    () -> "Repository storage is required",
+                    HttpStatus.BAD_REQUEST_400
+                )
+            );
+            if (jsvalidator.validate(context)) {
                 this.crs.save(rname, json);
                 context.response()
                     .setStatusCode(HttpStatus.OK_200)
@@ -169,65 +203,24 @@ public final class RepositoryRest extends BaseRest {
      */
     private void removeRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        if (validate(new RepositoryNameValidator(rname), HttpStatus.BAD_REQUEST_400, context)
-            &&
-            validate(
+        final RepositoryNameCondition rnvalidator = new RepositoryNameCondition(rname);
+        final Validator validator = validator(
+            validator(
+                rnvalidator,
+                rnvalidator,
+                HttpStatus.BAD_REQUEST_400
+            ),
+            validator(
                 () -> this.crs.exists(rname),
-                String.format("Repository %s does not exist. ", rname),
-                HttpStatus.NOT_FOUND_404,
-                context
+                () -> String.format("Repository %s does not exist. ", rname),
+                HttpStatus.NOT_FOUND_404
             )
-        ) {
+        );
+        if (validator.validate(context)) {
             this.data.remove(rname).thenRun(() -> this.crs.delete(rname));
             context.response()
                 .setStatusCode(HttpStatus.OK_200)
                 .end();
         }
-    }
-
-    /**
-     * Validate new repository json.
-     * @param context Routing context
-     * @param json New repository json
-     * @return True is json correct
-     * @checkstyle BooleanExpressionComplexityCheck (50 lines)
-     */
-    private static boolean validateRepo(final RoutingContext context, final JsonObject json) {
-        final String repomsg = "Section `repo` is required";
-        return
-            validate(
-                () -> json != null,
-                "JSON body is expected",
-                HttpStatus.BAD_REQUEST_400,
-                context
-            )
-                &&
-                validate(
-                    () -> json.containsKey(RepositoryRest.REPO),
-                    repomsg,
-                    HttpStatus.BAD_REQUEST_400,
-                    context
-                )
-                &&
-                validate(
-                    () -> json.getJsonObject(RepositoryRest.REPO) != null,
-                    repomsg,
-                    HttpStatus.BAD_REQUEST_400,
-                    context
-                )
-                &&
-                validate(
-                    () -> json.getJsonObject(RepositoryRest.REPO).containsKey("type"),
-                    "Repository type is required",
-                    HttpStatus.BAD_REQUEST_400,
-                    context
-                )
-                &&
-                validate(
-                    () -> json.getJsonObject(RepositoryRest.REPO).containsKey("storage"),
-                    "Repository storage is required",
-                    HttpStatus.BAD_REQUEST_400,
-                    context
-                );
     }
 }

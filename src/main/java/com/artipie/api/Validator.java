@@ -4,21 +4,18 @@
  */
 package com.artipie.api;
 
+import io.vertx.ext.web.RoutingContext;
+
 /**
  * Validator.
  * @since 0.26
  */
+@FunctionalInterface
 public interface Validator {
     /**
-     * Validate.
-     *
-     * @return True if valid
+     * Validates by using context.
+     * @param context RoutingContext
+     * @return Result of validation
      */
-    boolean isValid();
-
-    /**
-     * Provides error message if not valid.
-     * @return Error message
-     */
-    String errorMessage();
+    boolean validate(RoutingContext context);
 }
