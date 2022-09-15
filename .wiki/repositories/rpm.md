@@ -35,7 +35,7 @@ Section `setting` allows to configure repository-specific parameters and is not 
 - `update` section allows to set update mode: either update the repository when the package is uploaded via HTTP
   or schedule the update via cron
 
-[Permissions configuration](../Configuration-Repository-Permissions.md) section specifies users who can upload and download from the repository.
+[Permissions configuration](./Configuration-Repository-Permissions) section specifies users who can upload and download from the repository.
 
 In order to use Artipie `rpm` repository with `yum` follow the steps:
 

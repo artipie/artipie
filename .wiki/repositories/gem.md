@@ -14,7 +14,7 @@ repo:
       - upload
 ```
 Check
-[storage](../Configuration-Storage.md) and [permission](../Configuration-Repository-Permissions.md)
+[storage](./Configuration-Storage) and [permission](./Configuration-Repository-Permissions)
 documentations to learn more about these settings.
 
 Before uploading gems, obtain a key for authorization and set it to `GEM_HOST_API_KEY` environment variable. 

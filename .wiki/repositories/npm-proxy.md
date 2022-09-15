@@ -15,7 +15,7 @@ repo:
       url: http://npmjs-repo/
 ```
 
-All the fields of YAML config are required, `path` is the repository relative path, [storage section](../Configuration-Storage.md)
+All the fields of YAML config are required, `path` is the repository relative path, [storage section](./Configuration-Storage)
 configures storage to cache the packages, `settings` section sets remote repository url.
 
 To use Artipie NPM proxy repository with `npm` client, specify the repository URL with `--registry` option:
