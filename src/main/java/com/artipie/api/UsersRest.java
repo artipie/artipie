@@ -64,12 +64,13 @@ public final class UsersRest extends BaseRest {
     private void deleteUser(final RoutingContext context) {
         try {
             this.users.remove(context.pathParam(RepositoryName.UNAME));
-            this.cache.invalidateAll();
-            context.response().setStatusCode(HttpStatus.OK_200).end();
         } catch (final IllegalStateException err) {
             Logger.error(this, err.getMessage());
             context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
+            return;
         }
+        this.cache.invalidateAll();
+        context.response().setStatusCode(HttpStatus.OK_200).end();
     }
 
     /**
