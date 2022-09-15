@@ -155,6 +155,52 @@ final class UsersRestTest extends RestApiServerBase {
         );
     }
 
+    @Test
+    void returnsNotFoundIfUserDoesNotExistOnDelete(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(HttpMethod.DELETE, "/api/v1/users/Jane"),
+            response -> MatcherAssert.assertThat(
+                response.statusCode(),
+                new IsEqual<>(HttpStatus.NOT_FOUND_404)
+            )
+        );
+    }
+
+    @Test
+    void removeUser(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.save(
+            new Key.From(ManageUsersTest.KEY),
+            new CredsConfigYaml().withUsers("Mark", "Alice")
+                .toString().getBytes(StandardCharsets.UTF_8)
+        );
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(HttpMethod.DELETE, "/api/v1/users/Alice"),
+            response -> {
+                MatcherAssert.assertThat(
+                    response.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                );
+                MatcherAssert.assertThat(
+                    new String(this.storage().value(ManageUsersTest.KEY), StandardCharsets.UTF_8),
+                    new IsEqual<>(
+                        String.join(
+                            System.lineSeparator(),
+                            "credentials:",
+                            "  Mark:",
+                            "    pass: 123",
+                            "    type: plain"
+                        )
+                    )
+                );
+                MatcherAssert.assertThat(
+                    "Auth cache should be invalidated",
+                    ((AuthCache.Fake) this.settingsCaches().auth()).wasInvalidated()
+                );
+            }
+        );
+    }
+
     @Override
     String layout() {
         return "org";

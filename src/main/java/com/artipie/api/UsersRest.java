@@ -6,6 +6,7 @@ package com.artipie.api;
 
 import com.artipie.settings.cache.AuthCache;
 import com.artipie.settings.users.CrudUsers;
+import com.jcabi.log.Logger;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.io.StringReader;
@@ -51,6 +52,25 @@ public final class UsersRest extends BaseRest {
         rbr.operation("putUser")
             .handler(this::putUser)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rbr.operation("deleteUser")
+            .handler(this::deleteUser)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+    }
+
+    /**
+     * Removes user.
+     * @param context Request context
+     */
+    private void deleteUser(final RoutingContext context) {
+        try {
+            this.users.remove(context.pathParam(RepositoryName.UNAME));
+        } catch (final IllegalStateException err) {
+            Logger.error(this, err.getMessage());
+            context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
+            return;
+        }
+        this.cache.invalidateAll();
+        context.response().setStatusCode(HttpStatus.OK_200).end();
     }
 
     /**
