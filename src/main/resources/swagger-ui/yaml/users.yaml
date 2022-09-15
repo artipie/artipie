@@ -89,6 +89,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete user info.
+      operationId: deleteUser
+      tags:
+        - users
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: User name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User removed successfully
+        '404':
+          description: User does not exist
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Error:
