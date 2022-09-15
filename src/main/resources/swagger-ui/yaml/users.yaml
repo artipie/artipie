@@ -62,6 +62,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    put:
+      summary: Create or replace user.
+      operationId: putUser
+      tags:
+        - users
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: User name
+          schema:
+            type: string
+      requestBody:
+        description: User info json
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FullUser'
+      responses:
+        '201':
+          description: User successfully added
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Error:
@@ -81,6 +108,22 @@ components:
         - name
       properties:
         name:
+          type: string
+        email:
+          type: string
+        groups:
+          type: array
+          items:
+            type: string
+    FullUser:
+      type: object
+      required:
+        - type
+        - pass
+      properties:
+        type:
+          type: string
+        pass:
           type: string
         email:
           type: string

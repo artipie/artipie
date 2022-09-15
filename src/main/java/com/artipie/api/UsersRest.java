@@ -4,10 +4,13 @@
  */
 package com.artipie.api;
 
+import com.artipie.settings.cache.AuthCache;
 import com.artipie.settings.users.CrudUsers;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.io.StringReader;
 import java.util.Optional;
+import javax.json.Json;
 import javax.json.JsonObject;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -23,11 +26,18 @@ public final class UsersRest extends BaseRest {
     private final CrudUsers users;
 
     /**
+     * Artipie authenticated users cache.
+     */
+    private final AuthCache cache;
+
+    /**
      * Ctor.
      * @param users Crud users object
+     * @param cache Artipie authenticated users cache
      */
-    public UsersRest(final CrudUsers users) {
+    public UsersRest(final CrudUsers users, final AuthCache cache) {
         this.users = users;
+        this.cache = cache;
     }
 
     @Override
@@ -38,6 +48,22 @@ public final class UsersRest extends BaseRest {
         rbr.operation("getUser")
             .handler(this::getUser)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rbr.operation("putUser")
+            .handler(this::putUser)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+    }
+
+    /**
+     * Create or replace existing user.
+     * @param context Request context
+     */
+    private void putUser(final RoutingContext context) {
+        this.users.addOrUpdate(
+            Json.createReader(new StringReader(context.body().asString())).readObject(),
+            context.pathParam(RepositoryName.UNAME)
+        );
+        this.cache.invalidateAll();
+        context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
     /**

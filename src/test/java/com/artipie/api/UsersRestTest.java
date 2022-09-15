@@ -7,8 +7,12 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.misc.UncheckedConsumer;
 import com.artipie.settings.CredsConfigYaml;
+import com.artipie.settings.cache.AuthCache;
 import com.artipie.settings.users.Users;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxTestContext;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -16,6 +20,7 @@ import java.util.Set;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -79,6 +84,74 @@ final class UsersRestTest extends RestApiServerBase {
                 response.statusCode(),
                 new IsEqual<>(HttpStatus.NOT_FOUND_404)
             )
+        );
+    }
+
+    @Test
+    void altersUser(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.save(
+            new Key.From(ManageUsersTest.KEY),
+            new CredsConfigYaml().withUsers("Mark").toString().getBytes(StandardCharsets.UTF_8)
+        );
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.PUT, "/api/v1/users/Mark",
+                new JsonObject().put("type", "plain").put("pass", "qwerty")
+                    .put("email", "mark@example.com")
+            ),
+            response -> {
+                MatcherAssert.assertThat(
+                    response.statusCode(),
+                    new IsEqual<>(HttpStatus.CREATED_201)
+                );
+                MatcherAssert.assertThat(
+                    new String(this.storage().value(ManageUsersTest.KEY), StandardCharsets.UTF_8),
+                    new StringContains(
+                        String.join(
+                            System.lineSeparator(),
+                            "  Mark:",
+                            "    type: plain",
+                            "    pass: qwerty",
+                            "    email: mark@example.com"
+                        )
+                    )
+                );
+            }
+        );
+    }
+
+    @Test
+    void addsUser(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.PUT, "/api/v1/users/Alice",
+                new JsonObject().put("type", "plain").put("pass", "wonderland")
+                    .put("groups", JsonArray.of("readers", "tags"))
+            ),
+            response -> {
+                MatcherAssert.assertThat(
+                    response.statusCode(),
+                    new IsEqual<>(HttpStatus.CREATED_201)
+                );
+                MatcherAssert.assertThat(
+                    new String(this.storage().value(ManageUsersTest.KEY), StandardCharsets.UTF_8),
+                    new StringContains(
+                        String.join(
+                            System.lineSeparator(),
+                            "  Alice:",
+                            "    type: plain",
+                            "    pass: wonderland",
+                            "    groups:",
+                            "      - readers",
+                            "      - tags"
+                        )
+                    )
+                );
+                MatcherAssert.assertThat(
+                    "Auth cache should be invalidated",
+                    ((AuthCache.Fake) this.settingsCaches().auth()).wasInvalidated()
+                );
+            }
         );
     }
 

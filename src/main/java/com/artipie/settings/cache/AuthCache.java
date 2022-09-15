@@ -6,6 +6,7 @@ package com.artipie.settings.cache;
 
 import com.artipie.http.auth.Authentication;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Cache for user logins which were found by credentials.
@@ -31,6 +32,19 @@ public interface AuthCache {
      * @since 0.22
      */
     class Fake implements AuthCache {
+
+        /**
+         * Counter for `invalidateAll()` method calls.
+         */
+        private final AtomicInteger cnt;
+
+        /**
+         * Ctor.
+         */
+        public Fake() {
+            this.cnt = new AtomicInteger(0);
+        }
+
         @Override
         public Optional<Authentication.User> user(
             final String username,
@@ -42,7 +56,15 @@ public interface AuthCache {
 
         @Override
         public void invalidateAll() {
-            // do nothing
+            this.cnt.incrementAndGet();
+        }
+
+        /**
+         * Was `invalidateAll()` called?
+         * @return True if `invalidateAll()` was called exactly once
+         */
+        public boolean wasInvalidated() {
+            return this.cnt.get() == 1;
         }
     }
 }
