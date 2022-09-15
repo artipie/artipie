@@ -27,9 +27,9 @@ where
 - `Architectures` is a space separated [list of the architectures](https://wiki.debian.org/DebianRepository/Format#Architectures),
 supported by the repository, required;
 - Debian repository supports gpg signature, to enable it, provide gpg password in `gpg_password` field and 
-secret file location `gpg_secret_key` relatively to [Artipie configuration storage](./Configuration.md).
+secret file location `gpg_secret_key` relatively to [Artipie configuration storage](./Configuration).
 
-Check [storage](./Configuration-Storage.md) and [permission](./Configuration-Repository-Permissions.md)
+Check [storage](./Configuration-Storage) and [permission](./Configuration-Repository-Permissions)
 documentations to learn more about these settings.
 
 To use Artipie Debian repository, add local repository to the list of repos for `apt` by adding

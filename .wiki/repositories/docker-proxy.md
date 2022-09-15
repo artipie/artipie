@@ -27,4 +27,4 @@ will try to request the image from each remote while the image is not found.
 When `storage` section under `meta` section in configured, it is also possible to push images
 using `docker push` command to proxy repository and store them locally.
 
-Find the example how to pull and push images into docker registry in [Docker repository section](./docker.md#usage-example).
+Find the example how to pull and push images into docker registry in [Docker repository section](./docker#usage-example).
