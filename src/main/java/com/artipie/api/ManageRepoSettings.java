@@ -4,6 +4,7 @@
  */
 package com.artipie.api;
 
+import com.artipie.api.verifier.ReservedNamesVerifier;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.misc.Json2Yaml;
@@ -13,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.json.JsonStructure;
-import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Manage repository settings.
@@ -21,12 +21,6 @@ import org.apache.commons.lang3.NotImplementedException;
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class ManageRepoSettings implements CrudRepoSettings {
-    /**
-     * Not implemented error.
-     */
-    private static final NotImplementedException NOT_IMPLEMENTED =
-        new NotImplementedException("Not implemented yet");
-
     /**
      * Repository settings storage.
      */
@@ -100,8 +94,13 @@ public final class ManageRepoSettings implements CrudRepoSettings {
     }
 
     @Override
-    public void move(final String name, final String nname) {
-        throw ManageRepoSettings.NOT_IMPLEMENTED;
+    public void move(final RepositoryName rname, final RepositoryName newrname) {
+        final ConfigKeys oldkeys = new ConfigKeys(rname.toString());
+        final ConfigKeys newkeys = new ConfigKeys(newrname.toString());
+        this.asto.move(
+            oldkeys.yamlKey(),
+            newkeys.yamlKey()
+        );
     }
 
     @Override
@@ -119,7 +118,7 @@ public final class ManageRepoSettings implements CrudRepoSettings {
         final Collection<String> res = new ArrayList<>(5);
         for (final Key item : this.asto.list(key)) {
             final String name = item.string();
-            if (yamlFilename(name) && new RepositoryNameValidator(name).valid()) {
+            if (yamlFilename(name) && new ReservedNamesVerifier(name).valid()) {
                 res.add(name.replaceAll("\\.yaml|\\.yml", ""));
             }
         }

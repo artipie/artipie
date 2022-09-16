@@ -56,11 +56,10 @@ public interface CrudRepoSettings {
 
     /**
      * Move repository and all data.
-     * @param name Old repository name. The name can be composite: in the case of org layout it will
-     *  consist of two parts - username and repo name, for example john/maven-s3.
-     * @param nname New repository name
+     * @param rname Old repository name
+     * @param newrname New repository name
      */
-    void move(String name, String nname);
+    void move(RepositoryName rname, RepositoryName newrname);
 
     /**
      * Checks that stored repository has duplicates of settings names.
