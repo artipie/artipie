@@ -90,6 +90,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/AliasRepository'
                   - $ref: '#/components/schemas/FullRepository'
+        '400':
+          description: Wrong repository name
+        '404':
+          description: Repository not found
+        '409':
+          description: Repository has settings duplicates
         default:
           description: unexpected error
           content:
@@ -128,6 +134,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FullRepository'
+        '400':
+          description: Wrong repository name
+        '409':
+          description: Repository already exists
         default:
           description: unexpected error
           content:
@@ -159,6 +169,47 @@ paths:
           description: Wrong repository name
         '404':
           description: Repository not found
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/repository/{uname}/{rname}/move:
+    put:
+      summary: Move repository
+      operationId: moveUserRepo
+      tags:
+        - repository
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: Name of the user
+          schema:
+            type: string
+        - name: rname
+          in: path
+          required: true
+          description: Name of the repository
+          schema:
+            type: string
+      requestBody:
+        description: Move a repository
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveToRepository'
+        required: true
+      responses:
+        '200':
+          description: Remove a repository with name {rname}
+        '400':
+          description: Wrong repository name
+        '404':
+          description: Repository not found
+        '409':
+          description: Repository has settings duplicates
         default:
           description: unexpected error
           content:
@@ -496,4 +547,11 @@ components:
         - type
       properties:
         type:
+          type: string
+    MoveToRepository:
+      type: object
+      required:
+        - name
+      properties:
+        name:
           type: string

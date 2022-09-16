@@ -8,7 +8,10 @@ import com.jcabi.log.Logger;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.io.StringReader;
 import java.util.function.Supplier;
+import javax.json.Json;
+import javax.json.JsonObject;
 
 /**
  * Base class for rest-api operations.
@@ -39,6 +42,17 @@ abstract class BaseRest {
                 .end();
             Logger.error(this, context.failure().getMessage());
         };
+    }
+
+    /**
+     * Read body as JsonObject.
+     * @param context RoutingContext
+     * @return JsonObject
+     */
+    protected static JsonObject readJsonObject(final RoutingContext context) {
+        return (JsonObject) (Json.createReader(
+            new StringReader(context.body().asString())
+        ).read());
     }
 
     /**

@@ -4,13 +4,15 @@
  */
 package com.artipie.api;
 
+import com.artipie.api.verifier.ExistenceVerifier;
+import com.artipie.api.verifier.ReservedNamesVerifier;
+import com.artipie.api.verifier.SettingsDuplicatesVerifier;
+import com.artipie.settings.Layout;
 import com.artipie.settings.RepoData;
 import com.artipie.settings.repo.CrudRepoSettings;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
-import java.io.StringReader;
-import javax.json.Json;
 import javax.json.JsonObject;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -63,6 +65,9 @@ public final class RepositoryRest extends BaseRest {
             rbr.operation("removeRepo")
                 .handler(this::removeRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rbr.operation("moveRepo")
+                .handler(this::moveRepo)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         } else {
             rbr.operation("list")
                 .handler(this::listUserRepos)
@@ -76,6 +81,9 @@ public final class RepositoryRest extends BaseRest {
             rbr.operation("removeUserRepo")
                 .handler(this::removeRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rbr.operation("moveUserRepo")
+                .handler(this::moveRepo)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         }
     }
 
@@ -85,20 +93,14 @@ public final class RepositoryRest extends BaseRest {
      */
     private void getRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final RepositoryNameValidator rnvalidator = new RepositoryNameValidator(rname);
+        final ReservedNamesVerifier reserved = new ReservedNamesVerifier(rname);
+        final SettingsDuplicatesVerifier duplicates =
+            new SettingsDuplicatesVerifier(rname, this.crs);
+        final ExistenceVerifier existence = new ExistenceVerifier(rname, this.crs);
         final Validator validator = validator(
-            validator(rnvalidator::valid, rnvalidator::message, HttpStatus.BAD_REQUEST_400),
-            validator(
-                () -> this.crs.exists(rname),
-                () -> String.format("Repository %s does not exist.", rname),
-                HttpStatus.NOT_FOUND_404
-            ),
-            validator(
-                () -> !this.crs.hasSettingsDuplicates(rname),
-                // @checkstyle LineLengthCheck (1 line)
-                () -> String.format("Repository %s has settings duplicates. Please remove repository and create it again.", rname),
-                HttpStatus.CONFLICT_409
-            )
+            validator(reserved::valid, reserved::message, HttpStatus.BAD_REQUEST_400),
+            validator(existence::valid, existence::message, HttpStatus.NOT_FOUND_404),
+            validator(duplicates::valid, duplicates::message, HttpStatus.CONFLICT_409)
         );
         if (validator.validate(context)) {
             context.response()
@@ -133,9 +135,9 @@ public final class RepositoryRest extends BaseRest {
      */
     private void createRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final RepositoryNameValidator rnvalidator = new RepositoryNameValidator(rname);
+        final ReservedNamesVerifier reserved = new ReservedNamesVerifier(rname);
         final Validator validator = validator(
-            validator(rnvalidator::valid, rnvalidator::message, HttpStatus.BAD_REQUEST_400),
+            validator(reserved::valid, reserved::message, HttpStatus.BAD_REQUEST_400),
             validator(
                 () -> !this.crs.exists(rname),
                 () -> String.format("Repository %s already exists", rname),
@@ -143,9 +145,7 @@ public final class RepositoryRest extends BaseRest {
             )
         );
         if (validator.validate(context)) {
-            final JsonObject json = (JsonObject) (Json.createReader(
-                new StringReader(context.body().asString())
-            ).read());
+            final JsonObject json = BaseRest.readJsonObject(context);
             final String repomsg = "Section `repo` is required";
             final Validator jsvalidator = validator(
                 validator(
@@ -189,9 +189,9 @@ public final class RepositoryRest extends BaseRest {
      */
     private void removeRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
-        final RepositoryNameValidator rnvalidator = new RepositoryNameValidator(rname);
+        final ReservedNamesVerifier reserved = new ReservedNamesVerifier(rname);
         final Validator validator = validator(
-            validator(rnvalidator::valid, rnvalidator::message, HttpStatus.BAD_REQUEST_400),
+            validator(reserved::valid, reserved::message, HttpStatus.BAD_REQUEST_400),
             validator(
                 () -> this.crs.exists(rname),
                 () -> String.format("Repository %s does not exist. ", rname),
@@ -200,6 +200,36 @@ public final class RepositoryRest extends BaseRest {
         );
         if (validator.validate(context)) {
             this.data.remove(rname).thenRun(() -> this.crs.delete(rname));
+            context.response()
+                .setStatusCode(HttpStatus.OK_200)
+                .end();
+        }
+    }
+
+    /**
+     * Move a repository settings.
+     * @param context Routing context
+     */
+    private void moveRepo(final RoutingContext context) {
+        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final ReservedNamesVerifier reserved = new ReservedNamesVerifier(rname);
+        final SettingsDuplicatesVerifier duplicates =
+            new SettingsDuplicatesVerifier(rname, this.crs);
+        final ExistenceVerifier existence = new ExistenceVerifier(rname, this.crs);
+        final Validator validator = validator(
+            validator(reserved::valid, reserved::message, HttpStatus.BAD_REQUEST_400),
+            validator(existence::valid, existence::message, HttpStatus.NOT_FOUND_404),
+            validator(duplicates::valid, duplicates::message, HttpStatus.CONFLICT_409)
+        );
+        if (validator.validate(context)) {
+            final String newname = BaseRest.readJsonObject(context).getString("name");
+            final RepositoryName newrname;
+            if (new Layout.Flat().toString().equals(this.layout)) {
+                newrname = new RepositoryName.Flat(newname);
+            } else {
+                newrname = new RepositoryName.Org(newname, context.pathParam(RepositoryName.UNAME));
+            }
+            this.data.move(rname, newrname).thenRun(() -> this.crs.move(rname, newrname));
             context.response()
                 .setStatusCode(HttpStatus.OK_200)
                 .end();

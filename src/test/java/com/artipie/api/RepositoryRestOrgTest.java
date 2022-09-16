@@ -6,17 +6,12 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -25,7 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * @since 0.26
  */
 @ExtendWith(VertxExtension.class)
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     @Test
     void listsAllRepos(final Vertx vertx, final VertxTestContext ctx) throws Exception {
@@ -60,116 +55,96 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     }
 
     @Test
-    void createUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        final JsonObject json = new JsonObject()
-            .put(
-                "repo", new JsonObject()
-                    .put("type", "fs")
-                    .put("storage", new JsonObject())
-            );
-        this.requestAndAssert(
-            vertx, ctx, new TestRequest(HttpMethod.PUT, "/api/v1/repository/alice/newrepo", json),
-            resp -> {
-                MatcherAssert.assertThat(
-                    resp.statusCode(),
-                    new IsEqual<>(HttpStatus.OK_200)
-                );
-                MatcherAssert.assertThat(
-                    this.storage().exists(new Key.From("alice/newrepo.yaml")),
-                    new IsEqual<>(true)
-                );
-            }
+    void getRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        getRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    }
+
+    @Test
+    void getUserRepoWithDuplicatesSettings(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        getRepositoryWithDuplicatesSettings(
+            vertx,
+            ctx,
+            new RepositoryName.Org("docker-repo", "Alice")
         );
+    }
+
+    @Test
+    void getUserRepoNotfound(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.getRepositoryNotfound(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    }
+
+    @Test
+    void getReservedUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+            getReservedRepository(vertx, ctx, new RepositoryName.Org(name, "Alice"));
+        }
+    }
+
+    @Test
+    void createUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        createRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
     }
 
     @Test
     void createDuplicateUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        this.save(new Key.From("alice/newrepo.yaml"), new byte[0]);
-        final JsonObject json = new JsonObject()
-            .put(
-                "repo", new JsonObject()
-                    .put("type", "fs")
-                    .put("storage", new JsonObject())
-            );
-        this.requestAndAssert(
-            vertx, ctx, new TestRequest(HttpMethod.PUT, "/api/v1/repository/alice/newrepo", json),
-            resp ->
-                MatcherAssert.assertThat(
-                    resp.statusCode(),
-                    new IsEqual<>(HttpStatus.CONFLICT_409)
-                )
-        );
+        createDuplicateRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    }
+
+    @Test
+    void createReservedUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+            createReservedRepository(vertx, ctx, new RepositoryName.Org(name, "Alice"));
+        }
     }
 
     @Test
     void deleteRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        this.save(
-            new Key.From("artipie/docker-repo.yaml"),
-            this.repoSettings().getBytes(StandardCharsets.UTF_8)
-        );
-        final Key.From alpine = new Key.From("artipie/docker-repo/alpine.img");
-        this.getData().save(alpine, new byte[]{});
-        final Key.From python = new Key.From("artipie/docker-repo/python.img");
-        this.getData().save(python, new byte[]{});
-        this.requestAndAssert(
-            vertx, ctx, new TestRequest(
-                HttpMethod.DELETE,
-                "/api/v1/repository/artipie/docker-repo"
-            ),
-            res -> {
-                MatcherAssert.assertThat(
-                    res.statusCode(),
-                    new IsEqual<>(HttpStatus.OK_200)
-                );
-                MatcherAssert.assertThat(
-                    waitCondition(
-                        () ->
-                            !this.storage().exists(new Key.From("artipie/docker-repo.yaml"))
-                    ),
-                    new IsEqual<>(true)
-                );
-                MatcherAssert.assertThat(
-                    waitCondition(() -> !this.getData().exists(alpine)),
-                    new IsEqual<>(true)
-                );
-                MatcherAssert.assertThat(
-                    waitCondition(() -> !this.getData().exists(python)),
-                    new IsEqual<>(true)
-                );
-            }
-        );
+        deleteRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
     }
 
     @Test
     void deleteRepoNotfound(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        this.requestAndAssert(
-            vertx, ctx, new TestRequest(
-                HttpMethod.DELETE,
-                "/api/v1/repository/artipie/docker-repo"
-            ),
-            res -> {
-                MatcherAssert.assertThat(
-                    res.statusCode(),
-                    new IsEqual<>(HttpStatus.NOT_FOUND_404)
-                );
-            }
-        );
+        this.deleteRepositoryNotfound(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
     }
 
     @Test
     void deleteReservedRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
-            this.requestAndAssert(
-                vertx, ctx, new TestRequest(
-                    HttpMethod.DELETE, String.format("/api/v1/repository/artipie/%s", name)
-                ),
-                res -> {
-                    MatcherAssert.assertThat(
-                        res.statusCode(),
-                        new IsEqual<>(HttpStatus.BAD_REQUEST_400)
-                    );
-                }
-            );
+            deleteReservedRepository(vertx, ctx, new RepositoryName.Org(name, "Alice"));
+        }
+    }
+
+    @Test
+    void moveRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        moveRepository(
+            vertx,
+            ctx,
+            new RepositoryName.Org("docker-repo", "Alice"),
+            new RepositoryName.Org("docker-repo-new", "Alice")
+        );
+    }
+
+    @Test
+    void moveRepoNotFound(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        moveRepositoryNotfound(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    }
+
+    @Test
+    void moveRepoWithDuplicatesSettings(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        moveRepositoryWithDuplicatesSettings(
+            vertx,
+            ctx,
+            new RepositoryName.Org("docker-repo", "Alice")
+        );
+    }
+
+    @Test
+    void moveRepositoryReservedRepo(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+            moveRepositoryReservedRepo(vertx, ctx, new RepositoryName.Org(name, "Alice"));
         }
     }
 
