@@ -117,11 +117,28 @@ final class RepositoryRestFlatTest extends RepositoryRestBaseTest {
     }
 
     @Test
-    void moveRepositoryReservedRepo(final Vertx vertx, final VertxTestContext ctx)
+    void moveRepoReservedRepo(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
             moveRepositoryReservedRepo(vertx, ctx, new RepositoryName.Flat(name));
         }
+    }
+
+    @Test
+    void moveRepoReservedNewRepo(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        final RepositoryName rname = new RepositoryName.Flat("doker-repo");
+        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+            moveRepositoryReservedNewRepo(vertx, ctx, rname, new RepositoryName.Flat(name));
+        }
+    }
+
+    @Test
+    void moveRepoWithNewRepoDuplicatesSettings(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        final RepositoryName rname = new RepositoryName.Flat("doker-repo");
+        final String newrname = "doker-repo-new";
+        moveRepositoryWithNewRepositoryDuplicatesSettings(vertx, ctx, rname, newrname);
     }
 
     @Override

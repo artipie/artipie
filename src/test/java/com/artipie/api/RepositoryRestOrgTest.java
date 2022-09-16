@@ -141,11 +141,28 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     }
 
     @Test
-    void moveRepositoryReservedRepo(final Vertx vertx, final VertxTestContext ctx)
+    void moveRepoReservedRepo(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
             moveRepositoryReservedRepo(vertx, ctx, new RepositoryName.Org(name, "Alice"));
         }
+    }
+
+    @Test
+    void moveRepoReservedNewRepo(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        final RepositoryName rname = new RepositoryName.Org("doker-repo", "Alice");
+        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+            moveRepositoryReservedNewRepo(vertx, ctx, rname, new RepositoryName.Org(name, "Alice"));
+        }
+    }
+
+    @Test
+    void moveRepoWithNewRepoDuplicatesSettings(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        final RepositoryName rname = new RepositoryName.Org("doker-repo", "Alice");
+        final String newrname = "doker-repo-new";
+        moveRepositoryWithNewRepositoryDuplicatesSettings(vertx, ctx, rname, newrname);
     }
 
     @Override

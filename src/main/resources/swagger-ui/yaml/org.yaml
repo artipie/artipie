@@ -551,7 +551,7 @@ components:
     MoveToRepository:
       type: object
       required:
-        - name
+        - new_name
       properties:
-        name:
+        new_name:
           type: string

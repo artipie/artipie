@@ -287,7 +287,7 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
         this.getData().save(alpine, new byte[]{});
         final JsonObject json = new JsonObject()
-            .put("name", "docker-repo-new");
+            .put("new_name", "docker-repo-new");
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
                 HttpMethod.PUT,
@@ -342,7 +342,7 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
             vertx, ctx, new TestRequest(
                 HttpMethod.PUT,
                 String.format("/api/v1/repository/%s/move", rname),
-                new JsonObject().put("name", "docker-repo-new")
+                new JsonObject().put("new_name", "docker-repo-new")
             ),
             res ->
                 MatcherAssert.assertThat(
@@ -367,7 +367,7 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
             new TestRequest(
                 HttpMethod.PUT,
                 String.format("/api/v1/repository/%s/move", rname),
-                new JsonObject().put("name", "docker-repo-new")
+                new JsonObject().put("new_name", "docker-repo-new")
             ),
             res ->
                 MatcherAssert.assertThat(
@@ -385,12 +385,72 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
             new TestRequest(
                 HttpMethod.PUT,
                 String.format("/api/v1/repository/%s/move", rname),
-                new JsonObject().put("name", "docker-repo-new")
+                new JsonObject().put("new_name", "docker-repo-new")
             ),
             res ->
                 MatcherAssert.assertThat(
                     res.statusCode(),
                     new IsEqual<>(HttpStatus.BAD_REQUEST_400)
+                )
+        );
+    }
+
+    // @checkstyle ParameterNumberCheck (3 lines)
+    void moveRepositoryReservedNewRepo(final Vertx vertx, final VertxTestContext ctx,
+        final RepositoryName rname, final RepositoryName newrname)
+        throws Exception {
+        this.save(
+            new ConfigKeys(rname.toString()).yamlKey(),
+            this.repoSettings().getBytes(StandardCharsets.UTF_8)
+        );
+        this.requestAndAssert(
+            vertx, ctx,
+            new TestRequest(
+                HttpMethod.PUT,
+                String.format("/api/v1/repository/%s/move", rname),
+                new JsonObject()
+                    .put("new_name", newrname.toString())
+            ),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.BAD_REQUEST_400)
+                )
+        );
+    }
+
+    // @checkstyle ParameterNumberCheck (3 lines)
+    void moveRepositoryWithNewRepositoryDuplicatesSettings(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname, final String newrname)
+        throws Exception {
+        this.save(
+            new ConfigKeys(rname.toString()).yamlKey(),
+            this.repoSettings().getBytes(StandardCharsets.UTF_8)
+        );
+        final String newrnamepath;
+        if ("flat".equals(layout())) {
+            newrnamepath = newrname;
+        } else {
+            newrnamepath = String.format("Alice/%s", newrname);
+        }
+        new ConfigKeys(newrnamepath).keys().forEach(
+            key ->
+                this.save(
+                    key,
+                    new byte[0]
+                )
+        );
+        this.requestAndAssert(
+            vertx, ctx,
+            new TestRequest(
+                HttpMethod.PUT,
+                String.format("/api/v1/repository/%s/move", rname),
+                new JsonObject().put("new_name", newrname)
+            ),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.CONFLICT_409)
                 )
         );
     }
