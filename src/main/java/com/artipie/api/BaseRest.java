@@ -49,8 +49,6 @@ abstract class BaseRest {
      * @return JsonObject
      */
     protected static JsonObject readJsonObject(final RoutingContext context) {
-        return (JsonObject) (Json.createReader(
-            new StringReader(context.body().asString())
-        ).read());
+        return Json.createReader(new StringReader(context.body().asString())).readObject();
     }
 }
