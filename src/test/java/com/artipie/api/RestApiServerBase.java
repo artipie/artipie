@@ -7,6 +7,7 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.auth.Authentication;
 import com.artipie.nuget.RandomFreePort;
 import com.artipie.settings.cache.SettingsCaches;
 import io.vertx.core.Vertx;
@@ -81,6 +82,15 @@ public abstract class RestApiServerBase {
     abstract String layout();
 
     /**
+     * Artipie authentication, this method can be overridden if necessary.
+     * @return Authentication instance.
+     * @checkstyle NonStaticMethodCheck (5 lines)
+     */
+    Authentication auth() {
+        return Authentication.ANONYMOUS;
+    }
+
+    /**
      * Save bytes into test storage with provided key.
      * @param key The key
      * @param data Data to save
@@ -128,7 +138,8 @@ public abstract class RestApiServerBase {
         this.caches = new SettingsCaches.Fake();
         vertx.deployVerticle(
             new RestApi(
-                this.caches, storage, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY)
+                this.caches, storage, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY),
+                this.auth()
             ),
             context.succeedingThenComplete()
         );

@@ -7,12 +7,16 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.http.auth.Authentication;
 import com.artipie.misc.JavaResource;
 import com.artipie.settings.RepoData;
 import com.artipie.settings.cache.SettingsCaches;
 import com.jcabi.log.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpServer;
+import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.FileSystemAccess;
 import io.vertx.ext.web.handler.StaticHandler;
@@ -52,64 +56,84 @@ public final class RestApi extends AbstractVerticle {
     private final Optional<Key> users;
 
     /**
+     * Artipie authentication.
+     */
+    private final Authentication auth;
+
+    /**
      * Ctor.
      * @param caches Artipie settings caches
      * @param storage Artipie settings storage.
      * @param layout Artipie layout
      * @param port Port to start verticle on
      * @param users Key to users credentials yaml location
+     * @param auth Artipie authentication
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     public RestApi(final SettingsCaches caches, final Storage storage, final String layout,
-        final int port, final Optional<Key> users) {
+        final int port, final Optional<Key> users, final Authentication auth) {
         this.caches = caches;
         this.storage = storage;
         this.layout = layout;
         this.port = port;
         this.users = users;
+        this.auth = auth;
     }
 
     @Override
     public void start() throws Exception {
         RouterBuilder.create(this.vertx, String.format("swagger-ui/yaml/%s.yaml", this.layout))
             .compose(
-                rrb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").onSuccess(
-                    urb -> {
-                        final BlockingStorage asto = new BlockingStorage(this.storage);
-                        new RepositoryRest(
-                            new ManageRepoSettings(asto),
-                            new RepoData(this.storage),
-                            this.layout
-                        ).init(rrb);
-                        new StorageAliasesRest(this.caches.storageConfig(), asto, this.layout)
-                            .init(rrb);
-                        if (this.users.isPresent()) {
-                            new UsersRest(
-                                new ManageUsers(this.users.get(), asto), this.caches.auth()
-                            ).init(urb);
-                        } else {
-                            Logger.warn(
-                                this, "File credentials are not set, users API is not available"
+                rrb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").compose(
+                    urb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/oauth.yaml").onSuccess(
+                        arb -> {
+                            final BlockingStorage asto = new BlockingStorage(this.storage);
+                            new RepositoryRest(
+                                new ManageRepoSettings(asto),
+                                new RepoData(this.storage), this.layout
+                            ).init(rrb);
+                            new StorageAliasesRest(this.caches.storageConfig(), asto, this.layout)
+                                .init(rrb);
+                            if (this.users.isPresent()) {
+                                new UsersRest(
+                                    new ManageUsers(this.users.get(), asto), this.caches.auth()
+                                ).init(urb);
+                            } else {
+                                Logger.warn(
+                                    this, "File credentials are not set, users API is not available"
+                                );
+                            }
+                            new AuthTokenRest(this.jwtAuth(), this.caches.auth(), this.auth)
+                                .init(arb);
+                            final Router router = rrb.createRouter();
+                            router.route("/*").subRouter(urb.createRouter());
+                            router.route("/*").subRouter(arb.createRouter());
+                            router.route("/api/*").handler(
+                                StaticHandler.create(
+                                    FileSystemAccess.ROOT,
+                                    new JavaResource("swagger-ui").uri().getPath()
+                                ).setIndexPage(String.format("index-%s.html", this.layout))
                             );
+                            final HttpServer server = this.vertx.createHttpServer();
+                            server.requestHandler(router)
+                                .listen(this.port)
+                                .onComplete(res -> Logger.info(this, "Rest API started"))
+                                .onFailure(err -> Logger.error(this, err.getMessage()));
                         }
-                        final Router router = rrb.createRouter();
-                        router.route("/*").subRouter(urb.createRouter());
-                        router.route("/api/*")
-                            .handler(
-                                StaticHandler
-                                    .create(
-                                        FileSystemAccess.ROOT,
-                                        new JavaResource("swagger-ui").uri().getPath()
-                                    )
-                                    .setIndexPage(String.format("index-%s.html", this.layout))
-                            );
-                        final HttpServer server = this.vertx.createHttpServer();
-                        server.requestHandler(router)
-                            .listen(this.port)
-                            .onComplete(res -> Logger.info(this, "Rest API started"))
-                            .onFailure(err -> Logger.error(this, err.getMessage()));
-                    }
-                ).onFailure(Throwable::printStackTrace)
+                    ).onFailure(Throwable::printStackTrace)
+                )
             );
+    }
+
+    /**
+     * Vertx JWTAuth provider.
+     * @return Auth provider
+     */
+    private JWTAuth jwtAuth() {
+        return JWTAuth.create(
+            this.vertx, new JWTAuthOptions().addPubSecKey(
+                new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
+            )
+        );
     }
 }

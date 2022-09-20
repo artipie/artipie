@@ -143,9 +143,9 @@ public final class RepositoryRest extends BaseRest {
             )
         );
         if (validator.validate(context)) {
-            final JsonObject json = (JsonObject) (Json.createReader(
+            final JsonObject json = Json.createReader(
                 new StringReader(context.body().asString())
-            ).read());
+            ).readObject();
             final String repomsg = "Section `repo` is required";
             final Validator jsvalidator = validator(
                 validator(

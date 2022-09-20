@@ -105,19 +105,17 @@ public final class VertxMain {
         final Settings settings = new SettingsFromPath(this.config).find(this.port, caches);
         final Metrics metrics = metrics(settings);
         final int main = this.listenOn(
-            new MainSlice(this.http, settings, metrics),
-            metrics, this.port
+            new MainSlice(this.http, settings, metrics), metrics, this.port
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
         this.startRepos(settings, metrics, this.port);
-        this.vertx.deployVerticle(
-            new RestApi(
-                caches,
-                settings.repoConfigsStorage(),
-                settings.layout().toString(),
-                // @checkstyle MagicNumberCheck (1 line)
-                8086,
-                settings.credentialsKey()
+        settings.auth().thenAccept(
+            auth -> this.vertx.deployVerticle(
+                new RestApi(
+                    caches, settings.repoConfigsStorage(), settings.layout().toString(),
+                    // @checkstyle MagicNumberCheck (1 line)
+                    8086, settings.credentialsKey(), auth
+                )
             )
         );
         return main;

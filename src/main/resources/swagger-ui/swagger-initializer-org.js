@@ -6,6 +6,7 @@ window.onload = function() {
   {
     urls: [
               {url: "./yaml/org.yaml", name: "Repositories"},
+              {url: "./yaml/oauth.yaml", name: "Auth tokens"},
               {url: "./yaml/users.yaml", name: "Users"},
             ],
     dom_id: '#swagger-ui',
