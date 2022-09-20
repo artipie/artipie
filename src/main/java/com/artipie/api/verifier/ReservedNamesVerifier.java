@@ -2,8 +2,9 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie.api;
+package com.artipie.api.verifier;
 
+import com.artipie.api.RepositoryName;
 import java.util.Set;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Set;
  * reserved words `_storages, _permissions, _credentials` in it.
  * @since 0.26
  */
-public final class RepositoryNameValidator {
+public final class ReservedNamesVerifier {
     /**
      * Words that should not be present inside repository name.
      */
@@ -27,7 +28,7 @@ public final class RepositoryNameValidator {
      * Ctor.
      * @param name The name to test
      */
-    public RepositoryNameValidator(final String name) {
+    public ReservedNamesVerifier(final String name) {
         this.name = name;
     }
 
@@ -35,7 +36,7 @@ public final class RepositoryNameValidator {
      * Ctor.
      * @param name The name to test
      */
-    public RepositoryNameValidator(final RepositoryName name) {
+    public ReservedNamesVerifier(final RepositoryName name) {
         this(name.toString());
     }
 
@@ -45,7 +46,7 @@ public final class RepositoryNameValidator {
      */
     @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     public static Set<String> reservedWords() {
-        return RepositoryNameValidator.RESERVED;
+        return ReservedNamesVerifier.RESERVED;
     }
 
     /**
@@ -53,7 +54,7 @@ public final class RepositoryNameValidator {
      * @return True if valid
      */
     public boolean valid() {
-        return RepositoryNameValidator.RESERVED.stream()
+        return ReservedNamesVerifier.RESERVED.stream()
             .filter(this.name::contains).findAny().isEmpty();
     }
 
