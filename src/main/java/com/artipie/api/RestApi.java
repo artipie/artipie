@@ -82,32 +82,33 @@ public final class RestApi extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
-        RouterBuilder.create(this.vertx, String.format("swagger-ui/yaml/%s.yaml", this.layout))
+        RouterBuilder.create(this.vertx, String.format("swagger-ui/yaml/repo-%s.yaml", this.layout))
             .compose(
-                rrb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").compose(
-                    urb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/oauth.yaml").onSuccess(
-                        arb -> {
+                repoRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").compose(
+                    //@checkstyle LineLengthCheck (1 line)
+                    userRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/oauth.yaml").onSuccess(
+                        authRb -> {
                             final BlockingStorage asto = new BlockingStorage(this.storage);
                             new RepositoryRest(
                                 new ManageRepoSettings(asto),
                                 new RepoData(this.storage), this.layout
-                            ).init(rrb);
+                            ).init(repoRb);
                             new StorageAliasesRest(this.caches.storageConfig(), asto, this.layout)
-                                .init(rrb);
+                                .init(repoRb);
                             if (this.users.isPresent()) {
                                 new UsersRest(
                                     new ManageUsers(this.users.get(), asto), this.caches.auth()
-                                ).init(urb);
+                                ).init(userRb);
                             } else {
                                 Logger.warn(
                                     this, "File credentials are not set, users API is not available"
                                 );
                             }
                             new AuthTokenRest(this.jwtAuth(), this.caches.auth(), this.auth)
-                                .init(arb);
-                            final Router router = rrb.createRouter();
-                            router.route("/*").subRouter(urb.createRouter());
-                            router.route("/*").subRouter(arb.createRouter());
+                                .init(authRb);
+                            final Router router = repoRb.createRouter();
+                            router.route("/*").subRouter(userRb.createRouter());
+                            router.route("/*").subRouter(authRb.createRouter());
                             router.route("/api/*").handler(
                                 StaticHandler.create(
                                     FileSystemAccess.ROOT,
