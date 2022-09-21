@@ -51,7 +51,7 @@ public interface AuthCache {
             final String password,
             final Authentication origin
         ) {
-            return Optional.empty();
+            return origin.user(username, password);
         }
 
         @Override

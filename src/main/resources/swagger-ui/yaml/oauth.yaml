@@ -1,0 +1,73 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Artipie - OpenAPI 3.0
+  description:
+    This is Atripie Server based on the OpenAPI 3.0 specification.
+  license:
+    name: MIT
+externalDocs:
+  description: Find out more about Artipie
+  url: https://github.com/artipie
+tags:
+  - name: oauth
+    description: Authentication
+paths:
+  /api/v1/oauth/token:
+    post:
+      summary: Obtain JWT auth token .
+      operationId: getJwtToken
+      tags:
+        - oauth
+      requestBody:
+        description: OAuth request json
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthUser'
+      responses:
+        '200':
+          description: User JWT token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Token"
+        '401':
+          description: User and password pair is not valid
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    OAuthUser:
+      type: object
+      required:
+        - name
+        - pass
+      properties:
+        name:
+          type: string
+        pass:
+          type: string
+    Token:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type:
+            string
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
