@@ -133,6 +133,65 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
+    void existRepository(final Vertx vertx, final VertxTestContext ctx,
+        final RepositoryName rname) throws Exception {
+        this.save(new ConfigKeys(rname.toString()).yamlKey(), this.repoSettings().getBytes());
+        this.requestAndAssert(
+            vertx,
+            ctx,
+            new TestRequest(HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                )
+        );
+    }
+
+    void existRepositoryHasSettingsDuplicates(final Vertx vertx, final VertxTestContext ctx,
+        final RepositoryName rname) throws Exception {
+        this.save(new ConfigKeys(rname.toString()).yamlKey(), new byte[0]);
+        this.save(new ConfigKeys(rname.toString()).ymlKey(), new byte[0]);
+        this.requestAndAssert(
+            vertx,
+            ctx,
+            new TestRequest(HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.CONFLICT_409)
+                )
+        );
+    }
+
+    void existRepositoryNotfound(final Vertx vertx, final VertxTestContext ctx,
+        final RepositoryName rname) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)
+            ),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.NOT_FOUND_404)
+                )
+        );
+    }
+
+    void existReservedRepository(final Vertx vertx, final VertxTestContext ctx,
+        final RepositoryName rname) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)
+            ),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.BAD_REQUEST_400)
+                )
+        );
+    }
+
     void createRepository(final Vertx vertx, final VertxTestContext ctx,
         final RepositoryName rname) throws Exception {
         this.requestAndAssert(

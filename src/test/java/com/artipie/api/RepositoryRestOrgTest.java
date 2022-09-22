@@ -82,6 +82,33 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     }
 
     @Test
+    void existRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        existRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    }
+
+    @Test
+    void existRepoHasSettingsDuplicates(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        existRepositoryHasSettingsDuplicates(
+            vertx,
+            ctx,
+            new RepositoryName.Org("docker-repo", "Alice")
+        );
+    }
+
+    @Test
+    void existRepoNotfound(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.existRepositoryNotfound(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    }
+
+    @Test
+    void existReservedRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+            existReservedRepository(vertx, ctx, new RepositoryName.Org(name, "Alice"));
+        }
+    }
+
+    @Test
     void createUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         createRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
     }

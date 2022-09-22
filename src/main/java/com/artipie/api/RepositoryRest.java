@@ -60,6 +60,9 @@ public final class RepositoryRest extends BaseRest {
             rbr.operation("getRepo")
                 .handler(this::getRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rbr.operation("existRepo")
+                .handler(this::existRepo)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("createRepo")
                 .handler(this::createRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
@@ -75,6 +78,9 @@ public final class RepositoryRest extends BaseRest {
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("getUserRepo")
                 .handler(this::getRepo)
+                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            rbr.operation("existUserRepo")
+                .handler(this::existRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("createUserRepo")
                 .handler(this::createRepo)
@@ -107,6 +113,28 @@ public final class RepositoryRest extends BaseRest {
             context.response()
                 .setStatusCode(HttpStatus.OK_200)
                 .end(this.crs.value(rname).toString());
+        }
+    }
+
+    /**
+     * Checks if repository settings exist.
+     * @param context Routing context
+     */
+    private void existRepo(final RoutingContext context) {
+        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final ReservedNamesVerifier reserved = new ReservedNamesVerifier(rname);
+        final SettingsDuplicatesVerifier duplicates =
+            new SettingsDuplicatesVerifier(rname, this.crs);
+        final ExistenceVerifier existence = new ExistenceVerifier(rname, this.crs);
+        final Validator validator = new Validator.All(
+            Validator.validator(reserved::valid, reserved::message, HttpStatus.BAD_REQUEST_400),
+            Validator.validator(existence::valid, existence::message, HttpStatus.NOT_FOUND_404),
+            Validator.validator(duplicates::valid, duplicates::message, HttpStatus.CONFLICT_409)
+        );
+        if (validator.validate(context)) {
+            context.response()
+                .setStatusCode(HttpStatus.OK_200)
+                .end();
         }
     }
 

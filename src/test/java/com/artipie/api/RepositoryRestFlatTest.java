@@ -62,6 +62,29 @@ final class RepositoryRestFlatTest extends RepositoryRestBaseTest {
     }
 
     @Test
+    void existRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        existRepository(vertx, ctx, new RepositoryName.Flat("docker-repo"));
+    }
+
+    @Test
+    void existRepoHasSettingsDuplicates(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        existRepositoryHasSettingsDuplicates(vertx, ctx, new RepositoryName.Flat("docker-repo"));
+    }
+
+    @Test
+    void existRepoNotfound(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.existRepositoryNotfound(vertx, ctx, new RepositoryName.Flat("docker-repo"));
+    }
+
+    @Test
+    void existReservedRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+            existReservedRepository(vertx, ctx, new RepositoryName.Flat(name));
+        }
+    }
+
+    @Test
     void createRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         createRepository(vertx, ctx, new RepositoryName.Flat("docker-repo"));
     }
