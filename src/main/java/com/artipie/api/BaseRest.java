@@ -7,6 +7,7 @@ package com.artipie.api;
 import com.jcabi.log.Logger;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.HttpException;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.io.StringReader;
 import javax.json.Json;
@@ -35,10 +36,17 @@ abstract class BaseRest {
      */
     protected Handler<RoutingContext> errorHandler(final int code) {
         return context -> {
-            context.response()
-                .setStatusMessage(context.failure().getMessage())
-                .setStatusCode(code)
-                .end();
+            if (context.failure() instanceof HttpException) {
+                context.response()
+                    .setStatusMessage(context.failure().getMessage())
+                    .setStatusCode(((HttpException) context.failure()).getStatusCode())
+                    .end();
+            } else {
+                context.response()
+                    .setStatusMessage(context.failure().getMessage())
+                    .setStatusCode(code)
+                    .end();
+            }
             Logger.error(this, context.failure().getMessage());
         };
     }

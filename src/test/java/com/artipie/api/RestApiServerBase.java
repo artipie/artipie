@@ -147,7 +147,8 @@ public abstract class RestApiServerBase {
     }
 
     /**
-     * Perform the request and check the result.
+     * Perform the request and check the result. In this request auth token for username
+     * `anonymous` is used, issued to be valid forever.
      * @param vertx Text vertx server instance
      * @param ctx Vertx Test Context
      * @param rqs Request parameters: method and path
@@ -157,8 +158,30 @@ public abstract class RestApiServerBase {
      */
     final void requestAndAssert(final Vertx vertx, final VertxTestContext ctx,
         final TestRequest rqs, final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx, rqs,
+            //@checkstyle LineLengthCheck (1 line)
+            Optional.of("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbm9ueW1vdXMifQ.maJSTCP0koQO-lCx1cs4sBLepSxFMJ8liAqUQH_9-bY"),
+            assertion
+        );
+    }
+
+    /**
+     * Perform the request and check the result.
+     * @param vertx Text vertx server instance
+     * @param ctx Vertx Test Context
+     * @param rqs Request parameters: method and path
+     * @param token Jwt auth token
+     * @param assertion Test assertion
+     * @throws Exception On error
+     * @checkstyle ParameterNumberCheck (5 lines)
+     */
+    final void requestAndAssert(final Vertx vertx, final VertxTestContext ctx,
+        final TestRequest rqs, final Optional<String> token,
+        final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
         final HttpRequest<Buffer> request = WebClient.create(vertx)
             .request(rqs.method, this.port(), RestApiServerBase.HOST, rqs.path);
+        token.ifPresent(request::bearerTokenAuthentication);
         rqs.body.map(request::sendJsonObject)
             .orElse(request.send())
             .onSuccess(
@@ -295,6 +318,13 @@ public abstract class RestApiServerBase {
          */
         TestRequest(final String path) {
             this(HttpMethod.GET, path);
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                "TestRequest: method='%s', path='%s', body='%s'", this.method, this.path, this.body
+            );
         }
     }
 }
