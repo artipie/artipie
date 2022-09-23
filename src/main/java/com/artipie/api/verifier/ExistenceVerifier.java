@@ -11,7 +11,7 @@ import com.artipie.settings.repo.CrudRepoSettings;
  * Validates that repository name exists in storage.
  * @since 0.26
  */
-public final class ExistenceVerifier {
+public final class ExistenceVerifier implements Verifier {
     /**
      * Repository name.
      */

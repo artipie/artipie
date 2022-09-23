@@ -55,14 +55,17 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     }
 
     @Test
-    void getRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        getRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    void getRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        getRepoReturnsOkIfRepositoryExists(
+            vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
+        );
     }
 
     @Test
-    void getUserRepoWithDuplicatesSettings(final Vertx vertx, final VertxTestContext ctx)
-        throws Exception {
-        getRepositoryWithDuplicatesSettings(
+    void getRepoReturnsConflictIfRepoHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        getRepoReturnsConflictIfRepositoryHasSettingsDuplicates(
             vertx,
             ctx,
             new RepositoryName.Org("docker-repo", "Alice")
@@ -70,26 +73,35 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     }
 
     @Test
-    void getUserRepoNotfound(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        this.getRepositoryNotfound(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    void getRepoReturnsNotFoundIfRepoDoesNotExist(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        this.getRepoReturnsNotFoundIfRepositoryDoesNotExist(
+            vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
+        );
     }
 
     @Test
-    void getReservedUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+    void getRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
-            getReservedRepository(vertx, ctx, new RepositoryName.Org(name, "Alice"));
+            getRepoReturnsBadRequestIfRepositoryHasReservedName(
+                vertx, ctx, new RepositoryName.Org(name, "Alice")
+            );
         }
     }
 
     @Test
-    void existRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        existRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    void existsRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        existsRepoReturnsOkIfRepositoryExists(
+            vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
+        );
     }
 
     @Test
-    void existRepoHasSettingsDuplicates(final Vertx vertx, final VertxTestContext ctx)
-        throws Exception {
-        existRepositoryHasSettingsDuplicates(
+    void existsRepoReturnsConflictIfRepoHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        existsRepoReturnsConflictIfRepositoryHasSettingsDuplicates(
             vertx,
             ctx,
             new RepositoryName.Org("docker-repo", "Alice")
@@ -97,54 +109,79 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     }
 
     @Test
-    void existRepoNotfound(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        this.existRepositoryNotfound(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    void existsRepoReturnsNotFoundIfRepoDoesNotExist(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        this.existsRepoReturnsNotFoundIfRepositoryDoesNotExist(
+            vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
+        );
     }
 
     @Test
-    void existReservedRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+    void existsRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
-            existReservedRepository(vertx, ctx, new RepositoryName.Org(name, "Alice"));
+            existsRepoReturnsBadRequestIfRepositoryHasReservedName(
+                vertx, ctx, new RepositoryName.Org(name, "Alice")
+            );
         }
     }
 
     @Test
-    void createUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        createRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    void createRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        createRepoReturnsOkIfRepositoryExists(
+            vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
+        );
     }
 
     @Test
-    void createDuplicateUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        createDuplicateRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    void createRepoReturnsConflictIfRepoHasDuplicates(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        createRepoReturnsConflictIfRepositoryHasDuplicates(
+            vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
+        );
     }
 
     @Test
-    void createReservedUserRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+    void createRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
-            createReservedRepository(vertx, ctx, new RepositoryName.Org(name, "Alice"));
+            createRepoReturnsBadRequestIfRepositoryHasReservedName(
+                vertx, ctx, new RepositoryName.Org(name, "Alice")
+            );
         }
     }
 
     @Test
-    void deleteRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        deleteRepository(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    void removeRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        removeRepoReturnsOkIfRepositoryExists(
+            vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
+        );
     }
 
     @Test
-    void deleteRepoNotfound(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        this.deleteRepositoryNotfound(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    void removeRepoReturnsNotFoundIfRepoDoesNotExist(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        this.removeRepoReturnsNotFoundIfRepositoryDoesNotExist(
+            vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
+        );
     }
 
     @Test
-    void deleteReservedRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+    void removeRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
-            deleteReservedRepository(vertx, ctx, new RepositoryName.Org(name, "Alice"));
+            removeRepoReturnsBadRequestIfRepositoryHasReservedName(
+                vertx, ctx, new RepositoryName.Org(name, "Alice")
+            );
         }
     }
 
     @Test
-    void moveRepo(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        moveRepository(
+    void moveRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        moveRepoReturnsOkIfRepositoryExists(
             vertx,
             ctx,
             new RepositoryName.Org("docker-repo", "Alice"),
@@ -153,14 +190,17 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     }
 
     @Test
-    void moveRepoNotFound(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        moveRepositoryNotfound(vertx, ctx, new RepositoryName.Org("docker-repo", "Alice"));
+    void moveRepoReturnsNotFoundIfRepoDoesNotExist(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        moveRepoReturnsNotFoundIfRepositoryDoesNotExist(
+            vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
+        );
     }
 
     @Test
-    void moveRepoWithDuplicatesSettings(final Vertx vertx, final VertxTestContext ctx)
-        throws Exception {
-        moveRepositoryWithDuplicatesSettings(
+    void moveRepoReturnsConflictIfRepoHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        moveRepoReturnsConflictIfRepositoryHasSettingsDuplicates(
             vertx,
             ctx,
             new RepositoryName.Org("docker-repo", "Alice")
@@ -168,28 +208,32 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     }
 
     @Test
-    void moveRepoReservedRepo(final Vertx vertx, final VertxTestContext ctx)
-        throws Exception {
+    void moveRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
-            moveRepositoryReservedRepo(vertx, ctx, new RepositoryName.Org(name, "Alice"));
+            moveRepoReturnsBadRequestIfRepositoryHasReservedName(
+                vertx, ctx, new RepositoryName.Org(name, "Alice")
+            );
         }
     }
 
     @Test
-    void moveRepoReservedNewRepo(final Vertx vertx, final VertxTestContext ctx)
-        throws Exception {
+    void moveRepoReturnsBadRequestIfNewRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         final RepositoryName rname = new RepositoryName.Org("doker-repo", "Alice");
         for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
-            moveRepositoryReservedNewRepo(vertx, ctx, rname, new RepositoryName.Org(name, "Alice"));
+            moveRepoReturnsBadRequestIfNewRepositoryHasReservedName(
+                vertx, ctx, rname, new RepositoryName.Org(name, "Alice")
+            );
         }
     }
 
     @Test
-    void moveRepoWithNewRepoDuplicatesSettings(final Vertx vertx, final VertxTestContext ctx)
-        throws Exception {
+    void moveRepoReturnsBadRequestIfNewRepoHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         final RepositoryName rname = new RepositoryName.Org("doker-repo", "Alice");
         final String newrname = "doker-repo-new";
-        moveRepositoryWithNewRepositoryDuplicatesSettings(vertx, ctx, rname, newrname);
+        moveRepoReturnsBadRequestIfNewRepositoryHasSettingsDuplicates(vertx, ctx, rname, newrname);
     }
 
     @Override
