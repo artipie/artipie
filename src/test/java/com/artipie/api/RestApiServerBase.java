@@ -26,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import org.eclipse.jetty.http.HttpStatus;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * Base class for Rest API tests. When creating test for rest API verticle, extend this class
  * and implement {@link RestApiServerBase#layout()} method.
  * @since 0.27
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @ExtendWith(VertxExtension.class)
 public abstract class RestApiServerBase {
@@ -193,6 +197,37 @@ public abstract class RestApiServerBase {
             .onFailure(ctx::failNow)
             .toCompletionStage().toCompletableFuture()
             .get(RestApiServerBase.TEST_TIMEOUT, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Obtain jwt auth token for given username and password.
+     * @param vertx Text vertx server instance
+     * @param ctx Vertx Test Context
+     * @param name Username
+     * @param pass Password
+     * @return Jwt token
+     * @throws Exception On error
+     * @checkstyle ParameterNumberCheck (5 lines)
+     */
+    final AtomicReference<String> getToken(
+        final Vertx vertx, final VertxTestContext ctx, final String name, final String pass
+    ) throws Exception {
+        final AtomicReference<String> token = new AtomicReference<>();
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.POST, "/api/v1/oauth/token",
+                new JsonObject().put("name", name).put("pass", pass)
+            ), Optional.empty(),
+            response -> {
+                MatcherAssert.assertThat(
+                    "Failed to get token",
+                    response.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                );
+                token.set(((JsonObject) response.body().toJson()).getString("token"));
+            }
+        );
+        return token;
     }
 
     /**
