@@ -19,6 +19,8 @@ paths:
       operationId: listAllUsers
       tags:
         - users
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: A list of the existing users
@@ -28,6 +30,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -47,6 +51,8 @@ paths:
           description: User name
           schema:
             type: string
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: User info
@@ -56,6 +62,8 @@ paths:
                 $ref: "#/components/schemas/User"
         '404':
           description: User does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -80,9 +88,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FullUser'
+      security:
+        - bearerAuth: [ ]
       responses:
         '201':
           description: User successfully added
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -101,11 +113,15 @@ paths:
           description: User name
           schema:
             type: string
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: User removed successfully
         '404':
           description: User does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -113,6 +129,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Error:
       type: object
@@ -154,3 +175,8 @@ components:
           type: array
           items:
             type: string
+  responses:
+    UnauthorizedError:
+      description: "Access token is missing or invalid"
+security:
+  - bearerAuth: []

@@ -9,6 +9,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxTestContext;
+import java.util.Optional;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -28,7 +29,7 @@ final class AuthTokenRestTest extends RestApiServerBase {
             vertx, ctx, new TestRequest(
                 HttpMethod.POST, "/api/v1/oauth/token",
                 new JsonObject().put("name", "Alice").put("pass", "wonderland")
-            ),
+            ), Optional.empty(),
             response -> {
                 MatcherAssert.assertThat(
                     response.statusCode(),
@@ -49,7 +50,7 @@ final class AuthTokenRestTest extends RestApiServerBase {
             vertx, ctx, new TestRequest(
                 HttpMethod.POST, "/api/v1/oauth/token",
                 new JsonObject().put("name", "John").put("pass", "any")
-            ),
+            ), Optional.empty(),
             response -> MatcherAssert.assertThat(
                 response.statusCode(),
                 new IsEqual<>(HttpStatus.UNAUTHORIZED_401)

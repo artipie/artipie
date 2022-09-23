@@ -19,6 +19,8 @@ paths:
       operationId: listAll
       tags:
         - repository
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: A list of the existing repositories
@@ -28,6 +30,8 @@ paths:
                 type: array
                 items:
                   type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -47,6 +51,8 @@ paths:
           description: User name
           schema:
             type: string
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: A list of the existing repositories
@@ -56,6 +62,8 @@ paths:
                 type: array
                 items:
                   type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -81,6 +89,8 @@ paths:
           description: Name of the repository
           schema:
             type: string
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Full repository settings
@@ -96,6 +106,8 @@ paths:
           description: Repository not found
         '409':
           description: Repository has settings duplicates
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -127,6 +139,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Repository'
         required: true
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Creates a new repository with name {rname} for user {uname}
@@ -138,6 +152,8 @@ paths:
           description: Wrong repository name
         '409':
           description: Repository already exists
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -162,6 +178,8 @@ paths:
           description: Name of the repository
           schema:
             type: string
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Remove a repository with name {rname} for user {uname}
@@ -169,6 +187,8 @@ paths:
           description: Wrong repository name
         '404':
           description: Repository not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -201,6 +221,8 @@ paths:
             schema:
               $ref: '#/components/schemas/MoveToRepository'
         required: true
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Remove a repository with name {rname}
@@ -210,6 +232,8 @@ paths:
           description: Repository not found
         '409':
           description: Repository has settings duplicates
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -235,6 +259,8 @@ paths:
           description: Name of the repository
           schema:
             type: string
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Full storage alias settings
@@ -244,6 +270,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/StorageAlias'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -282,9 +310,13 @@ paths:
             schema:
               $ref: '#/components/schemas/Storage'
         required: true
+      security:
+        - bearerAuth: [ ]
       responses:
         '201':
           description: Alias added successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -315,11 +347,15 @@ paths:
           description: Name of the storage alias
           schema:
             type: string
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Alias was removed successfully
         '404':
-          description: Alias does not exis
+          description: Alias does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -332,6 +368,8 @@ paths:
       operationId: getAliases
       tags:
         - storage aliases
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Full aliases settings
@@ -341,6 +379,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/StorageAlias'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -367,9 +407,13 @@ paths:
             schema:
               $ref: '#/components/schemas/Storage'
         required: true
+      security:
+        - bearerAuth: [ ]
       responses:
         '201':
           description: Alias added successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -388,11 +432,15 @@ paths:
           description: Name of the storage alias
           schema:
             type: string
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Alias was removed successfully
         '404':
-          description: Alias does not exis
+          description: Alias does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -412,6 +460,8 @@ paths:
           description: Username
           schema:
             type: string
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Full aliases settings
@@ -421,6 +471,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/StorageAlias'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -453,9 +505,13 @@ paths:
             schema:
               $ref: '#/components/schemas/Storage'
         required: true
+      security:
+        - bearerAuth: [ ]
       responses:
         '201':
           description: Alias added successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -480,11 +536,15 @@ paths:
           description: Name of the storage alias
           schema:
             type: string
+      security:
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Alias was removed successfully
         '404':
-          description: Alias does not exis
+          description: Alias does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -492,6 +552,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Error:
       type: object
@@ -555,3 +620,8 @@ components:
       properties:
         new_name:
           type: string
+  responses:
+    UnauthorizedError:
+      description: "Access token is missing or invalid"
+security:
+  - bearerAuth: []
