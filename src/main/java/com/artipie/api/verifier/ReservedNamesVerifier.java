@@ -13,7 +13,7 @@ import java.util.Set;
  * reserved words `_storages, _permissions, _credentials` in it.
  * @since 0.26
  */
-public final class ReservedNamesVerifier {
+public final class ReservedNamesVerifier implements Verifier {
     /**
      * Words that should not be present inside repository name.
      */

@@ -11,7 +11,7 @@ import com.artipie.settings.repo.CrudRepoSettings;
  * Validates that repository name has duplicates of settings names.
  * @since 0.26
  */
-public final class SettingsDuplicatesVerifier {
+public final class SettingsDuplicatesVerifier implements Verifier {
     /**
      * Repository name.
      */
