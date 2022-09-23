@@ -114,6 +114,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+    head:
+      summary: Checks if repository settings exist
+      operationId: existUserRepo
+      tags:
+        - repository
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: User name
+          schema:
+            type: string
+        - name: rname
+          in: path
+          required: true
+          description: Name of the repository
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Repository exists
+        '400':
+          description: Wrong repository name
+        '404':
+          description: Repository not found
+        '409':
+          description: Repository has settings duplicates
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
     put:
       summary: Create user repository
       operationId: createUserRepo

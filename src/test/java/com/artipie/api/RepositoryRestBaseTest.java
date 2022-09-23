@@ -72,9 +72,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void getRepository(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname)
-        throws Exception {
+    void getRepoReturnsOkIfRepositoryExists(final Vertx vertx, final VertxTestContext ctx,
+        final RepositoryName rname) throws Exception {
         this.save(new ConfigKeys(rname.toString()).yamlKey(), this.repoSettings().getBytes());
         this.requestAndAssert(
             vertx,
@@ -90,9 +89,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void getRepositoryWithDuplicatesSettings(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname)
-        throws Exception {
+    void getRepoReturnsConflictIfRepositoryHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         this.save(new ConfigKeys(rname.toString()).yamlKey(), new byte[0]);
         this.save(new ConfigKeys(rname.toString()).ymlKey(), new byte[0]);
         this.requestAndAssert(
@@ -109,8 +107,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void getRepositoryNotfound(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname) throws Exception {
+    void getRepoReturnsNotFoundIfRepositoryDoesNotExist(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         this.requestAndAssert(
             vertx, ctx, new TestRequest(String.format("/api/v1/repository/%s", rname)),
             res ->
@@ -121,8 +119,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void getReservedRepository(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname) throws Exception {
+    void getRepoReturnsBadRequestIfRepositoryHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         this.requestAndAssert(
             vertx, ctx, new TestRequest(String.format("/api/v1/repository/%s", rname)),
             res ->
@@ -133,7 +131,66 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void createRepository(final Vertx vertx, final VertxTestContext ctx,
+    void existsRepoReturnsOkIfRepositoryExists(final Vertx vertx, final VertxTestContext ctx,
+        final RepositoryName rname) throws Exception {
+        this.save(new ConfigKeys(rname.toString()).yamlKey(), this.repoSettings().getBytes());
+        this.requestAndAssert(
+            vertx,
+            ctx,
+            new TestRequest(HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                )
+        );
+    }
+
+    void existsRepoReturnsConflictIfRepositoryHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+        this.save(new ConfigKeys(rname.toString()).yamlKey(), new byte[0]);
+        this.save(new ConfigKeys(rname.toString()).ymlKey(), new byte[0]);
+        this.requestAndAssert(
+            vertx,
+            ctx,
+            new TestRequest(HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.CONFLICT_409)
+                )
+        );
+    }
+
+    void existsRepoReturnsNotFoundIfRepositoryDoesNotExist(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)
+            ),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.NOT_FOUND_404)
+                )
+        );
+    }
+
+    void existsRepoReturnsBadRequestIfRepositoryHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)
+            ),
+            res ->
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.BAD_REQUEST_400)
+                )
+        );
+    }
+
+    void createRepoReturnsOkIfRepositoryExists(final Vertx vertx, final VertxTestContext ctx,
         final RepositoryName rname) throws Exception {
         this.requestAndAssert(
             vertx,
@@ -161,8 +218,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void createDuplicateRepository(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname) throws Exception {
+    void createRepoReturnsConflictIfRepositoryHasDuplicates(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         this.save(
             new ConfigKeys(rname.toString()).yamlKey(), new byte[0]
         );
@@ -187,8 +244,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void createReservedRepository(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname) throws Exception {
+    void createRepoReturnsBadRequestIfRepositoryHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
                 HttpMethod.PUT,
@@ -208,8 +265,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void deleteRepository(final Vertx vertx, final VertxTestContext ctx, final RepositoryName rname)
-        throws Exception {
+    void removeRepoReturnsOkIfRepositoryExists(final Vertx vertx, final VertxTestContext ctx,
+        final RepositoryName rname) throws Exception {
         this.save(
             new ConfigKeys(rname.toString()).yamlKey(),
             this.repoSettings().getBytes(StandardCharsets.UTF_8)
@@ -245,8 +302,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void deleteRepositoryNotfound(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname) throws Exception {
+    void removeRepoReturnsNotFoundIfRepositoryDoesNotExist(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
                 HttpMethod.DELETE,
@@ -260,8 +317,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void deleteReservedRepository(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname) throws Exception {
+    void removeRepoReturnsBadRequestIfRepositoryHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
                 HttpMethod.DELETE, String.format("/api/v1/repository/%s", rname)
@@ -275,7 +332,7 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
     }
 
     // @checkstyle ParameterNumberCheck (5 lines)
-    void moveRepository(final Vertx vertx, final VertxTestContext ctx,
+    void moveRepoReturnsOkIfRepositoryExists(final Vertx vertx, final VertxTestContext ctx,
         final RepositoryName rname, final RepositoryName newrname)
         throws Exception {
         this.save(
@@ -335,9 +392,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void moveRepositoryNotfound(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname)
-        throws Exception {
+    void moveRepoReturnsNotFoundIfRepositoryDoesNotExist(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
                 HttpMethod.PUT,
@@ -352,9 +408,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void moveRepositoryWithDuplicatesSettings(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname)
-        throws Exception {
+    void moveRepoReturnsConflictIfRepositoryHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         new ConfigKeys(rname.toString()).keys().forEach(
             key ->
                 this.save(
@@ -377,9 +432,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void moveRepositoryReservedRepo(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname)
-        throws Exception {
+    void moveRepoReturnsBadRequestIfRepositoryHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         this.requestAndAssert(
             vertx, ctx,
             new TestRequest(
@@ -396,8 +450,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
     }
 
     // @checkstyle ParameterNumberCheck (3 lines)
-    void moveRepositoryReservedNewRepo(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname, final RepositoryName newrname)
+    void moveRepoReturnsBadRequestIfNewRepositoryHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname, final RepositoryName newrname)
         throws Exception {
         this.save(
             new ConfigKeys(rname.toString()).yamlKey(),
@@ -420,7 +474,7 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
     }
 
     // @checkstyle ParameterNumberCheck (3 lines)
-    void moveRepositoryWithNewRepositoryDuplicatesSettings(final Vertx vertx,
+    void moveRepoReturnsBadRequestIfNewRepositoryHasSettingsDuplicates(final Vertx vertx,
         final VertxTestContext ctx, final RepositoryName rname, final String newrname)
         throws Exception {
         this.save(

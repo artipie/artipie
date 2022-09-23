@@ -4,6 +4,7 @@
  */
 package com.artipie.api;
 
+import com.artipie.api.verifier.Verifier;
 import io.vertx.ext.web.RoutingContext;
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -58,6 +59,25 @@ public interface Validator {
                 context.response()
                     .setStatusCode(code)
                     .end(message.get());
+            }
+            return valid;
+        };
+    }
+
+    /**
+     * Builds validator instance from verifier and status code.
+     * @param verifier Verifier
+     * @param code Status code
+     * @return Validator instance
+     */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    static Validator validator(final Verifier verifier, final int code) {
+        return context -> {
+            final boolean valid = verifier.valid();
+            if (!valid) {
+                context.response()
+                    .setStatusCode(code)
+                    .end(verifier.message());
             }
             return valid;
         };
