@@ -10,8 +10,8 @@ externalDocs:
   description: Find out more about Artipie
   url: https://github.com/artipie
 tags:
-  - name: oauth
-    description: Authentication
+  - name: token
+    description: Endpoint to generate JWT token
 paths:
   /api/v1/oauth/token:
     post:

@@ -19,6 +19,7 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.FileSystemAccess;
+import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.util.Optional;
@@ -29,6 +30,11 @@ import java.util.Optional;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class RestApi extends AbstractVerticle {
+
+    /**
+     * The name of the security scheme (from the Open API description yaml).
+     */
+    private static final String SECURITY_SCHEME = "bearerAuth";
 
     /**
      * Artipie setting cache.
@@ -86,8 +92,9 @@ public final class RestApi extends AbstractVerticle {
             .compose(
                 repoRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").compose(
                     //@checkstyle LineLengthCheck (1 line)
-                    userRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/oauth.yaml").onSuccess(
-                        authRb -> {
+                    userRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/token-gen.yaml").onSuccess(
+                        tokenRb -> {
+                            this.addJwtAuth(repoRb, userRb, tokenRb);
                             final BlockingStorage asto = new BlockingStorage(this.storage);
                             new RepositoryRest(
                                 new ManageRepoSettings(asto),
@@ -104,11 +111,9 @@ public final class RestApi extends AbstractVerticle {
                                     this, "File credentials are not set, users API is not available"
                                 );
                             }
-                            new AuthTokenRest(this.jwtAuth(), this.caches.auth(), this.auth)
-                                .init(authRb);
                             final Router router = repoRb.createRouter();
                             router.route("/*").subRouter(userRb.createRouter());
-                            router.route("/*").subRouter(authRb.createRouter());
+                            router.route("/*").subRouter(tokenRb.createRouter());
                             router.route("/api/*").handler(
                                 StaticHandler.create(
                                     FileSystemAccess.ROOT,
@@ -127,14 +132,22 @@ public final class RestApi extends AbstractVerticle {
     }
 
     /**
-     * Vertx JWTAuth provider.
-     * @return Auth provider
+     * Create and add all JWT-auth related settings:
+     *  - initialize rest method to issue JWT tokens;
+     *  - add security handlers to all REST API requests.
+     * @param repo Repository API router builder
+     * @param user Users API router builder
+     * @param token Auth tokens generate API router builder
      */
-    private JWTAuth jwtAuth() {
-        return JWTAuth.create(
+    private void addJwtAuth(final RouterBuilder repo, final RouterBuilder user,
+        final RouterBuilder token) {
+        final JWTAuth jwt = JWTAuth.create(
             this.vertx, new JWTAuthOptions().addPubSecKey(
                 new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
             )
         );
+        new AuthTokenRest(jwt, this.caches.auth(), this.auth).init(token);
+        repo.securityHandler(RestApi.SECURITY_SCHEME, JWTAuthHandler.create(jwt));
+        user.securityHandler(RestApi.SECURITY_SCHEME, JWTAuthHandler.create(jwt));
     }
 }
