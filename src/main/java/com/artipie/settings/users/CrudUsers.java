@@ -29,14 +29,21 @@ public interface CrudUsers {
     /**
      * Add user.
      * @param info User info (password, email, groups, etc)
-     * @param uid User name
+     * @param uname User name
      */
-    void addOrUpdate(JsonObject info, String uid);
+    void addOrUpdate(JsonObject info, String uname);
 
     /**
      * Remove user by name.
-     * @param uid User name
+     * @param uname User name
      */
-    void remove(String uid);
+    void remove(String uname);
+
+    /**
+     * Alter user's password.
+     * @param uname Username
+     * @param info Json object with new password and type
+     */
+    void alterPassword(String uname, JsonObject info);
 
 }
