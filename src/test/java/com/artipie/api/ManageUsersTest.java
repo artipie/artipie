@@ -179,7 +179,7 @@ class ManageUsersTest {
             new String(this.blsto.value(ManageUsersTest.KEY), StandardCharsets.UTF_8),
             new IsEqual<>(
                 String.join(
-                    "\n",
+                    System.lineSeparator(),
                     "credentials:",
                     "  Mark:",
                     "    pass: 123",
