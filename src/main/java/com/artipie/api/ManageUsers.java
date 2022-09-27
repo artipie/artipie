@@ -124,21 +124,22 @@ public final class ManageUsers implements CrudUsers {
 
     @Override
     public void alterPassword(final String uname, final JsonObject info) {
-        if (this.users().map(yaml -> yaml.yamlMapping(uname) != null).orElse(false)) {
+        final Optional<YamlMapping> users = this.users();
+        if (users.map(yaml -> yaml.yamlMapping(uname) != null).orElse(false)) {
             YamlMappingBuilder all = Yaml.createYamlMappingBuilder();
-            final YamlMapping users = this.users().get();
-            for (final YamlNode node : users.keys()) {
-                final String val = node.asScalar().value();
-                if (!uname.equals(val)) {
-                    all = all.add(val, users.yamlMapping(val));
+            final YamlMapping names = users.get();
+            for (final YamlNode node : names.keys()) {
+                final String name = node.asScalar().value();
+                if (!uname.equals(name)) {
+                    all = all.add(name, names.yamlMapping(name));
                 }
             }
-            final YamlMapping user = this.users().get().yamlMapping(uname);
+            final YamlMapping user = users.get().yamlMapping(uname);
             YamlMappingBuilder changing = Yaml.createYamlMappingBuilder();
             for (final YamlNode node : user.keys()) {
-                final String val = node.asScalar().value();
-                if (!ManageUsers.TYPE.equals(val) && !ManageUsers.PASS.equals(val)) {
-                    changing = changing.add(val, user.value(val));
+                final String prop = node.asScalar().value();
+                if (!ManageUsers.TYPE.equals(prop) && !ManageUsers.PASS.equals(prop)) {
+                    changing = changing.add(prop, user.value(prop));
                 }
             }
             changing = changing.add(ManageUsers.PASS, info.getString("new_pass"));
