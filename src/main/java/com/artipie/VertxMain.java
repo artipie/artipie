@@ -51,6 +51,11 @@ import org.apache.commons.cli.Options;
 public final class VertxMain {
 
     /**
+     * Default port to start Artipie Rest API service.
+     */
+    private static final String DEF_API_PORT = "8086";
+
+    /**
      * HTTP client.
      */
     private final ClientSlices http;
@@ -97,10 +102,11 @@ public final class VertxMain {
     /**
      * Starts the server.
      *
+     * @param apiport Port to run Rest API service on
      * @return Port the servers listening on.
      * @throws IOException In case of error reading settings.
      */
-    public int start() throws IOException {
+    public int start(final int apiport) throws IOException {
         final SettingsCaches caches = new SettingsCaches.All();
         final Settings settings = new SettingsFromPath(this.config).find(this.port, caches);
         final Metrics metrics = metrics(settings);
@@ -113,8 +119,7 @@ public final class VertxMain {
             auth -> this.vertx.deployVerticle(
                 new RestApi(
                     caches, settings.repoConfigsStorage(), settings.layout().toString(),
-                    // @checkstyle MagicNumberCheck (1 line)
-                    8086, settings.credentialsKey(), auth
+                    apiport, settings.credentialsKey(), auth
                 )
             )
         );
@@ -143,8 +148,10 @@ public final class VertxMain {
         final Options options = new Options();
         final String popt = "p";
         final String fopt = "f";
-        options.addOption(popt, "port", true, "The port to start artipie on");
-        options.addOption(fopt, "config-file", true, "The path to artipie configuration file");
+        final String apiport = "apiport";
+        options.addOption(popt, "port", true, "The port to start Artipie on");
+        options.addOption(fopt, "config-file", true, "The path to aArtipie configuration file");
+        options.addOption(apiport, true, "The port to start Artipie Rest API on");
         final CommandLineParser parser = new DefaultParser();
         final CommandLine cmd = parser.parse(options, args);
         if (cmd.hasOption(popt)) {
@@ -165,7 +172,8 @@ public final class VertxMain {
         );
         final JettyClientSlices http = new JettyClientSlices(new HttpClientSettings());
         http.start();
-        new VertxMain(http, config, vertx, port).start();
+        new VertxMain(http, config, vertx, port)
+            .start(Integer.parseInt(cmd.getOptionValue(apiport, VertxMain.DEF_API_PORT)));
     }
 
     /**
