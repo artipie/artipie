@@ -241,6 +241,23 @@ final class UsersRestTest extends RestApiServerBase {
         );
     }
 
+    @Test
+    void returnsNotFoundWhenUserDoesNotExistsOnAlterPassword(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx,
+            new TestRequest(
+                HttpMethod.POST, "/api/v1/users/Jane/alter/password",
+                new JsonObject().put("old_pass", "any_pass").put("new_type", "plain")
+                    .put("new_pass", "another_pass")
+            ),
+            response -> MatcherAssert.assertThat(
+                response.statusCode(),
+                new IsEqual<>(HttpStatus.NOT_FOUND_404)
+            )
+        );
+    }
+
     @Override
     String layout() {
         return "org";
