@@ -123,7 +123,8 @@ public final class RestApi extends AbstractVerticle {
                             final HttpServer server = this.vertx.createHttpServer();
                             server.requestHandler(router)
                                 .listen(this.port)
-                                .onComplete(res -> Logger.info(this, "Rest API started"))
+                                //@checkstyle LineLengthCheck (1 line)
+                                .onComplete(res -> Logger.info(this, String.format("Rest API started on port %d, swagger is available on http://localhost:%d/api/index-%s.html", this.port, this.port, this.layout)))
                                 .onFailure(err -> Logger.error(this, err.getMessage()));
                         }
                     ).onFailure(Throwable::printStackTrace)
