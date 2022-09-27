@@ -162,6 +162,39 @@ class ManageUsersTest {
         );
     }
 
+    @Test
+    void altersPassword() {
+        this.blsto.save(
+            ManageUsersTest.KEY,
+            new CredsConfigYaml().withUsers("Mark").withFullInfo(
+                "John", Users.PasswordFormat.PLAIN, "abc",
+                "john@example.com", Set.of("admin")
+            ).yaml().toString().getBytes(StandardCharsets.UTF_8)
+        );
+        this.users.alterPassword(
+            "John",
+            Json.createObjectBuilder().add("new_pass", "[poiu").add("new_type", "plain").build()
+        );
+        MatcherAssert.assertThat(
+            new String(this.blsto.value(ManageUsersTest.KEY), StandardCharsets.UTF_8),
+            new IsEqual<>(
+                String.join(
+                    System.lineSeparator(),
+                    "credentials:",
+                    "  Mark:",
+                    "    pass: 123",
+                    "    type: plain",
+                    "  John:",
+                    "    email: john@example.com",
+                    "    groups:",
+                    "      - admin",
+                    "    pass: \"[poiu\"",
+                    "    type: plain"
+                )
+            )
+        );
+    }
+
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static Stream<Pair<YamlMapping, Boolean>> creds() {
         return Stream.of(

@@ -104,7 +104,8 @@ public final class RestApi extends AbstractVerticle {
                                 .init(repoRb);
                             if (this.users.isPresent()) {
                                 new UsersRest(
-                                    new ManageUsers(this.users.get(), asto), this.caches.auth()
+                                    new ManageUsers(this.users.get(), asto),
+                                    this.caches.auth(), this.auth
                                 ).init(userRb);
                             } else {
                                 Logger.warn(

@@ -4,6 +4,7 @@
  */
 package com.artipie.api;
 
+import com.artipie.http.auth.Authentication;
 import com.artipie.settings.cache.AuthCache;
 import com.artipie.settings.users.CrudUsers;
 import com.jcabi.log.Logger;
@@ -32,13 +33,20 @@ public final class UsersRest extends BaseRest {
     private final AuthCache cache;
 
     /**
+     * Artipie auth.
+     */
+    private final Authentication auth;
+
+    /**
      * Ctor.
      * @param users Crud users object
      * @param cache Artipie authenticated users cache
+     * @param auth Artipie authentication
      */
-    public UsersRest(final CrudUsers users, final AuthCache cache) {
+    public UsersRest(final CrudUsers users, final AuthCache cache, final Authentication auth) {
         this.users = users;
         this.cache = cache;
+        this.auth = auth;
     }
 
     @Override
@@ -54,6 +62,9 @@ public final class UsersRest extends BaseRest {
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("deleteUser")
             .handler(this::deleteUser)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rbr.operation("alterPassword")
+            .handler(this::alterPassword)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
 
@@ -105,6 +116,29 @@ public final class UsersRest extends BaseRest {
      */
     private void listAllUsers(final RoutingContext context) {
         context.response().setStatusCode(HttpStatus.OK_200).end(this.users.list().toString());
+    }
+
+    /**
+     * Alter user password.
+     * @param context Routing context
+     */
+    private void alterPassword(final RoutingContext context) {
+        final String uname = context.pathParam(RepositoryName.UNAME);
+        final JsonObject body = readJsonObject(context);
+        final Optional<Authentication.User> usr =
+            this.cache.user(uname, body.getString("old_pass"), this.auth);
+        if (usr.isPresent()) {
+            try {
+                this.users.alterPassword(uname, body);
+                context.response().setStatusCode(HttpStatus.OK_200).end();
+                this.cache.invalidateAll();
+            } catch (final IllegalStateException err) {
+                Logger.error(this, err.getMessage());
+                context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
+            }
+        } else {
+            context.response().setStatusCode(HttpStatus.UNAUTHORIZED_401).end();
+        }
     }
 
 }

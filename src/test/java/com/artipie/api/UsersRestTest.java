@@ -168,7 +168,7 @@ final class UsersRestTest extends RestApiServerBase {
     }
 
     @Test
-    void removeUser(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+    void removesUser(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(
             new Key.From(ManageUsersTest.KEY),
             new CredsConfigYaml().withUsers("Mark", "Alice")
@@ -198,6 +198,63 @@ final class UsersRestTest extends RestApiServerBase {
                     ((AuthCache.Fake) this.settingsCaches().auth()).wasInvalidated()
                 );
             }
+        );
+    }
+
+    @Test
+    void altersUserPassword(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        final String old = "abc123";
+        this.save(
+            new Key.From(ManageUsersTest.KEY),
+            new CredsConfigYaml().withUserAndPswd("Mark", Users.PasswordFormat.PLAIN, old)
+                .toString().getBytes(StandardCharsets.UTF_8)
+        );
+        this.requestAndAssert(
+            vertx, ctx,
+            new TestRequest(
+                HttpMethod.POST, "/api/v1/users/Mark/alter/password",
+                new JsonObject().put("old_pass", old).put("new_type", "plain")
+                    .put("new_pass", "xyz098")
+            ),
+            response -> {
+                MatcherAssert.assertThat(
+                    response.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                );
+                MatcherAssert.assertThat(
+                    new String(this.storage().value(ManageUsersTest.KEY), StandardCharsets.UTF_8),
+                    new IsEqual<>(
+                        String.join(
+                            System.lineSeparator(),
+                            "credentials:",
+                            "  Mark:",
+                            "    pass: xyz098",
+                            "    type: plain"
+                        )
+                    )
+                );
+                MatcherAssert.assertThat(
+                    "Auth cache should be invalidated",
+                    ((AuthCache.Fake) this.settingsCaches().auth()).wasInvalidated()
+                );
+            }
+        );
+    }
+
+    @Test
+    void returnsNotFoundWhenUserDoesNotExistsOnAlterPassword(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx,
+            new TestRequest(
+                HttpMethod.POST, "/api/v1/users/Jane/alter/password",
+                new JsonObject().put("old_pass", "any_pass").put("new_type", "plain")
+                    .put("new_pass", "another_pass")
+            ),
+            response -> MatcherAssert.assertThat(
+                response.statusCode(),
+                new IsEqual<>(HttpStatus.NOT_FOUND_404)
+            )
         );
     }
 

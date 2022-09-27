@@ -56,6 +56,7 @@ public final class AuthRestOrgTest extends RestApiServerBase {
             new TestRequest(HttpMethod.PUT, "/api/v1/users/Mark"),
             new TestRequest(HttpMethod.GET, "/api/v1/users/Alice"),
             new TestRequest(HttpMethod.DELETE, "/api/v1/users/Justine"),
+            new TestRequest(HttpMethod.POST, "/api/v1/users/David/alter/password"),
             new TestRequest(HttpMethod.GET, "/api/v1/repository/list/John"),
             new TestRequest(HttpMethod.GET, "/api/v1/repository/Olga/my-maven"),
             new TestRequest(HttpMethod.PUT, "/api/v1/repository/Jane/rpm"),
@@ -178,6 +179,24 @@ public final class AuthRestOrgTest extends RestApiServerBase {
             response -> MatcherAssert.assertThat(
                 response.statusCode(),
                 new IsEqual<>(HttpStatus.OK_200)
+            )
+        );
+    }
+
+    @Test
+    void returnUnauthorizedWhenOldPasswordIsNotCorrectOnAlterPassword(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        this.requestAndAssert(
+            vertx, ctx,
+            new TestRequest(
+                HttpMethod.POST,
+                String.format("/api/v1/users/%s/alter/password", AuthRestOrgTest.NAME),
+                new JsonObject().put("old_pass", "abc123").put("new_type", "plain")
+                    .put("new_pass", "xyz098")
+            ),
+            response -> MatcherAssert.assertThat(
+                response.statusCode(),
+                new IsEqual<>(HttpStatus.UNAUTHORIZED_401)
             )
         );
     }

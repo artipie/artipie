@@ -128,6 +128,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/users/{uname}/alter/password:
+    post:
+      summary: Alter user password.
+      operationId: alterPassword
+      tags:
+        - users
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: User name
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Old and new password
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlterPassword'
+      responses:
+        '200':
+          description: Password changed successfully
+        '404':
+          description: User does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   securitySchemes:
     bearerAuth:
@@ -175,6 +209,19 @@ components:
           type: array
           items:
             type: string
+    AlterPassword:
+      type: object
+      required:
+        - old_pass
+        - new_pass
+        - new_type
+      properties:
+        old_pass:
+          type: string
+        new_pass:
+          type: string
+        new_type:
+          type: string
   responses:
     UnauthorizedError:
       description: "Access token is missing or invalid"

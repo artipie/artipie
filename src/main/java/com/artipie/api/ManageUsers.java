@@ -34,6 +34,16 @@ import javax.json.JsonObjectBuilder;
 public final class ManageUsers implements CrudUsers {
 
     /**
+     * Yaml field name for password.
+     */
+    private static final String PASS = "pass";
+
+    /**
+     * Yaml field name for password type.
+     */
+    private static final String TYPE = "type";
+
+    /**
      * Yaml file key.
      */
     private final Key key;
@@ -73,7 +83,7 @@ public final class ManageUsers implements CrudUsers {
     }
 
     @Override
-    public void addOrUpdate(final JsonObject info, final String uid) {
+    public void addOrUpdate(final JsonObject info, final String uname) {
         YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
         final Optional<YamlMapping> users = this.users();
         if (users.isPresent()) {
@@ -82,7 +92,7 @@ public final class ManageUsers implements CrudUsers {
                 builder = builder.add(val, users.get().yamlMapping(val));
             }
         }
-        builder = builder.add(uid, new Json2Yaml().apply(info.toString()));
+        builder = builder.add(uname, new Json2Yaml().apply(info.toString()));
         this.blsto.save(
             this.key,
             Yaml.createYamlMappingBuilder().add(YamlSettings.NODE_CREDENTIALS, builder.build())
@@ -91,13 +101,13 @@ public final class ManageUsers implements CrudUsers {
     }
 
     @Override
-    public void remove(final String uid) {
-        if (this.users().map(yaml -> yaml.yamlMapping(uid) != null).orElse(false)) {
+    public void remove(final String uname) {
+        if (this.users().map(yaml -> yaml.yamlMapping(uname) != null).orElse(false)) {
             YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
             final YamlMapping users = this.users().get();
             for (final YamlNode node : users.keys()) {
                 final String val = node.asScalar().value();
-                if (!uid.equals(val)) {
+                if (!uname.equals(val)) {
                     builder = builder.add(val, users.yamlMapping(val));
                 }
             }
@@ -109,7 +119,41 @@ public final class ManageUsers implements CrudUsers {
             );
             return;
         }
-        throw new IllegalStateException(String.format("User %s does not exist", uid));
+        throw new IllegalStateException(String.format("User %s does not exist", uname));
+    }
+
+    @Override
+    public void alterPassword(final String uname, final JsonObject info) {
+        final Optional<YamlMapping> users = this.users();
+        if (users.map(yaml -> yaml.yamlMapping(uname) != null).orElse(false)) {
+            YamlMappingBuilder all = Yaml.createYamlMappingBuilder();
+            final YamlMapping names = users.get();
+            for (final YamlNode node : names.keys()) {
+                final String name = node.asScalar().value();
+                if (!uname.equals(name)) {
+                    all = all.add(name, names.yamlMapping(name));
+                }
+            }
+            final YamlMapping user = users.get().yamlMapping(uname);
+            YamlMappingBuilder changing = Yaml.createYamlMappingBuilder();
+            for (final YamlNode node : user.keys()) {
+                final String prop = node.asScalar().value();
+                if (!ManageUsers.TYPE.equals(prop) && !ManageUsers.PASS.equals(prop)) {
+                    changing = changing.add(prop, user.value(prop));
+                }
+            }
+            changing = changing.add(ManageUsers.PASS, info.getString("new_pass"));
+            changing = changing.add(ManageUsers.TYPE, info.getString("new_type"));
+            all = all.add(uname, changing.build());
+            this.blsto.save(
+                this.key,
+                Yaml.createYamlMappingBuilder()
+                    .add(YamlSettings.NODE_CREDENTIALS, all.build())
+                    .build().toString().getBytes(StandardCharsets.UTF_8)
+            );
+            return;
+        }
+        throw new IllegalStateException(String.format("User %s does not found", uname));
     }
 
     /**
@@ -143,8 +187,8 @@ public final class ManageUsers implements CrudUsers {
         final JsonObjectBuilder usr = Json.createObjectBuilder(
             new Yaml2Json().apply(yaml.toString()).asJsonObject()
         );
-        usr.remove("pass");
-        usr.remove("type");
+        usr.remove(ManageUsers.PASS);
+        usr.remove(ManageUsers.TYPE);
         return Json.createObjectBuilder().add("name", uname).addAll(usr).build();
     }
 }
