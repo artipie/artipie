@@ -8,10 +8,10 @@ of this file is `/etc/artipie/artipie.yml`.
 Yaml configuration file contains server meta configuration, such as:
  - `layout` - `flat` or `org` string, not required, default value is `flat`;
  - `storage` - repositories definition storage config, required;
- - `credentials` - user [credentials config](./Configuration-Credentials.md);
+ - `credentials` - user [credentials config](./Configuration-Credentials);
  - `configs` - repository config files location, not required, the storage key relative to the 
 main storage, or, in file system storage terms, subdirectory where repo configs are located relatively to the storage;
- - `metrics` - enable and set [metrics collection](./Configuration-Metrics.md), not required.
+ - `metrics` - enable and set [metrics collection](./Configuration-Metrics), not required.
 
 Example: 
 ```yaml
@@ -38,8 +38,8 @@ In `org` layout, repositories have a maintainer (owner) who can manage
 repositories and permissions; the maintainer can add,
 delete and edit repositories, add granular permissions for other users for each repository.
 
-Storage - is a [storage configuration](./Configuration-Storage.md)
-for [repository definitions](./Configuration-Repository.md).
+Storage - is a [storage configuration](./Configuration-Storage)
+for [repository definitions](./Configuration-Repository).
 It sets a storage where all config files for each repository are located. Keep in mind,
 Artipie user should have read and write permissions for this storage.
 
@@ -72,9 +72,9 @@ If the layout is `org`, then repository configurations will be located in users'
 │   │   │   nuget-repo.yaml
 ```
 
-In the examples above `_storages.yaml` is a file for [storages aliases](./Configuration-Storage.md#storage-aliases)
+In the examples above `_storages.yaml` is a file for [storages aliases](./Configuration-Storage#storage-aliases)
 (note, that is the case of `org` layout it can be added for users individually) and
-`_credentials.yaml` describes Artipie [users](./Configuration-Credentials.md). `repo` subdirectory
+`_credentials.yaml` describes Artipie [users](./Configuration-Credentials). `repo` subdirectory
 (as configured with `configs` field in `/etc/artipie/artipie.yml`) contains configs for repositories. If `configs` 
 setting is omitted in `/etc/artipie/artipie.yml`, then repo configs will be located in `/tmp/artipie/configs`
 directly.

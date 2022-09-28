@@ -21,7 +21,7 @@ meta:
 
 ### Storage metrics
 
-Storage metrics will periodically publish statistics to [storage](./Configuration-Storage.md) as text files, 
+Storage metrics will periodically publish statistics to [storage](./Configuration-Storage) as text files, 
 here is the way to configure such metrics:
 ```yaml
 meta:
