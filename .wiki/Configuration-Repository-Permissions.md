@@ -1,6 +1,6 @@
 # Repository permissions
 
-Permissions for repository operations can be granted in the [repository configuration file](Configuration-Repository.md):
+Permissions for repository operations can be granted in the [repository configuration file](Configuration-Repository):
 ```yaml
 repo:
   ...
@@ -37,7 +37,7 @@ repo:
 ```
 Operations and their synonyms for users and groups are the same, users and groups can be mixed in 
 `permissions` section, the only rule here - groups names should start with `/` sign. Permissions granted 
-to the group are applied to the users participating in this group. Check [Credentials](./Configuration-Credentials.md) 
+to the group are applied to the users participating in this group. Check [Credentials](./Configuration-Credentials) 
 section to find out how to add users group.
 
 If `permissions` section is absent in repo config, then any supported operation is allowed for everyone,
