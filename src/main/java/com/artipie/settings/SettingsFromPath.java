@@ -77,11 +77,6 @@ public final class SettingsFromPath {
                     "\t\t\t\t\tHello!",
                     "\t\tArtipie configuration was not found, created default.",
                     "\t\t\tDefault username/password: `artipie`/`artipie`. ",
-                    "\t\t\t\t   Check the dashboard at:",
-                    String.format(
-                        "\t\t\thttp://localhost:%d/dashboard/artipie",
-                        port
-                    ),
                     "\t-===============================================================-", ""
                 )
             );
