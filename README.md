@@ -60,10 +60,10 @@ It'll start a new Docker container with latest Artipie version, the command incl
 ports: on port `8080` repositories are served and on port `8081` Artipie Rest API and Swagger 
 documentation is provided.
 A new image generate default configuration, prints a list of running repositories, test 
-credentials and a link to the Swagger documentation to console. If started on localhost with the command
-above, the Swagger documentation URI is `http://localhost:8081/api/index-org.html` and default 
-username and password are `artipie/artipie`. To check existing repositories using Artipie Rest API
-- go to Swagger documentation page, choose "Auth token" in "Select a definition" list,
+credentials and a link to the [Swagger](https://swagger.io/) documentation to console. To check 
+existing repositories using Artipie Rest API:
+- go to Swagger documentation page `http://localhost:8081/api/index-org.html`, 
+choose "Auth token" in "Select a definition" list,
 - generate and copy authentication token for user `artipie/artipie`,  
 - switch to "Repositories" definition, press "Authorize" button and paste the token 
 - then perform `GET /api/v1/repository/list` request. 
@@ -97,9 +97,6 @@ to `/var/artipie/repos` to check and edit it manually.
 
 > **Important:** check that `<your-local-config-dir>` has correct permissions, it should be `2020:2021`,  
 to change it correctly use `chown -R 2020:2021 <your-local-config-dir>`.
-
-We recommend you read the "Architecture" section in our [White Paper](https://github.com/artipie/white-paper) 
-to fully understand how Artipie is designed.
 
 If you have any question or suggestions, do not hesitate to [create an issue](https://github.com/artipie/artipie/issues/new) or contact us in
 [Telegram](https://t.me/artipie).  
