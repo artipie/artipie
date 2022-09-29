@@ -17,7 +17,7 @@ COPY target/${JAR_FILE} /usr/lib/artipie/artipie.jar
 
 VOLUME /var/artipie /etc/artipie
 WORKDIR /var/artipie
-EXPOSE 8080 8081
+EXPOSE 8080 8086
 CMD [ \
   "java", \
   "--add-opens", "java.base/java.util=ALL-UNNAMED", \
@@ -26,5 +26,5 @@ CMD [ \
   "com.artipie.VertxMain", \
   "--config-file=/etc/artipie/artipie.yml", \
   "--port=8080", \
-  "--api-port=8081" \
+  "--api-port=8086" \
 ]

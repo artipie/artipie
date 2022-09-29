@@ -53,16 +53,16 @@ The fastest way to start Artipie is by using Docker container. First, make sure 
 Then, open command line and instruct Docker Engine to run Artipie container:
 
 ```bash
-docker run -it -p 8080:8080 -p 8081:8081 artipie/artipie:latest
+docker run -it -p 8080:8080 -p 8086:8086 artipie/artipie:latest
 ```
 
 It'll start a new Docker container with latest Artipie version, the command includes mapping of two 
-ports: on port `8080` repositories are served and on port `8081` Artipie Rest API and Swagger 
+ports: on port `8080` repositories are served and on port `8086` Artipie Rest API and Swagger 
 documentation is provided.
 A new image generate default configuration, prints a list of running repositories, test 
 credentials and a link to the [Swagger](https://swagger.io/) documentation to console. To check 
 existing repositories using Artipie Rest API:
-- go to Swagger documentation page `http://localhost:8081/api/index-org.html`, 
+- go to Swagger documentation page `http://localhost:8086/api/index-org.html`, 
 choose "Auth token" in "Select a definition" list,
 - generate and copy authentication token for user `artipie/artipie`,  
 - switch to "Repositories" definition, press "Authorize" button and paste the token 
