@@ -4,14 +4,11 @@
  */
 package com.artipie.misc;
 
-import com.artipie.ArtipieException;
 import com.jcabi.log.Logger;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -50,20 +47,6 @@ public final class JavaResource {
     public JavaResource(final String name, final ClassLoader clo) {
         this.name = name;
         this.clo = clo;
-    }
-
-    /**
-     * Obtain resource URI.
-     * @return Resource URI
-     */
-    public URI uri() {
-        try {
-            return Objects.requireNonNull(
-                Thread.currentThread().getContextClassLoader().getResource(this.name)
-            ).toURI();
-        } catch (final URISyntaxException err) {
-            throw new ArtipieException(err);
-        }
     }
 
     /**

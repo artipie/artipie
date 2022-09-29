@@ -8,7 +8,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.http.auth.Authentication;
-import com.artipie.misc.JavaResource;
 import com.artipie.settings.RepoData;
 import com.artipie.settings.cache.SettingsCaches;
 import com.jcabi.log.Logger;
@@ -18,7 +17,6 @@ import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.FileSystemAccess;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
@@ -116,10 +114,8 @@ public final class RestApi extends AbstractVerticle {
                             router.route("/*").subRouter(userRb.createRouter());
                             router.route("/*").subRouter(tokenRb.createRouter());
                             router.route("/api/*").handler(
-                                StaticHandler.create(
-                                    FileSystemAccess.ROOT,
-                                    new JavaResource("swagger-ui").uri().getPath()
-                                ).setIndexPage(String.format("index-%s.html", this.layout))
+                                StaticHandler.create("swagger-ui")
+                                    .setIndexPage(String.format("index-%s.html", this.layout))
                             );
                             final HttpServer server = this.vertx.createHttpServer();
                             server.requestHandler(router)

@@ -148,10 +148,10 @@ public final class VertxMain {
         final Options options = new Options();
         final String popt = "p";
         final String fopt = "f";
-        final String apiport = "apiport";
+        final String apiport = "ap";
         options.addOption(popt, "port", true, "The port to start Artipie on");
-        options.addOption(fopt, "config-file", true, "The path to aArtipie configuration file");
-        options.addOption(apiport, true, "The port to start Artipie Rest API on");
+        options.addOption(fopt, "config-file", true, "The path to Artipie configuration file");
+        options.addOption(apiport, "api-port", true, "The port to start Artipie Rest API on");
         final CommandLineParser parser = new DefaultParser();
         final CommandLine cmd = parser.parse(options, args);
         if (cmd.hasOption(popt)) {

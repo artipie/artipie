@@ -57,7 +57,7 @@ public final class SettingsFromPath {
         final Key init = new Key.From(".artipie", "initialized");
         if (initialize && !bsto.exists(init)) {
             final List<String> resources = Arrays.asList(
-                "_credentials.yaml", StorageAliases.FILE_NAME, "_api_permissions.yaml",
+                "_credentials.yaml", StorageAliases.FILE_NAME,
                 "artipie/my-bin.yaml", "artipie/my-docker.yaml", "artipie/my-maven.yaml"
             );
             for (final String res : resources) {
@@ -77,11 +77,6 @@ public final class SettingsFromPath {
                     "\t\t\t\t\tHello!",
                     "\t\tArtipie configuration was not found, created default.",
                     "\t\t\tDefault username/password: `artipie`/`artipie`. ",
-                    "\t\t\t\t   Check the dashboard at:",
-                    String.format(
-                        "\t\t\thttp://localhost:%d/dashboard/artipie",
-                        port
-                    ),
                     "\t-===============================================================-", ""
                 )
             );

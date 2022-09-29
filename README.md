@@ -46,48 +46,57 @@ Learn more about Artipie in our [Wiki](https://github.com/artipie/artipie/wiki).
 
 # Quickstart
 
-Make sure you have already installed both [Docker Engine](https://docs.docker.com/get-docker/) and 
-[Docker Compose](https://docs.docker.com/compose/install/).
-Then, obtain `docker-compose.yaml` file from the repository: 
-you can [open it from the browser](https://github.com/artipie/artipie/blob/master/docker-compose.yaml), 
-copy content and save it locally or use [git](https://git-scm.com/) and [clone](https://git-scm.com/docs/git-clone) the repository. 
-As soon as Docker Compose is installed and `docker-compose.yaml` file is retrieved, open command line, 
-`cd` to the location with the compose file and run Artipie service:
+Artipie is distributed as Docker container and as fat `jar`. The `jar` file can be downloaded on the
+GitHub [release page](https://github.com/artipie/artipie/releases) and here is a 
+[Wiki page](https://github.com/artipie/artipie/wiki#how-to-start-artipie-service-with-a-maven-proxy-repository) describing how to start it.
+The fastest way to start Artipie is by using Docker container. First, make sure you have already installed [Docker Engine](https://docs.docker.com/get-docker/).
+Then, open command line and instruct Docker Engine to run Artipie container:
 
 ```bash
-docker-compose up
+docker run -it -p 8080:8080 -p 8086:8086 artipie/artipie:latest
 ```
 
-It'll start a new Docker container with latest Artipie and Artipie dashboard service image. 
-Containers should share same config directory, default local mount location is `/usr/local/artipie`,
-you may need to correct it if docker client is running not on linux operating system.
-A new image generate default configuration if not found at `/etc/artipie/artipie.yml`, prints initial
-credentials to console and prints a link to the dashboard. If started on localhost with command
-above, the dashboard URI is `http://localhost:8080/dashboard` and default username and password 
-are `artipie/artipie`. Artipie server side (repositories) is served on `8081` port and is 
-available on URI `http://localhost:8081/{username}/{reponame}`, where `{username}` is the name 
-of the user and `{reponame}` is the name of the repository.
+It'll start a new Docker container with latest Artipie version, the command includes mapping of two 
+ports: on port `8080` repositories are served and on port `8086` Artipie Rest API and Swagger 
+documentation is provided.
+A new image generate default configuration, prints a list of running repositories, test 
+credentials and a link to the [Swagger](https://swagger.io/) documentation to console. To check 
+existing repositories using Artipie Rest API:
+- go to Swagger documentation page `http://localhost:8086/api/index-org.html`, 
+choose "Auth token" in "Select a definition" list,
+- generate and copy authentication token for user `artipie/artipie`,  
+- switch to "Repositories" definition, press "Authorize" button and paste the token 
+- then perform `GET /api/v1/repository/list` request. 
+Response should be a json list with three default repositories:
+```json
+[
+  "artipie/my-bin",
+  "artipie/my-docker",
+  "artipie/my-maven"
+]
+```
+Artipie server side (repositories) is served on `8080` port and is available on URI 
+`http://localhost:8080/{username}/{reponame}`, where `{username}` is the name 
+of the user and `{reponame}` is the name of the repository. Let's put some text data into binary repository:
+```commandline
+curl -X PUT -d 'Hello world!' http://localhost:8080/artipie/my-bin/test.txt
+```
+With this request we added file `test.txt` containing text "Hello world!" into repository. Let's check
+it's really there:
+```commandline
+curl -X GET http://localhost:8080/artipie/my-bin/test.txt
+```
+"Hello world!" should be printed in console.
 
+Do dive in dipper into Artipie configuration, features, explore repositories and storages settings, 
+please, address our [Wiki](https://github.com/artipie/artipie/wiki).
 
-To create a new artifact repository:
- 1. Go to the dashboard
- 2. Enter the name of a new repository, choose a type, and click button "Add"
- 3. Artipie generates standard configuration for selected kind of repository, and
-  asks for review or edit. You can ignore this step for now.
- 4. Below the repository configuration, the page will have a simple configuration
-  for your client, and usage examples, e.g. the code for `pom.xml` for Maven repository.
-
-Default server configuration refers to `/var/artipie/repos` to look up for repository configurations.
-You may want to mount local configurations `<your-local-config-dir>` to `/var/artipie/repos` to edit 
-it manually by changing `volumes` values inside `docker-compose.yaml` script.
+Default server configuration in Docker Container refers to `/var/artipie/repos` to look up for 
+repository configurations. You may want to mount local configurations `<your-local-config-dir>` 
+to `/var/artipie/repos` to check and edit it manually.
 
 > **Important:** check that `<your-local-config-dir>` has correct permissions, it should be `2020:2021`,  
 to change it correctly use `chown -R 2020:2021 <your-local-config-dir>`.
-
-More configuration details and examples are available in our [Wiki](https://github.com/artipie/artipie/wiki).
-
-We recommend you read the "Architecture" section in our [White Paper](https://github.com/artipie/white-paper) 
-to fully understand how Artipie is designed.
 
 If you have any question or suggestions, do not hesitate to [create an issue](https://github.com/artipie/artipie/issues/new) or contact us in
 [Telegram](https://t.me/artipie).  
