@@ -6,7 +6,7 @@ package com.artipie.api.ssl;
 
 import com.artipie.asto.Storage;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 
 /**
  * Key store.
@@ -26,10 +26,10 @@ public interface KeyStore {
     boolean isConfigured();
 
     /**
-     * Create http server.
+     * Provides SSL-options for http server.
      * @param vertx Vertx.
      * @param storage Artipie settings storage.
      * @return HttpServer
      */
-    HttpServer createHttpServer(Vertx vertx, Storage storage);
+    HttpServerOptions secureOptions(Vertx vertx, Storage storage);
 }

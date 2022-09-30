@@ -130,9 +130,11 @@ public final class RestApi extends AbstractVerticle {
                             final HttpServer server;
                             final String schema;
                             if (this.keystore.isPresent() && this.keystore.get().enabled()) {
-                                server = this.keystore.get().createHttpServer(
-                                    this.vertx,
-                                    this.storage
+                                server = vertx.createHttpServer(
+                                    this.keystore.get().secureOptions(
+                                        this.vertx,
+                                        this.storage
+                                    )
                                 );
                                 schema = "https";
                             } else {

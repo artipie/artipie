@@ -7,7 +7,6 @@ package com.artipie.api.ssl;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.PemKeyCertOptions;
 
@@ -45,11 +44,10 @@ class PemKeyStore extends YamlBasedKeyStore {
     }
 
     @Override
-    public HttpServer createHttpServer(final Vertx vertx, final Storage storage) {
-        final HttpServerOptions options = new HttpServerOptions()
+    public HttpServerOptions secureOptions(final Vertx vertx, final Storage storage) {
+        return new HttpServerOptions()
             .setSsl(true)
             .setPemKeyCertOptions(this.pemOptions(storage));
-        return vertx.createHttpServer(options);
     }
 
     /**

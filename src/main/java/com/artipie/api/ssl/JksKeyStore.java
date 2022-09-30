@@ -7,7 +7,6 @@ package com.artipie.api.ssl;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.JksOptions;
 
@@ -35,11 +34,10 @@ class JksKeyStore extends YamlBasedKeyStore {
     }
 
     @Override
-    public HttpServer createHttpServer(final Vertx vertx, final Storage storage) {
-        final HttpServerOptions options = new HttpServerOptions()
+    public HttpServerOptions secureOptions(final Vertx vertx, final Storage storage) {
+        return new HttpServerOptions()
             .setSsl(true)
             .setKeyStoreOptions(this.jksOptions(storage));
-        return vertx.createHttpServer(options);
     }
 
     /**
