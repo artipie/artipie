@@ -1,6 +1,7 @@
   * [[Introduction|Home]]
   * Configuration
     * [[Main Artipie configuration|Configuration]]
+    * [[Artipie management REST API|Rest-api]]
     * [[Storage|Configuration-Storage]]
       * [[File System storage|Configuration-Storage#file-system-storage]]
       * [[S3 storage|Configuration-Storage#s3-storage]]
