@@ -7,7 +7,8 @@ package com.artipie.settings;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.amihaiemil.eoyaml.YamlSequence;
-import com.artipie.api.KeyStore;
+import com.artipie.api.ssl.KeyStore;
+import com.artipie.api.ssl.KeyStoreFactory;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
@@ -139,7 +140,8 @@ public final class YamlSettings implements Settings {
 
     @Override
     public Optional<KeyStore> keyStore() {
-        return this.sslYamlMapping().map(KeyStore::create);
+        return Optional.ofNullable(this.meta().yamlMapping(YamlSettings.NODE_SSL))
+            .map(KeyStoreFactory::newInstance);
     }
 
     @Override
@@ -198,17 +200,6 @@ public final class YamlSettings implements Settings {
             }
         }
         return res;
-    }
-
-    /**
-     * SSL YAML mapping.
-     *
-     * @return YAML mapping.
-     */
-    private Optional<YamlMapping> sslYamlMapping() {
-        return Optional.ofNullable(
-            this.meta().yamlMapping(YamlSettings.NODE_SSL)
-        );
     }
 
     /**

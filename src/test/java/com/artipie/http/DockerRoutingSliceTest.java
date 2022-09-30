@@ -5,7 +5,7 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.api.KeyStore;
+import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;

@@ -5,6 +5,7 @@
 package com.artipie.api;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.settings.YamlSettings;
@@ -29,7 +30,8 @@ final class SSLPemRestTest extends SSLBaseRestTest {
      */
     private static final String CERT_PEM = "cert.pem";
 
-    void initKeyStore() {
+    @Override
+    Optional<KeyStore> keyStore() throws IOException {
         this.save(
             new Key.From(SSLPemRestTest.PRIVATE_KEY_PEM),
             new TestResource(String.format("ssl/%s", SSLPemRestTest.PRIVATE_KEY_PEM)).asBytes()
@@ -38,10 +40,6 @@ final class SSLPemRestTest extends SSLBaseRestTest {
             new Key.From(SSLPemRestTest.CERT_PEM),
             new TestResource(String.format("ssl/%s", SSLPemRestTest.CERT_PEM)).asBytes()
         );
-    }
-
-    @Override
-    Optional<KeyStore> keyStore() throws IOException {
         return new YamlSettings(
             Yaml.createYamlInput(
                 String.join(

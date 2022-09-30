@@ -5,6 +5,7 @@
 package com.artipie.api;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.settings.YamlSettings;
@@ -24,15 +25,12 @@ final class SSLPfxRestTest extends SSLBaseRestTest {
      */
     private static final String CERT_PFX = "cert.pfx";
 
-    void initKeyStore() {
+    @Override
+    Optional<KeyStore> keyStore() throws IOException {
         this.save(
             new Key.From(SSLPfxRestTest.CERT_PFX),
             new TestResource(String.format("ssl/%s", SSLPfxRestTest.CERT_PFX)).asBytes()
         );
-    }
-
-    @Override
-    Optional<KeyStore> keyStore() throws IOException {
         return new YamlSettings(
             Yaml.createYamlInput(
                 String.join(

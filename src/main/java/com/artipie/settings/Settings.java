@@ -6,7 +6,7 @@ package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.api.KeyStore;
+import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
@@ -105,7 +105,7 @@ public interface Settings {
         /**
          * KeyStore.
          */
-        private final KeyStore keystore;
+        private final Optional<KeyStore> keystore;
 
         /**
          * Ctor.
@@ -148,7 +148,7 @@ public interface Settings {
                 new UsersFromEnv(),
                 Yaml.createYamlMappingBuilder().build(),
                 layout,
-                null
+                Optional.empty()
             );
         }
 
@@ -180,7 +180,7 @@ public interface Settings {
          * @checkstyle ParameterNumberCheck (2 lines)
          */
         public Fake(final Storage storage, final Users cred, final YamlMapping meta) {
-            this(storage, cred, meta, new Layout.Flat(), null);
+            this(storage, cred, meta, new Layout.Flat(), Optional.empty());
         }
 
         /**
@@ -198,7 +198,7 @@ public interface Settings {
             final Users cred,
             final YamlMapping meta,
             final Layout layout,
-            final KeyStore keystore
+            final Optional<KeyStore> keystore
         ) {
             this.storage = storage;
             this.cred = cred;
@@ -244,7 +244,7 @@ public interface Settings {
 
         @Override
         public Optional<KeyStore> keyStore() {
-            return Optional.ofNullable(this.keystore);
+            return this.keystore;
         }
     }
 }

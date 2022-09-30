@@ -4,6 +4,7 @@
  */
 package com.artipie.api;
 
+import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
@@ -109,16 +110,6 @@ public abstract class RestApiServerBase {
     }
 
     /**
-     * Before each method initializes all necessary things that required for used KeyStore.
-     * @checkstyle NonStaticMethodCheck (5 lines)
-     */
-    @SuppressWarnings(
-        {"PMD.EmptyMethodInAbstractClassShouldBeAbstract", "PMD.UncommentedEmptyMethodBody"}
-    )
-    void initKeyStore() {
-    }
-
-    /**
      * Save bytes into test storage with provided key.
      * @param key The key
      * @param data Data to save
@@ -164,9 +155,6 @@ public abstract class RestApiServerBase {
         final InMemoryStorage storage = new InMemoryStorage();
         this.asto = new BlockingStorage(storage);
         this.caches = new SettingsCaches.Fake();
-        if (this.keyStore().isPresent()) {
-            this.initKeyStore();
-        }
         vertx.deployVerticle(
             new RestApi(
                 this.caches, storage, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY),

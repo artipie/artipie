@@ -5,6 +5,7 @@
 package com.artipie.api;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.settings.YamlSettings;
@@ -25,15 +26,11 @@ final class SSLJksRestTest extends SSLBaseRestTest {
     private static final String JKS = "keystore.jks";
 
     @Override
-    void initKeyStore() {
+    Optional<KeyStore> keyStore() throws IOException {
         this.save(
             new Key.From(SSLJksRestTest.JKS),
             new TestResource(String.format("ssl/%s", SSLJksRestTest.JKS)).asBytes()
         );
-    }
-
-    @Override
-    Optional<KeyStore> keyStore() throws IOException {
         return new YamlSettings(
             Yaml.createYamlInput(
                 String.join(
