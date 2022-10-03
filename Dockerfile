@@ -20,6 +20,7 @@ WORKDIR /var/artipie
 EXPOSE 8080 8086
 CMD [ \
   "java", \
+  $JVM_ARGS, \
   "--add-opens", "java.base/java.util=ALL-UNNAMED", \
   "--add-opens", "java.base/java.security=ALL-UNNAMED", \
   "-cp", "/usr/lib/artipie/artipie.jar:/usr/lib/artipie/lib/*", \
