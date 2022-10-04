@@ -7,6 +7,8 @@ package com.artipie.settings;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.amihaiemil.eoyaml.YamlSequence;
+import com.artipie.api.ssl.KeyStore;
+import com.artipie.api.ssl.KeyStoreFactory;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
@@ -49,6 +51,11 @@ public final class YamlSettings implements Settings {
      * YAML node name for `path` credentials type.
      */
     private static final String NODE_PATH = "path";
+
+    /**
+     * YAML node name for `ssl` yaml section.
+     */
+    private static final String NODE_SSL = "ssl";
 
     /**
      * YAML file content.
@@ -129,6 +136,12 @@ public final class YamlSettings implements Settings {
                 ).findFirst().map(YamlNode::asMapping)
         ).orElse(Optional.ofNullable(this.meta().yamlMapping(YamlSettings.NODE_CREDENTIALS)))
             .map(file -> new Key.From(file.string(YamlSettings.NODE_PATH)));
+    }
+
+    @Override
+    public Optional<KeyStore> keyStore() {
+        return Optional.ofNullable(this.meta().yamlMapping(YamlSettings.NODE_SSL))
+            .map(KeyStoreFactory::newInstance);
     }
 
     @Override

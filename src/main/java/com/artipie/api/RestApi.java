@@ -4,6 +4,7 @@
  */
 package com.artipie.api;
 
+import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
@@ -20,6 +21,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -65,6 +67,11 @@ public final class RestApi extends AbstractVerticle {
     private final Authentication auth;
 
     /**
+     * KeyStore.
+     */
+    private final Optional<KeyStore> keystore;
+
+    /**
      * Ctor.
      * @param caches Artipie settings caches
      * @param storage Artipie settings storage.
@@ -72,16 +79,19 @@ public final class RestApi extends AbstractVerticle {
      * @param port Port to start verticle on
      * @param users Key to users credentials yaml location
      * @param auth Artipie authentication
+     * @param keystore KeyStore
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     public RestApi(final SettingsCaches caches, final Storage storage, final String layout,
-        final int port, final Optional<Key> users, final Authentication auth) {
+        final int port, final Optional<Key> users, final Authentication auth,
+        final Optional<KeyStore> keystore) {
         this.caches = caches;
         this.storage = storage;
         this.layout = layout;
         this.port = port;
         this.users = users;
         this.auth = auth;
+        this.keystore = Objects.requireNonNull(keystore);
     }
 
     @Override
@@ -117,11 +127,24 @@ public final class RestApi extends AbstractVerticle {
                                 StaticHandler.create("swagger-ui")
                                     .setIndexPage(String.format("index-%s.html", this.layout))
                             );
-                            final HttpServer server = this.vertx.createHttpServer();
+                            final HttpServer server;
+                            final String schema;
+                            if (this.keystore.isPresent() && this.keystore.get().enabled()) {
+                                server = vertx.createHttpServer(
+                                    this.keystore.get().secureOptions(
+                                        this.vertx,
+                                        this.storage
+                                    )
+                                );
+                                schema = "https";
+                            } else {
+                                server = this.vertx.createHttpServer();
+                                schema = "http";
+                            }
                             server.requestHandler(router)
                                 .listen(this.port)
                                 //@checkstyle LineLengthCheck (1 line)
-                                .onComplete(res -> Logger.info(this, String.format("Rest API started on port %d, swagger is available on http://localhost:%d/api/index-%s.html", this.port, this.port, this.layout)))
+                                .onComplete(res -> Logger.info(this, String.format("Rest API started on port %d, swagger is available on %s://localhost:%d/api/index-%s.html", this.port, schema, this.port, this.layout)))
                                 .onFailure(err -> Logger.error(this, err.getMessage()));
                         }
                     ).onFailure(Throwable::printStackTrace)

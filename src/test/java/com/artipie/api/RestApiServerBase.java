@@ -4,6 +4,7 @@
  */
 package com.artipie.api;
 
+import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
@@ -18,8 +19,10 @@ import io.vertx.core.net.NetClient;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +43,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @ExtendWith(VertxExtension.class)
+@SuppressWarnings("PMD.TooManyMethods")
 public abstract class RestApiServerBase {
 
     /**
@@ -95,6 +99,17 @@ public abstract class RestApiServerBase {
     }
 
     /**
+     * Create the SSL KeyStore.
+     * Creates instance of KeyStore based on Artipie yaml-configuration.
+     * @return KeyStore.
+     * @throws IOException During yaml creation
+     * @checkstyle NonStaticMethodCheck (5 lines)
+     */
+    Optional<KeyStore> keyStore() throws IOException {
+        return Optional.empty();
+    }
+
+    /**
      * Save bytes into test storage with provided key.
      * @param key The key
      * @param data Data to save
@@ -143,7 +158,8 @@ public abstract class RestApiServerBase {
         vertx.deployVerticle(
             new RestApi(
                 this.caches, storage, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY),
-                this.auth()
+                this.auth(),
+                this.keyStore()
             ),
             context.succeedingThenComplete()
         );
@@ -183,11 +199,12 @@ public abstract class RestApiServerBase {
     final void requestAndAssert(final Vertx vertx, final VertxTestContext ctx,
         final TestRequest rqs, final Optional<String> token,
         final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
-        final HttpRequest<Buffer> request = WebClient.create(vertx)
+        final HttpRequest<Buffer> request = WebClient.create(vertx, this.webClientOptions())
             .request(rqs.method, this.port(), RestApiServerBase.HOST, rqs.path);
         token.ifPresent(request::bearerTokenAuthentication);
-        rqs.body.map(request::sendJsonObject)
-            .orElse(request.send())
+        rqs.body
+            .map(request::sendJsonObject)
+            .orElseGet(request::send)
             .onSuccess(
                 res -> {
                     assertion.accept(res);
@@ -197,6 +214,19 @@ public abstract class RestApiServerBase {
             .onFailure(ctx::failNow)
             .toCompletionStage().toCompletableFuture()
             .get(RestApiServerBase.TEST_TIMEOUT, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Creates web client options.
+     * @return WebClientOptions instance.
+     * @throws IOException During yaml creation
+     */
+    final WebClientOptions webClientOptions() throws IOException {
+        final WebClientOptions options = new WebClientOptions();
+        if (this.keyStore().isPresent() && this.keyStore().get().enabled()) {
+            options.setSsl(true).setTrustAll(true);
+        }
+        return options;
     }
 
     /**

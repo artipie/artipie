@@ -6,6 +6,7 @@ package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
@@ -69,6 +70,12 @@ public interface Settings {
     Optional<Key> credentialsKey();
 
     /**
+     * Key store.
+     * @return KeyStore
+     */
+    Optional<KeyStore> keyStore();
+
+    /**
      * Fake {@link Settings} using a file storage.
      *
      * @since 0.2
@@ -94,6 +101,11 @@ public interface Settings {
          * Layout.
          */
         private final Layout layout;
+
+        /**
+         * KeyStore.
+         */
+        private final Optional<KeyStore> keystore;
 
         /**
          * Ctor.
@@ -135,7 +147,8 @@ public interface Settings {
                 storage,
                 new UsersFromEnv(),
                 Yaml.createYamlMappingBuilder().build(),
-                layout
+                layout,
+                Optional.empty()
             );
         }
 
@@ -167,7 +180,7 @@ public interface Settings {
          * @checkstyle ParameterNumberCheck (2 lines)
          */
         public Fake(final Storage storage, final Users cred, final YamlMapping meta) {
-            this(storage, cred, meta, new Layout.Flat());
+            this(storage, cred, meta, new Layout.Flat(), Optional.empty());
         }
 
         /**
@@ -177,18 +190,21 @@ public interface Settings {
          * @param cred Credentials
          * @param meta Yaml `meta` mapping
          * @param layout Layout
+         * @param keystore KeyStore
          * @checkstyle ParameterNumberCheck (2 lines)
          */
         public Fake(
             final Storage storage,
             final Users cred,
             final YamlMapping meta,
-            final Layout layout
+            final Layout layout,
+            final Optional<KeyStore> keystore
         ) {
             this.storage = storage;
             this.cred = cred;
             this.meta = meta;
             this.layout = layout;
+            this.keystore = keystore;
         }
 
         @Override
@@ -224,6 +240,11 @@ public interface Settings {
         @Override
         public Optional<Key> credentialsKey() {
             return Optional.empty();
+        }
+
+        @Override
+        public Optional<KeyStore> keyStore() {
+            return this.keystore;
         }
     }
 }
