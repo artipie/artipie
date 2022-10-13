@@ -13,5 +13,6 @@ meta:
   layout: org
   base_url: http://central.artipie.com/
   metrics:
-    type: log
-    interval: 60
+    -
+      type: log
+      interval: 60
