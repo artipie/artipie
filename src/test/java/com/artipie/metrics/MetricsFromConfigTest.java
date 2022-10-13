@@ -6,15 +6,11 @@ package com.artipie.metrics;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.metrics.memory.InMemoryMetrics;
-import java.time.temporal.ChronoUnit;
-import org.cactoos.list.ListOf;
-import org.hamcrest.Matcher;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.AllOf;
-import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.Assertions;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
-import org.llorllale.cactoos.matchers.MatcherOf;
 
 /**
  * Test for {@link MetricsFromConfig}.
@@ -26,58 +22,31 @@ import org.llorllale.cactoos.matchers.MatcherOf;
 class MetricsFromConfigTest {
 
     @Test
-    void failsIfTypeIsNotSpecified() {
-        MatcherAssert.assertThat(
-            Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> new MetricsFromConfig(
-                    Yaml.createYamlMappingBuilder().add("three", "four").build()
-                ).metrics()
-            ).getMessage(),
-            new StringContains("Metrics type is not specified")
-        );
-    }
-
-    @Test
-    void failsIfTypeIsUnsupported() {
-        MatcherAssert.assertThat(
-            Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> new MetricsFromConfig(
-                    Yaml.createYamlMappingBuilder().add("type", "any").build()
-                ).metrics()
-            ).getMessage(),
-            new StringContains("Unsupported metrics type")
-        );
-    }
-
-    @Test
     void parsesSettings() {
         MatcherAssert.assertThat(
             new MetricsFromConfig(
-                Yaml.createYamlMappingBuilder().add("type", "log").add("interval", "10").build()
-            ),
-            new AllOf<>(
-                new ListOf<Matcher<? super MetricsFromConfig>>(
-                    new MatcherOf<>(metrics -> metrics.metrics() instanceof InMemoryMetrics),
-                    new MatcherOf<>(metrics -> metrics.interval().get(ChronoUnit.SECONDS) == 10)
-                )
-            )
+                Yaml.createYamlSequenceBuilder().add(
+                    Yaml.createYamlMappingBuilder().add("type", "log").add("interval", "10").build()
+                ).build()
+            ).metrics(),
+            new IsInstanceOf(InMemoryMetrics.class)
         );
     }
 
     @Test
-    void usesDefaultInterval() {
+    void readsVertxSettings() {
+        final String path = "/metrics/vertx";
+        final int port = 8083;
         MatcherAssert.assertThat(
             new MetricsFromConfig(
-                Yaml.createYamlMappingBuilder().add("type", "log").build()
-            ),
-            new AllOf<>(
-                new ListOf<Matcher<? super MetricsFromConfig>>(
-                    new MatcherOf<>(metrics -> metrics.metrics() instanceof InMemoryMetrics),
-                    new MatcherOf<>(metrics -> metrics.interval().get(ChronoUnit.SECONDS) == 5)
-                )
-            )
+                Yaml.createYamlSequenceBuilder().add(
+                    Yaml.createYamlMappingBuilder()
+                        .add("type", "vertx")
+                        .add("path", path)
+                        .add("port", String.valueOf(port)).build()
+                ).build()
+            ).vertxMetricsConf().get(),
+            new IsEqual<>(new ImmutablePair<>(path, port))
         );
     }
 
