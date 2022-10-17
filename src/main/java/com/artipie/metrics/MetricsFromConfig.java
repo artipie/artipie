@@ -68,31 +68,6 @@ public final class MetricsFromConfig {
     }
 
     /**
-     * Obtain metrics output according to metrics config.
-     * @param node Yaml node
-     * @return Metrics output if configured
-     */
-    private static Optional<MetricsOutput> metricsOutput(final YamlNode node) {
-        final String type = node.asMapping().string(MetricsFromConfig.TYPE);
-        final Optional<MetricsOutput> res;
-        if ("log".equals(type)) {
-            res = Optional.of(new MetricsLogOutput(LoggerFactory.getLogger(Metrics.class)));
-        } else if ("asto".equals(type)) {
-            res = Optional.of(
-                new StorageMetricsOutput(
-                    new SubStorage(
-                        new Key.From(".meta", "metrics"),
-                        new YamlStorage(node.asMapping().yamlMapping("storage")).storage()
-                    )
-                )
-            );
-        } else {
-            res = Optional.empty();
-        }
-        return res;
-    }
-
-    /**
      * Obtains, if configured, path and port to expose Vert.x metrics.
      * @return Path and port to expose Vert.x metrics on
      */
@@ -117,5 +92,30 @@ public final class MetricsFromConfig {
         return Optional.ofNullable(node.asMapping().string("interval"))
             .map(interval -> Duration.ofSeconds(Integer.parseInt(interval)))
             .orElse(Duration.ofSeconds(5));
+    }
+
+    /**
+     * Obtain metrics output according to metrics config.
+     * @param node Yaml node
+     * @return Metrics output if configured
+     */
+    private static Optional<MetricsOutput> metricsOutput(final YamlNode node) {
+        final String type = node.asMapping().string(MetricsFromConfig.TYPE);
+        final Optional<MetricsOutput> res;
+        if ("log".equals(type)) {
+            res = Optional.of(new MetricsLogOutput(LoggerFactory.getLogger(Metrics.class)));
+        } else if ("asto".equals(type)) {
+            res = Optional.of(
+                new StorageMetricsOutput(
+                    new SubStorage(
+                        new Key.From(".meta", "metrics"),
+                        new YamlStorage(node.asMapping().yamlMapping("storage")).storage()
+                    )
+                )
+            );
+        } else {
+            res = Optional.empty();
+        }
+        return res;
     }
 }
