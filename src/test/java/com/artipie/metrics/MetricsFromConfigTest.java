@@ -42,7 +42,7 @@ class MetricsFromConfigTest {
                 Yaml.createYamlSequenceBuilder().add(
                     Yaml.createYamlMappingBuilder()
                         .add("type", "vertx")
-                        .add("path", path)
+                        .add("endpoint", path)
                         .add("port", String.valueOf(port)).build()
                 ).build()
             ).vertxMetricsConf().get(),
