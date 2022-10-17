@@ -10,6 +10,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
 import com.artipie.metrics.memory.InMemoryMetrics;
 import com.artipie.metrics.publish.MetricsLogOutput;
+import com.artipie.metrics.publish.MetricsOutput;
 import com.artipie.metrics.publish.MetricsPublisher;
 import com.artipie.metrics.publish.StorageMetricsOutput;
 import com.artipie.settings.YamlStorage;
@@ -31,11 +32,6 @@ public final class MetricsFromConfig {
      * Key word to identify Prometheus.
      */
     public static final String PROMETHEUS = "prometheus";
-
-    /**
-     * Log metrics type.
-     */
-    private static final String LOG = "log";
 
     /**
      * Metrics yaml type field name.
@@ -62,28 +58,38 @@ public final class MetricsFromConfig {
      */
     public Metrics metrics() {
         final Metrics metrics = new InMemoryMetrics();
-        this.settings.values().stream().filter(
-            item -> MetricsFromConfig.LOG.equals(item.asMapping().string(MetricsFromConfig.TYPE))
-                || "asto".equals(item.asMapping().string(MetricsFromConfig.TYPE))
-        ).forEach(
-            item -> {
-                final String type = item.asMapping().string(MetricsFromConfig.TYPE);
-                if (MetricsFromConfig.LOG.equals(type)) {
-                    new MetricsPublisher(metrics, MetricsFromConfig.interval(item))
-                        .start(new MetricsLogOutput(LoggerFactory.getLogger(Metrics.class)));
-                } else {
-                    new MetricsPublisher(metrics, MetricsFromConfig.interval(item)).start(
-                        new StorageMetricsOutput(
-                            new SubStorage(
-                                new Key.From(".meta", "metrics"),
-                                new YamlStorage(item.asMapping().yamlMapping("storage")).storage()
-                            )
-                        )
-                    );
-                }
-            }
+        this.settings.values().forEach(
+            item -> metricsOutput(item).ifPresent(
+                output -> new MetricsPublisher(metrics, MetricsFromConfig.interval(item))
+                    .start(output)
+            )
         );
         return metrics;
+    }
+
+    /**
+     * Obtain metrics output according to metrics config.
+     * @param node Yaml node
+     * @return Metrics output if configured
+     */
+    private static Optional<MetricsOutput> metricsOutput(final YamlNode node) {
+        final String type = node.asMapping().string(MetricsFromConfig.TYPE);
+        final Optional<MetricsOutput> res;
+        if ("log".equals(type)) {
+            res = Optional.of(new MetricsLogOutput(LoggerFactory.getLogger(Metrics.class)));
+        } else if ("asto".equals(type)) {
+            res = Optional.of(
+                new StorageMetricsOutput(
+                    new SubStorage(
+                        new Key.From(".meta", "metrics"),
+                        new YamlStorage(node.asMapping().yamlMapping("storage")).storage()
+                    )
+                )
+            );
+        } else {
+            res = Optional.empty();
+        }
+        return res;
     }
 
     /**
@@ -95,7 +101,7 @@ public final class MetricsFromConfig {
             item -> "vertx".equals(item.asMapping().string(MetricsFromConfig.TYPE))
         ).findFirst().map(YamlNode::asMapping).map(
             map -> new ImmutablePair<>(
-                Objects.requireNonNull(map.string("path")),
+                Objects.requireNonNull(map.string("endpoint")),
                 map.integer("port")
             )
         );

@@ -21,7 +21,8 @@ add `metrics` to `meta` section of global configuration file `/etc/artipie/artip
 ```yaml
 meta:
   metrics:
-    - type: log # Metrics type, `log` to print statistics into application log
+    - 
+      type: log # Metrics type, `log` to print statistics into application log
       interval: 5 # Publishing interval in seconds, default value is 5
 ```
 
@@ -32,7 +33,8 @@ here is the way to configure such metrics:
 ```yaml
 meta:
   metrics:
-    - type: asto # Metrics type, `asto` to publish statistics into storage
+    - 
+      type: asto # Metrics type, `asto` to publish statistics into storage
       interval: 5 # Publishing interval in seconds, default value is 5
       storage: # Storage to publish the metrics to
         type: fs
@@ -50,7 +52,8 @@ To collect metrics via [`Prometheus`](https://prometheus.io/), simply configure 
 ```yaml
 meta:
   metrics:
-    - type: prometheus
+    - 
+      type: prometheus
 ```
 Metrics in Prometheus compatible format will be available on `http://{host}:{port}/prometheus/metrics` path,
 where `{host}` and `{port}` Artipie service host and port. 
@@ -62,11 +65,12 @@ add the following configuration:
 ```yaml
 meta:
   metrics:
-    - type: vertx # Metrics type, `vertx` for Vert.x metrics
-      path: "/metrics/vertx" # Path, starting with `/`, where the metrics will be served
+    - 
+      type: vertx # Metrics type, `vertx` for Vert.x metrics
+      endpoint: "/metrics/vertx" # Path of the endpoint, starting with `/`, where the metrics will be served
       port: 8087 # Port to serve the metrics
 ```
-The metrics will be served on specified port and path. Vert.x gather various HTTP server statistics,
+The metrics will be served on specified port and endpoint path. Vert.x gather various HTTP server statistics,
 such as number of opened connections, number of bytes received/sent by the server, number of 
 requests being processed etc. Full list is available [here](https://vertx.io/docs/3.9.13/vertx-micrometer-metrics/java/#_http_server).
 Statistics is served in [`Prometheus`](https://prometheus.io/) compatible format.

@@ -264,7 +264,7 @@ public final class VertxMain {
      */
     private static Vertx vertx(final Optional<MetricsFromConfig> metrics) {
         return metrics.flatMap(
-            sntgs -> sntgs.vertxMetricsConf().map(
+            settings -> settings.vertxMetricsConf().map(
                 pair -> Vertx.vertx(
                     new VertxOptions().setMetricsOptions(
                         new MicrometerMetricsOptions()
