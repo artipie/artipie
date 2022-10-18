@@ -129,7 +129,7 @@ SOFTWARE.
     <maven.compiler.target>17</maven.compiler.target>
     <docker.image.name>artipie/artipie</docker.image.name>
     <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
-    <vertx.version>4.3.3</vertx.version>
+    <vertx.version>4.3.4</vertx.version>
   </properties>
   <dependencies>
     <dependency>
@@ -283,17 +283,7 @@ SOFTWARE.
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
       <version>2.0.0</version>
     </dependency>
     <dependency>
@@ -334,7 +324,17 @@ SOFTWARE.
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-auth-jwt</artifactId>
-      <version>4.3.3</version>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-micrometer-metrics</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+      <version>1.9.5</version>
     </dependency>
     <!-- Test scope-->
     <dependency>

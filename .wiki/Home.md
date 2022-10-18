@@ -72,12 +72,12 @@ Repository name is used to get access to the repository, in our case `http://{ho
 Now, you can execute:
 
 ```bash
-java -jar ./artipie-latest-jar-with-dependencies.jar --config-file=/{path-to-config}/my-artipie.yaml --port=8085
+java -jar ./artipie-latest-jar-with-dependencies.jar --config-file=/{path-to-config}/my-artipie.yaml --port=8085 --api-port=8086
 ```
 
 - `--config-file` required parameter points to the Artipie main configuration file.
-- `--port` optional parameter defines port to start the service.
-If `--port` parameter is omitted, Artipie will use `80` as default port.
+- `--port` optional parameter defines port to start the service, if omitted, Artipie will use `80` as default port.
+- `--api-port` optional parameter defines port to start API management API on, default value is `8086`
 
 You should see the following in the console:
 
