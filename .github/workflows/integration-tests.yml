@@ -1,5 +1,5 @@
 ---
-name: Integation tests
+name: Integration tests
 "on":
   push:
     branches:
