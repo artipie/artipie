@@ -149,7 +149,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto-core</artifactId>
-      <version>v1.13.0</version>
+      <version>v1.14.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
