@@ -153,8 +153,8 @@ SOFTWARE.
       <!-- Do not remove this exclusion! No tests will run if dependency is not excluded! -->
       <exclusions>
         <exclusion>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+          <groupId>org.testng</groupId>
+          <artifactId>testng</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
