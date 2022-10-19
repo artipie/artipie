@@ -86,32 +86,6 @@ class YamlSettingsTest {
     }
 
     @Test
-    void shouldBuildS3StorageFromSettings() throws Exception {
-        final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlInput(
-                String.join(
-                    "",
-                    "meta:\n",
-                    "  storage:\n",
-                    "    type: s3\n",
-                    "    bucket: my-bucket\n",
-                    "    region: my-region\n",
-                    "    endpoint: https://my-s3-provider.com\n",
-                    "    credentials:\n",
-                    "      type: basic\n",
-                    "      accessKeyId: ***\n",
-                    "      secretAccessKey: ***"
-                )
-            ).readYamlMapping(),
-            new SettingsCaches.All()
-        );
-        MatcherAssert.assertThat(
-            settings.storage(),
-            Matchers.notNullValue()
-        );
-    }
-
-    @Test
     void shouldCreateAuthFromEnv() throws Exception {
         final YamlSettings settings = new YamlSettings(
             this.config("some/path", this.credentials("env")),
