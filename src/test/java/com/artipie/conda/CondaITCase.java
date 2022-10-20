@@ -38,6 +38,7 @@ public final class CondaITCase {
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withCredentials("_credentials.yaml")
             .withRepoConfig("conda/conda.yml", "my-conda")
             .withRepoConfig("conda/conda-port.yml", "my-conda-port")
             .withExposedPorts(8081),
@@ -119,7 +120,7 @@ public final class CondaITCase {
         this.containers.assertExec(
             "Login was not successful",
             new ContainerResultMatcher(),
-            "anaconda", "login", "--username", "any", "--password", "any"
+            "anaconda", "login", "--username", "alice", "--password", "123"
         );
         this.containers.assertExec(
             "Package was not installed successfully",
