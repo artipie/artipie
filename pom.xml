@@ -172,6 +172,14 @@ SOFTWARE.
           <groupId>com.jcabi</groupId>
           <artifactId>jcabi-xml</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-library</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-core</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -335,12 +343,12 @@ SOFTWARE.
       <artifactId>micrometer-registry-prometheus</artifactId>
       <version>1.9.5</version>
     </dependency>
-    <!-- Test scope-->
+    <!-- Hamcrest is required in the main code for github auth -->
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
-      <scope>test</scope>
     </dependency>
+    <!-- Test scope-->
     <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-matchers</artifactId>
