@@ -131,7 +131,7 @@ public final class CondaITCase {
                         String.format("Using Anaconda API: http://artipie:%s/%s/", port, repo)
                     ),
                     // @checkstyle LineLengthCheck (1 line)
-                    new StringContains("Uploading file \"anonymous/example-package/0.0.1/linux-64/example-package-0.0.1-0.tar.bz2\""),
+                    new StringContains("Uploading file \"alice/example-package/0.0.1/linux-64/example-package-0.0.1-0.tar.bz2\""),
                     new StringContains("Upload complete")
                 )
             ),
