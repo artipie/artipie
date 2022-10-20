@@ -3,3 +3,6 @@ meta:
   storage:
     type: fs
     path: /var/artipie/cfg
+  credentials:
+    type: file
+    path: _credentials.yaml
