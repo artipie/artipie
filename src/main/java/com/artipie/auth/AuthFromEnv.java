@@ -54,7 +54,7 @@ public final class AuthFromEnv implements Authentication {
             && Objects.equals(Objects.requireNonNull(password), this.env.get(AuthFromEnv.ENV_PASS))) {
             result = Optional.of(new Authentication.User(username));
         } else {
-            result = Optional.of(new Authentication.User("anonymous"));
+            result = Optional.empty();
         }
         return result;
     }

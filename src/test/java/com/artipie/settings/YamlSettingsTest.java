@@ -149,7 +149,7 @@ class YamlSettingsTest {
     }
 
     @Test
-    void authorizesWithoutCredentialsSection() throws Exception {
+    void doNotAuthorizeWithoutCredentialsSection() throws Exception {
         final YamlSettings settings = new YamlSettings(
             Yaml.createYamlMappingBuilder().add(
                 "meta",
@@ -164,9 +164,8 @@ class YamlSettingsTest {
         );
         MatcherAssert.assertThat(
             settings.auth().toCompletableFuture().get()
-                .user("any_name", "any_password")
-                .get().name(),
-            new IsEqual<>("anonymous")
+                .user("any_name", "any_password").isEmpty(),
+            new IsEqual<>(true)
         );
     }
 
