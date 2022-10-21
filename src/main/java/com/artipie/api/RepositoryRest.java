@@ -63,8 +63,8 @@ public final class RepositoryRest extends BaseRest {
             rbr.operation("existRepo")
                 .handler(this::existRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("createRepo")
-                .handler(this::createRepo)
+            rbr.operation("createOrUpdateRepo")
+                .handler(this::createOrUpdateRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("removeRepo")
                 .handler(this::removeRepo)
@@ -82,8 +82,8 @@ public final class RepositoryRest extends BaseRest {
             rbr.operation("existUserRepo")
                 .handler(this::existRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("createUserRepo")
-                .handler(this::createRepo)
+            rbr.operation("createOrUpdateUserRepo")
+                .handler(this::createOrUpdateRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("removeUserRepo")
                 .handler(this::removeRepo)
@@ -160,15 +160,10 @@ public final class RepositoryRest extends BaseRest {
      * Create a repository.
      * @param context Routing context
      */
-    private void createRepo(final RoutingContext context) {
+    private void createOrUpdateRepo(final RoutingContext context) {
         final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
         final Validator validator = new Validator.All(
-            Validator.validator(new ReservedNamesVerifier(rname), HttpStatus.BAD_REQUEST_400),
-            Validator.validator(
-                () -> !this.crs.exists(rname),
-                () -> String.format("Repository %s already exists", rname),
-                HttpStatus.CONFLICT_409
-            )
+            Validator.validator(new ReservedNamesVerifier(rname), HttpStatus.BAD_REQUEST_400)
         );
         if (validator.validate(context)) {
             final JsonObject json = BaseRest.readJsonObject(context);

@@ -103,15 +103,15 @@ final class RepositoryRestFlatTest extends RepositoryRestBaseTest {
     }
 
     @Test
-    void createRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
+    void createRepoReturnsOkIfRepoNoExists(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
-        createRepoReturnsOkIfRepositoryExists(vertx, ctx, new RepositoryName.Flat("docker-repo"));
+        createRepoReturnsOkIfRepositoryNoExists(vertx, ctx, new RepositoryName.Flat("docker-repo"));
     }
 
     @Test
-    void createRepoReturnsConflictIfRepoHasDuplicates(final Vertx vertx, final VertxTestContext ctx)
+    void updateRepoReturnsOkIfRepoAlreadyExists(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
-        createRepoReturnsConflictIfRepositoryHasDuplicates(
+        updateRepoReturnsOkIfRepositoryAlreadyExists(
             vertx, ctx, new RepositoryName.Flat("docker-repo")
         );
     }

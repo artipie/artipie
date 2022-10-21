@@ -190,7 +190,7 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void createRepoReturnsOkIfRepositoryExists(final Vertx vertx, final VertxTestContext ctx,
+    void createRepoReturnsOkIfRepositoryNoExists(final Vertx vertx, final VertxTestContext ctx,
         final RepositoryName rname) throws Exception {
         this.requestAndAssert(
             vertx,
@@ -218,7 +218,7 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void createRepoReturnsConflictIfRepositoryHasDuplicates(final Vertx vertx,
+    void updateRepoReturnsOkIfRepositoryAlreadyExists(final Vertx vertx,
         final VertxTestContext ctx, final RepositoryName rname) throws Exception {
         this.save(
             new ConfigKeys(rname.toString()).yamlKey(), new byte[0]
@@ -236,11 +236,16 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
                             .put("storage", new JsonObject())
                     )
             ),
-            resp ->
+            resp -> {
                 MatcherAssert.assertThat(
                     resp.statusCode(),
-                    new IsEqual<>(HttpStatus.CONFLICT_409)
-                )
+                    new IsEqual<>(HttpStatus.OK_200)
+                );
+                MatcherAssert.assertThat(
+                    storage().value(new ConfigKeys(rname.toString()).yamlKey()).length > 0,
+                    new IsEqual<>(true)
+                );
+            }
         );
     }
 
