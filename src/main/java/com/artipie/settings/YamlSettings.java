@@ -14,7 +14,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
-import com.artipie.settings.cache.AuthCache;
 import com.artipie.settings.cache.SettingsCaches;
 import com.artipie.settings.users.Users;
 import com.artipie.settings.users.UsersFromEnv;
@@ -245,7 +244,7 @@ public final class YamlSettings implements Settings {
          * Credentials type: github.
          */
         GITHUB((settings, mapping) -> CompletableFuture.completedStage(
-            new UsersWithCachedAuth(settings.caches.auth(), new UsersFromGithub())
+            new UsersFromGithub()
         )),
 
         /**
@@ -298,102 +297,6 @@ public final class YamlSettings implements Settings {
             final YamlMapping yaml
         ) {
             return this.map.apply(settings, yaml);
-        }
-    }
-
-    /**
-     * Wrapping for auth cache.
-     *
-     * @since 0.22
-     */
-    private static final class Cached implements Authentication {
-        /**
-         * Auth cache.
-         */
-        private final AuthCache cache;
-
-        /**
-         * Auth provider.
-         */
-        private final Authentication origin;
-
-        /**
-         * Ctor.
-         * @param cache Auth cache
-         * @param origin Auth provider
-         */
-        Cached(final AuthCache cache, final Authentication origin) {
-            this.cache = cache;
-            this.origin = origin;
-        }
-
-        @Override
-        public Optional<User> user(
-            final String username,
-            final String password
-        ) {
-            return this.cache.user(username, password, this.origin);
-        }
-
-        @Override
-        public String toString() {
-            return String.format(
-                "%s(%s)",
-                this.getClass().getSimpleName(),
-                this.origin
-            );
-        }
-    }
-
-    /**
-     * Wrapping for artipie credentials that produce a cached authentication.
-     *
-     * @since 0.22
-     */
-    private static final class UsersWithCachedAuth implements Users {
-        /**
-         * Auth cache.
-         */
-        private final AuthCache cache;
-
-        /**
-         * Original users.
-         */
-        private final Users users;
-
-        /**
-         * Ctor.
-         *
-         * @param cache Auth cache.
-         * @param users Artipie credentials.
-         */
-        UsersWithCachedAuth(final AuthCache cache, final Users users) {
-            this.cache = cache;
-            this.users = users;
-        }
-
-        @Override
-        public CompletionStage<List<User>> list() {
-            return this.users.list();
-        }
-
-        @Override
-        public CompletionStage<Void> add(
-            final User user,
-            final String pswd,
-            final PasswordFormat format
-        ) {
-            return this.users.add(user, pswd, format);
-        }
-
-        @Override
-        public CompletionStage<Void> remove(final String username) {
-            return this.users.remove(username);
-        }
-
-        @Override
-        public CompletionStage<Authentication> auth() {
-            return this.users.auth().thenApply(auth -> new Cached(this.cache, auth));
         }
     }
 }
