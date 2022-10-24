@@ -127,17 +127,17 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     }
 
     @Test
-    void createRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
+    void createRepoReturnsOkIfRepoNoExists(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
-        createRepoReturnsOkIfRepositoryExists(
+        createRepoReturnsOkIfRepositoryNoExists(
             vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
         );
     }
 
     @Test
-    void createRepoReturnsConflictIfRepoHasDuplicates(final Vertx vertx, final VertxTestContext ctx)
+    void updateRepoReturnsOkIfRepoAlreadyExists(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
-        createRepoReturnsConflictIfRepositoryHasDuplicates(
+        updateRepoReturnsOkIfRepositoryAlreadyExists(
             vertx, ctx, new RepositoryName.Org("docker-repo", "Alice")
         );
     }
