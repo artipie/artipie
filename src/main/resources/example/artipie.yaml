@@ -9,7 +9,7 @@ meta:
       type: github
     -
       type: file
-      path: _credentials.yml
+      path: _credentials.yaml
   layout: org
   base_url: http://central.artipie.com/
   metrics:
