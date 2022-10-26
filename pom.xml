@@ -215,7 +215,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.9.8</version>
+      <version>0.9.9</version>
       <exclusions>
         <exclusion>
           <groupId>com.jcabi</groupId>
