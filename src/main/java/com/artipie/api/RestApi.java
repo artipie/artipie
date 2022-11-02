@@ -99,57 +99,72 @@ public final class RestApi extends AbstractVerticle {
         RouterBuilder.create(this.vertx, String.format("swagger-ui/yaml/repo-%s.yaml", this.layout))
             .compose(
                 repoRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").compose(
-                    //@checkstyle LineLengthCheck (1 line)
-                    userRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/token-gen.yaml").onSuccess(
-                        tokenRb -> {
-                            this.addJwtAuth(repoRb, userRb, tokenRb);
-                            final BlockingStorage asto = new BlockingStorage(this.storage);
-                            new RepositoryRest(
-                                new ManageRepoSettings(asto),
-                                new RepoData(this.storage), this.layout
-                            ).init(repoRb);
-                            new StorageAliasesRest(this.caches.storageConfig(), asto, this.layout)
-                                .init(repoRb);
-                            if (this.users.isPresent()) {
-                                new UsersRest(
-                                    new ManageUsers(this.users.get(), asto),
-                                    this.caches.auth(), this.auth
-                                ).init(userRb);
-                            } else {
-                                Logger.warn(
-                                    this, "File credentials are not set, users API is not available"
-                                );
-                            }
-                            final Router router = repoRb.createRouter();
-                            router.route("/*").subRouter(userRb.createRouter());
-                            router.route("/*").subRouter(tokenRb.createRouter());
-                            router.route("/api/*").handler(
-                                StaticHandler.create("swagger-ui")
-                                    .setIndexPage(String.format("index-%s.html", this.layout))
-                            );
-                            final HttpServer server;
-                            final String schema;
-                            if (this.keystore.isPresent() && this.keystore.get().enabled()) {
-                                server = vertx.createHttpServer(
-                                    this.keystore.get().secureOptions(
-                                        this.vertx,
-                                        this.storage
-                                    )
-                                );
-                                schema = "https";
-                            } else {
-                                server = this.vertx.createHttpServer();
-                                schema = "http";
-                            }
-                            server.requestHandler(router)
-                                .listen(this.port)
-                                //@checkstyle LineLengthCheck (1 line)
-                                .onComplete(res -> Logger.info(this, String.format("Rest API started on port %d, swagger is available on %s://localhost:%d/api/index-%s.html", this.port, schema, this.port, this.layout)))
-                                .onFailure(err -> Logger.error(this, err.getMessage()));
-                        }
-                    ).onFailure(Throwable::printStackTrace)
+                    userRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/token-gen.yaml")
+                        .compose(
+                            //@checkstyle LineLengthCheck (1 line)
+                            tokenRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/settings.yaml")
+                                .onSuccess(
+                                    settingsRb -> {
+                                        this.startServices(repoRb, userRb, tokenRb, settingsRb);
+                                    }
+                                ).onFailure(Throwable::printStackTrace)
+                        )
                 )
             );
+    }
+
+    /**
+     * Start rest services.
+     * @param repoRb Repository RouterBuilder
+     * @param userRb User RouterBuilder
+     * @param tokenRb Token RouterBuilder
+     * @param settingsRb Settings RouterBuilder
+     * @checkstyle ParameterNameCheck (4 lines)
+     * @checkstyle ParameterNumberCheck (3 lines)
+     */
+    private void startServices(final RouterBuilder repoRb, final RouterBuilder userRb,
+        final RouterBuilder tokenRb, final RouterBuilder settingsRb) {
+        this.addJwtAuth(repoRb, userRb, tokenRb);
+        final BlockingStorage asto = new BlockingStorage(this.storage);
+        new RepositoryRest(
+            new ManageRepoSettings(asto),
+            new RepoData(this.storage), this.layout
+        ).init(repoRb);
+        new StorageAliasesRest(this.caches.storageConfig(), asto, this.layout)
+            .init(repoRb);
+        if (this.users.isPresent()) {
+            new UsersRest(
+                new ManageUsers(this.users.get(), asto),
+                this.caches.auth(), this.auth
+            ).init(userRb);
+        } else {
+            Logger.warn(this, "File credentials are not set, users API is not available");
+        }
+        new SettingsRest(this.layout).init(settingsRb);
+        final Router router = repoRb.createRouter();
+        router.route("/*").subRouter(userRb.createRouter());
+        router.route("/*").subRouter(tokenRb.createRouter());
+        router.route("/*").subRouter(settingsRb.createRouter());
+        router.route("/api/*").handler(
+            StaticHandler.create("swagger-ui")
+                .setIndexPage(String.format("index-%s.html", this.layout))
+        );
+        final HttpServer server;
+        final String schema;
+        if (this.keystore.isPresent() && this.keystore.get().enabled()) {
+            server = vertx.createHttpServer(
+                this.keystore.get().secureOptions(this.vertx, this.storage)
+            );
+            schema = "https";
+        } else {
+            server = this.vertx.createHttpServer();
+            schema = "http";
+        }
+        server.requestHandler(router)
+            .listen(this.port)
+            //@checkstyle LineLengthCheck (1 line)
+            .onComplete(res -> Logger.info(this, String.format("Rest API started on port %d, swagger is available on %s://localhost:%d/api/index-%s.html", this.port, schema, this.port, this.layout)))
+            .onFailure(err -> Logger.error(this, err.getMessage()));
     }
 
     /**
@@ -159,6 +174,8 @@ public final class RestApi extends AbstractVerticle {
      * @param repo Repository API router builder
      * @param user Users API router builder
      * @param token Auth tokens generate API router builder
+     * @checkstyle ParameterNumberCheck (3 lines)
+     * @checkstyle HiddenFieldCheck (3 lines)
      */
     private void addJwtAuth(final RouterBuilder repo, final RouterBuilder user,
         final RouterBuilder token) {

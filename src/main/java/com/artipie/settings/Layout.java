@@ -32,6 +32,22 @@ public interface Layout {
     Optional<Key> keyFromPath(String path);
 
     /**
+     * Obtain layout by name.
+     * @param name Layout name
+     * @return Layout
+     */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    static Layout valueOf(final String name) {
+        final Layout layout;
+        if (name == null || Flat.NAME.equals(name)) {
+            layout = new Flat();
+        } else {
+            layout = new Org();
+        }
+        return layout;
+    }
+
+    /**
      * Split path into parts.
      *
      * @param path Path.

@@ -22,7 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Test for {@link RepositoryRest} with `flat` layout.
+ * Test for {@link RepositoryRest}.
  * @since 0.26
  * @checkstyle DesignForExtensionCheck (500 lines)
  */
