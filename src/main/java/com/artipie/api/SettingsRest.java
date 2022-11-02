@@ -4,7 +4,6 @@
  */
 package com.artipie.api;
 
-import com.artipie.settings.Settings;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import javax.json.Json;
@@ -17,23 +16,23 @@ import org.eclipse.jetty.http.HttpStatus;
  */
 public final class SettingsRest extends BaseRest {
     /**
-     * Settings.
+     * Artipie layout.
      */
-    private final Settings settings;
+    private final String layout;
 
     /**
      * Ctor.
-     * @param settings Settings
+     * @param layout Artipie layout
      */
-    public SettingsRest(final Settings settings) {
-        this.settings = settings;
+    public SettingsRest(final String layout) {
+        this.layout = layout;
     }
 
     @Override
     @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     public void init(final RouterBuilder rbr) {
         rbr.operation("layout")
-            .handler(this::layout)
+            .handler(this::layoutRest)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
 
@@ -41,9 +40,9 @@ public final class SettingsRest extends BaseRest {
      * Layout of repository.
      * @param context Request context
      */
-    private void layout(final RoutingContext context) {
+    private void layoutRest(final RoutingContext context) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
-        builder.add("layout", this.settings.layout().toString());
+        builder.add("layout", this.layout);
         context.response()
             .setStatusCode(HttpStatus.OK_200)
             .end(builder.build().toString());

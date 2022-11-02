@@ -10,7 +10,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.settings.RepoData;
-import com.artipie.settings.Settings;
 import com.artipie.settings.cache.SettingsCaches;
 import com.jcabi.log.Logger;
 import io.vertx.core.AbstractVerticle;
@@ -73,11 +72,6 @@ public final class RestApi extends AbstractVerticle {
     private final Optional<KeyStore> keystore;
 
     /**
-     * Artipie settings.
-     */
-    private final Settings settings;
-
-    /**
      * Ctor.
      * @param caches Artipie settings caches
      * @param storage Artipie settings storage.
@@ -86,12 +80,11 @@ public final class RestApi extends AbstractVerticle {
      * @param users Key to users credentials yaml location
      * @param auth Artipie authentication
      * @param keystore KeyStore
-     * @param settings Artipie settings
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     public RestApi(final SettingsCaches caches, final Storage storage, final String layout,
         final int port, final Optional<Key> users, final Authentication auth,
-        final Optional<KeyStore> keystore, final Settings settings) {
+        final Optional<KeyStore> keystore) {
         this.caches = caches;
         this.storage = storage;
         this.layout = layout;
@@ -99,7 +92,6 @@ public final class RestApi extends AbstractVerticle {
         this.users = users;
         this.auth = auth;
         this.keystore = Objects.requireNonNull(keystore);
-        this.settings = settings;
     }
 
     @Override
@@ -148,7 +140,7 @@ public final class RestApi extends AbstractVerticle {
         } else {
             Logger.warn(this, "File credentials are not set, users API is not available");
         }
-        new SettingsRest(this.settings).init(settingsRb);
+        new SettingsRest(this.layout).init(settingsRb);
         final Router router = repoRb.createRouter();
         router.route("/*").subRouter(userRb.createRouter());
         router.route("/*").subRouter(tokenRb.createRouter());
