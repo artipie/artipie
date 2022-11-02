@@ -19,8 +19,6 @@ paths:
       operationId: layout
       tags:
         - settings
-      security:
-        - bearerAuth: [ ]
       responses:
         '200':
           description: Layout of repository
@@ -28,8 +26,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Layout'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
         default:
           description: unexpected error
           content:
@@ -61,8 +57,3 @@ components:
           format: int32
         message:
           type: string
-  responses:
-    UnauthorizedError:
-      description: "Access token is missing or invalid"
-security:
-  - bearerAuth: []
