@@ -1,0 +1,68 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Artipie - OpenAPI 3.0
+  description:
+    This is Atripie Server based on the OpenAPI 3.0 specification.
+  license:
+    name: MIT
+externalDocs:
+  description: Find out more about Artipie
+  url: https://github.com/artipie
+tags:
+  - name: settings
+    description: Operations about settings
+paths:
+  /api/v1/settings/layout:
+    get:
+      summary: Repository layout.
+      operationId: layout
+      tags:
+        - settings
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Layout of repository
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Layout'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Layout:
+      type: object
+      required:
+        - layout
+      properties:
+        layout:
+          type: string
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  responses:
+    UnauthorizedError:
+      description: "Access token is missing or invalid"
+security:
+  - bearerAuth: []

@@ -10,6 +10,8 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.nuget.RandomFreePort;
+import com.artipie.settings.Layout;
+import com.artipie.settings.Settings;
 import com.artipie.settings.cache.SettingsCaches;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -159,7 +161,8 @@ public abstract class RestApiServerBase {
             new RestApi(
                 this.caches, storage, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY),
                 this.auth(),
-                this.keyStore()
+                this.keyStore(),
+                new Settings.Fake(Layout.valueOf(this.layout()))
             ),
             context.succeedingThenComplete()
         );

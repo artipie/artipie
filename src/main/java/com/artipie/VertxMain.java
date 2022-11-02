@@ -115,7 +115,7 @@ public final class VertxMain {
             auth -> vertx.deployVerticle(
                 new RestApi(
                     caches, settings.repoConfigsStorage(), settings.layout().toString(),
-                    apiport, settings.credentialsKey(), auth, settings.keyStore()
+                    apiport, settings.credentialsKey(), auth, settings.keyStore(), settings
                 )
             )
         );

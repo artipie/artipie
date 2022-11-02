@@ -8,6 +8,7 @@ window.onload = function() {
           {url: "./yaml/repo-flat.yaml", name: "Repositories"},
           {url: "./yaml/token-gen.yaml", name: "Auth tokens"},
           {url: "./yaml/users.yaml", name: "Users"},
+          {url: "./yaml/settings.yaml", name: "Settings"},
         ],
     dom_id: '#swagger-ui',
     deepLinking: true,
