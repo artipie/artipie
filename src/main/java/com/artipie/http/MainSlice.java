@@ -5,6 +5,8 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlNode;
+import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
 import com.artipie.http.client.ClientSlices;
@@ -24,6 +26,7 @@ import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.Settings;
 import com.artipie.settings.YamlStorage;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -93,7 +96,7 @@ public final class MainSlice extends Slice.Wrap {
                     new SliceOptional<>(
                         settings,
                         MainSlice::isPrometheusConfigAvailable,
-                        available -> new PromuSlice(metrics)
+                        available -> new PrometheusSlice(metrics)
                     )
                 ),
                 new RtRulePath(
@@ -112,30 +115,47 @@ public final class MainSlice extends Slice.Wrap {
     }
 
     /**
-     * Metrics storage Yaml node.
+     * Checks that metrics are collected by Prometheus.
+     *
      * @param settings Artipie settings
-     * @return Yaml node, could be null
+     * @return True if metrics are collected by Prometheus.
      */
-    private static Optional<YamlMapping> metricsStorage(final Settings settings) {
-        return Optional.ofNullable(settings.meta().yamlMapping("metrics"))
-            .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("storage")));
+    static boolean isPrometheusConfigAvailable(final Settings settings) {
+        final YamlSequence seq = settings
+            .meta()
+            .yamlSequence("metrics");
+        boolean res = false;
+        if (seq != null) {
+            res = seq
+                .values()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(YamlNode::asMapping)
+                .anyMatch(mapping -> MetricsFromConfig.PROMETHEUS.equals(mapping.string("type")));
+        }
+        return res;
     }
 
     /**
-     * Checks that metrics are collected by Prometheus.
+     * Metrics storage Yaml node.
+     *
      * @param settings Artipie settings
      * @return Yaml node, could be null
      */
-    private static boolean isPrometheusConfigAvailable(final Settings settings) {
-        final Optional<YamlMapping> myml =
-            Optional.ofNullable(settings.meta().yamlMapping("metrics"));
-        final boolean available;
-        if (myml.isPresent()) {
-            final String type = myml.get().string("type");
-            available = MetricsFromConfig.PROMETHEUS.equals(type);
-        } else {
-            available = false;
+    static Optional<YamlMapping> metricsStorage(final Settings settings) {
+        final YamlSequence seq = settings.meta()
+            .yamlSequence("metrics");
+        Optional<YamlMapping> res = Optional.empty();
+        if (seq != null) {
+            res = seq
+                .values()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(YamlNode::asMapping)
+                .filter(mapping -> "asto".equals(mapping.string("type")))
+                .findFirst()
+                .flatMap(asto -> Optional.ofNullable(asto.yamlMapping("storage")));
         }
-        return available;
+        return res;
     }
 }

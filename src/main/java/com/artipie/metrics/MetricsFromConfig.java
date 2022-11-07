@@ -45,10 +45,10 @@ public final class MetricsFromConfig {
 
     /**
      * Ctor.
-     * @param metrics Yaml settings
+     * @param settings Yaml settings
      */
-    public MetricsFromConfig(final YamlSequence metrics) {
-        this.settings = metrics;
+    public MetricsFromConfig(final YamlSequence settings) {
+        this.settings = settings;
     }
 
     /**
@@ -88,7 +88,7 @@ public final class MetricsFromConfig {
      * @return Interval
      * @checkstyle MagicNumberCheck (500 lines)
      */
-    static Duration interval(final YamlNode node) {
+    private static Duration interval(final YamlNode node) {
         return Optional.ofNullable(node.asMapping().string("interval"))
             .map(interval -> Duration.ofSeconds(Integer.parseInt(interval)))
             .orElse(Duration.ofSeconds(5));
@@ -100,8 +100,8 @@ public final class MetricsFromConfig {
      * @return Metrics output if configured
      */
     private static Optional<MetricsOutput> metricsOutput(final YamlNode node) {
+        Optional<MetricsOutput> res = Optional.empty();
         final String type = node.asMapping().string(MetricsFromConfig.TYPE);
-        final Optional<MetricsOutput> res;
         if ("log".equals(type)) {
             res = Optional.of(new MetricsLogOutput(LoggerFactory.getLogger(Metrics.class)));
         } else if ("asto".equals(type)) {
@@ -113,8 +113,6 @@ public final class MetricsFromConfig {
                     )
                 )
             );
-        } else {
-            res = Optional.empty();
         }
         return res;
     }

@@ -31,6 +31,7 @@ public interface Metrics {
 
     /**
      * Publish metrics to output.
+     *
      * @param out Metrics output
      */
     void publish(MetricsOutput out);

@@ -30,7 +30,7 @@ import org.reactivestreams.Publisher;
  * @since 0.23
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-public final class PromuSlice implements Slice {
+public final class PrometheusSlice implements Slice {
 
     /**
      * Metrics.
@@ -41,7 +41,7 @@ public final class PromuSlice implements Slice {
      * New slice with metrics.
      * @param metrics Metrics
      */
-    public PromuSlice(final Metrics metrics) {
+    public PrometheusSlice(final Metrics metrics) {
         this.metrics = metrics;
     }
 

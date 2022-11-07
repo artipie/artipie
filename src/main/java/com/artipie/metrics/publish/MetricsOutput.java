@@ -7,7 +7,7 @@ package com.artipie.metrics.publish;
 import java.util.Map;
 
 /**
- * Metrics output to accepts published data.
+ * Metrics output to accept published data.
  * @since 0.19
  */
 public interface MetricsOutput {
