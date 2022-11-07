@@ -6,6 +6,7 @@ package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
+import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
 import com.artipie.http.client.ClientSlices;
@@ -120,23 +121,41 @@ public final class MainSlice extends Slice.Wrap {
      * @return True if metrics are collected by Prometheus.
      */
     static boolean isPrometheusConfigAvailable(final Settings settings) {
-        return settings
+        final YamlSequence seq = settings
             .meta()
-            .yamlSequence("metrics")
-            .values()
-            .stream()
-            .filter(Objects::nonNull)
-            .map(YamlNode::asMapping)
-            .anyMatch(mapping -> MetricsFromConfig.PROMETHEUS.equals(mapping.string("type")));
+            .yamlSequence("metrics");
+        boolean res = false;
+        if (seq != null) {
+            res = seq
+                .values()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(YamlNode::asMapping)
+                .anyMatch(mapping -> MetricsFromConfig.PROMETHEUS.equals(mapping.string("type")));
+        }
+        return res;
     }
 
     /**
      * Metrics storage Yaml node.
+     *
      * @param settings Artipie settings
      * @return Yaml node, could be null
      */
-    private static Optional<YamlMapping> metricsStorage(final Settings settings) {
-        return Optional.ofNullable(settings.meta().yamlMapping("metrics"))
-            .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("storage")));
+    static Optional<YamlMapping> metricsStorage(final Settings settings) {
+        final YamlSequence seq = settings.meta()
+            .yamlSequence("metrics");
+        Optional<YamlMapping> res = Optional.empty();
+        if (seq != null) {
+            res = seq
+                .values()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(YamlNode::asMapping)
+                .filter(mapping -> "asto".equals(mapping.string("type")))
+                .findFirst()
+                .flatMap(asto -> Optional.ofNullable(asto.yamlMapping("storage")));
+        }
+        return res;
     }
 }

@@ -5,10 +5,14 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.settings.Settings;
 import com.artipie.settings.users.UsersFromEnv;
+import java.util.Optional;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +20,7 @@ import org.junit.jupiter.api.Test;
  * MainSlice tests.
  * @since 0.11
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class MainSliceTest {
 
     @Test
@@ -32,6 +37,60 @@ public class MainSliceTest {
             MainSlice.isPrometheusConfigAvailable(
                 MainSliceTest.createSettings("asto", MetricsFromConfig.PROMETHEUS)
             ));
+    }
+
+    @Test
+    public void isPrometheusConfigAvailableShouldReturnFalseWhenMetricsAreAbsent() {
+        Assertions.assertFalse(
+            MainSlice.isPrometheusConfigAvailable(
+                new Settings.Fake(
+                    new UsersFromEnv(),
+                    Yaml.createYamlMappingBuilder()
+                        .build()
+                )
+            )
+        );
+    }
+
+    @Test
+    public void metricsStorageShouldReturnYamlMappingOptionalWhenAstoDefined() {
+        final Optional<YamlMapping> res = MainSlice.metricsStorage(
+            new Settings.Fake(
+                new UsersFromEnv(),
+                Yaml.createYamlMappingBuilder()
+                    .add(
+                        "metrics",
+                        Yaml.createYamlSequenceBuilder()
+                            .add(
+                                Yaml.createYamlMappingBuilder()
+                                    .add("type", "asto")
+                                    .add(
+                                        "storage",
+                                        Yaml.createYamlMappingBuilder()
+                                            .add("type", "fs")
+                                            .add("path", "/tmp/artipie/statistict")
+                                            .build()
+                                    ).build()
+                            )
+                            .build()
+                    ).build()
+            )
+        );
+        Assertions.assertTrue(res.isPresent());
+        MatcherAssert.assertThat(res.get().string("type"), Is.is("fs"));
+        MatcherAssert.assertThat(
+            res.get().string("path"),
+            Is.is("/tmp/artipie/statistict")
+        );
+    }
+
+    @Test
+    public void metricsStorageShouldReturnEmptyOptionalWhenTypeIsNotAsto() {
+        Assertions.assertFalse(
+            MainSlice.metricsStorage(
+                createSettings("log")
+            ).isPresent()
+        );
     }
 
     /**
