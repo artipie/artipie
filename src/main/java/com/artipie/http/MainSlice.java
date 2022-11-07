@@ -125,7 +125,7 @@ public final class MainSlice extends Slice.Wrap {
      * Checks that metrics are collected by Prometheus.
      *
      * @param settings Artipie settings
-     * @return true if metrics are collected by Prometheus.
+     * @return True if metrics are collected by Prometheus.
      */
     private static boolean isPrometheusConfigAvailable(final Settings settings) {
         boolean res = false;
