@@ -93,7 +93,7 @@ public final class MainSlice extends Slice.Wrap {
                     new SliceOptional<>(
                         settings,
                         MainSlice::isPrometheusConfigAvailable,
-                        available -> new PromuSlice(metrics)
+                        available -> new PrometheusSlice(metrics)
                     )
                 ),
                 new RtRulePath(
@@ -123,19 +123,16 @@ public final class MainSlice extends Slice.Wrap {
 
     /**
      * Checks that metrics are collected by Prometheus.
+     *
      * @param settings Artipie settings
-     * @return Yaml node, could be null
+     * @return true if metrics are collected by Prometheus.
      */
     private static boolean isPrometheusConfigAvailable(final Settings settings) {
-        final Optional<YamlMapping> myml =
-            Optional.ofNullable(settings.meta().yamlMapping("metrics"));
-        final boolean available;
-        if (myml.isPresent()) {
-            final String type = myml.get().string("type");
-            available = MetricsFromConfig.PROMETHEUS.equals(type);
-        } else {
-            available = false;
+        boolean res = false;
+        final YamlMapping metrics = settings.meta().yamlMapping("metrics");
+        if (metrics != null) {
+            res = MetricsFromConfig.PROMETHEUS.equals(metrics.string("type"));
         }
-        return available;
+        return res;
     }
 }

@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * @since 0.23
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-final class PromuSliceITCase {
+final class PrometheusSliceITCase {
 
     /**
      * Test deployments.

@@ -33,7 +33,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 /**
- * Test case for {@link PromuSlice}.
+ * Test case for {@link PrometheusSlice}.
  *
  * @see <a href="https://sysdig.com/blog/prometheus-metrics/"/>
  * @since 0.23
@@ -43,7 +43,7 @@ import org.junit.jupiter.params.provider.CsvSource;
  * @checkstyle MethodNameCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-final class PromuSliceTest {
+final class PrometheusSliceTest {
 
     /**
      * Openmetrics text mime type.
@@ -71,7 +71,7 @@ final class PromuSliceTest {
         final Metrics metrics = new InMemoryMetrics();
         collect(metrics, name, value, type);
         MatcherAssert.assertThat(
-            new PromuSlice(metrics),
+            new PrometheusSlice(metrics),
             new SliceHasResponse(
                 new AllOf<>(
                     Arrays.asList(
@@ -104,7 +104,7 @@ final class PromuSliceTest {
         metrics.gauge("http.response.content").set(5000L);
         metrics.gauge("app.workload").set(300L);
         MatcherAssert.assertThat(
-            new PromuSlice(metrics),
+            new PrometheusSlice(metrics),
             new SliceHasResponse(
                 new RsHasBody(
                     new AnyOf<>(
@@ -140,7 +140,7 @@ final class PromuSliceTest {
                     "/prometheus/metrics?name=http_response_content&name=app_workload"
                 ),
                 new Headers.From(
-                    new Header(Accept.NAME, PromuSliceTest.PLAIN_TEXT)
+                    new Header(Accept.NAME, PrometheusSliceTest.PLAIN_TEXT)
                 ),
                 Content.EMPTY
             )
@@ -292,10 +292,10 @@ final class PromuSliceTest {
     ) {
         final String body;
         switch (mimetype) {
-            case PromuSliceTest.PLAIN_TEXT:
+            case PrometheusSliceTest.PLAIN_TEXT:
                 body = metricInPlainText(name, value, type);
                 break;
-            case PromuSliceTest.OPENMETRICS_TEXT:
+            case PrometheusSliceTest.OPENMETRICS_TEXT:
                 body = metricInOpenmetricsText(name, value, type);
                 break;
             default:
