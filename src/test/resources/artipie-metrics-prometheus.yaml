@@ -8,4 +8,5 @@ meta:
     type: file
     path: _credentials.yaml
   metrics:
-    type: prometheus
+    -
+      type: prometheus
