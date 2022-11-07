@@ -5,6 +5,7 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.Key;
 import com.artipie.asto.SubStorage;
 import com.artipie.http.client.ClientSlices;
@@ -24,6 +25,7 @@ import com.artipie.metrics.MetricsFromConfig;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.Settings;
 import com.artipie.settings.YamlStorage;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -112,6 +114,23 @@ public final class MainSlice extends Slice.Wrap {
     }
 
     /**
+     * Checks that metrics are collected by Prometheus.
+     *
+     * @param settings Artipie settings
+     * @return True if metrics are collected by Prometheus.
+     */
+    static boolean isPrometheusConfigAvailable(final Settings settings) {
+        return settings
+            .meta()
+            .yamlSequence("metrics")
+            .values()
+            .stream()
+            .filter(Objects::nonNull)
+            .map(YamlNode::asMapping)
+            .anyMatch(mapping -> MetricsFromConfig.PROMETHEUS.equals(mapping.string("type")));
+    }
+
+    /**
      * Metrics storage Yaml node.
      * @param settings Artipie settings
      * @return Yaml node, could be null
@@ -119,20 +138,5 @@ public final class MainSlice extends Slice.Wrap {
     private static Optional<YamlMapping> metricsStorage(final Settings settings) {
         return Optional.ofNullable(settings.meta().yamlMapping("metrics"))
             .flatMap(metrics -> Optional.ofNullable(metrics.yamlMapping("storage")));
-    }
-
-    /**
-     * Checks that metrics are collected by Prometheus.
-     *
-     * @param settings Artipie settings
-     * @return True if metrics are collected by Prometheus.
-     */
-    private static boolean isPrometheusConfigAvailable(final Settings settings) {
-        boolean res = false;
-        final YamlMapping metrics = settings.meta().yamlMapping("metrics");
-        if (metrics != null) {
-            res = MetricsFromConfig.PROMETHEUS.equals(metrics.string("type"));
-        }
-        return res;
     }
 }
