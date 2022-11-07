@@ -37,6 +37,6 @@ public final class NopMetrics implements Metrics {
 
     @Override
     public void publish(final MetricsOutput out) {
-        // nothing to publish
+        throw new IllegalStateException("NopMetrics should not be used to publish metrics");
     }
 }
