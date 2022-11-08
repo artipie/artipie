@@ -24,7 +24,7 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Test for {@link RepositoryRest}.
  * @since 0.26
- * @checkstyle DesignForExtensionCheck (500 lines)
+ * @checkstyle DesignForExtensionCheck (1000 lines)
  */
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
@@ -333,6 +333,59 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
                     res.statusCode(),
                     new IsEqual<>(HttpStatus.BAD_REQUEST_400)
                 )
+        );
+    }
+
+    void removeRepoReturnsOkIfRepositoryHasWrongStorageConfiguration(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+        final String repoconf = String.join(
+            System.lineSeparator(),
+            "repo:",
+            "  type: binary",
+            "  storage: fakeStorage"
+        );
+        this.removeRepoReturnsOkIfRepositoryHasAnyConfiguration(vertx, ctx, rname, repoconf);
+    }
+
+    void removeRepoReturnsOkAndRepoIsRemovedIfRepositoryHasWrongConfiguration(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+        final String repoconf = String.join(
+            System.lineSeparator(),
+            "“When you go after honey with a balloon,",
+            " the great thing is to not let the bees know you’re coming.",
+            "—Winnie the Pooh"
+        );
+        this.removeRepoReturnsOkIfRepositoryHasAnyConfiguration(vertx, ctx, rname, repoconf);
+    }
+
+    // @checkstyle ParameterNumberCheck (5 lines)
+    void removeRepoReturnsOkIfRepositoryHasAnyConfiguration(final Vertx vertx,
+        final VertxTestContext ctx, final RepositoryName rname, final String repoconf)
+        throws Exception {
+        this.save(
+            new ConfigKeys(rname.toString()).yamlKey(),
+            repoconf.getBytes(StandardCharsets.UTF_8)
+        );
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.DELETE,
+                String.format("/api/v1/repository/%s", rname)
+            ),
+            res -> {
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                );
+                MatcherAssert.assertThat(
+                    waitCondition(
+                        () ->
+                            !this.storage().exists(
+                                new ConfigKeys(rname.toString()).yamlKey()
+                            )
+                    ),
+                    new IsEqual<>(true)
+                );
+            }
         );
     }
 
