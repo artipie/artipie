@@ -219,7 +219,14 @@ public final class RepositoryRest extends BaseRest {
             )
         );
         if (validator.validate(context)) {
-            this.data.remove(rname).thenRun(() -> this.crs.delete(rname));
+            this.data.remove(rname)
+                .thenRun(() -> this.crs.delete(rname))
+                .exceptionally(
+                    exc -> {
+                        this.crs.delete(rname);
+                        return null;
+                    }
+                );
             context.response()
                 .setStatusCode(HttpStatus.OK_200)
                 .end();

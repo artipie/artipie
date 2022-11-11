@@ -151,6 +151,22 @@ final class RepositoryRestFlatTest extends RepositoryRestBaseTest {
     }
 
     @Test
+    void removeRepoReturnsOkIfRepoHasWrongStorageConfiguration(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        removeRepoReturnsOkIfRepositoryHasWrongStorageConfiguration(
+            vertx, ctx, new RepositoryName.Flat("docker")
+        );
+    }
+
+    @Test
+    void removeRepoReturnsOkAndRepoIsRemovedIfRepoHasWrongConfiguration(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        removeRepoReturnsOkAndRepoIsRemovedIfRepositoryHasWrongConfiguration(
+            vertx, ctx, new RepositoryName.Flat("docker")
+        );
+    }
+
+    @Test
     void moveRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         moveRepoReturnsOkIfRepositoryExists(
