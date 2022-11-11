@@ -6,9 +6,8 @@ package com.artipie.http;
 
 import com.artipie.MeasuredSlice;
 import com.artipie.http.slice.LoggingSlice;
-import com.artipie.metrics.Metrics;
+import com.artipie.metrics.MetricsContext;
 import com.artipie.metrics.PrefixedMetrics;
-import com.artipie.metrics.nop.NopMetrics;
 import java.util.logging.Level;
 
 /**
@@ -25,13 +24,13 @@ public final class BaseSlice extends Slice.Wrap {
     /**
      * Ctor.
      *
-     * @param metrics Metrics.
+     * @param mctx Metrics context.
      * @param origin Origin slice.
      */
-    public BaseSlice(final Metrics metrics, final Slice origin) {
+    public BaseSlice(final MetricsContext mctx, final Slice origin) {
         super(
             BaseSlice.wrapToBaseMetricsSlices(
-                metrics,
+                mctx,
                 new SafeSlice(
                     new MeasuredSlice(
                         new LoggingSlice(
@@ -47,21 +46,19 @@ public final class BaseSlice extends Slice.Wrap {
     /**
      * Wraps slice to metric related slices when {@code Metrics} is defined.
      *
-     * @param metrics Defined metrics.
+     * @param mctx Metrics context.
      * @param origin Original slice.
      * @return Wrapped slice.
      */
-    private static Slice wrapToBaseMetricsSlices(final Metrics metrics, final Slice origin) {
-        final Slice res;
-        if (metrics instanceof NopMetrics) {
-            res = origin;
-        } else {
+    private static Slice wrapToBaseMetricsSlices(final MetricsContext mctx, final Slice origin) {
+        Slice res = origin;
+        if (mctx.enabled()) {
             res = new TrafficMetricSlice(
                 new ResponseMetricsSlice(
                     origin,
-                    new PrefixedMetrics(metrics, "http.response.")
+                    new PrefixedMetrics(mctx.getMetrics(), "http.response.")
                 ),
-                new PrefixedMetrics(metrics, "http.")
+                new PrefixedMetrics(mctx.getMetrics(), "http.")
             );
         }
         return res;

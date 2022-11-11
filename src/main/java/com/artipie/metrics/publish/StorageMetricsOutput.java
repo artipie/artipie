@@ -10,6 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.jcabi.log.Logger;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -18,7 +19,7 @@ import java.util.concurrent.CompletionStage;
  * Storage metrics publisher.
  * @since 0.19
  */
-public final class StorageMetricsOutput implements MetricsOutput {
+public final class StorageMetricsOutput implements IntervalMetricOutput {
 
     /**
      * Storage for metrics.
@@ -26,11 +27,23 @@ public final class StorageMetricsOutput implements MetricsOutput {
     private final Storage storage;
 
     /**
-     * New storage metrics.
-     * @param storage Storage
+     * Publishing interval.
      */
-    public StorageMetricsOutput(final Storage storage) {
+    private final Duration interval;
+
+    /**
+     * New storage metrics.
+     * @param storage Storage.
+     * @param interval Publishing interval.
+     */
+    public StorageMetricsOutput(final Storage storage, final Duration interval) {
         this.storage = storage;
+        this.interval = interval;
+    }
+
+    @Override
+    public Duration getInterval() {
+        return this.interval;
     }
 
     @Override

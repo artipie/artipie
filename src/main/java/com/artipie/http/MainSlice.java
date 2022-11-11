@@ -4,11 +4,6 @@
  */
 package com.artipie.http;
 
-import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlNode;
-import com.amihaiemil.eoyaml.YamlSequence;
-import com.artipie.asto.Key;
-import com.artipie.asto.SubStorage;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
@@ -21,12 +16,9 @@ import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.http.slice.SliceOptional;
 import com.artipie.metrics.MetricSlice;
-import com.artipie.metrics.Metrics;
-import com.artipie.metrics.MetricsFromConfig;
+import com.artipie.metrics.MetricsContext;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.Settings;
-import com.artipie.settings.YamlStorage;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -58,13 +50,15 @@ public final class MainSlice extends Slice.Wrap {
 
     /**
      * Artipie entry point.
-     * @param http HTTP client
-     * @param settings Artipie settings
-     * @param metrics Metrics
+     *
+     * @param http HTTP client.
+     * @param settings Artipie settings.
+     * @param mctx Metrics context.
      */
     public MainSlice(
-        final ClientSlices http, final Settings settings,
-        final Metrics metrics) {
+        final ClientSlices http,
+        final Settings settings,
+        final MetricsContext mctx) {
         super(
             new SliceRoute(
                 MainSlice.EMPTY_PATH,
@@ -78,13 +72,10 @@ public final class MainSlice extends Slice.Wrap {
                         new RtRule.ByPath("/.metrics")
                     ),
                     new SliceOptional<>(
-                        metricsStorage(settings),
-                        Optional::isPresent,
+                        "",
+                        ign -> mctx.storageEnabled(),
                         yaml -> new MetricSlice(
-                            new SubStorage(
-                                new Key.From(".meta", "metrics"),
-                                new YamlStorage(yaml.orElseThrow()).storage()
-                            )
+                            mctx.metricsStorage()
                         )
                     )
                 ),
@@ -94,9 +85,9 @@ public final class MainSlice extends Slice.Wrap {
                         new RtRule.ByPath("/prometheus/metrics")
                     ),
                     new SliceOptional<>(
-                        settings,
-                        MainSlice::isPrometheusConfigAvailable,
-                        available -> new PrometheusSlice(metrics)
+                        "",
+                        ign -> mctx.prometheusEnabled(),
+                        available -> new PrometheusSlice(mctx.getMetrics())
                     )
                 ),
                 new RtRulePath(
@@ -112,50 +103,5 @@ public final class MainSlice extends Slice.Wrap {
                 )
             )
         );
-    }
-
-    /**
-     * Checks that metrics are collected by Prometheus.
-     *
-     * @param settings Artipie settings
-     * @return True if metrics are collected by Prometheus.
-     */
-    static boolean isPrometheusConfigAvailable(final Settings settings) {
-        final YamlSequence seq = settings
-            .meta()
-            .yamlSequence("metrics");
-        boolean res = false;
-        if (seq != null) {
-            res = seq
-                .values()
-                .stream()
-                .filter(Objects::nonNull)
-                .map(YamlNode::asMapping)
-                .anyMatch(mapping -> MetricsFromConfig.PROMETHEUS.equals(mapping.string("type")));
-        }
-        return res;
-    }
-
-    /**
-     * Metrics storage Yaml node.
-     *
-     * @param settings Artipie settings
-     * @return Yaml node, could be null
-     */
-    static Optional<YamlMapping> metricsStorage(final Settings settings) {
-        final YamlSequence seq = settings.meta()
-            .yamlSequence("metrics");
-        Optional<YamlMapping> res = Optional.empty();
-        if (seq != null) {
-            res = seq
-                .values()
-                .stream()
-                .filter(Objects::nonNull)
-                .map(YamlNode::asMapping)
-                .filter(mapping -> "asto".equals(mapping.string("type")))
-                .findFirst()
-                .flatMap(asto -> Optional.ofNullable(asto.yamlMapping("storage")));
-        }
-        return res;
     }
 }

@@ -14,9 +14,7 @@ import com.artipie.http.MainSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import com.artipie.metrics.Metrics;
-import com.artipie.metrics.MetricsFromConfig;
-import com.artipie.metrics.nop.NopMetrics;
+import com.artipie.metrics.MetricsContext;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.Settings;
@@ -36,7 +34,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
@@ -80,7 +77,13 @@ public final class VertxMain {
     private final List<VertxSliceServer> servers;
 
     /**
+     * Metrics context.
+     */
+    private final MetricsContext mctx;
+
+    /**
      * Ctor.
+     *
      * @param http HTTP client
      * @param config Config file path.
      * @param port HTTP port
@@ -90,6 +93,7 @@ public final class VertxMain {
         this.config = config;
         this.port = port;
         this.servers = new ArrayList<>(0);
+        this.mctx = new MetricsContext();
     }
 
     /**
@@ -102,15 +106,13 @@ public final class VertxMain {
     public int start(final int apiport) throws IOException {
         final SettingsCaches caches = new SettingsCaches.All();
         final Settings settings = new SettingsFromPath(this.config).find(this.port, caches);
-        final Optional<MetricsFromConfig> msettings = metricsSettings(settings);
-        final Metrics metrics = msettings.map(MetricsFromConfig::metrics)
-            .orElse(NopMetrics.INSTANCE);
-        final Vertx vertx = VertxMain.vertx(msettings);
+        this.mctx.init(settings.meta());
+        final Vertx vertx = VertxMain.vertx(this.mctx);
         final int main = this.listenOn(
-            new MainSlice(this.http, settings, metrics), metrics, this.port, vertx
+            new MainSlice(this.http, settings, this.mctx), this.port, vertx
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
-        this.startRepos(vertx, settings, metrics, this.port);
+        this.startRepos(vertx, settings, this.port);
         settings.auth().thenAccept(
             auth -> vertx.deployVerticle(
                 new RestApi(
@@ -119,6 +121,7 @@ public final class VertxMain {
                 )
             )
         );
+        this.mctx.start();
         return main;
     }
 
@@ -175,12 +178,10 @@ public final class VertxMain {
      * Start repository servers.
      * @param vertx Vertx instance
      * @param settings Settings.
-     * @param metrics Metrics.
      * @param mport Artipie service main port
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     private void startRepos(
-        final Vertx vertx, final Settings settings, final Metrics metrics, final int mport
+        final Vertx vertx, final Settings settings, final int mport
     ) {
         final Storage storage = settings.repoConfigsStorage();
         final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
@@ -199,7 +200,7 @@ public final class VertxMain {
                         this.listenOn(
                             new ArtipieRepositories(this.http, settings).slice(
                                 new Key.From(name), prt
-                            ), metrics, prt, vertx
+                            ), prt, vertx
                         );
                         VertxMain.logRepo(prt, name);
                     },
@@ -216,32 +217,18 @@ public final class VertxMain {
      * Starts HTTP server listening on specified port.
      *
      * @param slice Slice.
-     * @param metrics Metrics.
      * @param sport Slice server port.
      * @param vertx Vertx instance
      * @return Port server started to listen on.
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     private int listenOn(
-        final Slice slice, final Metrics metrics, final int sport, final Vertx vertx
+        final Slice slice, final int sport, final Vertx vertx
     ) {
         final VertxSliceServer server = new VertxSliceServer(
-            vertx, new BaseSlice(metrics, slice), sport
+            vertx, new BaseSlice(this.mctx, slice), sport
         );
         this.servers.add(server);
         return server.start();
-    }
-
-    /**
-     * Creates and initialize metrics from settings.
-     *
-     * @param settings Settings.
-     * @return Metrics.
-     */
-    private static Optional<MetricsFromConfig> metricsSettings(final Settings settings) {
-        return Optional.ofNullable(settings.meta())
-            .flatMap(meta -> Optional.ofNullable(meta.yamlSequence("metrics")))
-            .map(MetricsFromConfig::new);
     }
 
     /**
@@ -259,25 +246,28 @@ public final class VertxMain {
      * Obtain and configure Vert.x instance. If vertx metrics are configured,
      * this method enables Micrometer metrics options with Prometheus. Check
      * <a href="https://vertx.io/docs/3.9.13/vertx-micrometer-metrics/java/#_prometheus">docs</a>.
-     * @param metrics Metrics if configured
+     *
+     * @param mctx Metrics context
      * @return Vert.x instance
      */
-    private static Vertx vertx(final Optional<MetricsFromConfig> metrics) {
-        return metrics.flatMap(
-            settings -> settings.vertxMetricsConf().map(
-                pair -> Vertx.vertx(
-                    new VertxOptions().setMetricsOptions(
-                        new MicrometerMetricsOptions()
-                            .setPrometheusOptions(
-                                new VertxPrometheusOptions().setEnabled(true)
-                                    .setStartEmbeddedServer(true)
-                                    .setEmbeddedServerOptions(
-                                        new HttpServerOptions().setPort(pair.getValue())
-                                    ).setEmbeddedServerEndpoint(pair.getKey())
-                            ).setEnabled(true)
-                    )
+    private static Vertx vertx(final MetricsContext mctx) {
+        final Vertx res;
+        if (mctx.vertxEnabled()) {
+            res = Vertx.vertx(
+                new VertxOptions().setMetricsOptions(
+                    new MicrometerMetricsOptions()
+                        .setPrometheusOptions(
+                            new VertxPrometheusOptions().setEnabled(true)
+                                .setStartEmbeddedServer(true)
+                                .setEmbeddedServerOptions(
+                                    new HttpServerOptions().setPort(mctx.vertxPort())
+                                ).setEmbeddedServerEndpoint(mctx.vertxEndpoint())
+                        ).setEnabled(true)
                 )
-            )
-        ).orElse(Vertx.vertx());
+            );
+        } else {
+            res = Vertx.vertx();
+        }
+        return res;
     }
 }
