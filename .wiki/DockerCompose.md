@@ -5,15 +5,14 @@ Make sure you have already installed both [Docker Engine](https://docs.docker.co
 Then, obtain `docker-compose.yaml` file from the repository:
 you can [open it from the browser](https://github.com/artipie/artipie/blob/master/docker-compose.yaml),
 copy content and save it locally or use [git](https://git-scm.com/) and [clone](https://git-scm.com/docs/git-clone) the repository.
-As soon as Docker Compose is installed and `docker-compose.yaml` file is retrieved, open command line,
-`cd` to the location with the compose file and run Artipie service:
+Open command line, `cd` to the location with the compose file and run Artipie service:
 
 ```bash
 docker-compose up
 ```
 
-It'll start a new Docker containers with latest Artipie and Artipie dashboard service images.
-A new Artipie's container generates default configuration if not found at `/etc/artipie/artipie.yml`, 
+It'll start new Docker containers with latest Artipie and Artipie dashboard service images.
+New Artipie's container generates default configuration if not found at `/etc/artipie/artipie.yml`, 
 prints to console a list of running repositories, test credentials and a link to the [Swagger UI](https://swagger.io/tools/swagger-ui/).
 
 If started on localhost with command above: 
