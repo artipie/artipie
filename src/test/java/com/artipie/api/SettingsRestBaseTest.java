@@ -37,4 +37,23 @@ public abstract class SettingsRestBaseTest extends RestApiServerBase {
             }
         );
     }
+
+    protected void returnsPortAndStatusCodeOk(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        this.requestAndAssert(
+            vertx,
+            ctx,
+            new TestRequest("/api/v1/settings/port"),
+            res -> {
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                );
+                MatcherAssert.assertThat(
+                    res.bodyAsJsonObject().getInteger("port"),
+                    new IsEqual<>(this.port())
+                );
+            }
+        );
+    }
 }

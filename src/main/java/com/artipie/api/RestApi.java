@@ -140,7 +140,7 @@ public final class RestApi extends AbstractVerticle {
         } else {
             Logger.warn(this, "File credentials are not set, users API is not available");
         }
-        new SettingsRest(this.layout).init(settingsRb);
+        new SettingsRest(this.port, this.layout).init(settingsRb);
         final Router router = repoRb.createRouter();
         router.route("/*").subRouter(userRb.createRouter());
         router.route("/*").subRouter(tokenRb.createRouter());
