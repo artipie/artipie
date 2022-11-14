@@ -13,6 +13,25 @@ tags:
   - name: settings
     description: Operations about settings
 paths:
+  /api/v1/settings/port:
+    get:
+      summary: Artipie server-side port (repositories default port).
+      operationId: port
+      tags:
+        - settings
+      responses:
+        '200':
+          description: Artipie server-side port (repositories default port)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Port'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /api/v1/settings/layout:
     get:
       summary: Repository layout.
@@ -39,6 +58,13 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    Port:
+      type: object
+      required:
+        - port
+      properties:
+        port:
+          type: integer
     Layout:
       type: object
       required:
