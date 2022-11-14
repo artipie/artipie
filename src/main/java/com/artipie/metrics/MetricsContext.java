@@ -156,21 +156,13 @@ public final class MetricsContext {
     }
 
     /**
-     * Log metrics output is enabled.
+     * Checks whether configured a metric output with a certain type or not.
      *
-     * @return True, if enabled.
+     * @param type Type to check.
+     * @return True if a metrics output is configured.
      */
-    public boolean logEnabled() {
-        return this.outputs.containsKey(MetricsOutputType.LOG);
-    }
-
-    /**
-     * Storage metrics output is enabled.
-     *
-     * @return True, if enabled.
-     */
-    public boolean storageEnabled() {
-        return this.outputs.containsKey(MetricsOutputType.ASTO);
+    public boolean enabledMetricsOutput(final MetricsOutputType type) {
+        return this.outputs.containsKey(type);
     }
 
     /**
@@ -179,30 +171,12 @@ public final class MetricsContext {
      * @return Storage.
      */
     public Storage metricsStorage() {
-        if (!this.storageEnabled()) {
+        if (!this.enabledMetricsOutput(MetricsOutputType.ASTO)) {
             throw new IllegalStateException("Storage type metrics are not defined");
         }
         return metricsStorage(this.outputs.get(MetricsOutputType.ASTO)
             .yamlMapping(MetricsContext.STORAGE)
         );
-    }
-
-    /**
-     * Prometheus metrics are enabled.
-     *
-     * @return True, if Prometheus metrics are enabled.
-     */
-    public boolean prometheusEnabled() {
-        return this.outputs.containsKey(MetricsOutputType.PROMETHEUS);
-    }
-
-    /**
-     * Vertx metrics are enabled.
-     *
-     * @return True, if vertx metrics are enabled.
-     */
-    public boolean vertxEnabled() {
-        return this.outputs.containsKey(MetricsOutputType.VERTX);
     }
 
     /**
@@ -212,7 +186,7 @@ public final class MetricsContext {
      */
     public String vertxEndpoint() {
         String res = null;
-        if (this.vertxEnabled()) {
+        if (this.enabledMetricsOutput(MetricsOutputType.VERTX)) {
             res = this.outputs.get(MetricsOutputType.VERTX).string("endpoint");
         }
         return res;
@@ -225,7 +199,7 @@ public final class MetricsContext {
      */
     public int vertxPort() {
         int res = -1;
-        if (this.vertxEnabled()) {
+        if (this.enabledMetricsOutput(MetricsOutputType.VERTX)) {
             res = Integer.parseInt(
                 this.outputs.get(MetricsOutputType.VERTX).string("port")
             );

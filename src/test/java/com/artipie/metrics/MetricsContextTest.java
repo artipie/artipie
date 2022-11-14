@@ -5,6 +5,7 @@
 package com.artipie.metrics;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.metrics.publish.MetricsOutputType;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.StringContains;
@@ -31,11 +32,7 @@ public class MetricsContextTest {
         this.ctx.init(
             Yaml.createYamlMappingBuilder().build()
         );
-        MatcherAssert.assertThat(this.ctx.enabled(), Is.is(false));
-        MatcherAssert.assertThat(this.ctx.logEnabled(), Is.is(false));
-        MatcherAssert.assertThat(this.ctx.storageEnabled(), Is.is(false));
-        MatcherAssert.assertThat(this.ctx.prometheusEnabled(), Is.is(false));
-        MatcherAssert.assertThat(this.ctx.vertxEnabled(), Is.is(false));
+        this.assertAllMetrics(false);
     }
 
     @Test
@@ -47,11 +44,7 @@ public class MetricsContextTest {
                     Yaml.createYamlSequenceBuilder().build()
                 ).build()
         );
-        MatcherAssert.assertThat(this.ctx.enabled(), Is.is(false));
-        MatcherAssert.assertThat(this.ctx.logEnabled(), Is.is(false));
-        MatcherAssert.assertThat(this.ctx.storageEnabled(), Is.is(false));
-        MatcherAssert.assertThat(this.ctx.prometheusEnabled(), Is.is(false));
-        MatcherAssert.assertThat(this.ctx.vertxEnabled(), Is.is(false));
+        this.assertAllMetrics(false);
     }
 
     @Test
@@ -93,11 +86,7 @@ public class MetricsContextTest {
                         .build()
                 ).build()
         );
-        MatcherAssert.assertThat(this.ctx.enabled(), Is.is(true));
-        MatcherAssert.assertThat(this.ctx.storageEnabled(), Is.is(true));
-        MatcherAssert.assertThat(this.ctx.logEnabled(), Is.is(true));
-        MatcherAssert.assertThat(this.ctx.prometheusEnabled(), Is.is(true));
-        MatcherAssert.assertThat(this.ctx.vertxEnabled(), Is.is(true));
+        this.assertAllMetrics(true);
         MatcherAssert.assertThat(this.ctx.vertxEndpoint(), Is.is("test_endpoint"));
         MatcherAssert.assertThat(this.ctx.vertxPort(), Is.is(333));
     }
@@ -200,5 +189,26 @@ public class MetricsContextTest {
                 )
             );
         }
+    }
+
+    /**
+     * Checks that all metrics are disabled or enabled.
+     *
+     * @param enabled Enabled flag.
+     */
+    private void assertAllMetrics(final boolean enabled) {
+        MatcherAssert.assertThat(this.ctx.enabled(), Is.is(enabled));
+        MatcherAssert.assertThat(
+            this.ctx.enabledMetricsOutput(MetricsOutputType.LOG), Is.is(enabled)
+        );
+        MatcherAssert.assertThat(
+            this.ctx.enabledMetricsOutput(MetricsOutputType.ASTO), Is.is(enabled)
+        );
+        MatcherAssert.assertThat(
+            this.ctx.enabledMetricsOutput(MetricsOutputType.PROMETHEUS), Is.is(enabled)
+        );
+        MatcherAssert.assertThat(
+            this.ctx.enabledMetricsOutput(MetricsOutputType.VERTX), Is.is(enabled)
+        );
     }
 }

@@ -15,6 +15,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.metrics.MetricsContext;
+import com.artipie.metrics.publish.MetricsOutputType;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.Settings;
@@ -107,7 +108,7 @@ public final class VertxMain {
         final SettingsCaches caches = new SettingsCaches.All();
         final Settings settings = new SettingsFromPath(this.config).find(this.port, caches);
         this.mctx.init(settings.meta());
-        final Vertx vertx = VertxMain.vertx(this.mctx);
+        final Vertx vertx = this.vertx();
         final int main = this.listenOn(
             new MainSlice(this.http, settings, this.mctx), this.port, vertx
         );
@@ -247,12 +248,11 @@ public final class VertxMain {
      * this method enables Micrometer metrics options with Prometheus. Check
      * <a href="https://vertx.io/docs/3.9.13/vertx-micrometer-metrics/java/#_prometheus">docs</a>.
      *
-     * @param mctx Metrics context
      * @return Vert.x instance
      */
-    private static Vertx vertx(final MetricsContext mctx) {
+    private Vertx vertx() {
         final Vertx res;
-        if (mctx.vertxEnabled()) {
+        if (this.mctx.enabledMetricsOutput(MetricsOutputType.VERTX)) {
             res = Vertx.vertx(
                 new VertxOptions().setMetricsOptions(
                     new MicrometerMetricsOptions()
@@ -260,8 +260,8 @@ public final class VertxMain {
                             new VertxPrometheusOptions().setEnabled(true)
                                 .setStartEmbeddedServer(true)
                                 .setEmbeddedServerOptions(
-                                    new HttpServerOptions().setPort(mctx.vertxPort())
-                                ).setEmbeddedServerEndpoint(mctx.vertxEndpoint())
+                                    new HttpServerOptions().setPort(this.mctx.vertxPort())
+                                ).setEmbeddedServerEndpoint(this.mctx.vertxEndpoint())
                         ).setEnabled(true)
                 )
             );

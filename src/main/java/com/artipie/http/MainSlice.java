@@ -17,6 +17,7 @@ import com.artipie.http.rt.SliceRoute;
 import com.artipie.http.slice.SliceOptional;
 import com.artipie.metrics.MetricSlice;
 import com.artipie.metrics.MetricsContext;
+import com.artipie.metrics.publish.MetricsOutputType;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.Settings;
 import java.util.Optional;
@@ -73,7 +74,7 @@ public final class MainSlice extends Slice.Wrap {
                     ),
                     new SliceOptional<>(
                         "",
-                        ign -> mctx.storageEnabled(),
+                        ign -> mctx.enabledMetricsOutput(MetricsOutputType.ASTO),
                         yaml -> new MetricSlice(
                             mctx.metricsStorage()
                         )
@@ -86,7 +87,7 @@ public final class MainSlice extends Slice.Wrap {
                     ),
                     new SliceOptional<>(
                         "",
-                        ign -> mctx.prometheusEnabled(),
+                        ign -> mctx.enabledMetricsOutput(MetricsOutputType.PROMETHEUS),
                         available -> new PrometheusSlice(mctx.getMetrics())
                     )
                 ),
