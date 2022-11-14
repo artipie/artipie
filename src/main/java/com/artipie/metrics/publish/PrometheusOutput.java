@@ -16,7 +16,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Prometheus metrics output.
+ * Prometheus's metrics output.
  * @since 0.23
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

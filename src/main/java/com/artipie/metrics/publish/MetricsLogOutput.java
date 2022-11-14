@@ -5,6 +5,7 @@
 package com.artipie.metrics.publish;
 
 import com.artipie.metrics.memory.InMemoryMetrics;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ import org.slf4j.Logger;
  *  It should be tested that the publisher runs periodically, collects fresh metrics data
  *  and logs the data as expected.
  */
-public final class MetricsLogOutput implements MetricsOutput {
+public final class MetricsLogOutput implements IntervalMetricOutput {
 
     /**
      * Logger to use for publishing.
@@ -31,13 +32,25 @@ public final class MetricsLogOutput implements MetricsOutput {
     private final Map<String, Long> metrics;
 
     /**
+     * Publishing interval.
+     */
+    private final Duration interval;
+
+    /**
      * Ctor.
      *
      * @param logger Logger to use for publishing.
+     * @param interval Publishing interval.
      */
-    public MetricsLogOutput(final Logger logger) {
+    public MetricsLogOutput(final Logger logger, final Duration interval) {
         this.logger = logger;
+        this.interval = interval;
         this.metrics = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public Duration getInterval() {
+        return this.interval;
     }
 
     @Override

@@ -5,12 +5,17 @@
 package com.artipie.metrics.publish;
 
 import com.artipie.metrics.Metrics;
-import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Metrics periodical publisher.
+ *
  * @since 0.19
  */
 public final class MetricsPublisher {
@@ -21,30 +26,46 @@ public final class MetricsPublisher {
     private final Metrics metrics;
 
     /**
-     * Period.
+     * List of metrics output executors.
      */
-    private final Duration period;
+    private final List<ExecutorService> executors;
+
+    /**
+     * Collection of metrics output to accept published data.
+     */
+    private final Collection<IntervalMetricOutput> outputs;
 
     /**
      * Ctor.
      *
      * @param metrics Metrics for publishing.
-     * @param period Period.
+     * @param outputs Outputs.
      */
-    public MetricsPublisher(final Metrics metrics, final Duration period) {
+    public MetricsPublisher(final Metrics metrics, final Collection<IntervalMetricOutput> outputs) {
         this.metrics = metrics;
-        this.period = period;
+        this.outputs = outputs;
+        this.executors = new ArrayList<>(outputs.size());
     }
 
     /**
      * Start periodic publishing.
-     * @param output Output for publishing
      */
-    public void start(final MetricsOutput output) {
-        final long millis = this.period.toMillis();
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
-            () -> this.metrics.publish(output),
-            millis, millis, TimeUnit.MILLISECONDS
-        );
+    public void start() {
+        for (final IntervalMetricOutput out : this.outputs) {
+            final long millis = out.getInterval().toMillis();
+            final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+            this.executors.add(executor);
+            executor.scheduleAtFixedRate(
+                () -> this.metrics.publish(out),
+                millis, millis, TimeUnit.MILLISECONDS
+            );
+        }
+    }
+
+    /**
+     * Shutdowns metrics output executors.
+     */
+    public void stop() {
+        this.executors.forEach(ExecutorService::shutdown);
     }
 }
