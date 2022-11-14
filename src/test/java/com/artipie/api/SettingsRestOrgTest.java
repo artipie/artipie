@@ -17,6 +17,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(VertxExtension.class)
 public final class SettingsRestOrgTest extends SettingsRestBaseTest {
     @Test
+    void returnsPortAndStatusCodeOkForOrgLayout(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        this.returnsPortAndStatusCodeOk(vertx, ctx);
+    }
+
+    @Test
     void returnsFlatLayoutAndStatusCodeOk(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         this.returnsLayoutAndStatusCodeOk(vertx, ctx, this.layout());
