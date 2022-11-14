@@ -15,13 +15,13 @@ tags:
 paths:
   /api/v1/settings/port:
     get:
-      summary: Artipie port.
+      summary: Artipie server-side port (repositories default port).
       operationId: port
       tags:
         - settings
       responses:
         '200':
-          description: Port of Artipie
+          description: Artipie server-side port (repositories default port)
           content:
             application/json:
               schema:
