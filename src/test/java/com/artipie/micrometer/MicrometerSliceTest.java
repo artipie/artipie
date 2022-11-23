@@ -17,6 +17,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,16 +88,17 @@ class MicrometerSliceTest {
                 new RequestLine(RqMethod.POST, "/a/b/c")
             )
         );
+        System.out.println(this.registry.getMetersAsString());
         MatcherAssert.assertThat(
-            this.registry.getMetersAsString(),
-            Matchers.stringContainsInOrder(
+            List.of(this.registry.getMetersAsString().split(System.lineSeparator())),
+            Matchers.containsInAnyOrder(
                 // @checkstyle LineLengthCheck (10 lines)
-                "request.body.size(DISTRIBUTION_SUMMARY)[method='POST', path='/a/b/c']; count=0.0, total=0.0 bytes, max=0.0 bytes",
-                "request.body.size(DISTRIBUTION_SUMMARY)[method='GET', path='/same/path']; count=0.0, total=0.0 bytes, max=0.0 bytes",
-                "request.counter(COUNTER)[method='POST', path='/a/b/c', status='CONTINUE']; count=1.0",
-                "request.counter(COUNTER)[method='GET', path='/same/path', status='OK']; count=2.0",
-                "response.body.size(DISTRIBUTION_SUMMARY)[method='GET', path='/same/path']; count=3.0, total=15.0 bytes, max=6.0 bytes",
-                "response.body.size(DISTRIBUTION_SUMMARY)[method='POST', path='/a/b/c']; count=0.0, total=0.0 bytes, max=0.0 bytes"
+                "artipie.request.body.size(DISTRIBUTION_SUMMARY)[method='POST', route='/a/b/c']; count=0.0, total=0.0 bytes, max=0.0 bytes",
+                "artipie.request.body.size(DISTRIBUTION_SUMMARY)[method='GET', route='/same/path']; count=0.0, total=0.0 bytes, max=0.0 bytes",
+                "artipie.request.counter(COUNTER)[method='GET', route='/same/path', status='OK']; count=2.0",
+                "artipie.request.counter(COUNTER)[method='POST', route='/a/b/c', status='CONTINUE']; count=1.0",
+                "artipie.response.body.size(DISTRIBUTION_SUMMARY)[method='POST', route='/a/b/c']; count=0.0, total=0.0 bytes, max=0.0 bytes",
+                "artipie.response.body.size(DISTRIBUTION_SUMMARY)[method='GET', route='/same/path']; count=3.0, total=15.0 bytes, max=6.0 bytes"
             )
         );
     }
