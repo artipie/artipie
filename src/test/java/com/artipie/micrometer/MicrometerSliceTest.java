@@ -88,9 +88,8 @@ class MicrometerSliceTest {
                 new RequestLine(RqMethod.POST, "/a/b/c")
             )
         );
-        System.out.println(this.registry.getMetersAsString());
         MatcherAssert.assertThat(
-            List.of(this.registry.getMetersAsString().split(System.lineSeparator())),
+            List.of(this.registry.getMetersAsString().split("\n")),
             Matchers.containsInAnyOrder(
                 // @checkstyle LineLengthCheck (10 lines)
                 "artipie.request.body.size(DISTRIBUTION_SUMMARY)[method='POST', route='/a/b/c']; count=0.0, total=0.0 bytes, max=0.0 bytes",
