@@ -5,10 +5,7 @@
 package com.artipie.jfr;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.Key;
 import com.artipie.asto.Splitting;
-import com.artipie.asto.Storage;
-import com.artipie.asto.memory.InMemoryStorage;
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -57,24 +54,17 @@ class ChunksAndSizeMetricsContentTest {
      */
     private AtomicLong sum;
 
-    /**
-     * To consume data.
-     */
-    private Storage asto;
-
     @BeforeEach
     void init() {
         this.count = new AtomicInteger();
         this.sum = new AtomicLong();
-        this.asto = new InMemoryStorage();
     }
 
     @Test
     void shouldPassToCallbackChunkCountAndReceivedBytesWithDelay() {
         final int size = 10 * 1024 * 1024;
         final int chunks = 15;
-        this.asto.save(
-            new Key.From("test-key"),
+        Flowable.fromPublisher(
             new ChunksAndSizeMetricsContent(
                 this.content(size, chunks, true),
                 (c, w) -> {
@@ -82,7 +72,7 @@ class ChunksAndSizeMetricsContentTest {
                     this.sum.set(w);
                 }
             )
-        ).join();
+        ).blockingSubscribe();
         this.assertResults(chunks, size);
     }
 
@@ -90,8 +80,7 @@ class ChunksAndSizeMetricsContentTest {
     void shouldPassToCallbackChunkCountAndReceivedBytesWithoutDelay() {
         final int size = 5 * 1024 * 1024;
         final int chunks = 24;
-        this.asto.save(
-            new Key.From("test-key"),
+        Flowable.fromPublisher(
             new ChunksAndSizeMetricsContent(
                 this.content(size, chunks, false),
                 (c, w) -> {
@@ -99,7 +88,7 @@ class ChunksAndSizeMetricsContentTest {
                     this.sum.set(w);
                 }
             )
-        ).join();
+        ).blockingSubscribe();
         this.assertResults(chunks, size);
     }
 
@@ -123,8 +112,7 @@ class ChunksAndSizeMetricsContentTest {
                         }
                         return true;
                     }));
-            this.asto.save(
-                new Key.From("test-key"),
+            Flowable.fromPublisher(
                 new ChunksAndSizeMetricsContent(
                     content,
                     (c, w) -> {
@@ -133,7 +121,7 @@ class ChunksAndSizeMetricsContentTest {
                         counter.getAndIncrement();
                     }
                 )
-            ).join();
+            ).blockingSubscribe();
             Assertions.fail();
         } catch (final RuntimeException err) {
             // @checkstyle MethodBodyCommentsCheck (1 lines)
