@@ -25,10 +25,17 @@ import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
+import io.vertx.micrometer.backends.BackendRegistries;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -265,6 +272,12 @@ public final class VertxMain {
                         ).setEnabled(true)
                 )
             );
+            final MeterRegistry registry = BackendRegistries.getDefaultNow();
+            new ClassLoaderMetrics().bindTo(registry);
+            new JvmMemoryMetrics().bindTo(registry);
+            new JvmGcMetrics().bindTo(registry);
+            new ProcessorMetrics().bindTo(registry);
+            new JvmThreadMetrics().bindTo(registry);
         } else {
             res = Vertx.vertx();
         }

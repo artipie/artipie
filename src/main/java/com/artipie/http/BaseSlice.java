@@ -7,7 +7,7 @@ package com.artipie.http;
 import com.artipie.MeasuredSlice;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.metrics.MetricsContext;
-import com.artipie.metrics.PrefixedMetrics;
+import com.artipie.micrometer.MicrometerSlice;
 import java.util.logging.Level;
 
 /**
@@ -53,13 +53,7 @@ public final class BaseSlice extends Slice.Wrap {
     private static Slice wrapToBaseMetricsSlices(final MetricsContext mctx, final Slice origin) {
         Slice res = origin;
         if (mctx.enabled()) {
-            res = new TrafficMetricSlice(
-                new ResponseMetricsSlice(
-                    origin,
-                    new PrefixedMetrics(mctx.getMetrics(), "http.response.")
-                ),
-                new PrefixedMetrics(mctx.getMetrics(), "http.")
-            );
+            res = new MicrometerSlice(origin);
         }
         return res;
     }
