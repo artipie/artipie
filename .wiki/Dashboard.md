@@ -5,9 +5,9 @@ The Artipie front-end provides a convenient dashboard with UI pages for managing
 Artipie front-end is distributed as [Docker image](hub.docker.com/r/artipie/front) and as fat jar.
 The jar file can be downloaded on GitHub [releases page](https://github.com/artipie/front/releases).
 
-The Artipie front-end is independent part of Artipie project that interacts with Artipie server by using REST-API services provided by Artipie server.
+The Artipie front-end is independent part of Artipie project that interacts with Artipie server by using [REST-API services](./Rest-api) provided by Artipie server.
 
-The Artipie dashboard provides following abilities:
+The Artipie dashboard provides following functionality:
 * Sign in
 * View of all available repositories
 * Creating a new repository
@@ -47,18 +47,23 @@ The `Create repository` page allows the Artipie user:
 * to provide `configuration` of repository
 
 The page provides default repository configuration that can be edited by the Artipie user.<br/>
-Additionally page provides information how a new repository can be used by tools according a repository type.<br/>
+Additionally page provides information how a new repository can be used by tools according to repository type.<br/>
 
 To save a new repository configuration please click `Add repository` button.
+
+Follow [this link](./Configuration-Repository) to know all the technical details about supported repositories and settings.
+
 [[/images/dashboard/repository_create|Create repository]]
 
 ## Edit repository
 To edit existing repository please click on `repository name` on the `Repository list` page.
 
 The `Edit repository` page allows the Artipie user to change `configuration` of repository.<br/>
-Page provides information how the existing repository can be used by tools according a repository type.<br/>
+Page provides information how the existing repository can be used by tools according to repository type.<br/>
 
 To save the repository configuration please click `Update` button.
+
+Follow [this link](./Configuration-Repository) to know all the technical details about supported repositories and settings.
 
 [[/images/dashboard/repository_edit|Edit repository]]
 
