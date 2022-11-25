@@ -129,7 +129,12 @@ public final class JfrStorage implements Storage {
 
     @Override
     public CompletableFuture<Void> deleteAll(final Key prefix) {
-        return this.original.deleteAll(prefix);
+        final StorageDeleteAllEvent event = new StorageDeleteAllEvent();
+        event.storage = this.identifier();
+        event.key = prefix.string();
+        event.begin();
+        return this.original.deleteAll(prefix)
+            .thenRun(event::commit);
     }
 
     @Override

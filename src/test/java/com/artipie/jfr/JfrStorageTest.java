@@ -87,6 +87,19 @@ class JfrStorageTest {
     }
 
     @Test
+    void shouldPublishStorageDeleteAllEventWhenDeleteAll() {
+        final Key base = new Key.From("test");
+        this.storage.save(new Key.From(base, "1"), content(1024, 1));
+        this.storage.save(new Key.From(base, "2"), content(1024, 1));
+        this.storage.save(new Key.From(base, "3"), content(1024, 1));
+        final RecordedEvent event = process(
+            "artipie.StorageDeleteAll",
+            () -> this.storage.deleteAll(base)
+        );
+        assertEvent(event, base.string());
+    }
+
+    @Test
     void shouldPublishStorageMoveEventWhenMove() {
         final Key key = new Key.From("test-key");
         final Key target = new Key.From("new-test-key");
