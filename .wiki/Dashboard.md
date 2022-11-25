@@ -53,7 +53,7 @@ To save a new repository configuration please click `Add repository` button.
 
 Follow [this link](./Configuration-Repository) to know all the technical details about supported repositories and settings.
 
-[[/images/dashboard/repository_create|Create repository]]
+[[/images/dashboard/repository_create.jpg|Create repository]]
 
 ## Edit repository
 To edit existing repository please click on `repository name` on the `Repository list` page.
@@ -65,7 +65,7 @@ To save the repository configuration please click `Update` button.
 
 Follow [this link](./Configuration-Repository) to know all the technical details about supported repositories and settings.
 
-[[/images/dashboard/repository_edit|Edit repository]]
+[[/images/dashboard/repository_edit.jpg|Edit repository]]
 
 ## Remove a repository
 To remove existing repository please click `Remove` button on `Edit repository` page.
