@@ -1,8 +1,8 @@
 # Artipie dashboard
 
-The Artipie provides [front-end](github.com/artipie/front) web application to manage repositories using a web-browser.<br/>
+The Artipie provides [front-end](https://github.com/artipie/front) web application to manage repositories using a web-browser.<br/>
 The Artipie front-end provides a convenient dashboard with UI pages for managing repositories.<br/>
-Artipie front-end is distributed as [Docker image](hub.docker.com/r/artipie/front) and as fat jar.
+Artipie front-end is distributed as [Docker image](https://hub.docker.com/r/artipie/front) and as fat jar.
 The jar file can be downloaded on GitHub [releases page](https://github.com/artipie/front/releases).
 
 The Artipie front-end is independent part of Artipie project that interacts with Artipie server by using [REST-API services](./Rest-api) provided by Artipie server.
