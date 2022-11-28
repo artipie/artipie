@@ -24,8 +24,8 @@ import jdk.jfr.Name;
 public final class StorageValueEvent extends AbstractStorageEvent {
 
     @Label("Chunks Count")
-    public int chunks;
+    public volatile int chunks;
 
     @Label("Value Size")
-    public long size;
+    public volatile long size;
 }

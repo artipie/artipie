@@ -22,5 +22,5 @@ import jdk.jfr.Name;
 @Description("Move value from one location to another")
 public final class StorageMoveEvent extends AbstractStorageEvent {
     @Label("Target Key")
-    public String target;
+    public volatile String target;
 }

@@ -18,9 +18,9 @@ import jdk.jfr.Label;
 public abstract class AbstractStorageEvent extends Event {
 
     @Label("Storage Identifier")
-    public String storage;
+    public volatile String storage;
 
     @Label("Key")
-    public String key;
+    public volatile String key;
 
 }

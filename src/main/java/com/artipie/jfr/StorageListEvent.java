@@ -24,6 +24,6 @@ import jdk.jfr.Name;
 public final class StorageListEvent extends AbstractStorageEvent {
 
     @Label("Keys Count")
-    public int keysCount;
+    public volatile int keysCount;
 
 }
