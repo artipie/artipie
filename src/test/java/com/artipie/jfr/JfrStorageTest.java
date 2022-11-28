@@ -147,6 +147,28 @@ class JfrStorageTest {
         MatcherAssert.assertThat(event.getInt("keysCount"), Is.is(3));
     }
 
+    @Test
+    void shouldPublishStorageExistsEventWhenExists() {
+        final Key key = new Key.From("test-key");
+        this.storage.save(key, content(1024, 1));
+        final RecordedEvent event = process(
+            "artipie.StorageExists",
+            () -> this.storage.exists(key)
+        );
+        assertEvent(event, key.string());
+    }
+
+    @Test
+    void shouldPublishStorageMetadataEventWhenMetadata() {
+        final Key key = new Key.From("test-key");
+        this.storage.save(key, content(1024, 1));
+        final RecordedEvent event = process(
+            "artipie.StorageMetadata",
+            () -> this.storage.metadata(key)
+        );
+        assertEvent(event, key.string());
+    }
+
     /**
      * Asserts common event fields.
      *

@@ -37,7 +37,16 @@ public final class JfrStorage implements Storage {
 
     @Override
     public CompletableFuture<Boolean> exists(final Key key) {
-        return this.original.exists(key);
+        final StorageExistsEvent event = new StorageExistsEvent();
+        event.storage = this.identifier();
+        event.key = key.string();
+        return this.original.exists(key)
+            .thenApply(
+                res -> {
+                    event.commit();
+                    return res;
+                }
+            );
     }
 
     @Override
@@ -90,7 +99,16 @@ public final class JfrStorage implements Storage {
 
     @Override
     public CompletableFuture<? extends Meta> metadata(final Key key) {
-        return this.original.metadata(key);
+        final StorageMetadataEvent event = new StorageMetadataEvent();
+        event.storage = this.identifier();
+        event.key = key.string();
+        return this.original.metadata(key)
+            .thenApply(
+                res -> {
+                    event.commit();
+                    return res;
+                }
+            );
     }
 
     @Override
