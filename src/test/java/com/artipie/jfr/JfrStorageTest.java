@@ -19,6 +19,7 @@ import jdk.jfr.consumer.RecordingStream;
 import org.awaitility.Awaitility;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -181,6 +182,7 @@ class JfrStorageTest {
             Is.is("InMemoryStorage")
         );
         MatcherAssert.assertThat(event.getString("key"), Is.is(key));
+        Assertions.assertTrue(event.getDuration().toNanos() > 0);
     }
 
     /**

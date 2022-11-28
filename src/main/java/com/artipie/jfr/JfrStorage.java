@@ -40,6 +40,7 @@ public final class JfrStorage implements Storage {
         final StorageExistsEvent event = new StorageExistsEvent();
         event.storage = this.identifier();
         event.key = key.string();
+        event.begin();
         return this.original.exists(key)
             .thenApply(
                 res -> {
@@ -55,21 +56,17 @@ public final class JfrStorage implements Storage {
         event.storage = this.identifier();
         event.key = key.string();
         event.begin();
-        try {
-            return this.original.save(
-                key,
-                new ChunksAndSizeMetricsContent(
-                    content,
-                    (chunks, size) -> {
-                        event.chunks = chunks;
-                        event.size = size;
-                        event.commit();
-                    }
-                )
-            );
-        } finally {
-            event.commit();
-        }
+        return this.original.save(
+            key,
+            new ChunksAndSizeMetricsContent(
+                content,
+                (chunks, size) -> {
+                    event.chunks = chunks;
+                    event.size = size;
+                    event.commit();
+                }
+            )
+        );
     }
 
     @Override
@@ -93,6 +90,7 @@ public final class JfrStorage implements Storage {
         event.storage = this.identifier();
         event.key = source.string();
         event.target = target.string();
+        event.begin();
         return this.original.move(source, target)
             .thenRun(event::commit);
     }
@@ -102,6 +100,7 @@ public final class JfrStorage implements Storage {
         final StorageMetadataEvent event = new StorageMetadataEvent();
         event.storage = this.identifier();
         event.key = key.string();
+        event.begin();
         return this.original.metadata(key)
             .thenApply(
                 res -> {
