@@ -7,6 +7,7 @@ package com.artipie.settings;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.factory.Storages;
+import com.artipie.jfr.JfrStorage;
 import com.google.common.base.Strings;
 
 /**
@@ -40,6 +41,8 @@ public final class YamlStorage {
         if (Strings.isNullOrEmpty(type)) {
             throw new IllegalArgumentException("Storage type cannot be null or empty.");
         }
-        return new Storages().newStorage(type, this.yaml);
+        return new JfrStorage(
+            new Storages().newStorage(type, this.yaml)
+        );
     }
 }
