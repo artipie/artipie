@@ -1,5 +1,6 @@
   * [[Introduction|Home]]
-  * [[Quickstart with docker-compose|DockerCompose]] 
+  * [[Quickstart with docker-compose|DockerCompose]]
+  * [[Dashboard|Dashboard]]
   * Configuration
     * [[Main Artipie configuration|Configuration]]
     * [[Artipie management REST API|Rest-api]]
