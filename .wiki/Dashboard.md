@@ -1,8 +1,8 @@
 # Artipie dashboard
 
-The Artipie provides [front-end](github.com/artipie/front) web application to manage repositories using a web-browser.<br/>
+The Artipie provides [front-end](https://github.com/artipie/front) web application to manage repositories using a web-browser.<br/>
 The Artipie front-end provides a convenient dashboard with UI pages for managing repositories.<br/>
-Artipie front-end is distributed as [Docker image](hub.docker.com/r/artipie/front) and as fat jar.
+Artipie front-end is distributed as [Docker image](https://hub.docker.com/r/artipie/front) and as fat jar.
 The jar file can be downloaded on GitHub [releases page](https://github.com/artipie/front/releases).
 
 The Artipie front-end is independent part of Artipie project that interacts with Artipie server by using [REST-API services](./Rest-api) provided by Artipie server.
@@ -53,7 +53,7 @@ To save a new repository configuration please click `Add repository` button.
 
 Follow [this link](./Configuration-Repository) to know all the technical details about supported repositories and settings.
 
-[[/images/dashboard/repository_create|Create repository]]
+[[/images/dashboard/repository_create.jpg|Create repository]]
 
 ## Edit repository
 To edit existing repository please click on `repository name` on the `Repository list` page.
@@ -65,7 +65,7 @@ To save the repository configuration please click `Update` button.
 
 Follow [this link](./Configuration-Repository) to know all the technical details about supported repositories and settings.
 
-[[/images/dashboard/repository_edit|Edit repository]]
+[[/images/dashboard/repository_edit.jpg|Edit repository]]
 
 ## Remove a repository
 To remove existing repository please click `Remove` button on `Edit repository` page.
