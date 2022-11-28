@@ -10,22 +10,16 @@ import jdk.jfr.Label;
 import jdk.jfr.Name;
 
 /**
- * Storage event for the {@code value} operation.
+ * Storage event for the {@code exclusively} operation.
  *
  * @since 0.28.0
  * @checkstyle JavadocVariableCheck (500 lines)
  * @checkstyle VisibilityModifierCheck (500 lines)
- * @checkstyle MemberNameCheck (500 lines)
  */
-@Name("artipie.StorageValue")
-@Label("Storage Get")
+@Name("artipie.StorageExclusively")
+@Label("Storage Exclusively")
 @Category({"Artipie", "Storage"})
-@Description("Get value from a storage")
-public final class StorageValueEvent extends AbstractStorageEvent {
+@Description("Runs operation exclusively for specified key")
+public final class StorageExclusivelyEvent extends AbstractStorageEvent {
 
-    @Label("Chunks Count")
-    public int chunks;
-
-    @Label("Value Size")
-    public long size;
 }

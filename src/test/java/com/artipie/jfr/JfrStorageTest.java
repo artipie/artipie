@@ -11,6 +11,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import io.reactivex.Flowable;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import jdk.jfr.consumer.RecordedEvent;
@@ -29,7 +30,13 @@ import org.junit.jupiter.api.Test;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle LocalFinalVariableNameCheck (500 lines)
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ProhibitPlainJunitAssertionsRule"})
+@SuppressWarnings(
+    {
+        "PMD.AvoidDuplicateLiterals",
+        "PMD.ProhibitPlainJunitAssertionsRule",
+        "PMD.TooManyMethods"
+    }
+)
 class JfrStorageTest {
     /**
      * Random one for all tests.
@@ -97,6 +104,20 @@ class JfrStorageTest {
             () -> this.storage.deleteAll(base)
         );
         assertEvent(event, base.string());
+    }
+
+    @Test
+    void shouldPublishStorageExclusivelyEventWhenExclusively() {
+        final Key key = new Key.From("test-Exclusively");
+        this.storage.save(key, content(1024, 2));
+        final RecordedEvent event = process(
+            "artipie.StorageExclusively",
+            () -> this.storage.exclusively(
+                key,
+                stor -> CompletableFuture.allOf()
+            )
+        );
+        assertEvent(event, key.string());
     }
 
     @Test

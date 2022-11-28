@@ -10,7 +10,7 @@ import jdk.jfr.Label;
 import jdk.jfr.Name;
 
 /**
- * Storage event for the move operation.
+ * Storage event for the {@code move} operation.
  *
  * @since 0.28.0
  * @checkstyle JavadocVariableCheck (500 lines)

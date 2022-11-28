@@ -17,6 +17,7 @@ import java.util.function.Function;
  * Wrapper for a Storage that generates JFR events for operations.
  *
  * @since 0.28.0
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class JfrStorage implements Storage {
 
@@ -124,7 +125,17 @@ public final class JfrStorage implements Storage {
     @Override
     public <T> CompletionStage<T> exclusively(final Key key,
         final Function<Storage, CompletionStage<T>> function) {
-        return this.original.exclusively(key, function);
+        final StorageExclusivelyEvent event = new StorageExclusivelyEvent();
+        event.storage = this.identifier();
+        event.key = key.string();
+        event.begin();
+        return this.original.exclusively(key, function)
+            .thenApply(
+                res -> {
+                    event.commit();
+                    return res;
+                }
+            );
     }
 
     @Override

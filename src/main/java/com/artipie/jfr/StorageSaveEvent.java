@@ -10,7 +10,7 @@ import jdk.jfr.Label;
 import jdk.jfr.Name;
 
 /**
- * Storage event for the save operation.
+ * Storage event for the {@code save} operation.
  *
  * @since 0.28.0
  * @checkstyle VisibilityModifierCheck (500 lines)
