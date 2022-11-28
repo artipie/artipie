@@ -4,8 +4,10 @@
  */
 package com.artipie.micrometer;
 
+import com.artipie.asto.Content;
 import io.micrometer.core.instrument.DistributionSummary;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -17,12 +19,12 @@ import org.reactivestreams.Subscription;
  * <a href="https://micrometer.io/docs/concepts#_distribution_summaries">Docs</a>.
  * @since 0.28
  */
-public final class MicrometerPublisher implements Publisher<ByteBuffer> {
+public final class MicrometerPublisher implements Content {
 
     /**
      * Origin publisher.
      */
-    private final Publisher<ByteBuffer> origin;
+    private final Content origin;
 
     /**
      * Micrometer distribution summary.
@@ -31,18 +33,32 @@ public final class MicrometerPublisher implements Publisher<ByteBuffer> {
 
     /**
      * Ctor.
+     * @param origin Origin content
+     * @param summary Micrometer distribution summary
+     */
+    public MicrometerPublisher(final Content origin, final DistributionSummary summary) {
+        this.origin = origin;
+        this.summary = summary;
+    }
+
+    /**
+     * Ctor.
      * @param origin Origin publisher
      * @param summary Micrometer distribution summary
      */
     public MicrometerPublisher(final Publisher<ByteBuffer> origin,
         final DistributionSummary summary) {
-        this.origin = origin;
-        this.summary = summary;
+        this(new Content.From(origin), summary);
     }
 
     @Override
     public void subscribe(final Subscriber<? super ByteBuffer> subscriber) {
         this.origin.subscribe(new MicrometerSubscriber(subscriber, this.summary));
+    }
+
+    @Override
+    public Optional<Long> size() {
+        return this.origin.size();
     }
 
     /**
