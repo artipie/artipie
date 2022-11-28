@@ -7,6 +7,7 @@ package com.artipie.composer;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
+import org.junit.Ignore;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -16,8 +17,10 @@ import org.testcontainers.containers.BindMode;
  * Integration test for Composer repo.
  * @since 0.18
  * @checkstyle MagicNumberCheck (500 lines)
+ * @checkstyle TrailingCommentCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Ignore //todo https://github.com/artipie/artipie/issues/1193
 final class PhpComposerITCase {
     /**
      * Package for installation.
