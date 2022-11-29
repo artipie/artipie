@@ -6,7 +6,6 @@ package com.artipie.settings.cache;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.ArtipieException;
-import com.artipie.MeasuredStorage;
 import com.artipie.asto.Storage;
 import com.artipie.asto.misc.UncheckedScalar;
 import com.artipie.misc.ArtipieProperties;
@@ -62,9 +61,7 @@ final class CachedStorages implements StorageConfigCache {
         return new UncheckedScalar<>(
             () -> this.storages.get(
                 meta,
-                () -> new MeasuredStorage(
-                    new YamlStorage(meta.storageMeta()).storage()
-                )
+                () -> new YamlStorage(meta.storageMeta()).storage()
             )
         ).value();
     }

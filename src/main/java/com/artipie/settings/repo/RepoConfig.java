@@ -6,7 +6,6 @@
 package com.artipie.settings.repo;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.MeasuredStorage;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.auth.YamlPermissions;
@@ -122,7 +121,7 @@ public final class RepoConfig {
      * @return Async storage for repo
      */
     public Storage storage() {
-        return this.storageOpt().map(MeasuredStorage::new).orElseThrow(
+        return this.storageOpt().orElseThrow(
             () -> new IllegalStateException("Storage is not configured")
         );
     }

@@ -14,10 +14,6 @@ import com.artipie.http.rt.RtPath;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
-import com.artipie.http.slice.SliceOptional;
-import com.artipie.metrics.MetricSlice;
-import com.artipie.metrics.MetricsContext;
-import com.artipie.metrics.publish.MetricsOutputType;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.Settings;
 import java.util.Optional;
@@ -54,42 +50,14 @@ public final class MainSlice extends Slice.Wrap {
      *
      * @param http HTTP client.
      * @param settings Artipie settings.
-     * @param mctx Metrics context.
      */
-    public MainSlice(
-        final ClientSlices http,
-        final Settings settings,
-        final MetricsContext mctx) {
+    public MainSlice(final ClientSlices http, final Settings settings) {
         super(
             new SliceRoute(
                 MainSlice.EMPTY_PATH,
                 new RtRulePath(
                     new RtRule.ByPath(Pattern.compile("/\\.health")),
                     new HealthSlice(settings)
-                ),
-                new RtRulePath(
-                    new RtRule.All(
-                        new ByMethodsRule(RqMethod.GET),
-                        new RtRule.ByPath("/.metrics")
-                    ),
-                    new SliceOptional<>(
-                        "",
-                        ign -> mctx.enabledMetricsOutput(MetricsOutputType.ASTO),
-                        yaml -> new MetricSlice(
-                            mctx.metricsStorage()
-                        )
-                    )
-                ),
-                new RtRulePath(
-                    new RtRule.All(
-                        new ByMethodsRule(RqMethod.GET),
-                        new RtRule.ByPath("/prometheus/metrics")
-                    ),
-                    new SliceOptional<>(
-                        "",
-                        ign -> mctx.enabledMetricsOutput(MetricsOutputType.PROMETHEUS),
-                        available -> new PrometheusSlice(mctx.getMetrics())
-                    )
                 ),
                 new RtRulePath(
                     new RtRule.All(
