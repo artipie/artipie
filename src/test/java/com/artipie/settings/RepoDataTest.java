@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -27,8 +28,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link RepoData}.
  * @since 0.1
+ * @checkstyle TrailingCommentCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
+@Ignore //todo https://github.com/artipie/artipie/issues/1191
 class RepoDataTest {
 
     /**

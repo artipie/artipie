@@ -5,7 +5,6 @@
 package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.asto.fs.FileStorage;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -29,8 +28,8 @@ class YamlStorageTest {
             Yaml.createYamlInput("type: fs\npath: /artipie/storage\n").readYamlMapping()
         );
         MatcherAssert.assertThat(
-            settings.storage(),
-            Matchers.instanceOf(FileStorage.class)
+            settings.storage().identifier(),
+            Matchers.startsWith("FS:")
         );
     }
 
