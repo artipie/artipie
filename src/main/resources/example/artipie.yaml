@@ -13,6 +13,5 @@ meta:
   layout: org
   base_url: http://central.artipie.com/
   metrics:
-    -
-      type: log
-      interval: 60
+    port: 8087
+    endpoint: "/metrics"

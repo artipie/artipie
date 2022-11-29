@@ -4,10 +4,9 @@
  */
 package com.artipie.http;
 
-import com.artipie.MeasuredSlice;
 import com.artipie.http.slice.LoggingSlice;
-import com.artipie.metrics.MetricsContext;
 import com.artipie.micrometer.MicrometerSlice;
+import com.artipie.settings.MetricsContext;
 import java.util.logging.Level;
 
 /**
@@ -17,7 +16,6 @@ import java.util.logging.Level;
  * and response is given back to caller.
  *
  * @since 0.11
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class BaseSlice extends Slice.Wrap {
 
@@ -30,15 +28,7 @@ public final class BaseSlice extends Slice.Wrap {
     public BaseSlice(final MetricsContext mctx, final Slice origin) {
         super(
             BaseSlice.wrapToBaseMetricsSlices(
-                mctx,
-                new SafeSlice(
-                    new MeasuredSlice(
-                        new LoggingSlice(
-                            Level.INFO,
-                            origin
-                        )
-                    )
-                )
+                mctx, new SafeSlice(new LoggingSlice(Level.INFO, origin))
             )
         );
     }
