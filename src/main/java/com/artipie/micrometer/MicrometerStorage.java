@@ -11,6 +11,7 @@ import com.artipie.asto.Storage;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import io.vertx.micrometer.backends.BackendRegistries;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -52,6 +53,14 @@ public final class MicrometerStorage implements Storage {
     public MicrometerStorage(final Storage origin, final MeterRegistry registry) {
         this.origin = origin;
         this.registry = registry;
+    }
+
+    /**
+     * Ctor.
+     * @param origin Origin source storage
+     */
+    public MicrometerStorage(final Storage origin) {
+        this(origin, BackendRegistries.getDefaultNow());
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.auth.YamlPermissions;
 import com.artipie.http.auth.Permissions;
+import com.artipie.micrometer.MicrometerStorage;
 import com.artipie.settings.StorageAliases;
 import com.artipie.settings.StorageYamlConfig;
 import java.net.MalformedURLException;
@@ -21,7 +22,6 @@ import java.util.stream.Stream;
 /**
  * Repository config.
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ParameterNumberCheck (500 lines)
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
@@ -43,15 +43,37 @@ public final class RepoConfig {
     private final YamlMapping yaml;
 
     /**
+     * Are metrics enabled?
+     */
+    private final boolean metrics;
+
+    /**
      * Ctor.
      * @param storages Repository storage aliases
      * @param prefix Storage prefix
      * @param yaml Config yaml
+     * @param metrics Are metrics enabled?
      */
-    public RepoConfig(final StorageAliases storages, final Key prefix, final YamlMapping yaml) {
+    public RepoConfig(
+        final StorageAliases storages, final Key prefix, final YamlMapping yaml,
+        final boolean metrics
+    ) {
         this.prefix = prefix;
         this.yaml = yaml;
         this.storages = storages;
+        this.metrics = metrics;
+    }
+
+    /**
+     * Ctor for test usage only.
+     * @param storages Repository storage aliases
+     * @param prefix Storage prefix
+     * @param yaml Config yaml
+     */
+    public RepoConfig(
+        final StorageAliases storages, final Key prefix, final YamlMapping yaml
+    ) {
+        this(storages, prefix, yaml, false);
     }
 
     /**
@@ -134,6 +156,13 @@ public final class RepoConfig {
     public Optional<Storage> storageOpt() {
         return Optional.ofNullable(this.repoConfig().value("storage")).map(
             node -> new StorageYamlConfig(node, this.storages).subStorage(this.prefix)
+        ).map(
+            asto -> {
+                if (this.metrics) {
+                    asto = new MicrometerStorage(asto);
+                }
+                return asto;
+            }
         );
     }
 

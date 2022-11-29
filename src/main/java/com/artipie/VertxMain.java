@@ -7,7 +7,6 @@ package com.artipie;
 
 import com.artipie.api.RestApi;
 import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -185,15 +184,15 @@ public final class VertxMain {
     private void startRepos(
         final Vertx vertx, final Settings settings, final int mport, final MetricsContext mctx
     ) {
-        final Storage storage = settings.repoConfigsStorage();
-        final Collection<RepoConfig> configs = storage.list(Key.ROOT).thenApply(
-            keys -> keys.stream().map(ConfigFile::new)
-                .filter(Predicate.not(ConfigFile::isSystem).and(ConfigFile::isYamlOrYml))
-                .map(ConfigFile::name)
-                .map(name -> new RepositoriesFromStorage(storage).config(name))
-                .map(stage -> stage.toCompletableFuture().join())
-                .collect(Collectors.toList())
-        ).toCompletableFuture().join();
+        final Collection<RepoConfig> configs = settings.repoConfigsStorage().list(Key.ROOT)
+            .thenApply(
+                keys -> keys.stream().map(ConfigFile::new)
+                    .filter(Predicate.not(ConfigFile::isSystem).and(ConfigFile::isYamlOrYml))
+                    .map(ConfigFile::name)
+                    .map(name -> new RepositoriesFromStorage(settings).config(name))
+                    .map(stage -> stage.toCompletableFuture().join())
+                    .collect(Collectors.toList())
+            ).toCompletableFuture().join();
         for (final RepoConfig repo : configs) {
             try {
                 repo.port().ifPresentOrElse(

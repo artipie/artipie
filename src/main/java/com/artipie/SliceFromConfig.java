@@ -193,7 +193,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                             .stream().map(node -> node.asScalar().value())
                             .map(
                                 name -> new AsyncSlice(
-                                    new RepositoriesFromStorage(settings.storage()).config(name)
+                                    new RepositoriesFromStorage(settings).config(name)
                                         .thenApply(
                                             sub -> new SliceFromConfig(
                                                 http, settings, sub, aliases, standalone
