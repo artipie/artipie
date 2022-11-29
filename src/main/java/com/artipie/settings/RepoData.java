@@ -6,7 +6,6 @@ package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlInput;
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.RepositoryName;
 import com.artipie.asto.Copy;
 import com.artipie.asto.Key;
@@ -15,7 +14,6 @@ import com.artipie.asto.SubStorage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.misc.UncheckedIOFunc;
 import com.jcabi.log.Logger;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -110,21 +108,11 @@ public final class RepoData {
             .thenApply(new UncheckedIOFunc<>(YamlInput::readYamlMapping))
             .thenApply(yaml -> yaml.yamlMapping("repo"))
             .thenCompose(
-                yaml -> {
-                    final CompletableFuture<Storage> ret;
-                    final YamlMapping res = yaml.yamlMapping(RepoData.STORAGE);
-                    if (res == null) {
-                        ret = StorageAliases.find(this.storage, new Key.From(rname.toString()))
-                            .thenApply(
-                                aliases ->
-                                    new StorageYamlConfig(yaml.value(RepoData.STORAGE), aliases)
-                                        .storage()
-                            );
-                    } else {
-                        ret = CompletableFuture.completedFuture(new YamlStorage(res).storage());
-                    }
-                    return ret;
-                }
+                yaml -> StorageAliases.find(this.storage, new Key.From(rname.toString()))
+                    .thenApply(
+                        aliases -> new StorageYamlConfig(yaml.value(RepoData.STORAGE), aliases)
+                            .storage()
+                    )
             );
     }
 }

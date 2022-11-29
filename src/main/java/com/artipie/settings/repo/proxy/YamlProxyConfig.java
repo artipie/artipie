@@ -6,7 +6,6 @@ package com.artipie.settings.repo.proxy;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.MeasuredStorage;
 import com.artipie.asto.Key;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.Authenticator;
@@ -154,11 +153,9 @@ public final class YamlProxyConfig implements ProxyConfig {
             return Optional.ofNullable(this.source.yamlMapping("cache")).flatMap(
                 root -> Optional.ofNullable(root.value("storage")).map(
                     node -> new YamlProxyStorage(
-                        new MeasuredStorage(
-                            new StorageYamlConfig(
-                                node, YamlProxyConfig.this.storages
-                            ).subStorage(YamlProxyConfig.this.prefix)
-                        )
+                        new StorageYamlConfig(
+                            node, YamlProxyConfig.this.storages
+                        ).subStorage(YamlProxyConfig.this.prefix)
                     )
                 )
             );
