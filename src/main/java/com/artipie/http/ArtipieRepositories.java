@@ -6,7 +6,6 @@ package com.artipie.http;
 
 import com.artipie.SliceFromConfig;
 import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rs.RsWithBody;
@@ -53,13 +52,12 @@ public final class ArtipieRepositories {
      * @return Repository slice
      */
     public Slice slice(final Key name, final int port) {
-        final Storage storage = this.settings.repoConfigsStorage();
         return new AsyncSlice(
-            new ConfigFile(name).existsIn(storage).thenCompose(
+            new ConfigFile(name).existsIn(this.settings.repoConfigsStorage()).thenCompose(
                 exists -> {
                     final CompletionStage<Slice> res;
                     if (exists) {
-                        res = this.resolve(storage, name, port);
+                        res = this.resolve(name, port);
                     } else {
                         res = CompletableFuture.completedFuture(
                             new SliceSimple(new RsRepoNotFound(name))
@@ -73,19 +71,14 @@ public final class ArtipieRepositories {
 
     /**
      * Resolve async {@link Slice} by provided configuration.
-     * @param storage Artipie config storage
      * @param name Repository name
      * @param port Repository port
      * @return Async slice for repo
      * @checkstyle ParameterNumberCheck (2 lines)
      */
-    private CompletionStage<Slice> resolve(
-        final Storage storage,
-        final Key name,
-        final int port
-    ) {
-        return new RepositoriesFromStorage(storage).config(name.string()).thenCombine(
-            StorageAliases.find(storage, name),
+    private CompletionStage<Slice> resolve(final Key name, final int port) {
+        return new RepositoriesFromStorage(this.settings).config(name.string()).thenCombine(
+            StorageAliases.find(this.settings.repoConfigsStorage(), name),
             (config, aliases) -> {
                 final Slice res;
                 if (config.port().isEmpty() || config.port().getAsInt() == port) {
