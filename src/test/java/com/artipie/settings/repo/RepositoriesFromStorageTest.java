@@ -9,7 +9,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ValueNotFoundException;
-import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.settings.Settings;
 import com.artipie.settings.StorageAliases;
 import java.nio.file.Path;
 import java.util.concurrent.CompletionException;
@@ -46,9 +46,15 @@ final class RepositoriesFromStorageTest {
      */
     private Storage storage;
 
+    /**
+     * Artipie settings.
+     */
+    private Settings settings;
+
     @BeforeEach
     void setUp() {
-        this.storage = new InMemoryStorage();
+        this.settings = new Settings.Fake();
+        this.storage = this.settings.repoConfigsStorage();
     }
 
     @ParameterizedTest
@@ -158,7 +164,7 @@ final class RepositoriesFromStorageTest {
     }
 
     private RepoConfig repoConfig() {
-        return new RepositoriesFromStorage(this.storage)
+        return new RepositoriesFromStorage(this.settings)
             .config(RepositoriesFromStorageTest.REPO)
             .toCompletableFuture().join();
     }
