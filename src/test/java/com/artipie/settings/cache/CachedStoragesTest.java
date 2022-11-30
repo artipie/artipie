@@ -5,6 +5,7 @@
 package com.artipie.settings.cache;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
 import com.artipie.settings.Settings;
@@ -27,7 +28,7 @@ final class CachedStoragesTest {
     /**
      * Cache for users.
      */
-    private Cache<CachedStorages.Metadata, Storage> cache;
+    private Cache<YamlMapping, Storage> cache;
 
     @BeforeEach
     void setUp() {

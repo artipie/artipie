@@ -53,7 +53,7 @@ public final class SettingsFromPath {
         final Settings settings = new YamlSettings(
             Yaml.createYamlInput(this.path.toFile()).readYamlMapping(), caches
         );
-        final BlockingStorage bsto = new BlockingStorage(settings.storage());
+        final BlockingStorage bsto = new BlockingStorage(settings.configStorage());
         final Key init = new Key.From(".artipie", "initialized");
         if (initialize && !bsto.exists(init)) {
             final List<String> resources = Arrays.asList(

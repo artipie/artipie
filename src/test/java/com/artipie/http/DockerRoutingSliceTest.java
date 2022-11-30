@@ -131,7 +131,7 @@ final class DockerRoutingSliceTest {
         }
 
         @Override
-        public Storage storage() {
+        public Storage configStorage() {
             throw new UnsupportedOperationException();
         }
 

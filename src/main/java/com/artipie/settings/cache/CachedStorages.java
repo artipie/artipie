@@ -7,7 +7,6 @@ package com.artipie.settings.cache;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
-import com.artipie.asto.misc.UncheckedScalar;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
 import com.artipie.settings.Settings;
@@ -15,8 +14,7 @@ import com.artipie.settings.YamlStorage;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -24,11 +22,11 @@ import java.util.concurrent.TimeUnit;
  * in Artipie settings using {@link LoadingCache}.
  * @since 0.23
  */
-final class CachedStorages implements StorageConfigCache {
+final class CachedStorages implements StoragesCache {
     /**
      * Cache for storages settings.
      */
-    private final Cache<Metadata, Storage> storages;
+    private final Cache<YamlMapping, Storage> storages;
 
     /**
      * Ctor.
@@ -51,19 +49,31 @@ final class CachedStorages implements StorageConfigCache {
      * Ctor.
      * @param cache Cache for storages settings
      */
-    CachedStorages(final Cache<Metadata, Storage> cache) {
+    CachedStorages(final Cache<YamlMapping, Storage> cache) {
         this.storages = cache;
     }
 
     @Override
     public Storage storage(final Settings settings) {
-        final Metadata meta = new Metadata(settings);
-        return new UncheckedScalar<>(
-            () -> this.storages.get(
-                meta,
-                () -> new YamlStorage(meta.storageMeta()).storage()
-            )
-        ).value();
+        final YamlMapping yaml = settings.meta().yamlMapping("storage");
+        if (yaml == null) {
+            throw new ArtipieException(
+                String.format("Failed to find storage configuration in \n%s", settings)
+            );
+        }
+        return this.storage(yaml);
+    }
+
+    @Override
+    public Storage storage(final YamlMapping yaml) {
+        try {
+            return this.storages.get(
+                yaml,
+                () -> new YamlStorage(yaml).storage()
+            );
+        } catch (final ExecutionException err) {
+            throw new ArtipieException(err);
+        }
     }
 
     @Override
@@ -77,66 +87,5 @@ final class CachedStorages implements StorageConfigCache {
             "%s(size=%d)",
             this.getClass().getSimpleName(), this.storages.size()
         );
-    }
-
-    /**
-     * Extra class for using metadata information in static section.
-     * @since 0.22
-     */
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-    static final class Metadata {
-        /**
-         * Settings of Artipie server.
-         */
-        private final Settings csettings;
-
-        /**
-         * Ctor.
-         * @param settings Settings
-         */
-        Metadata(final Settings settings) {
-            this.csettings = settings;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            final boolean res;
-            if (this == obj) {
-                res = true;
-            } else if (obj == null || this.getClass() != obj.getClass()) {
-                res = false;
-            } else {
-                final Metadata meta = (Metadata) obj;
-                res = Objects.equals(this.storageMeta(), meta.storageMeta());
-            }
-            return res;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(this.storageMeta());
-        }
-
-        /**
-         * Obtains settings.
-         * @return Settings.
-         */
-        Settings settings() {
-            return this.csettings;
-        }
-
-        /**
-         * Obtains meta information about storage configuration.
-         * @return Information about storage configuration.
-         */
-        YamlMapping storageMeta() {
-            return Optional.ofNullable(
-                this.csettings.meta().yamlMapping("storage")
-            ).orElseThrow(
-                () -> new ArtipieException(
-                    String.format("Failed to find storage configuration in \n%s", this.csettings)
-                )
-            );
-        }
     }
 }

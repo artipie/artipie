@@ -7,7 +7,7 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.misc.UncheckedConsumer;
 import com.artipie.settings.StorageAliases;
-import com.artipie.settings.cache.StorageConfigCache;
+import com.artipie.settings.cache.StoragesCache;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -113,7 +113,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Storages cache was invalidated",
-                    ((StorageConfigCache.Fake) this.settingsCaches().storageConfig())
+                    ((StoragesCache.Fake) this.settingsCaches().storageConfig())
                         .wasInvalidated()
                 );
             }
@@ -155,7 +155,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Storages cache was invalidated",
-                    ((StorageConfigCache.Fake) this.settingsCaches().storageConfig())
+                    ((StoragesCache.Fake) this.settingsCaches().storageConfig())
                         .wasInvalidated()
                 );
             }
@@ -202,7 +202,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Storages cache was invalidated",
-                    ((StorageConfigCache.Fake) this.settingsCaches().storageConfig())
+                    ((StoragesCache.Fake) this.settingsCaches().storageConfig())
                         .wasInvalidated()
                 );
             }
@@ -248,7 +248,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Storages cache was invalidated",
-                    ((StorageConfigCache.Fake) this.settingsCaches().storageConfig())
+                    ((StoragesCache.Fake) this.settingsCaches().storageConfig())
                         .wasInvalidated()
                 );
             }
@@ -287,7 +287,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Storages cache was invalidated",
-                    ((StorageConfigCache.Fake) this.settingsCaches().storageConfig())
+                    ((StoragesCache.Fake) this.settingsCaches().storageConfig())
                         .wasInvalidated()
                 );
             }

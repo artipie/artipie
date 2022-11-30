@@ -13,7 +13,7 @@ public interface SettingsCaches {
      * Obtains cache for configurations of storages.
      * @return Cache for configurations of storages.
      */
-    StorageConfigCache storageConfig();
+    StoragesCache storageConfig();
 
     /**
      * Obtains cache for configurations of credentials.
@@ -40,7 +40,7 @@ public interface SettingsCaches {
         /**
          * Cache for configurations of storages.
          */
-        private final StorageConfigCache strgcache;
+        private final StoragesCache strgcache;
 
         /**
          * Cache for configurations of credentials.
@@ -57,7 +57,7 @@ public interface SettingsCaches {
         }
 
         @Override
-        public StorageConfigCache storageConfig() {
+        public StoragesCache storageConfig() {
             return this.strgcache;
         }
 
@@ -85,7 +85,7 @@ public interface SettingsCaches {
         /**
          * Cache for configurations of storages.
          */
-        private final StorageConfigCache strgcache;
+        private final StoragesCache strgcache;
 
         /**
          * Cache for configurations of credentials.
@@ -97,12 +97,12 @@ public interface SettingsCaches {
          */
         public Fake() {
             this.authcache = new AuthCache.Fake();
-            this.strgcache = new StorageConfigCache.Fake();
+            this.strgcache = new StoragesCache.Fake();
             this.credscache = new CredsConfigCache.Fake();
         }
 
         @Override
-        public StorageConfigCache storageConfig() {
+        public StoragesCache storageConfig() {
             return this.strgcache;
         }
 

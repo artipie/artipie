@@ -77,7 +77,7 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public Storage storage() {
+    public Storage configStorage() {
         return this.caches.storageConfig().storage(this);
     }
 
@@ -101,8 +101,8 @@ public final class YamlSettings implements Settings {
     @Override
     public Storage repoConfigsStorage() {
         return Optional.ofNullable(this.meta().string("repo_configs"))
-            .<Storage>map(str -> new SubStorage(new Key.From(str), this.storage()))
-            .orElse(this.storage());
+            .<Storage>map(str -> new SubStorage(new Key.From(str), this.configStorage()))
+            .orElse(this.configStorage());
     }
 
     @Override
@@ -212,7 +212,7 @@ public final class YamlSettings implements Settings {
             );
             final String path = mapping.string(YamlSettings.NODE_PATH);
             if (path != null) {
-                final Storage storage = settings.storage();
+                final Storage storage = settings.configStorage();
                 final KeyFromPath key = new KeyFromPath(path);
                 res = storage.exists(key).thenApply(
                     exists -> {

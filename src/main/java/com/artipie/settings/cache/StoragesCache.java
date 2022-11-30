@@ -4,6 +4,7 @@
  */
 package com.artipie.settings.cache;
 
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.settings.Settings;
@@ -13,14 +14,24 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Cache for storages with similar configurations in Artipie settings.
  * @since 0.23
  */
-public interface StorageConfigCache {
+public interface StoragesCache {
     /**
      * Finds storage by specified in settings configuration cache or creates
      * a new item and caches it.
+     *
      * @param settings Artipie settings
      * @return Storage
      */
     Storage storage(Settings settings);
+
+    /**
+     * Finds storage by specified in settings configuration cache or creates
+     * a new item and caches it.
+     *
+     * @param yaml Storage settings
+     * @return Storage
+     */
+    Storage storage(YamlMapping yaml);
 
     /**
      * Invalidate all items in cache.
@@ -28,11 +39,11 @@ public interface StorageConfigCache {
     void invalidateAll();
 
     /**
-     * Fake implementation of {@link StorageConfigCache} which
+     * Fake implementation of {@link StoragesCache} which
      * always return in-memory storage.
      * @since 0.22
      */
-    class Fake implements StorageConfigCache {
+    class Fake implements StoragesCache {
         /**
          * Storage.
          */
@@ -53,6 +64,11 @@ public interface StorageConfigCache {
 
         @Override
         public Storage storage(final Settings ignored) {
+            return this.storage;
+        }
+
+        @Override
+        public Storage storage(final YamlMapping yaml) {
             return this.storage;
         }
 

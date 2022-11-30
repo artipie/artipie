@@ -80,7 +80,7 @@ class YamlSettingsTest {
             new SettingsCaches.All()
         );
         MatcherAssert.assertThat(
-            settings.storage(),
+            settings.configStorage(),
             Matchers.notNullValue()
         );
     }
@@ -261,7 +261,7 @@ class YamlSettingsTest {
             Yaml.createYamlInput(yaml).readYamlMapping(),
             new SettingsCaches.All()
         );
-        Assertions.assertThrows(RuntimeException.class, settings::storage);
+        Assertions.assertThrows(RuntimeException.class, settings::configStorage);
     }
 
     private String credentials() {
