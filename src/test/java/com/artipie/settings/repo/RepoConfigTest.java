@@ -165,7 +165,8 @@ public final class RepoConfigTest {
                             "storage", Yaml.createYamlSequenceBuilder()
                                 .add("wrong because sequence").build()
                         ).build()
-                ).build()
+                ).build(),
+                false
             ).storage()
         );
     }
@@ -191,7 +192,8 @@ public final class RepoConfigTest {
                     .add("type", "maven")
                     .add(name, value)
                     .build()
-            ).build()
+            ).build(),
+            false
         );
     }
 
@@ -199,7 +201,7 @@ public final class RepoConfigTest {
         throws IOException {
         return new RepoConfig(
             StorageAliases.EMPTY, new Key.From(name),
-            Yaml.createYamlInput(new TestResource(name).asInputStream()).readYamlMapping()
+            Yaml.createYamlInput(new TestResource(name).asInputStream()).readYamlMapping(), false
         );
     }
 }

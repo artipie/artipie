@@ -14,6 +14,7 @@ import com.artipie.asto.ext.PublisherAs;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
 import com.artipie.settings.ConfigFile;
+import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.StorageAliases;
 import com.google.common.cache.CacheBuilder;
@@ -75,31 +76,29 @@ public final class RepositoriesFromStorage implements Repositories {
     }
 
     /**
-     * Storage.
+     * Artipie settings.
      */
-    private final Storage storage;
+    private final Settings settings;
 
     /**
      * Ctor.
      *
-     * @param storage Storage.
+     * @param settings Artipie settings.
      */
-    public RepositoriesFromStorage(final Storage storage) {
-        this.storage = storage;
+    public RepositoriesFromStorage(final Settings settings) {
+        this.settings = settings;
     }
 
     @Override
     public CompletionStage<RepoConfig> config(final String name) {
         final FilesContent pair = new FilesContent(
-            new Key.From(new ConfigFile(name).name()), this.storage
+            new Key.From(new ConfigFile(name).name()), this.settings.repoConfigsStorage()
         );
         return Single.zip(
             RepositoriesFromStorage.configs.getUnchecked(pair),
             RepositoriesFromStorage.aliases.getUnchecked(pair),
             (data, alias) -> SingleInterop.fromFuture(
-                RepositoriesFromStorage.fromPublisher(
-                    alias, pair.key, new Content.From(data.getBytes())
-                )
+                this.fromPublisher(alias, pair.key, new Content.From(data.getBytes()))
             )
         ).flatMap(self -> self).to(SingleInterop.get());
     }
@@ -111,7 +110,7 @@ public final class RepositoriesFromStorage implements Repositories {
      * @param pub Yaml content publisher
      * @return Completion stage of yaml
      */
-    private static CompletionStage<RepoConfig> fromPublisher(
+    private CompletionStage<RepoConfig> fromPublisher(
         final StorageAliases storages, final Key prefix, final Publisher<ByteBuffer> pub
     ) {
         return new Concatenation(pub).single()
@@ -120,7 +119,11 @@ public final class RepositoriesFromStorage implements Repositories {
             .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config:\n%s", yaml))
             .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
             .to(SingleInterop.get())
-            .thenApply(yaml -> new RepoConfig(storages, prefix, yaml));
+            .thenApply(
+                yaml -> new RepoConfig(
+                    storages, prefix, yaml, new MetricsContext(this.settings.meta()).enabled()
+                )
+            );
     }
 
     /**

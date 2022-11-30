@@ -6,10 +6,9 @@ package com.artipie.settings.repo;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
+import com.artipie.settings.Settings;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,11 +24,11 @@ final class RepositoriesFromStorageCacheTest {
     /**
      * Storage.
      */
-    private Storage storage;
+    private Settings settings;
 
     @BeforeEach
     void setUp() {
-        this.storage = new InMemoryStorage();
+        this.settings = new Settings.Fake();
     }
 
     @Test
@@ -37,12 +36,12 @@ final class RepositoriesFromStorageCacheTest {
         final Key key = new Key.From("some-repo.yaml");
         final byte[] old = "some: data".getBytes();
         final byte[] upd = "some: new data".getBytes();
-        new BlockingStorage(this.storage).save(key, old);
-        new RepositoriesFromStorage(this.storage).config(key.string())
+        new BlockingStorage(this.settings.repoConfigsStorage()).save(key, old);
+        new RepositoriesFromStorage(this.settings).config(key.string())
             .toCompletableFuture().join();
-        new BlockingStorage(this.storage).save(key, upd);
+        new BlockingStorage(this.settings.repoConfigsStorage()).save(key, upd);
         MatcherAssert.assertThat(
-            new RepositoriesFromStorage(this.storage).config(key.string())
+            new RepositoriesFromStorage(this.settings).config(key.string())
                 .toCompletableFuture().join()
                 .toString(),
             new IsEqual<>(new String(old))
@@ -53,13 +52,14 @@ final class RepositoriesFromStorageCacheTest {
     void readAliasesFromCache() {
         final Key alias = new Key.From("_storages.yaml");
         final Key config = new Key.From("bin.yaml");
-        new TestResource(alias.string()).saveTo(this.storage);
-        new BlockingStorage(this.storage).save(config, "repo:\n  storage: default".getBytes());
-        new RepositoriesFromStorage(this.storage).config(config.string())
+        new TestResource(alias.string()).saveTo(this.settings.repoConfigsStorage());
+        new BlockingStorage(this.settings.repoConfigsStorage())
+            .save(config, "repo:\n  storage: default".getBytes());
+        new RepositoriesFromStorage(this.settings).config(config.string())
             .toCompletableFuture().join();
-        this.storage.save(alias, Content.EMPTY).join();
+        this.settings.repoConfigsStorage().save(alias, Content.EMPTY).join();
         MatcherAssert.assertThat(
-            new RepositoriesFromStorage(this.storage).config(config.string())
+            new RepositoriesFromStorage(this.settings).config(config.string())
                 .toCompletableFuture().join()
                 .storageOpt().isPresent(),
             new IsEqual<>(true)
