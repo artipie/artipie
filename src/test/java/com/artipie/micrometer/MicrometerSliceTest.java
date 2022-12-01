@@ -91,13 +91,19 @@ class MicrometerSliceTest {
         MatcherAssert.assertThat(
             List.of(this.registry.getMetersAsString().split("\n")),
             Matchers.containsInAnyOrder(
-                // @checkstyle LineLengthCheck (10 lines)
-                "artipie.request.body.size(DISTRIBUTION_SUMMARY)[method='POST', route='/a/b/c']; count=0.0, total=0.0 bytes, max=0.0 bytes",
-                "artipie.request.body.size(DISTRIBUTION_SUMMARY)[method='GET', route='/same/path']; count=0.0, total=0.0 bytes, max=0.0 bytes",
-                "artipie.request.counter(COUNTER)[method='GET', route='/same/path', status='OK']; count=2.0",
-                "artipie.request.counter(COUNTER)[method='POST', route='/a/b/c', status='CONTINUE']; count=1.0",
-                "artipie.response.body.size(DISTRIBUTION_SUMMARY)[method='POST', route='/a/b/c']; count=0.0, total=0.0 bytes, max=0.0 bytes",
-                "artipie.response.body.size(DISTRIBUTION_SUMMARY)[method='GET', route='/same/path']; count=3.0, total=15.0 bytes, max=6.0 bytes"
+                // @checkstyle LineLengthCheck (20 lines)
+                Matchers.containsString("artipie.request.body.size(DISTRIBUTION_SUMMARY)[method='POST', route='/a/b/c']; count=0.0, total=0.0 bytes, max=0.0 bytes"),
+                Matchers.containsString("artipie.request.body.size(DISTRIBUTION_SUMMARY)[method='GET', route='/same/path']; count=0.0, total=0.0 bytes, max=0.0 bytes"),
+                Matchers.containsString("artipie.request.counter(COUNTER)[method='GET', route='/same/path', status='OK']; count=2.0"),
+                Matchers.containsString("artipie.request.counter(COUNTER)[method='POST', route='/a/b/c', status='CONTINUE']; count=1.0"),
+                Matchers.containsString("artipie.response.body.size(DISTRIBUTION_SUMMARY)[method='POST', route='/a/b/c']; count=0.0, total=0.0 bytes, max=0.0 bytes"),
+                Matchers.containsString("artipie.response.body.size(DISTRIBUTION_SUMMARY)[method='GET', route='/same/path']; count=3.0, total=15.0 bytes, max=6.0 bytes"),
+                Matchers.containsString("artipie.connection.accept(TIMER)[route='/a/b/c']; count=1.0"),
+                Matchers.containsString("artipie.connection.accept(TIMER)[route='/same/path']; count=2.0,"),
+                Matchers.containsString("artipie.response.send(TIMER)[route='/a/b/c']; count=1.0,"),
+                Matchers.containsString("artipie.response.send(TIMER)[route='/same/path']; count=2.0"),
+                Matchers.containsString("artipie.slice.response(TIMER)[route='/a/b/c']; count=1.0"),
+                Matchers.containsString("artipie.slice.response(TIMER)[route='/same/path']; count=2.0,")
             )
         );
     }

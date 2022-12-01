@@ -1,76 +1,54 @@
 ## Metrics
 
-// @todo #1031:30min Verify this configuration section: start Artipie locally, configure metrics (try 
-//  each type) and check how they work. Check `com.artipie.metrics` package for all details. When checking,
-//  extend this documentation with examples and details about gathered statistics.
+Artipie metrics are meant to gather incoming HTTP requests and storage operations statistic and provide it in the 
+[`Prometheus`](https://prometheus.io/) compatible format. Under the hood [Micrometer](https://micrometer.io/) is used
+to gather the metrics.
 
-Artipie metrics are meant to gather incoming HTTP requests statistic and publish it in the 
-configured format: it can be application log, [`Prometheus`](https://prometheus.io/) or/and data storage.
+Besides custom Artipie metrics, Vert.x embedded [Micrometer metrics](https://vertx.io/docs/3.9.13/vertx-micrometer-metrics/java/)
+and [JVM and system metrics](https://micrometer.io/docs/ref/jvm) are provided.
 
-Also, you can enable Vert.x embedded [Micrometer metrics](https://vertx.io/docs/3.9.13/vertx-micrometer-metrics/java/)
-to obtain HTTP server statistics in [`Prometheus`](https://prometheus.io/) compatible format.
-
-Section `metrics` of Artipie main configuration file is a yaml sequence, each item enables one of the
-metrics. Thus, several metrics can be enabled in the same time.
-
-### Logging metrics
-
-To enable some basic metrics collecting and periodic publishing to application log
-add `metrics` to `meta` section of global configuration file `/etc/artipie/artipie.yml`:
-
+To enable metrics, add section `metrics` to Artipie main configuration file:
 ```yaml
 meta:
   metrics:
-    - 
-      type: log # Metrics type, `log` to print statistics into application log
-      interval: 5 # Publishing interval in seconds, default value is 5
+    endpoint: "/metrics/vertx" # Path of the endpoint, starting with `/`, where the metrics will be served
+    port: 8087 # Port to serve the metrics
 ```
 
-### Storage metrics
+Both `endpoint` and `port` fields are required. If one of the fields is absent, metrics are considered as not enabled.
 
-Storage metrics will periodically publish statistics to [storage](./Configuration-Storage) as text files, 
-here is the way to configure such metrics:
-```yaml
-meta:
-  metrics:
-    - 
-      type: asto # Metrics type, `asto` to publish statistics into storage
-      interval: 5 # Publishing interval in seconds, default value is 5
-      storage: # Storage to publish the metrics to
-        type: fs
-        path: /tmp/artipie/statistict
-```
+### Artipie metrics
 
-Storage metrics can be obtained via HTTP `GET` request by path `http://{host}:{port}/.metrics`, 
-where `{host}` and `{port}` Artipie service host and port accordingly. The response is a json object
-with gathered statistics.
+Artipie gather the following metrics:
 
-### Prometheus metrics
+| Name                                | Type    | Description                           | Tags                  |
+|-------------------------------------|---------|---------------------------------------|-----------------------|
+| artipie_response_body_size_bytes    | summary | Response body size and chunks         | method, route         |
+| artipie_request_body_size_bytes     | summary | Request body size and chunks          | method, route         |
+| artipie_request_counter_total       | counter | Requests counter                      | method, route, status |
+| artipie_response_send_seconds       | summary | Response.send execution time          | route                 |
+| artipie_connection_accept_seconds   | summary | Connection.accept execution time      | route                 |
+| artipie_slice_response_seconds      | summary | Slice.response execution time         | route                 |
+| artipie_storage_value_seconds       | summary | Time to read value from storage       | id, key               |
+| artipie_storage_value_size_bytes    | summary | Storage value size and chunks         | id, key               |
+| artipie_storage_save_seconds        | summary | Time to save storage value            | id, key               |
+| artipie_storage_exists_seconds      | summary | Storage exists operation time         | id, key               |
+| artipie_storage_list_seconds        | summary | Storage list operation time           | id, key               |
+| artipie_storage_move_seconds        | summary | Storage move operation time           | id, key, dest         |
+| artipie_storage_metadata_seconds    | summary | Storage metadata operation time       | id, key               |
+| artipie_storage_delete_seconds      | summary | Storage delete operation time         | id, key               |
+| artipie_storage_deleteAll_seconds   | summary | Storage deleteAll operation seconds   | id, key               |
+| artipie_storage_exclusively_seconds | summary | Storage exclusively operation seconds | id, key               |
 
-To collect metrics via [`Prometheus`](https://prometheus.io/), simply configure `metrics` like this:
+All the metrics for storage operations report `error` events in the case of any errors, the events have `_error` postfix.
 
-```yaml
-meta:
-  metrics:
-    - 
-      type: prometheus
-```
-Metrics in Prometheus compatible format will be available on `http://{host}:{port}/prometheus/metrics` path,
-where `{host}` and `{port}` Artipie service host and port. 
+Tags description:
 
-### Vertx server metrics
-
-To enable Vert.x embedded [Micrometer metrics](https://vertx.io/docs/3.9.13/vertx-micrometer-metrics/java/) 
-add the following configuration:
-```yaml
-meta:
-  metrics:
-    - 
-      type: vertx # Metrics type, `vertx` for Vert.x metrics
-      endpoint: "/metrics/vertx" # Path of the endpoint, starting with `/`, where the metrics will be served
-      port: 8087 # Port to serve the metrics
-```
-The metrics will be served on specified port and endpoint path. Vert.x gather various HTTP server statistics,
-such as number of opened connections, number of bytes received/sent by the server, number of 
-requests being processed etc. Full list is available [here](https://vertx.io/docs/3.9.13/vertx-micrometer-metrics/java/#_http_server).
-Statistics is served in [`Prometheus`](https://prometheus.io/) compatible format.
+| Name   | Description                                                                                                                                              |
+|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| method | Request method, upper cased                                                                                                                              |
+| route  | Request route                                                                                                                                            |
+| status | [Response status](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/http/rs/RsStatus.java), string                                   |
+| id     | Storage id, returned by [Storage.identifier()](https://github.com/artipie/asto/blob/master/asto-core/src/main/java/com/artipie/asto/Storage.java) method |
+| key    | Storage operation key                                                                                                                                    |
+| dest   | Destination key in the storage move operation                                                                                                            |

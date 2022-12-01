@@ -13,15 +13,20 @@ import com.artipie.http.rs.RsStatus;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import io.vertx.micrometer.backends.BackendRegistries;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import org.reactivestreams.Publisher;
 
 /**
  * Calculated uploaded and downloaded body size for all requests.
  * @since 0.28
+ * @checkstyle ParameterNumberCheck (500 lines)
  */
 public final class MicrometerSlice implements Slice {
 
@@ -75,20 +80,49 @@ public final class MicrometerSlice implements Slice {
         final String path = rqline.uri().getPath();
         final String method = rqline.method().value();
         final Counter.Builder cnt = Counter.builder("artipie.request.counter")
+            .description("HTTP requests counter")
             .tag(MicrometerSlice.ROUTE, path).tag(MicrometerSlice.METHOD, method);
         final DistributionSummary rqbody = DistributionSummary.builder("artipie.request.body.size")
+            .description("Request body size and chunks")
             .baseUnit(MicrometerSlice.BYTES)
             .tag(MicrometerSlice.ROUTE, path)
             .tag(MicrometerSlice.METHOD, method)
             .register(this.registry);
         final DistributionSummary rsbody = DistributionSummary.builder("artipie.response.body.size")
             .baseUnit(MicrometerSlice.BYTES)
+            .description("Response body size and chunks")
             .tag(MicrometerSlice.ROUTE, path)
             .tag(MicrometerSlice.METHOD, method)
             .register(this.registry);
+        final Timer.Sample timer = Timer.start(this.registry);
         return new MicrometerResponse(
-            this.origin.response(line, head, new MicrometerPublisher(body, rqbody)), rsbody, cnt
+            this.origin.response(line, head, new MicrometerPublisher(body, rqbody)),
+            rsbody, cnt, timer, path
         );
+    }
+
+    /**
+     * Handle completion of some action by registering the timer.
+     * @param name Timer name
+     * @param timer The timer
+     * @param route Request path
+     * @return Completable action
+     */
+    private BiFunction<Void, Throwable, CompletionStage<Void>> handleWithTimer(
+        final String name, final Timer.Sample timer, final String route
+    ) {
+        return (ignored, err) -> {
+            CompletionStage<Void> res = CompletableFuture.allOf();
+            String copy = name;
+            if (err != null) {
+                copy = String.format("%s.error", name);
+                res = CompletableFuture.failedFuture(err);
+            }
+            timer.stop(
+                this.registry.timer(copy, MicrometerSlice.ROUTE, route)
+            );
+            return res;
+        };
     }
 
     /**
@@ -113,24 +147,43 @@ public final class MicrometerSlice implements Slice {
         private final Counter.Builder counter;
 
         /**
+         * Timer sample to measure slice.response method execution time.
+         */
+        private final Timer.Sample sample;
+
+        /**
+         * Request route.
+         */
+        private final String route;
+
+        /**
          * Wraps response.
          *
          * @param response Origin response
          * @param summary Micrometer distribution summary
          * @param counter Micrometer requests counter
+         * @param sample Timer sample to measure slice.response method execution time
+         * @param route Request route
          */
         MicrometerResponse(final Response response, final DistributionSummary summary,
-            final Counter.Builder counter) {
+            final Counter.Builder counter, final Timer.Sample sample, final String route) {
             this.origin = response;
             this.summary = summary;
             this.counter = counter;
+            this.sample = sample;
+            this.route = route;
         }
 
         @Override
         public CompletionStage<Void> send(final Connection connection) {
+            final Timer.Sample timer = Timer.start(MicrometerSlice.this.registry);
             return this.origin.send(
-                new MicrometerConnection(connection, this.summary, this.counter)
-            );
+                new MicrometerConnection(
+                    connection, this.summary, this.counter, this.route, this.sample
+                )
+            ).handle(
+                MicrometerSlice.this.handleWithTimer("artipie.response.send", timer, this.route)
+            ).thenCompose(Function.identity());
         }
 
         /**
@@ -155,17 +208,31 @@ public final class MicrometerSlice implements Slice {
             private final Counter.Builder counter;
 
             /**
+             * Request route.
+             */
+            private final String route;
+
+            /**
+             * Timer sample to measure slice.response method execution time.
+             */
+            private final Timer.Sample sample;
+
+            /**
              * Wrap connection.
              *
              * @param origin Origin connection
              * @param summary Micrometer distribution summary
              * @param counter Micrometer requests counter
+             * @param route Request route
+             * @param sample Timer sample to measure slice.response method execution time
              */
             MicrometerConnection(final Connection origin, final DistributionSummary summary,
-                final Counter.Builder counter) {
+                final Counter.Builder counter, final String route, final Timer.Sample sample) {
                 this.origin = origin;
                 this.summary = summary;
                 this.counter = counter;
+                this.route = route;
+                this.sample = sample;
             }
 
             @Override
@@ -173,9 +240,18 @@ public final class MicrometerSlice implements Slice {
                 final Publisher<ByteBuffer> body) {
                 this.counter.tag("status", status.name()).register(MicrometerSlice.this.registry)
                     .increment();
+                final Timer.Sample timer = Timer.start(MicrometerSlice.this.registry);
                 return this.origin.accept(
                     status, headers, new MicrometerPublisher(body, this.summary)
-                );
+                ).handle(
+                    MicrometerSlice.this.handleWithTimer(
+                        "artipie.connection.accept", timer, this.route
+                    )
+                ).thenCompose(Function.identity()).handle(
+                    MicrometerSlice.this.handleWithTimer(
+                        "artipie.slice.response", this.sample, this.route
+                    )
+                ).thenCompose(Function.identity());
             }
         }
     }
