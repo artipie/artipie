@@ -37,10 +37,10 @@ final class SSLPfxRestTest extends SSLBaseRestTest {
                     "",
                     "meta:\n",
                     "  ssl:\n",
-                    "    enabled:true\n",
+                    "    enabled: true\n",
                     "    pfx:\n",
-                    "      path:cert.pfx\n",
-                    "      password:secret\n"
+                    "      path: cert.pfx\n",
+                    "      password: secret\n"
                 )
             ).readYamlMapping(),
             new SettingsCaches.Fake()

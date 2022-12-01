@@ -39,8 +39,9 @@ public final class YamlPermissions implements Permissions {
     @Override
     public boolean allowed(final Authentication.User user, final String action) {
         return check(this.yaml.yamlSequence(user.name()), action)
-            || check(this.yaml.yamlSequence(YamlPermissions.WILDCARD), action)
-            || this.checkGroups(user.groups(), action);
+            || check(
+                this.yaml.yamlSequence(String.format("\"%s\"", YamlPermissions.WILDCARD)), action
+            ) || this.checkGroups(user.groups(), action);
     }
 
     /**

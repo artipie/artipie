@@ -37,10 +37,10 @@ final class SSLJksRestTest extends SSLBaseRestTest {
                     "",
                     "meta:\n",
                     "  ssl:\n",
-                    "    enabled:true\n",
+                    "    enabled: true\n",
                     "    jks:\n",
-                    "      path:keystore.jks\n",
-                    "      password:secret"
+                    "      path: keystore.jks\n",
+                    "      password: secret"
                 )
             ).readYamlMapping(),
             new SettingsCaches.Fake()

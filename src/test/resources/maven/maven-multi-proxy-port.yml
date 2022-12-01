@@ -3,7 +3,5 @@ repo:
   type: maven-proxy
   port: 8081
   remotes:
-    -
-      url: "http://artipie-empty:8080/empty-maven"
-    -
-      url: "http://artipie-origin:8080/origin-maven"
+    - url: "http://artipie-empty:8080/empty-maven"
+    - url: "http://artipie-origin:8080/origin-maven"

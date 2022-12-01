@@ -135,7 +135,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.amihaiemil.web</groupId>
       <artifactId>eo-yaml</artifactId>
-      <version>5.1.5</version>
+      <version>7.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>

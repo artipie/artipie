@@ -110,7 +110,9 @@ class DockerProxyTest {
                 "    - url: another-registry.org:54321",
                 "    - url: mcr.microsoft.com",
                 "      cache:",
-                "        storage: my-storage",
+                "        storage: ",
+                "          type: fs",
+                "          path: /var/artipie/data/local/cache",
                 "  storage:",
                 "    type: fs",
                 "    path: /var/artipie/data/local"
@@ -125,8 +127,7 @@ class DockerProxyTest {
             "repo:",
             "repo:\n  remotes:\n    - attr: value",
             "repo:\n  remotes:\n    - url: registry-1.docker.io\n      username: admin",
-            "repo:\n  remotes:\n    - url: registry-1.docker.io\n      password: qwerty",
-            "repo:\n  remotes:\n    - url: registry-1.docker.io\n      cache:"
+            "repo:\n  remotes:\n    - url: registry-1.docker.io\n      password: qwerty"
         );
     }
 }
