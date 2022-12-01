@@ -14,7 +14,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
-import com.artipie.settings.cache.SettingsCaches;
+import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.users.Users;
 import com.artipie.settings.users.UsersFromEnv;
 import com.artipie.settings.users.UsersFromGithub;
@@ -64,21 +64,21 @@ public final class YamlSettings implements Settings {
     /**
      * A set of caches for settings.
      */
-    private final SettingsCaches caches;
+    private final ArtipieCaches caches;
 
     /**
      * Ctor.
      * @param content YAML file content.
      * @param caches Settings caches
      */
-    public YamlSettings(final YamlMapping content, final SettingsCaches caches) {
+    public YamlSettings(final YamlMapping content, final ArtipieCaches caches) {
         this.content = content;
         this.caches = caches;
     }
 
     @Override
     public Storage configStorage() {
-        return this.caches.storageConfig().storage(this);
+        return this.caches.storagesCache().storage(this);
     }
 
     @Override

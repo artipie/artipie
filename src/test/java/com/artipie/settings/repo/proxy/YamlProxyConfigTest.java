@@ -10,6 +10,8 @@ import com.artipie.asto.Key;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.settings.StorageAliases;
+import com.artipie.settings.repo.RepoConfig;
+import com.artipie.test.TestStoragesCache;
 import java.util.Collection;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyCollection;
@@ -195,7 +197,14 @@ public final class YamlProxyConfigTest {
     private Collection<YamlProxyConfig.YamlRemote> remotes(final YamlMapping yaml) {
         return new YamlProxyConfig(
             new JettyClientSlices(),
-            StorageAliases.EMPTY, Key.ROOT, yaml
+            new RepoConfig(
+                StorageAliases.EMPTY,
+                Key.ROOT,
+                yaml,
+                new TestStoragesCache()
+            ),
+            Key.ROOT,
+            yaml
         ).remotes();
     }
 

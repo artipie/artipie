@@ -7,10 +7,12 @@ package com.artipie.settings.cache;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
+import com.artipie.asto.factory.Storages;
+import com.artipie.jfr.JfrStorage;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
 import com.artipie.settings.Settings;
-import com.artipie.settings.YamlStorage;
+import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
@@ -20,37 +22,36 @@ import java.util.concurrent.TimeUnit;
 /**
  * Implementation of cache for storages with similar configurations
  * in Artipie settings using {@link LoadingCache}.
+ *
  * @since 0.23
+ * @checkstyle DesignForExtensionCheck (500 lines)
  */
-final class CachedStorages implements StoragesCache {
+public class CachedStorages implements StoragesCache {
+
     /**
-     * Cache for storages settings.
+     * Storages factory.
      */
-    private final Cache<YamlMapping, Storage> storages;
+    private final Storages storages;
+
+    /**
+     * Cache for storages.
+     */
+    private final Cache<YamlMapping, Storage> cache;
 
     /**
      * Ctor.
-     * Here an instance of cache is created. It is important that cache
-     * is a local variable.
+     *
+     * @param storages Storages factory
      */
-    CachedStorages() {
-        this(
-            CacheBuilder.newBuilder()
-                .expireAfterWrite(
-                    //@checkstyle MagicNumberCheck (1 line)
-                    new Property(ArtipieProperties.STORAGE_TIMEOUT).asLongOrDefault(180_000L),
-                    TimeUnit.MILLISECONDS
-                ).softValues()
-                .build()
-        );
-    }
-
-    /**
-     * Ctor.
-     * @param cache Cache for storages settings
-     */
-    CachedStorages(final Cache<YamlMapping, Storage> cache) {
-        this.storages = cache;
+    CachedStorages(final Storages storages) {
+        this.storages = storages;
+        this.cache = CacheBuilder.newBuilder()
+            .expireAfterWrite(
+                //@checkstyle MagicNumberCheck (1 line)
+                new Property(ArtipieProperties.STORAGE_TIMEOUT).asLongOrDefault(180_000L),
+                TimeUnit.MILLISECONDS
+            ).softValues()
+            .build();
     }
 
     @Override
@@ -67,9 +68,17 @@ final class CachedStorages implements StoragesCache {
     @Override
     public Storage storage(final YamlMapping yaml) {
         try {
-            return this.storages.get(
+            return this.cache.get(
                 yaml,
-                () -> new YamlStorage(yaml).storage()
+                () -> {
+                    final String type = yaml.string("type");
+                    if (Strings.isNullOrEmpty(type)) {
+                        throw new IllegalArgumentException("Storage type cannot be null or empty.");
+                    }
+                    return new JfrStorage(
+                        this.storages.newStorage(type, yaml)
+                    );
+                }
             );
         } catch (final ExecutionException err) {
             throw new ArtipieException(err);
@@ -77,15 +86,20 @@ final class CachedStorages implements StoragesCache {
     }
 
     @Override
+    public long size() {
+        return this.cache.size();
+    }
+
+    @Override
     public void invalidateAll() {
-        this.storages.invalidateAll();
+        this.cache.invalidateAll();
     }
 
     @Override
     public String toString() {
         return String.format(
             "%s(size=%d)",
-            this.getClass().getSimpleName(), this.storages.size()
+            this.getClass().getSimpleName(), this.cache.size()
         );
     }
 }

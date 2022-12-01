@@ -4,34 +4,41 @@
  */
 package com.artipie.settings.cache;
 
+import com.artipie.asto.factory.Storages;
+
 /**
  * Encapsulates caches which are possible to use in settings of Artipie server.
+ *
  * @since 0.23
  */
-public interface SettingsCaches {
+public interface ArtipieCaches {
     /**
-     * Obtains cache for configurations of storages.
-     * @return Cache for configurations of storages.
+     * Obtains storages cache.
+     *
+     * @return Storages cache.
      */
-    StoragesCache storageConfig();
+    StoragesCache storagesCache();
 
     /**
      * Obtains cache for configurations of credentials.
+     *
      * @return Cache for configurations of credentials.
      */
     CredsConfigCache credsConfig();
 
     /**
      * Obtains cache for user logins.
+     *
      * @return Cache for user logins.
      */
     AuthCache auth();
 
     /**
      * Implementation with all real instances of caches.
+     *
      * @since 0.23
      */
-    class All implements SettingsCaches {
+    class All implements ArtipieCaches {
         /**
          * Cache for user logins.
          */
@@ -52,57 +59,12 @@ public interface SettingsCaches {
          */
         public All() {
             this.authcache = new CachedUsers();
-            this.strgcache = new CachedStorages();
+            this.strgcache = new CachedStorages(new Storages());
             this.credscache = new CachedCreds();
         }
 
         @Override
-        public StoragesCache storageConfig() {
-            return this.strgcache;
-        }
-
-        @Override
-        public CredsConfigCache credsConfig() {
-            return this.credscache;
-        }
-
-        @Override
-        public AuthCache auth() {
-            return this.authcache;
-        }
-    }
-
-    /**
-     * Implementation with fake instances of caches.
-     * @since 0.23
-     */
-    class Fake implements SettingsCaches {
-        /**
-         * Cache for user logins.
-         */
-        private final AuthCache authcache;
-
-        /**
-         * Cache for configurations of storages.
-         */
-        private final StoragesCache strgcache;
-
-        /**
-         * Cache for configurations of credentials.
-         */
-        private final CredsConfigCache credscache;
-
-        /**
-         * Ctor with all fake initialized caches.
-         */
-        public Fake() {
-            this.authcache = new AuthCache.Fake();
-            this.strgcache = new StoragesCache.Fake();
-            this.credscache = new CredsConfigCache.Fake();
-        }
-
-        @Override
-        public StoragesCache storageConfig() {
+        public StoragesCache storagesCache() {
             return this.strgcache;
         }
 

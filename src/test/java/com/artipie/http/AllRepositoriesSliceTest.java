@@ -11,7 +11,9 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.settings.Settings;
+import com.artipie.test.TestStoragesCache;
 import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -23,12 +25,23 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 public final class AllRepositoriesSliceTest {
 
+    /**
+     * Storages cache.
+     */
+    private TestStoragesCache cache;
+
+    @BeforeEach
+    public void setUp() {
+        this.cache = new TestStoragesCache();
+    }
+
     @Test
     public void unexistingRepoReturnNotFound() {
         MatcherAssert.assertThat(
             new AllRepositoriesSlice(
                 new JettyClientSlices(),
-                new Settings.Fake()
+                new Settings.Fake(),
+                this.cache
             ).response(
                 new RequestLine(RqMethod.GET, "/repo/foo").toString(),
                 Headers.EMPTY,
@@ -44,7 +57,8 @@ public final class AllRepositoriesSliceTest {
         MatcherAssert.assertThat(
             new AllRepositoriesSlice(
                 new JettyClientSlices(),
-                new Settings.Fake()
+                new Settings.Fake(),
+                this.cache
             ).response(
                 new RequestLine(RqMethod.GET, uri).toString(),
                 Headers.EMPTY,

@@ -9,7 +9,7 @@ import com.artipie.VertxMain;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.misc.JavaResource;
-import com.artipie.settings.cache.SettingsCaches;
+import com.artipie.settings.cache.ArtipieCaches;
 import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,13 +38,12 @@ public final class SettingsFromPath {
 
     /**
      * Searches settings by the provided path, if no settings are found,
-     * example setting set is used.
-     * @param port Port for info logging
+     * example settings are used.
      * @param caches Settings caches
      * @return Artipie settings
      * @throws IOException On IO error
      */
-    public Settings find(final int port, final SettingsCaches caches) throws IOException {
+    public Settings find(final ArtipieCaches caches) throws IOException {
         boolean initialize = Boolean.parseBoolean(System.getenv("ARTIPIE_INIT"));
         if (!Files.exists(this.path)) {
             new JavaResource("example/artipie.yaml").copy(this.path);

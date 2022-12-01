@@ -4,10 +4,13 @@
  */
 package com.artipie.settings;
 
+import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.misc.ContentAsYaml;
+import com.artipie.settings.cache.StoragesCache;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -22,7 +25,7 @@ public interface StorageAliases {
     /**
      * Empty storage alias.
      */
-    StorageAliases EMPTY = alias -> {
+    StorageAliases EMPTY = (cache, alias) -> {
         throw new IllegalStateException(String.format("No storage alias found: %s", alias));
     };
 
@@ -32,14 +35,38 @@ public interface StorageAliases {
     String FILE_NAME = "_storages.yaml";
 
     /**
-     * Find storage by alias.
+     * Finds or create storage by alias.
+     *
+     * @param cache Storages cache
      * @param alias Storage alias
      * @return Storage instance
      */
-    Storage storage(String alias);
+    Storage storage(StoragesCache cache, String alias);
+
+    /**
+     * Finds or create storage by config.
+     *
+     * @param cache Storages cache
+     * @param node Storage config
+     * @return Storage instance
+     */
+    default Storage storage(StoragesCache cache, YamlNode node) {
+        final Storage res;
+        if (node instanceof Scalar) {
+            res = this.storage(cache, ((Scalar) node).value());
+        } else if (node instanceof YamlMapping) {
+            res = cache.storage((YamlMapping) node);
+        } else {
+            throw new IllegalStateException(
+                String.format("Invalid storage config: %s", node)
+            );
+        }
+        return res;
+    }
 
     /**
      * Find storage aliases config for repo.
+     *
      * @param storage Config storage
      * @param repo Repo key
      * @return Async storages
@@ -86,10 +113,10 @@ public interface StorageAliases {
         }
 
         @Override
-        public Storage storage(final String alias) {
+        public Storage storage(final StoragesCache cache, final String alias) {
             return Optional.ofNullable(this.yaml.yamlMapping("storages")).map(
                 node -> Optional.ofNullable(node.yamlMapping(alias)).map(
-                    aliasyaml -> new YamlStorage(aliasyaml).storage()
+                    cache::storage
                 ).orElseThrow(FromYaml::illegalState)
             ).orElseThrow(FromYaml::illegalState);
         }
