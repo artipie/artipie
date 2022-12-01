@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.SubStorage;
+import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.users.UsersFromStorageYaml;
 import com.artipie.test.TestArtipieCaches;
 import java.io.IOException;
@@ -40,11 +41,11 @@ class YamlSettingsTest {
     /**
      * Artipie`s caches.
      */
-    private TestArtipieCaches caches;
+    private ArtipieCaches caches;
 
     @BeforeEach
     void setUp() {
-        this.caches = new TestArtipieCaches();
+        this.caches = new ArtipieCaches.All();
     }
 
     @Test
