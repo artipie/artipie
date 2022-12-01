@@ -44,7 +44,7 @@ public final class YamlPermissions implements Permissions {
 
     @Override
     public boolean allowed(final Authentication.User user, final String action) {
-        return check(this.yaml.yamlSequence(YamlPermissions.SEQ_WILDCARD), action)
+        return check(this.yaml.yamlSequence(YamlPermissions.escapeAsterisk(user.name())), action)
             || check(
                 this.yaml.yamlSequence(YamlPermissions.SEQ_WILDCARD), action
             ) || this.checkGroups(user.groups(), action);
@@ -71,6 +71,19 @@ public final class YamlPermissions implements Permissions {
     private static boolean check(final YamlSequence seq, final String action) {
         return seq != null && seq.values().stream().map(node -> Scalar.class.cast(node).value())
             .anyMatch(item -> item.equals(action) || item.equals(YamlPermissions.WILDCARD));
+    }
+
+    /**
+     * Escape asterisk to obtain yaml sequence.
+     * @param value The value to check
+     * @return The value or escaped asterisk
+     */
+    private static String escapeAsterisk(final String value) {
+        String res = value;
+        if ("*".equals(value)) {
+            res = String.format("\"%s\"", value);
+        }
+        return res;
     }
 
 }
