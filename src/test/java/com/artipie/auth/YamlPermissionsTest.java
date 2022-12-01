@@ -67,6 +67,10 @@ class YamlPermissionsTest {
             this.permissions().allowed(new Authentication.User("anyone"), "download"),
             new IsEqual<>(true)
         );
+        MatcherAssert.assertThat(
+            this.permissions().allowed(new Authentication.User("*"), "download"),
+            new IsEqual<>(true)
+        );
     }
 
     @Test

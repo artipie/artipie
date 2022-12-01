@@ -24,6 +24,12 @@ public final class YamlPermissions implements Permissions {
     private static final String WILDCARD = "*";
 
     /**
+     * Asterisk wildcard with ": it's necessary to escape
+     * asterisk to obtain yaml sequence.
+     */
+    private static final String SEQ_WILDCARD = "\"*\"";
+
+    /**
      * YAML storage settings.
      */
     private final YamlMapping yaml;
@@ -38,9 +44,9 @@ public final class YamlPermissions implements Permissions {
 
     @Override
     public boolean allowed(final Authentication.User user, final String action) {
-        return check(this.yaml.yamlSequence(user.name()), action)
+        return check(this.yaml.yamlSequence(YamlPermissions.SEQ_WILDCARD), action)
             || check(
-                this.yaml.yamlSequence(String.format("\"%s\"", YamlPermissions.WILDCARD)), action
+                this.yaml.yamlSequence(YamlPermissions.SEQ_WILDCARD), action
             ) || this.checkGroups(user.groups(), action);
     }
 
