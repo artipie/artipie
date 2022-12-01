@@ -43,7 +43,7 @@ public class CachedStorages implements StoragesCache {
      *
      * @param storages Storages factory
      */
-    CachedStorages(final Storages storages) {
+    protected CachedStorages(final Storages storages) {
         this.storages = storages;
         this.cache = CacheBuilder.newBuilder()
             .expireAfterWrite(
