@@ -6,15 +6,18 @@ package com.artipie.settings.repo.proxy;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.Key;
+import com.artipie.asto.LoggingStorage;
+import com.artipie.asto.Storage;
+import com.artipie.asto.SubStorage;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.auth.GenericAuthenticator;
-import com.artipie.settings.StorageAliases;
-import com.artipie.settings.StorageYamlConfig;
 import com.artipie.settings.repo.RepoConfig;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -22,6 +25,8 @@ import java.util.stream.StreamSupport;
  * Proxy repository config from YAML.
  *
  * @since 0.12
+ * @checkstyle MemberNameCheck (500 lines)
+ * @checkstyle ParameterNameCheck (500 lines)
  */
 public final class YamlProxyConfig implements ProxyConfig {
 
@@ -31,9 +36,9 @@ public final class YamlProxyConfig implements ProxyConfig {
     private final ClientSlices http;
 
     /**
-     * Storages.
+     * Repository config.
      */
-    private final StorageAliases storages;
+    private final RepoConfig repoConfig;
 
     /**
      * Cache storage prefix.
@@ -49,19 +54,19 @@ public final class YamlProxyConfig implements ProxyConfig {
      * Ctor.
      *
      * @param http HTTP client
-     * @param storages Storages.
+     * @param repoConfig Repository config.
      * @param prefix Cache storage prefix.
      * @param yaml Source YAML.
      * @checkstyle ParameterNumberCheck (10 lines)
      */
     public YamlProxyConfig(
         final ClientSlices http,
-        final StorageAliases storages,
+        final RepoConfig repoConfig,
         final Key prefix,
         final YamlMapping yaml
     ) {
         this.http = http;
-        this.storages = storages;
+        this.repoConfig = repoConfig;
         this.prefix = prefix;
         this.yaml = yaml;
     }
@@ -70,10 +75,10 @@ public final class YamlProxyConfig implements ProxyConfig {
      * Ctor.
      *
      * @param http HTTP client
-     * @param repo Repo configuration.
+     * @param repoConfig Repo configuration.
      */
-    public YamlProxyConfig(final ClientSlices http, final RepoConfig repo) {
-        this(http, repo.storageAliases(), new Key.From(repo.name()), repo.repoConfig());
+    public YamlProxyConfig(final ClientSlices http, final RepoConfig repoConfig) {
+        this(http, repoConfig, new Key.From(repoConfig.name()), repoConfig.repoYaml());
     }
 
     @Override
@@ -95,6 +100,23 @@ public final class YamlProxyConfig implements ProxyConfig {
                 return new YamlRemote((YamlMapping) remote);
             }
         ).collect(Collectors.toList());
+    }
+
+    /**
+     * Creates proxy storage.
+     *
+     * @param node Storage config or alias.
+     * @return Storage.
+     */
+    Storage storageForProxy(final YamlNode node) {
+        return new SubStorage(
+            this.prefix,
+            new LoggingStorage(
+                Level.INFO,
+                this.repoConfig.storageAliases()
+                    .storage(this.repoConfig.storagesCache(), node)
+            )
+        );
     }
 
     /**
@@ -153,9 +175,7 @@ public final class YamlProxyConfig implements ProxyConfig {
             return Optional.ofNullable(this.source.yamlMapping("cache")).flatMap(
                 root -> Optional.ofNullable(root.value("storage")).map(
                     node -> new YamlProxyStorage(
-                        new StorageYamlConfig(
-                            node, YamlProxyConfig.this.storages
-                        ).subStorage(YamlProxyConfig.this.prefix)
+                        YamlProxyConfig.this.storageForProxy(node)
                     )
                 )
             );

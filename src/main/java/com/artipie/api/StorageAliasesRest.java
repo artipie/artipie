@@ -7,7 +7,7 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.settings.Layout;
-import com.artipie.settings.cache.StorageConfigCache;
+import com.artipie.settings.cache.StoragesCache;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.io.StringReader;
@@ -31,7 +31,7 @@ public final class StorageAliasesRest extends BaseRest {
     /**
      * Artipie setting storage cache.
      */
-    private final StorageConfigCache caches;
+    private final StoragesCache caches;
 
     /**
      * Artipie settings storage.
@@ -49,7 +49,7 @@ public final class StorageAliasesRest extends BaseRest {
      * @param asto Artipie settings storage
      * @param layout Artipie layout
      */
-    public StorageAliasesRest(final StorageConfigCache caches, final BlockingStorage asto,
+    public StorageAliasesRest(final StoragesCache caches, final BlockingStorage asto,
         final String layout) {
         this.caches = caches;
         this.asto = asto;

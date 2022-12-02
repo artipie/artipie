@@ -15,7 +15,9 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.settings.cache.StoragesCache;
 import com.artipie.settings.repo.RepoConfig;
+import com.artipie.test.TestStoragesCache;
 import io.reactivex.Flowable;
 import java.io.IOException;
 import java.util.Optional;
@@ -25,6 +27,7 @@ import org.hamcrest.CustomMatcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsNot;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -32,14 +35,25 @@ import org.junit.jupiter.params.provider.MethodSource;
  * Tests for {@link DockerProxy}.
  *
  * @since 0.9
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DockerProxyTest {
 
+    /**
+     * Storages caches.
+     */
+    private StoragesCache cache;
+
+    @BeforeEach
+    void setUp() {
+        this.cache = new TestStoragesCache();
+    }
+
     @ParameterizedTest
     @MethodSource("goodConfigs")
     void shouldBuildFromConfig(final String yaml) throws Exception {
-        final Slice slice = dockerProxy(yaml);
+        final Slice slice = dockerProxy(this.cache, yaml);
         MatcherAssert.assertThat(
             slice.response(
                 new RequestLine(RqMethod.GET, "/").toString(),
@@ -62,7 +76,7 @@ class DockerProxyTest {
     @ParameterizedTest
     @MethodSource("badConfigs")
     void shouldFailBuildFromBadConfig(final String yaml) throws Exception {
-        final Slice slice = dockerProxy(yaml);
+        final Slice slice = dockerProxy(this.cache, yaml);
         Assertions.assertThrows(
             RuntimeException.class,
             () -> slice.response(
@@ -75,16 +89,20 @@ class DockerProxyTest {
         );
     }
 
-    private static DockerProxy dockerProxy(final String yaml) throws IOException {
+    private static DockerProxy dockerProxy(
+        final StoragesCache cache,
+        final String yaml
+    ) throws IOException {
         return new DockerProxy(
             new JettyClientSlices(),
             false,
             new RepoConfig(
-                alias -> {
+                (stors, alias) -> {
                     throw new UnsupportedOperationException();
                 },
                 Key.ROOT,
-                Yaml.createYamlInput(yaml).readYamlMapping()
+                Yaml.createYamlInput(yaml).readYamlMapping(),
+                cache
             ),
             Permissions.FREE,
             (username, password) -> Optional.empty()

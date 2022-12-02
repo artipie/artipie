@@ -10,7 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.settings.RepoData;
-import com.artipie.settings.cache.SettingsCaches;
+import com.artipie.settings.cache.ArtipieCaches;
 import com.jcabi.log.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpServer;
@@ -28,6 +28,8 @@ import java.util.Optional;
  * Vert.x {@link io.vertx.core.Verticle} for exposing Rest API operations.
  * @since 0.26
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle MemberNameCheck (500 lines)
+ * @checkstyle ParameterNameCheck (500 lines)
  */
 public final class RestApi extends AbstractVerticle {
 
@@ -37,14 +39,14 @@ public final class RestApi extends AbstractVerticle {
     private static final String SECURITY_SCHEME = "bearerAuth";
 
     /**
-     * Artipie setting cache.
+     * Artipie caches.
      */
-    private final SettingsCaches caches;
+    private final ArtipieCaches caches;
 
     /**
      * Artipie settings storage.
      */
-    private final Storage storage;
+    private final Storage configsStorage;
 
     /**
      * Artipie layout.
@@ -74,7 +76,7 @@ public final class RestApi extends AbstractVerticle {
     /**
      * Ctor.
      * @param caches Artipie settings caches
-     * @param storage Artipie settings storage.
+     * @param configsStorage Artipie settings storage
      * @param layout Artipie layout
      * @param port Port to start verticle on
      * @param users Key to users credentials yaml location
@@ -82,11 +84,11 @@ public final class RestApi extends AbstractVerticle {
      * @param keystore KeyStore
      * @checkstyle ParameterNumberCheck (5 lines)
      */
-    public RestApi(final SettingsCaches caches, final Storage storage, final String layout,
+    public RestApi(final ArtipieCaches caches, final Storage configsStorage, final String layout,
         final int port, final Optional<Key> users, final Authentication auth,
         final Optional<KeyStore> keystore) {
         this.caches = caches;
-        this.storage = storage;
+        this.configsStorage = configsStorage;
         this.layout = layout;
         this.port = port;
         this.users = users;
@@ -125,12 +127,12 @@ public final class RestApi extends AbstractVerticle {
     private void startServices(final RouterBuilder repoRb, final RouterBuilder userRb,
         final RouterBuilder tokenRb, final RouterBuilder settingsRb) {
         this.addJwtAuth(repoRb, userRb, tokenRb);
-        final BlockingStorage asto = new BlockingStorage(this.storage);
+        final BlockingStorage asto = new BlockingStorage(this.configsStorage);
         new RepositoryRest(
             new ManageRepoSettings(asto),
-            new RepoData(this.storage), this.layout
+            new RepoData(this.configsStorage, this.caches.storagesCache()), this.layout
         ).init(repoRb);
-        new StorageAliasesRest(this.caches.storageConfig(), asto, this.layout)
+        new StorageAliasesRest(this.caches.storagesCache(), asto, this.layout)
             .init(repoRb);
         if (this.users.isPresent()) {
             new UsersRest(
@@ -153,7 +155,7 @@ public final class RestApi extends AbstractVerticle {
         final String schema;
         if (this.keystore.isPresent() && this.keystore.get().enabled()) {
             server = vertx.createHttpServer(
-                this.keystore.get().secureOptions(this.vertx, this.storage)
+                this.keystore.get().secureOptions(this.vertx, this.configsStorage)
             );
             schema = "https";
         } else {

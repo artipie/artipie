@@ -14,7 +14,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
-import com.artipie.settings.cache.SettingsCaches;
+import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.users.Users;
 import com.artipie.settings.users.UsersFromEnv;
 import com.artipie.settings.users.UsersFromGithub;
@@ -64,21 +64,21 @@ public final class YamlSettings implements Settings {
     /**
      * A set of caches for settings.
      */
-    private final SettingsCaches caches;
+    private final ArtipieCaches caches;
 
     /**
      * Ctor.
      * @param content YAML file content.
      * @param caches Settings caches
      */
-    public YamlSettings(final YamlMapping content, final SettingsCaches caches) {
+    public YamlSettings(final YamlMapping content, final ArtipieCaches caches) {
         this.content = content;
         this.caches = caches;
     }
 
     @Override
-    public Storage storage() {
-        return this.caches.storageConfig().storage(this);
+    public Storage configStorage() {
+        return this.caches.storagesCache().storage(this);
     }
 
     @Override
@@ -101,8 +101,8 @@ public final class YamlSettings implements Settings {
     @Override
     public Storage repoConfigsStorage() {
         return Optional.ofNullable(this.meta().string("repo_configs"))
-            .<Storage>map(str -> new SubStorage(new Key.From(str), this.storage()))
-            .orElse(this.storage());
+            .<Storage>map(str -> new SubStorage(new Key.From(str), this.configStorage()))
+            .orElse(this.configStorage());
     }
 
     @Override
@@ -212,7 +212,7 @@ public final class YamlSettings implements Settings {
             );
             final String path = mapping.string(YamlSettings.NODE_PATH);
             if (path != null) {
-                final Storage storage = settings.storage();
+                final Storage storage = settings.configStorage();
                 final KeyFromPath key = new KeyFromPath(path);
                 res = storage.exists(key).thenApply(
                     exists -> {
