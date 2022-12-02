@@ -21,5 +21,9 @@ repo:
       - deploy
     "*":
       - download
+    \*:
+      - drink
+    ann:
+      - \*
   settings:
     custom-property: custom-value

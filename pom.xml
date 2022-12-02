@@ -135,7 +135,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.amihaiemil.web</groupId>
       <artifactId>eo-yaml</artifactId>
-      <version>5.1.5</version>
+      <version>7.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -149,7 +149,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>asto-core</artifactId>
-      <version>v1.15.0</version>
+      <version>v1.15.1</version>
       <!-- Do not remove this exclusion! No tests will run if dependency is not excluded! -->
       <exclusions>
         <exclusion>
@@ -200,7 +200,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>npm-adapter</artifactId>
-      <version>v0.10.6</version>
+      <version>v0.10.8</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -226,12 +226,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>rpm-adapter</artifactId>
-      <version>1.10.2</version>
+      <version>1.10.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>gem-adapter</artifactId>
-      <version>v1.2</version>
+      <version>v1.3.1</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -266,7 +266,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>debian-adapter</artifactId>
-      <version>v0.8.2</version>
+      <version>v0.8.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>

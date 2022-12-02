@@ -3,12 +3,9 @@ meta:
     type: fs
     path: /var/artipie/repo
   credentials:
-    -
-      type: env
-    -
-      type: github
-    -
-      type: file
+    - type: env
+    - type: github
+    - type: file
       path: _credentials.yaml
   layout: org
   base_url: http://central.artipie.com/
