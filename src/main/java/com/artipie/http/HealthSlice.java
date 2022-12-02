@@ -70,7 +70,7 @@ public final class HealthSlice implements Slice {
     @SuppressWarnings("PMD.OnlyOneReturn")
     private CompletionStage<Boolean> storageStatus() {
         try {
-            return this.settings.storage().save(
+            return this.settings.configStorage().save(
                 new Key.From(".system", "test"),
                 new Content.From("OK".getBytes(StandardCharsets.US_ASCII))
             ).thenApply(none -> true).exceptionally(ignore -> false);

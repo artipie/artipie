@@ -10,6 +10,8 @@ import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.auth.YamlPermissions;
 import com.artipie.settings.StorageAliases;
+import com.artipie.settings.cache.StoragesCache;
+import com.artipie.test.TestStoragesCache;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -17,14 +19,26 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link RepoConfig}.
+ *
  * @since 0.2
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 public final class RepoConfigTest {
+
+    /**
+     * Storages cache.
+     */
+    private StoragesCache cache;
+
+    @BeforeEach
+    public void setUp() {
+        this.cache = new TestStoragesCache();
+    }
 
     @Test
     public void readsCustom() throws Exception {
@@ -166,6 +180,7 @@ public final class RepoConfigTest {
                                 .add("wrong because sequence").build()
                         ).build()
                 ).build(),
+                this.cache,
                 false
             ).storage()
         );
@@ -193,6 +208,7 @@ public final class RepoConfigTest {
                     .add(name, value)
                     .build()
             ).build(),
+            this.cache,
             false
         );
     }
@@ -201,7 +217,11 @@ public final class RepoConfigTest {
         throws IOException {
         return new RepoConfig(
             StorageAliases.EMPTY, new Key.From(name),
-            Yaml.createYamlInput(new TestResource(name).asInputStream()).readYamlMapping(), false
+            Yaml.createYamlInput(
+                new TestResource(name).asInputStream()
+            ).readYamlMapping(),
+            this.cache,
+            false
         );
     }
 }

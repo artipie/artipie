@@ -25,11 +25,11 @@ import java.util.concurrent.CompletionStage;
 public interface Settings {
 
     /**
-     * Provides a storage.
+     * Provides a configuration storage.
      *
      * @return Storage instance.
      */
-    Storage storage();
+    Storage configStorage();
 
     /**
      * Provides authorization.
@@ -208,7 +208,7 @@ public interface Settings {
         }
 
         @Override
-        public Storage storage() {
+        public Storage configStorage() {
             return this.storage;
         }
 

@@ -14,6 +14,8 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
+import org.awaitility.Awaitility;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -290,18 +292,11 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
                     res.statusCode(),
                     new IsEqual<>(HttpStatus.OK_200)
                 );
-                MatcherAssert.assertThat(
-                    waitCondition(
-                        () ->
-                            !this.storage().exists(
-                                new ConfigKeys(rname.toString()).yamlKey()
-                            )
-                    ),
-                    new IsEqual<>(true)
+                Awaitility.waitAtMost(MAX_WAIT_TIME, TimeUnit.SECONDS).until(
+                    () -> !this.storage().exists(new ConfigKeys(rname.toString()).yamlKey())
                 );
-                MatcherAssert.assertThat(
-                    waitCondition(() -> !this.getData().exists(alpine)),
-                    new IsEqual<>(true)
+                Awaitility.waitAtMost(MAX_WAIT_TIME, TimeUnit.SECONDS).until(
+                    () -> !this.getData().exists(alpine)
                 );
             }
         );
@@ -376,14 +371,8 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
                     res.statusCode(),
                     new IsEqual<>(HttpStatus.OK_200)
                 );
-                MatcherAssert.assertThat(
-                    waitCondition(
-                        () ->
-                            !this.storage().exists(
-                                new ConfigKeys(rname.toString()).yamlKey()
-                            )
-                    ),
-                    new IsEqual<>(true)
+                Awaitility.waitAtMost(MAX_WAIT_TIME, TimeUnit.SECONDS).until(
+                    () -> !this.storage().exists(new ConfigKeys(rname.toString()).yamlKey())
                 );
             }
         );
@@ -414,37 +403,19 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
                     res.statusCode(),
                     new IsEqual<>(HttpStatus.OK_200)
                 );
-                MatcherAssert.assertThat(
-                    waitCondition(
-                        () -> !this.storage().exists(
-                            new ConfigKeys(rname.toString()).yamlKey()
-                        )
-                    ),
-                    new IsEqual<>(true)
+                Awaitility.waitAtMost(MAX_WAIT_TIME, TimeUnit.SECONDS).until(
+                    () -> !this.storage().exists(new ConfigKeys(rname.toString()).yamlKey())
                 );
-                MatcherAssert.assertThat(
-                    waitCondition(() -> !this.getData().exists(alpine)),
-                    new IsEqual<>(true)
+                Awaitility.waitAtMost(MAX_WAIT_TIME, TimeUnit.SECONDS).until(
+                    () -> !this.getData().exists(alpine)
                 );
-                MatcherAssert.assertThat(
-                    waitCondition(
-                        () ->
-                            this.storage().exists(
-                                new ConfigKeys(newrname.toString()).yamlKey()
-                            )
-                    ),
-                    new IsEqual<>(true)
+                Awaitility.waitAtMost(MAX_WAIT_TIME, TimeUnit.SECONDS).until(
+                    () -> this.storage().exists(new ConfigKeys(newrname.toString()).yamlKey())
                 );
-                MatcherAssert.assertThat(
-                    waitCondition(
-                        () ->
-                            this.getData().exists(
-                                new Key.From(
-                                    String.format("%s/alpine.img", newrname)
-                                )
-                            )
-                    ),
-                    new IsEqual<>(true)
+                Awaitility.waitAtMost(MAX_WAIT_TIME, TimeUnit.SECONDS).until(
+                    () -> this.getData().exists(
+                        new Key.From(String.format("%s/alpine.img", newrname))
+                    )
                 );
             }
         );

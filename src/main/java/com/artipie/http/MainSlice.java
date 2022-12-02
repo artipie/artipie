@@ -16,6 +16,7 @@ import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.Settings;
+import com.artipie.settings.cache.StoragesCache;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -50,8 +51,13 @@ public final class MainSlice extends Slice.Wrap {
      *
      * @param http HTTP client.
      * @param settings Artipie settings.
+     * @param cache Storages cache
      */
-    public MainSlice(final ClientSlices http, final Settings settings) {
+    public MainSlice(
+        final ClientSlices http,
+        final Settings settings,
+        final StoragesCache cache
+    ) {
         super(
             new SliceRoute(
                 MainSlice.EMPTY_PATH,
@@ -68,7 +74,7 @@ public final class MainSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new AllRepositoriesSlice(http, settings)
+                    new AllRepositoriesSlice(http, settings, cache)
                 )
             )
         );

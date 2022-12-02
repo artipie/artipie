@@ -18,7 +18,8 @@ import com.artipie.settings.ConfigFile;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.SettingsFromPath;
-import com.artipie.settings.cache.SettingsCaches;
+import com.artipie.settings.cache.ArtipieCaches;
+import com.artipie.settings.cache.StoragesCache;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import com.artipie.vertx.VertxSliceServer;
@@ -106,18 +107,28 @@ public final class VertxMain {
      * @throws IOException In case of error reading settings.
      */
     public int start(final int apiport) throws IOException {
-        final SettingsCaches caches = new SettingsCaches.All();
-        final Settings settings = new SettingsFromPath(this.config).find(this.port, caches);
+        final ArtipieCaches caches = new ArtipieCaches.All();
+        final Settings settings = new SettingsFromPath(this.config).find(caches);
         final MetricsContext mctx = new MetricsContext(settings.meta());
         final Vertx vertx = VertxMain.vertx(mctx);
-        final int main = this.listenOn(new MainSlice(this.http, settings), this.port, vertx, mctx);
+        final int main = this.listenOn(
+            new MainSlice(this.http, settings, caches.storagesCache()),
+            this.port,
+            vertx,
+            mctx
+        );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
-        this.startRepos(vertx, settings, this.port, mctx);
+        this.startRepos(vertx, settings, this.port, mctx, caches.storagesCache());
         settings.auth().thenAccept(
             auth -> vertx.deployVerticle(
                 new RestApi(
-                    caches, settings.repoConfigsStorage(), settings.layout().toString(),
-                    apiport, settings.credentialsKey(), auth, settings.keyStore()
+                    caches,
+                    settings.repoConfigsStorage(),
+                    settings.layout().toString(),
+                    apiport,
+                    settings.credentialsKey(),
+                    auth,
+                    settings.keyStore()
                 )
             )
         );
@@ -175,21 +186,27 @@ public final class VertxMain {
 
     /**
      * Start repository servers.
+     *
      * @param vertx Vertx instance
      * @param settings Settings.
      * @param mport Artipie service main port
      * @param mctx Metrics context
+     * @param cache Storage cache
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     private void startRepos(
-        final Vertx vertx, final Settings settings, final int mport, final MetricsContext mctx
+        final Vertx vertx,
+        final Settings settings,
+        final int mport,
+        final MetricsContext mctx,
+        final StoragesCache cache
     ) {
         final Collection<RepoConfig> configs = settings.repoConfigsStorage().list(Key.ROOT)
             .thenApply(
                 keys -> keys.stream().map(ConfigFile::new)
                     .filter(Predicate.not(ConfigFile::isSystem).and(ConfigFile::isYamlOrYml))
                     .map(ConfigFile::name)
-                    .map(name -> new RepositoriesFromStorage(settings).config(name))
+                    .map(name -> new RepositoriesFromStorage(settings, cache).config(name))
                     .map(stage -> stage.toCompletableFuture().join())
                     .collect(Collectors.toList())
             ).toCompletableFuture().join();
@@ -199,9 +216,10 @@ public final class VertxMain {
                     prt -> {
                         final String name = new ConfigFile(repo.name()).name();
                         this.listenOn(
-                            new ArtipieRepositories(this.http, settings).slice(
-                                new Key.From(name), prt
-                            ), prt, vertx, mctx
+                            new ArtipieRepositories(this.http, settings, cache)
+                                .slice(
+                                    new Key.From(name), prt
+                                ), prt, vertx, mctx
                         );
                         VertxMain.logRepo(prt, name);
                     },
