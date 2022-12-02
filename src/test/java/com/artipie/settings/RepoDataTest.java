@@ -10,6 +10,8 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.settings.cache.StoragesCache;
+import com.artipie.test.TestStoragesCache;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -18,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -29,9 +30,9 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Test for {@link RepoData}.
  * @since 0.1
  * @checkstyle TrailingCommentCheck (500 lines)
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
-@Ignore //todo https://github.com/artipie/artipie/issues/1191
 class RepoDataTest {
 
     /**
@@ -72,8 +73,14 @@ class RepoDataTest {
      */
     private BlockingStorage data;
 
+    /**
+     * Storages cache.
+     */
+    private StoragesCache cache;
+
     @BeforeEach
     void init() {
+        this.cache = new TestStoragesCache();
         this.storage = new InMemoryStorage();
         this.stngs = new BlockingStorage(this.storage);
         this.data = new BlockingStorage(new FileStorage(this.temp));
@@ -87,7 +94,7 @@ class RepoDataTest {
         );
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
-        new RepoData(this.storage)
+        new RepoData(this.storage, this.cache)
             .remove(new RepositoryName.Flat(RepoDataTest.REPO)).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are removed",
@@ -103,7 +110,7 @@ class RepoDataTest {
         );
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
-        new RepoData(this.storage)
+        new RepoData(this.storage, this.cache)
             .move(new RepositoryName.Flat(RepoDataTest.REPO), new RepositoryName.Flat("new-repo"))
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -132,7 +139,7 @@ class RepoDataTest {
         );
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
-        new RepoData(this.storage)
+        new RepoData(this.storage, this.cache)
             .move(new RepositoryName.Flat(RepoDataTest.REPO), new RepositoryName.Flat("new-repo"))
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -163,7 +170,7 @@ class RepoDataTest {
         this.data.save(new Key.From(uid, RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(uid, RepoDataTest.REPO, "second.txt"), new byte[]{});
         final String nrepo = "new-repo";
-        new RepoData(this.storage)
+        new RepoData(this.storage, this.cache)
             .move(
                 new RepositoryName.Org(RepoDataTest.REPO, uid),
                 new RepositoryName.Org(nrepo, uid)
@@ -195,7 +202,7 @@ class RepoDataTest {
         );
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
-        new RepoData(this.storage)
+        new RepoData(this.storage, this.cache)
             .remove(new RepositoryName.Flat(RepoDataTest.REPO)).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
@@ -219,7 +226,7 @@ class RepoDataTest {
         );
         this.data.save(new Key.From(uid, RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(uid, RepoDataTest.REPO, "second.txt"), new byte[]{});
-        new RepoData(this.storage)
+        new RepoData(this.storage, this.cache)
             .remove(new RepositoryName.Org(RepoDataTest.REPO, uid)).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository is empty",

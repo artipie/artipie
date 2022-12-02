@@ -10,7 +10,9 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.nuget.RandomFreePort;
-import com.artipie.settings.cache.SettingsCaches;
+import com.artipie.settings.cache.ArtipieCaches;
+import com.artipie.test.TestArtipieCaches;
+import com.artipie.test.TestStoragesCache;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
@@ -28,7 +30,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -45,6 +46,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings("PMD.TooManyMethods")
 public abstract class RestApiServerBase {
+
+    /**
+     * Max wait time for condition in seconds.
+     */
+    public static final int MAX_WAIT_TIME = 5;
 
     /**
      * Wait test completion.
@@ -79,9 +85,9 @@ public abstract class RestApiServerBase {
     private BlockingStorage asto;
 
     /**
-     * Test settings caches.
+     * Test artipie`s caches.
      */
-    private SettingsCaches caches;
+    private ArtipieCaches caches;
 
     /**
      * Artipie layout.
@@ -136,9 +142,9 @@ public abstract class RestApiServerBase {
 
     /**
      * Get settings caches.
-     * @return Instance of {@link SettingsCaches}
+     * @return Instance of {@link ArtipieCaches}
      */
-    final SettingsCaches settingsCaches() {
+    final ArtipieCaches settingsCaches() {
         return this.caches;
     }
 
@@ -154,7 +160,7 @@ public abstract class RestApiServerBase {
         this.prt = new RandomFreePort().value();
         final InMemoryStorage storage = new InMemoryStorage();
         this.asto = new BlockingStorage(storage);
-        this.caches = new SettingsCaches.Fake();
+        this.caches = new TestArtipieCaches();
         vertx.deployVerticle(
             new RestApi(
                 this.caches, storage, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY),
@@ -297,32 +303,14 @@ public abstract class RestApiServerBase {
     }
 
     /**
-     * Awaiting of action during maximum 5 seconds.
-     * Allows to wait result of action during period of time.
-     * @param action Action
-     * @return Result of action
-     * @checkstyle MagicNumberCheck (15 lines)
-     * @checkstyle NonStaticMethodCheck (15 lines)
+     * Asserts that storages cache was invalidated.
      */
-    final Boolean waitCondition(final Supplier<Boolean> action) {
-        final long max = System.currentTimeMillis() + RestApiServerBase.MAX_WAIT;
-        boolean res;
-        do {
-            res = action.get();
-            if (res) {
-                break;
-            } else {
-                try {
-                    TimeUnit.MILLISECONDS.sleep(RestApiServerBase.SLEEP_DURATION);
-                } catch (final InterruptedException exc) {
-                    break;
-                }
-            }
-        } while (System.currentTimeMillis() < max);
-        if (!res) {
-            res = action.get();
-        }
-        return res;
+    void assertStorageCacheInvalidated() {
+        MatcherAssert.assertThat(
+            "Storages cache was invalidated",
+            ((TestStoragesCache) this.settingsCaches().storagesCache())
+                .wasInvalidated()
+        );
     }
 
     /**

@@ -5,7 +5,7 @@
 package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.settings.cache.SettingsCaches;
+import com.artipie.test.TestArtipieCaches;
 import com.google.common.io.Files;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -34,7 +34,7 @@ class SettingsFromPathTest {
             ).build().toString().getBytes(),
             stng.toFile()
         );
-        final Settings settings = new SettingsFromPath(stng).find(8080, new SettingsCaches.Fake());
+        final Settings settings = new SettingsFromPath(stng).find(new TestArtipieCaches());
         MatcherAssert.assertThat(
             settings,
             new IsInstanceOf(YamlSettings.class)
