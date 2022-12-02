@@ -30,7 +30,7 @@ import org.llorllale.cactoos.matchers.MatcherOf;
 class YamlPermissionsTest {
 
     @Test
-    void johnCanDownloadDeployAndDelete() throws Exception {
+    void johnCanDownloadDeployDrinkAndDelete() throws Exception {
         final Authentication.User user = new Authentication.User("john");
         MatcherAssert.assertThat(
             this.permissions(),
@@ -39,6 +39,7 @@ class YamlPermissionsTest {
                     new MatcherOf<>(perm -> { return perm.allowed(user, "delete"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(user, "deploy"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(user, "download"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "drink"); }),
                     new MatcherOf<>(perm -> !perm.allowed(user, "install"))
                 )
             )
@@ -46,7 +47,7 @@ class YamlPermissionsTest {
     }
 
     @Test
-    void janeCanDownloadAndDeploy() throws Exception {
+    void janeCanDownloadDrinkAndDeploy() throws Exception {
         final Authentication.User user = new Authentication.User("jane");
         MatcherAssert.assertThat(
             this.permissions(),
@@ -54,6 +55,7 @@ class YamlPermissionsTest {
                 new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
                     new MatcherOf<>(perm -> { return perm.allowed(user, "deploy"); }),
                     new MatcherOf<>(perm -> { return perm.allowed(user, "download"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "drink"); }),
                     new MatcherOf<>(perm -> !perm.allowed(user, "install")),
                     new MatcherOf<>(perm -> !perm.allowed(user, "update"))
                 )
@@ -62,13 +64,37 @@ class YamlPermissionsTest {
     }
 
     @Test
-    void anyoneCanDownload() throws Exception {
+    void annCanDoAnything() throws Exception {
+        final Authentication.User user = new Authentication.User("ann");
+        MatcherAssert.assertThat(
+            this.permissions(),
+            new AllOf<YamlPermissions>(
+                new ListOf<org.hamcrest.Matcher<? super YamlPermissions>>(
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "deploy"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "download"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "drink"); }),
+                    new MatcherOf<>(perm -> { return perm.allowed(user, "any_action"); })
+                )
+            )
+        );
+    }
+
+    @Test
+    void anyoneCanDownloadAndDrink() throws Exception {
         MatcherAssert.assertThat(
             this.permissions().allowed(new Authentication.User("anyone"), "download"),
             new IsEqual<>(true)
         );
         MatcherAssert.assertThat(
             this.permissions().allowed(new Authentication.User("*"), "download"),
+            new IsEqual<>(true)
+        );
+        MatcherAssert.assertThat(
+            this.permissions().allowed(new Authentication.User("*"), "drink"),
+            new IsEqual<>(true)
+        );
+        MatcherAssert.assertThat(
+            this.permissions().allowed(new Authentication.User("Someone"), "drink"),
             new IsEqual<>(true)
         );
     }
