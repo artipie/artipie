@@ -9,6 +9,7 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
 import com.artipie.asto.factory.Storages;
 import com.artipie.jfr.JfrStorage;
+import com.artipie.jfr.StorageCreateEvent;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
 import com.artipie.settings.Settings;
@@ -75,9 +76,18 @@ public class CachedStorages implements StoragesCache {
                     if (Strings.isNullOrEmpty(type)) {
                         throw new IllegalArgumentException("Storage type cannot be null or empty.");
                     }
-                    return new JfrStorage(
-                        this.storages.newStorage(type, yaml)
-                    );
+                    final Storage res;
+                    final StorageCreateEvent event = new StorageCreateEvent();
+                    try {
+                        event.begin();
+                        res = new JfrStorage(
+                            this.storages.newStorage(type, yaml)
+                        );
+                        event.storage = res.identifier();
+                    } finally {
+                        event.commit();
+                    }
+                    return res;
                 }
             );
         } catch (final ExecutionException err) {
