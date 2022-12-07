@@ -6,6 +6,7 @@ package com.artipie.jfr;
 
 import jdk.jfr.Event;
 import jdk.jfr.Label;
+import jdk.jfr.StackTrace;
 
 /**
  * Abstract storage event.
@@ -15,6 +16,7 @@ import jdk.jfr.Label;
  * @checkstyle VisibilityModifierCheck (500 lines)
  */
 @SuppressWarnings("PMD.AbstractClassWithoutAnyMethod")
+@StackTrace(false)
 public abstract class AbstractStorageEvent extends Event {
 
     @Label("Storage Identifier")

@@ -78,14 +78,13 @@ public class CachedStorages implements StoragesCache {
                     }
                     final Storage res;
                     final StorageCreateEvent event = new StorageCreateEvent();
-                    try {
+                    if (event.isEnabled()) {
                         event.begin();
-                        res = new JfrStorage(
-                            this.storages.newStorage(type, yaml)
-                        );
+                        res = new JfrStorage(this.storages.newStorage(type, yaml));
                         event.storage = res.identifier();
-                    } finally {
                         event.commit();
+                    } else {
+                        res = new JfrStorage(this.storages.newStorage(type, yaml));
                     }
                     return res;
                 }

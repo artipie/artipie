@@ -9,6 +9,7 @@ import jdk.jfr.Description;
 import jdk.jfr.Event;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
+import jdk.jfr.StackTrace;
 
 /**
  * Event triggered when storage is created.
@@ -21,6 +22,7 @@ import jdk.jfr.Name;
 @Label("Storage Create")
 @Category({"Artipie", "Storage"})
 @Description("Event triggered when storage is created")
+@StackTrace(false)
 public class StorageCreateEvent extends Event {
 
     @Label("Storage Identifier")
