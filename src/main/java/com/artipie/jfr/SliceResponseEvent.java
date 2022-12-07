@@ -5,10 +5,12 @@
 package com.artipie.jfr;
 
 import jdk.jfr.Category;
+import jdk.jfr.DataAmount;
 import jdk.jfr.Description;
 import jdk.jfr.Event;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
+import jdk.jfr.StackTrace;
 
 /**
  * Slice response event triggered when the slice's {@code response} method is called.
@@ -22,6 +24,7 @@ import jdk.jfr.Name;
 @Label("Slice Response")
 @Category({"Artipie", "Slice"})
 @Description("HTTP request")
+@StackTrace(false)
 public class SliceResponseEvent extends Event {
 
     @Label("Request Method")
@@ -30,15 +33,20 @@ public class SliceResponseEvent extends Event {
     @Label("Request Path")
     public volatile String path;
 
+    @Label("Headers")
+    public String headers;
+
     @Label("Request Body Chunks Count")
     public volatile int requestChunks;
 
     @Label("Request Body Value Size")
+    @DataAmount
     public volatile long requestSize;
 
     @Label("Response Body Chunks Count")
     public volatile int responseChunks;
 
     @Label("Response Body Value Size")
+    @DataAmount
     public volatile long responseSize;
 }

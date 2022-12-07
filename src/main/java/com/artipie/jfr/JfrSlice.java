@@ -14,6 +14,8 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.reactivestreams.Publisher;
 
 /**
@@ -41,17 +43,39 @@ public final class JfrSlice implements Slice {
     @Override
     public Response response(
         final String line,
-        final Iterable<Map.Entry<String, String>> head,
+        final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final RequestLineFrom rqLine = new RequestLineFrom(line);
+        final Response res;
         final SliceResponseEvent event = new SliceResponseEvent();
-        event.method = rqLine.method().value();
-        event.path = rqLine.uri().getPath();
+        if (event.isEnabled()) {
+            res = this.wrapResponse(line, headers, body, event);
+        } else {
+            res = this.original.response(line, headers, body);
+        }
+        return res;
+    }
+
+    /**
+     * Executes request and fills an event data.
+     *
+     * @param line The request line
+     * @param headers The request headers
+     * @param body The request body
+     * @param event JFR event
+     * @return The response.
+     * @checkstyle ParameterNumberCheck (25 lines)
+     */
+    private Response wrapResponse(
+        final String line,
+        final Iterable<Map.Entry<String, String>> headers,
+        final Publisher<ByteBuffer> body,
+        final SliceResponseEvent event
+    ) {
         event.begin();
         final Response res = this.original.response(
             line,
-            head,
+            headers,
             new ChunksAndSizeMetricsPublisher(
                 body,
                 (chunks, size) -> {
@@ -63,11 +87,30 @@ public final class JfrSlice implements Slice {
         return new JfrResponse(
             res,
             (chunks, size) -> {
-                event.responseChunks = chunks;
-                event.responseSize = size;
-                event.commit();
+                event.end();
+                if (event.shouldCommit()) {
+                    final RequestLineFrom rqLine = new RequestLineFrom(line);
+                    event.method = rqLine.method().value();
+                    event.path = rqLine.uri().getPath();
+                    event.headers = JfrSlice.headersAsString(headers);
+                    event.responseChunks = chunks;
+                    event.responseSize = size;
+                    event.commit();
+                }
             }
         );
+    }
+
+    /**
+     * Headers to String.
+     *
+     * @param headers Headers
+     * @return String
+     */
+    private static String headersAsString(final Iterable<Map.Entry<String, String>> headers) {
+        return StreamSupport.stream(headers.spliterator(), false)
+            .map(entry -> entry.getKey() + '=' + entry.getValue())
+            .collect(Collectors.joining(";"));
     }
 
     /**

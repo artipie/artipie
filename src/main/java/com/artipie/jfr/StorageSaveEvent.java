@@ -5,6 +5,7 @@
 package com.artipie.jfr;
 
 import jdk.jfr.Category;
+import jdk.jfr.DataAmount;
 import jdk.jfr.Description;
 import jdk.jfr.Label;
 import jdk.jfr.Name;
@@ -26,5 +27,6 @@ public final class StorageSaveEvent extends AbstractStorageEvent {
     public volatile int chunks;
 
     @Label("Value Size")
+    @DataAmount
     public volatile long size;
 }

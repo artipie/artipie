@@ -11,6 +11,7 @@ import com.artipie.asto.Storage;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -18,8 +19,15 @@ import java.util.function.Function;
  *
  * @since 0.28.0
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle TooManyMethods (500 lines)
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class JfrStorage implements Storage {
+
+    /**
+     * Runnable, that does nothing.
+     */
+    private static final Runnable EMPTY_RUNNABLE = () -> { };
 
     /**
      * Original storage.
@@ -37,136 +45,230 @@ public final class JfrStorage implements Storage {
 
     @Override
     public CompletableFuture<Boolean> exists(final Key key) {
+        final CompletableFuture<Boolean> res;
         final StorageExistsEvent event = new StorageExistsEvent();
-        event.storage = this.identifier();
-        event.key = key.string();
-        event.begin();
-        return this.original.exists(key)
-            .thenApply(
-                res -> {
-                    event.commit();
-                    return res;
-                }
-            );
+        if (event.isEnabled()) {
+            event.begin();
+            res = this.original.exists(key)
+                .thenApply(
+                    rt -> this.eventProcess(rt, key, event, JfrStorage.EMPTY_RUNNABLE)
+                );
+        } else {
+            res = this.original.exists(key);
+        }
+        return res;
     }
 
     @Override
     public CompletableFuture<Void> save(final Key key, final Content content) {
+        final CompletableFuture<Void> res;
         final StorageSaveEvent event = new StorageSaveEvent();
-        event.storage = this.identifier();
-        event.key = key.string();
-        event.begin();
-        return this.original.save(
-            key,
-            new ChunksAndSizeMetricsContent(
-                content,
-                (chunks, size) -> {
-                    event.chunks = chunks;
-                    event.size = size;
-                    event.commit();
-                }
-            )
-        );
-    }
-
-    @Override
-    public CompletableFuture<Collection<Key>> list(final Key key) {
-        final StorageListEvent event = new StorageListEvent();
-        event.storage = this.identifier();
-        event.key = key.string();
-        event.begin();
-        return this.original.list(key).thenApply(
-            res -> {
-                event.keysCount = res.size();
-                event.commit();
-                return res;
-            }
-        );
-    }
-
-    @Override
-    public CompletableFuture<Void> move(final Key source, final Key target) {
-        final StorageMoveEvent event = new StorageMoveEvent();
-        event.storage = this.identifier();
-        event.key = source.string();
-        event.target = target.string();
-        event.begin();
-        return this.original.move(source, target)
-            .thenRun(event::commit);
-    }
-
-    @Override
-    public CompletableFuture<? extends Meta> metadata(final Key key) {
-        final StorageMetadataEvent event = new StorageMetadataEvent();
-        event.storage = this.identifier();
-        event.key = key.string();
-        event.begin();
-        return this.original.metadata(key)
-            .thenApply(
-                res -> {
-                    event.commit();
-                    return res;
-                }
+        if (event.isEnabled()) {
+            event.begin();
+            res = this.original.save(
+                key,
+                this.metricsContent(
+                    key, content, event,
+                    (chunks, size) -> {
+                        event.chunks = chunks;
+                        event.size = size;
+                    }
+                )
             );
+        } else {
+            res = this.original.save(key, content);
+        }
+        return res;
     }
 
     @Override
     public CompletableFuture<Content> value(final Key key) {
+        final CompletableFuture<Content> res;
         final StorageValueEvent event = new StorageValueEvent();
-        event.storage = this.identifier();
-        event.key = key.string();
-        event.begin();
-        return this.original.value(key)
-            .thenApply(
-                content -> new ChunksAndSizeMetricsContent(
-                    content,
-                    (chunks, size) -> {
-                        event.chunks = chunks;
-                        event.size = size;
-                        event.commit();
-                    }
+        if (event.isEnabled()) {
+            event.begin();
+            res = this.original.value(key)
+                .thenApply(
+                    content -> this.metricsContent(
+                        key, content, event,
+                        (chunks, size) -> {
+                            event.chunks = chunks;
+                            event.size = size;
+                        }
+                    )
+                );
+        } else {
+            res = this.original.value(key);
+        }
+        return res;
+    }
+
+    @Override
+    public CompletableFuture<Collection<Key>> list(final Key key) {
+        final CompletableFuture<Collection<Key>> res;
+        final StorageListEvent event = new StorageListEvent();
+        if (event.isEnabled()) {
+            event.begin();
+            res = this.original.list(key).thenApply(
+                rt -> this.eventProcess(
+                    rt, key, event, () -> event.keysCount = rt.size()
                 )
             );
+        } else {
+            res = this.original.list(key);
+        }
+        return res;
+    }
+
+    @Override
+    public CompletableFuture<Void> move(final Key source, final Key target) {
+        final CompletableFuture<Void> res;
+        final StorageMoveEvent event = new StorageMoveEvent();
+        if (event.isEnabled()) {
+            event.begin();
+            res = this.original.move(source, target)
+                .thenRun(
+                    () -> this.eventProcess(source, event, () -> event.target = target.string())
+                );
+        } else {
+            res = this.original.move(source, target);
+        }
+        return res;
+    }
+
+    @Override
+    public CompletableFuture<? extends Meta> metadata(final Key key) {
+        final CompletableFuture<? extends Meta> res;
+        final StorageMetadataEvent event = new StorageMetadataEvent();
+        if (event.isEnabled()) {
+            event.begin();
+            res = this.original.metadata(key)
+                .thenApply(
+                    rt -> this.eventProcess(rt, key, event, JfrStorage.EMPTY_RUNNABLE)
+                );
+        } else {
+            res = this.original.metadata(key);
+        }
+        return res;
     }
 
     @Override
     public CompletableFuture<Void> delete(final Key key) {
+        final CompletableFuture<Void> res;
         final StorageDeleteEvent event = new StorageDeleteEvent();
-        event.storage = this.identifier();
-        event.key = key.string();
-        event.begin();
-        return this.original.delete(key)
-            .thenRun(event::commit);
+        if (event.isEnabled()) {
+            event.begin();
+            res = this.original.delete(key)
+                .thenRun(
+                    () -> this.eventProcess(key, event, JfrStorage.EMPTY_RUNNABLE)
+                );
+        } else {
+            res = this.original.delete(key);
+        }
+        return res;
     }
 
     @Override
     public <T> CompletionStage<T> exclusively(final Key key,
         final Function<Storage, CompletionStage<T>> function) {
+        final CompletionStage<T> res;
         final StorageExclusivelyEvent event = new StorageExclusivelyEvent();
-        event.storage = this.identifier();
-        event.key = key.string();
-        event.begin();
-        return this.original.exclusively(key, function)
-            .thenApply(
-                res -> {
-                    event.commit();
-                    return res;
-                }
-            );
+        if (event.isEnabled()) {
+            event.begin();
+            res = this.original.exclusively(key, function)
+                .thenApply(
+                    rt -> this.eventProcess(rt, key, event, JfrStorage.EMPTY_RUNNABLE)
+                );
+        } else {
+            res = this.original.exclusively(key, function);
+        }
+        return res;
     }
 
     @Override
     public CompletableFuture<Void> deleteAll(final Key prefix) {
+        final CompletableFuture<Void> res;
         final StorageDeleteAllEvent event = new StorageDeleteAllEvent();
-        event.storage = this.identifier();
-        event.key = prefix.string();
-        event.begin();
-        return this.original.deleteAll(prefix)
-            .thenRun(event::commit);
+        if (event.isEnabled()) {
+            event.begin();
+            res = this.original.deleteAll(prefix)
+                .thenRun(
+                    () -> this.eventProcess(prefix, event, JfrStorage.EMPTY_RUNNABLE)
+                );
+        } else {
+            res = this.original.deleteAll(prefix);
+        }
+        return res;
     }
 
     @Override
     public String identifier() {
         return this.original.identifier();
+    }
+
+    /**
+     * Wraps passed {@code content} to {@link ChunksAndSizeMetricsContent}.
+     *
+     * @param key Key
+     * @param content Content
+     * @param evt JFR event
+     * @param updater Lambda to fulfill an event`s fields
+     * @return Wrapped content
+     * @checkstyle ParameterNumberCheck (25 lines)
+     */
+    private ChunksAndSizeMetricsContent metricsContent(
+        final Key key,
+        final Content content,
+        final AbstractStorageEvent evt,
+        final BiConsumer<Integer, Long> updater
+    ) {
+        return new ChunksAndSizeMetricsContent(
+            content,
+            (chunks, size) -> this.eventProcess(
+                key, evt, () -> updater.accept(chunks, size)
+            )
+        );
+    }
+
+    /**
+     * If {@code event} should be commit then fulfills an event`s fields and commits.
+     *
+     * @param key Key
+     * @param evt JFR event
+     * @param updater Lambda to fulfill an event`s fields
+     */
+    private void eventProcess(
+        final Key key,
+        final AbstractStorageEvent evt,
+        final Runnable updater
+    ) {
+        this.eventProcess(null, key, evt, updater);
+    }
+
+    /**
+     * If {@code event} should be commit then fulfills an event`s fields and commits.
+     *
+     * @param res Result
+     * @param key Key
+     * @param evt JFR event
+     * @param updater Lambda to fulfill an event`s fields
+     * @param <T> Result type
+     * @return Result
+     * @checkstyle ParameterNumberCheck (25 lines)
+     */
+    private <T> T eventProcess(
+        final T res,
+        final Key key,
+        final AbstractStorageEvent evt,
+        final Runnable updater
+    ) {
+        evt.end();
+        if (evt.shouldCommit()) {
+            evt.storage = this.identifier();
+            evt.key = key.string();
+            updater.run();
+            evt.commit();
+        }
+        return res;
     }
 }
