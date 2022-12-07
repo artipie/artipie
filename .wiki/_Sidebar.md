@@ -40,7 +40,3 @@
     * [[Repository Permissions|Configuration-Repository Permissions]]
       * [[Docker repository granular permissions|Configuration-Repository Permissions#docker-repository-granular-permissions]]
     * [[Metrics|Configuration-Metrics]]
-      * [[Logging metrics|Configuration-Metrics#logging-metrics]]
-      * [[Storage metrics|Configuration-Metrics#storage-metrics]]
-      * [[Prometheus metrics|Configuration-Metrics#prometheus-metrics]]
-      
