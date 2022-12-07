@@ -51,7 +51,7 @@ public final class JfrStorage implements Storage {
             event.begin();
             res = this.original.exists(key)
                 .thenApply(
-                    rt -> this.eventProcess(rt, key, event, JfrStorage.EMPTY_RUNNABLE)
+                    exists -> this.eventProcess(exists, key, event, JfrStorage.EMPTY_RUNNABLE)
                 );
         } else {
             res = this.original.exists(key);
@@ -110,8 +110,8 @@ public final class JfrStorage implements Storage {
         if (event.isEnabled()) {
             event.begin();
             res = this.original.list(key).thenApply(
-                rt -> this.eventProcess(
-                    rt, key, event, () -> event.keysCount = rt.size()
+                list -> this.eventProcess(
+                    list, key, event, () -> event.keysCount = list.size()
                 )
             );
         } else {
@@ -144,7 +144,7 @@ public final class JfrStorage implements Storage {
             event.begin();
             res = this.original.metadata(key)
                 .thenApply(
-                    rt -> this.eventProcess(rt, key, event, JfrStorage.EMPTY_RUNNABLE)
+                    metadata -> this.eventProcess(metadata, key, event, JfrStorage.EMPTY_RUNNABLE)
                 );
         } else {
             res = this.original.metadata(key);
@@ -177,7 +177,7 @@ public final class JfrStorage implements Storage {
             event.begin();
             res = this.original.exclusively(key, function)
                 .thenApply(
-                    rt -> this.eventProcess(rt, key, event, JfrStorage.EMPTY_RUNNABLE)
+                    fres -> this.eventProcess(fres, key, event, JfrStorage.EMPTY_RUNNABLE)
                 );
         } else {
             res = this.original.exclusively(key, function);
