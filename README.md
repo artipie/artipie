@@ -7,7 +7,7 @@
 
 [![Javadoc](http://www.javadoc.io/badge/com.artipie/http-client.svg)](http://www.javadoc.io/doc/com.artipie/http-client)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
-[![codecov](https://codecov.io/gh/artipie/http-client/branch/master/graph/badge.svg)](https://codecov.io/gh/artipie/http-client)
+[![codecov](https://codecov.io/gh/artipie/artipie/branch/master/graph/badge.svg)](https://app.codecov.io/gh/artipie/artipie)
 [![Hits-of-Code](https://hitsofcode.com/github/artipie/artipie)](https://hitsofcode.com/view/github/artipie/artipie)
 ![Docker Pulls](https://img.shields.io/docker/pulls/artipie/artipie)
 ![Docker Image Version (latest by date)](https://img.shields.io/docker/v/artipie/artipie?label=DockerHub&sort=date)
