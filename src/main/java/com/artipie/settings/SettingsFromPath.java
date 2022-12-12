@@ -56,7 +56,7 @@ public final class SettingsFromPath {
         final Key init = new Key.From(".artipie", "initialized");
         if (initialize && !bsto.exists(init)) {
             final List<String> resources = Arrays.asList(
-                "_credentials.yaml", StorageAliases.FILE_NAME,
+                "_credentials.yaml", AliasSettings.FILE_NAME,
                 "artipie/my-bin.yaml", "artipie/my-docker.yaml", "artipie/my-maven.yaml"
             );
             for (final String res : resources) {

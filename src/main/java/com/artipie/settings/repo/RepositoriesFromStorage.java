@@ -13,10 +13,11 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
+import com.artipie.settings.AliasSettings;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
-import com.artipie.settings.StorageAliases;
+import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -46,7 +47,7 @@ public final class RepositoriesFromStorage implements Repositories {
     /**
      * Cache for aliases.
      */
-    private static LoadingCache<FilesContent, Single<StorageAliases>> aliases;
+    private static LoadingCache<FilesContent, Single<StorageByAlias>> aliases;
 
     static {
         final long duration;
@@ -69,7 +70,7 @@ public final class RepositoriesFromStorage implements Repositories {
             .build(
                 new CacheLoader<>() {
                     @Override
-                    public Single<StorageAliases> load(final FilesContent alias) {
+                    public Single<StorageByAlias> load(final FilesContent alias) {
                         return alias.aliases();
                     }
                 }
@@ -123,7 +124,7 @@ public final class RepositoriesFromStorage implements Repositories {
      * @return Completion stage of yaml
      */
     private CompletionStage<RepoConfig> fromPublisher(
-        final StorageAliases als, final Key prefix, final Publisher<ByteBuffer> pub
+        final StorageByAlias als, final Key prefix, final Publisher<ByteBuffer> pub
     ) {
         return new Concatenation(pub).single()
             .map(buf -> new Remaining(buf).bytes())
@@ -204,10 +205,8 @@ public final class RepositoriesFromStorage implements Repositories {
          * Obtains aliases from storage by key.
          * @return Aliases from storage by key.
          */
-        Single<StorageAliases> aliases() {
-            return Single.fromFuture(
-                StorageAliases.find(this.storage, this.key)
-            );
+        Single<StorageByAlias> aliases() {
+            return Single.fromFuture(new AliasSettings().find(this.storage, this.key));
         }
     }
 }

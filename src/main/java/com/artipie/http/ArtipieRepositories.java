@@ -13,7 +13,6 @@ import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.Settings;
-import com.artipie.settings.StorageAliases;
 import com.artipie.settings.cache.StoragesCache;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import java.nio.charset.StandardCharsets;
@@ -91,16 +90,14 @@ public final class ArtipieRepositories {
     private CompletionStage<Slice> resolve(final Key name, final int port) {
         return new RepositoriesFromStorage(this.settings, this.cache)
             .config(name.string())
-            .thenCombine(
-                StorageAliases.find(this.settings.repoConfigsStorage(), name),
-                (config, aliases) -> {
+            .thenApply(
+                config -> {
                     final Slice res;
                     if (config.port().isEmpty() || config.port().getAsInt() == port) {
                         res = new SliceFromConfig(
                             this.http,
                             this.settings,
                             config,
-                            aliases,
                             config.port().isPresent()
                         );
                     } else {

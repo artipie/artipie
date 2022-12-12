@@ -6,7 +6,7 @@ package com.artipie.api;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.misc.UncheckedConsumer;
-import com.artipie.settings.StorageAliases;
+import com.artipie.settings.AliasSettings;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -35,7 +35,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
     void listsCommonAliases(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         this.save(
-            new Key.From(StorageAliases.FILE_NAME),
+            new Key.From(AliasSettings.FILE_NAME),
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
@@ -54,7 +54,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
     void listsUserAliases(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         final String name = "alice";
         this.save(
-            new Key.From(name, StorageAliases.FILE_NAME),
+            new Key.From(name, AliasSettings.FILE_NAME),
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
@@ -73,7 +73,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
     void listsRepoAliases(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         final String name = "alice/docker";
         this.save(
-            new Key.From(name, StorageAliases.FILE_NAME),
+            new Key.From(name, AliasSettings.FILE_NAME),
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
@@ -103,7 +103,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     new String(
-                        this.storage().value(new Key.From(uname, StorageAliases.FILE_NAME)),
+                        this.storage().value(new Key.From(uname, AliasSettings.FILE_NAME)),
                         StandardCharsets.UTF_8
                     ),
                     new IsEqual<>(
@@ -125,7 +125,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
     void updatesRepoAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         final String rname = "my-pypi";
         final String uname = "mark";
-        final Key.From key = new Key.From(uname, rname, StorageAliases.FILE_NAME);
+        final Key.From key = new Key.From(uname, rname, AliasSettings.FILE_NAME);
         this.save(key, this.yamlAliases().getBytes(StandardCharsets.UTF_8));
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
@@ -162,7 +162,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
     @Test
     void addsNewCommonAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(
-            new Key.From(StorageAliases.FILE_NAME),
+            new Key.From(AliasSettings.FILE_NAME),
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
@@ -176,7 +176,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     new String(
-                        this.storage().value(new Key.From(StorageAliases.FILE_NAME)),
+                        this.storage().value(new Key.From(AliasSettings.FILE_NAME)),
                         StandardCharsets.UTF_8
                     ),
                     new IsEqual<>(
@@ -215,7 +215,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
     @Test
     void removesCommonAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(
-            new Key.From(StorageAliases.FILE_NAME),
+            new Key.From(AliasSettings.FILE_NAME),
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
@@ -224,7 +224,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                 MatcherAssert.assertThat(resp.statusCode(), new IsEqual<>(HttpStatus.OK_200));
                 MatcherAssert.assertThat(
                     new String(
-                        this.storage().value(new Key.From(StorageAliases.FILE_NAME)),
+                        this.storage().value(new Key.From(AliasSettings.FILE_NAME)),
                         StandardCharsets.UTF_8
                     ),
                     new IsEqual<>(
@@ -249,7 +249,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
         final String uname = "max";
         final String rname = "my-rpm";
         this.save(
-            new Key.From(uname, rname, StorageAliases.FILE_NAME),
+            new Key.From(uname, rname, AliasSettings.FILE_NAME),
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
@@ -261,7 +261,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                 MatcherAssert.assertThat(resp.statusCode(), new IsEqual<>(HttpStatus.OK_200));
                 MatcherAssert.assertThat(
                     new String(
-                        this.storage().value(new Key.From(uname, rname, StorageAliases.FILE_NAME)),
+                        this.storage().value(new Key.From(uname, rname, AliasSettings.FILE_NAME)),
                         StandardCharsets.UTF_8
                     ),
                     new IsEqual<>(

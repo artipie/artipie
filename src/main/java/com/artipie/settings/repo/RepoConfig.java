@@ -13,7 +13,7 @@ import com.artipie.asto.SubStorage;
 import com.artipie.auth.YamlPermissions;
 import com.artipie.http.auth.Permissions;
 import com.artipie.micrometer.MicrometerStorage;
-import com.artipie.settings.StorageAliases;
+import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,7 +33,7 @@ public final class RepoConfig {
     /**
      * Storage aliases.
      */
-    private final StorageAliases aliases;
+    private final StorageByAlias aliases;
 
     /**
      * Storage prefix.
@@ -65,7 +65,7 @@ public final class RepoConfig {
      * @param metrics Are metrics enabled?
      */
     public RepoConfig(
-        final StorageAliases aliases,
+        final StorageByAlias aliases,
         final Key prefix,
         final YamlMapping yaml,
         final StoragesCache cache,
@@ -86,7 +86,7 @@ public final class RepoConfig {
      * @param cache Storages cache.
      */
     public RepoConfig(
-        final StorageAliases aliases,
+        final StorageByAlias aliases,
         final Key prefix,
         final YamlMapping yaml,
         final StoragesCache cache
@@ -179,7 +179,7 @@ public final class RepoConfig {
                 this.prefix,
                 new LoggingStorage(
                     Level.INFO,
-                    this.aliases.storage(this.cache, node)
+                    this.cache.storage(this.aliases, node)
                 )
             )
         ).map(
@@ -215,9 +215,9 @@ public final class RepoConfig {
     /**
      * Storage aliases.
      *
-     * @return Returns {@link StorageAliases} instance
+     * @return Returns {@link StorageByAlias} instance
      */
-    public StorageAliases storageAliases() {
+    public StorageByAlias storageAliases() {
         return this.aliases;
     }
 

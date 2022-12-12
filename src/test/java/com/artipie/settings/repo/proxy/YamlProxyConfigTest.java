@@ -9,7 +9,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import com.artipie.settings.StorageAliases;
+import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.test.TestStoragesCache;
 import java.util.Collection;
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link YamlProxyConfig}.
  *
  * @since 0.12
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class YamlProxyConfigTest {
@@ -198,7 +199,7 @@ public final class YamlProxyConfigTest {
         return new YamlProxyConfig(
             new JettyClientSlices(),
             new RepoConfig(
-                StorageAliases.EMPTY,
+                new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
                 Key.ROOT,
                 yaml,
                 new TestStoragesCache()
