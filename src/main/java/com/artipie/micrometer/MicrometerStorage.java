@@ -197,6 +197,7 @@ public final class MicrometerStorage implements Storage {
     private DistributionSummary summary(final Key key, final String method) {
         return DistributionSummary
             .builder(String.join(".", MicrometerStorage.ARTIPIE_STORAGE, method, "size"))
+            .description("Storage content body size and chunks")
             .tag(MicrometerStorage.KEY, key.string())
             .tag("id", this.identifier())
             .baseUnit("bytes")

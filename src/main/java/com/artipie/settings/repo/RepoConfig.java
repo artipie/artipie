@@ -7,16 +7,19 @@ package com.artipie.settings.repo;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
+import com.artipie.asto.LoggingStorage;
 import com.artipie.asto.Storage;
+import com.artipie.asto.SubStorage;
 import com.artipie.auth.YamlPermissions;
 import com.artipie.http.auth.Permissions;
 import com.artipie.micrometer.MicrometerStorage;
 import com.artipie.settings.StorageAliases;
-import com.artipie.settings.StorageYamlConfig;
+import com.artipie.settings.cache.StoragesCache;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 /**
@@ -28,9 +31,9 @@ import java.util.stream.Stream;
 public final class RepoConfig {
 
     /**
-     * Storages.
+     * Storage aliases.
      */
-    private final StorageAliases storages;
+    private final StorageAliases aliases;
 
     /**
      * Storage prefix.
@@ -43,37 +46,52 @@ public final class RepoConfig {
     private final YamlMapping yaml;
 
     /**
+     * Storages cache.
+     */
+    private final StoragesCache cache;
+
+    /**
      * Are metrics enabled?
      */
     private final boolean metrics;
 
     /**
      * Ctor.
-     * @param storages Repository storage aliases
+     *
+     * @param aliases Repository storage aliases
      * @param prefix Storage prefix
      * @param yaml Config yaml
+     * @param cache Storages cache.
      * @param metrics Are metrics enabled?
      */
     public RepoConfig(
-        final StorageAliases storages, final Key prefix, final YamlMapping yaml,
+        final StorageAliases aliases,
+        final Key prefix,
+        final YamlMapping yaml,
+        final StoragesCache cache,
         final boolean metrics
     ) {
+        this.aliases = aliases;
         this.prefix = prefix;
         this.yaml = yaml;
-        this.storages = storages;
+        this.cache = cache;
         this.metrics = metrics;
     }
 
     /**
      * Ctor for test usage only.
-     * @param storages Repository storage aliases
+     * @param aliases Repository storage aliases
      * @param prefix Storage prefix
      * @param yaml Config yaml
+     * @param cache Storages cache.
      */
     public RepoConfig(
-        final StorageAliases storages, final Key prefix, final YamlMapping yaml
+        final StorageAliases aliases,
+        final Key prefix,
+        final YamlMapping yaml,
+        final StoragesCache cache
     ) {
-        this(storages, prefix, yaml, false);
+        this(aliases, prefix, yaml, cache, false);
     }
 
     /**
@@ -99,7 +117,7 @@ public final class RepoConfig {
      * @return Repository port.
      */
     public OptionalInt port() {
-        return Stream.ofNullable(this.repoConfig().string("port"))
+        return Stream.ofNullable(this.repoYaml().string("port"))
             .mapToInt(Integer::parseInt)
             .findFirst();
     }
@@ -154,41 +172,62 @@ public final class RepoConfig {
      * @return Async storage for repo
      */
     public Optional<Storage> storageOpt() {
-        return Optional.ofNullable(this.repoConfig().value("storage")).map(
-            node -> new StorageYamlConfig(node, this.storages).subStorage(this.prefix)
+        return Optional.ofNullable(
+            this.repoYaml().value("storage")
+        ).map(
+            node -> new SubStorage(
+                this.prefix,
+                new LoggingStorage(
+                    Level.INFO,
+                    this.aliases.storage(this.cache, node)
+                )
+            )
         ).map(
             asto -> {
+                Storage res = asto;
                 if (this.metrics) {
-                    asto = new MicrometerStorage(asto);
+                    res = new MicrometerStorage(asto);
                 }
-                return asto;
+                return res;
             }
         );
     }
 
     /**
      * Custom repository configuration.
+     *
      * @return Async custom repository config or Optional.empty
      */
     public Optional<YamlMapping> settings() {
-        return Optional.ofNullable(this.repoConfig().yamlMapping("settings"));
+        return Optional.ofNullable(this.repoYaml().yamlMapping("settings"));
     }
 
     /**
      * Repository permissions.
+     *
      * @return Async permissions, empty if not configured.
      */
     public Optional<Permissions> permissions() {
-        return Optional.ofNullable(this.repoConfig().yamlMapping("permissions"))
+        return Optional.ofNullable(this.repoYaml().yamlMapping("permissions"))
             .map(YamlPermissions::new);
     }
 
     /**
      * Storage aliases.
+     *
      * @return Returns {@link StorageAliases} instance
      */
     public StorageAliases storageAliases() {
-        return this.storages;
+        return this.aliases;
+    }
+
+    /**
+     * Gets storages cache.
+     *
+     * @return Storages cache.
+     */
+    public StoragesCache storagesCache() {
+        return this.cache;
     }
 
     /**
@@ -196,7 +235,7 @@ public final class RepoConfig {
      *
      * @return Async YAML mapping
      */
-    public YamlMapping repoConfig() {
+    public YamlMapping repoYaml() {
         return Optional.ofNullable(this.yaml.yamlMapping("repo")).orElseThrow(
             () -> new IllegalStateException("Invalid repo configuration")
         );
@@ -226,6 +265,6 @@ public final class RepoConfig {
      * @return String value, empty if none present.
      */
     private Optional<String> stringOpt(final String key) {
-        return Optional.ofNullable(this.repoConfig().string(key));
+        return Optional.ofNullable(this.repoYaml().string(key));
     }
 }

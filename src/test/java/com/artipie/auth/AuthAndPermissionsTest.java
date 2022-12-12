@@ -4,18 +4,20 @@
  */
 package com.artipie.auth;
 
+import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.test.TestResource;
 import com.artipie.http.auth.BasicAuthSlice;
 import com.artipie.http.auth.Permission;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.settings.CredsConfigYaml;
-import com.artipie.settings.repo.perms.RepoPerms;
 import io.reactivex.Flowable;
 import java.io.IOException;
 import java.util.Collections;
@@ -35,18 +37,17 @@ import org.junit.jupiter.api.Test;
 public class AuthAndPermissionsTest {
 
     @Test
-    void allowsDownloadWhenAuthHeaderIsNotPresent() {
+    void allowsDownloadWhenAuthHeaderIsNotPresent() throws IOException {
         MatcherAssert.assertThat(
             new BasicAuthSlice(
                 new SliceSimple(StandardRs.EMPTY),
                 new AuthFromYaml(this.credentials()),
                 new Permission.ByName("download", this.permissions())
-            ).response(
-                new RequestLine("POST", "/bar", "HTTP/1.2").toString(),
-                Collections.emptyList(),
-                Flowable.empty()
             ),
-            new RsHasStatus(RsStatus.OK)
+            new SliceHasResponse(
+                new RsHasStatus(RsStatus.OK),
+                new RequestLine("POST", "/bar", "HTTP/1.2")
+            )
         );
     }
 
@@ -153,7 +154,7 @@ public class AuthAndPermissionsTest {
     }
 
     @Test
-    void authIsNotRequiredForPublicRepo() {
+    void authIsNotRequiredForPublicRepo() throws IOException {
         final RsStatus status = RsStatus.ACCEPTED;
         MatcherAssert.assertThat(
             new BasicAuthSlice(
@@ -195,20 +196,17 @@ public class AuthAndPermissionsTest {
             .withUserAndPlainPswd("admin", "abc").yaml();
     }
 
-    private YamlPermissions permissions() {
+    private YamlPermissions permissions() throws IOException {
         return new YamlPermissions(
-            new RepoPerms(
-                new ListOf<>(
-                    new RepoPerms.PermissionItem("admin", "*"),
-                    new RepoPerms.PermissionItem("*", "download"),
-                    new RepoPerms.PermissionItem("john", new ListOf<>("delete", "deploy"))
-                )
-            ).permsYaml()
+            Yaml.createYamlInput(new TestResource("repo-full-config.yml").asInputStream())
+                .readYamlMapping().yamlMapping("repo").yamlMapping("permissions")
         );
     }
 
-    private YamlPermissions allAllowedPermissions() {
-        return new YamlPermissions(new RepoPerms("*", "*").permsYaml());
+    private YamlPermissions allAllowedPermissions() throws IOException {
+        return new YamlPermissions(
+            Yaml.createYamlInput("\"*\":\n  - \"*\"").readYamlMapping()
+        );
     }
 
 }

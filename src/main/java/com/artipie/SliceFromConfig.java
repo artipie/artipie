@@ -115,8 +115,12 @@ public final class SliceFromConfig extends Slice.Wrap {
     )
     static Slice build(
         final ClientSlices http,
-        final Settings settings, final Authentication auth,
-        final RepoConfig cfg, final StorageAliases aliases, final boolean standalone) {
+        final Settings settings,
+        final Authentication auth,
+        final RepoConfig cfg,
+        final StorageAliases aliases,
+        final boolean standalone
+    ) {
         final Slice slice;
         final Permissions permissions = new LoggingPermissions(
             cfg.permissions().orElse(Permissions.FREE)
@@ -193,7 +197,8 @@ public final class SliceFromConfig extends Slice.Wrap {
                             .stream().map(node -> node.asScalar().value())
                             .map(
                                 name -> new AsyncSlice(
-                                    new RepositoriesFromStorage(settings).config(name)
+                                    new RepositoriesFromStorage(settings, cfg.storagesCache())
+                                        .config(name)
                                         .thenApply(
                                             sub -> new SliceFromConfig(
                                                 http, settings, sub, aliases, standalone
@@ -257,7 +262,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 slice = new TrimPathSlice(
                     new DebianSlice(
                         cfg.storage(), permissions, auth,
-                        new Config.FromYaml(cfg.name(), cfg.settings(), settings.storage())
+                        new Config.FromYaml(cfg.name(), cfg.settings(), settings.configStorage())
                     ),
                     settings.layout().pattern()
                 );

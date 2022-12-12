@@ -9,7 +9,7 @@ import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.settings.YamlSettings;
-import com.artipie.settings.cache.SettingsCaches;
+import com.artipie.test.TestArtipieCaches;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -46,13 +46,13 @@ final class SSLPemRestTest extends SSLBaseRestTest {
                     "",
                     "meta:\n",
                     "  ssl:\n",
-                    "    enabled:true\n",
+                    "    enabled: true\n",
                     "    pem:\n",
-                    "      key-path:private-key.pem\n",
-                    "      cert-path:cert.pem\n"
+                    "      key-path: private-key.pem\n",
+                    "      cert-path: cert.pem\n"
                 )
             ).readYamlMapping(),
-            new SettingsCaches.Fake()
+            new TestArtipieCaches()
         ).keyStore();
     }
 }

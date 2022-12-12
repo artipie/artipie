@@ -14,6 +14,7 @@ import com.artipie.http.slice.SliceSimple;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.Settings;
 import com.artipie.settings.StorageAliases;
+import com.artipie.settings.cache.StoragesCache;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
@@ -36,13 +37,24 @@ public final class ArtipieRepositories {
     private final Settings settings;
 
     /**
+     * Storages cache.
+     */
+    private final StoragesCache cache;
+
+    /**
      * New Artipie repositories.
      * @param http HTTP client
      * @param settings Artipie settings
+     * @param cache Storages cache.
      */
-    public ArtipieRepositories(final ClientSlices http, final Settings settings) {
+    public ArtipieRepositories(
+        final ClientSlices http,
+        final Settings settings,
+        final StoragesCache cache
+    ) {
         this.http = http;
         this.settings = settings;
+        this.cache = cache;
     }
 
     /**
@@ -77,20 +89,25 @@ public final class ArtipieRepositories {
      * @checkstyle ParameterNumberCheck (2 lines)
      */
     private CompletionStage<Slice> resolve(final Key name, final int port) {
-        return new RepositoriesFromStorage(this.settings).config(name.string()).thenCombine(
-            StorageAliases.find(this.settings.repoConfigsStorage(), name),
-            (config, aliases) -> {
-                final Slice res;
-                if (config.port().isEmpty() || config.port().getAsInt() == port) {
-                    res = new SliceFromConfig(
-                        this.http, this.settings,
-                        config, aliases, config.port().isPresent()
-                    );
-                } else {
-                    res = new SliceSimple(new RsRepoNotFound(name));
+        return new RepositoriesFromStorage(this.settings, this.cache)
+            .config(name.string())
+            .thenCombine(
+                StorageAliases.find(this.settings.repoConfigsStorage(), name),
+                (config, aliases) -> {
+                    final Slice res;
+                    if (config.port().isEmpty() || config.port().getAsInt() == port) {
+                        res = new SliceFromConfig(
+                            this.http,
+                            this.settings,
+                            config,
+                            aliases,
+                            config.port().isPresent()
+                        );
+                    } else {
+                        res = new SliceSimple(new RsRepoNotFound(name));
+                    }
+                    return res;
                 }
-                return res;
-            }
         );
     }
 
