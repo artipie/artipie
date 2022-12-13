@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Micrometer storage decorator measures various storage operations execution time.
@@ -24,11 +23,6 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class MicrometerStorage implements Storage {
-
-    /**
-     * Tag key.
-     */
-    private static final String KEY = "key";
 
     /**
      * First part name of the metric.
@@ -67,7 +61,7 @@ public final class MicrometerStorage implements Storage {
     public CompletableFuture<Boolean> exists(final Key key) {
         final Timer.Sample timer = Timer.start(this.registry);
         return this.origin.exists(key).handle(
-            (res, err) -> this.handleCompletion("exists", key, timer, res, err)
+            (res, err) -> this.handleCompletion("exists", timer, res, err)
         ).thenCompose(Function.identity());
     }
 
@@ -75,7 +69,7 @@ public final class MicrometerStorage implements Storage {
     public CompletableFuture<Collection<Key>> list(final Key key) {
         final Timer.Sample timer = Timer.start(this.registry);
         return this.origin.list(key).handle(
-            (res, err) -> this.handleCompletion("list", key, timer, res, err)
+            (res, err) -> this.handleCompletion("list", timer, res, err)
         ).thenCompose(Function.identity());
     }
 
@@ -84,9 +78,9 @@ public final class MicrometerStorage implements Storage {
         final Timer.Sample timer = Timer.start(this.registry);
         final String method = "save";
         return this.origin.save(
-            key, new MicrometerPublisher(content, this.summary(key, method))
+            key, new MicrometerPublisher(content, this.summary(method))
         ).handle(
-            (res, err) -> this.handleCompletion(method, key, timer, res, err)
+            (res, err) -> this.handleCompletion(method, timer, res, err)
         ).thenCompose(Function.identity());
     }
 
@@ -95,7 +89,7 @@ public final class MicrometerStorage implements Storage {
         final Timer.Sample timer = Timer.start(this.registry);
         return this.origin.move(source, dest).handle(
             (res, err) ->
-                this.handleCompletion("move", source, timer, res, err, "dest", dest.string())
+                this.handleCompletion("move", timer, res, err)
         ).thenCompose(Function.identity());
     }
 
@@ -103,7 +97,7 @@ public final class MicrometerStorage implements Storage {
     public CompletableFuture<? extends Meta> metadata(final Key key) {
         final Timer.Sample timer = Timer.start(this.registry);
         return this.origin.metadata(key).handle(
-            (res, err) -> this.handleCompletion("metadata", key, timer, res, err)
+            (res, err) -> this.handleCompletion("metadata", timer, res, err)
         ).thenCompose(Function.identity());
     }
 
@@ -112,16 +106,16 @@ public final class MicrometerStorage implements Storage {
         final Timer.Sample timer = Timer.start(this.registry);
         final String method = "value";
         return this.origin.value(key).handle(
-            (res, err) -> this.handleCompletion(method, key, timer, res, err)
+            (res, err) -> this.handleCompletion(method, timer, res, err)
         ).thenCompose(Function.identity())
-            .thenApply(content -> new MicrometerPublisher(content, this.summary(key, method)));
+            .thenApply(content -> new MicrometerPublisher(content, this.summary(method)));
     }
 
     @Override
     public CompletableFuture<Void> delete(final Key key) {
         final Timer.Sample timer = Timer.start(this.registry);
         return this.origin.delete(key).handle(
-            (res, err) -> this.handleCompletion("delete", key, timer, res, err)
+            (res, err) -> this.handleCompletion("delete", timer, res, err)
         ).thenCompose(Function.identity());
     }
 
@@ -129,7 +123,7 @@ public final class MicrometerStorage implements Storage {
     public CompletableFuture<Void> deleteAll(final Key prefix) {
         final Timer.Sample timer = Timer.start(this.registry);
         return this.origin.deleteAll(prefix).handle(
-            (res, err) -> this.handleCompletion("deleteAll", prefix, timer, res, err)
+            (res, err) -> this.handleCompletion("deleteAll", timer, res, err)
         ).thenCompose(Function.identity());
     }
 
@@ -138,7 +132,7 @@ public final class MicrometerStorage implements Storage {
         final Function<Storage, CompletionStage<T>> function) {
         final Timer.Sample timer = Timer.start(this.registry);
         return this.origin.exclusively(key, function).handle(
-            (res, err) -> this.handleCompletion("exclusively", key, timer, res, err)
+            (res, err) -> this.handleCompletion("exclusively", timer, res, err)
         ).thenCompose(Function.identity());
     }
 
@@ -153,34 +147,25 @@ public final class MicrometerStorage implements Storage {
      * Storage id and key tags are added by default, provide additional tags in the corresponding
      * parameters.
      * @param method The method name
-     * @param key Storage key
      * @param timer Timer
      * @param res Operation result
      * @param err Error
-     * @param tags Additional tags
      * @param <T> Result type
      * @return Completion stage with the result
      * @checkstyle ParameterNumberCheck (10 lines)
      */
     private <T> CompletionStage<T> handleCompletion(
-        final String method, final Key key, final Timer.Sample timer,
-        final T res, final Throwable err, final String... tags
+        final String method, final Timer.Sample timer, final T res, final Throwable err
     ) {
         final CompletionStage<T> complete;
-        Stream<String> all = Stream.of(
-            "id", this.identifier(), MicrometerStorage.KEY, key.string()
-        );
-        if (tags.length > 0) {
-            all = Stream.concat(all, Stream.of(tags));
-        }
         final String operation = String.join(".", MicrometerStorage.ARTIPIE_STORAGE, method);
         if (err == null) {
-            timer.stop(this.registry.timer(operation, all.toArray(String[]::new)));
+            timer.stop(this.registry.timer(operation, "id", this.identifier()));
             complete = CompletableFuture.completedFuture(res);
         } else {
             timer.stop(
                 this.registry.timer(
-                    String.join(".", operation, "error"), all.toArray(String[]::new)
+                    String.join(".", operation, "error"), "id", this.identifier()
                 )
             );
             complete = CompletableFuture.failedFuture(err);
@@ -190,15 +175,13 @@ public final class MicrometerStorage implements Storage {
 
     /**
      * Create and register distribution summary.
-     * @param key The operation key
      * @param method Method name
      * @return Summary
      */
-    private DistributionSummary summary(final Key key, final String method) {
+    private DistributionSummary summary(final String method) {
         return DistributionSummary
             .builder(String.join(".", MicrometerStorage.ARTIPIE_STORAGE, method, "size"))
             .description("Storage content body size and chunks")
-            .tag(MicrometerStorage.KEY, key.string())
             .tag("id", this.identifier())
             .baseUnit("bytes")
             .register(this.registry);
