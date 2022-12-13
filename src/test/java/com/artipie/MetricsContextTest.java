@@ -7,6 +7,7 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlMappingBuilder;
+import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.settings.MetricsContext;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -36,8 +37,8 @@ public class MetricsContextTest {
             new IsEqual<>(new ImmutablePair<>(endpoint, port))
         );
         MatcherAssert.assertThat(
-            "Metrics are enabled",
-            metrics.enabled()
+            "Metrics (all types) are enabled",
+            metrics.enabled() && metrics.jvm() && metrics.http() && metrics.storage()
         );
     }
 
@@ -51,8 +52,8 @@ public class MetricsContextTest {
             new IsEqual<>(true)
         );
         MatcherAssert.assertThat(
-            "Metrics are disabled",
-            !metrics.enabled()
+            "Metrics (all types) are disabled",
+            !metrics.enabled() && !metrics.jvm() && !metrics.http() && !metrics.storage()
         );
     }
 
@@ -71,6 +72,26 @@ public class MetricsContextTest {
         );
     }
 
+    @Test
+    void returnsTrueWhenTypeIsEnabled() {
+        final MetricsContext metrics =
+            new MetricsContext(this.settings("/any", 9876, "jvm", "http", "storage"));
+        MatcherAssert.assertThat(
+            "Metrics (all types) are enabled",
+            metrics.jvm() && metrics.http() && metrics.storage()
+        );
+    }
+
+    @Test
+    void returnsFalseWhenTypeIsDisabled() {
+        final MetricsContext metrics =
+            new MetricsContext(this.settings("/any", 9876));
+        MatcherAssert.assertThat(
+            "Metrics (all types) are disabled",
+            !metrics.jvm() && !metrics.http() && !metrics.storage()
+        );
+    }
+
     private YamlMapping settings(final Optional<String> endpoint, final Optional<Integer> port) {
         YamlMappingBuilder res = Yaml.createYamlMappingBuilder();
         if (port.isPresent()) {
@@ -80,5 +101,19 @@ public class MetricsContextTest {
             res = res.add("endpoint", endpoint.get());
         }
         return Yaml.createYamlMappingBuilder().add("metrics", res.build()).build();
+    }
+
+    private YamlMapping settings(
+        final String endpoint, final int port, final String... types
+    ) {
+        final YamlMappingBuilder res = Yaml.createYamlMappingBuilder()
+            .add("port", String.valueOf(port))
+            .add("endpoint", endpoint);
+        YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
+        for (final String item : types) {
+            seq = seq.add(item);
+        }
+        return Yaml.createYamlMappingBuilder()
+            .add("metrics", res.add("types", seq.build()).build()).build();
     }
 }

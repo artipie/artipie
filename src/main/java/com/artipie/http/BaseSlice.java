@@ -47,7 +47,7 @@ public final class BaseSlice extends Slice.Wrap {
      */
     private static Slice wrapToBaseMetricsSlices(final MetricsContext mctx, final Slice origin) {
         Slice res = origin;
-        if (mctx.enabled()) {
+        if (mctx.http()) {
             res = new MicrometerSlice(origin);
         }
         return res;

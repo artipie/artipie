@@ -286,12 +286,14 @@ public final class VertxMain {
                         ).setEnabled(true)
                 )
             );
-            final MeterRegistry registry = BackendRegistries.getDefaultNow();
-            new ClassLoaderMetrics().bindTo(registry);
-            new JvmMemoryMetrics().bindTo(registry);
-            new JvmGcMetrics().bindTo(registry);
-            new ProcessorMetrics().bindTo(registry);
-            new JvmThreadMetrics().bindTo(registry);
+            if (mctx.jvm()) {
+                final MeterRegistry registry = BackendRegistries.getDefaultNow();
+                new ClassLoaderMetrics().bindTo(registry);
+                new JvmMemoryMetrics().bindTo(registry);
+                new JvmGcMetrics().bindTo(registry);
+                new ProcessorMetrics().bindTo(registry);
+                new JvmThreadMetrics().bindTo(registry);
+            }
             Logger.info(
                 VertxMain.class,
                 String.format(

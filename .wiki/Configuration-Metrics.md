@@ -13,9 +13,15 @@ meta:
   metrics:
     endpoint: "/metrics/vertx" # Path of the endpoint, starting with `/`, where the metrics will be served
     port: 8087 # Port to serve the metrics
+    types:
+      - jvm # enables jvm-related metrics 
+      - storage # enables storage-related metrics
+      - http # enables http requests/responses related metrics
 ```
 
-Both `endpoint` and `port` fields are required. If one of the fields is absent, metrics are considered as not enabled.
+Both `endpoint` and `port` fields are required. If one of the fields is absent, metrics are considered as not enabled. 
+Sequence `types` is optional: if `types` is absent all metrics are enabled, if it's present and empty, only
+Vert.x embedded metrics are available. Add `types` items `jvm`, `storage` and/or `http` to enable required metrics. 
 
 ### Artipie metrics
 

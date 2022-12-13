@@ -5,6 +5,7 @@
 package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlSequence;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,9 +23,14 @@ public final class MetricsContext {
     private static final String ENDPOINT = "endpoint";
 
     /**
-     * Endpoint for metrics.
+     * Port for metrics.
      */
     private static final String PORT = "port";
+
+    /**
+     * Metrics yaml section.
+     */
+    private static final String METRICS = "metrics";
 
     /**
      * Meta section from Artipie yaml settings.
@@ -53,7 +59,7 @@ public final class MetricsContext {
      */
     public Optional<Pair<String, Integer>> endpointAndPort() {
         Optional<Pair<String, Integer>> res = Optional.empty();
-        final YamlMapping metrics = this.meta.yamlMapping("metrics");
+        final YamlMapping metrics = this.meta.yamlMapping(MetricsContext.METRICS);
         if (metrics != null && metrics.string(MetricsContext.ENDPOINT) != null
             && metrics.value(MetricsContext.PORT) != null) {
             res = Optional.of(
@@ -61,6 +67,46 @@ public final class MetricsContext {
                     metrics.string(MetricsContext.ENDPOINT), metrics.integer(MetricsContext.PORT)
                 )
             );
+        }
+        return res;
+    }
+
+    /**
+     * Are JVM metrics enabled?
+     * @return True is yes
+     */
+    public boolean jvm() {
+        return this.enabled() && this.isTypeEnabled("jvm");
+    }
+
+    /**
+     * Are storage metrics enabled?
+     * @return True is yes
+     */
+    public boolean storage() {
+        return this.enabled() && this.isTypeEnabled("storage");
+    }
+
+    /**
+     * Are http (requests) metrics enabled?
+     * @return True is yes
+     */
+    public boolean http() {
+        return this.enabled() && this.isTypeEnabled("http");
+    }
+
+    /**
+     * Check if given metrics type is enabled.
+     * @param type Type to check
+     * @return True is enabled
+     */
+    private boolean isTypeEnabled(final String type) {
+        boolean res = true;
+        final YamlSequence types = this.meta.yamlMapping(MetricsContext.METRICS)
+            .yamlSequence("types");
+        if (types != null) {
+            res = types.values().stream().map(node -> node.asScalar().value())
+                .anyMatch(val -> val.equals(type));
         }
         return res;
     }

@@ -137,7 +137,7 @@ public final class RepositoriesFromStorage implements Repositories {
                     prefix,
                     yaml,
                     this.cache,
-                    new MetricsContext(this.settings.meta()).enabled()
+                    new MetricsContext(this.settings.meta()).storage()
                 )
             );
     }
