@@ -5,10 +5,7 @@
 package com.artipie.settings.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.asto.Concatenation;
-import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.misc.ArtipieProperties;
@@ -22,15 +19,11 @@ import com.artipie.settings.cache.StoragesCache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
-import org.reactivestreams.Publisher;
 
 /**
  * Artipie repositories created from {@link Settings}.
@@ -100,47 +93,20 @@ public final class RepositoriesFromStorage implements Repositories {
 
     @Override
     public CompletionStage<RepoConfig> config(final String name) {
-        final FilesContent pair = new FilesContent(
+        final FilesContent content = new FilesContent(
             new Key.From(new ConfigFile(name).name()), this.settings.repoConfigsStorage()
         );
         return Single.zip(
-            RepositoriesFromStorage.configs.getUnchecked(pair),
-            RepositoriesFromStorage.aliases.getUnchecked(pair),
-            (data, als) -> SingleInterop.fromFuture(
-                this.fromPublisher(
-                    als,
-                    pair.key,
-                    new Content.From(data.getBytes())
-                )
+            RepositoriesFromStorage.configs.getUnchecked(content),
+            RepositoriesFromStorage.aliases.getUnchecked(content),
+            (data, als) -> new RepoConfig(
+                als,
+                content.key,
+                Yaml.createYamlInput(data).readYamlMapping(),
+                this.cache,
+                new MetricsContext(this.settings.meta()).enabled()
             )
-        ).flatMap(self -> self).to(SingleInterop.get());
-    }
-
-    /**
-     * Create async yaml config from content publisher.
-     * @param als Storage aliases
-     * @param prefix Repository prefix
-     * @param pub Yaml content publisher
-     * @return Completion stage of yaml
-     */
-    private CompletionStage<RepoConfig> fromPublisher(
-        final StorageByAlias als, final Key prefix, final Publisher<ByteBuffer> pub
-    ) {
-        return new Concatenation(pub).single()
-            .map(buf -> new Remaining(buf).bytes())
-            .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
-            .doOnSuccess(yaml -> Logger.debug(RepoConfig.class, "parsed yaml config:\n%s", yaml))
-            .map(content -> Yaml.createYamlInput(content.toString()).readYamlMapping())
-            .to(SingleInterop.get())
-            .thenApply(
-                yaml -> new RepoConfig(
-                    als,
-                    prefix,
-                    yaml,
-                    this.cache,
-                    new MetricsContext(this.settings.meta()).enabled()
-                )
-            );
+        ).to(SingleInterop.get());
     }
 
     /**
@@ -206,7 +172,7 @@ public final class RepositoriesFromStorage implements Repositories {
          * @return Aliases from storage by key.
          */
         Single<StorageByAlias> aliases() {
-            return Single.fromFuture(new AliasSettings().find(this.storage, this.key));
+            return Single.fromFuture(new AliasSettings(this.storage).find(this.key));
         }
     }
 }

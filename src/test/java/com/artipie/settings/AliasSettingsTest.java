@@ -52,7 +52,7 @@ class AliasSettingsTest {
             )
         ).join();
         MatcherAssert.assertThat(
-            new AliasSettings().find(this.asto, new Key.From("alice/my-maven")).join()
+            new AliasSettings(this.asto).find(new Key.From("alice/my-maven")).join()
                 .storage(new TestStoragesCache(), "def").identifier(),
             new IsEqual<>("FS: any")
         );
@@ -77,7 +77,7 @@ class AliasSettingsTest {
         ).join();
         Assertions.assertThrows(
             IllegalStateException.class,
-            () -> new AliasSettings().find(this.asto, new Key.From("john/my-deb")).join()
+            () -> new AliasSettings(this.asto).find(new Key.From("john/my-deb")).join()
                 .storage(new TestStoragesCache(), "def")
         );
     }

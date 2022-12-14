@@ -126,8 +126,8 @@ public final class RepoData {
                 node -> {
                     final CompletionStage<Storage> res;
                     if (node instanceof Scalar) {
-                        res = new AliasSettings().find(
-                            this.configStorage, new Key.From(rname.toString())
+                        res = new AliasSettings(this.configStorage).find(
+                            new Key.From(rname.toString())
                         ).thenApply(
                             aliases -> aliases.storage(
                                 this.storagesCache,

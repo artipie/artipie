@@ -24,24 +24,36 @@ public final class AliasSettings {
     public static final String FILE_NAME = "_storages.yaml";
 
     /**
+     * Settings storage.
+     */
+    private final Storage storage;
+
+    /**
+     * Ctor.
+     * @param storage Settings storage
+     */
+    public AliasSettings(final Storage storage) {
+        this.storage = storage;
+    }
+
+    /**
      * Find alias settings for repository.
      *
-     * @param storage Settings storage
      * @param repo Repository name
      * @return Instance of {@link StorageByAlias}
      */
-    public CompletableFuture<StorageByAlias> find(final Storage storage, final Key repo) {
+    public CompletableFuture<StorageByAlias> find(final Key repo) {
         final Key.From key = new Key.From(repo, AliasSettings.FILE_NAME);
-        return new ConfigFile(key).existsIn(storage).thenCompose(
+        return new ConfigFile(key).existsIn(this.storage).thenCompose(
             found -> {
                 final CompletionStage<StorageByAlias> res;
                 if (found) {
-                    res = SingleInterop.fromFuture(new ConfigFile(key).valueFrom(storage))
+                    res = SingleInterop.fromFuture(new ConfigFile(key).valueFrom(this.storage))
                         .to(new ContentAsYaml())
                         .to(SingleInterop.get())
                         .thenApply(StorageByAlias::new);
                 } else {
-                    res = repo.parent().map(parent -> this.find(storage, parent))
+                    res = repo.parent().map(this::find)
                         .orElse(
                             CompletableFuture.completedFuture(
                                 new StorageByAlias(Yaml.createYamlMappingBuilder().build())
