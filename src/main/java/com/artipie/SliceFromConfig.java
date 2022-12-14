@@ -49,7 +49,6 @@ import com.artipie.nuget.http.NuGet;
 import com.artipie.pypi.http.PySlice;
 import com.artipie.rpm.http.RpmSlice;
 import com.artipie.settings.Settings;
-import com.artipie.settings.StorageAliases;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import java.net.URI;
@@ -72,20 +71,18 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param http HTTP client
      * @param settings Artipie settings
      * @param config Repo config
-     * @param aliases Storage aliases
      * @param standalone Standalone flag
      */
     public SliceFromConfig(
         final ClientSlices http,
         final Settings settings, final RepoConfig config,
-        final StorageAliases aliases,
         final boolean standalone) {
         super(
             new AsyncSlice(
                 settings.auth().thenApply(
                     auth -> SliceFromConfig.build(
                         http, settings, new LoggingAuth(auth),
-                        config, aliases, standalone
+                        config, standalone
                     )
                 )
             )
@@ -99,7 +96,6 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param settings Artipie settings
      * @param auth Authentication
      * @param cfg Repository config
-     * @param aliases Storage aliases
      * @param standalone Standalone flag
      * @return Slice completionStage
      * @checkstyle LineLengthCheck (150 lines)
@@ -118,7 +114,6 @@ public final class SliceFromConfig extends Slice.Wrap {
         final Settings settings,
         final Authentication auth,
         final RepoConfig cfg,
-        final StorageAliases aliases,
         final boolean standalone
     ) {
         final Slice slice;
@@ -201,7 +196,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                                         .config(name)
                                         .thenApply(
                                             sub -> new SliceFromConfig(
-                                                http, settings, sub, aliases, standalone
+                                                http, settings, sub, standalone
                                             )
                                         )
                                 )

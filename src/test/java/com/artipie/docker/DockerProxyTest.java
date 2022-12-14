@@ -15,6 +15,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.test.TestStoragesCache;
@@ -97,9 +98,7 @@ class DockerProxyTest {
             new JettyClientSlices(),
             false,
             new RepoConfig(
-                (stors, alias) -> {
-                    throw new UnsupportedOperationException();
-                },
+                new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
                 Key.ROOT,
                 Yaml.createYamlInput(yaml).readYamlMapping(),
                 cache
