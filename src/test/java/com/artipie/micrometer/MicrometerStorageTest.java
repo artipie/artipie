@@ -56,7 +56,7 @@ class MicrometerStorageTest {
         MatcherAssert.assertThat(
             this.registry.getMetersAsString(),
             Matchers.stringContainsInOrder(
-                "artipie.storage.exists(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"
+                "artipie.storage.exists(TIMER)[id='InMemoryStorage']; count=1.0"
             )
         );
     }
@@ -67,7 +67,7 @@ class MicrometerStorageTest {
         MatcherAssert.assertThat(
             this.registry.getMetersAsString(),
             Matchers.stringContainsInOrder(
-                "artipie.storage.list(TIMER)[id='InMemoryStorage', key='']; count=1.0"
+                "artipie.storage.list(TIMER)[id='InMemoryStorage']; count=1.0"
             )
         );
     }
@@ -82,8 +82,8 @@ class MicrometerStorageTest {
             Arrays.stream(this.registry.getMetersAsString().split("\n")).toList(),
             Matchers.containsInAnyOrder(
                 // @checkstyle LineLengthCheck (2 lines)
-                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage', key='any/test.txt']; count=1.0, total=3.0 bytes, max=3.0")
+                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage']; count=1.0, total=3.0 bytes, max=3.0")
             )
         );
         this.asto.move(MicrometerStorageTest.KEY, new Key.From("other/location/test.txt")).join();
@@ -92,9 +92,9 @@ class MicrometerStorageTest {
             Arrays.stream(this.registry.getMetersAsString().split("\n")).toList(),
             Matchers.containsInAnyOrder(
                 // @checkstyle LineLengthCheck (3 lines)
-                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage', key='any/test.txt']; count=1.0, total=3.0 bytes, max=3.0"),
-                Matchers.containsString("artipie.storage.move(TIMER)[dest='other/location/test.txt', id='InMemoryStorage', key='any/test.txt']; count=1.0")
+                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage']; count=1.0, total=3.0 bytes, max=3.0"),
+                Matchers.containsString("artipie.storage.move(TIMER)[id='InMemoryStorage']; count=1.0")
             )
         );
     }
@@ -109,8 +109,8 @@ class MicrometerStorageTest {
             Arrays.stream(this.registry.getMetersAsString().split("\n")).toList(),
             Matchers.containsInAnyOrder(
                 // @checkstyle LineLengthCheck (2 lines)
-                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage', key='any/test.txt']; count=1.0, total=3.0 bytes, max=3.0")
+                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage']; count=1.0, total=3.0 bytes, max=3.0")
             )
         );
         this.asto.value(MicrometerStorageTest.KEY).thenAccept(
@@ -121,10 +121,10 @@ class MicrometerStorageTest {
             Arrays.stream(this.registry.getMetersAsString().split("\n")).toList(),
             Matchers.containsInAnyOrder(
                 // @checkstyle LineLengthCheck (4 lines)
-                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.value(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage', key='any/test.txt']; count=1.0, total=3.0 bytes, max=3.0"),
-                Matchers.containsString("artipie.storage.value.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage', key='any/test.txt']; count=1.0, total=3.0 bytes, max=3.0")
+                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.value(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage']; count=1.0, total=3.0 bytes, max=3.0"),
+                Matchers.containsString("artipie.storage.value.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage']; count=1.0, total=3.0 bytes, max=3.0")
             )
         );
     }
@@ -140,10 +140,10 @@ class MicrometerStorageTest {
             Arrays.stream(this.registry.getMetersAsString().split("\n")).toList(),
             Matchers.containsInAnyOrder(
                 // @checkstyle LineLengthCheck (4 lines)
-                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.delete(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.metadata(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage', key='any/test.txt']; count=1.0, total=3.0 bytes, max=3.0")
+                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.delete(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.metadata(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage']; count=1.0, total=3.0 bytes, max=3.0")
             )
         );
     }
@@ -161,10 +161,10 @@ class MicrometerStorageTest {
             Arrays.stream(this.registry.getMetersAsString().split("\n")).toList(),
             Matchers.containsInAnyOrder(
                 // @checkstyle LineLengthCheck (4 lines)
-                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.exclusively(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.deleteAll(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"),
-                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage', key='any/test.txt']; count=1.0, total=3.0 bytes, max=3.0")
+                Matchers.containsString("artipie.storage.save(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.exclusively(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.deleteAll(TIMER)[id='InMemoryStorage']; count=1.0"),
+                Matchers.containsString("artipie.storage.save.size(DISTRIBUTION_SUMMARY)[id='InMemoryStorage']; count=1.0, total=3.0 bytes, max=3.0")
             )
         );
     }
@@ -182,7 +182,7 @@ class MicrometerStorageTest {
             this.registry.getMetersAsString(),
             Matchers.containsString(
                 // @checkstyle LineLengthCheck (1 line)
-                "artipie.storage.value.error(TIMER)[id='InMemoryStorage', key='any/test.txt']; count=1.0"
+                "artipie.storage.value.error(TIMER)[id='InMemoryStorage']; count=1.0"
             )
         );
     }
