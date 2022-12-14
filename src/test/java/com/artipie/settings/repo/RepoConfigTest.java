@@ -9,7 +9,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.auth.YamlPermissions;
-import com.artipie.settings.StorageAliases;
+import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
 import com.artipie.test.TestStoragesCache;
 import java.io.IOException;
@@ -171,7 +171,7 @@ public final class RepoConfigTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new RepoConfig(
-                StorageAliases.EMPTY,
+                new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
                 new Key.From("key"),
                 Yaml.createYamlMappingBuilder().add(
                     "repo", Yaml.createYamlMappingBuilder()
@@ -200,7 +200,7 @@ public final class RepoConfigTest {
 
     private RepoConfig repoCustom(final String name, final String value) {
         return new RepoConfig(
-            StorageAliases.EMPTY,
+            new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
             new Key.From("repo-custom.yml"),
             Yaml.createYamlMappingBuilder().add(
                 "repo", Yaml.createYamlMappingBuilder()
@@ -213,10 +213,10 @@ public final class RepoConfigTest {
         );
     }
 
-    private RepoConfig readFromResource(final String name)
-        throws IOException {
+    private RepoConfig readFromResource(final String name) throws IOException {
         return new RepoConfig(
-            StorageAliases.EMPTY, new Key.From(name),
+            new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
+            new Key.From(name),
             Yaml.createYamlInput(
                 new TestResource(name).asInputStream()
             ).readYamlMapping(),

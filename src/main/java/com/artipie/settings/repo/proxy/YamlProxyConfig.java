@@ -113,8 +113,7 @@ public final class YamlProxyConfig implements ProxyConfig {
             this.prefix,
             new LoggingStorage(
                 Level.INFO,
-                this.repoConfig.storageAliases()
-                    .storage(this.repoConfig.storagesCache(), node)
+                this.repoConfig.storagesCache().storage(this.repoConfig.storageAliases(), node)
             )
         );
     }
