@@ -76,6 +76,12 @@ public interface Settings {
     Optional<KeyStore> keyStore();
 
     /**
+     * Metrics setting.
+     * @return Metrics configuration
+     */
+    MetricsContext metrics();
+
+    /**
      * Fake {@link Settings} using a file storage.
      *
      * @since 0.2
@@ -245,6 +251,11 @@ public interface Settings {
         @Override
         public Optional<KeyStore> keyStore() {
             return this.keystore;
+        }
+
+        @Override
+        public MetricsContext metrics() {
+            return null;
         }
     }
 }
