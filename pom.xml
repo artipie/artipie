@@ -161,7 +161,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>hexpm-adapter</artifactId>
-      <version>v0.1.0</version>
+      <version>v0.1.1</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -190,7 +190,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http-client</artifactId>
-      <version>0.3.5</version>
+      <version>0.3.9</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -215,7 +215,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.9.9</version>
+      <version>0.9.10</version>
       <exclusions>
         <exclusion>
           <groupId>com.jcabi</groupId>
@@ -231,7 +231,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>gem-adapter</artifactId>
-      <version>v1.3.1</version>
+      <version>v1.3.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -241,27 +241,27 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>go-adapter</artifactId>
-      <version>0.4.1</version>
+      <version>0.5.0</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>nuget-adapter</artifactId>
-      <version>1.4.1</version>
+      <version>1.5.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>v0.8.2</version>
+      <version>v0.8.7</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>helm-adapter</artifactId>
-      <version>v1.1.1</version>
+      <version>v1.1.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>0.13.1</version>
+      <version>v0.17.2</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
