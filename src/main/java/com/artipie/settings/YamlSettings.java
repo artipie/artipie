@@ -67,6 +67,11 @@ public final class YamlSettings implements Settings {
     private final ArtipieCaches caches;
 
     /**
+     * Metrics context.
+     */
+    private final MetricsContext mctx;
+
+    /**
      * Ctor.
      * @param content YAML file content.
      * @param caches Settings caches
@@ -74,6 +79,7 @@ public final class YamlSettings implements Settings {
     public YamlSettings(final YamlMapping content, final ArtipieCaches caches) {
         this.content = content;
         this.caches = caches;
+        this.mctx = new MetricsContext(this.meta());
     }
 
     @Override
@@ -95,7 +101,12 @@ public final class YamlSettings implements Settings {
 
     @Override
     public YamlMapping meta() {
-        return this.content.yamlMapping("meta");
+        return Optional.ofNullable(this.content.yamlMapping("meta"))
+            .orElseThrow(
+                () -> new IllegalStateException(
+                    "Invalid settings: not empty `meta` section is expected"
+                )
+            );
     }
 
     @Override
@@ -134,6 +145,11 @@ public final class YamlSettings implements Settings {
     public Optional<KeyStore> keyStore() {
         return Optional.ofNullable(this.meta().yamlMapping(YamlSettings.NODE_SSL))
             .map(KeyStoreFactory::newInstance);
+    }
+
+    @Override
+    public MetricsContext metrics() {
+        return this.mctx;
     }
 
     @Override

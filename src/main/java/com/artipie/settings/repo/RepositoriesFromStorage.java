@@ -12,7 +12,6 @@ import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
 import com.artipie.settings.AliasSettings;
 import com.artipie.settings.ConfigFile;
-import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
@@ -104,7 +103,7 @@ public final class RepositoriesFromStorage implements Repositories {
                 content.key,
                 Yaml.createYamlInput(data).readYamlMapping(),
                 this.cache,
-                new MetricsContext(this.settings.meta()).enabled()
+                this.settings.metrics().storage()
             )
         ).to(SingleInterop.get());
     }

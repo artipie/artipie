@@ -20,6 +20,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.settings.Layout;
+import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.users.Users;
 import io.reactivex.Flowable;
@@ -168,6 +169,11 @@ final class DockerRoutingSliceTest {
         @Override
         public Optional<KeyStore> keyStore() {
             return Optional.empty();
+        }
+
+        @Override
+        public MetricsContext metrics() {
+            return null;
         }
     }
 }

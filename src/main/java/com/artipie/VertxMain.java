@@ -109,16 +109,15 @@ public final class VertxMain {
     public int start(final int apiport) throws IOException {
         final ArtipieCaches caches = new ArtipieCaches.All();
         final Settings settings = new SettingsFromPath(this.config).find(caches);
-        final MetricsContext mctx = new MetricsContext(settings.meta());
-        final Vertx vertx = VertxMain.vertx(mctx);
+        final Vertx vertx = VertxMain.vertx(settings.metrics());
         final int main = this.listenOn(
             new MainSlice(this.http, settings, caches.storagesCache()),
             this.port,
             vertx,
-            mctx
+            settings.metrics()
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
-        this.startRepos(vertx, settings, this.port, mctx, caches.storagesCache());
+        this.startRepos(vertx, settings, this.port, caches.storagesCache());
         settings.auth().thenAccept(
             auth -> vertx.deployVerticle(
                 new RestApi(
@@ -190,7 +189,6 @@ public final class VertxMain {
      * @param vertx Vertx instance
      * @param settings Settings.
      * @param mport Artipie service main port
-     * @param mctx Metrics context
      * @param cache Storage cache
      * @checkstyle ParameterNumberCheck (5 lines)
      */
@@ -198,7 +196,6 @@ public final class VertxMain {
         final Vertx vertx,
         final Settings settings,
         final int mport,
-        final MetricsContext mctx,
         final StoragesCache cache
     ) {
         final Collection<RepoConfig> configs = settings.repoConfigsStorage().list(Key.ROOT)
@@ -219,7 +216,7 @@ public final class VertxMain {
                             new ArtipieRepositories(this.http, settings, cache)
                                 .slice(
                                     new Key.From(name), prt
-                                ), prt, vertx, mctx
+                                ), prt, vertx, settings.metrics()
                         );
                         VertxMain.logRepo(prt, name);
                     },
@@ -286,12 +283,14 @@ public final class VertxMain {
                         ).setEnabled(true)
                 )
             );
-            final MeterRegistry registry = BackendRegistries.getDefaultNow();
-            new ClassLoaderMetrics().bindTo(registry);
-            new JvmMemoryMetrics().bindTo(registry);
-            new JvmGcMetrics().bindTo(registry);
-            new ProcessorMetrics().bindTo(registry);
-            new JvmThreadMetrics().bindTo(registry);
+            if (mctx.jvm()) {
+                final MeterRegistry registry = BackendRegistries.getDefaultNow();
+                new ClassLoaderMetrics().bindTo(registry);
+                new JvmMemoryMetrics().bindTo(registry);
+                new JvmGcMetrics().bindTo(registry);
+                new ProcessorMetrics().bindTo(registry);
+                new JvmThreadMetrics().bindTo(registry);
+            }
             Logger.info(
                 VertxMain.class,
                 String.format(

@@ -6,6 +6,8 @@ package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -22,21 +24,57 @@ public final class MetricsContext {
     private static final String ENDPOINT = "endpoint";
 
     /**
-     * Endpoint for metrics.
+     * Port for metrics.
      */
     private static final String PORT = "port";
 
     /**
+     * Metrics yaml section.
+     */
+    private static final String METRICS = "metrics";
+
+    /**
+     * Jvm metrics type.
+     */
+    private static final String TYPE_JVM = "jvm";
+
+    /**
+     * Http metrics type.
+     */
+    private static final String TYPE_HTTP = "http";
+
+    /**
+     * Storage metrics type.
+     */
+    private static final String TYPE_STORAGE = "storage";
+
+    /**
      * Meta section from Artipie yaml settings.
      */
-    private final YamlMapping meta;
+    private final Optional<Pair<String, Integer>> pair;
+
+    /**
+     * Enabled metrics types.
+     */
+    private final Set<String> types;
 
     /**
      * Ctor.
      * @param meta Meta section from Artipie yaml settings
      */
     public MetricsContext(final YamlMapping meta) {
-        this.meta = meta;
+        this.pair = MetricsContext.parseYaml(meta);
+        this.types = Optional.ofNullable(meta.yamlMapping(MetricsContext.METRICS))
+            .flatMap(map -> Optional.ofNullable(map.yamlSequence("types")))
+            .map(
+                seq -> seq.values().stream()
+                    .map(item -> item.asScalar().value()).collect(Collectors.toSet())
+            )
+            .orElse(
+                Set.of(
+                    MetricsContext.TYPE_HTTP, MetricsContext.TYPE_JVM, MetricsContext.TYPE_STORAGE
+                )
+            );
     }
 
     /**
@@ -52,8 +90,41 @@ public final class MetricsContext {
      * @return Endpoint and port is present
      */
     public Optional<Pair<String, Integer>> endpointAndPort() {
+        return this.pair;
+    }
+
+    /**
+     * Are JVM metrics enabled?
+     * @return True is yes
+     */
+    public boolean jvm() {
+        return this.enabled() && this.types.contains(MetricsContext.TYPE_JVM);
+    }
+
+    /**
+     * Are storage metrics enabled?
+     * @return True is yes
+     */
+    public boolean storage() {
+        return this.enabled() && this.types.contains(MetricsContext.TYPE_STORAGE);
+    }
+
+    /**
+     * Are http (requests) metrics enabled?
+     * @return True is yes
+     */
+    public boolean http() {
+        return this.enabled() && this.types.contains(MetricsContext.TYPE_HTTP);
+    }
+
+    /**
+     * Get endpoint and port pair from yaml.
+     * @param meta Yaml mapping
+     * @return Endpoint and port pair if present
+     */
+    private static Optional<Pair<String, Integer>> parseYaml(final YamlMapping meta) {
         Optional<Pair<String, Integer>> res = Optional.empty();
-        final YamlMapping metrics = this.meta.yamlMapping("metrics");
+        final YamlMapping metrics = meta.yamlMapping(MetricsContext.METRICS);
         if (metrics != null && metrics.string(MetricsContext.ENDPOINT) != null
             && metrics.value(MetricsContext.PORT) != null) {
             res = Optional.of(
