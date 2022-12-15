@@ -101,7 +101,12 @@ public final class YamlSettings implements Settings {
 
     @Override
     public YamlMapping meta() {
-        return this.content.yamlMapping("meta");
+        return Optional.ofNullable(this.content.yamlMapping("meta"))
+            .orElseThrow(
+                () -> new IllegalStateException(
+                    "Invalid settings: not empty `meta` section is expected"
+                )
+            );
     }
 
     @Override

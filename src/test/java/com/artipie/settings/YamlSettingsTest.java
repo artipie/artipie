@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Tests for {@link YamlSettings}.
@@ -275,6 +276,15 @@ class YamlSettingsTest {
         Assertions.assertThrows(RuntimeException.class, settings::configStorage);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"", "meta:\n"})
+    void throwsErrorIfMetaSectionIsAbsentOrEmpty(final String yaml) {
+        Assertions.assertThrows(
+            IllegalStateException.class,
+            () -> new YamlSettings(Yaml.createYamlInput(yaml).readYamlMapping(), this.caches).meta()
+        );
+    }
+
     private String credentials() {
         return Yaml.createYamlMappingBuilder().add(
             "credentials",
@@ -289,8 +299,6 @@ class YamlSettingsTest {
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static Stream<String> badYamls() {
         return Stream.of(
-            "",
-            "meta:\n",
             "meta:\n  storage:\n",
             "meta:\n  storage:\n    type: unknown\n",
             "meta:\n  storage:\n    type: fs\n",

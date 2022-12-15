@@ -255,7 +255,7 @@ public interface Settings {
 
         @Override
         public MetricsContext metrics() {
-            return null;
+            return new MetricsContext(Yaml.createYamlMappingBuilder().build());
         }
     }
 }
