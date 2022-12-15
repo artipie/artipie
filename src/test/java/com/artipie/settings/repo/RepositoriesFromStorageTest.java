@@ -9,8 +9,8 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ValueNotFoundException;
+import com.artipie.settings.AliasSettings;
 import com.artipie.settings.Settings;
-import com.artipie.settings.StorageAliases;
 import com.artipie.settings.cache.StoragesCache;
 import com.artipie.test.TestStoragesCache;
 import java.nio.file.Path;
@@ -136,7 +136,7 @@ final class RepositoriesFromStorageTest {
             .withStorageAlias(alias)
             .saveTo(this.storage, RepositoriesFromStorageTest.REPO);
         this.storage.save(
-            new Key.From(StorageAliases.FILE_NAME),
+            new Key.From(AliasSettings.FILE_NAME),
             new Content.From(
                 Yaml.createYamlMappingBuilder().add(
                     "storages", Yaml.createYamlSequenceBuilder()
@@ -160,7 +160,7 @@ final class RepositoriesFromStorageTest {
 
     @Test
     void throwsExceptionForUnknownAlias() {
-        this.saveAliasConfig("some alias", StorageAliases.FILE_NAME);
+        this.saveAliasConfig("some alias", AliasSettings.FILE_NAME);
         new RepoConfigYaml(RepositoriesFromStorageTest.TYPE)
             .withStorageAlias("unknown alias")
             .saveTo(this.storage, RepositoriesFromStorageTest.REPO);
