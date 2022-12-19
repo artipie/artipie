@@ -10,7 +10,7 @@ one percent. JFR collects data about the JVM as well as the Java application run
 To get more information about JFR, please read [Oracle's Guide](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm#JFRUH170).
 
 ## Artipie`s Events
-Artipie generate the following events:
+Artipie generates the following events:
 
 ### artipie.SliceResponse
 Label: Slice Response  
@@ -62,7 +62,7 @@ Category: Artipie, Storage
 
 ### artipie.StorageExists
 Label: Storage Exists  
-Description: Does exist a record with this key?  
+Description: Does a record with this key exist?  
 Category: Artipie, Storage
 
 | Attribute   | Type   | Label                  |
