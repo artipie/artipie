@@ -17,7 +17,7 @@ import jdk.jfr.Name;
  * @checkstyle VisibilityModifierCheck (500 lines)
  */
 @Name("artipie.StorageDeleteAll")
-@Label("Storage Delete")
+@Label("Storage Delete All")
 @Category({"Artipie", "Storage"})
 @Description("Delete all values with key prefix from a storage")
 public final class StorageDeleteAllEvent extends AbstractStorageEvent {
