@@ -14,11 +14,6 @@ import org.junit.jupiter.api.Test;
  * Test for {@link HttpClientSettings}.
  *
  * @since 0.9
- * @todo #429:30min Test `SystemSettings.trustAll` method.
- *  `SystemSettings.trustAll` reads data using static method `System.getenv`.
- *  To test this method in presence of this environment variable it is need to mock static method.
- *  This could be done with Powermock library, however it is tricky at the moment to use it with
- *  JUnit5 as it is not directly supported.
  */
 class HttpClientSettingsTest {
 
