@@ -40,3 +40,4 @@
     * [[Repository Permissions|Configuration-Repository Permissions]]
       * [[Docker repository granular permissions|Configuration-Repository Permissions#docker-repository-granular-permissions]]
     * [[Metrics|Configuration-Metrics]]
+    * [[Artipie`s JFR Events|jfr-events]]

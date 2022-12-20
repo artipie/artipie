@@ -22,8 +22,8 @@ import jdk.jfr.StackTrace;
  */
 @Name("artipie.SliceResponse")
 @Label("Slice Response")
-@Category({"Artipie", "Slice"})
-@Description("HTTP request")
+@Category("Artipie")
+@Description("Event triggered when Artipie processes an HTTP request")
 @StackTrace(false)
 public class SliceResponseEvent extends Event {
 

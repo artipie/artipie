@@ -19,7 +19,7 @@ import jdk.jfr.Name;
 @Name("artipie.StorageExists")
 @Label("Storage Exists")
 @Category({"Artipie", "Storage"})
-@Description("Does exist a record with this key?")
+@Description("Does a record with this key exist?")
 public final class StorageExistsEvent extends AbstractStorageEvent {
 
 }
