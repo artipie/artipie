@@ -50,4 +50,4 @@ jobs:
               }
             ]
       - name: Deploy artifacts
-        run: mvn deploy -Partipie-central,jar-build,sonatype,gpg-sign -DskipITs --errors
+        run: mvn deploy -Partipie-central,jar-build,sonatype,gpg-sign -Ddockerfile.skip=true -Dmaven.test.skip=true --errors
