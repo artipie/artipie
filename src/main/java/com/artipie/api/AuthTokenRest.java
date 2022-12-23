@@ -20,6 +20,16 @@ import org.eclipse.jetty.http.HttpStatus;
 public final class AuthTokenRest extends BaseRest {
 
     /**
+     * Token field with username.
+     */
+    public static final String SUB = "sub";
+
+    /**
+     * Token field with user groups.
+     */
+    public static final String GROUPS = "groups";
+
+    /**
      * JWT auth provider.
      */
     private final JWTAuth provider;
@@ -68,7 +78,8 @@ public final class AuthTokenRest extends BaseRest {
                 new JsonObject().put(
                     "token",
                     this.provider.generateToken(
-                        new JsonObject().put("sub", user.get().name())
+                        new JsonObject().put(AuthTokenRest.SUB, user.get().name())
+                            .put(AuthTokenRest.GROUPS, user.get().groups())
                     )
                 ).encode()
             );
