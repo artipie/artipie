@@ -21,6 +21,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -126,7 +127,7 @@ public final class RestApi extends AbstractVerticle {
      */
     private void startServices(final RouterBuilder repoRb, final RouterBuilder userRb,
         final RouterBuilder tokenRb, final RouterBuilder settingsRb) {
-        this.addJwtAuth(repoRb, userRb, tokenRb);
+        this.addJwtAuth(tokenRb, repoRb, userRb, settingsRb);
         final BlockingStorage asto = new BlockingStorage(this.configsStorage);
         new RepositoryRest(
             new ManageRepoSettings(asto),
@@ -173,21 +174,18 @@ public final class RestApi extends AbstractVerticle {
      * Create and add all JWT-auth related settings:
      *  - initialize rest method to issue JWT tokens;
      *  - add security handlers to all REST API requests.
-     * @param repo Repository API router builder
-     * @param user Users API router builder
      * @param token Auth tokens generate API router builder
-     * @checkstyle ParameterNumberCheck (3 lines)
-     * @checkstyle HiddenFieldCheck (3 lines)
+     * @param builders Router builders to add token auth to
      */
-    private void addJwtAuth(final RouterBuilder repo, final RouterBuilder user,
-        final RouterBuilder token) {
+    private void addJwtAuth(final RouterBuilder token, final RouterBuilder... builders) {
         final JWTAuth jwt = JWTAuth.create(
             this.vertx, new JWTAuthOptions().addPubSecKey(
                 new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
             )
         );
         new AuthTokenRest(jwt, this.caches.auth(), this.auth).init(token);
-        repo.securityHandler(RestApi.SECURITY_SCHEME, JWTAuthHandler.create(jwt));
-        user.securityHandler(RestApi.SECURITY_SCHEME, JWTAuthHandler.create(jwt));
+        Arrays.stream(builders).forEach(
+            item -> item.securityHandler(RestApi.SECURITY_SCHEME, JWTAuthHandler.create(jwt))
+        );
     }
 }
