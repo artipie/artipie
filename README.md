@@ -44,6 +44,14 @@ The following set of features makes Artipie unique among all others:
 
 Learn more about Artipie in our [Wiki](https://github.com/artipie/artipie/wiki).
 
+**Publications about Artipie:**
+- [An Easy Way to Get Your Own Binary Repository](https://dzone.com/articles/easy-way-to-get-your-own-binary-repository#)
+- [Private Remote Maven Repository With Artipie](https://dzone.com/articles/private-remote-maven-repository-with-artipie-1)
+- [Deployment of NPM Repositories with Artipie](https://dev.to/andpopov/deployment-of-npm-repositories-with-artipie-30co)
+- [How I use Artipie, a PyPI repo](https://opensource.com/article/22/12/python-package-index-repository-artipie)
+- [Готовим приватные репозитории с помощью Artipie](https://habr.com/ru/post/687394/)
+
+
 # Quickstart
 
 Artipie is distributed as Docker container and as fat `jar`. The `jar` file can be downloaded on the
