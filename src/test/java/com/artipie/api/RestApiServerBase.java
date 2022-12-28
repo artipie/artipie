@@ -18,6 +18,9 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.NetClient;
+import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
@@ -165,7 +168,12 @@ public abstract class RestApiServerBase {
             new RestApi(
                 this.caches, storage, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY),
                 this.auth(),
-                this.keyStore()
+                this.keyStore(),
+                JWTAuth.create(
+                    vertx, new JWTAuthOptions().addPubSecKey(
+                        new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
+                    )
+                )
             ),
             context.succeedingThenComplete()
         );
