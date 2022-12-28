@@ -10,19 +10,17 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.settings.RepoData;
+import com.artipie.settings.Settings;
 import com.artipie.settings.cache.ArtipieCaches;
 import com.jcabi.log.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpServer;
-import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.JWTAuthHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -75,26 +73,56 @@ public final class RestApi extends AbstractVerticle {
     private final Optional<KeyStore> keystore;
 
     /**
-     * Ctor.
+     * Jwt authentication provider.
+     */
+    private final JWTAuth jwt;
+
+    /**
+     * Primary ctor.
      * @param caches Artipie settings caches
      * @param configsStorage Artipie settings storage
      * @param layout Artipie layout
-     * @param port Port to start verticle on
-     * @param users Key to users credentials yaml location
+     * @param port Port to run API on
+     * @param users Key to users credentials yaml file location
      * @param auth Artipie authentication
      * @param keystore KeyStore
-     * @checkstyle ParameterNumberCheck (5 lines)
+     * @param jwt Jwt authentication provider
+     * @checkstyle ParameterNumberCheck (10 lines)
      */
-    public RestApi(final ArtipieCaches caches, final Storage configsStorage, final String layout,
-        final int port, final Optional<Key> users, final Authentication auth,
-        final Optional<KeyStore> keystore) {
+    public RestApi(
+        final ArtipieCaches caches,
+        final Storage configsStorage,
+        final String layout,
+        final int port, final Optional<Key> users,
+        final Authentication auth,
+        final Optional<KeyStore> keystore,
+        final JWTAuth jwt
+    ) {
         this.caches = caches;
         this.configsStorage = configsStorage;
         this.layout = layout;
         this.port = port;
         this.users = users;
         this.auth = auth;
-        this.keystore = Objects.requireNonNull(keystore);
+        this.keystore = keystore;
+        this.jwt = jwt;
+    }
+
+    /**
+     * Ctor.
+     * @param caches Artipie settings caches
+     * @param settings Artipie settings
+     * @param port Port to start verticle on
+     * @param auth Artipie authentication
+     * @param jwt Jwt authentication provider
+     * @checkstyle ParameterNumberCheck (5 lines)
+     */
+    public RestApi(final ArtipieCaches caches, final Settings settings,
+        final int port, final Authentication auth, final JWTAuth jwt) {
+        this(
+            caches, settings.configStorage(), settings.layout().toString(),
+            port, settings.credentialsKey(), auth, settings.keyStore(), jwt
+        );
     }
 
     @Override
@@ -178,14 +206,9 @@ public final class RestApi extends AbstractVerticle {
      * @param builders Router builders to add token auth to
      */
     private void addJwtAuth(final RouterBuilder token, final RouterBuilder... builders) {
-        final JWTAuth jwt = JWTAuth.create(
-            this.vertx, new JWTAuthOptions().addPubSecKey(
-                new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
-            )
-        );
-        new AuthTokenRest(jwt, this.caches.auth(), this.auth).init(token);
+        new AuthTokenRest(this.jwt, this.caches.auth(), this.auth).init(token);
         Arrays.stream(builders).forEach(
-            item -> item.securityHandler(RestApi.SECURITY_SCHEME, JWTAuthHandler.create(jwt))
+            item -> item.securityHandler(RestApi.SECURITY_SCHEME, JWTAuthHandler.create(this.jwt))
         );
     }
 }

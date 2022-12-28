@@ -38,6 +38,7 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Permissions;
+import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.group.GroupSlice;
 import com.artipie.http.slice.TrimPathSlice;
@@ -72,16 +73,17 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param settings Artipie settings
      * @param config Repo config
      * @param standalone Standalone flag
+     * @param tauth Token-based authentication
      */
     public SliceFromConfig(
         final ClientSlices http,
         final Settings settings, final RepoConfig config,
-        final boolean standalone) {
+        final boolean standalone, final TokenAuthentication tauth) {
         super(
             new AsyncSlice(
                 settings.auth().thenApply(
                     auth -> SliceFromConfig.build(
-                        http, settings, new LoggingAuth(auth),
+                        http, settings, new LoggingAuth(auth), tauth,
                         config, standalone
                     )
                 )
@@ -95,6 +97,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param http HTTP client
      * @param settings Artipie settings
      * @param auth Authentication
+     * @param tauth Token-based authentication
      * @param cfg Repository config
      * @param standalone Standalone flag
      * @return Slice completionStage
@@ -109,10 +112,11 @@ public final class SliceFromConfig extends Slice.Wrap {
             "PMD.AvoidDuplicateLiterals", "PMD.NcssCount"
         }
     )
-    static Slice build(
+    private static Slice build(
         final ClientSlices http,
         final Settings settings,
         final Authentication auth,
+        final TokenAuthentication tauth,
         final RepoConfig cfg,
         final boolean standalone
     ) {
@@ -131,7 +135,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "npm":
                 slice = new TrimPathSlice(
-                    new NpmSlice(cfg.url(), cfg.storage(), permissions, auth),
+                    new NpmSlice(cfg.url(), cfg.storage(), permissions, tauth),
                     settings.layout().pattern()
                 );
                 break;
@@ -196,7 +200,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                                         .config(name)
                                         .thenApply(
                                             sub -> new SliceFromConfig(
-                                                http, settings, sub, standalone
+                                                http, settings, sub, standalone, tauth
                                             )
                                         )
                                 )

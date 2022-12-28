@@ -220,6 +220,23 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     }
 
     /**
+     * Exec command in client container.
+     * @param cmd Command list to execute
+     * @return Command execution result
+     * @throws IOException In case of client exception
+     */
+    public ExecResult exec(final String... cmd) throws IOException {
+        final ExecResult exec;
+        try {
+            exec = this.client.execInContainer(cmd);
+        } catch (final InterruptedException err) {
+            Thread.currentThread().interrupt();
+            throw new IOException(err);
+        }
+        return exec;
+    }
+
+    /**
      * Just exec command in client container and fail on error.
      * @param cmd Command list to execute
      * @throws IOException In case of client exception

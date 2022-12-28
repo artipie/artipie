@@ -7,6 +7,7 @@ package com.artipie;
 
 import com.artipie.api.RestApi;
 import com.artipie.asto.Key;
+import com.artipie.auth.JwtTokenAuth;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -32,6 +33,9 @@ import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.auth.PubSecKeyOptions;
+import io.vertx.ext.auth.jwt.JWTAuth;
+import io.vertx.ext.auth.jwt.JWTAuthOptions;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
@@ -110,24 +114,27 @@ public final class VertxMain {
         final ArtipieCaches caches = new ArtipieCaches.All();
         final Settings settings = new SettingsFromPath(this.config).find(caches);
         final Vertx vertx = VertxMain.vertx(settings.metrics());
+        final JWTAuth jwt = JWTAuth.create(
+            vertx.getDelegate(), new JWTAuthOptions().addPubSecKey(
+                new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
+            )
+        );
         final int main = this.listenOn(
-            new MainSlice(this.http, settings, caches.storagesCache()),
+            new MainSlice(this.http, settings, caches.storagesCache(), new JwtTokenAuth(jwt)),
             this.port,
             vertx,
             settings.metrics()
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
-        this.startRepos(vertx, settings, this.port, caches.storagesCache());
+        this.startRepos(vertx, settings, this.port, caches.storagesCache(), jwt);
         settings.auth().thenAccept(
             auth -> vertx.deployVerticle(
                 new RestApi(
                     caches,
-                    settings.repoConfigsStorage(),
-                    settings.layout().toString(),
+                    settings,
                     apiport,
-                    settings.credentialsKey(),
                     auth,
-                    settings.keyStore()
+                    jwt
                 )
             )
         );
@@ -190,13 +197,15 @@ public final class VertxMain {
      * @param settings Settings.
      * @param mport Artipie service main port
      * @param cache Storage cache
+     * @param jwt Jwt authentication
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     private void startRepos(
         final Vertx vertx,
         final Settings settings,
         final int mport,
-        final StoragesCache cache
+        final StoragesCache cache,
+        final JWTAuth jwt
     ) {
         final Collection<RepoConfig> configs = settings.repoConfigsStorage().list(Key.ROOT)
             .thenApply(
@@ -213,10 +222,10 @@ public final class VertxMain {
                     prt -> {
                         final String name = new ConfigFile(repo.name()).name();
                         this.listenOn(
-                            new ArtipieRepositories(this.http, settings, cache)
-                                .slice(
-                                    new Key.From(name), prt
-                                ), prt, vertx, settings.metrics()
+                            new ArtipieRepositories(
+                                this.http, settings, new JwtTokenAuth(jwt), cache
+                            ).slice(new Key.From(name), prt),
+                            prt, vertx, settings.metrics()
                         );
                         VertxMain.logRepo(prt, name);
                     },

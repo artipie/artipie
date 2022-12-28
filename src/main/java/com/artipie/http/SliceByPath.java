@@ -5,6 +5,7 @@
 package com.artipie.http;
 
 import com.artipie.asto.Key;
+import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
@@ -40,20 +41,29 @@ final class SliceByPath implements Slice {
     private final StoragesCache cache;
 
     /**
+     * Token-based authentication.
+     */
+    private final TokenAuthentication tauth;
+
+    /**
      * New slice from settings.
      *
      * @param http HTTP client
      * @param settings Artipie settings
      * @param cache Storages cache
+     * @param tauth Token-based authentication
+     * @checkstyle ParameterNumberCheck (10 lines)
      */
     SliceByPath(
         final ClientSlices http,
         final Settings settings,
-        final StoragesCache cache
+        final StoragesCache cache,
+        final TokenAuthentication tauth
     ) {
         this.http = http;
         this.settings = settings;
         this.cache = cache;
+        this.tauth = tauth;
     }
 
     // @checkstyle ReturnCountCheck (20 lines)
@@ -71,7 +81,7 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
-        return new ArtipieRepositories(this.http, this.settings, this.cache)
+        return new ArtipieRepositories(this.http, this.settings, this.tauth, this.cache)
             .slice(key.get(), new RequestLineFrom(line).uri().getPort())
             .response(line, headers, body);
     }

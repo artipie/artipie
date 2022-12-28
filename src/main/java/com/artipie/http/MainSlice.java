@@ -4,6 +4,7 @@
  */
 package com.artipie.http;
 
+import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
@@ -22,8 +23,8 @@ import java.util.regex.Pattern;
 
 /**
  * Slice Artipie serves on it's main port.
- * The slice handles `/.health`, `/.metrics`, `/.meta/metrics`, `/api`, `/dashboard`
- * and repository requests extracting repository name from URI path.
+ * The slice handles `/.health`, `/.version` and repositories requests
+ * extracting repository name from URI path.
  *
  * @since 0.11
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
@@ -52,11 +53,14 @@ public final class MainSlice extends Slice.Wrap {
      * @param http HTTP client.
      * @param settings Artipie settings.
      * @param cache Storages cache
+     * @param tauth Token-based authentication
+     * @checkstyle ParameterNumberCheck (10 lines)
      */
     public MainSlice(
         final ClientSlices http,
         final Settings settings,
-        final StoragesCache cache
+        final StoragesCache cache,
+        final TokenAuthentication tauth
     ) {
         super(
             new SliceRoute(
@@ -74,7 +78,7 @@ public final class MainSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new AllRepositoriesSlice(http, settings, cache)
+                    new DockerRoutingSlice(settings, new SliceByPath(http, settings, cache, tauth))
                 )
             )
         );
