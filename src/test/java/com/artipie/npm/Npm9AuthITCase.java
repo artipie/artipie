@@ -54,7 +54,7 @@ final class Npm9AuthITCase {
             "Package was published",
             new ContainerResultMatcher(
                 new IsEqual<>(0),
-                new StringContains("Unable to authenticate")
+                new StringContains("+ @hello/simple-npm-project@1.0.1")
             ),
             "npm", "publish", "@hello/simple-npm-project/",
             "--registry", "http://artipie:8080/my-npm"
