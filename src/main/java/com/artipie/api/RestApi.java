@@ -8,6 +8,7 @@ import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.auth.JwtTokens;
 import com.artipie.http.auth.Authentication;
 import com.artipie.settings.RepoData;
 import com.artipie.settings.Settings;
@@ -206,7 +207,7 @@ public final class RestApi extends AbstractVerticle {
      * @param builders Router builders to add token auth to
      */
     private void addJwtAuth(final RouterBuilder token, final RouterBuilder... builders) {
-        new AuthTokenRest(this.jwt, this.caches.auth(), this.auth).init(token);
+        new AuthTokenRest(new JwtTokens(this.jwt), this.caches.auth(), this.auth).init(token);
         Arrays.stream(builders).forEach(
             item -> item.securityHandler(RestApi.SECURITY_SCHEME, JWTAuthHandler.create(this.jwt))
         );
