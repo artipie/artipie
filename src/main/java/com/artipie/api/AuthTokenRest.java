@@ -5,9 +5,9 @@
 package com.artipie.api;
 
 import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.Tokens;
 import com.artipie.settings.cache.AuthCache;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.util.Optional;
@@ -30,9 +30,9 @@ public final class AuthTokenRest extends BaseRest {
     public static final String GROUPS = "groups";
 
     /**
-     * JWT auth provider.
+     * Tokens provider.
      */
-    private final JWTAuth provider;
+    private final Tokens tokens;
 
     /**
      * Artipie auth cache.
@@ -51,8 +51,8 @@ public final class AuthTokenRest extends BaseRest {
      * @param cache Artipie auth cache
      * @param auth Artipie authentication
      */
-    public AuthTokenRest(final JWTAuth provider, final AuthCache cache, final Authentication auth) {
-        this.provider = provider;
+    public AuthTokenRest(final Tokens provider, final AuthCache cache, final Authentication auth) {
+        this.tokens = provider;
         this.cache = cache;
         this.auth = auth;
     }
@@ -75,13 +75,7 @@ public final class AuthTokenRest extends BaseRest {
         );
         if (user.isPresent()) {
             routing.response().setStatusCode(HttpStatus.OK_200).end(
-                new JsonObject().put(
-                    "token",
-                    this.provider.generateToken(
-                        new JsonObject().put(AuthTokenRest.SUB, user.get().name())
-                            .put(AuthTokenRest.GROUPS, user.get().groups())
-                    )
-                ).encode()
+                new JsonObject().put("token", this.tokens.generate(user.get())).encode()
             );
         } else {
             routing.response().setStatusCode(HttpStatus.UNAUTHORIZED_401).send();
