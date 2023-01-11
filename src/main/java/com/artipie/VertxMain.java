@@ -7,7 +7,7 @@ package com.artipie;
 
 import com.artipie.api.RestApi;
 import com.artipie.asto.Key;
-import com.artipie.auth.JwtTokenAuth;
+import com.artipie.auth.JwtTokens;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -120,7 +120,7 @@ public final class VertxMain {
             )
         );
         final int main = this.listenOn(
-            new MainSlice(this.http, settings, caches.storagesCache(), new JwtTokenAuth(jwt)),
+            new MainSlice(this.http, settings, caches.storagesCache(), new JwtTokens(jwt)),
             this.port,
             vertx,
             settings.metrics()
@@ -223,7 +223,7 @@ public final class VertxMain {
                         final String name = new ConfigFile(repo.name()).name();
                         this.listenOn(
                             new ArtipieRepositories(
-                                this.http, settings, new JwtTokenAuth(jwt), cache
+                                this.http, settings, new JwtTokens(jwt), cache
                             ).slice(new Key.From(name), prt),
                             prt, vertx, settings.metrics()
                         );
@@ -235,7 +235,6 @@ public final class VertxMain {
                 Logger.error(this, "Invalid repo config file %s: %[exception]s", repo.name(), err);
             }
         }
-        new QuartzScheduler(configs).start();
     }
 
     /**

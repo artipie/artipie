@@ -4,7 +4,7 @@
  */
 package com.artipie.http;
 
-import com.artipie.http.auth.TokenAuthentication;
+import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
@@ -53,14 +53,14 @@ public final class MainSlice extends Slice.Wrap {
      * @param http HTTP client.
      * @param settings Artipie settings.
      * @param cache Storages cache
-     * @param tauth Token-based authentication
+     * @param tokens Tokens: authentication and generation
      * @checkstyle ParameterNumberCheck (10 lines)
      */
     public MainSlice(
         final ClientSlices http,
         final Settings settings,
         final StoragesCache cache,
-        final TokenAuthentication tauth
+        final Tokens tokens
     ) {
         super(
             new SliceRoute(
@@ -78,7 +78,7 @@ public final class MainSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new DockerRoutingSlice(settings, new SliceByPath(http, settings, cache, tauth))
+                    new DockerRoutingSlice(settings, new SliceByPath(http, settings, cache, tokens))
                 )
             )
         );

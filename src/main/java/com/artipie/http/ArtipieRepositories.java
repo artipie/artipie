@@ -7,7 +7,7 @@ package com.artipie.http;
 import com.artipie.SliceFromConfig;
 import com.artipie.asto.Key;
 import com.artipie.http.async.AsyncSlice;
-import com.artipie.http.auth.TokenAuthentication;
+import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
@@ -37,9 +37,9 @@ public final class ArtipieRepositories {
     private final Settings settings;
 
     /**
-     * Token-based authentication.
+     * Tokens: authentication and generation.
      */
-    private final TokenAuthentication tauth;
+    private final Tokens tokens;
 
     /**
      * Storages cache.
@@ -50,19 +50,19 @@ public final class ArtipieRepositories {
      * New Artipie repositories.
      * @param http HTTP client
      * @param settings Artipie settings
-     * @param tauth Token-based authentication
+     * @param tokens Tokens: authentication and generation
      * @param cache Storages cache.
      * @checkstyle ParameterNumberCheck (10 lines)
      */
     public ArtipieRepositories(
         final ClientSlices http,
         final Settings settings,
-        final TokenAuthentication tauth,
+        final Tokens tokens,
         final StoragesCache cache
     ) {
         this.http = http;
         this.settings = settings;
-        this.tauth = tauth;
+        this.tokens = tokens;
         this.cache = cache;
     }
 
@@ -109,7 +109,7 @@ public final class ArtipieRepositories {
                             this.settings,
                             config,
                             config.port().isPresent(),
-                            this.tauth
+                            this.tokens
                         );
                     } else {
                         res = new SliceSimple(new RsRepoNotFound(name));
