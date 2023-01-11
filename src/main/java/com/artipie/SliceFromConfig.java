@@ -5,7 +5,6 @@
 
 package com.artipie;
 
-import com.artipie.adapters.conda.CondaConfig;
 import com.artipie.adapters.docker.DockerPermissions;
 import com.artipie.adapters.docker.DockerProxy;
 import com.artipie.adapters.file.FileProxy;
@@ -38,7 +37,7 @@ import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Permissions;
-import com.artipie.http.auth.TokenAuthentication;
+import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.group.GroupSlice;
 import com.artipie.http.slice.TrimPathSlice;
@@ -73,17 +72,17 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param settings Artipie settings
      * @param config Repo config
      * @param standalone Standalone flag
-     * @param tauth Token-based authentication
+     * @param tokens Tokens: authentication and generation
      */
     public SliceFromConfig(
         final ClientSlices http,
         final Settings settings, final RepoConfig config,
-        final boolean standalone, final TokenAuthentication tauth) {
+        final boolean standalone, final Tokens tokens) {
         super(
             new AsyncSlice(
                 settings.auth().thenApply(
                     auth -> SliceFromConfig.build(
-                        http, settings, new LoggingAuth(auth), tauth,
+                        http, settings, new LoggingAuth(auth), tokens,
                         config, standalone
                     )
                 )
@@ -97,7 +96,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param http HTTP client
      * @param settings Artipie settings
      * @param auth Authentication
-     * @param tauth Token-based authentication
+     * @param tokens Tokens: authentication and generation
      * @param cfg Repository config
      * @param standalone Standalone flag
      * @return Slice completionStage
@@ -116,7 +115,7 @@ public final class SliceFromConfig extends Slice.Wrap {
         final ClientSlices http,
         final Settings settings,
         final Authentication auth,
-        final TokenAuthentication tauth,
+        final Tokens tokens,
         final RepoConfig cfg,
         final boolean standalone
     ) {
@@ -135,7 +134,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "npm":
                 slice = new TrimPathSlice(
-                    new NpmSlice(cfg.url(), cfg.storage(), permissions, tauth),
+                    new NpmSlice(cfg.url(), cfg.storage(), permissions, tokens.auth()),
                     settings.layout().pattern()
                 );
                 break;
@@ -200,7 +199,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                                         .config(name)
                                         .thenApply(
                                             sub -> new SliceFromConfig(
-                                                http, settings, sub, standalone, tauth
+                                                http, settings, sub, standalone, tokens
                                             )
                                         )
                                 )
@@ -267,12 +266,8 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "conda":
-                slice = new TrimPathSlice(
-                    new CondaSlice(
-                        cfg.storage(), permissions, auth, cfg.url().toString(),
-                        new CondaConfig(cfg.settings()).authTokenTtl()
-                    ),
-                    settings.layout().pattern()
+                slice = new CondaSlice(
+                    cfg.storage(), permissions, auth, tokens, cfg.url().toString()
                 );
                 break;
             case "hexpm":

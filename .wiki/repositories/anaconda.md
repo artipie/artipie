@@ -10,9 +10,6 @@ repo:
   storage:
     type: fs
     path: /var/artipie/my-conda
-  settings:
-    auth_token_ttl: P30D
-    clean_auth_token_at: 0 0 12 * * ?
   permissions:
     alice:
       - upload
@@ -23,12 +20,10 @@ repo:
 Configuration requires `url` field that contains repository full URL,
 `{host}` and `{port}` are Artipie service host and port, `{repository-name}`
 is the name of the repository (and repository name is the name of the repo config yaml file).
-Anaconda client does not work without authentication and uses tokens to authorize users. That's why
-the repository `settings` section contains two optional parameters:
-- `auth_token_ttl` is repository authentication tokens time to leave, format is
-  compliant with ISO-8601 duration format PnDTnHnMn.nS. Default value is 365 days.
-- `clean_auth_token_at` - time to clean expired auth tokens as a cron expression.
-  Default value is `0 0 1 * * ?` - at 01 AM every night.
+Anaconda client does not work without authentication and uses tokens to authorize users. Artipie provides
+[JWT](https://jwt.io/) tokens for `anaconda` client, the token can obtained automatically with 
+`anaconda login` command or using [Artipie Rest API](./Rest-api) `POST /api/v1/oauth/token` request. Note, that
+`anaconda logout` command only removes token from local machine, not from Artipie.
 
 Find more information about permissions [here](./Configuration-Repository-Permissions).
 

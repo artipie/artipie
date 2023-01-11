@@ -1,0 +1,2 @@
+channels:
+  - http://alice:123@artipie:8080/my-conda
