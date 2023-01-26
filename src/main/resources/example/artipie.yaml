@@ -7,6 +7,11 @@ meta:
     - type: github
     - type: file
       path: _credentials.yaml
+  policy:
+    type: yaml_policy
+    storage:
+      type: fs
+      path: /var/artipie/repo/security
   layout: org
   base_url: http://central.artipie.com/
   metrics:

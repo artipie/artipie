@@ -11,6 +11,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
+import com.artipie.security.policy.Policy;
 import com.artipie.settings.users.Users;
 import com.artipie.settings.users.UsersFromEnv;
 import java.util.Optional;
@@ -80,6 +81,12 @@ public interface Settings {
      * @return Metrics configuration
      */
     MetricsContext metrics();
+
+    /**
+     * Artipie policy.
+     * @return The policy
+     */
+    Policy<?> policy();
 
     /**
      * Fake {@link Settings} using a file storage.
@@ -256,6 +263,11 @@ public interface Settings {
         @Override
         public MetricsContext metrics() {
             return new MetricsContext(Yaml.createYamlMappingBuilder().build());
+        }
+
+        @Override
+        public Policy<?> policy() {
+            throw new UnsupportedOperationException();
         }
     }
 }

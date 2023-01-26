@@ -48,6 +48,7 @@ import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.pypi.http.PySlice;
 import com.artipie.rpm.http.RpmSlice;
+import com.artipie.security.policy.Policy;
 import com.artipie.settings.Settings;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.RepositoriesFromStorage;
@@ -82,7 +83,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             new AsyncSlice(
                 settings.auth().thenApply(
                     auth -> SliceFromConfig.build(
-                        http, settings, new LoggingAuth(auth), tokens,
+                        http, settings, new LoggingAuth(auth), tokens, settings.policy(),
                         config, standalone
                     )
                 )
@@ -97,6 +98,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param settings Artipie settings
      * @param auth Authentication
      * @param tokens Tokens: authentication and generation
+     * @param policy Security policy
      * @param cfg Repository config
      * @param standalone Standalone flag
      * @return Slice completionStage
@@ -116,6 +118,7 @@ public final class SliceFromConfig extends Slice.Wrap {
         final Settings settings,
         final Authentication auth,
         final Tokens tokens,
+        final Policy<?> policy,
         final RepoConfig cfg,
         final boolean standalone
     ) {
@@ -126,7 +129,7 @@ public final class SliceFromConfig extends Slice.Wrap {
         switch (cfg.type()) {
             case "file":
                 slice = new TrimPathSlice(
-                    new FilesSlice(cfg.storage(), permissions, auth), settings.layout().pattern()
+                    new FilesSlice(cfg.storage(), policy, auth, cfg.name()), settings.layout().pattern()
                 );
                 break;
             case "file-proxy":

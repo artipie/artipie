@@ -57,7 +57,8 @@ public final class SettingsFromPath {
         if (initialize && !bsto.exists(init)) {
             final List<String> resources = Arrays.asList(
                 "_credentials.yaml", AliasSettings.FILE_NAME,
-                "artipie/my-bin.yaml", "artipie/my-docker.yaml", "artipie/my-maven.yaml"
+                "artipie/my-bin.yaml", "artipie/my-docker.yaml", "artipie/my-maven.yaml",
+                "security/roles/reader.yml", "security/users/artipie.yaml"
             );
             for (final String res : resources) {
                 final Path tmp = Files.createTempFile(

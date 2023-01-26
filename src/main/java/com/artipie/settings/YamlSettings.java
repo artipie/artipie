@@ -14,6 +14,9 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
+import com.artipie.security.policy.PoliciesLoader;
+import com.artipie.security.policy.Policy;
+import com.artipie.security.policy.YamlPolicyConfig;
 import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.users.Users;
 import com.artipie.settings.users.UsersFromEnv;
@@ -55,6 +58,11 @@ public final class YamlSettings implements Settings {
      * YAML node name for `ssl` yaml section.
      */
     private static final String NODE_SSL = "ssl";
+
+    /**
+     * Policies loader.
+     */
+    private static final PoliciesLoader POLICIES_LOADER = new PoliciesLoader();
 
     /**
      * YAML file content.
@@ -150,6 +158,20 @@ public final class YamlSettings implements Settings {
     @Override
     public MetricsContext metrics() {
         return this.mctx;
+    }
+
+    @Override
+    public Policy<?> policy() {
+        final YamlMapping mapping = this.meta().yamlMapping("policy");
+        final Policy<?> res;
+        if (mapping == null) {
+            res = Policy.FREE;
+        } else {
+            res = POLICIES_LOADER.newObject(
+                mapping.string(YamlSettings.NODE_TYPE), new YamlPolicyConfig(mapping)
+            );
+        }
+        return res;
     }
 
     @Override

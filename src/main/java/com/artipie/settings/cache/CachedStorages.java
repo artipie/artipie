@@ -7,7 +7,8 @@ package com.artipie.settings.cache;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
-import com.artipie.asto.factory.Storages;
+import com.artipie.asto.factory.Config;
+import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.jfr.JfrStorage;
 import com.artipie.jfr.StorageCreateEvent;
 import com.artipie.misc.ArtipieProperties;
@@ -32,7 +33,7 @@ public class CachedStorages implements StoragesCache {
     /**
      * Storages factory.
      */
-    private final Storages storages;
+    private final StoragesLoader storages;
 
     /**
      * Cache for storages.
@@ -44,7 +45,7 @@ public class CachedStorages implements StoragesCache {
      *
      * @param storages Storages factory
      */
-    protected CachedStorages(final Storages storages) {
+    protected CachedStorages(final StoragesLoader storages) {
         this.storages = storages;
         this.cache = CacheBuilder.newBuilder()
             .expireAfterWrite(
@@ -80,11 +81,17 @@ public class CachedStorages implements StoragesCache {
                     final StorageCreateEvent event = new StorageCreateEvent();
                     if (event.isEnabled()) {
                         event.begin();
-                        res = new JfrStorage(this.storages.newStorage(type, yaml));
+                        res = new JfrStorage(
+                            this.storages.newObject(
+                                type, new Config.YamlStorageConfig(yaml)
+                            )
+                        );
                         event.storage = res.identifier();
                         event.commit();
                     } else {
-                        res = new JfrStorage(this.storages.newStorage(type, yaml));
+                        res = new JfrStorage(
+                            this.storages.newObject(type, new Config.YamlStorageConfig(yaml))
+                        );
                     }
                     return res;
                 }

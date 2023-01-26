@@ -7,7 +7,7 @@ package com.artipie.settings.cache;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
-import com.artipie.asto.factory.Storages;
+import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.settings.Settings;
 import com.artipie.settings.YamlSettings;
 import com.artipie.test.TestArtipieCaches;
@@ -27,11 +27,11 @@ final class CachedStoragesTest {
     /**
      * Storages factory.
      */
-    private Storages storages;
+    private StoragesLoader storages;
 
     @BeforeEach
     void setUp() {
-        this.storages = new Storages();
+        this.storages = new StoragesLoader();
     }
 
     @Test

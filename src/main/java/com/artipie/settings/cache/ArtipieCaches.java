@@ -4,7 +4,7 @@
  */
 package com.artipie.settings.cache;
 
-import com.artipie.asto.factory.Storages;
+import com.artipie.asto.factory.StoragesLoader;
 
 /**
  * Encapsulates caches which are possible to use in settings of Artipie server.
@@ -59,7 +59,7 @@ public interface ArtipieCaches {
          */
         public All() {
             this.authcache = new CachedUsers();
-            this.strgcache = new CachedStorages(new Storages());
+            this.strgcache = new CachedStorages(new StoragesLoader());
             this.credscache = new CachedCreds();
         }
 
