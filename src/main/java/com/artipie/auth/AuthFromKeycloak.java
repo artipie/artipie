@@ -36,7 +36,6 @@ public final class AuthFromKeycloak implements Authentication {
     }
 
     @Override
-    @SuppressWarnings("PMD.OnlyOneReturn")
     public Optional<User> user(final String username, final String password) {
         final AuthzClient client = AuthzClient.create(this.config);
         try {

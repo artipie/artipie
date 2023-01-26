@@ -38,6 +38,8 @@ import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -52,6 +54,7 @@ import org.testcontainers.utility.DockerImageName;
  */
 @SuppressWarnings("PMD.AvoidCatchingThrowable")
 @Testcontainers
+@DisabledOnOs(OS.WINDOWS)
 public class AuthFromKeycloakTest {
     /**
      * Keycloak port.
