@@ -11,7 +11,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.settings.CredsConfigYaml;
 import com.artipie.settings.users.CrudUsers;
-import com.artipie.settings.users.Users;
+import com.artipie.settings.users.PasswordFormat;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -69,7 +69,7 @@ class ManageUsersTest {
             ManageUsersTest.KEY,
             new CredsConfigYaml().withUserAndGroups("Alice", List.of("readers"))
                 .withFullInfo(
-                    "Bob", Users.PasswordFormat.PLAIN, "xyz", "bob@example.com", Set.of("admin")
+                    "Bob", PasswordFormat.PLAIN, "xyz", "bob@example.com", Set.of("admin")
                 ).toString().getBytes(StandardCharsets.UTF_8)
         );
         JSONAssert.assertEquals(
@@ -167,7 +167,7 @@ class ManageUsersTest {
         this.blsto.save(
             ManageUsersTest.KEY,
             new CredsConfigYaml().withUsers("Mark").withFullInfo(
-                "John", Users.PasswordFormat.PLAIN, "abc",
+                "John", PasswordFormat.PLAIN, "abc",
                 "john@example.com", Set.of("admin")
             ).yaml().toString().getBytes(StandardCharsets.UTF_8)
         );
@@ -200,7 +200,7 @@ class ManageUsersTest {
         return Stream.of(
             new ImmutablePair<>(
                 new CredsConfigYaml().withFullInfo(
-                    "Bob", Users.PasswordFormat.SHA256, "abc123",
+                    "Bob", PasswordFormat.SHA256, "abc123",
                     "bob@example.com", Collections.emptySet()
                 ).yaml(),
                 true
