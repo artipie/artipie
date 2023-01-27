@@ -10,12 +10,9 @@ meta:
     -
       type: file
       path: _credentials.yml
-    -
-      type: github
-    -
-      type: env
-    -
-      type: keycloak
+    - type: github
+    - type: env
+    - type: keycloak
       url: http://localhost:8080
       realm: realm_name
       client-id: client_application_id
@@ -94,8 +91,7 @@ Example:
 ```yaml
 meta:
   credentials:
-    - 
-      type: keycloak
+    - type: keycloak
       url: http://localhost:8080
       realm: demorealm
       client-id: demoapp
