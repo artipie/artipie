@@ -7,8 +7,7 @@ full `credentials` section:
 ```yaml
 meta:
   credentials:
-    -
-      type: file
+    - type: file
       path: _credentials.yml
     - type: github
     - type: env
