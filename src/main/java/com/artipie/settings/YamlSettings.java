@@ -18,6 +18,7 @@ import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.users.Users;
 import com.artipie.settings.users.UsersFromEnv;
 import com.artipie.settings.users.UsersFromGithub;
+import com.artipie.settings.users.UsersFromKeycloak;
 import com.artipie.settings.users.UsersFromStorageYaml;
 import java.util.List;
 import java.util.Locale;
@@ -261,6 +262,13 @@ public final class YamlSettings implements Settings {
          */
         ENV((settings, mapping) -> CompletableFuture.completedStage(
             new UsersFromEnv()
+        )),
+
+        /**
+         * Credentials type: keycloak.
+         */
+        KEYCLOAK((settings, mapping) -> CompletableFuture.completedStage(
+            new UsersFromKeycloak(mapping)
         ));
 
         /**
