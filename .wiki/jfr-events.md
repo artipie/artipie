@@ -21,7 +21,7 @@ Category: Artipie
 |----------------|--------|----------------------------|
 | startTime      | long   | Start Time (Timestamp)     |
 | duration       | long   | Duration (Timespan)        |
-| duration       | long   | End Time (Timestamp)       |
+| endTime        | long   | End Time (Timestamp)       |
 | eventThread    | String | Event Thread               |
 | method         | String | Request Method             |
 | path           | String | Request Path               |
@@ -40,7 +40,7 @@ Category: Artipie, Storage
 |-------------|--------|------------------------|
 | startTime   | long   | Start Time (Timestamp) |
 | duration    | long   | Duration (Timespan)    |
-| duration    | long   | End Time (Timestamp)   |
+| endTime     | long   | End Time (Timestamp)   |
 | eventThread | String | Event Thread           |
 | storage     | String | Storage Identifier     |
 
@@ -53,7 +53,7 @@ Category: Artipie, Storage
 |-------------|--------|------------------------|
 | startTime   | long   | Start Time (Timestamp) |
 | duration    | long   | Duration (Timespan)    |
-| duration    | long   | End Time (Timestamp)   |
+| endTime     | long   | End Time (Timestamp)   |
 | eventThread | String | Event Thread           |
 | storage     | String | Storage Identifier     |
 | key         | String | Key                    |
@@ -69,7 +69,7 @@ Category: Artipie, Storage
 |-------------|--------|------------------------|
 | startTime   | long   | Start Time (Timestamp) |
 | duration    | long   | Duration (Timespan)    |
-| duration    | long   | End Time (Timestamp)   |
+| endTime     | long   | End Time (Timestamp)   |
 | eventThread | String | Event Thread           |
 | storage     | String | Storage Identifier     |
 | key         | String | Key                    |
@@ -83,7 +83,7 @@ Category: Artipie, Storage
 |-------------|--------|------------------------|
 | startTime   | long   | Start Time (Timestamp) |
 | duration    | long   | Duration (Timespan)    |
-| duration    | long   | End Time (Timestamp)   |
+| endTime     | long   | End Time (Timestamp)   |
 | eventThread | String | Event Thread           |
 | storage     | String | Storage Identifier     |
 | key         | String | Key                    |
@@ -99,7 +99,7 @@ Category: Artipie, Storage
 |-------------|--------|------------------------|
 | startTime   | long   | Start Time (Timestamp) |
 | duration    | long   | Duration (Timespan)    |
-| duration    | long   | End Time (Timestamp)   |
+| endTime     | long   | End Time (Timestamp)   |
 | eventThread | String | Event Thread           |
 | storage     | String | Storage Identifier     |
 | key         | String | Key                    |
@@ -113,7 +113,7 @@ Category: Artipie, Storage
 |-------------|--------|------------------------|
 | startTime   | long   | Start Time (Timestamp) |
 | duration    | long   | Duration (Timespan)    |
-| duration    | long   | End Time (Timestamp)   |
+| endTime     | long   | End Time (Timestamp)   |
 | eventThread | String | Event Thread           |
 | storage     | String | Storage Identifier     |
 | key         | String | Key                    |
@@ -127,7 +127,7 @@ Category: Artipie, Storage
 |-------------|--------|------------------------|
 | startTime   | long   | Start Time (Timestamp) |
 | duration    | long   | Duration (Timespan)    |
-| duration    | long   | End Time (Timestamp)   |
+| endTime     | long   | End Time (Timestamp)   |
 | eventThread | String | Event Thread           |
 | storage     | String | Storage Identifier     |
 | key         | String | Key                    |
@@ -142,7 +142,7 @@ Category: Artipie, Storage
 |-------------|--------|------------------------|
 | startTime   | long   | Start Time (Timestamp) |
 | duration    | long   | Duration (Timespan)    |
-| duration    | long   | End Time (Timestamp)   |
+| endTime     | long   | End Time (Timestamp)   |
 | eventThread | String | Event Thread           |
 | storage     | String | Storage Identifier     |
 | key         | String | Key                    |
@@ -157,7 +157,7 @@ Category: Artipie, Storage
 |-------------|--------|------------------------|
 | startTime   | long   | Start Time (Timestamp) |
 | duration    | long   | Duration (Timespan)    |
-| duration    | long   | End Time (Timestamp)   |
+| endTime     | long   | End Time (Timestamp)   |
 | eventThread | String | Event Thread           |
 | storage     | String | Storage Identifier     |
 | key         | String | Key                    |
@@ -171,7 +171,7 @@ Category: Artipie, Storage
 |-------------|--------|------------------------|
 | startTime   | long   | Start Time (Timestamp) |
 | duration    | long   | Duration (Timespan)    |
-| duration    | long   | End Time (Timestamp)   |
+| endTime     | long   | End Time (Timestamp)   |
 | eventThread | String | Event Thread           |
 | storage     | String | Storage Identifier     |
 | key         | String | Key                    |
