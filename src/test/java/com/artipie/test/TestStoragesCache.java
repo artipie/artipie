@@ -4,7 +4,7 @@
  */
 package com.artipie.test;
 
-import com.artipie.asto.factory.Storages;
+import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.settings.cache.CachedStorages;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,7 +25,7 @@ public final class TestStoragesCache extends CachedStorages {
      * is a local variable.
      */
     public TestStoragesCache() {
-        super(new Storages());
+        super(new StoragesLoader());
         this.cnt = new AtomicInteger(0);
     }
 

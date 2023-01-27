@@ -19,6 +19,7 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.security.policy.Policy;
 import com.artipie.settings.Layout;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
@@ -173,6 +174,11 @@ final class DockerRoutingSliceTest {
 
         @Override
         public MetricsContext metrics() {
+            return null;
+        }
+
+        @Override
+        public Policy<?> policy() {
             return null;
         }
     }

@@ -8,6 +8,8 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.SubStorage;
+import com.artipie.security.policy.Policy;
+import com.artipie.security.policy.YamlPolicy;
 import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.users.UsersFromStorageYaml;
 import com.artipie.test.TestArtipieCaches;
@@ -282,6 +284,41 @@ class YamlSettingsTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new YamlSettings(Yaml.createYamlInput(yaml).readYamlMapping(), this.caches).meta()
+        );
+    }
+
+    @Test
+    void readsPolicy() {
+        MatcherAssert.assertThat(
+            new YamlSettings(
+                Yaml.createYamlMappingBuilder().add(
+                    "meta",
+                    Yaml.createYamlMappingBuilder()
+                        .add(
+                            "policy", Yaml.createYamlMappingBuilder().add("type", "yaml_policy")
+                                .add(
+                                    "storage",
+                                    Yaml.createYamlMappingBuilder().add("type", "fs")
+                                        .add("path", "any").build()
+                                ).build()
+                        ).build()
+                ).build(),
+                this.caches
+            ).policy(),
+            new IsInstanceOf(YamlPolicy.class)
+        );
+    }
+
+    @Test
+    void returnsFreePolicyIfSectionIsAbsent() {
+        MatcherAssert.assertThat(
+            new YamlSettings(
+                Yaml.createYamlMappingBuilder()
+                    .add("meta", Yaml.createYamlMappingBuilder().add("key", "value").build())
+                    .build(),
+                this.caches
+            ).policy(),
+            new IsInstanceOf(Policy.FREE.getClass())
         );
     }
 

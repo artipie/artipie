@@ -135,7 +135,7 @@ SOFTWARE.
     <repository>
       <id>example-repo</id>
       <name>Example Repository</name>
-      <url>file:///Users/alenagerasimova/artipie/artipie/repo</url>
+      <url>file:///C:\Users\g00563573\IdeaProjects\artipie\repo</url>
     </repository>
   </repositories>
   <dependencies>
