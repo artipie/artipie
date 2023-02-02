@@ -12,20 +12,21 @@ import com.artipie.api.ssl.KeyStoreFactory;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
+import com.artipie.auth.AuthFromEnv;
+import com.artipie.auth.AuthFromKeycloak;
+import com.artipie.auth.AuthFromYaml;
+import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.settings.cache.ArtipieCaches;
-import com.artipie.settings.users.Users;
-import com.artipie.settings.users.UsersFromEnv;
-import com.artipie.settings.users.UsersFromGithub;
-import com.artipie.settings.users.UsersFromKeycloak;
-import com.artipie.settings.users.UsersFromStorageYaml;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
+import org.keycloak.authorization.client.Configuration;
 
 /**
  * Settings built from YAML.
@@ -90,8 +91,14 @@ public final class YamlSettings implements Settings {
 
     @Override
     public CompletionStage<Authentication> auth() {
-        return this.credentials().thenCompose(
-            Users::auth
+        return this.credentialsYamlSequence().map(
+            s -> s.values().stream()
+                .map(YamlNode::asMapping)
+                .map(this::auth)
+                .findFirst()
+                .orElseThrow()
+        ).orElse(
+            this.auth(this.meta().yamlMapping(YamlSettings.NODE_CREDENTIALS))
         ).thenCompose(this::withAlternative);
     }
 
@@ -115,19 +122,6 @@ public final class YamlSettings implements Settings {
         return Optional.ofNullable(this.meta().string("repo_configs"))
             .<Storage>map(str -> new SubStorage(new Key.From(str), this.configStorage()))
             .orElse(this.configStorage());
-    }
-
-    @Override
-    public CompletionStage<Users> credentials() {
-        return this.credentialsYamlSequence().map(
-            s -> s.values().stream()
-                .map(YamlNode::asMapping)
-                .map(this::users)
-                .findFirst()
-                .orElseThrow()
-        ).orElse(
-            this.users(this.meta().yamlMapping(YamlSettings.NODE_CREDENTIALS))
-        );
     }
 
     @Override
@@ -170,15 +164,13 @@ public final class YamlSettings implements Settings {
     }
 
     /**
-     * Users from yaml file.
+     * Authentication from yaml file.
      *
      * @param cred YAML credentials.
      * @return Completion action with {@code Users}.
      */
-    private CompletionStage<Users> users(final YamlMapping cred) {
-        return CredentialsType
-            .valueOf(cred)
-            .users(this, cred);
+    private CompletionStage<Authentication> auth(final YamlMapping cred) {
+        return CredentialsType.valueOf(cred).auth(this, cred);
     }
 
     /**
@@ -194,17 +186,15 @@ public final class YamlSettings implements Settings {
             .completedStage(auth);
         final Optional<YamlSequence> seq = this.credentialsYamlSequence();
         if (seq.isPresent()) {
-            final List<CompletionStage<Users>> list = seq.get().values()
+            final List<CompletionStage<Authentication>> list = seq.get().values()
                 .stream()
                 .skip(1)
                 .map(YamlNode::asMapping)
-                .map(YamlSettings.this::users)
+                .map(YamlSettings.this::auth)
                 .toList();
-            for (final CompletionStage<Users> users : list) {
+            for (final CompletionStage<Authentication> users : list) {
                 res = res.thenCompose(
-                    prev -> users
-                        .thenCompose(Users::auth)
-                        .thenApply(next -> new Authentication.Joined(prev, next))
+                    prev -> users.thenApply(next -> new Authentication.Joined(prev, next))
                 );
             }
         }
@@ -222,7 +212,7 @@ public final class YamlSettings implements Settings {
          * Credentials type: file.
          */
         FILE((settings, mapping) -> {
-            CompletionStage<Users> res = CompletableFuture.failedFuture(
+            CompletionStage<Authentication> res = CompletableFuture.failedFuture(
                 new RuntimeException(
                     "Invalid credentials configuration: type `file` requires `path`!"
                 )
@@ -231,19 +221,16 @@ public final class YamlSettings implements Settings {
             if (path != null) {
                 final Storage storage = settings.configStorage();
                 final KeyFromPath key = new KeyFromPath(path);
-                res = storage.exists(key).thenApply(
+                res = storage.exists(key).thenCompose(
                     exists -> {
-                        final Users users;
+                        final CompletionStage<Authentication> auth;
                         if (exists) {
-                            users = new UsersFromStorageYaml(
-                                storage,
-                                key,
-                                settings.caches.credsConfig()
-                            );
+                            auth = settings.caches.credsConfig().credentials(storage, key)
+                                .thenApply(AuthFromYaml::new);
                         } else {
-                            users = new UsersFromEnv();
+                            auth = CompletableFuture.completedStage(new AuthFromEnv());
                         }
-                        return users;
+                        return auth;
                     }
                 );
             }
@@ -254,34 +241,43 @@ public final class YamlSettings implements Settings {
          * Credentials type: github.
          */
         GITHUB((settings, mapping) -> CompletableFuture.completedStage(
-            new UsersFromGithub()
+            new GithubAuth()
         )),
 
         /**
          * Credentials type: env.
          */
         ENV((settings, mapping) -> CompletableFuture.completedStage(
-            new UsersFromEnv()
+            new AuthFromEnv()
         )),
 
         /**
          * Credentials type: keycloak.
          */
         KEYCLOAK((settings, mapping) -> CompletableFuture.completedStage(
-            new UsersFromKeycloak(mapping)
+            new AuthFromKeycloak(
+                new Configuration(
+                    mapping.string("url"),
+                    mapping.string("realm"),
+                    mapping.string("client-id"),
+                    Map.of("secret", mapping.string("client-password")),
+                    null
+                )
+            )
         ));
 
         /**
-         * Transform yaml to completion action with users.
+         * Transform yaml to completion action with authentication.
          */
-        private final BiFunction<YamlSettings, YamlMapping, CompletionStage<Users>> map;
+        private final BiFunction<YamlSettings, YamlMapping, CompletionStage<Authentication>> map;
 
         /**
          * Ctor.
          *
          * @param map Transform yaml to completion action with users.
          */
-        CredentialsType(final BiFunction<YamlSettings, YamlMapping, CompletionStage<Users>> map) {
+        CredentialsType(final BiFunction<YamlSettings, YamlMapping,
+            CompletionStage<Authentication>> map) {
             this.map = map;
         }
 
@@ -303,13 +299,13 @@ public final class YamlSettings implements Settings {
         }
 
         /**
-         * Transform yaml to completion action with users.
+         * Transform yaml to completion action with authentication.
          *
          * @param settings YamlSettings.
          * @param yaml Credentials yaml mapping.
          * @return Completion action with users.
          */
-        CompletionStage<Users> users(
+        CompletionStage<Authentication> auth(
             final YamlSettings settings,
             final YamlMapping yaml
         ) {

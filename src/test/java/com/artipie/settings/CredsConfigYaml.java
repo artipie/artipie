@@ -11,7 +11,7 @@ import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.settings.users.Users;
+import com.artipie.settings.users.PasswordFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -96,10 +96,10 @@ public final class CredsConfigYaml {
      * @param pswd Password
      * @return Itself
      */
-    public CredsConfigYaml withUserAndPswd(final String username, final Users.PasswordFormat format,
+    public CredsConfigYaml withUserAndPswd(final String username, final PasswordFormat format,
         final String pswd) {
         String pass = pswd;
-        if (format == Users.PasswordFormat.SHA256) {
+        if (format == PasswordFormat.SHA256) {
             pass = DigestUtils.sha256Hex(pass);
         }
         this.builder = this.builder.add(
@@ -122,10 +122,10 @@ public final class CredsConfigYaml {
      * @checkstyle ParameterNumberCheck (500 lines)
      */
     public CredsConfigYaml withFullInfo(final
-        String username, final Users.PasswordFormat format,
+        String username, final PasswordFormat format,
         final String pswd, final String email, final Set<String> groups) {
         String pass = pswd;
-        if (format == Users.PasswordFormat.SHA256) {
+        if (format == PasswordFormat.SHA256) {
             pass = DigestUtils.sha256Hex(pass);
         }
         YamlMappingBuilder user = Yaml.createYamlMappingBuilder()

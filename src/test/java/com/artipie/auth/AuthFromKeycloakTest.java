@@ -9,7 +9,6 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.auth.Authentication;
 import com.artipie.settings.YamlSettings;
-import com.artipie.settings.users.Users;
 import com.artipie.tools.CodeBlob;
 import com.artipie.tools.CodeClassLoader;
 import com.artipie.tools.CompilerTool;
@@ -137,9 +136,7 @@ public class AuthFromKeycloakTest {
             AuthFromKeycloakTest.CLIENT_PASSWORD
         );
         final AtomicReference<Authentication.User> ref = new AtomicReference<>();
-        settings
-            .credentials()
-            .thenCompose(Users::auth)
+        settings.auth()
             .thenAccept(auth -> ref.set(auth.user(login, password).get()));
         // @checkstyle MagicNumberCheck (1 line)
         Awaitility.waitAtMost(3_000, TimeUnit.MILLISECONDS)
@@ -167,9 +164,7 @@ public class AuthFromKeycloakTest {
             AuthFromKeycloakTest.CLIENT_PASSWORD
         );
         final AtomicReference<Throwable> ref = new AtomicReference<>();
-        settings
-            .credentials()
-            .thenCompose(Users::auth)
+        settings.auth()
             .thenAccept(auth -> auth.user(fake, fake))
             .exceptionally(
                 exc -> {
