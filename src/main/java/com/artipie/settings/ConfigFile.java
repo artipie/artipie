@@ -31,7 +31,8 @@ public final class ConfigFile {
     /**
      * Pattern to divide all filenames into two groups: name and extension.
      */
-    private static final Pattern PTN_ALL = Pattern.compile("(?<name>.+?)(?<extension>\\.[^.]*$|$)");
+    private static final Pattern PTN_ALL =
+        Pattern.compile("(?<name>.+?)(?<extension>(?<!/)\\.[^./]*$|$)");
 
     /**
      * Filename.

@@ -84,7 +84,55 @@ final class ConfigFileTest {
     @ParameterizedTest
     @ValueSource(strings = {".yaml", ".yml", ".jar", ".json", ""})
     void getFilenameAndExtensionCorrect(final String extension) {
-        final String name = "filename";
+        final String simple = "filename";
+        MatcherAssert.assertThat(
+            "Correct name",
+            new ConfigFile(String.join("", simple, extension)).name(),
+            new IsEqual<>(simple)
+        );
+        MatcherAssert.assertThat(
+            "Correct extension",
+            new ConfigFile(String.join("", simple, extension)).extension().orElse(""),
+            new IsEqual<>(extension)
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {".yaml", ".yml", ".jar", ".json", ""})
+    void getFilenameAndExtensionCorrectFromHiddenDir(final String extension) {
+        final String name = "..2023_02_06_09_57_10.2284382907/filename";
+        MatcherAssert.assertThat(
+            "Correct name",
+            new ConfigFile(String.join("", name, extension)).name(),
+            new IsEqual<>(name)
+        );
+        MatcherAssert.assertThat(
+            "Correct extension",
+            new ConfigFile(String.join("", name, extension)).extension().orElse(""),
+            new IsEqual<>(extension)
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {".yaml", ".yml", ".jar", ".json", ""})
+    void getFilenameAndExtensionCorrectFromHiddenFile(final String extension) {
+        final String name = "some_dir/.filename";
+        MatcherAssert.assertThat(
+            "Correct name",
+            new ConfigFile(String.join("", name, extension)).name(),
+            new IsEqual<>(name)
+        );
+        MatcherAssert.assertThat(
+            "Correct extension",
+            new ConfigFile(String.join("", name, extension)).extension().orElse(""),
+            new IsEqual<>(extension)
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {".yaml", ".yml", ".jar", ".json", ""})
+    void getFilenameAndExtensionCorrectFromHiddenFileInHiddenDir(final String extension) {
+        final String name = ".some_dir/.filename";
         MatcherAssert.assertThat(
             "Correct name",
             new ConfigFile(String.join("", name, extension)).name(),
@@ -128,7 +176,9 @@ final class ConfigFileTest {
         "file.yaml,true",
         "name.yml,true",
         "name.xml,false",
-        "name,false"
+        "name,false",
+        ".some.yaml,true",
+        "..hidden_dir/any.yml,true"
     })
     void yamlOrYmlDeterminedCorrectly(final String filename, final boolean yaml) {
         MatcherAssert.assertThat(
