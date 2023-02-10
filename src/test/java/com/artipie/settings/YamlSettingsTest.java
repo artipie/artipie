@@ -8,8 +8,8 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.SubStorage;
+import com.artipie.security.policy.CachedYamlPolicy;
 import com.artipie.security.policy.Policy;
-import com.artipie.security.policy.YamlPolicy;
 import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.users.UsersFromStorageYaml;
 import com.artipie.test.TestArtipieCaches;
@@ -305,7 +305,7 @@ class YamlSettingsTest {
                 ).build(),
                 this.caches
             ).policy(),
-            new IsInstanceOf(YamlPolicy.class)
+            new IsInstanceOf(CachedYamlPolicy.class)
         );
     }
 
