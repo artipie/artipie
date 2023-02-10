@@ -11,7 +11,6 @@ import com.artipie.asto.SubStorage;
 import com.artipie.security.policy.CachedYamlPolicy;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.cache.ArtipieCaches;
-import com.artipie.settings.users.UsersFromStorageYaml;
 import com.artipie.test.TestArtipieCaches;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -201,21 +200,6 @@ class YamlSettingsTest {
     }
 
     @Test
-    void returnsCredentials(@TempDir final Path tmp) throws IOException {
-        final String fname = "_cred.yml";
-        final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), this.credentials("file", Optional.of(fname))),
-            this.caches
-        );
-        final Path yaml = tmp.resolve(fname);
-        Files.writeString(yaml, this.credentials());
-        MatcherAssert.assertThat(
-            settings.credentials().toCompletableFuture().join(),
-            new IsInstanceOf(UsersFromStorageYaml.class)
-        );
-    }
-
-    @Test
     void getsCredentialsFromCache(@TempDir final Path tmp) throws IOException {
         final String fname = "_cred.yml";
         final YamlSettings settings = new YamlSettings(
@@ -223,8 +207,7 @@ class YamlSettingsTest {
             this.caches
         );
         Files.writeString(tmp.resolve(fname), this.credentials());
-        settings.credentials().toCompletableFuture().join()
-            .list().toCompletableFuture().join();
+        settings.auth().toCompletableFuture().join();
         Files.writeString(tmp.resolve(fname), "not valid yaml file");
         MatcherAssert.assertThat(
             "Storage configuration was not cached",
@@ -233,12 +216,7 @@ class YamlSettingsTest {
         );
         MatcherAssert.assertThat(
             "Invalid yaml file was used, although credentials from cache should be used",
-            settings.credentials()
-                .toCompletableFuture().join()
-                .list()
-                .toCompletableFuture().join()
-                .size(),
-            new IsEqual<>(1)
+            settings.auth().toCompletableFuture().join().user("john", "123").isPresent()
         );
     }
 
@@ -328,7 +306,7 @@ class YamlSettingsTest {
             Yaml.createYamlMappingBuilder()
                 .add(
                     "john",
-                    Yaml.createYamlMappingBuilder().add("password", "plain:123").build()
+                    Yaml.createYamlMappingBuilder().add("pass", "plain:123").build()
                 ).build()
         ).build().toString();
     }

@@ -8,7 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.auth.Authentication;
 import com.artipie.settings.CredsConfigYaml;
-import com.artipie.settings.users.Users;
+import com.artipie.settings.users.PasswordFormat;
 import java.util.List;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cactoos.list.ListOf;
@@ -128,7 +128,7 @@ final class AuthFromYamlTest {
         final String pass = "qwerty";
         MatcherAssert.assertThat(
             new AuthFromYaml(
-                new CredsConfigYaml().withUserAndPswd(user, Users.PasswordFormat.PLAIN, pass).yaml()
+                new CredsConfigYaml().withUserAndPswd(user, PasswordFormat.PLAIN, pass).yaml()
             ).user(user, pass).get(),
             new IsEqual<>(new Authentication.User(user))
         );
@@ -141,7 +141,7 @@ final class AuthFromYamlTest {
         MatcherAssert.assertThat(
             new AuthFromYaml(
                 new CredsConfigYaml()
-                    .withUserAndPswd(user, Users.PasswordFormat.SHA256, pass).yaml()
+                    .withUserAndPswd(user, PasswordFormat.SHA256, pass).yaml()
             ).user(user, pass).get(),
             new IsEqual<>(new Authentication.User(user))
         );
@@ -153,7 +153,7 @@ final class AuthFromYamlTest {
         MatcherAssert.assertThat(
             new AuthFromYaml(
                 new CredsConfigYaml()
-                    .withUserAndPswd(user, Users.PasswordFormat.PLAIN, "123").yaml()
+                    .withUserAndPswd(user, PasswordFormat.PLAIN, "123").yaml()
             ).user(user, "456").isEmpty(),
             new IsEqual<>(true)
         );
@@ -165,7 +165,7 @@ final class AuthFromYamlTest {
         MatcherAssert.assertThat(
             new AuthFromYaml(
                 new CredsConfigYaml()
-                    .withUserAndPswd("ann", Users.PasswordFormat.SHA256, pass).yaml()
+                    .withUserAndPswd("ann", PasswordFormat.SHA256, pass).yaml()
             ).user("anna", pass).isEmpty(),
             new IsEqual<>(true)
         );

@@ -23,7 +23,6 @@ import com.artipie.security.policy.Policy;
 import com.artipie.settings.Layout;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
-import com.artipie.settings.users.Users;
 import io.reactivex.Flowable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -154,11 +153,6 @@ final class DockerRoutingSliceTest {
 
         @Override
         public Storage repoConfigsStorage() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public CompletionStage<Users> credentials() {
             throw new UnsupportedOperationException();
         }
 

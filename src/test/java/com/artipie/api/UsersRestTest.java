@@ -8,7 +8,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.misc.UncheckedConsumer;
 import com.artipie.settings.CredsConfigYaml;
 import com.artipie.settings.cache.AuthCache;
-import com.artipie.settings.users.Users;
+import com.artipie.settings.users.PasswordFormat;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
@@ -36,7 +36,7 @@ final class UsersRestTest extends RestApiServerBase {
         this.save(
             new Key.From(ManageUsersTest.KEY),
             new CredsConfigYaml().withUserAndGroups("Alice", List.of("readers")).withFullInfo(
-                "Bob", Users.PasswordFormat.PLAIN, "xyz", "bob@example.com", Set.of("admin")
+                "Bob", PasswordFormat.PLAIN, "xyz", "bob@example.com", Set.of("admin")
             ).toString().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
@@ -58,7 +58,7 @@ final class UsersRestTest extends RestApiServerBase {
             new Key.From(ManageUsersTest.KEY),
             new CredsConfigYaml().withUsers("Mark")
                 .withFullInfo(
-                    "John", Users.PasswordFormat.PLAIN, "231", "john@example.com",
+                    "John", PasswordFormat.PLAIN, "231", "john@example.com",
                     Set.of("readers", "tags")
                 ).toString().getBytes(StandardCharsets.UTF_8)
         );
@@ -206,7 +206,7 @@ final class UsersRestTest extends RestApiServerBase {
         final String old = "abc123";
         this.save(
             new Key.From(ManageUsersTest.KEY),
-            new CredsConfigYaml().withUserAndPswd("Mark", Users.PasswordFormat.PLAIN, old)
+            new CredsConfigYaml().withUserAndPswd("Mark", PasswordFormat.PLAIN, old)
                 .toString().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(

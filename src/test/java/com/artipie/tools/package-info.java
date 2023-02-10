@@ -4,8 +4,8 @@
  */
 
 /**
- * Tests for user settings classes.
+ * Artipie tools for dynamic compiling and loading compiled classes.
  *
- * @since 0.12
+ * @since 0.28
  */
-package com.artipie.settings.users;
+package com.artipie.tools;

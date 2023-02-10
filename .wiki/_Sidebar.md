@@ -15,6 +15,7 @@
       * [[File credentials|Configuration-Credentials#credentials-type-file]]
       * [[GitHub credentials|Configuration-Credentials#credentials-type-github]]
       * [[Environment credentials|Configuration-Credentials#credentials-type-env]]
+      * [[Keycloak credentials|Configuration-Credentials#credentials-type-keycloak]]
     * [[Repository|Configuration-Repository]]
       * [[Single repository on port|Configuration-Repository#single-repository-on-port]]
       * [[Repositories types|Configuration-Repository#supported-repository-types]]

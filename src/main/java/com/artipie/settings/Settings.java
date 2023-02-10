@@ -12,10 +12,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.security.policy.Policy;
-import com.artipie.settings.users.Users;
-import com.artipie.settings.users.UsersFromEnv;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -59,12 +56,6 @@ public interface Settings {
     Storage repoConfigsStorage();
 
     /**
-     * Artipie credentials.
-     * @return Completion action with credentials
-     */
-    CompletionStage<Users> credentials();
-
-    /**
      * Key for credentials yaml settings.
      * @return Key for credentials
      */
@@ -101,11 +92,6 @@ public interface Settings {
         private final Storage storage;
 
         /**
-         * Credentials.
-         */
-        private final Users cred;
-
-        /**
          * Yaml `meta` mapping.
          */
         private final YamlMapping meta;
@@ -135,7 +121,6 @@ public interface Settings {
         public Fake(final Storage storage) {
             this(
                 storage,
-                new UsersFromEnv(),
                 Yaml.createYamlMappingBuilder().build()
             );
         }
@@ -158,7 +143,6 @@ public interface Settings {
         public Fake(final Storage storage, final Layout layout) {
             this(
                 storage,
-                new UsersFromEnv(),
                 Yaml.createYamlMappingBuilder().build(),
                 layout,
                 Optional.empty()
@@ -168,39 +152,27 @@ public interface Settings {
         /**
          * Ctor.
          *
-         * @param cred Credentials
-         */
-        public Fake(final Users cred) {
-            this(new InMemoryStorage(), cred, Yaml.createYamlMappingBuilder().build());
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param cred Credentials
          * @param meta Yaml `meta` mapping
          */
-        public Fake(final Users cred, final YamlMapping meta) {
-            this(new InMemoryStorage(), cred, meta);
+        public Fake(final YamlMapping meta) {
+            this(new InMemoryStorage(), meta);
         }
 
         /**
          * Primary ctor.
          *
          * @param storage Storage
-         * @param cred Credentials
          * @param meta Yaml `meta` mapping
          * @checkstyle ParameterNumberCheck (2 lines)
          */
-        public Fake(final Storage storage, final Users cred, final YamlMapping meta) {
-            this(storage, cred, meta, new Layout.Flat(), Optional.empty());
+        public Fake(final Storage storage, final YamlMapping meta) {
+            this(storage, meta, new Layout.Flat(), Optional.empty());
         }
 
         /**
          * Primary ctor.
          *
          * @param storage Storage
-         * @param cred Credentials
          * @param meta Yaml `meta` mapping
          * @param layout Layout
          * @param keystore KeyStore
@@ -208,13 +180,11 @@ public interface Settings {
          */
         public Fake(
             final Storage storage,
-            final Users cred,
             final YamlMapping meta,
             final Layout layout,
             final Optional<KeyStore> keystore
         ) {
             this.storage = storage;
-            this.cred = cred;
             this.meta = meta;
             this.layout = layout;
             this.keystore = keystore;
@@ -243,11 +213,6 @@ public interface Settings {
         @Override
         public Storage repoConfigsStorage() {
             return this.storage;
-        }
-
-        @Override
-        public CompletionStage<Users> credentials() {
-            return CompletableFuture.completedFuture(this.cred);
         }
 
         @Override
