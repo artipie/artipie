@@ -6,7 +6,6 @@ package com.artipie.api;
 
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Tokens;
-import com.artipie.settings.cache.AuthCache;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
@@ -35,11 +34,6 @@ public final class AuthTokenRest extends BaseRest {
     private final Tokens tokens;
 
     /**
-     * Artipie auth cache.
-     */
-    private final AuthCache cache;
-
-    /**
      * Artipie authentication.
      */
     private final Authentication auth;
@@ -48,12 +42,10 @@ public final class AuthTokenRest extends BaseRest {
      * Ctor.
      *
      * @param provider Vertx JWT auth
-     * @param cache Artipie auth cache
      * @param auth Artipie authentication
      */
-    public AuthTokenRest(final Tokens provider, final AuthCache cache, final Authentication auth) {
+    public AuthTokenRest(final Tokens provider, final Authentication auth) {
         this.tokens = provider;
-        this.cache = cache;
         this.auth = auth;
     }
 
@@ -70,8 +62,8 @@ public final class AuthTokenRest extends BaseRest {
      */
     private void getJwtToken(final RoutingContext routing) {
         final JsonObject body = routing.body().asJsonObject();
-        final Optional<Authentication.User> user = this.cache.user(
-            body.getString("name"), body.getString("pass"), this.auth
+        final Optional<Authentication.User> user = this.auth.user(
+            body.getString("name"), body.getString("pass")
         );
         if (user.isPresent()) {
             routing.response().setStatusCode(HttpStatus.OK_200).end(

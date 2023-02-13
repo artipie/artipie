@@ -11,8 +11,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ValueNotFoundException;
 import com.artipie.settings.AliasSettings;
 import com.artipie.settings.Settings;
-import com.artipie.settings.cache.StoragesCache;
-import com.artipie.test.TestStoragesCache;
+import com.artipie.test.TestSettings;
 import java.nio.file.Path;
 import java.util.concurrent.CompletionException;
 import org.hamcrest.MatcherAssert;
@@ -44,11 +43,6 @@ final class RepositoriesFromStorageTest {
     private static final String TYPE = "maven";
 
     /**
-     * Storages cache.
-     */
-    private StoragesCache cache;
-
-    /**
      * Storage.
      */
     private Storage storage;
@@ -60,9 +54,8 @@ final class RepositoriesFromStorageTest {
 
     @BeforeEach
     void setUp() {
-        this.settings = new Settings.Fake();
+        this.settings = new TestSettings();
         this.storage = this.settings.repoConfigsStorage();
-        this.cache = new TestStoragesCache();
     }
 
     @ParameterizedTest
@@ -172,7 +165,7 @@ final class RepositoriesFromStorageTest {
     }
 
     private RepoConfig repoConfig() {
-        return new RepositoriesFromStorage(this.settings, this.cache)
+        return new RepositoriesFromStorage(this.settings)
             .config(RepositoriesFromStorageTest.REPO)
             .toCompletableFuture().join();
     }

@@ -5,9 +5,9 @@
 package com.artipie.test;
 
 import com.artipie.settings.cache.ArtipieCaches;
-import com.artipie.settings.cache.AuthCache;
-import com.artipie.settings.cache.CredsConfigCache;
+import com.artipie.settings.cache.Cleanable;
 import com.artipie.settings.cache.StoragesCache;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Test Artipie caches.
@@ -16,27 +16,21 @@ import com.artipie.settings.cache.StoragesCache;
 public final class TestArtipieCaches implements ArtipieCaches {
 
     /**
-     * Cache for user logins.
-     */
-    private final AuthCache authcache;
-
-    /**
      * Cache for configurations of storages.
      */
     private final StoragesCache strgcache;
 
     /**
-     * Cache for configurations of credentials.
+     * Was invalidating method called?
      */
-    private final CredsConfigCache credscache;
+    private final AtomicLong invalidation;
 
     /**
      * Ctor with all fake initialized caches.
      */
     public TestArtipieCaches() {
-        this.authcache = new AuthCache.Fake();
         this.strgcache = new TestStoragesCache();
-        this.credscache = new CredsConfigCache.Fake();
+        this.invalidation = new AtomicLong();
     }
 
     @Override
@@ -45,12 +39,15 @@ public final class TestArtipieCaches implements ArtipieCaches {
     }
 
     @Override
-    public CredsConfigCache credsConfig() {
-        return this.credscache;
+    public Cleanable usersCache() {
+        return this.invalidation::incrementAndGet;
     }
 
-    @Override
-    public AuthCache auth() {
-        return this.authcache;
+    /**
+     * True if invalidate method of the {@link Cleanable} was called exactly one time.
+     * @return True if invalidated
+     */
+    public boolean wasInvalidated() {
+        return this.invalidation.get() == 1;
     }
 }

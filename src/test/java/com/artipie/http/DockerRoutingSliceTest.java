@@ -22,12 +22,14 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.settings.Layout;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
+import com.artipie.settings.cache.ArtipieCaches;
+import com.artipie.test.TestArtipieCaches;
+import com.artipie.test.TestSettings;
 import io.reactivex.Flowable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.Test;
@@ -44,7 +46,7 @@ final class DockerRoutingSliceTest {
     void removesDockerPrefix() throws Exception {
         verify(
             new DockerRoutingSlice(
-                new Settings.Fake(),
+                new TestSettings(),
                 new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/foo/bar")))
             ),
             "/v2/foo/bar"
@@ -56,7 +58,7 @@ final class DockerRoutingSliceTest {
         final String path = "/repo/name";
         verify(
             new DockerRoutingSlice(
-                new Settings.Fake(),
+                new TestSettings(),
                 new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath(path)))
             ),
             path
@@ -95,7 +97,7 @@ final class DockerRoutingSliceTest {
         final String path = "/v2/one/two";
         verify(
             new DockerRoutingSlice(
-                new Settings.Fake(),
+                new TestSettings(),
                 new DockerRoutingSlice.Reverted(
                     new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath(path)))
                 )
@@ -136,8 +138,8 @@ final class DockerRoutingSliceTest {
         }
 
         @Override
-        public CompletionStage<Authentication> auth() {
-            return CompletableFuture.completedFuture(this.auth);
+        public Authentication auth() {
+            return this.auth;
         }
 
         @Override
@@ -168,6 +170,11 @@ final class DockerRoutingSliceTest {
         @Override
         public MetricsContext metrics() {
             return null;
+        }
+
+        @Override
+        public ArtipieCaches caches() {
+            return new TestArtipieCaches();
         }
     }
 }

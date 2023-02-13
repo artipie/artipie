@@ -136,8 +136,7 @@ public class AuthFromKeycloakTest {
             AuthFromKeycloakTest.CLIENT_PASSWORD
         );
         final AtomicReference<Authentication.User> ref = new AtomicReference<>();
-        settings.auth()
-            .thenAccept(auth -> ref.set(auth.user(login, password).get()));
+        ref.set(settings.auth().user(login, password).get());
         // @checkstyle MagicNumberCheck (1 line)
         Awaitility.waitAtMost(3_000, TimeUnit.MILLISECONDS)
             .until(() -> ref.get() != null);
@@ -164,14 +163,7 @@ public class AuthFromKeycloakTest {
             AuthFromKeycloakTest.CLIENT_PASSWORD
         );
         final AtomicReference<Throwable> ref = new AtomicReference<>();
-        settings.auth()
-            .thenAccept(auth -> auth.user(fake, fake))
-            .exceptionally(
-                exc -> {
-                    ref.set(exc);
-                    return null;
-                }
-            );
+        settings.auth().user(fake, fake);
         // @checkstyle MagicNumberCheck (1 line)
         Awaitility.waitAtMost(3_000, TimeUnit.MILLISECONDS)
             .until(() -> ref.get() != null);
@@ -209,8 +201,7 @@ public class AuthFromKeycloakTest {
                                 .build()
                         ).build()
                 ).build()
-            ).build(),
-            null
+            ).build()
         );
     }
 

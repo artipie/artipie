@@ -15,7 +15,7 @@ import com.artipie.settings.StorageByAlias;
  * Cache for storages with similar configurations in Artipie settings.
  * @since 0.23
  */
-public interface StoragesCache {
+public interface StoragesCache extends Cleanable {
     /**
      * Finds storage by specified in settings configuration cache or creates
      * a new item and caches it.
@@ -62,8 +62,4 @@ public interface StoragesCache {
      */
     long size();
 
-    /**
-     * Invalidate all items in cache.
-     */
-    void invalidateAll();
 }

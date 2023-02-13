@@ -5,7 +5,6 @@
 package com.artipie.http;
 
 import com.artipie.docker.http.BaseEntity;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.BasicAuthSlice;
 import com.artipie.http.auth.Permissions;
 import com.artipie.http.rq.RequestLine;
@@ -64,15 +63,11 @@ public final class DockerRoutingSlice implements Slice {
         if (matcher.matches()) {
             final String group = matcher.group(1);
             if (group.isEmpty() || group.equals("/")) {
-                rsp = new AsyncResponse(
-                    this.settings.auth().thenApply(
-                        auth -> new BasicAuthSlice(
-                            new BaseEntity(),
-                            auth,
-                            user -> !user.equals(Permissions.ANY_USER)
-                        ).response(line, headers, body)
-                    )
-                );
+                rsp = new BasicAuthSlice(
+                    new BaseEntity(),
+                    this.settings.auth(),
+                    user -> !user.equals(Permissions.ANY_USER)
+                ).response(line, headers, body);
             } else {
                 rsp = this.origin.response(
                     new RequestLine(

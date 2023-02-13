@@ -32,7 +32,7 @@ public class CachedStorages implements StoragesCache {
     /**
      * Storages factory.
      */
-    private final Storages storages;
+    private static final Storages STORAGES = new Storages();
 
     /**
      * Cache for storages.
@@ -41,11 +41,8 @@ public class CachedStorages implements StoragesCache {
 
     /**
      * Ctor.
-     *
-     * @param storages Storages factory
      */
-    protected CachedStorages(final Storages storages) {
-        this.storages = storages;
+    public CachedStorages() {
         this.cache = CacheBuilder.newBuilder()
             .expireAfterWrite(
                 //@checkstyle MagicNumberCheck (1 line)
@@ -80,11 +77,11 @@ public class CachedStorages implements StoragesCache {
                     final StorageCreateEvent event = new StorageCreateEvent();
                     if (event.isEnabled()) {
                         event.begin();
-                        res = new JfrStorage(this.storages.newStorage(type, yaml));
+                        res = new JfrStorage(CachedStorages.STORAGES.newStorage(type, yaml));
                         event.storage = res.identifier();
                         event.commit();
                     } else {
-                        res = new JfrStorage(this.storages.newStorage(type, yaml));
+                        res = new JfrStorage(CachedStorages.STORAGES.newStorage(type, yaml));
                     }
                     return res;
                 }
@@ -100,7 +97,7 @@ public class CachedStorages implements StoragesCache {
     }
 
     @Override
-    public void invalidateAll() {
+    public void invalidate() {
         this.cache.invalidateAll();
     }
 

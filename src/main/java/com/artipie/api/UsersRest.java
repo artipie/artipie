@@ -5,7 +5,7 @@
 package com.artipie.api;
 
 import com.artipie.http.auth.Authentication;
-import com.artipie.settings.cache.AuthCache;
+import com.artipie.settings.cache.Cleanable;
 import com.artipie.settings.users.CrudUsers;
 import com.jcabi.log.Logger;
 import io.vertx.ext.web.RoutingContext;
@@ -30,7 +30,7 @@ public final class UsersRest extends BaseRest {
     /**
      * Artipie authenticated users cache.
      */
-    private final AuthCache cache;
+    private final Cleanable cache;
 
     /**
      * Artipie auth.
@@ -43,7 +43,7 @@ public final class UsersRest extends BaseRest {
      * @param cache Artipie authenticated users cache
      * @param auth Artipie authentication
      */
-    public UsersRest(final CrudUsers users, final AuthCache cache, final Authentication auth) {
+    public UsersRest(final CrudUsers users, final Cleanable cache, final Authentication auth) {
         this.users = users;
         this.cache = cache;
         this.auth = auth;
@@ -80,7 +80,7 @@ public final class UsersRest extends BaseRest {
             context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
             return;
         }
-        this.cache.invalidateAll();
+        this.cache.invalidate();
         context.response().setStatusCode(HttpStatus.OK_200).end();
     }
 
@@ -93,7 +93,7 @@ public final class UsersRest extends BaseRest {
             Json.createReader(new StringReader(context.body().asString())).readObject(),
             context.pathParam(RepositoryName.UNAME)
         );
-        this.cache.invalidateAll();
+        this.cache.invalidate();
         context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
@@ -126,12 +126,12 @@ public final class UsersRest extends BaseRest {
         final String uname = context.pathParam(RepositoryName.UNAME);
         final JsonObject body = readJsonObject(context);
         final Optional<Authentication.User> usr =
-            this.cache.user(uname, body.getString("old_pass"), this.auth);
+            this.auth.user(uname, body.getString("old_pass"));
         if (usr.isPresent()) {
             try {
                 this.users.alterPassword(uname, body);
                 context.response().setStatusCode(HttpStatus.OK_200).end();
-                this.cache.invalidateAll();
+                this.cache.invalidate();
             } catch (final IllegalStateException err) {
                 Logger.error(this, err.getMessage());
                 context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
