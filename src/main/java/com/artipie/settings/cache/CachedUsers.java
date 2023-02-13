@@ -27,7 +27,7 @@ public final class CachedUsers implements Authentication, Cleanable {
      * Cache for users. The key is md5 calculated from username and password
      * joined with space.
      */
-    private final Cache<byte[], Optional<Authentication.User>> users;
+    private final Cache<String, Optional<Authentication.User>> users;
 
     /**
      * Origin authentication.
@@ -60,7 +60,7 @@ public final class CachedUsers implements Authentication, Cleanable {
      */
     CachedUsers(
         final Authentication origin,
-        final Cache<byte[], Optional<Authentication.User>> cache
+        final Cache<String, Optional<Authentication.User>> cache
     ) {
         this.users = cache;
         this.origin = origin;
@@ -71,7 +71,7 @@ public final class CachedUsers implements Authentication, Cleanable {
         final String username,
         final String password
     ) {
-        final byte[] key = DigestUtils.md5(String.join(" ", username, password));
+        final String key = DigestUtils.md5Hex(String.join(" ", username, password));
         return new UncheckedScalar<>(
             () -> this.users.get(key, () -> this.origin.user(username, password))
         ).value();
