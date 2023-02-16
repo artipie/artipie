@@ -9,7 +9,6 @@ import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.settings.YamlSettings;
-import com.artipie.test.TestArtipieCaches;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -42,8 +41,7 @@ final class SSLPfxRestTest extends SSLBaseRestTest {
                     "      path: cert.pfx\n",
                     "      password: secret\n"
                 )
-            ).readYamlMapping(),
-            new TestArtipieCaches()
+            ).readYamlMapping()
         ).keyStore();
     }
 }

@@ -27,14 +27,13 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import org.awaitility.Awaitility;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsNull;
+import org.hamcrest.core.StringContains;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -135,17 +134,12 @@ public class AuthFromKeycloakTest {
             AuthFromKeycloakTest.CLIENT_ID,
             AuthFromKeycloakTest.CLIENT_PASSWORD
         );
-        final AtomicReference<Authentication.User> ref = new AtomicReference<>();
-        settings.auth()
-            .thenAccept(auth -> ref.set(auth.user(login, password).get()));
-        // @checkstyle MagicNumberCheck (1 line)
-        Awaitility.waitAtMost(3_000, TimeUnit.MILLISECONDS)
-            .until(() -> ref.get() != null);
+        final Optional<Authentication.User> opt = settings.auth().user(login, password);
         MatcherAssert.assertThat(
-            ref.get(),
-            Is.is(IsNull.notNullValue())
+            opt.isPresent(),
+            new IsEqual<>(true)
         );
-        final Authentication.User user = ref.get();
+        final Authentication.User user = opt.get();
         MatcherAssert.assertThat(
             user.name(),
             Is.is(login)
@@ -163,21 +157,12 @@ public class AuthFromKeycloakTest {
             AuthFromKeycloakTest.CLIENT_ID,
             AuthFromKeycloakTest.CLIENT_PASSWORD
         );
-        final AtomicReference<Throwable> ref = new AtomicReference<>();
-        settings.auth()
-            .thenAccept(auth -> auth.user(fake, fake))
-            .exceptionally(
-                exc -> {
-                    ref.set(exc);
-                    return null;
-                }
-            );
-        // @checkstyle MagicNumberCheck (1 line)
-        Awaitility.waitAtMost(3_000, TimeUnit.MILLISECONDS)
-            .until(() -> ref.get() != null);
         MatcherAssert.assertThat(
-            ref.get().getMessage().contains("Failed to obtain authorization data"),
-            Is.is(true)
+            Assertions.assertThrows(
+                ArtipieException.class,
+                () -> settings.auth().user(fake, fake)
+            ).getMessage(),
+            new StringContains("Failed to obtain authorization data")
         );
     }
 
@@ -209,8 +194,7 @@ public class AuthFromKeycloakTest {
                                 .build()
                         ).build()
                 ).build()
-            ).build(),
-            null
+            ).build()
         );
     }
 

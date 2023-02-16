@@ -4,8 +4,6 @@
  */
 package com.artipie.settings.cache;
 
-import com.artipie.asto.factory.Storages;
-
 /**
  * Encapsulates caches which are possible to use in settings of Artipie server.
  *
@@ -20,18 +18,11 @@ public interface ArtipieCaches {
     StoragesCache storagesCache();
 
     /**
-     * Obtains cache for configurations of credentials.
-     *
-     * @return Cache for configurations of credentials.
-     */
-    CredsConfigCache credsConfig();
-
-    /**
      * Obtains cache for user logins.
      *
      * @return Cache for user logins.
      */
-    AuthCache auth();
+    Cleanable usersCache();
 
     /**
      * Implementation with all real instances of caches.
@@ -42,7 +33,7 @@ public interface ArtipieCaches {
         /**
          * Cache for user logins.
          */
-        private final AuthCache authcache;
+        private final Cleanable authcache;
 
         /**
          * Cache for configurations of storages.
@@ -50,17 +41,13 @@ public interface ArtipieCaches {
         private final StoragesCache strgcache;
 
         /**
-         * Cache for configurations of credentials.
-         */
-        private final CredsConfigCache credscache;
-
-        /**
          * Ctor with all initialized caches.
+         * @param users Users cache
+         * @param strgcache Storages cache
          */
-        public All() {
-            this.authcache = new CachedUsers();
-            this.strgcache = new CachedStorages(new Storages());
-            this.credscache = new CachedCreds();
+        public All(final Cleanable users, final StoragesCache strgcache) {
+            this.authcache = users;
+            this.strgcache = strgcache;
         }
 
         @Override
@@ -69,12 +56,7 @@ public interface ArtipieCaches {
         }
 
         @Override
-        public CredsConfigCache credsConfig() {
-            return this.credscache;
-        }
-
-        @Override
-        public AuthCache auth() {
+        public Cleanable usersCache() {
             return this.authcache;
         }
     }

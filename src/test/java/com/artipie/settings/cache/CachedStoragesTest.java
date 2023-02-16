@@ -7,14 +7,11 @@ package com.artipie.settings.cache;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
-import com.artipie.asto.factory.Storages;
 import com.artipie.settings.Settings;
 import com.artipie.settings.YamlSettings;
-import com.artipie.test.TestArtipieCaches;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -24,20 +21,10 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CachedStoragesTest {
 
-    /**
-     * Storages factory.
-     */
-    private Storages storages;
-
-    @BeforeEach
-    void setUp() {
-        this.storages = new Storages();
-    }
-
     @Test
     void getsValueFromCache() {
         final String path = "same/path/for/storage";
-        final CachedStorages cache = new CachedStorages(this.storages);
+        final CachedStorages cache = new CachedStorages();
         final Storage strg = cache.storage(CachedStoragesTest.config(path));
         final Storage same = cache.storage(CachedStoragesTest.config(path));
         MatcherAssert.assertThat(
@@ -54,7 +41,7 @@ final class CachedStoragesTest {
 
     @Test
     void getsOriginForDifferentConfiguration() {
-        final CachedStorages cache = new CachedStorages(this.storages);
+        final CachedStorages cache = new CachedStorages();
         final Storage frst = cache.storage(CachedStoragesTest.config("first"));
         final Storage scnd = cache.storage(CachedStoragesTest.config("second"));
         MatcherAssert.assertThat(
@@ -73,12 +60,11 @@ final class CachedStoragesTest {
     void failsToGetStorageWhenSectionIsAbsent() {
         Assertions.assertThrows(
             ArtipieException.class,
-            () -> new CachedStorages(this.storages).storage(
+            () -> new CachedStorages().storage(
                 new YamlSettings(
                     Yaml.createYamlMappingBuilder()
                         .add("meta", Yaml.createYamlMappingBuilder().build())
-                        .build(),
-                    new TestArtipieCaches()
+                        .build()
                 )
             )
         );
@@ -95,8 +81,7 @@ final class CachedStoragesTest {
                             .add("type", "fs")
                             .add("path", stpath).build()
                     ).build()
-                ).build(),
-            new TestArtipieCaches()
+                ).build()
         );
     }
 }

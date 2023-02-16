@@ -79,13 +79,9 @@ public final class SliceFromConfig extends Slice.Wrap {
         final Settings settings, final RepoConfig config,
         final boolean standalone, final Tokens tokens) {
         super(
-            new AsyncSlice(
-                settings.auth().thenApply(
-                    auth -> SliceFromConfig.build(
-                        http, settings, new LoggingAuth(auth), tokens,
-                        config, standalone
-                    )
-                )
+            SliceFromConfig.build(
+                http, settings, new LoggingAuth(settings.auth()),
+                tokens, config, standalone
             )
         );
     }
@@ -195,7 +191,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                             .stream().map(node -> node.asScalar().value())
                             .map(
                                 name -> new AsyncSlice(
-                                    new RepositoriesFromStorage(settings, cfg.storagesCache())
+                                    new RepositoriesFromStorage(settings)
                                         .config(name)
                                         .thenApply(
                                             sub -> new SliceFromConfig(

@@ -4,15 +4,13 @@
  */
 package com.artipie.settings;
 
-import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
+import com.artipie.settings.cache.ArtipieCaches;
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Application settings.
@@ -33,7 +31,7 @@ public interface Settings {
      *
      * @return Authentication instance
      */
-    CompletionStage<Authentication> auth();
+    Authentication auth();
 
     /**
      * Repository layout.
@@ -73,154 +71,9 @@ public interface Settings {
     MetricsContext metrics();
 
     /**
-     * Fake {@link Settings} using a file storage.
-     *
-     * @since 0.2
+     * Artipie caches.
+     * @return The caches
      */
-    final class Fake implements Settings {
+    ArtipieCaches caches();
 
-        /**
-         * Storage.
-         */
-        private final Storage storage;
-
-        /**
-         * Yaml `meta` mapping.
-         */
-        private final YamlMapping meta;
-
-        /**
-         * Layout.
-         */
-        private final Layout layout;
-
-        /**
-         * KeyStore.
-         */
-        private final Optional<KeyStore> keystore;
-
-        /**
-         * Ctor.
-         */
-        public Fake() {
-            this(new InMemoryStorage());
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param storage Storage
-         */
-        public Fake(final Storage storage) {
-            this(
-                storage,
-                Yaml.createYamlMappingBuilder().build()
-            );
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param layout Layout
-         */
-        public Fake(final Layout layout) {
-            this(new InMemoryStorage(), layout);
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param storage Storage
-         * @param layout Layout
-         */
-        public Fake(final Storage storage, final Layout layout) {
-            this(
-                storage,
-                Yaml.createYamlMappingBuilder().build(),
-                layout,
-                Optional.empty()
-            );
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param meta Yaml `meta` mapping
-         */
-        public Fake(final YamlMapping meta) {
-            this(new InMemoryStorage(), meta);
-        }
-
-        /**
-         * Primary ctor.
-         *
-         * @param storage Storage
-         * @param meta Yaml `meta` mapping
-         * @checkstyle ParameterNumberCheck (2 lines)
-         */
-        public Fake(final Storage storage, final YamlMapping meta) {
-            this(storage, meta, new Layout.Flat(), Optional.empty());
-        }
-
-        /**
-         * Primary ctor.
-         *
-         * @param storage Storage
-         * @param meta Yaml `meta` mapping
-         * @param layout Layout
-         * @param keystore KeyStore
-         * @checkstyle ParameterNumberCheck (2 lines)
-         */
-        public Fake(
-            final Storage storage,
-            final YamlMapping meta,
-            final Layout layout,
-            final Optional<KeyStore> keystore
-        ) {
-            this.storage = storage;
-            this.meta = meta;
-            this.layout = layout;
-            this.keystore = keystore;
-        }
-
-        @Override
-        public Storage configStorage() {
-            return this.storage;
-        }
-
-        @Override
-        public CompletionStage<Authentication> auth() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Layout layout() {
-            return this.layout;
-        }
-
-        @Override
-        public YamlMapping meta() {
-            return this.meta;
-        }
-
-        @Override
-        public Storage repoConfigsStorage() {
-            return this.storage;
-        }
-
-        @Override
-        public Optional<Key> credentialsKey() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<KeyStore> keyStore() {
-            return this.keystore;
-        }
-
-        @Override
-        public MetricsContext metrics() {
-            return new MetricsContext(Yaml.createYamlMappingBuilder().build());
-        }
-    }
 }

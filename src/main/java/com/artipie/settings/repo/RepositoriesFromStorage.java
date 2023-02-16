@@ -14,7 +14,6 @@ import com.artipie.settings.AliasSettings;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.Settings;
 import com.artipie.settings.StorageByAlias;
-import com.artipie.settings.cache.StoragesCache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -75,19 +74,12 @@ public final class RepositoriesFromStorage implements Repositories {
     private final Settings settings;
 
     /**
-     * Storages cache.
-     */
-    private final StoragesCache cache;
-
-    /**
      * Ctor.
      *
      * @param settings Artipie settings.
-     * @param cache Storages cache.
      */
-    public RepositoriesFromStorage(final Settings settings, final StoragesCache cache) {
+    public RepositoriesFromStorage(final Settings settings) {
         this.settings = settings;
-        this.cache = cache;
     }
 
     @Override
@@ -102,7 +94,7 @@ public final class RepositoriesFromStorage implements Repositories {
                 als,
                 content.key,
                 Yaml.createYamlInput(data).readYamlMapping(),
-                this.cache,
+                this.settings.caches().storagesCache(),
                 this.settings.metrics().storage()
             )
         ).to(SingleInterop.get());

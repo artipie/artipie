@@ -4,7 +4,6 @@
  */
 package com.artipie.test;
 
-import com.artipie.asto.factory.Storages;
 import com.artipie.settings.cache.CachedStorages;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,14 +24,14 @@ public final class TestStoragesCache extends CachedStorages {
      * is a local variable.
      */
     public TestStoragesCache() {
-        super(new Storages());
+        super();
         this.cnt = new AtomicInteger(0);
     }
 
     @Override
-    public void invalidateAll() {
+    public void invalidate() {
         this.cnt.incrementAndGet();
-        super.invalidateAll();
+        super.invalidate();
     }
 
     /**

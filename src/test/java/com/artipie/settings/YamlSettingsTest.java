@@ -8,13 +8,10 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.SubStorage;
-import com.artipie.settings.cache.ArtipieCaches;
-import com.artipie.test.TestArtipieCaches;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -22,7 +19,6 @@ import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,16 +34,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class YamlSettingsTest {
 
-    /**
-     * Artipie`s caches.
-     */
-    private ArtipieCaches caches;
-
-    @BeforeEach
-    void setUp() {
-        this.caches = new ArtipieCaches.All();
-    }
-
     @Test
     void shouldSetFlatAsDefaultLayout() throws Exception {
         final YamlSettings settings = new YamlSettings(
@@ -57,8 +43,7 @@ class YamlSettingsTest {
                     "meta:\n",
                     "  storage:\n"
                 )
-            ).readYamlMapping(),
-            this.caches
+            ).readYamlMapping()
         );
         MatcherAssert.assertThat(
             settings.layout(),
@@ -76,8 +61,7 @@ class YamlSettingsTest {
                     "  storage: []\n",
                     "  layout: org\n"
                 )
-            ).readYamlMapping(),
-            new TestArtipieCaches()
+            ).readYamlMapping()
         );
         MatcherAssert.assertThat(
             settings.layout(),
@@ -88,8 +72,7 @@ class YamlSettingsTest {
     @Test
     void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", this.credentials("env")),
-            this.caches
+            this.config("some/path", this.credentials("env"))
         );
         MatcherAssert.assertThat(
             settings.configStorage(),
@@ -98,13 +81,12 @@ class YamlSettingsTest {
     }
 
     @Test
-    void shouldCreateAuthFromEnv() throws Exception {
+    void shouldCreateAuthFromEnv() {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", this.credentials("env")),
-            this.caches
+            this.config("some/path", this.credentials("env"))
         );
         MatcherAssert.assertThat(
-            settings.auth().toCompletableFuture().get().toString(),
+            settings.auth().toString(),
             new StringContains("AuthFromEnv")
         );
     }
@@ -112,11 +94,10 @@ class YamlSettingsTest {
     @Test
     void shouldCreateGithub() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path", this.credentials("github")),
-            this.caches
+            this.config("some/path", this.credentials("github"))
         );
         MatcherAssert.assertThat(
-            settings.auth().toCompletableFuture().get().toString(),
+            settings.auth().toString(),
             new StringContains("GithubAuth")
         );
     }
@@ -125,6 +106,8 @@ class YamlSettingsTest {
     void shouldCreateAuthFromEnvWithAlternativeAuths(@TempDir final Path tmp)
         throws Exception {
         final String fname = "_cred.yml";
+        final Path yaml = tmp.resolve(fname);
+        Files.writeString(yaml, this.credentials());
         final YamlSettings settings = new YamlSettings(
             this.config(
                 tmp.toString(),
@@ -145,13 +128,10 @@ class YamlSettingsTest {
                             .add("type", "github")
                             .build()
                     ).build()
-            ),
-            this.caches
+            )
         );
-        final Path yaml = tmp.resolve(fname);
-        Files.writeString(yaml, this.credentials());
         MatcherAssert.assertThat(
-            settings.auth().toCompletableFuture().get().toString(),
+            settings.auth().toString(),
             Matchers.allOf(
                 new StringContains("AuthFromEnv"),
                 new StringContains("GithubAuth"),
@@ -171,12 +151,10 @@ class YamlSettingsTest {
                         .add("type", "fs")
                         .add("path", "path/storage").build()
                 ).build()
-            ).build(),
-            this.caches
+            ).build()
         );
         MatcherAssert.assertThat(
-            settings.auth().toCompletableFuture().get()
-                .user("any_name", "any_password").isEmpty(),
+            settings.auth().user("any_name", "any_password").isEmpty(),
             new IsEqual<>(true)
         );
     }
@@ -185,14 +163,13 @@ class YamlSettingsTest {
     void shouldCreateAuthFromYaml(@TempDir final Path tmp)
         throws Exception {
         final String fname = "_cred.yml";
-        final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), this.credentials("file", Optional.of(fname))),
-            this.caches
-        );
         final Path yaml = tmp.resolve(fname);
         Files.writeString(yaml, this.credentials());
+        final YamlSettings settings = new YamlSettings(
+            this.config(tmp.toString(), this.credentials("file", Optional.of(fname)))
+        );
         MatcherAssert.assertThat(
-            settings.auth().toCompletableFuture().get().toString(),
+            settings.auth().toString(),
             new StringContains("AuthFromYaml")
         );
     }
@@ -200,21 +177,23 @@ class YamlSettingsTest {
     @Test
     void getsCredentialsFromCache(@TempDir final Path tmp) throws IOException {
         final String fname = "_cred.yml";
-        final YamlSettings settings = new YamlSettings(
-            this.config(tmp.toString(), this.credentials("file", Optional.of(fname))),
-            this.caches
-        );
         Files.writeString(tmp.resolve(fname), this.credentials());
-        settings.auth().toCompletableFuture().join();
+        final YamlSettings settings = new YamlSettings(
+            this.config(tmp.toString(), this.credentials("file", Optional.of(fname)))
+        );
+        MatcherAssert.assertThat(
+            "User was authenticated",
+            settings.auth().user("john", "123").isPresent()
+        );
         Files.writeString(tmp.resolve(fname), "not valid yaml file");
         MatcherAssert.assertThat(
-            "Storage configuration was not cached",
-            this.caches.credsConfig().toString(),
+            "User was not cached",
+            settings.caches().usersCache().toString(),
             new StringContains("size=1")
         );
         MatcherAssert.assertThat(
             "Invalid yaml file was used, although credentials from cache should be used",
-            settings.auth().toCompletableFuture().join().user("john", "123").isPresent()
+            settings.auth().user("john", "123").isPresent()
         );
     }
 
@@ -222,8 +201,7 @@ class YamlSettingsTest {
     void returnsRepoConfigs(@TempDir final Path tmp) {
         MatcherAssert.assertThat(
             new YamlSettings(
-                this.config(tmp.toString(), this.credentials("file")),
-                new TestArtipieCaches()
+                this.config(tmp.toString(), this.credentials("file", Optional.of("any/path")))
             ).repoConfigsStorage(),
             new IsInstanceOf(SubStorage.class)
         );
@@ -231,16 +209,11 @@ class YamlSettingsTest {
 
     @Test
     void shouldThrowExceptionWhenPathIsNotSet() {
-        final YamlSettings settings = new YamlSettings(
-            this.config("some/path", this.credentials("file", Optional.empty())),
-            new TestArtipieCaches()
-        );
-        MatcherAssert.assertThat(
-            Assertions.assertThrows(
-                ExecutionException.class,
-                () -> settings.auth().toCompletableFuture().get()
-            ).getCause(),
-            new IsInstanceOf(RuntimeException.class)
+        Assertions.assertThrows(
+            RuntimeException.class,
+            () -> new YamlSettings(
+                this.config("some/path", this.credentials("file", Optional.empty()))
+            )
         );
     }
 
@@ -248,8 +221,7 @@ class YamlSettingsTest {
     @MethodSource("badYamls")
     void shouldFailProvideStorageFromBadYaml(final String yaml) throws IOException {
         final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlInput(yaml).readYamlMapping(),
-            this.caches
+            Yaml.createYamlInput(yaml).readYamlMapping()
         );
         Assertions.assertThrows(RuntimeException.class, settings::configStorage);
     }
@@ -259,7 +231,7 @@ class YamlSettingsTest {
     void throwsErrorIfMetaSectionIsAbsentOrEmpty(final String yaml) {
         Assertions.assertThrows(
             IllegalStateException.class,
-            () -> new YamlSettings(Yaml.createYamlInput(yaml).readYamlMapping(), this.caches).meta()
+            () -> new YamlSettings(Yaml.createYamlInput(yaml).readYamlMapping()).meta()
         );
     }
 

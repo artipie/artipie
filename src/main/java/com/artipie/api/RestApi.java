@@ -111,18 +111,15 @@ public final class RestApi extends AbstractVerticle {
 
     /**
      * Ctor.
-     * @param caches Artipie settings caches
      * @param settings Artipie settings
      * @param port Port to start verticle on
-     * @param auth Artipie authentication
      * @param jwt Jwt authentication provider
      * @checkstyle ParameterNumberCheck (5 lines)
      */
-    public RestApi(final ArtipieCaches caches, final Settings settings,
-        final int port, final Authentication auth, final JWTAuth jwt) {
+    public RestApi(final Settings settings, final int port, final JWTAuth jwt) {
         this(
-            caches, settings.configStorage(), settings.layout().toString(),
-            port, settings.credentialsKey(), auth, settings.keyStore(), jwt
+            settings.caches(), settings.configStorage(), settings.layout().toString(),
+            port, settings.credentialsKey(), settings.auth(), settings.keyStore(), jwt
         );
     }
 
@@ -167,7 +164,7 @@ public final class RestApi extends AbstractVerticle {
         if (this.users.isPresent()) {
             new UsersRest(
                 new ManageUsers(this.users.get(), asto),
-                this.caches.auth(), this.auth
+                this.caches.usersCache(), this.auth
             ).init(userRb);
         } else {
             Logger.warn(this, "File credentials are not set, users API is not available");
@@ -207,7 +204,7 @@ public final class RestApi extends AbstractVerticle {
      * @param builders Router builders to add token auth to
      */
     private void addJwtAuth(final RouterBuilder token, final RouterBuilder... builders) {
-        new AuthTokenRest(new JwtTokens(this.jwt), this.caches.auth(), this.auth).init(token);
+        new AuthTokenRest(new JwtTokens(this.jwt), this.auth).init(token);
         Arrays.stream(builders).forEach(
             item -> item.securityHandler(RestApi.SECURITY_SCHEME, JWTAuthHandler.create(this.jwt))
         );

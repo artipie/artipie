@@ -17,7 +17,6 @@ import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.Settings;
-import com.artipie.settings.cache.StoragesCache;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -52,14 +51,12 @@ public final class MainSlice extends Slice.Wrap {
      *
      * @param http HTTP client.
      * @param settings Artipie settings.
-     * @param cache Storages cache
      * @param tokens Tokens: authentication and generation
      * @checkstyle ParameterNumberCheck (10 lines)
      */
     public MainSlice(
         final ClientSlices http,
         final Settings settings,
-        final StoragesCache cache,
         final Tokens tokens
     ) {
         super(
@@ -78,7 +75,7 @@ public final class MainSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new DockerRoutingSlice(settings, new SliceByPath(http, settings, cache, tokens))
+                    new DockerRoutingSlice(settings, new SliceByPath(http, settings, tokens))
                 )
             )
         );
