@@ -5,10 +5,10 @@ meta:
   credentials:
     - type: env
     - type: github
-    - type: file
-      path: _credentials.yaml
+    - type: artipie
+
   policy:
-    type: yaml_policy
+    type: artipie_policy
     storage:
       type: fs
       path: /var/artipie/repo/security
