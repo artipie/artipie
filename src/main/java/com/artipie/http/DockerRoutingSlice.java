@@ -64,15 +64,11 @@ public final class DockerRoutingSlice implements Slice {
         if (matcher.matches()) {
             final String group = matcher.group(1);
             if (group.isEmpty() || group.equals("/")) {
-                rsp = new AsyncResponse(
-                    this.settings.auth().thenApply(
-                        auth -> new BasicAuthSlice(
-                            new BaseEntity(),
-                            auth,
-                            user -> !user.equals(Authentication.ANY_USER)
-                        ).response(line, headers, body)
-                    )
-                );
+                rsp = new BasicAuthSlice(
+                    new BaseEntity(),
+                    this.settings.auth(),
+                    user -> !user.equals(Authentication.ANY_USER)
+                ).response(line, headers, body);
             } else {
                 rsp = this.origin.response(
                     new RequestLine(

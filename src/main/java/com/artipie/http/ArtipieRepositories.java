@@ -14,7 +14,6 @@ import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.Settings;
-import com.artipie.settings.cache.StoragesCache;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
@@ -42,28 +41,19 @@ public final class ArtipieRepositories {
     private final Tokens tokens;
 
     /**
-     * Storages cache.
-     */
-    private final StoragesCache cache;
-
-    /**
      * New Artipie repositories.
      * @param http HTTP client
      * @param settings Artipie settings
      * @param tokens Tokens: authentication and generation
-     * @param cache Storages cache.
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     public ArtipieRepositories(
         final ClientSlices http,
         final Settings settings,
-        final Tokens tokens,
-        final StoragesCache cache
+        final Tokens tokens
     ) {
         this.http = http;
         this.settings = settings;
         this.tokens = tokens;
-        this.cache = cache;
     }
 
     /**
@@ -98,7 +88,7 @@ public final class ArtipieRepositories {
      * @checkstyle ParameterNumberCheck (2 lines)
      */
     private CompletionStage<Slice> resolve(final Key name, final int port) {
-        return new RepositoriesFromStorage(this.settings, this.cache)
+        return new RepositoriesFromStorage(this.settings)
             .config(name.string())
             .thenApply(
                 config -> {

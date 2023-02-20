@@ -9,8 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.settings.Settings;
-import com.artipie.settings.cache.StoragesCache;
-import com.artipie.test.TestStoragesCache;
+import com.artipie.test.TestSettings;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,15 +27,9 @@ final class RepositoriesFromStorageCacheTest {
      */
     private Settings settings;
 
-    /**
-     * Storages cache.
-     */
-    private StoragesCache cache;
-
     @BeforeEach
     void setUp() {
-        this.settings = new Settings.Fake();
-        this.cache = new TestStoragesCache();
+        this.settings = new TestSettings();
     }
 
     @Test
@@ -45,13 +38,11 @@ final class RepositoriesFromStorageCacheTest {
         final byte[] old = "some: data".getBytes();
         final byte[] upd = "some: new data".getBytes();
         new BlockingStorage(this.settings.repoConfigsStorage()).save(key, old);
-        new RepositoriesFromStorage(
-            this.settings,
-            this.cache
-        ).config(key.string()).toCompletableFuture().join();
+        new RepositoriesFromStorage(this.settings).config(key.string())
+            .toCompletableFuture().join();
         new BlockingStorage(this.settings.repoConfigsStorage()).save(key, upd);
         MatcherAssert.assertThat(
-            new RepositoriesFromStorage(this.settings, this.cache)
+            new RepositoriesFromStorage(this.settings)
                 .config(key.string())
                 .toCompletableFuture().join()
                 .toString(),
@@ -66,12 +57,11 @@ final class RepositoriesFromStorageCacheTest {
         new TestResource(alias.string()).saveTo(this.settings.repoConfigsStorage());
         new BlockingStorage(this.settings.repoConfigsStorage())
             .save(config, "repo:\n  storage: default".getBytes());
-        new RepositoriesFromStorage(this.settings, this.cache)
-            .config(config.string())
+        new RepositoriesFromStorage(this.settings).config(config.string())
             .toCompletableFuture().join();
         this.settings.repoConfigsStorage().save(alias, Content.EMPTY).join();
         MatcherAssert.assertThat(
-            new RepositoriesFromStorage(this.settings, this.cache)
+            new RepositoriesFromStorage(this.settings)
                 .config(config.string())
                 .toCompletableFuture().join()
                 .storageOpt().isPresent(),

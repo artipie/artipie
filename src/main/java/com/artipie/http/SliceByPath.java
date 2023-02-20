@@ -12,7 +12,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.settings.Settings;
-import com.artipie.settings.cache.StoragesCache;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -36,11 +35,6 @@ final class SliceByPath implements Slice {
     private final Settings settings;
 
     /**
-     * Storages cache.
-     */
-    private final StoragesCache cache;
-
-    /**
      * Tokens: authentication and generation.
      */
     private final Tokens tokens;
@@ -50,19 +44,16 @@ final class SliceByPath implements Slice {
      *
      * @param http HTTP client
      * @param settings Artipie settings
-     * @param cache Storages cache
      * @param tokens Tokens: authentication and generation
      * @checkstyle ParameterNumberCheck (10 lines)
      */
     SliceByPath(
         final ClientSlices http,
         final Settings settings,
-        final StoragesCache cache,
         final Tokens tokens
     ) {
         this.http = http;
         this.settings = settings;
-        this.cache = cache;
         this.tokens = tokens;
     }
 
@@ -81,7 +72,7 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
-        return new ArtipieRepositories(this.http, this.settings, this.tokens, this.cache)
+        return new ArtipieRepositories(this.http, this.settings, this.tokens)
             .slice(key.get(), new RequestLineFrom(line).uri().getPort())
             .response(line, headers, body);
     }

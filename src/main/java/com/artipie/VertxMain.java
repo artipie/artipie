@@ -19,8 +19,6 @@ import com.artipie.settings.ConfigFile;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.SettingsFromPath;
-import com.artipie.settings.cache.ArtipieCaches;
-import com.artipie.settings.cache.StoragesCache;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import com.artipie.vertx.VertxSliceServer;
@@ -111,8 +109,7 @@ public final class VertxMain {
      * @throws IOException In case of error reading settings.
      */
     public int start(final int apiport) throws IOException {
-        final ArtipieCaches caches = new ArtipieCaches.All();
-        final Settings settings = new SettingsFromPath(this.config).find(caches);
+        final Settings settings = new SettingsFromPath(this.config).find();
         final Vertx vertx = VertxMain.vertx(settings.metrics());
         final JWTAuth jwt = JWTAuth.create(
             vertx.getDelegate(), new JWTAuthOptions().addPubSecKey(
@@ -120,24 +117,14 @@ public final class VertxMain {
             )
         );
         final int main = this.listenOn(
-            new MainSlice(this.http, settings, caches.storagesCache(), new JwtTokens(jwt)),
+            new MainSlice(this.http, settings, new JwtTokens(jwt)),
             this.port,
             vertx,
             settings.metrics()
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
-        this.startRepos(vertx, settings, this.port, caches.storagesCache(), jwt);
-        settings.auth().thenAccept(
-            auth -> vertx.deployVerticle(
-                new RestApi(
-                    caches,
-                    settings,
-                    apiport,
-                    auth,
-                    jwt
-                )
-            )
-        );
+        this.startRepos(vertx, settings, this.port, jwt);
+        vertx.deployVerticle(new RestApi(settings, apiport, jwt));
         return main;
     }
 
@@ -196,7 +183,6 @@ public final class VertxMain {
      * @param vertx Vertx instance
      * @param settings Settings.
      * @param mport Artipie service main port
-     * @param cache Storage cache
      * @param jwt Jwt authentication
      * @checkstyle ParameterNumberCheck (5 lines)
      */
@@ -204,7 +190,6 @@ public final class VertxMain {
         final Vertx vertx,
         final Settings settings,
         final int mport,
-        final StoragesCache cache,
         final JWTAuth jwt
     ) {
         final Collection<RepoConfig> configs = settings.repoConfigsStorage().list(Key.ROOT)
@@ -212,7 +197,7 @@ public final class VertxMain {
                 keys -> keys.stream().map(ConfigFile::new)
                     .filter(Predicate.not(ConfigFile::isSystem).and(ConfigFile::isYamlOrYml))
                     .map(ConfigFile::name)
-                    .map(name -> new RepositoriesFromStorage(settings, cache).config(name))
+                    .map(name -> new RepositoriesFromStorage(settings).config(name))
                     .map(stage -> stage.toCompletableFuture().join())
                     .collect(Collectors.toList())
             ).toCompletableFuture().join();
@@ -223,7 +208,7 @@ public final class VertxMain {
                         final String name = new ConfigFile(repo.name()).name();
                         this.listenOn(
                             new ArtipieRepositories(
-                                this.http, settings, new JwtTokens(jwt), cache
+                                this.http, settings, new JwtTokens(jwt)
                             ).slice(new Key.From(name), prt),
                             prt, vertx, settings.metrics()
                         );

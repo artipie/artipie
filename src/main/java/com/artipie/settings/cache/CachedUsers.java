@@ -10,9 +10,9 @@ import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * Cached authentication decorator.
@@ -22,19 +22,27 @@ import java.util.concurrent.TimeUnit;
  * </p>
  * @since 0.22
  */
-final class CachedUsers implements AuthCache {
+public final class CachedUsers implements Authentication, Cleanable {
     /**
-     * Cache for users.
+     * Cache for users. The key is md5 calculated from username and password
+     * joined with space.
      */
-    private final Cache<Data, Optional<Authentication.User>> users;
+    private final Cache<String, Optional<Authentication.User>> users;
+
+    /**
+     * Origin authentication.
+     */
+    private final Authentication origin;
 
     /**
      * Ctor.
      * Here an instance of cache is created. It is important that cache
      * is a local variable.
+     * @param origin Origin authentication
      */
-    CachedUsers() {
+    public CachedUsers(final Authentication origin) {
         this(
+            origin,
             CacheBuilder.newBuilder()
                 .expireAfterAccess(
                     //@checkstyle MagicNumberCheck (1 line)
@@ -47,94 +55,39 @@ final class CachedUsers implements AuthCache {
 
     /**
      * Ctor.
+     * @param origin Origin authentication
      * @param cache Cache for users
      */
-    CachedUsers(final Cache<Data, Optional<Authentication.User>> cache) {
+    CachedUsers(
+        final Authentication origin,
+        final Cache<String, Optional<Authentication.User>> cache
+    ) {
         this.users = cache;
+        this.origin = origin;
     }
 
     @Override
     public Optional<Authentication.User> user(
         final String username,
-        final String password,
-        final Authentication origin
+        final String password
     ) {
-        final Data data = new Data(username, password, origin);
+        final String key = DigestUtils.md5Hex(String.join(" ", username, password));
         return new UncheckedScalar<>(
-            () -> this.users.get(data, data::user)
+            () -> this.users.get(key, () -> this.origin.user(username, password))
         ).value();
-    }
-
-    @Override
-    public void invalidateAll() {
-        this.users.invalidateAll();
     }
 
     @Override
     public String toString() {
         return String.format(
-            "%s(size=%d)",
-            this.getClass().getSimpleName(), this.users.size()
+            "%s(size=%d),origin=%s",
+            this.getClass().getSimpleName(), this.users.size(),
+            this.origin.toString()
         );
     }
 
-    /**
-     * Extra class for using instance field in static section.
-     * @since 0.22
-     */
-    static class Data {
-        /**
-         * Username.
-         */
-        private final String username;
-
-        /**
-         * Password.
-         */
-        private final String pswd;
-
-        /**
-         * Auth provider.
-         */
-        private final Authentication origin;
-
-        /**
-         * Ctor.
-         * @param username Username
-         * @param pswd Password
-         * @param origin Auth provider
-         */
-        Data(final String username, final String pswd, final Authentication origin) {
-            this.username = username;
-            this.pswd = pswd;
-            this.origin = origin;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            final boolean res;
-            if (this == obj) {
-                res = true;
-            } else if (obj == null || this.getClass() != obj.getClass()) {
-                res = false;
-            } else {
-                final Data data = (Data) obj;
-                res = Objects.equals(this.username, data.username);
-            }
-            return res;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(this.username);
-        }
-
-        /**
-         * Find user by credentials.
-         * @return User login if found.
-         */
-        Optional<Authentication.User> user() {
-            return this.origin.user(this.username, this.pswd);
-        }
+    @Override
+    public void invalidate() {
+        this.users.invalidateAll();
     }
 }

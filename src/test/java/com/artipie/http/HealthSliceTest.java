@@ -14,7 +14,7 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.settings.Settings;
+import com.artipie.test.TestSettings;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -38,7 +38,7 @@ final class HealthSliceTest {
     @Test
     void returnsOkForValidStorage() {
         MatcherAssert.assertThat(
-            new HealthSlice(new Settings.Fake()),
+            new HealthSlice(new TestSettings()),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
@@ -52,7 +52,7 @@ final class HealthSliceTest {
     @Test
     void returnsBadRequestForBrokenStorage() {
         MatcherAssert.assertThat(
-            new HealthSlice(new Settings.Fake(new FakeStorage())),
+            new HealthSlice(new TestSettings(new FakeStorage())),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.UNAVAILABLE),

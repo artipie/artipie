@@ -128,7 +128,7 @@ public final class StorageAliasesRest extends BaseRest {
             context.pathParam(StorageAliasesRest.ANAME),
             StorageAliasesRest.jsonFromRequest(context)
         );
-        this.caches.invalidateAll();
+        this.caches.invalidate();
         context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
@@ -141,7 +141,7 @@ public final class StorageAliasesRest extends BaseRest {
             context.pathParam(StorageAliasesRest.ANAME),
             StorageAliasesRest.jsonFromRequest(context)
         );
-        this.caches.invalidateAll();
+        this.caches.invalidate();
         context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
@@ -156,7 +156,7 @@ public final class StorageAliasesRest extends BaseRest {
             context.pathParam(StorageAliasesRest.ANAME),
             StorageAliasesRest.jsonFromRequest(context)
         );
-        this.caches.invalidateAll();
+        this.caches.invalidate();
         context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
@@ -213,7 +213,7 @@ public final class StorageAliasesRest extends BaseRest {
         try {
             new ManageStorageAliases(key, this.asto)
                 .remove(context.pathParam(StorageAliasesRest.ANAME));
-            this.caches.invalidateAll();
+            this.caches.invalidate();
             context.response().setStatusCode(HttpStatus.OK_200).end();
         } catch (final IllegalStateException err) {
             context.response().setStatusCode(HttpStatus.NOT_FOUND_404)

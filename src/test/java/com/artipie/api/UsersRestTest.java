@@ -7,8 +7,8 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.misc.UncheckedConsumer;
 import com.artipie.settings.CredsConfigYaml;
-import com.artipie.settings.cache.AuthCache;
 import com.artipie.settings.users.PasswordFormat;
+import com.artipie.test.TestArtipieCaches;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
@@ -149,7 +149,7 @@ final class UsersRestTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Auth cache should be invalidated",
-                    ((AuthCache.Fake) this.settingsCaches().auth()).wasInvalidated()
+                    ((TestArtipieCaches) this.settingsCaches()).wasInvalidated()
                 );
             }
         );
@@ -195,7 +195,7 @@ final class UsersRestTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Auth cache should be invalidated",
-                    ((AuthCache.Fake) this.settingsCaches().auth()).wasInvalidated()
+                    ((TestArtipieCaches) this.settingsCaches()).wasInvalidated()
                 );
             }
         );
@@ -235,7 +235,7 @@ final class UsersRestTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Auth cache should be invalidated",
-                    ((AuthCache.Fake) this.settingsCaches().auth()).wasInvalidated()
+                    ((TestArtipieCaches) this.settingsCaches()).wasInvalidated()
                 );
             }
         );
