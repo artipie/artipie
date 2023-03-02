@@ -7,7 +7,7 @@ package com.artipie.auth;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieException;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.settings.YamlSettings;
 import com.artipie.tools.CodeBlob;
 import com.artipie.tools.CodeClassLoader;
@@ -134,18 +134,16 @@ public class AuthFromKeycloakTest {
             AuthFromKeycloakTest.CLIENT_ID,
             AuthFromKeycloakTest.CLIENT_PASSWORD
         );
-        final Optional<Authentication.User> opt = settings.auth().user(login, password);
+        final Optional<AuthUser> opt = settings.authz().authentication().user(login, password);
         MatcherAssert.assertThat(
             opt.isPresent(),
             new IsEqual<>(true)
         );
-        final Authentication.User user = opt.get();
+        final AuthUser user = opt.get();
         MatcherAssert.assertThat(
             user.name(),
             Is.is(login)
         );
-        MatcherAssert.assertThat(user.groups().contains("role_realm"), new IsEqual<>(true));
-        MatcherAssert.assertThat(user.groups().contains("client_role"), new IsEqual<>(true));
     }
 
     @Test
@@ -160,7 +158,7 @@ public class AuthFromKeycloakTest {
         MatcherAssert.assertThat(
             Assertions.assertThrows(
                 ArtipieException.class,
-                () -> settings.auth().user(fake, fake)
+                () -> settings.authz().authentication().user(fake, fake)
             ).getMessage(),
             new StringContains("Failed to obtain authorization data")
         );

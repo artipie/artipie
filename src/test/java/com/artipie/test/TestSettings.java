@@ -7,10 +7,9 @@ package com.artipie.test;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.ssl.KeyStore;
-import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.auth.Authentication;
+import com.artipie.settings.ArtipieAuthorization;
 import com.artipie.settings.Layout;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
@@ -141,8 +140,8 @@ public final class TestSettings implements Settings {
     }
 
     @Override
-    public Authentication auth() {
-        throw new UnsupportedOperationException();
+    public ArtipieAuthorization authz() {
+        return null;
     }
 
     @Override
@@ -158,11 +157,6 @@ public final class TestSettings implements Settings {
     @Override
     public Storage repoConfigsStorage() {
         return this.storage;
-    }
-
-    @Override
-    public Optional<Key> credentialsKey() {
-        return Optional.empty();
     }
 
     @Override

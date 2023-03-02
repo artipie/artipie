@@ -4,6 +4,7 @@
  */
 package com.artipie.api;
 
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.Tokens;
 import io.vertx.core.json.JsonObject;
@@ -24,9 +25,9 @@ public final class AuthTokenRest extends BaseRest {
     public static final String SUB = "sub";
 
     /**
-     * Token field with user groups.
+     * Token field with user context.
      */
-    public static final String GROUPS = "groups";
+    public static final String CONTEXT = "context";
 
     /**
      * Tokens provider.
@@ -62,7 +63,7 @@ public final class AuthTokenRest extends BaseRest {
      */
     private void getJwtToken(final RoutingContext routing) {
         final JsonObject body = routing.body().asJsonObject();
-        final Optional<Authentication.User> user = this.auth.user(
+        final Optional<AuthUser> user = this.auth.user(
             body.getString("name"), body.getString("pass")
         );
         if (user.isPresent()) {

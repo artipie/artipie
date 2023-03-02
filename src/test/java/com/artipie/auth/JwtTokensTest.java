@@ -4,7 +4,7 @@
  */
 package com.artipie.auth;
 
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -48,7 +48,7 @@ class JwtTokensTest {
     @Test
     void generatesToken() {
         MatcherAssert.assertThat(
-            new JwtTokens(this.provider).generate(new Authentication.User("Oleg")),
+            new JwtTokens(this.provider).generate(new AuthUser("Oleg", "test")),
             new IsNot<>(Matchers.emptyString())
         );
     }

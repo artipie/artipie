@@ -453,62 +453,28 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         }
 
         /**
-         * With credentials.
+         * With user.
          *
-         * @param temp Temp directory
-         * @param cred Credentials
+         * @param res User resource path
+         * @param uname Username
          * @return Self
          */
-        public ArtipieContainer withCredentials(
-            final Path temp,
-            final String cred
-        ) {
-            return this.withFileSystemBind(
-                write(temp, cred, "_credentials.yaml"),
-                "/var/artipie/repo/_credentials.yaml",
-                BindMode.READ_ONLY
-            );
-        }
-
-        /**
-         * With credentials.
-         *
-         * @param res Credentials resource path
-         * @return Self
-         */
-        public ArtipieContainer withCredentials(final String res) {
+        public ArtipieContainer withUser(final String res, final String uname) {
             return this.withClasspathResourceMapping(
-                res, "/var/artipie/repo/_credentials.yaml", BindMode.READ_ONLY
+                res, String.format("/var/artipie/security/users/%s.yaml", uname), BindMode.READ_ONLY
             );
         }
 
         /**
-         * With repository permissions.
+         * With role.
          *
-         * @param temp Temp directory
-         * @param perms Permissions
+         * @param res User resource path
+         * @param rname Role name
          * @return Self
          */
-        public ArtipieContainer withPermissions(
-            final Path temp,
-            final String perms
-        ) {
-            return this.withFileSystemBind(
-                write(temp, perms, "_permissions.yaml"),
-                "/var/artipie/repo/_permissions.yaml",
-                BindMode.READ_ONLY
-            );
-        }
-
-        /**
-         * With repository permissions.
-         *
-         * @param res Config resource path
-         * @return Self
-         */
-        public ArtipieContainer withPermissions(final String res) {
+        public ArtipieContainer withRole(final String res, final String rname) {
             return this.withClasspathResourceMapping(
-                res, "/var/artipie/repo/_permissions.yaml", BindMode.READ_ONLY
+                res, String.format("/var/artipie/security/roles/%s.yaml", rname), BindMode.READ_ONLY
             );
         }
 

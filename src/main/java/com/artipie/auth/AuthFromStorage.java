@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.jcabi.log.Logger;
 import java.io.ByteArrayInputStream;
@@ -46,6 +47,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 public final class AuthFromStorage implements Authentication {
 
     /**
+     * Auth type name.
+     */
+    private static final String ARTIPIE = "artipie";
+
+    /**
      * The storage to obtain users files from.
      */
     private final BlockingStorage asto;
@@ -59,7 +65,7 @@ public final class AuthFromStorage implements Authentication {
     }
 
     @Override
-    public Optional<User> user(final String name, final String pass) {
+    public Optional<AuthUser> user(final String name, final String pass) {
         final Optional<byte[]> res;
         final Key yaml = new Key.From(String.format("users/%s.yaml", name));
         final Key yml = new Key.From(String.format("users/%s.yml", name));
@@ -81,9 +87,9 @@ public final class AuthFromStorage implements Authentication {
      * @param pass Password to check
      * @return User if yaml parsed and password is correct
      */
-    private static Optional<User> readAndCheckFromYaml(final byte[] bytes, final String name,
+    private static Optional<AuthUser> readAndCheckFromYaml(final byte[] bytes, final String name,
         final String pass) {
-        Optional<User> res = Optional.empty();
+        Optional<AuthUser> res = Optional.empty();
         try {
             final YamlMapping yaml = Yaml.createYamlInput(new ByteArrayInputStream(bytes))
                 .readYamlMapping();
@@ -93,9 +99,9 @@ public final class AuthFromStorage implements Authentication {
                 final String type = info.string("type");
                 final String origin = info.string("pass");
                 if ("plain".equals(type) && Objects.equals(origin, pass)) {
-                    res = Optional.of(new User(name));
+                    res = Optional.of(new AuthUser(name, AuthFromStorage.ARTIPIE));
                 } else if ("sha256".equals(type) && DigestUtils.sha256Hex(pass).equals(origin)) {
-                    res = Optional.of(new User(name));
+                    res = Optional.of(new AuthUser(name, AuthFromStorage.ARTIPIE));
                 }
             }
         } catch (final IOException err) {

@@ -1,0 +1,5 @@
+readers:
+  permissions:
+    artipie_basic_permission:
+      "*":
+        - read

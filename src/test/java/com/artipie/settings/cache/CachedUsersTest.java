@@ -4,6 +4,7 @@
  */
 package com.artipie.settings.cache;
 
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -25,7 +26,7 @@ final class CachedUsersTest {
     /**
      * Test cache.
      */
-    private Cache<String, Optional<Authentication.User>> cache;
+    private Cache<String, Optional<AuthUser>> cache;
 
     /**
      * Test users.
@@ -118,11 +119,11 @@ final class CachedUsersTest {
         private final AtomicInteger cnt = new AtomicInteger();
 
         @Override
-        public Optional<User> user(final String name, final String pswd) {
+        public Optional<AuthUser> user(final String name, final String pswd) {
             this.cnt.incrementAndGet();
-            final Optional<User> res;
+            final Optional<AuthUser> res;
             if (name.equals("jane")) {
-                res = Optional.of(new Authentication.User(name));
+                res = Optional.of(new AuthUser(name, "test"));
             } else {
                 res = Optional.empty();
             }

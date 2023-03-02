@@ -5,7 +5,7 @@
 package com.artipie.auth;
 
 import com.artipie.ArtipieException;
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import java.util.Optional;
 import org.cactoos.text.Joined;
 import org.hamcrest.MatcherAssert;
@@ -33,7 +33,7 @@ final class GithubAuthTest {
                     return "";
                 }
             ).user("github.com/UsEr", secret).orElseThrow(),
-            new IsEqual<>(new Authentication.User("UsEr"))
+            new IsEqual<>(new AuthUser("UsEr", "test"))
         );
     }
 

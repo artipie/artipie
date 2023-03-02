@@ -4,14 +4,12 @@
  */
 package com.artipie.auth;
 
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.auth.jwt.JWTAuthOptions;
-import java.util.Collections;
-import java.util.List;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,25 +40,12 @@ class JwtTokenAuthTest {
     @Test
     void returnsUser() {
         final String name = "Alice";
-        final List<String> groups = List.of("admin");
+        final String cntx = "artipie";
         MatcherAssert.assertThat(
             new JwtTokenAuth(this.provider).user(
-                this.provider.generateToken(new JsonObject().put("sub", name).put("groups", groups))
+                this.provider.generateToken(new JsonObject().put("sub", name).put("context", cntx))
             ).toCompletableFuture().join().get(),
-            new IsEqual<>(new Authentication.User(name, groups))
-        );
-    }
-
-    @Test
-    void returnsUserWhenGroupsAreEmpty() {
-        final String name = "John";
-        MatcherAssert.assertThat(
-            new JwtTokenAuth(this.provider).user(
-                this.provider.generateToken(
-                    new JsonObject().put("sub", name).put("groups", Collections.emptyList())
-                )
-            ).toCompletableFuture().join().get(),
-            new IsEqual<>(new Authentication.User(name))
+            new IsEqual<>(new AuthUser(name, cntx))
         );
     }
 
@@ -68,14 +53,14 @@ class JwtTokenAuthTest {
     void returnsEmptyWhenSubIsNotPresent() {
         MatcherAssert.assertThat(
             new JwtTokenAuth(this.provider).user(
-                this.provider.generateToken(new JsonObject().put("groups", List.of("reader")))
+                this.provider.generateToken(new JsonObject().put("context", "any"))
             ).toCompletableFuture().join().isEmpty(),
             new IsEqual<>(true)
         );
     }
 
     @Test
-    void returnsEmptyWhenGroupsAreNotPresent() {
+    void returnsEmptyWhenContextIsNotPresent() {
         MatcherAssert.assertThat(
             new JwtTokenAuth(this.provider).user(
                 this.provider.generateToken(new JsonObject().put("sub", "Alex"))

@@ -41,7 +41,7 @@ final class Npm9AuthITCase {
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("npm/npm-auth.yml", "my-npm")
-            .withCredentials("_credentials.yaml"),
+            .withUser("security/users/alice.yaml", "alice"),
         () -> new TestDeployment.ClientContainer("node:19-alpine")
             .withWorkingDirectory("/w")
     );

@@ -1,0 +1,5 @@
+bob:
+  type: plain
+  pass: qwerty
+  roles:
+    - readers

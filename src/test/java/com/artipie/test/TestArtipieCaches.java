@@ -4,10 +4,11 @@
  */
 package com.artipie.test;
 
+import com.artipie.asto.misc.Cleanable;
 import com.artipie.settings.cache.ArtipieCaches;
-import com.artipie.settings.cache.Cleanable;
 import com.artipie.settings.cache.StoragesCache;
 import java.util.concurrent.atomic.AtomicLong;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Test Artipie caches.
@@ -39,8 +40,18 @@ public final class TestArtipieCaches implements ArtipieCaches {
     }
 
     @Override
-    public Cleanable usersCache() {
-        return this.invalidation::incrementAndGet;
+    public Cleanable<String> usersCache() {
+        return new Cleanable<>() {
+            @Override
+            public void invalidate(final String uname) {
+                TestArtipieCaches.this.invalidation.incrementAndGet();
+            }
+
+            @Override
+            public void invalidateAll() {
+                throw new NotImplementedException("method not implemented");
+            }
+        };
     }
 
     /**

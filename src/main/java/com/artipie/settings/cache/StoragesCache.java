@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.Storage;
+import com.artipie.asto.misc.Cleanable;
 import com.artipie.settings.Settings;
 import com.artipie.settings.StorageByAlias;
 
@@ -15,7 +16,7 @@ import com.artipie.settings.StorageByAlias;
  * Cache for storages with similar configurations in Artipie settings.
  * @since 0.23
  */
-public interface StoragesCache extends Cleanable {
+public interface StoragesCache extends Cleanable<YamlMapping> {
     /**
      * Finds storage by specified in settings configuration cache or creates
      * a new item and caches it.

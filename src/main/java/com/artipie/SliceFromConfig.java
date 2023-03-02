@@ -81,9 +81,8 @@ public final class SliceFromConfig extends Slice.Wrap {
         final boolean standalone, final Tokens tokens) {
         super(
             SliceFromConfig.build(
-                http, settings, new LoggingAuth(settings.auth()), tokens, settings.policy(),
-                        config, standalone
-
+                http, settings, new LoggingAuth(settings.authz().authentication()), tokens,
+                settings.authz().policy(), config, standalone
             )
         );
     }

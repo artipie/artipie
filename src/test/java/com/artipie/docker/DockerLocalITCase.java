@@ -25,7 +25,7 @@ final class DockerLocalITCase {
     final TestDeployment deployment = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("docker/registry.yml", "registry")
-            .withCredentials("_credentials.yaml"),
+            .withUser("security/users/alice.yaml", "alice"),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
             .withPrivilegedMode(true)
             .withWorkingDirectory("/w")

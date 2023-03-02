@@ -5,13 +5,12 @@
 package com.artipie.auth;
 
 import com.artipie.api.AuthTokenRest;
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.TokenAuthentication;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 
 /**
  * Token authentication with Vert.x {@link io.vertx.ext.auth.jwt.JWTAuth} under the hood.
@@ -33,17 +32,16 @@ public final class JwtTokenAuth implements TokenAuthentication {
     }
 
     @Override
-    public CompletionStage<Optional<Authentication.User>> user(final String token) {
+    public CompletionStage<Optional<AuthUser>> user(final String token) {
         return this.provider.authenticate(new JsonObject().put("token", token)).map(
             user -> {
-                Optional<Authentication.User> res = Optional.empty();
+                Optional<AuthUser> res = Optional.empty();
                 if (user.principal().containsKey(AuthTokenRest.SUB)
-                    && user.containsKey(AuthTokenRest.GROUPS)) {
+                    && user.containsKey(AuthTokenRest.CONTEXT)) {
                     res = Optional.of(
-                        new Authentication.User(
+                        new AuthUser(
                             user.principal().getString(AuthTokenRest.SUB),
-                            user.principal().getJsonArray(AuthTokenRest.GROUPS).stream()
-                                .map(Object::toString).collect(Collectors.toList())
+                            user.principal().getString(AuthTokenRest.CONTEXT)
                         )
                     );
                 }

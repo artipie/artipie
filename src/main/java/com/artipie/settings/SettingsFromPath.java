@@ -54,15 +54,16 @@ public final class SettingsFromPath {
         final Key init = new Key.From(".artipie", "initialized");
         if (initialize && !bsto.exists(init)) {
             final List<String> resources = Arrays.asList(
-                "_credentials.yaml", AliasSettings.FILE_NAME,
-                "artipie/my-bin.yaml", "artipie/my-docker.yaml", "artipie/my-maven.yaml",
+                AliasSettings.FILE_NAME,
+                "repo/artipie/my-bin.yaml", "repo/artipie/my-docker.yaml",
+                "repo/artipie/my-maven.yaml",
                 "security/roles/reader.yml", "security/users/artipie.yaml"
             );
             for (final String res : resources) {
                 final Path tmp = Files.createTempFile(
                     Path.of(res).getFileName().toString(), ".tmp"
                 );
-                new JavaResource(String.format("example/repo/%s", res)).copy(tmp);
+                new JavaResource(String.format("example/%s", res)).copy(tmp);
                 bsto.save(new Key.From(res), Files.readAllBytes(tmp));
                 Files.delete(tmp);
             }

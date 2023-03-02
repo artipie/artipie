@@ -5,18 +5,14 @@
 package com.artipie.auth;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.auth.Authentication;
-import com.artipie.settings.repo.perms.RepoPerms;
+import com.artipie.http.auth.AuthUser;
 import java.io.IOException;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.llorllale.cactoos.matchers.MatcherOf;
 
 /**
@@ -31,7 +27,7 @@ class YamlPermissionsTest {
 
     @Test
     void johnCanDownloadDeployDrinkAndDelete() throws Exception {
-        final Authentication.User user = new Authentication.User("john");
+        final AuthUser user = new AuthUser("john", "test");
         MatcherAssert.assertThat(
             this.permissions(),
             new AllOf<YamlPermissions>(
@@ -48,7 +44,7 @@ class YamlPermissionsTest {
 
     @Test
     void janeCanDownloadDrinkAndDeploy() throws Exception {
-        final Authentication.User user = new Authentication.User("jane");
+        final AuthUser user = new AuthUser("jane", "test");
         MatcherAssert.assertThat(
             this.permissions(),
             new AllOf<YamlPermissions>(
@@ -65,7 +61,7 @@ class YamlPermissionsTest {
 
     @Test
     void annCanDoAnything() throws Exception {
-        final Authentication.User user = new Authentication.User("ann");
+        final AuthUser user = new AuthUser("ann", "test");
         MatcherAssert.assertThat(
             this.permissions(),
             new AllOf<YamlPermissions>(
@@ -82,26 +78,26 @@ class YamlPermissionsTest {
     @Test
     void anyoneCanDownloadAndDrink() throws Exception {
         MatcherAssert.assertThat(
-            this.permissions().allowed(new Authentication.User("anyone"), "download"),
+            this.permissions().allowed(new AuthUser("anyone", "test"), "download"),
             new IsEqual<>(true)
         );
         MatcherAssert.assertThat(
-            this.permissions().allowed(new Authentication.User("*"), "download"),
+            this.permissions().allowed(new AuthUser("*", "test"), "download"),
             new IsEqual<>(true)
         );
         MatcherAssert.assertThat(
-            this.permissions().allowed(new Authentication.User("*"), "drink"),
+            this.permissions().allowed(new AuthUser("*", "test"), "drink"),
             new IsEqual<>(true)
         );
         MatcherAssert.assertThat(
-            this.permissions().allowed(new Authentication.User("Someone"), "drink"),
+            this.permissions().allowed(new AuthUser("Someone", "test"), "drink"),
             new IsEqual<>(true)
         );
     }
 
     @Test
     void adminCanDoAnything() throws Exception {
-        final Authentication.User user = new Authentication.User("admin");
+        final AuthUser user = new AuthUser("admin", "test");
         MatcherAssert.assertThat(
             this.permissions(),
             new AllOf<YamlPermissions>(
@@ -112,31 +108,6 @@ class YamlPermissionsTest {
                     new MatcherOf<>(perm -> { return perm.allowed(user, "install"); })
                 )
             )
-        );
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {
-        "mark,read,readers,true",
-        "olga,write,group-a;group-b,true",
-        "john,read,abc;def,false",
-        "jane,manage,readers;leaders,false",
-        "ann,read,'',false"
-        }, nullValues = "''"
-    )
-    void checksGroups(final String name, final String action,
-        final String groups, final boolean res) {
-        final YamlMapping settings = new RepoPerms(
-            new ListOf<>(
-                new RepoPerms.PermissionItem(name, "write"),
-                new RepoPerms.PermissionItem("/readers", "read")
-            )
-        ).permsYaml();
-        MatcherAssert.assertThat(
-            new YamlPermissions(settings).allowed(
-                new Authentication.User(name, new ListOf<String>(groups.split(";"))), action
-            ),
-            new IsEqual<>(res)
         );
     }
 

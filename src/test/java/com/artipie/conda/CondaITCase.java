@@ -38,7 +38,7 @@ public final class CondaITCase {
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withCredentials("_credentials.yaml")
+            .withUser("security/users/alice.yaml", "alice")
             .withRepoConfig("conda/conda.yml", "my-conda")
             .withRepoConfig("conda/conda-port.yml", "my-conda-port")
             .withExposedPorts(8081),

@@ -5,7 +5,7 @@
 
 package com.artipie.auth;
 
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Permissions;
 import com.jcabi.log.Logger;
 import java.util.logging.Level;
@@ -45,7 +45,7 @@ public final class LoggingPermissions implements Permissions {
     }
 
     @Override
-    public boolean allowed(final Authentication.User user, final String action) {
+    public boolean allowed(final AuthUser user, final String action) {
         final boolean res = this.origin.allowed(user, action);
         if (res) {
             Logger.log(

@@ -5,7 +5,6 @@
 package com.artipie.api;
 
 import com.artipie.api.ssl.KeyStore;
-import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.auth.JwtTokens;
@@ -59,11 +58,6 @@ public final class RestApi extends AbstractVerticle {
     private final int port;
 
     /**
-     * Key to users credentials yaml file location.
-     */
-    private final Optional<Key> users;
-
-    /**
      * Artipie authentication.
      */
     private final Authentication auth;
@@ -84,7 +78,6 @@ public final class RestApi extends AbstractVerticle {
      * @param configsStorage Artipie settings storage
      * @param layout Artipie layout
      * @param port Port to run API on
-     * @param users Key to users credentials yaml file location
      * @param auth Artipie authentication
      * @param keystore KeyStore
      * @param jwt Jwt authentication provider
@@ -94,7 +87,7 @@ public final class RestApi extends AbstractVerticle {
         final ArtipieCaches caches,
         final Storage configsStorage,
         final String layout,
-        final int port, final Optional<Key> users,
+        final int port,
         final Authentication auth,
         final Optional<KeyStore> keystore,
         final JWTAuth jwt
@@ -103,7 +96,6 @@ public final class RestApi extends AbstractVerticle {
         this.configsStorage = configsStorage;
         this.layout = layout;
         this.port = port;
-        this.users = users;
         this.auth = auth;
         this.keystore = keystore;
         this.jwt = jwt;
@@ -119,7 +111,7 @@ public final class RestApi extends AbstractVerticle {
     public RestApi(final Settings settings, final int port, final JWTAuth jwt) {
         this(
             settings.caches(), settings.configStorage(), settings.layout().toString(),
-            port, settings.credentialsKey(), settings.auth(), settings.keyStore(), jwt
+            port, settings.authz().authentication(), settings.keyStore(), jwt
         );
     }
 
@@ -159,16 +151,8 @@ public final class RestApi extends AbstractVerticle {
             new ManageRepoSettings(asto),
             new RepoData(this.configsStorage, this.caches.storagesCache()), this.layout
         ).init(repoRb);
-        new StorageAliasesRest(this.caches.storagesCache(), asto, this.layout)
-            .init(repoRb);
-        if (this.users.isPresent()) {
-            new UsersRest(
-                new ManageUsers(this.users.get(), asto),
-                this.caches.usersCache(), this.auth
-            ).init(userRb);
-        } else {
-            Logger.warn(this, "File credentials are not set, users API is not available");
-        }
+        new StorageAliasesRest(this.caches.storagesCache(), asto, this.layout).init(repoRb);
+        Logger.warn(this, "Users API is not available for now");
         new SettingsRest(this.port, this.layout).init(settingsRb);
         final Router router = repoRb.createRouter();
         router.route("/*").subRouter(userRb.createRouter());

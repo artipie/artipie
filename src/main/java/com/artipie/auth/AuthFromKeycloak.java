@@ -5,6 +5,7 @@
 package com.artipie.auth;
 
 import com.artipie.ArtipieException;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import java.util.HashSet;
 import java.util.Optional;
@@ -36,7 +37,7 @@ public final class AuthFromKeycloak implements Authentication {
     }
 
     @Override
-    public Optional<User> user(final String username, final String password) {
+    public Optional<AuthUser> user(final String username, final String password) {
         final AuthzClient client = AuthzClient.create(this.config);
         try {
             final AuthorizationResponse response = client
@@ -47,7 +48,7 @@ public final class AuthFromKeycloak implements Authentication {
             final Set<String> roles = new HashSet<>();
             roles.addAll(AuthFromKeycloak.realmRoles(token));
             roles.addAll(AuthFromKeycloak.clientRoles(token));
-            return Optional.of(new User(username, roles.stream().toList()));
+            return Optional.of(new AuthUser(username, "keycloak"));
         } catch (final VerificationException exc) {
             throw new ArtipieException(exc);
         }

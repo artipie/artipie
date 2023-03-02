@@ -7,7 +7,7 @@ package com.artipie.auth;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hamcrest.MatcherAssert;
@@ -41,7 +41,7 @@ class AuthFromStorageTest {
         this.asto.save(new Key.From(key), this.aliceConfig());
         MatcherAssert.assertThat(
             new AuthFromStorage(this.asto).user("alice", "qwerty").get(),
-            new IsEqual<>(new Authentication.User("alice"))
+            new IsEqual<>(new AuthUser("alice", "test"))
         );
     }
 
@@ -61,7 +61,7 @@ class AuthFromStorageTest {
         this.asto.save(new Key.From(key), this.davidConfig());
         MatcherAssert.assertThat(
             new AuthFromStorage(this.asto).user("david", "abc123").get(),
-            new IsEqual<>(new Authentication.User("david"))
+            new IsEqual<>(new AuthUser("david", "test"))
         );
     }
 

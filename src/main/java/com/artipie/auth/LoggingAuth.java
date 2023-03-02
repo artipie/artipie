@@ -5,6 +5,7 @@
 
 package com.artipie.auth;
 
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.jcabi.log.Logger;
 import java.util.Optional;
@@ -45,8 +46,8 @@ public final class LoggingAuth implements Authentication {
     }
 
     @Override
-    public Optional<Authentication.User> user(final String username, final String password) {
-        final Optional<Authentication.User> res = this.origin.user(username, password);
+    public Optional<AuthUser> user(final String username, final String password) {
+        final Optional<AuthUser> res = this.origin.user(username, password);
         if (res.isEmpty()) {
             Logger.log(
                 this.level, this.origin,

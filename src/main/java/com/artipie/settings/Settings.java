@@ -6,11 +6,8 @@ package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.ssl.KeyStore;
-import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.auth.Authentication;
 import com.artipie.settings.cache.ArtipieCaches;
-import com.artipie.security.policy.Policy;
 import java.util.Optional;
 
 /**
@@ -28,11 +25,10 @@ public interface Settings {
     Storage configStorage();
 
     /**
-     * Provides authorization.
-     *
-     * @return Authentication instance
+     * Artipie authorization.
+     * @return Authentication and policy
      */
-    Authentication auth();
+    ArtipieAuthorization authz();
 
     /**
      * Repository layout.
@@ -54,12 +50,6 @@ public interface Settings {
     Storage repoConfigsStorage();
 
     /**
-     * Key for credentials yaml settings.
-     * @return Key for credentials
-     */
-    Optional<Key> credentialsKey();
-
-    /**
      * Key store.
      * @return KeyStore
      */
@@ -70,12 +60,6 @@ public interface Settings {
      * @return Metrics configuration
      */
     MetricsContext metrics();
-
-    /**
-     * Artipie policy.
-     * @return The policy
-     */
-    Policy<?> policy();
 
     /**
      * Artipie caches.
