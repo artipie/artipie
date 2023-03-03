@@ -1,0 +1,51 @@
+name: Do performance testing for artipie
+on:
+  push:
+    tags:
+      - "t*"
+jobs:
+  perf-test1:
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v3
+        #with:
+        #  path: "artipie"
+      - uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: adopt
+          cache: 'maven'
+      - uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-jdk-17-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-jdk-17-maven-
+          runs-on: ubuntu-latest
+      - run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - run: cat /etc/issue; mount; ls -lah; env; pwd
+      #- run: apt update -y && apt install maven tree -y --no-install-recommends
+      - run: docker info
+      - run: echo mvn versions:set -DnewVersion=latest
+      - run: echo mvn clean install -Pqulice
+      - run:  bash -c 'if [ -d ./benchmarks ] ; then echo "Reusing benchmarks"; else git clone https://github.com/artipie/benchmarks.git; fi'
+      - name: Branch + Artipie server
+        run: pwd;ls -lah;git branch -a;git fetch;git checkout ech-no-auto-rm && git pull --ff-only && cd loadtests && ./artipie-docker.sh 8081 && docker ps && tree ./root && ls -lah root/var/repo/artipie
+        working-directory: benchmarks
+      - name: Prepare JMeter
+        run: docker ps && wget https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-5.5.tgz && tar xf apache-jmeter-5.5.tgz && docker ps
+        working-directory: benchmarks/loadtests
+      - name: Prepare artifacts repo
+        run: ./prep-maven-dyn.py --total-artifacts 12 && docker ps
+        working-directory: benchmarks/loadtests
+      - name: Run upload test
+        run: docker ps;cat "$HOME/.benchvars" && . "$HOME/.benchvars" && ./jmx-files-maven-ul.sh "$TARGET_HOST" "$TARGET_PORT" 30 maven-dyn;docker ps
+        #TODO: with timeout
+        working-directory: benchmarks/loadtests
+      - name Try git commit:
+        run: ls -lah && pwd && . "$HOME/.benchvars" && git clone "https://chgen:$PUSH_TOKEN@github.com/ChGen/benchmarks.git" bench && cd bench && cp -fv ../last_test_result/statistics.json ./  && ls -lah && pwd && git add -f statistics.json && git commit -m 'new test' && git push origin master && env
+        working-directory: benchmarks/loadtests
+      - name: Stop artipie server
+        run: docker ps;echo docker stop artipie; ls -lah; echo rm -rfv root
+        working-directory: benchmarks/loadtests
+
