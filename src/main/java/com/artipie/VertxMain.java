@@ -145,7 +145,7 @@ public final class VertxMain {
     public static void main(final String... args) throws Exception {
         final Path config;
         final int port;
-        final int defp = 81;
+        final int defp = 80;
         final Options options = new Options();
         final String popt = "p";
         final String fopt = "f";
