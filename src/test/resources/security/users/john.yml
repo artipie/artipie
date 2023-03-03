@@ -1,5 +1,0 @@
-john:
-  type: plain
-  pass: xyz
-  roles:
-    - admin

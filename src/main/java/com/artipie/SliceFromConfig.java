@@ -266,7 +266,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "conda":
                 slice = new CondaSlice(
-                    cfg.storage(), permissions, auth, tokens, cfg.url().toString()
+                    cfg.storage(), policy, auth, tokens, cfg.url().toString(), cfg.name()
                 );
                 break;
             case "hexpm":

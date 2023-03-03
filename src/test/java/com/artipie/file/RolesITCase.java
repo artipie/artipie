@@ -30,8 +30,8 @@ public final class RolesITCase {
             .withRepoConfig("binary/bin.yml", "bin")
             .withUser("security/users/bob.yaml", "bob")
             .withUser("security/users/john.yaml", "john")
-            .withRole("security/users/admin.yaml", "admin")
-            .withRole("security/users/readers.yaml", "readers"),
+            .withRole("security/roles/admin.yaml", "admin")
+            .withRole("security/roles/readers.yaml", "readers"),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
             .withWorkingDirectory("/w")
     );

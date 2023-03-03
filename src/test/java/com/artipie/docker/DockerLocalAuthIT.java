@@ -36,7 +36,8 @@ final class DockerLocalAuthIT {
     final TestDeployment deployment = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("docker/registry-auth.yml", "registry")
-            .withUser("security/users/alice.yaml", "alice"),
+            .withUser("security/users/alice.yaml", "alice")
+            .withUser("security/users/bob.yaml", "bob"),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
             .withPrivilegedMode(true)
             .withWorkingDirectory("/w")

@@ -72,6 +72,8 @@ function start_artipie {
   docker run --rm --detach --name artipie \
     -v "$PWD/artipie.yml:/etc/artipie/artipie.yml" \
     -v "$PWD/.cfg:/var/artipie/cfg" \
+    -e ARTIPIE_USER_NAME=alice \
+    -e ARTIPIE_USER_PASS=qwerty123 \
     --mount source=artipie-data,destination=/var/artipie/data \
     --user 2020:2021 \
     --net=artipie \

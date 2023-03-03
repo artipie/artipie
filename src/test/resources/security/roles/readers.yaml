@@ -1,5 +1,4 @@
-readers:
-  permissions:
-    artipie_basic_permission:
-      "*":
-        - read
+permissions:
+  adapter_basic_permission:
+    *:
+      - read

@@ -91,9 +91,8 @@ public final class AuthFromStorage implements Authentication {
         final String pass) {
         Optional<AuthUser> res = Optional.empty();
         try {
-            final YamlMapping yaml = Yaml.createYamlInput(new ByteArrayInputStream(bytes))
+            final YamlMapping info = Yaml.createYamlInput(new ByteArrayInputStream(bytes))
                 .readYamlMapping();
-            final YamlMapping info = yaml.yamlMapping(name);
             if (info != null
                 && !Boolean.FALSE.toString().equalsIgnoreCase(info.string("enabled"))) {
                 final String type = info.string("type");

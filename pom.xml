@@ -144,7 +144,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>v1.2.2</version>
+      <version>v1.2.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -271,7 +271,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>conda-adapter</artifactId>
-      <version>v0.6.1</version>
+      <version>v0.6.2</version>
     </dependency>
     <dependency>
       <groupId>com.github.jknack</groupId>

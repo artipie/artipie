@@ -1,5 +1,4 @@
-bob:
-  type: plain
-  pass: qwerty
-  roles:
-    - readers
+type: plain
+pass: qwerty
+roles:
+  - readers

@@ -104,30 +104,27 @@ class AuthFromStorageTest {
     private byte[] aliceConfig() {
         return String.join(
             "\n",
-            "alice:",
-            "  type: plain",
-            "  pass: qwerty",
-            "  email: alice@example.com"
+            "type: plain",
+            "pass: qwerty",
+            "email: alice@example.com"
         ).getBytes(StandardCharsets.UTF_8);
     }
 
     private byte[] davidConfig() {
         return String.join(
             "\n",
-            "david:",
-            "  type: sha256",
-            String.format("  pass: %s", DigestUtils.sha256Hex("abc123")),
-            "  enabled: true"
+            "type: sha256",
+            String.format("pass: %s", DigestUtils.sha256Hex("abc123")),
+            "enabled: true"
         ).getBytes(StandardCharsets.UTF_8);
     }
 
     private byte[] janeConfig() {
         return String.join(
             "\n",
-            "jane:",
-            "  type: plain",
-            "  pass: qwerty",
-            "  enabled: false"
+            "type: plain",
+            "pass: qwerty",
+            "enabled: false"
         ).getBytes(StandardCharsets.UTF_8);
     }
 

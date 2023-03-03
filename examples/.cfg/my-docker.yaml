@@ -3,6 +3,3 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
-  credentials:
-    type: file
-    path: _credentials.yaml

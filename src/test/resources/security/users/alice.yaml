@@ -1,3 +1,2 @@
-alice:
-  type: plain
-  pass: 123
+type: plain
+pass: 123
