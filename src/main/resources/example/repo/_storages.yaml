@@ -1,4 +1,4 @@
 storages:
   default:
     type: fs
-    path: C:\Users\g00563573\IdeaProjects\artipie\src\main\resources\example\data
+    path: /var/artipie/repo/data
