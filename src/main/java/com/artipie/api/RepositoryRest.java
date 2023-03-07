@@ -152,7 +152,8 @@ public final class RepositoryRest extends BaseRest {
      */
     private void listUserRepos(final RoutingContext context) {
         context.response().setStatusCode(HttpStatus.OK_200).end(
-            JsonArray.of(this.crs.list(context.pathParam(RepositoryName.UNAME)).toArray()).encode()
+            JsonArray.of(this.crs.list(context.pathParam(RepositoryName.USER_NAME)).toArray())
+                .encode()
         );
     }
 
@@ -253,7 +254,9 @@ public final class RepositoryRest extends BaseRest {
             if (new Layout.Flat().toString().equals(this.layout)) {
                 newrname = new RepositoryName.Flat(newname);
             } else {
-                newrname = new RepositoryName.Org(newname, context.pathParam(RepositoryName.UNAME));
+                newrname = new RepositoryName.Org(
+                    newname, context.pathParam(RepositoryName.USER_NAME)
+                );
             }
             validator = new Validator.All(
                 Validator.validator(

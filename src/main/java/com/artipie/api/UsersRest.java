@@ -75,7 +75,7 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void deleteUser(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryName.UNAME);
+        final String uname = context.pathParam(RepositoryName.USER_NAME);
         try {
             this.users.remove(uname);
         } catch (final IllegalStateException err) {
@@ -92,7 +92,7 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void putUser(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryName.UNAME);
+        final String uname = context.pathParam(RepositoryName.USER_NAME);
         this.users.addOrUpdate(
             Json.createReader(new StringReader(context.body().asString())).readObject(),
             uname
@@ -106,7 +106,9 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void getUser(final RoutingContext context) {
-        final Optional<JsonObject> usr = this.users.get(context.pathParam(RepositoryName.UNAME));
+        final Optional<JsonObject> usr = this.users.get(
+            context.pathParam(RepositoryName.USER_NAME)
+        );
         if (usr.isPresent()) {
             context.response().setStatusCode(HttpStatus.OK_200).end(usr.get().toString());
         } else {
@@ -127,7 +129,7 @@ public final class UsersRest extends BaseRest {
      * @param context Routing context
      */
     private void alterPassword(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryName.UNAME);
+        final String uname = context.pathParam(RepositoryName.USER_NAME);
         final JsonObject body = readJsonObject(context);
         final Optional<AuthUser> usr = this.auth.user(uname, body.getString("old_pass"));
         if (usr.isPresent()) {

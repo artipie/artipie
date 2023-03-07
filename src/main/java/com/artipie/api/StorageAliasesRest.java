@@ -114,7 +114,9 @@ public final class StorageAliasesRest extends BaseRest {
      * @param context Routing context
      */
     private void deleteUserAlias(final RoutingContext context) {
-        this.delete(context, Optional.of(new Key.From(context.pathParam(RepositoryName.UNAME))));
+        this.delete(
+            context, Optional.of(new Key.From(context.pathParam(RepositoryName.USER_NAME)))
+        );
     }
 
     /**
@@ -151,7 +153,7 @@ public final class StorageAliasesRest extends BaseRest {
      */
     private void addUserAlias(final RoutingContext context) {
         new ManageStorageAliases(
-            new Key.From(context.pathParam(RepositoryName.UNAME)), this.asto
+            new Key.From(context.pathParam(RepositoryName.USER_NAME)), this.asto
         ).add(
             context.pathParam(StorageAliasesRest.ANAME),
             StorageAliasesRest.jsonFromRequest(context)
@@ -189,7 +191,7 @@ public final class StorageAliasesRest extends BaseRest {
      */
     private void getUserAliases(final RoutingContext context) {
         context.response().setStatusCode(HttpStatus.OK_200).end(
-            this.aliases(Optional.of(new Key.From(context.pathParam(RepositoryName.UNAME))))
+            this.aliases(Optional.of(new Key.From(context.pathParam(RepositoryName.USER_NAME))))
         );
     }
 
