@@ -32,8 +32,6 @@ import java.util.Set;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -125,7 +123,7 @@ public class AuthFromKeycloakTest {
     }
 
     @Test
-    void authenticateExistingUserReturnsUserWithRealmAndClientRoles() {
+    void authenticateExistingUserReturnsUserWithRealm() {
         final String login = "user1";
         final String password = "password";
         final YamlSettings settings = AuthFromKeycloakTest.settings(
@@ -156,11 +154,8 @@ public class AuthFromKeycloakTest {
             AuthFromKeycloakTest.CLIENT_PASSWORD
         );
         MatcherAssert.assertThat(
-            Assertions.assertThrows(
-                ArtipieException.class,
-                () -> settings.authz().authentication().user(fake, fake)
-            ).getMessage(),
-            new StringContains("Failed to obtain authorization data")
+            settings.authz().authentication().user(fake, fake).isEmpty(),
+            new IsEqual<>(true)
         );
     }
 
