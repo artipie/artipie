@@ -7,12 +7,15 @@ package com.artipie.settings;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.SubStorage;
+import com.artipie.security.policy.CachedYamlPolicy;
+import com.artipie.security.policy.Policy;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsInstanceOf;
+import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -100,6 +103,260 @@ class YamlSettingsTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new YamlSettings(Yaml.createYamlInput(yaml).readYamlMapping()).meta()
+        );
+    }
+
+    @Test
+    void initializesEnvAuth() throws IOException {
+        final YamlSettings authz = new YamlSettings(
+            Yaml.createYamlInput(this.envCreds()).readYamlMapping()
+        );
+        MatcherAssert.assertThat(
+            "Env credentials are initialized",
+            authz.authz().authentication().toString(),
+            new StringContains("AuthFromEnv")
+        );
+        MatcherAssert.assertThat(
+            "Policy is free",
+            authz.authz().policy(),
+            new IsInstanceOf(Policy.FREE.getClass())
+        );
+        MatcherAssert.assertThat(
+            "Policy storage is absent",
+            authz.authz().policyStorage().isEmpty()
+        );
+    }
+
+    @Test
+    void initializesGithubAuth() throws IOException {
+        final YamlSettings authz = new YamlSettings(
+            Yaml.createYamlInput(this.githubCreds()).readYamlMapping()
+        );
+        MatcherAssert.assertThat(
+            "Github auth created",
+            authz.authz().authentication().toString(),
+            new StringContains("GithubAuth")
+        );
+        MatcherAssert.assertThat(
+            "Policy is free",
+            authz.authz().policy(),
+            new IsInstanceOf(Policy.FREE.getClass())
+        );
+        MatcherAssert.assertThat(
+            "Policy storage is absent",
+            authz.authz().policyStorage().isEmpty()
+        );
+    }
+
+    @Test
+    void initializesKeycloakAuth() throws IOException {
+        final YamlSettings authz = new YamlSettings(
+            Yaml.createYamlInput(this.keycloakCreds()).readYamlMapping()
+        );
+        MatcherAssert.assertThat(
+            "Keycloak storage created",
+            authz.authz().authentication().toString(),
+            new StringContains("AuthFromKeycloak")
+        );
+        MatcherAssert.assertThat(
+            "Policy is free",
+            authz.authz().policy(),
+            new IsInstanceOf(Policy.FREE.getClass())
+        );
+        MatcherAssert.assertThat(
+            "Policy storage is absent",
+            authz.authz().policyStorage().isEmpty()
+        );
+    }
+
+    @Test
+    void initializesArtipieAuth() throws IOException {
+        final YamlSettings authz = new YamlSettings(
+            Yaml.createYamlInput(this.artipieCreds()).readYamlMapping()
+        );
+        MatcherAssert.assertThat(
+            "Auth from storage initiated",
+            authz.authz().authentication().toString(),
+            new StringContains("AuthFromStorage")
+        );
+        MatcherAssert.assertThat(
+            "Policy is free",
+            authz.authz().policy(),
+            new IsInstanceOf(Policy.FREE.getClass())
+        );
+        MatcherAssert.assertThat(
+            "Policy storage is present",
+            authz.authz().policyStorage().isPresent()
+        );
+    }
+
+    @Test
+    void initializesArtipieAuthAndPolicy() throws IOException {
+        final YamlSettings authz = new YamlSettings(
+            Yaml.createYamlInput(this.artipieCredsWithPolicy()).readYamlMapping()
+        );
+        MatcherAssert.assertThat(
+            "Auth from storage initiated",
+            authz.authz().authentication().toString(),
+            new StringContains("AuthFromStorage")
+        );
+        MatcherAssert.assertThat(
+            "CachedYamlPolicy created",
+            authz.authz().policy(),
+            new IsInstanceOf(CachedYamlPolicy.class)
+        );
+        MatcherAssert.assertThat(
+            "Policy storage is present",
+            authz.authz().policyStorage().isPresent()
+        );
+    }
+
+    @Test
+    void initializesAllAuths() throws IOException {
+        final YamlSettings authz = new YamlSettings(
+            Yaml.createYamlInput(this.artipieGithubKeycloakEnvCreds()).readYamlMapping()
+        );
+        MatcherAssert.assertThat(
+            "Auth from storage, github, env and keycloak initiated",
+            authz.authz().authentication().toString(),
+            Matchers.allOf(
+                new StringContains("AuthFromStorage"),
+                new StringContains("AuthFromKeycloak"),
+                new StringContains("GithubAuth"),
+                new StringContains("AuthFromEnv")
+            )
+        );
+        MatcherAssert.assertThat(
+            "Empty policy created",
+            authz.authz().policy(),
+            new IsInstanceOf(Policy.FREE.getClass())
+        );
+        MatcherAssert.assertThat(
+            "Policy storage is present",
+            authz.authz().policyStorage().isPresent()
+        );
+    }
+
+    @Test
+    void initializesAllAuthsAndPolicy() throws IOException {
+        final YamlSettings settings = new YamlSettings(
+            Yaml.createYamlInput(this.artipieGithubKeycloakEnvCredsAndPolicy()).readYamlMapping()
+        );
+        MatcherAssert.assertThat(
+            "Auth from storage, github, env and keycloak initiated",
+            settings.authz().authentication().toString(),
+            Matchers.allOf(
+                new StringContains("AuthFromStorage"),
+                new StringContains("AuthFromKeycloak"),
+                new StringContains("GithubAuth"),
+                new StringContains("AuthFromEnv")
+            )
+        );
+        MatcherAssert.assertThat(
+            "CachedYamlPolicy created",
+            settings.authz().policy(),
+            new IsInstanceOf(CachedYamlPolicy.class)
+        );
+        MatcherAssert.assertThat(
+            "Policy storage is present",
+            settings.authz().policyStorage().isPresent()
+        );
+    }
+
+    private String envCreds() {
+        return String.join(
+            "\n",
+            "meta:",
+            "  credentials:",
+            "    - type: env"
+        );
+    }
+
+    private String githubCreds() {
+        return String.join(
+            "\n",
+            "meta:",
+            "  credentials:",
+            "    - type: github"
+        );
+    }
+
+    private String keycloakCreds() {
+        return String.join(
+            "\n",
+            "meta:",
+            "  credentials:",
+            "    - type: keycloak",
+            "      url: http://any",
+            "      realm: any",
+            "      client-id: any",
+            "      client-password: abc123"
+        );
+    }
+
+    private String artipieCreds() {
+        return String.join(
+            "\n",
+            "meta:",
+            "  credentials:",
+            "    - type: artipie",
+            "      storage:",
+            "        type: fs",
+            "        path: any"
+        );
+    }
+
+    private String artipieCredsWithPolicy() {
+        return String.join(
+            "\n",
+            "meta:",
+            "  credentials:",
+            "    - type: artipie",
+            "  policy:",
+            "    type: artipie",
+            "    storage:",
+            "      type: fs",
+            "      path: /any/path"
+        );
+    }
+
+    private String artipieGithubKeycloakEnvCreds() {
+        return String.join(
+            "\n",
+            "meta:",
+            "  credentials:",
+            "    - type: github",
+            "    - type: env",
+            "    - type: keycloak",
+            "      url: http://any",
+            "      realm: any",
+            "      client-id: any",
+            "      client-password: abc123",
+            "    - type: artipie",
+            "      storage:",
+            "        type: fs",
+            "        path: any"
+        );
+    }
+
+    private String artipieGithubKeycloakEnvCredsAndPolicy() {
+        return String.join(
+            "\n",
+            "meta:",
+            "  credentials:",
+            "    - type: github",
+            "    - type: env",
+            "    - type: keycloak",
+            "      url: http://any",
+            "      realm: any",
+            "      client-id: any",
+            "      client-password: abc123",
+            "    - type: artipie",
+            "  policy:",
+            "    type: artipie",
+            "    storage:",
+            "      type: fs",
+            "      path: /any/path"
         );
     }
 
