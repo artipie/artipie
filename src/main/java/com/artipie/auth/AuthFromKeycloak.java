@@ -8,7 +8,6 @@ import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.jcabi.log.Logger;
 import java.util.Optional;
-import org.keycloak.authorization.client.AuthorizationDeniedException;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.authorization.client.Configuration;
 import org.keycloak.representations.idm.authorization.AuthorizationRequest;
@@ -32,6 +31,7 @@ public final class AuthFromKeycloak implements Authentication {
     }
 
     @Override
+    @SuppressWarnings("PMD.AvoidCatchingThrowable")
     public Optional<AuthUser> user(final String username, final String password) {
         final AuthzClient client = AuthzClient.create(this.config);
         Optional<AuthUser> res;
@@ -39,7 +39,8 @@ public final class AuthFromKeycloak implements Authentication {
             client.authorization(username, password, "openid")
                 .authorize(new AuthorizationRequest());
             res = Optional.of(new AuthUser(username, "keycloak"));
-        } catch (final AuthorizationDeniedException err) {
+            // @checkstyle IllegalCatchCheck (1 line)
+        } catch (final Throwable err) {
             Logger.error(this, err.getMessage());
             res = Optional.empty();
         }
