@@ -52,7 +52,7 @@ public final class YamlSettings implements Settings {
     /**
      * Authentication and policy.
      */
-    private final ArtipieAuthorization policy;
+    private final ArtipieSecurity security;
 
     /**
      * Ctor.
@@ -60,8 +60,8 @@ public final class YamlSettings implements Settings {
      */
     public YamlSettings(final YamlMapping content) {
         this.content = content;
-        this.policy = new ArtipieAuthorization.FromYaml(this.meta());
-        this.acach = new ArtipieCaches.All(this.policy.authentication(), new CachedStorages());
+        this.security = new ArtipieSecurity.FromYaml(this.meta());
+        this.acach = new ArtipieCaches.All(this.security.authentication(), new CachedStorages());
         this.mctx = new MetricsContext(this.meta());
     }
 
@@ -71,8 +71,8 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public ArtipieAuthorization authz() {
-        return this.policy;
+    public ArtipieSecurity authz() {
+        return this.security;
     }
 
     @Override

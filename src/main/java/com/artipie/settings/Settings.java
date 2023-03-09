@@ -28,7 +28,7 @@ public interface Settings {
      * Artipie authorization.
      * @return Authentication and policy
      */
-    ArtipieAuthorization authz();
+    ArtipieSecurity authz();
 
     /**
      * Repository layout.

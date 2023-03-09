@@ -9,7 +9,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.settings.ArtipieAuthorization;
+import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.Layout;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
@@ -140,7 +140,7 @@ public final class TestSettings implements Settings {
     }
 
     @Override
-    public ArtipieAuthorization authz() {
+    public ArtipieSecurity authz() {
         return null;
     }
 

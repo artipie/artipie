@@ -30,10 +30,10 @@ import java.util.function.Function;
 import org.keycloak.authorization.client.Configuration;
 
 /**
- * Artipie authorization: authentication and permissions policy.
+ * Artipie security: authentication and permissions policy.
  * @since 0.29
  */
-public interface ArtipieAuthorization {
+public interface ArtipieSecurity {
 
     /**
      * Instance of {@link CachedUsers} which implements
@@ -55,10 +55,10 @@ public interface ArtipieAuthorization {
     Optional<Storage> policyStorage();
 
     /**
-     * Artipie authorization from yaml settings.
+     * Artipie security from yaml settings.
      * @since 0.29
      */
-    class FromYaml implements ArtipieAuthorization {
+    class FromYaml implements ArtipieSecurity {
 
         /**
          * YAML node name `type` for credentials type.
@@ -137,7 +137,7 @@ public interface ArtipieAuthorization {
             final YamlSequence creds = settings.yamlSequence(FromYaml.NODE_CREDENTIALS);
             if (creds == null || creds.isEmpty()) {
                 Logger.info(
-                    ArtipieAuthorization.class,
+                    ArtipieSecurity.class,
                     "Credentials yaml section is absent or empty, using AuthFromEnv()"
                 );
                 res = new AuthFromEnv();

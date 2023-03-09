@@ -15,15 +15,15 @@ import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link ArtipieAuthorization.FromYaml}.
+ * Test for {@link ArtipieSecurity.FromYaml}.
  * @since 0.29
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
-class ArtipieAuthorizationTest {
+class ArtipieSecurityTest {
 
     @Test
     void initializesEnvAuth() throws IOException {
-        final ArtipieAuthorization authz = new ArtipieAuthorization.FromYaml(
+        final ArtipieSecurity authz = new ArtipieSecurity.FromYaml(
             Yaml.createYamlInput(this.envCreds()).readYamlMapping()
         );
         MatcherAssert.assertThat(
@@ -44,7 +44,7 @@ class ArtipieAuthorizationTest {
 
     @Test
     void initializesGithubAuth() throws IOException {
-        final ArtipieAuthorization authz = new ArtipieAuthorization.FromYaml(
+        final ArtipieSecurity authz = new ArtipieSecurity.FromYaml(
             Yaml.createYamlInput(this.githubCreds()).readYamlMapping()
         );
         MatcherAssert.assertThat(
@@ -65,7 +65,7 @@ class ArtipieAuthorizationTest {
 
     @Test
     void initializesKeycloakAuth() throws IOException {
-        final ArtipieAuthorization authz = new ArtipieAuthorization.FromYaml(
+        final ArtipieSecurity authz = new ArtipieSecurity.FromYaml(
             Yaml.createYamlInput(this.keycloakCreds()).readYamlMapping()
         );
         MatcherAssert.assertThat(
@@ -86,7 +86,7 @@ class ArtipieAuthorizationTest {
 
     @Test
     void initializesArtipieAuth() throws IOException {
-        final ArtipieAuthorization authz = new ArtipieAuthorization.FromYaml(
+        final ArtipieSecurity authz = new ArtipieSecurity.FromYaml(
             Yaml.createYamlInput(this.artipieCreds()).readYamlMapping()
         );
         MatcherAssert.assertThat(
@@ -107,7 +107,7 @@ class ArtipieAuthorizationTest {
 
     @Test
     void initializesArtipieAuthAndPolicy() throws IOException {
-        final ArtipieAuthorization authz = new ArtipieAuthorization.FromYaml(
+        final ArtipieSecurity authz = new ArtipieSecurity.FromYaml(
             Yaml.createYamlInput(this.artipieCredsWithPolicy()).readYamlMapping()
         );
         MatcherAssert.assertThat(
@@ -128,7 +128,7 @@ class ArtipieAuthorizationTest {
 
     @Test
     void initializesAllAuths() throws IOException {
-        final ArtipieAuthorization authz = new ArtipieAuthorization.FromYaml(
+        final ArtipieSecurity authz = new ArtipieSecurity.FromYaml(
             Yaml.createYamlInput(this.artipieGithubKeycloakEnvCreds()).readYamlMapping()
         );
         MatcherAssert.assertThat(
@@ -154,7 +154,7 @@ class ArtipieAuthorizationTest {
 
     @Test
     void initializesAllAuthsAndPolicy() throws IOException {
-        final ArtipieAuthorization authz = new ArtipieAuthorization.FromYaml(
+        final ArtipieSecurity authz = new ArtipieSecurity.FromYaml(
             Yaml.createYamlInput(this.artipieGithubKeycloakEnvCredsAndPolicy()).readYamlMapping()
         );
         MatcherAssert.assertThat(

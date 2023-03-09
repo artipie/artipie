@@ -19,7 +19,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.security.policy.Policy;
-import com.artipie.settings.ArtipieAuthorization;
+import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.Layout;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
@@ -139,8 +139,8 @@ final class DockerRoutingSliceTest {
         }
 
         @Override
-        public ArtipieAuthorization authz() {
-            return new ArtipieAuthorization() {
+        public ArtipieSecurity authz() {
+            return new ArtipieSecurity() {
 
                 @Override
                 public CachedUsers authentication() {
