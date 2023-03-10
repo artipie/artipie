@@ -6,10 +6,13 @@ package com.artipie.api;
 
 import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.nuget.RandomFreePort;
+import com.artipie.security.policy.Policy;
+import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.test.TestArtipieCaches;
 import com.artipie.test.TestStoragesCache;
@@ -88,6 +91,11 @@ public abstract class RestApiServerBase {
     private BlockingStorage asto;
 
     /**
+     * Test security storage.
+     */
+    private Storage ssto;
+
+    /**
      * Test artipie`s caches.
      */
     private ArtipieCaches caches;
@@ -103,8 +111,23 @@ public abstract class RestApiServerBase {
      * @return Authentication instance.
      * @checkstyle NonStaticMethodCheck (5 lines)
      */
-    Authentication auth() {
-        return Authentication.ANONYMOUS;
+    ArtipieSecurity auth() {
+        return new ArtipieSecurity() {
+            @Override
+            public Authentication authentication() {
+                return Authentication.ANONYMOUS;
+            }
+
+            @Override
+            public Policy<?> policy() {
+                return Policy.FREE;
+            }
+
+            @Override
+            public Optional<Storage> policyStorage() {
+                return Optional.of(RestApiServerBase.this.ssto);
+            }
+        };
     }
 
     /**
@@ -128,6 +151,15 @@ public abstract class RestApiServerBase {
     }
 
     /**
+     * Save bytes into test storage with provided key.
+     * @param key The key
+     * @param data Data to save
+     */
+    final void saveIntoSecurityStorage(final Key key, final byte[] data) {
+        new BlockingStorage(this.ssto).save(key, data);
+    }
+
+    /**
      * Get test server port.
      * @return The port int value
      */
@@ -141,6 +173,14 @@ public abstract class RestApiServerBase {
      */
     final BlockingStorage storage() {
         return this.asto;
+    }
+
+    /**
+     * Get test security storage.
+     * @return Instance of {@link BlockingStorage}
+     */
+    final BlockingStorage securityStorage() {
+        return new BlockingStorage(this.ssto);
     }
 
     /**
@@ -164,6 +204,7 @@ public abstract class RestApiServerBase {
         final InMemoryStorage storage = new InMemoryStorage();
         this.asto = new BlockingStorage(storage);
         this.caches = new TestArtipieCaches();
+        this.ssto = new InMemoryStorage();
         vertx.deployVerticle(
             new RestApi(
                 this.caches, storage, this.layout(), this.prt,

@@ -8,7 +8,7 @@ import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.auth.JwtTokens;
-import com.artipie.http.auth.Authentication;
+import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.RepoData;
 import com.artipie.settings.Settings;
 import com.artipie.settings.cache.ArtipieCaches;
@@ -58,9 +58,9 @@ public final class RestApi extends AbstractVerticle {
     private final int port;
 
     /**
-     * Artipie authentication.
+     * Artipie security.
      */
-    private final Authentication auth;
+    private final ArtipieSecurity security;
 
     /**
      * KeyStore.
@@ -78,7 +78,7 @@ public final class RestApi extends AbstractVerticle {
      * @param configsStorage Artipie settings storage
      * @param layout Artipie layout
      * @param port Port to run API on
-     * @param auth Artipie authentication
+     * @param security Artipie security
      * @param keystore KeyStore
      * @param jwt Jwt authentication provider
      * @checkstyle ParameterNumberCheck (10 lines)
@@ -88,7 +88,7 @@ public final class RestApi extends AbstractVerticle {
         final Storage configsStorage,
         final String layout,
         final int port,
-        final Authentication auth,
+        final ArtipieSecurity security,
         final Optional<KeyStore> keystore,
         final JWTAuth jwt
     ) {
@@ -96,7 +96,7 @@ public final class RestApi extends AbstractVerticle {
         this.configsStorage = configsStorage;
         this.layout = layout;
         this.port = port;
-        this.auth = auth;
+        this.security = security;
         this.keystore = keystore;
         this.jwt = jwt;
     }
@@ -111,7 +111,7 @@ public final class RestApi extends AbstractVerticle {
     public RestApi(final Settings settings, final int port, final JWTAuth jwt) {
         this(
             settings.caches(), settings.configStorage(), settings.layout().toString(),
-            port, settings.authz().authentication(), settings.keyStore(), jwt
+            port, settings.authz(), settings.keyStore(), jwt
         );
     }
 
@@ -152,7 +152,12 @@ public final class RestApi extends AbstractVerticle {
             new RepoData(this.configsStorage, this.caches.storagesCache()), this.layout
         ).init(repoRb);
         new StorageAliasesRest(this.caches.storagesCache(), asto, this.layout).init(repoRb);
-        Logger.warn(this, "Users API is not available for now");
+        if (this.security.policyStorage().isPresent()) {
+            new UsersRest(
+                new ManageUsers(new BlockingStorage(this.security.policyStorage().get())),
+                this.caches.usersCache(), this.security.authentication()
+            ).init(userRb);
+        }
         new SettingsRest(this.port, this.layout).init(settingsRb);
         final Router router = repoRb.createRouter();
         router.route("/*").subRouter(userRb.createRouter());
@@ -188,7 +193,7 @@ public final class RestApi extends AbstractVerticle {
      * @param builders Router builders to add token auth to
      */
     private void addJwtAuth(final RouterBuilder token, final RouterBuilder... builders) {
-        new AuthTokenRest(new JwtTokens(this.jwt), this.auth).init(token);
+        new AuthTokenRest(new JwtTokens(this.jwt), this.security.authentication()).init(token);
         Arrays.stream(builders).forEach(
             item -> item.securityHandler(RestApi.SECURITY_SCHEME, JWTAuthHandler.create(this.jwt))
         );

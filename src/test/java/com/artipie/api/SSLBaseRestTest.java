@@ -4,7 +4,10 @@
  */
 package com.artipie.api;
 
+import com.artipie.asto.Storage;
 import com.artipie.http.auth.Authentication;
+import com.artipie.security.policy.Policy;
+import com.artipie.settings.ArtipieSecurity;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -44,8 +47,23 @@ abstract class SSLBaseRestTest extends RestApiServerBase {
     }
 
     @Override
-    Authentication auth() {
-        return new Authentication.Single("Alice", "wonderland");
+    ArtipieSecurity auth() {
+        return new ArtipieSecurity() {
+            @Override
+            public Authentication authentication() {
+                return new Authentication.Single("Alice", "wonderland");
+            }
+
+            @Override
+            public Policy<?> policy() {
+                return Policy.FREE;
+            }
+
+            @Override
+            public Optional<Storage> policyStorage() {
+                return Optional.empty();
+            }
+        };
     }
 
     @Override

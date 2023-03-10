@@ -34,6 +34,18 @@ public interface CrudUsers {
     void addOrUpdate(JsonObject info, String uname);
 
     /**
+     * Disable user by name.
+     * @param uname User name
+     */
+    void disable(String uname);
+
+    /**
+     * Enable user by name.
+     * @param uname User name
+     */
+    void enable(String uname);
+
+    /**
      * Remove user by name.
      * @param uname User name
      */

@@ -10,27 +10,31 @@ import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.asto.ext.KeyLastPart;
+import com.artipie.asto.misc.UncheckedIOFunc;
 import com.artipie.misc.Json2Yaml;
 import com.artipie.misc.Yaml2Json;
-import com.artipie.settings.YamlSettings;
 import com.artipie.settings.users.CrudUsers;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Users from yaml file.
  *
  * @since 0.1
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class ManageUsers implements CrudUsers {
 
     /**
@@ -44,11 +48,6 @@ public final class ManageUsers implements CrudUsers {
     private static final String TYPE = "type";
 
     /**
-     * Yaml file key.
-     */
-    private final Key key;
-
-    /**
      * Storage.
      */
     private final BlockingStorage blsto;
@@ -56,123 +55,173 @@ public final class ManageUsers implements CrudUsers {
     /**
      * Ctor.
      *
-     * @param key Yaml file key
      * @param blsto Storage
      */
-    public ManageUsers(final Key key, final BlockingStorage blsto) {
-        this.key = key;
+    public ManageUsers(final BlockingStorage blsto) {
         this.blsto = blsto;
     }
 
     @Override
     public JsonArray list() {
-        final Optional<YamlMapping> users = this.users();
         final JsonArrayBuilder builder = Json.createArrayBuilder();
-        users.map(
-            yaml -> yaml.keys().stream().map(node -> node.asScalar().value()).map(
-                name -> jsonFromYaml(name, users.get().yamlMapping(name))
-            ).collect(Collectors.toList())
-        ).orElse(Collections.emptyList()).forEach(builder::add);
+        try {
+            for (final Key key : this.blsto.list(new Key.From("users"))) {
+                builder.add(
+                    jsonFromYaml(
+                        new KeyLastPart(key).get().replace(".yaml", "").replace(".yml", ""),
+                        Yaml.createYamlInput(
+                            new ByteArrayInputStream(this.blsto.value(key))
+                        ).readYamlMapping()
+                    )
+                );
+            }
+        } catch (final IOException err) {
+            throw new UncheckedIOException(err);
+        }
         return builder.build();
     }
 
     @Override
     public Optional<JsonObject> get(final String uname) {
-        return this.users().flatMap(yaml -> Optional.ofNullable(yaml.yamlMapping(uname)))
-            .map(yaml -> jsonFromYaml(uname, yaml));
+        return this.userInfo(uname).map(yaml -> jsonFromYaml(uname, yaml));
     }
 
     @Override
     public void addOrUpdate(final JsonObject info, final String uname) {
-        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
-        final Optional<YamlMapping> users = this.users();
-        if (users.isPresent()) {
-            for (final YamlNode node : users.get().keys()) {
-                final String val = node.asScalar().value();
-                builder = builder.add(val, users.get().yamlMapping(val));
-            }
-        }
-        builder = builder.add(uname, new Json2Yaml().apply(info.toString()));
         this.blsto.save(
-            this.key,
-            Yaml.createYamlMappingBuilder().add(YamlSettings.NODE_CREDENTIALS, builder.build())
-                .build().toString().getBytes(StandardCharsets.UTF_8)
+            this.userFileKey(uname),
+            new Json2Yaml().apply(info.toString()).toString().getBytes(StandardCharsets.UTF_8)
         );
     }
 
     @Override
+    public void disable(final String uname) {
+        this.activateUser(uname, false);
+    }
+
+    @Override
+    public void enable(final String uname) {
+        this.activateUser(uname, true);
+    }
+
+    @Override
     public void remove(final String uname) {
-        if (this.users().map(yaml -> yaml.yamlMapping(uname) != null).orElse(false)) {
-            YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
-            final YamlMapping users = this.users().get();
-            for (final YamlNode node : users.keys()) {
-                final String val = node.asScalar().value();
-                if (!uname.equals(val)) {
-                    builder = builder.add(val, users.yamlMapping(val));
-                }
-            }
-            this.blsto.save(
-                this.key,
-                Yaml.createYamlMappingBuilder()
-                    .add(YamlSettings.NODE_CREDENTIALS, builder.build())
-                    .build().toString().getBytes(StandardCharsets.UTF_8)
-            );
-            return;
-        }
-        throw new IllegalStateException(String.format("User %s does not exist", uname));
+        this.blsto.delete(this.userFileKeyIfExists(uname));
     }
 
     @Override
     public void alterPassword(final String uname, final JsonObject info) {
-        final Optional<YamlMapping> users = this.users();
-        if (users.map(yaml -> yaml.yamlMapping(uname) != null).orElse(false)) {
-            YamlMappingBuilder all = Yaml.createYamlMappingBuilder();
-            final YamlMapping names = users.get();
-            for (final YamlNode node : names.keys()) {
-                final String name = node.asScalar().value();
-                if (!uname.equals(name)) {
-                    all = all.add(name, names.yamlMapping(name));
-                }
-            }
-            final YamlMapping user = users.get().yamlMapping(uname);
-            YamlMappingBuilder changing = Yaml.createYamlMappingBuilder();
-            for (final YamlNode node : user.keys()) {
-                final String prop = node.asScalar().value();
-                if (!ManageUsers.TYPE.equals(prop) && !ManageUsers.PASS.equals(prop)) {
-                    changing = changing.add(prop, user.value(prop));
-                }
-            }
-            changing = changing.add(ManageUsers.PASS, info.getString("new_pass"));
-            changing = changing.add(ManageUsers.TYPE, info.getString("new_type"));
-            all = all.add(uname, changing.build());
+        final Optional<YamlMapping> yaml = this.userInfo(uname);
+        if (yaml.isPresent()) {
+            YamlMappingBuilder builder = ManageUsers.copyUserInfo(yaml.get());
+            builder = builder.add(ManageUsers.PASS, info.getString("new_pass"));
+            builder = builder.add(ManageUsers.TYPE, info.getString("new_type"));
             this.blsto.save(
-                this.key,
-                Yaml.createYamlMappingBuilder()
-                    .add(YamlSettings.NODE_CREDENTIALS, all.build())
-                    .build().toString().getBytes(StandardCharsets.UTF_8)
+                this.userFileKey(uname),
+                builder.build().toString().getBytes(StandardCharsets.UTF_8)
             );
-            return;
+        } else {
+            throw new IllegalStateException(String.format("User %s is not found", uname));
         }
-        throw new IllegalStateException(String.format("User %s does not found", uname));
     }
 
     /**
-     * Read yaml mapping with users from yaml file.
-     *
-     * @return Users yaml mapping
+     * Activate user.
+     * @param uname User to activate
+     * @param enable Enable or disable
      */
-    private Optional<YamlMapping> users() {
-        Optional<YamlMapping> res = Optional.empty();
-        if (this.blsto.exists(this.key)) {
-            try {
-                res = Optional.ofNullable(
-                    Yaml.createYamlInput(
-                        new String(this.blsto.value(this.key), StandardCharsets.UTF_8)
-                    ).readYamlMapping().yamlMapping("credentials")
-                );
-            } catch (final IOException err) {
-                throw new UncheckedIOException(err);
-            }
+    private void activateUser(final String uname, final boolean enable) {
+        final Optional<YamlMapping> info = this.userInfo(uname);
+        if (info.isPresent()) {
+            YamlMappingBuilder builder = ManageUsers.copyUserInfo(info.get());
+            builder = builder.add("enabled", String.valueOf(enable));
+            this.blsto.save(
+                this.userFileKey(uname),
+                builder.build().toString().getBytes(StandardCharsets.UTF_8)
+            );
+        } else {
+            throw new IllegalStateException(String.format("User %s does not exists", uname));
+        }
+    }
+
+    /**
+     * Read user info from yaml. Returns empty if user does not exist.
+     * @param uname The name of the user
+     * @return User info yaml
+     */
+    private Optional<YamlMapping> userInfo(final String uname) {
+        Optional<byte[]> res = Optional.empty();
+        final Pair<Key, Key> keys = ManageUsers.keys(uname);
+        if (this.blsto.exists(keys.getLeft())) {
+            res = Optional.of(this.blsto.value(keys.getLeft()));
+        } else if (this.blsto.exists(keys.getRight())) {
+            res = Optional.of(this.blsto.value(keys.getRight()));
+        }
+        return res.map(
+            new UncheckedIOFunc<>(
+                bytes -> Yaml.createYamlInput(new ByteArrayInputStream(bytes)).readYamlMapping()
+            )
+        );
+    }
+
+    /**
+     * Copy user info from yaml.
+     * @param yaml Yaml to copy info from
+     * @return Builder with existing data
+     */
+    private static YamlMappingBuilder copyUserInfo(final YamlMapping yaml) {
+        YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
+        for (final YamlNode node : yaml.keys()) {
+            final String val = node.asScalar().value();
+            builder = builder.add(val, yaml.value(val));
+        }
+        return builder;
+    }
+
+    /**
+     * Possible keys to check user info by.
+     * @param uname The username
+     * @return Keys pair with yml and yaml extension
+     */
+    private static Pair<Key, Key> keys(final String uname) {
+        return new ImmutablePair<>(
+            new Key.From(String.format("users/%s.yaml", uname)),
+            new Key.From(String.format("users/%s.yml", uname))
+        );
+    }
+
+    /**
+     * Key for the user file. No exception thrown, if file does not exist
+     * yml extension if returned.
+     * @param uname The username
+     * @return Key
+     */
+    private Key userFileKey(final String uname) {
+        final Key res;
+        final Pair<Key, Key> keys = ManageUsers.keys(uname);
+        if (this.blsto.exists(keys.getLeft())) {
+            res = keys.getLeft();
+        } else {
+            res = keys.getRight();
+        }
+        return res;
+    }
+
+    /**
+     * Key for the user file. Exception is thrown, if file does not exist.
+     * @param uname The username
+     * @return Key
+     * @throws IllegalStateException If user file not found
+     */
+    private Key userFileKeyIfExists(final String uname) {
+        final Key res;
+        final Pair<Key, Key> keys = ManageUsers.keys(uname);
+        if (this.blsto.exists(keys.getLeft())) {
+            res = keys.getLeft();
+        } else if (this.blsto.exists(keys.getRight())) {
+            res = keys.getRight();
+        } else {
+            throw new IllegalStateException(String.format("Failed to find user %s", uname));
         }
         return res;
     }

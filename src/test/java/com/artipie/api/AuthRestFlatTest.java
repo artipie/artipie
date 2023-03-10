@@ -4,7 +4,11 @@
  */
 package com.artipie.api;
 
+import com.artipie.asto.Storage;
+import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
+import com.artipie.security.policy.Policy;
+import com.artipie.settings.ArtipieSecurity;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -151,8 +155,23 @@ public final class AuthRestFlatTest extends RestApiServerBase {
     }
 
     @Override
-    Authentication auth() {
-        return new Authentication.Single(AuthRestFlatTest.NAME, AuthRestFlatTest.PASS);
+    ArtipieSecurity auth() {
+        return new ArtipieSecurity() {
+            @Override
+            public Authentication authentication() {
+                return new Authentication.Single(AuthRestFlatTest.NAME, AuthRestFlatTest.PASS);
+            }
+
+            @Override
+            public Policy<?> policy() {
+                return Policy.FREE;
+            }
+
+            @Override
+            public Optional<Storage> policyStorage() {
+                return Optional.of(new InMemoryStorage());
+            }
+        };
     }
 
     @Override
