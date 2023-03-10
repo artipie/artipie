@@ -7,7 +7,6 @@ package com.artipie.http;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Content;
-import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
@@ -19,10 +18,13 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.security.policy.Policy;
+import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.Layout;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.cache.ArtipieCaches;
+import com.artipie.settings.cache.CachedUsers;
 import com.artipie.test.TestArtipieCaches;
 import com.artipie.test.TestSettings;
 import io.reactivex.Flowable;
@@ -125,7 +127,6 @@ final class DockerRoutingSliceTest {
         /**
          * Authentication.
          */
-        @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
         private final Authentication auth;
 
         SettingsWithAuth(final Authentication auth) {
@@ -138,8 +139,24 @@ final class DockerRoutingSliceTest {
         }
 
         @Override
-        public Authentication auth() {
-            return this.auth;
+        public ArtipieSecurity authz() {
+            return new ArtipieSecurity() {
+
+                @Override
+                public CachedUsers authentication() {
+                    return new CachedUsers(SettingsWithAuth.this.auth);
+                }
+
+                @Override
+                public Policy<?> policy() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public Optional<Storage> policyStorage() {
+                    return Optional.empty();
+                }
+            };
         }
 
         @Override
@@ -155,11 +172,6 @@ final class DockerRoutingSliceTest {
         @Override
         public Storage repoConfigsStorage() {
             throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Optional<Key> credentialsKey() {
-            return Optional.empty();
         }
 
         @Override

@@ -83,7 +83,7 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     @Test
     void getRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
         final VertxTestContext ctx) throws Exception {
-        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+        for (final String name : Set.of("_storages")) {
             getRepoReturnsBadRequestIfRepositoryHasReservedName(
                 vertx, ctx, new RepositoryName.Org(name, "Alice")
             );
@@ -119,7 +119,7 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     @Test
     void existsRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
         final VertxTestContext ctx) throws Exception {
-        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+        for (final String name : Set.of("_storages")) {
             existsRepoReturnsBadRequestIfRepositoryHasReservedName(
                 vertx, ctx, new RepositoryName.Org(name, "Alice")
             );
@@ -145,7 +145,7 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     @Test
     void createRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
         final VertxTestContext ctx) throws Exception {
-        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+        for (final String name : Set.of("_storages")) {
             createRepoReturnsBadRequestIfRepositoryHasReservedName(
                 vertx, ctx, new RepositoryName.Org(name, "Alice")
             );
@@ -171,7 +171,7 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     @Test
     void removeRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
         final VertxTestContext ctx) throws Exception {
-        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+        for (final String name : Set.of("_storages")) {
             removeRepoReturnsBadRequestIfRepositoryHasReservedName(
                 vertx, ctx, new RepositoryName.Org(name, "Alice")
             );
@@ -226,7 +226,7 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     @Test
     void moveRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
         final VertxTestContext ctx) throws Exception {
-        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+        for (final String name : Set.of("_storages")) {
             moveRepoReturnsBadRequestIfRepositoryHasReservedName(
                 vertx, ctx, new RepositoryName.Org(name, "Alice")
             );
@@ -237,7 +237,7 @@ final class RepositoryRestOrgTest extends RepositoryRestBaseTest {
     void moveRepoReturnsBadRequestIfNewRepoHasReservedName(final Vertx vertx,
         final VertxTestContext ctx) throws Exception {
         final RepositoryName rname = new RepositoryName.Org("doker-repo", "Alice");
-        for (final String name : Set.of("_storages", "_permissions", "_credentials")) {
+        for (final String name : Set.of("_storages")) {
             moveRepoReturnsBadRequestIfNewRepositoryHasReservedName(
                 vertx, ctx, rname, new RepositoryName.Org(name, "Alice")
             );

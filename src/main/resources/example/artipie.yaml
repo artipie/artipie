@@ -5,8 +5,12 @@ meta:
   credentials:
     - type: env
     - type: github
-    - type: file
-      path: _credentials.yaml
+    - type: artipie
+  policy:
+    type: artipie
+    storage:
+      type: fs
+      path: /var/artipie/security
   layout: org
   base_url: http://central.artipie.com/
   metrics:

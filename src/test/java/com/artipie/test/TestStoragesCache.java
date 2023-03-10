@@ -29,9 +29,9 @@ public final class TestStoragesCache extends CachedStorages {
     }
 
     @Override
-    public void invalidate() {
+    public void invalidateAll() {
         this.cnt.incrementAndGet();
-        super.invalidate();
+        super.invalidateAll();
     }
 
     /**

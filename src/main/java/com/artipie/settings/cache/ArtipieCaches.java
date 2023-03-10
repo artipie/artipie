@@ -4,6 +4,8 @@
  */
 package com.artipie.settings.cache;
 
+import com.artipie.asto.misc.Cleanable;
+
 /**
  * Encapsulates caches which are possible to use in settings of Artipie server.
  *
@@ -22,7 +24,7 @@ public interface ArtipieCaches {
      *
      * @return Cache for user logins.
      */
-    Cleanable usersCache();
+    Cleanable<String> usersCache();
 
     /**
      * Implementation with all real instances of caches.
@@ -33,7 +35,7 @@ public interface ArtipieCaches {
         /**
          * Cache for user logins.
          */
-        private final Cleanable authcache;
+        private final Cleanable<String> authcache;
 
         /**
          * Cache for configurations of storages.
@@ -45,7 +47,7 @@ public interface ArtipieCaches {
          * @param users Users cache
          * @param strgcache Storages cache
          */
-        public All(final Cleanable users, final StoragesCache strgcache) {
+        public All(final Cleanable<String> users, final StoragesCache strgcache) {
             this.authcache = users;
             this.strgcache = strgcache;
         }
@@ -56,7 +58,7 @@ public interface ArtipieCaches {
         }
 
         @Override
-        public Cleanable usersCache() {
+        public Cleanable<String> usersCache() {
             return this.authcache;
         }
     }

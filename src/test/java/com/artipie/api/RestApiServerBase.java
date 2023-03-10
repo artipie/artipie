@@ -166,7 +166,7 @@ public abstract class RestApiServerBase {
         this.caches = new TestArtipieCaches();
         vertx.deployVerticle(
             new RestApi(
-                this.caches, storage, this.layout(), this.prt, Optional.of(ManageUsersTest.KEY),
+                this.caches, storage, this.layout(), this.prt,
                 this.auth(),
                 this.keyStore(),
                 JWTAuth.create(

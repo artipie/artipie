@@ -4,8 +4,9 @@
  */
 package com.artipie.api;
 
+import com.artipie.asto.misc.Cleanable;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
-import com.artipie.settings.cache.Cleanable;
 import com.artipie.settings.users.CrudUsers;
 import com.jcabi.log.Logger;
 import io.vertx.ext.web.RoutingContext;
@@ -30,7 +31,7 @@ public final class UsersRest extends BaseRest {
     /**
      * Artipie authenticated users cache.
      */
-    private final Cleanable cache;
+    private final Cleanable<String> cache;
 
     /**
      * Artipie auth.
@@ -43,7 +44,8 @@ public final class UsersRest extends BaseRest {
      * @param cache Artipie authenticated users cache
      * @param auth Artipie authentication
      */
-    public UsersRest(final CrudUsers users, final Cleanable cache, final Authentication auth) {
+    public UsersRest(final CrudUsers users, final Cleanable<String> cache,
+        final Authentication auth) {
         this.users = users;
         this.cache = cache;
         this.auth = auth;
@@ -73,14 +75,15 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void deleteUser(final RoutingContext context) {
+        final String uname = context.pathParam(RepositoryName.USER_NAME);
         try {
-            this.users.remove(context.pathParam(RepositoryName.UNAME));
+            this.users.remove(uname);
         } catch (final IllegalStateException err) {
             Logger.error(this, err.getMessage());
             context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
             return;
         }
-        this.cache.invalidate();
+        this.cache.invalidate(uname);
         context.response().setStatusCode(HttpStatus.OK_200).end();
     }
 
@@ -89,11 +92,12 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void putUser(final RoutingContext context) {
+        final String uname = context.pathParam(RepositoryName.USER_NAME);
         this.users.addOrUpdate(
             Json.createReader(new StringReader(context.body().asString())).readObject(),
-            context.pathParam(RepositoryName.UNAME)
+            uname
         );
-        this.cache.invalidate();
+        this.cache.invalidate(uname);
         context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
@@ -102,7 +106,9 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void getUser(final RoutingContext context) {
-        final Optional<JsonObject> usr = this.users.get(context.pathParam(RepositoryName.UNAME));
+        final Optional<JsonObject> usr = this.users.get(
+            context.pathParam(RepositoryName.USER_NAME)
+        );
         if (usr.isPresent()) {
             context.response().setStatusCode(HttpStatus.OK_200).end(usr.get().toString());
         } else {
@@ -123,15 +129,14 @@ public final class UsersRest extends BaseRest {
      * @param context Routing context
      */
     private void alterPassword(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryName.UNAME);
+        final String uname = context.pathParam(RepositoryName.USER_NAME);
         final JsonObject body = readJsonObject(context);
-        final Optional<Authentication.User> usr =
-            this.auth.user(uname, body.getString("old_pass"));
+        final Optional<AuthUser> usr = this.auth.user(uname, body.getString("old_pass"));
         if (usr.isPresent()) {
             try {
                 this.users.alterPassword(uname, body);
                 context.response().setStatusCode(HttpStatus.OK_200).end();
-                this.cache.invalidate();
+                this.cache.invalidate(uname);
             } catch (final IllegalStateException err) {
                 Logger.error(this, err.getMessage());
                 context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();

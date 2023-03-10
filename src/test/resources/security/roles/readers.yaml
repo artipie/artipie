@@ -1,0 +1,4 @@
+permissions:
+  adapter_basic_permission:
+    *:
+      - read

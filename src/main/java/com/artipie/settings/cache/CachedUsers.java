@@ -4,7 +4,9 @@
  */
 package com.artipie.settings.cache;
 
+import com.artipie.asto.misc.Cleanable;
 import com.artipie.asto.misc.UncheckedScalar;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
@@ -22,12 +24,12 @@ import org.apache.commons.codec.digest.DigestUtils;
  * </p>
  * @since 0.22
  */
-public final class CachedUsers implements Authentication, Cleanable {
+public final class CachedUsers implements Authentication, Cleanable<String> {
     /**
      * Cache for users. The key is md5 calculated from username and password
      * joined with space.
      */
-    private final Cache<String, Optional<Authentication.User>> users;
+    private final Cache<String, Optional<AuthUser>> users;
 
     /**
      * Origin authentication.
@@ -60,14 +62,14 @@ public final class CachedUsers implements Authentication, Cleanable {
      */
     CachedUsers(
         final Authentication origin,
-        final Cache<String, Optional<Authentication.User>> cache
+        final Cache<String, Optional<AuthUser>> cache
     ) {
         this.users = cache;
         this.origin = origin;
     }
 
     @Override
-    public Optional<Authentication.User> user(
+    public Optional<AuthUser> user(
         final String username,
         final String password
     ) {
@@ -87,7 +89,12 @@ public final class CachedUsers implements Authentication, Cleanable {
     }
 
     @Override
-    public void invalidate() {
+    public void invalidate(final String key) {
+        this.users.invalidate(key);
+    }
+
+    @Override
+    public void invalidateAll() {
         this.users.invalidateAll();
     }
 }

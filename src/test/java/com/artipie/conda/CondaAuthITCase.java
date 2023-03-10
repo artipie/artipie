@@ -37,7 +37,7 @@ public final class CondaAuthITCase {
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withCredentials("_credentials.yaml")
+            .withUser("security/users/alice.yaml", "alice")
             .withRepoConfig("conda/conda-auth.yml", "my-conda"),
         () -> new TestDeployment.ClientContainer("continuumio/miniconda3:22.11.1")
             .withWorkingDirectory("/w")

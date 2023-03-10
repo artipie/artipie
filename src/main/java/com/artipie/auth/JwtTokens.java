@@ -5,7 +5,7 @@
 package com.artipie.auth;
 
 import com.artipie.api.AuthTokenRest;
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.auth.Tokens;
 import io.vertx.core.json.JsonObject;
@@ -36,10 +36,10 @@ public final class JwtTokens implements Tokens {
     }
 
     @Override
-    public String generate(final Authentication.User user) {
+    public String generate(final AuthUser user) {
         return this.provider.generateToken(
             new JsonObject().put(AuthTokenRest.SUB, user.name())
-                .put(AuthTokenRest.GROUPS, user.groups())
+                .put(AuthTokenRest.CONTEXT, user.authContext())
         );
     }
 }

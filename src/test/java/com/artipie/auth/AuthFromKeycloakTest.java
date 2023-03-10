@@ -7,7 +7,7 @@ package com.artipie.auth;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieException;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.settings.YamlSettings;
 import com.artipie.tools.CodeBlob;
 import com.artipie.tools.CodeClassLoader;
@@ -32,8 +32,6 @@ import java.util.Set;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -125,7 +123,7 @@ public class AuthFromKeycloakTest {
     }
 
     @Test
-    void authenticateExistingUserReturnsUserWithRealmAndClientRoles() {
+    void authenticateExistingUserReturnsUserWithRealm() {
         final String login = "user1";
         final String password = "password";
         final YamlSettings settings = AuthFromKeycloakTest.settings(
@@ -134,18 +132,16 @@ public class AuthFromKeycloakTest {
             AuthFromKeycloakTest.CLIENT_ID,
             AuthFromKeycloakTest.CLIENT_PASSWORD
         );
-        final Optional<Authentication.User> opt = settings.auth().user(login, password);
+        final Optional<AuthUser> opt = settings.authz().authentication().user(login, password);
         MatcherAssert.assertThat(
             opt.isPresent(),
             new IsEqual<>(true)
         );
-        final Authentication.User user = opt.get();
+        final AuthUser user = opt.get();
         MatcherAssert.assertThat(
             user.name(),
             Is.is(login)
         );
-        MatcherAssert.assertThat(user.groups().contains("role_realm"), new IsEqual<>(true));
-        MatcherAssert.assertThat(user.groups().contains("client_role"), new IsEqual<>(true));
     }
 
     @Test
@@ -158,11 +154,8 @@ public class AuthFromKeycloakTest {
             AuthFromKeycloakTest.CLIENT_PASSWORD
         );
         MatcherAssert.assertThat(
-            Assertions.assertThrows(
-                ArtipieException.class,
-                () -> settings.auth().user(fake, fake)
-            ).getMessage(),
-            new StringContains("Failed to obtain authorization data")
+            settings.authz().authentication().user(fake, fake).isEmpty(),
+            new IsEqual<>(true)
         );
     }
 

@@ -10,14 +10,14 @@ import java.util.Set;
 /**
  * Checks if the repository name is valid.
  * The name is considered valid if it does not contain
- * reserved words `_storages, _permissions, _credentials` in it.
+ * reserved words `_storages` in it.
  * @since 0.26
  */
 public final class ReservedNamesVerifier implements Verifier {
     /**
      * Words that should not be present inside repository name.
      */
-    private static final Set<String> RESERVED = Set.of("_storages", "_permissions", "_credentials");
+    private static final Set<String> RESERVED = Set.of("_storages");
 
     /**
      * The name to test.

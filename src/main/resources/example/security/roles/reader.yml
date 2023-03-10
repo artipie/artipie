@@ -1,0 +1,5 @@
+reader:
+  permissions:
+    adapter_basic_permission:
+      artipie/my-bin:
+        - read

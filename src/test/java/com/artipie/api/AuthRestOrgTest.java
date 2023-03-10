@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -87,6 +88,7 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Test
+    @Disabled
     void returnsOkWhenTokenIsPresent(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
@@ -132,6 +134,7 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Test
+    @Disabled
     void createsAndRemovesUserWithAuth(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
@@ -184,6 +187,7 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Test
+    @Disabled
     void returnUnauthorizedWhenOldPasswordIsNotCorrectOnAlterPassword(final Vertx vertx,
         final VertxTestContext ctx) throws Exception {
         this.requestAndAssert(

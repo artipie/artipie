@@ -13,24 +13,23 @@ import com.artipie.api.ssl.KeyStoreFactory;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
+import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.asto.factory.Config;
+import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.auth.AuthFromEnv;
 import com.artipie.auth.AuthFromKeycloak;
-import com.artipie.auth.AuthFromYaml;
+import com.artipie.auth.AuthFromStorage;
 import com.artipie.auth.GithubAuth;
 import com.artipie.http.auth.Authentication;
-import com.artipie.http.slice.KeyFromPath;
 import com.artipie.settings.cache.ArtipieCaches;
-import com.artipie.settings.cache.CachedCreds;
 import com.artipie.settings.cache.CachedStorages;
 import com.artipie.settings.cache.CachedUsers;
-import com.artipie.settings.cache.StoragesCache;
+import com.jcabi.log.Logger;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import org.keycloak.authorization.client.Configuration;
 
 /**
@@ -44,7 +43,7 @@ import org.keycloak.authorization.client.Configuration;
 public final class YamlSettings implements Settings {
 
     /**
-     * YAML node name `credentials` for credentials yaml section.
+     * Yaml node credentials.
      */
     public static final String NODE_CREDENTIALS = "credentials";
 
@@ -54,9 +53,19 @@ public final class YamlSettings implements Settings {
     private static final String NODE_TYPE = "type";
 
     /**
-     * YAML node name for `path` credentials type.
+     * Yaml node policy.
      */
-    private static final String NODE_PATH = "path";
+    private static final String NODE_POLICY = "policy";
+
+    /**
+     * Yaml node storage.
+     */
+    private static final String NODE_STORAGE = "storage";
+
+    /**
+     * Artipie policy and creds type name.
+     */
+    private static final String ARTIPIE = "artipie";
 
     /**
      * YAML node name for `ssl` yaml section.
@@ -74,19 +83,14 @@ public final class YamlSettings implements Settings {
     private final ArtipieCaches acach;
 
     /**
-     * Storages cache.
-     */
-    private final StoragesCache storages;
-
-    /**
      * Metrics context.
      */
     private final MetricsContext mctx;
 
     /**
-     * Authentication.
+     * Authentication and policy.
      */
-    private final Authentication authn;
+    private final ArtipieSecurity security;
 
     /**
      * Ctor.
@@ -95,21 +99,22 @@ public final class YamlSettings implements Settings {
     @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
     public YamlSettings(final YamlMapping content) {
         this.content = content;
-        this.storages = new CachedStorages();
-        final CachedUsers users = new CachedUsers(this.initializeAuth());
-        this.authn = users;
-        this.acach = new ArtipieCaches.All(users, this.storages);
+        final CachedUsers auth = YamlSettings.initAuth(this.meta());
+        this.security = new ArtipieSecurity.FromYaml(
+            this.meta(), auth, YamlSettings.initPolicyStorage(this.meta())
+        );
+        this.acach = new ArtipieCaches.All(auth, new CachedStorages());
         this.mctx = new MetricsContext(this.meta());
     }
 
     @Override
     public Storage configStorage() {
-        return this.storages.storage(this);
+        return this.acach.storagesCache().storage(this);
     }
 
     @Override
-    public Authentication auth() {
-        return this.authn;
+    public ArtipieSecurity authz() {
+        return this.security;
     }
 
     @Override
@@ -135,18 +140,6 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public Optional<Key> credentialsKey() {
-        return this.credentialsYamlSequence().map(
-            seq -> seq.values().stream()
-                .filter(
-                    node -> CredentialsType.FILE.toString()
-                        .equalsIgnoreCase(node.asMapping().string(YamlSettings.NODE_TYPE))
-                ).findFirst().map(YamlNode::asMapping)
-        ).orElse(Optional.ofNullable(this.meta().yamlMapping(YamlSettings.NODE_CREDENTIALS)))
-            .map(file -> new Key.From(file.string(YamlSettings.NODE_PATH)));
-    }
-
-    @Override
     public Optional<KeyStore> keyStore() {
         return Optional.ofNullable(this.meta().yamlMapping(YamlSettings.NODE_SSL))
             .map(KeyStoreFactory::newInstance);
@@ -168,65 +161,68 @@ public final class YamlSettings implements Settings {
     }
 
     /**
-     * Initialise authentication taking into account various possible authentication types.
-     * @return Authentication instance, not cached
+     * Policy storage if `artipie` policy is used or empty.
+     * @param cfg Yaml config
+     * @return Storage if configured
      */
-    private Authentication initializeAuth() {
-        return this.withAlternative(
-            this.credentialsYamlSequence().map(
-                s -> s.values().stream()
-                    .map(YamlNode::asMapping)
-                    .map(this::auth)
-                    .findFirst()
-                    .orElseThrow()
-            ).orElse(
-                this.auth(this.meta().yamlMapping(YamlSettings.NODE_CREDENTIALS))
-            )
-        );
-    }
-
-    /**
-     * Credentials YAML sequence.
-     *
-     * @return YAML sequence.
-     */
-    private Optional<YamlSequence> credentialsYamlSequence() {
-        return Optional.ofNullable(
-            this.meta().yamlSequence(YamlSettings.NODE_CREDENTIALS)
-        );
-    }
-
-    /**
-     * Authentication from yaml file.
-     *
-     * @param cred YAML credentials.
-     * @return Completion action with {@code Users}.
-     */
-    private Authentication auth(final YamlMapping cred) {
-        return CredentialsType.valueOf(cred).auth(this, cred);
-    }
-
-    /**
-     * Full chain of authentication.
-     *
-     * @param auth Authentication from credentials.
-     * @return Completion action with {@code Authentication}.
-     */
-    private Authentication withAlternative(final Authentication auth) {
-        Authentication res = auth;
-        final Optional<YamlSequence> seq = this.credentialsYamlSequence();
-        if (seq.isPresent()) {
-            final List<Authentication> list = seq.get().values()
-                .stream()
-                .skip(1)
-                .map(YamlNode::asMapping)
-                .map(YamlSettings.this::auth)
-                .toList();
-            for (final Authentication users : list) {
-                res = new Authentication.Joined(res, users);
+    private static Optional<Storage> initPolicyStorage(final YamlMapping cfg) {
+        Optional<Storage> res = Optional.empty();
+        final YamlSequence credentials = cfg.yamlSequence(YamlSettings.NODE_CREDENTIALS);
+        final YamlMapping policy = cfg.yamlMapping(YamlSettings.NODE_POLICY);
+        if (credentials != null && !credentials.isEmpty()) {
+            final Optional<YamlMapping> asto = credentials
+                .values().stream().map(YamlNode::asMapping)
+                .filter(node -> YamlSettings.ARTIPIE.equals(node.string(YamlSettings.NODE_TYPE)))
+                .findFirst().map(node -> node.yamlMapping(YamlSettings.NODE_STORAGE));
+            if (asto.isPresent()) {
+                res = Optional.of(
+                    new StoragesLoader().newObject(
+                        asto.get().string(YamlSettings.NODE_TYPE),
+                        new Config.YamlStorageConfig(asto.get())
+                    )
+                );
+            } else if (policy != null
+                && YamlSettings.ARTIPIE.equals(policy.string(YamlSettings.NODE_TYPE))
+                && policy.yamlMapping(YamlSettings.NODE_STORAGE) != null) {
+                res = Optional.of(
+                    new StoragesLoader().newObject(
+                        policy.yamlMapping(YamlSettings.NODE_STORAGE)
+                            .string(YamlSettings.NODE_TYPE),
+                        new Config.YamlStorageConfig(
+                            policy.yamlMapping(YamlSettings.NODE_STORAGE)
+                        )
+                    )
+                );
             }
         }
         return res;
+    }
+
+    /**
+     * Initialise authentication. If `credentials` section is absent or empty,
+     * {@link AuthFromEnv} is used.
+     * @param settings Yaml settings
+     * @return Authentication
+     */
+    private static CachedUsers initAuth(final YamlMapping settings) {
+        Authentication res;
+        final YamlSequence creds = settings.yamlSequence(YamlSettings.NODE_CREDENTIALS);
+        if (creds == null || creds.isEmpty()) {
+            Logger.info(
+                ArtipieSecurity.class,
+                "Credentials yaml section is absent or empty, using AuthFromEnv()"
+            );
+            res = new AuthFromEnv();
+        } else {
+            final List<Authentication> auth = creds.values().stream().map(
+                node -> CredentialsType.valueOf(node.asMapping())
+            ).map(type -> type.auth(settings)).toList();
+            res = auth.get(0);
+            for (final Authentication users : auth.subList(1, auth.size())) {
+                res = new Authentication.Joined(res, users);
+            }
+        }
+        return new CachedUsers(res);
     }
 
     /**
@@ -237,66 +233,58 @@ public final class YamlSettings implements Settings {
     enum CredentialsType {
 
         /**
-         * Credentials type: file.
+         * Credentials type: artipie.
          */
-        FILE((settings, mapping) -> {
-            final String path = mapping.string(YamlSettings.NODE_PATH);
-            if (path == null) {
-                throw new ArtipieException(
-                    "Invalid credentials configuration: type `file` requires `path`!"
-                );
-            } else {
-                final Storage storage = settings.configStorage();
-                final KeyFromPath key = new KeyFromPath(path);
-                return storage.exists(key).thenCompose(
-                    exists -> {
-                        final CompletionStage<Authentication> auth;
-                        if (exists) {
-                            auth = new CachedCreds().credentials(storage, key)
-                                .thenApply(AuthFromYaml::new);
-                        } else {
-                            auth = CompletableFuture.completedStage(new AuthFromEnv());
-                        }
-                        return auth;
-                    }
-                ).join();
-            }
+        ARTIPIE(cfg -> {
+            return YamlSettings.initPolicyStorage(cfg).map(
+                asto -> new AuthFromStorage(new BlockingStorage(asto))
+            ).orElseThrow(
+                () ->  new ArtipieException(
+                    "Failed to create artipie auth, storage is not configured"
+                )
+            );
         }),
 
         /**
          * Credentials type: github.
          */
-        GITHUB((settings, mapping) -> new GithubAuth()),
+        GITHUB(cfg -> new GithubAuth()),
 
         /**
          * Credentials type: env.
          */
-        ENV((settings, mapping) -> new AuthFromEnv()),
+        ENV(cfg -> new AuthFromEnv()),
 
         /**
          * Credentials type: keycloak.
          */
-        KEYCLOAK((settings, mapping) -> new AuthFromKeycloak(
-            new Configuration(
-                mapping.string("url"),
-                mapping.string("realm"),
-                mapping.string("client-id"),
-                Map.of("secret", mapping.string("client-password")),
-                null
-            )
-        ));
+        KEYCLOAK(cfg -> {
+            final YamlMapping creds = cfg.yamlSequence(YamlSettings.NODE_CREDENTIALS)
+                .values().stream().map(YamlNode::asMapping)
+                .filter(node -> "keycloak".equals(node.string(YamlSettings.NODE_TYPE)))
+                .findFirst().orElseThrow();
+            return new AuthFromKeycloak(
+                new Configuration(
+                    creds.string("url"),
+                    creds.string("realm"),
+                    creds.string("client-id"),
+                    Map.of("secret", creds.string("client-password")),
+                    null
+                )
+            );
+        });
 
         /**
          * Transform yaml to completion action with authentication.
          */
-        private final BiFunction<YamlSettings, YamlMapping, Authentication> map;
+        private final Function<YamlMapping, Authentication> map;
 
         /**
          * Ctor.
          *
          * @param map Transform yaml to completion action with users.
          */
-        CredentialsType(final BiFunction<YamlSettings, YamlMapping, Authentication> map) {
+        CredentialsType(final Function<YamlMapping, Authentication> map) {
             this.map = map;
         }
 
@@ -320,15 +308,12 @@ public final class YamlSettings implements Settings {
         /**
          * Transform yaml to completion action with authentication.
          *
-         * @param settings YamlSettings.
          * @param yaml Credentials yaml mapping.
          * @return Completion action with users.
          */
-        Authentication auth(
-            final YamlSettings settings,
-            final YamlMapping yaml
-        ) {
-            return this.map.apply(settings, yaml);
+        Authentication auth(final YamlMapping yaml) {
+            return this.map.apply(yaml);
         }
     }
+
 }

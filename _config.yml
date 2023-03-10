@@ -1,9 +1,0 @@
-# Default config for Artipie docker image
-meta:
-  storage:
-    type: fs
-    path: /var/artipie/repo
-  credentials:
-    type: file
-    path: _credentials.yml
-  layout: org

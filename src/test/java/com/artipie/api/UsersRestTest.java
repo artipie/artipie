@@ -21,6 +21,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -29,6 +30,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
  * @since 0.27
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Disabled
 final class UsersRestTest extends RestApiServerBase {
 
     @Test

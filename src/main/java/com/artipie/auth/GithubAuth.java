@@ -5,6 +5,7 @@
 package com.artipie.auth;
 
 import com.artipie.ArtipieException;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.jcabi.github.RtGithub;
 import java.io.IOException;
@@ -61,8 +62,8 @@ public final class GithubAuth implements Authentication {
     }
 
     @Override
-    public Optional<Authentication.User> user(final String username, final String password) {
-        Optional<Authentication.User> result = Optional.empty();
+    public Optional<AuthUser> user(final String username, final String password) {
+        Optional<AuthUser> result = Optional.empty();
         final Matcher matcher = GithubAuth.PTN_NAME.matcher(username);
         if (matcher.matches()) {
             try {
@@ -70,7 +71,7 @@ public final class GithubAuth implements Authentication {
                 if (
                     Objects.equals(login, matcher.group(1).toLowerCase(Locale.US))
                 ) {
-                    result = Optional.of(new Authentication.User(matcher.group(1)));
+                    result = Optional.of(new AuthUser(matcher.group(1), "github"));
                 }
             } catch (final AssertionError error) {
                 if (error.getMessage() == null

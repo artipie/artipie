@@ -4,6 +4,7 @@
  */
 package com.artipie.auth;
 
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import java.util.Map;
 import java.util.Objects;
@@ -47,12 +48,12 @@ public final class AuthFromEnv implements Authentication {
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
-    public Optional<Authentication.User> user(final String username, final String password) {
-        final Optional<Authentication.User> result;
+    public Optional<AuthUser> user(final String username, final String password) {
+        final Optional<AuthUser> result;
         // @checkstyle LineLengthCheck (5 lines)
         if (Objects.equals(Objects.requireNonNull(username), this.env.get(AuthFromEnv.ENV_NAME))
             && Objects.equals(Objects.requireNonNull(password), this.env.get(AuthFromEnv.ENV_PASS))) {
-            result = Optional.of(new Authentication.User(username));
+            result = Optional.of(new AuthUser(username, "env"));
         } else {
             result = Optional.empty();
         }

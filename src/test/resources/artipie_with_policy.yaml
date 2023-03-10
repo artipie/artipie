@@ -6,6 +6,8 @@ meta:
   base_url: http://artipie:8080/
   credentials:
     - type: artipie
-      storage:
-        type: fs
-        path: /var/artipie/security
+  policy:
+    type: artipie
+    storage:
+      type: fs
+      path: /var/artipie/security

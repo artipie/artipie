@@ -5,7 +5,7 @@
 package com.artipie.docker;
 
 import com.artipie.adapters.docker.DockerPermissions;
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  *
  * @since 0.15
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DockerPermissionsTest {
 
     @ParameterizedTest
@@ -34,7 +35,7 @@ class DockerPermissionsTest {
                 captured.set(action);
                 return action.equals(translated);
             }
-        ).allowed(new Authentication.User("alice"), original);
+        ).allowed(new AuthUser("alice", "test"), original);
         MatcherAssert.assertThat(
             captured.get(),
             new IsEqual<>(translated)
@@ -46,7 +47,7 @@ class DockerPermissionsTest {
     void shouldForwardResult(final boolean result) {
         MatcherAssert.assertThat(
             new DockerPermissions((user, action) -> result).allowed(
-                new Authentication.User("bob"), "repository:my-test:pull"
+                new AuthUser("bob", "test"), "repository:my-test:pull"
             ),
             new IsEqual<>(result)
         );
@@ -62,7 +63,7 @@ class DockerPermissionsTest {
         final DockerPermissions permissions = new DockerPermissions((user, act) -> true);
         Assertions.assertThrows(
             RuntimeException.class,
-            () -> permissions.allowed(new Authentication.User("chuck"), action)
+            () -> permissions.allowed(new AuthUser("chuck", "test"), action)
         );
     }
 }

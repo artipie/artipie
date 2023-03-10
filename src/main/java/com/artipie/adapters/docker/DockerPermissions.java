@@ -6,7 +6,7 @@ package com.artipie.adapters.docker;
 
 import com.artipie.docker.http.Scope;
 import com.artipie.http.auth.Action;
-import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Permission;
 import com.artipie.http.auth.Permissions;
 
@@ -32,7 +32,7 @@ public final class DockerPermissions implements Permissions {
     }
 
     @Override
-    public boolean allowed(final Authentication.User user, final String action) {
+    public boolean allowed(final AuthUser user, final String action) {
         final Action translated;
         switch (new Scope.FromString(action).action()) {
             case "pull":

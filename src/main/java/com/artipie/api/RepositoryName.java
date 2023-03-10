@@ -16,12 +16,12 @@ public interface RepositoryName {
     /**
      * Username path parameter name.
      */
-    String UNAME = "uname";
+    String USER_NAME = "uname";
 
     /**
      * Repository path parameter name.
      */
-    String RNAME = "rname";
+    String REPOSITORY_NAME = "rname";
 
     /**
      * The name of the repository.
@@ -69,11 +69,11 @@ public interface RepositoryName {
         public String toString() {
             final String reponame;
             if (new Layout.Flat().toString().equals(this.layout)) {
-                reponame = this.context.pathParam(RepositoryName.RNAME);
+                reponame = this.context.pathParam(RepositoryName.REPOSITORY_NAME);
             } else {
                 reponame = new Org(
-                    this.context.pathParam(RepositoryName.RNAME),
-                    this.context.pathParam(RepositoryName.UNAME)
+                    this.context.pathParam(RepositoryName.REPOSITORY_NAME),
+                    this.context.pathParam(RepositoryName.USER_NAME)
                 ).toString();
             }
             return reponame;

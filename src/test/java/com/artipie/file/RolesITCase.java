@@ -13,11 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
- * Integration test with user's group permissions.
+ * Integration test with user's roles permissions.
  * @since 0.26
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public final class GroupsITCase {
+public final class RolesITCase {
 
     /**
      * Deployment for tests.
@@ -26,9 +26,12 @@ public final class GroupsITCase {
      */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
-        () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("binary/bin-user-groups.yml", "bin")
-            .withCredentials("_credentials.yaml"),
+        () -> new TestDeployment.ArtipieContainer().withConfig("artipie_with_policy.yaml")
+            .withRepoConfig("binary/bin.yml", "bin")
+            .withUser("security/users/bob.yaml", "bob")
+            .withUser("security/users/john.yaml", "john")
+            .withRole("security/roles/admin.yaml", "admin")
+            .withRole("security/roles/readers.yaml", "readers"),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
             .withWorkingDirectory("/w")
     );

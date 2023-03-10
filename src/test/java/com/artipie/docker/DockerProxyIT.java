@@ -42,7 +42,7 @@ final class DockerProxyIT {
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withCredentials("_credentials.yaml")
+            .withUser("security/users/alice.yaml", "alice")
             .withRepoConfig("docker/docker-proxy.yml", "my-docker"),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
             .withPrivilegedMode(true)
