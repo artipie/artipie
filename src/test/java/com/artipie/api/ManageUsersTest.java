@@ -4,23 +4,13 @@
  */
 package com.artipie.api;
 
-import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.settings.CredsConfigYaml;
 import com.artipie.settings.users.CrudUsers;
-import com.artipie.settings.users.PasswordFormat;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonArray;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.IsEqual;
@@ -29,9 +19,6 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
@@ -41,11 +28,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ManageUsersTest {
-
-    /**
-     * Test credentials key.
-     */
-    static final Key KEY = new Key.From("creds.yaml");
 
     /**
      * Test storage.
@@ -60,53 +42,60 @@ class ManageUsersTest {
     @BeforeEach
     void init() {
         this.blsto = new BlockingStorage(new InMemoryStorage());
-        this.users = new ManageUsers(ManageUsersTest.KEY, this.blsto);
+        this.users = new ManageUsers(this.blsto);
     }
 
     @Test
     void listUsers() throws JSONException {
         this.blsto.save(
-            ManageUsersTest.KEY,
-            new CredsConfigYaml().withUserAndGroups("Alice", List.of("readers"))
-                .withFullInfo(
-                    "Bob", PasswordFormat.PLAIN, "xyz", "bob@example.com", Set.of("admin")
-                ).toString().getBytes(StandardCharsets.UTF_8)
+            new Key.From("users/Alice.yaml"),
+            String.join(
+                System.lineSeparator(),
+                "type: plain",
+                "pass: qwerty",
+                "roles:",
+                "  - readers",
+                "permissions:",
+                "  adapter_basic_permission:",
+                "    repo1:",
+                "      - write"
+            ).getBytes(StandardCharsets.UTF_8)
+        );
+        this.blsto.save(
+            new Key.From("users/Bob.yml"),
+            String.join(
+                System.lineSeparator(),
+                "type: plain",
+                "pass: qwerty",
+                "email: bob@example.com",
+                "roles:",
+                "  - admin"
+            ).getBytes(StandardCharsets.UTF_8)
         );
         JSONAssert.assertEquals(
             this.users.list().toString(),
             // @checkstyle LineLengthCheck (1 line)
-            "[{\"name\":\"Alice\",\"groups\":[\"readers\"]},{\"name\":\"Bob\",\"email\":\"bob@example.com\",\"groups\":[\"admin\"]}]",
+            "[{\"name\":\"Alice\",\"roles\":[\"readers\"], \"permissions\":{\"adapter_basic_permission\":{\"repo1\":[\"write\"]}}},{\"name\":\"Bob\",\"email\":\"bob@example.com\",\"roles\":[\"admin\"]}]",
             true
         );
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void returnsEmptyList(final boolean add) {
-        if (add) {
-            this.blsto.save(ManageUsersTest.KEY, new byte[]{});
-        }
+    @Test
+    void returnsEmptyList() {
         MatcherAssert.assertThat(
             this.users.list(),
             new IsEmptyCollection<>()
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("creds")
-    void addsUser(final Pair<YamlMapping, Boolean> pair) {
-        if (pair.getRight()) {
-            this.blsto.save(
-                ManageUsersTest.KEY,
-                pair.getLeft().toString().getBytes(StandardCharsets.UTF_8)
-            );
-        }
+    @Test
+    void addsNewUser() {
         final String alice = "Alice";
         final String email = "Alice@example.com";
         this.users.addOrUpdate(
             Json.createObjectBuilder().add("type", "plain").add("pass", "xyz")
                 .add("email", email)
-                .add("groups", Json.createArrayBuilder().add("reader").add("creator").build())
+                .add("roles", Json.createArrayBuilder().add("reader").add("creator").build())
                 .build(),
             alice
         );
@@ -117,31 +106,67 @@ class ManageUsersTest {
         );
         MatcherAssert.assertThat(
             "Failed to add user",
-            new String(this.blsto.value(ManageUsersTest.KEY), StandardCharsets.UTF_8),
+            new String(this.blsto.value(new Key.From("users/Alice.yml")), StandardCharsets.UTF_8),
             new StringContains(
                 String.join(
                     System.lineSeparator(),
-                    "  Alice:",
-                    "    type: plain",
-                    "    pass: xyz",
-                    "    email: Alice@example.com",
-                    "    groups:",
-                    "      - reader",
-                    "      - creator"
+                    "type: plain",
+                    "pass: xyz",
+                    "email: Alice@example.com",
+                    "roles:",
+                    "  - reader",
+                    "  - creator"
                 )
             )
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("creds")
-    void throwsErrorWhenUserNotExist(final Pair<YamlMapping, Boolean> pair) {
-        if (pair.getRight()) {
-            this.blsto.save(
-                ManageUsersTest.KEY,
-                pair.getLeft().toString().getBytes(StandardCharsets.UTF_8)
-            );
-        }
+    @Test
+    void replacesUser() {
+        this.blsto.save(
+            new Key.From("users/Alice.yaml"),
+            String.join(
+                System.lineSeparator(),
+                "type: plain",
+                "pass: 025",
+                "email: abc@example.com",
+                "roles:",
+                "  - java-dev"
+            ).getBytes(StandardCharsets.UTF_8)
+        );
+        final String alice = "Alice";
+        final String email = "Alice@example.com";
+        this.users.addOrUpdate(
+            Json.createObjectBuilder().add("type", "plain").add("pass", "xyz")
+                .add("email", email)
+                .add("roles", Json.createArrayBuilder().add("reader").add("creator").build())
+                .build(),
+            alice
+        );
+        final JsonArray list = this.users.list();
+        MatcherAssert.assertThat(
+            "Failed to find added user",
+            list.stream().anyMatch(usr -> alice.equals(usr.asJsonObject().getString("name")))
+        );
+        MatcherAssert.assertThat(
+            "Failed to add user",
+            new String(this.blsto.value(new Key.From("users/Alice.yaml")), StandardCharsets.UTF_8),
+            new StringContains(
+                String.join(
+                    System.lineSeparator(),
+                    "type: plain",
+                    "pass: xyz",
+                    "email: Alice@example.com",
+                    "roles:",
+                    "  - reader",
+                    "  - creator"
+                )
+            )
+        );
+    }
+
+    @Test
+    void throwsErrorWhenUserNotExist() {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> this.users.remove("Alice")
@@ -150,63 +175,104 @@ class ManageUsersTest {
 
     @Test
     void removesUser() {
-        this.blsto.save(
-            ManageUsersTest.KEY,
-            new CredsConfigYaml().withUsers("John", "Mark").yaml().toString()
-                .getBytes(StandardCharsets.UTF_8)
-        );
-        this.users.remove("John");
+        this.blsto.save(new Key.From("users/john.yaml"), new byte[]{});
+        this.users.remove("john");
         MatcherAssert.assertThat(
             this.users.list().size(),
-            new IsEqual<>(1)
+            new IsEqual<>(0)
         );
     }
 
     @Test
     void altersPassword() {
         this.blsto.save(
-            ManageUsersTest.KEY,
-            new CredsConfigYaml().withUsers("Mark").withFullInfo(
-                "John", PasswordFormat.PLAIN, "abc",
-                "john@example.com", Set.of("admin")
-            ).yaml().toString().getBytes(StandardCharsets.UTF_8)
+            new Key.From("users/John.yaml"),
+            String.join(
+                System.lineSeparator(),
+                "type: plain",
+                "pass: bdhdb",
+                "email: john@example.com",
+                "roles:",
+                "  - java-dev",
+                "permissions:",
+                "  adapter_basic_permission:",
+                "    repo1:",
+                "      - write"
+            ).getBytes(StandardCharsets.UTF_8)
         );
         this.users.alterPassword(
             "John",
             Json.createObjectBuilder().add("new_pass", "[poiu").add("new_type", "plain").build()
         );
         MatcherAssert.assertThat(
-            new String(this.blsto.value(ManageUsersTest.KEY), StandardCharsets.UTF_8),
+            new String(this.blsto.value(new Key.From("users/John.yaml")), StandardCharsets.UTF_8),
             new IsEqual<>(
                 String.join(
                     System.lineSeparator(),
-                    "credentials:",
-                    "  Mark:",
-                    "    pass: 123",
-                    "    type: plain",
-                    "  John:",
-                    "    email: john@example.com",
-                    "    groups:",
-                    "      - admin",
-                    "    pass: \"[poiu\"",
-                    "    type: plain"
+                    "type: plain",
+                    "pass: \"[poiu\"",
+                    "email: john@example.com",
+                    "roles:",
+                    "  - \"java-dev\"",
+                    "permissions:",
+                    "  adapter_basic_permission:",
+                    "    repo1:",
+                    "      - write"
                 )
             )
         );
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private static Stream<Pair<YamlMapping, Boolean>> creds() {
-        return Stream.of(
-            new ImmutablePair<>(
-                new CredsConfigYaml().withFullInfo(
-                    "Bob", PasswordFormat.SHA256, "abc123",
-                    "bob@example.com", Collections.emptySet()
-                ).yaml(),
-                true
-            ),
-            new ImmutablePair<>(Yaml.createYamlMappingBuilder().build(), true),
-            new ImmutablePair<>(Yaml.createYamlMappingBuilder().build(), false)
+    @Test
+    void enablesDisabledUser() {
+        this.blsto.save(
+            new Key.From("users/John.yaml"),
+            String.join(
+                System.lineSeparator(),
+                "type: plain",
+                "pass: bdhdb",
+                "email: john@example.com",
+                "enabled: false"
+            ).getBytes(StandardCharsets.UTF_8)
+        );
+        this.users.enable("John");
+        MatcherAssert.assertThat(
+            new String(this.blsto.value(new Key.From("users/John.yaml")), StandardCharsets.UTF_8),
+            new IsEqual<>(
+                String.join(
+                    System.lineSeparator(),
+                    "type: plain",
+                    "pass: bdhdb",
+                    "email: john@example.com",
+                    "enabled: true"
+                )
+            )
+        );
+    }
+
+    @Test
+    void disablesUser() {
+        this.blsto.save(
+            new Key.From("users/John.yaml"),
+            String.join(
+                System.lineSeparator(),
+                "type: plain",
+                "pass: bdhdb",
+                "email: john@example.com"
+            ).getBytes(StandardCharsets.UTF_8)
+        );
+        this.users.disable("John");
+        MatcherAssert.assertThat(
+            new String(this.blsto.value(new Key.From("users/John.yaml")), StandardCharsets.UTF_8),
+            new IsEqual<>(
+                String.join(
+                    System.lineSeparator(),
+                    "type: plain",
+                    "pass: bdhdb",
+                    "email: john@example.com",
+                    "enabled: false"
+                )
+            )
         );
     }
 

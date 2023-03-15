@@ -162,6 +162,62 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/users/{uname}/disable:
+    post:
+      summary: Disable user.
+      operationId: disable
+      tags:
+        - users
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: User name
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: User disabled successfully
+        '404':
+          description: User does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/users/{uname}/enable:
+    post:
+      summary: Enable user.
+      operationId: enable
+      tags:
+        - users
+      parameters:
+        - name: uname
+          in: path
+          required: true
+          description: User name
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: User enabled successfully
+        '404':
+          description: User does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   securitySchemes:
     bearerAuth:

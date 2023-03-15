@@ -4,7 +4,11 @@
  */
 package com.artipie.api;
 
+import com.artipie.asto.Storage;
+import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
+import com.artipie.security.policy.Policy;
+import com.artipie.settings.ArtipieSecurity;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
@@ -18,7 +22,6 @@ import java.util.stream.Stream;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -58,6 +61,8 @@ public final class AuthRestOrgTest extends RestApiServerBase {
             new TestRequest(HttpMethod.GET, "/api/v1/users/Alice"),
             new TestRequest(HttpMethod.DELETE, "/api/v1/users/Justine"),
             new TestRequest(HttpMethod.POST, "/api/v1/users/David/alter/password"),
+            new TestRequest(HttpMethod.POST, "/api/v1/users/David/enable"),
+            new TestRequest(HttpMethod.POST, "/api/v1/users/David/disable"),
             new TestRequest(HttpMethod.GET, "/api/v1/repository/list/John"),
             new TestRequest(HttpMethod.GET, "/api/v1/repository/Olga/my-maven"),
             new TestRequest(HttpMethod.PUT, "/api/v1/repository/Jane/rpm"),
@@ -88,7 +93,6 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Test
-    @Disabled
     void returnsOkWhenTokenIsPresent(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
@@ -134,7 +138,6 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Test
-    @Disabled
     void createsAndRemovesUserWithAuth(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
@@ -187,7 +190,6 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Test
-    @Disabled
     void returnUnauthorizedWhenOldPasswordIsNotCorrectOnAlterPassword(final Vertx vertx,
         final VertxTestContext ctx) throws Exception {
         this.requestAndAssert(
@@ -206,8 +208,23 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Override
-    Authentication auth() {
-        return new Authentication.Single(AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+    ArtipieSecurity auth() {
+        return new ArtipieSecurity() {
+            @Override
+            public Authentication authentication() {
+                return new Authentication.Single(AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+            }
+
+            @Override
+            public Policy<?> policy() {
+                return Policy.FREE;
+            }
+
+            @Override
+            public Optional<Storage> policyStorage() {
+                return Optional.of(new InMemoryStorage());
+            }
+        };
     }
 
     @Override

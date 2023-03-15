@@ -68,6 +68,12 @@ public final class UsersRest extends BaseRest {
         rbr.operation("alterPassword")
             .handler(this::alterPassword)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rbr.operation("enable")
+            .handler(this::enableUser)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rbr.operation("disable")
+            .handler(this::disableUser)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
 
     /**
@@ -78,6 +84,40 @@ public final class UsersRest extends BaseRest {
         final String uname = context.pathParam(RepositoryName.USER_NAME);
         try {
             this.users.remove(uname);
+        } catch (final IllegalStateException err) {
+            Logger.error(this, err.getMessage());
+            context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
+            return;
+        }
+        this.cache.invalidate(uname);
+        context.response().setStatusCode(HttpStatus.OK_200).end();
+    }
+
+    /**
+     * Removes user.
+     * @param context Request context
+     */
+    private void enableUser(final RoutingContext context) {
+        final String uname = context.pathParam(RepositoryName.USER_NAME);
+        try {
+            this.users.enable(uname);
+        } catch (final IllegalStateException err) {
+            Logger.error(this, err.getMessage());
+            context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
+            return;
+        }
+        this.cache.invalidate(uname);
+        context.response().setStatusCode(HttpStatus.OK_200).end();
+    }
+
+    /**
+     * Removes user.
+     * @param context Request context
+     */
+    private void disableUser(final RoutingContext context) {
+        final String uname = context.pathParam(RepositoryName.USER_NAME);
+        try {
+            this.users.disable(uname);
         } catch (final IllegalStateException err) {
             Logger.error(this, err.getMessage());
             context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
