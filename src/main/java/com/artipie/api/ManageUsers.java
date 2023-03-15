@@ -172,8 +172,8 @@ public final class ManageUsers implements CrudUsers {
     private static YamlMappingBuilder copyUserInfo(final YamlMapping yaml) {
         YamlMappingBuilder builder = Yaml.createYamlMappingBuilder();
         for (final YamlNode node : yaml.keys()) {
-            final String val = node.asScalar().value();
-            builder = builder.add(val, yaml.value(val));
+            final String key = node.asScalar().value();
+            builder = builder.add(key, yaml.value(key));
         }
         return builder;
     }
