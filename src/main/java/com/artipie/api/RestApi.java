@@ -146,7 +146,6 @@ public final class RestApi extends AbstractVerticle {
     private void startServices(final RouterBuilder repoRb, final RouterBuilder userRb,
         final RouterBuilder tokenRb, final RouterBuilder settingsRb, final RouterBuilder rolesRb) {
         this.addJwtAuth(tokenRb, repoRb, userRb, settingsRb, rolesRb);
-        final Router router = repoRb.createRouter();
         final BlockingStorage asto = new BlockingStorage(this.configsStorage);
         new RepositoryRest(
             new ManageRepoSettings(asto),
@@ -158,16 +157,17 @@ public final class RestApi extends AbstractVerticle {
                 new ManageUsers(new BlockingStorage(this.security.policyStorage().get())),
                 this.caches.usersCache(), this.caches.policyCache(), this.security.authentication()
             ).init(userRb);
-            router.route("/*").subRouter(userRb.createRouter());
         }
         if (this.security.policy() instanceof CachedYamlPolicy) {
             new RolesRest(
                 new ManageRoles(new BlockingStorage(this.security.policyStorage().get())),
                 this.caches.policyCache()
             ).init(rolesRb);
-            router.route("/*").subRouter(rolesRb.createRouter());
         }
         new SettingsRest(this.port, this.layout).init(settingsRb);
+        final Router router = repoRb.createRouter();
+        router.route("/*").subRouter(rolesRb.createRouter());
+        router.route("/*").subRouter(userRb.createRouter());
         router.route("/*").subRouter(tokenRb.createRouter());
         router.route("/*").subRouter(settingsRb.createRouter());
         router.route("/api/*").handler(
