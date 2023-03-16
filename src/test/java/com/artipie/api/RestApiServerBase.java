@@ -11,6 +11,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.nuget.RandomFreePort;
+import com.artipie.security.policy.CachedYamlPolicy;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.cache.ArtipieCaches;
@@ -109,7 +110,6 @@ public abstract class RestApiServerBase {
     /**
      * Artipie authentication, this method can be overridden if necessary.
      * @return Authentication instance.
-     * @checkstyle NonStaticMethodCheck (5 lines)
      */
     ArtipieSecurity auth() {
         return new ArtipieSecurity() {
@@ -120,7 +120,10 @@ public abstract class RestApiServerBase {
 
             @Override
             public Policy<?> policy() {
-                return Policy.FREE;
+                //@checkstyle MagicNumberCheck (5 lines)
+                return new CachedYamlPolicy(
+                    new BlockingStorage(RestApiServerBase.this.ssto), 180_000L
+                );
             }
 
             @Override

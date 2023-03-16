@@ -22,16 +22,22 @@ public final class TestArtipieCaches implements ArtipieCaches {
     private final StoragesCache strgcache;
 
     /**
-     * Was invalidating method called?
+     * Was users invalidating method called?
      */
-    private final AtomicLong invalidation;
+    private final AtomicLong cleanuser;
+
+    /**
+     * Was policy invalidating method called?
+     */
+    private final AtomicLong cleanpolicy;
 
     /**
      * Ctor with all fake initialized caches.
      */
     public TestArtipieCaches() {
         this.strgcache = new TestStoragesCache();
-        this.invalidation = new AtomicLong();
+        this.cleanuser = new AtomicLong();
+        this.cleanpolicy = new AtomicLong();
     }
 
     @Override
@@ -44,7 +50,7 @@ public final class TestArtipieCaches implements ArtipieCaches {
         return new Cleanable<>() {
             @Override
             public void invalidate(final String uname) {
-                TestArtipieCaches.this.invalidation.incrementAndGet();
+                TestArtipieCaches.this.cleanuser.incrementAndGet();
             }
 
             @Override
@@ -54,11 +60,34 @@ public final class TestArtipieCaches implements ArtipieCaches {
         };
     }
 
+    @Override
+    public Cleanable<String> policyCache() {
+        return new Cleanable<>() {
+            @Override
+            public void invalidate(final String uname) {
+                TestArtipieCaches.this.cleanpolicy.incrementAndGet();
+            }
+
+            @Override
+            public void invalidateAll() {
+                throw new NotImplementedException("not implemented");
+            }
+        };
+    }
+
     /**
-     * True if invalidate method of the {@link Cleanable} was called exactly one time.
+     * True if invalidate method of the {@link Cleanable} for users was called exactly one time.
      * @return True if invalidated
      */
-    public boolean wasInvalidated() {
-        return this.invalidation.get() == 1;
+    public boolean wereUsersInvalidated() {
+        return this.cleanuser.get() == 1;
+    }
+
+    /**
+     * True if invalidate method of the {@link Cleanable} for policy was called exactly one time.
+     * @return True if invalidated
+     */
+    public boolean wasPolicyInvalidated() {
+        return this.cleanpolicy.get() == 1;
     }
 }

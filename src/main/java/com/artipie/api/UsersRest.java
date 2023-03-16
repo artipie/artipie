@@ -31,7 +31,12 @@ public final class UsersRest extends BaseRest {
     /**
      * Artipie authenticated users cache.
      */
-    private final Cleanable<String> cache;
+    private final Cleanable<String> ucache;
+
+    /**
+     * Artipie authenticated users cache.
+     */
+    private final Cleanable<String> pcache;
 
     /**
      * Artipie auth.
@@ -41,13 +46,16 @@ public final class UsersRest extends BaseRest {
     /**
      * Ctor.
      * @param users Crud users object
-     * @param cache Artipie authenticated users cache
+     * @param ucache Artipie authenticated users cache
+     * @param pcache Artipie policy cache
      * @param auth Artipie authentication
+     * @checkstyle ParameterNumberCheck (50 lines)
      */
-    public UsersRest(final CrudUsers users, final Cleanable<String> cache,
-        final Authentication auth) {
+    public UsersRest(final CrudUsers users, final Cleanable<String> ucache,
+        final Cleanable<String> pcache, final Authentication auth) {
         this.users = users;
-        this.cache = cache;
+        this.ucache = ucache;
+        this.pcache = pcache;
         this.auth = auth;
     }
 
@@ -89,7 +97,8 @@ public final class UsersRest extends BaseRest {
             context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
             return;
         }
-        this.cache.invalidate(uname);
+        this.ucache.invalidate(uname);
+        this.pcache.invalidate(uname);
         context.response().setStatusCode(HttpStatus.OK_200).end();
     }
 
@@ -106,7 +115,8 @@ public final class UsersRest extends BaseRest {
             context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
             return;
         }
-        this.cache.invalidate(uname);
+        this.ucache.invalidate(uname);
+        this.pcache.invalidate(uname);
         context.response().setStatusCode(HttpStatus.OK_200).end();
     }
 
@@ -123,7 +133,8 @@ public final class UsersRest extends BaseRest {
             context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();
             return;
         }
-        this.cache.invalidate(uname);
+        this.ucache.invalidate(uname);
+        this.pcache.invalidate(uname);
         context.response().setStatusCode(HttpStatus.OK_200).end();
     }
 
@@ -137,7 +148,8 @@ public final class UsersRest extends BaseRest {
             Json.createReader(new StringReader(context.body().asString())).readObject(),
             uname
         );
-        this.cache.invalidate(uname);
+        this.ucache.invalidate(uname);
+        this.pcache.invalidate(uname);
         context.response().setStatusCode(HttpStatus.CREATED_201).end();
     }
 
@@ -176,7 +188,7 @@ public final class UsersRest extends BaseRest {
             try {
                 this.users.alterPassword(uname, body);
                 context.response().setStatusCode(HttpStatus.OK_200).end();
-                this.cache.invalidate(uname);
+                this.ucache.invalidate(uname);
             } catch (final IllegalStateException err) {
                 Logger.error(this, err.getMessage());
                 context.response().setStatusCode(HttpStatus.NOT_FOUND_404).end();

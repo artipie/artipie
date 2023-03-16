@@ -191,7 +191,11 @@ final class UsersRestTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Auth cache should be invalidated",
-                    ((TestArtipieCaches) this.settingsCaches()).wasInvalidated()
+                    ((TestArtipieCaches) this.settingsCaches()).wereUsersInvalidated()
+                );
+                MatcherAssert.assertThat(
+                    "Policy cache should be invalidated",
+                    ((TestArtipieCaches) this.settingsCaches()).wasPolicyInvalidated()
                 );
             }
         );
@@ -252,7 +256,11 @@ final class UsersRestTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Auth cache should be invalidated",
-                    ((TestArtipieCaches) this.settingsCaches()).wasInvalidated()
+                    ((TestArtipieCaches) this.settingsCaches()).wereUsersInvalidated()
+                );
+                MatcherAssert.assertThat(
+                    "Policy cache should be invalidated",
+                    ((TestArtipieCaches) this.settingsCaches()).wasPolicyInvalidated()
                 );
             }
         );
@@ -302,7 +310,7 @@ final class UsersRestTest extends RestApiServerBase {
                 );
                 MatcherAssert.assertThat(
                     "Auth cache should be invalidated",
-                    ((TestArtipieCaches) this.settingsCaches()).wasInvalidated()
+                    ((TestArtipieCaches) this.settingsCaches()).wereUsersInvalidated()
                 );
             }
         );
@@ -363,6 +371,14 @@ final class UsersRestTest extends RestApiServerBase {
                         )
                     )
                 );
+                MatcherAssert.assertThat(
+                    "Auth cache should be invalidated",
+                    ((TestArtipieCaches) this.settingsCaches()).wereUsersInvalidated()
+                );
+                MatcherAssert.assertThat(
+                    "Policy cache should be invalidated",
+                    ((TestArtipieCaches) this.settingsCaches()).wasPolicyInvalidated()
+                );
             }
         );
     }
@@ -399,6 +415,14 @@ final class UsersRestTest extends RestApiServerBase {
                             "enabled: false"
                         )
                     )
+                );
+                MatcherAssert.assertThat(
+                    "Auth cache should be invalidated",
+                    ((TestArtipieCaches) this.settingsCaches()).wereUsersInvalidated()
+                );
+                MatcherAssert.assertThat(
+                    "Policy cache should be invalidated",
+                    ((TestArtipieCaches) this.settingsCaches()).wasPolicyInvalidated()
                 );
             }
         );
