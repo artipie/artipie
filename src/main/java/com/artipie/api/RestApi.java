@@ -8,6 +8,7 @@ import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.auth.JwtTokens;
+import com.artipie.security.policy.CachedYamlPolicy;
 import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.RepoData;
 import com.artipie.settings.Settings;
@@ -117,21 +118,18 @@ public final class RestApi extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
-        RouterBuilder.create(this.vertx, String.format("swagger-ui/yaml/repo-%s.yaml", this.layout))
-            .compose(
-                repoRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").compose(
-                    userRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/token-gen.yaml")
-                        .compose(
-                            //@checkstyle LineLengthCheck (1 line)
-                            tokenRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/settings.yaml")
-                                .onSuccess(
-                                    settingsRb -> {
-                                        this.startServices(repoRb, userRb, tokenRb, settingsRb);
-                                    }
-                                ).onFailure(Throwable::printStackTrace)
-                        )
+        //@checkstyle LineLengthCheck (10 line)
+        RouterBuilder.create(this.vertx, String.format("swagger-ui/yaml/repo-%s.yaml", this.layout)).compose(
+            repoRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").compose(
+                userRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/token-gen.yaml").compose(
+                    tokenRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/settings.yaml").compose(
+                        settingsRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/roles.yaml").onSuccess(
+                            rolesRb -> this.startServices(repoRb, userRb, tokenRb, settingsRb, rolesRb)
+                        ).onFailure(Throwable::printStackTrace)
+                    )
                 )
-            );
+            )
+        );
     }
 
     /**
@@ -140,12 +138,14 @@ public final class RestApi extends AbstractVerticle {
      * @param userRb User RouterBuilder
      * @param tokenRb Token RouterBuilder
      * @param settingsRb Settings RouterBuilder
+     * @param rolesRb Roles RouterBuilder
      * @checkstyle ParameterNameCheck (4 lines)
      * @checkstyle ParameterNumberCheck (3 lines)
+     * @checkstyle ExecutableStatementCountCheck (30 lines)
      */
     private void startServices(final RouterBuilder repoRb, final RouterBuilder userRb,
-        final RouterBuilder tokenRb, final RouterBuilder settingsRb) {
-        this.addJwtAuth(tokenRb, repoRb, userRb, settingsRb);
+        final RouterBuilder tokenRb, final RouterBuilder settingsRb, final RouterBuilder rolesRb) {
+        this.addJwtAuth(tokenRb, repoRb, userRb, settingsRb, rolesRb);
         final BlockingStorage asto = new BlockingStorage(this.configsStorage);
         new RepositoryRest(
             new ManageRepoSettings(asto),
@@ -155,11 +155,18 @@ public final class RestApi extends AbstractVerticle {
         if (this.security.policyStorage().isPresent()) {
             new UsersRest(
                 new ManageUsers(new BlockingStorage(this.security.policyStorage().get())),
-                this.caches.usersCache(), this.security.authentication()
+                this.caches.usersCache(), this.caches.policyCache(), this.security.authentication()
             ).init(userRb);
+        }
+        if (this.security.policy() instanceof CachedYamlPolicy) {
+            new RolesRest(
+                new ManageRoles(new BlockingStorage(this.security.policyStorage().get())),
+                this.caches.policyCache()
+            ).init(rolesRb);
         }
         new SettingsRest(this.port, this.layout).init(settingsRb);
         final Router router = repoRb.createRouter();
+        router.route("/*").subRouter(rolesRb.createRouter());
         router.route("/*").subRouter(userRb.createRouter());
         router.route("/*").subRouter(tokenRb.createRouter());
         router.route("/*").subRouter(settingsRb.createRouter());

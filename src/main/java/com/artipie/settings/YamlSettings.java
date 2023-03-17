@@ -103,7 +103,7 @@ public final class YamlSettings implements Settings {
         this.security = new ArtipieSecurity.FromYaml(
             this.meta(), auth, YamlSettings.initPolicyStorage(this.meta())
         );
-        this.acach = new ArtipieCaches.All(auth, new CachedStorages());
+        this.acach = new ArtipieCaches.All(auth, new CachedStorages(), this.security.policy());
         this.mctx = new MetricsContext(this.meta());
     }
 

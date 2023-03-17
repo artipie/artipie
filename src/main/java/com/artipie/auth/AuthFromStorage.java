@@ -79,6 +79,11 @@ public final class AuthFromStorage implements Authentication {
             .flatMap(opt -> opt);
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+
     /**
      * Reads bytes as yaml and check the password.
      * @param bytes Yaml bytes
