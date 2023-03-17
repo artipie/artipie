@@ -30,7 +30,6 @@ import org.apache.commons.codec.digest.DigestUtils;
  * where the name of the file is username (case-sensitive), both yml and yaml extensions are
  * supported. The yaml format file is the following:
  * <pre>{@code
- * david:
  *   type: plain # plain and sha256 types are supported
  *   pass: qwerty
  *   email: david@example.com # Optional

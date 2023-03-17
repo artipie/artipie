@@ -10,12 +10,6 @@ repo:
   storage:
     type: fs
     path: /var/artipie/my-conda
-  permissions:
-    alice:
-      - upload
-      - download
-    "*":
-      - download
 ```
 Configuration requires `url` field that contains repository full URL,
 `{host}` and `{port}` are Artipie service host and port, `{repository-name}`
@@ -24,8 +18,6 @@ Anaconda client does not work without authentication and uses tokens to authoriz
 [JWT](https://jwt.io/) tokens for `anaconda` client, the token can obtained automatically with 
 `anaconda login` command or using [Artipie Rest API](./Rest-api) `POST /api/v1/oauth/token` request. Note, that
 `anaconda logout` command only removes token from local machine, not from Artipie.
-
-Find more information about permissions [here](./Configuration-Repository-Permissions).
 
 To use Artipie repository with `conda` command-line tool, add the repository to `conda` channels settings to `/root/.condarc` file
 (check [documentation](https://conda.io/projects/conda/en/latest/user-guide/configuration/use-condarc.html) for more details):

@@ -1,20 +1,13 @@
 ## File
 
 Files repository is a general purpose file storage which provides API for upload and download: `PUT` requests for upload and `GET` for download.
-To set up this repository, create config with `file` repository type and storage configuration. [Permissions configuration](./Configuration-Repository-Permissions)
-can authorize users allowed to upload and download.
+To set up this repository, create config with `file` repository type and storage configuration. 
 
 *Example:*
 ```yaml
 repo:
   type: file
   storage: default
-  permissions:
-    alice:
-      - upload
-      - download
-    "*":
-      - download
 ```
 
 In order to upload a binary file to the storage, send a `PUT` HTTP request with file contents:

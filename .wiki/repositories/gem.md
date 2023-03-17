@@ -7,15 +7,8 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data/
-  permissions:
-    "*":
-      - download
-    mark:
-      - upload
 ```
-Check
-[storage](./Configuration-Storage) and [permission](./Configuration-Repository-Permissions)
-documentations to learn more about these settings.
+Check [storage](./Configuration-Storage) documentations to learn more about storage setting.
 
 Before uploading gems, obtain a key for authorization and set it to `GEM_HOST_API_KEY` environment variable. 
 A base64 encoded `{username}:{password}` pair would be a valid key:

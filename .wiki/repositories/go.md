@@ -9,12 +9,9 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
-  permissions:
-    "*":
-      - download
+
 ```
-Check [storage](./Configuration-Storage) and [permission](./Configuration-Repository-Permissions)
-documentations to learn more about these settings.
+Check [storage](./Configuration-Storage) documentations to learn more about storage setting.
 
 In order to use Artipie Go repository, declare the following environment variables:
 

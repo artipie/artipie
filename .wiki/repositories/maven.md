@@ -9,12 +9,6 @@ repo:
   storage:
     type: fs
     path: /tmp/artipie/data
-  permissions:
-    alice:
-      - upload
-      - download
-    "*":
-      - download
 ```
 
 To use this repository as regular maven repository in Java project, add the following configuration
