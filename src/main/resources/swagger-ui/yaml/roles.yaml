@@ -1,0 +1,227 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Artipie - OpenAPI 3.0
+  description:
+    This is Atripie Server based on the OpenAPI 3.0 specification.
+  license:
+    name: MIT
+externalDocs:
+  description: Find out more about Artipie
+  url: https://github.com/artipie
+tags:
+  - name: roles
+    description: Operations about user roles
+paths:
+  /api/v1/roles:
+    get:
+      summary: List all roles.
+      operationId: listAllRoles
+      tags:
+        - roles
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: A list of the existing roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Role"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/roles/{role}:
+    get:
+      summary: Get role info.
+      operationId: getRole
+      tags:
+        - roles
+      parameters:
+        - name: role
+          in: path
+          required: true
+          description: Role name
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Role info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+        '404':
+          description: Role does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Create or replace role.
+      operationId: putRole
+      tags:
+        - roles
+      parameters:
+        - name: role
+          in: path
+          required: true
+          description: Role name
+          schema:
+            type: string
+      requestBody:
+        description: Role info json
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FullRole'
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '201':
+          description: Role successfully added
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Delete role info.
+      operationId: deleteRole
+      tags:
+        - roles
+      parameters:
+        - name: role
+          in: path
+          required: true
+          description: Role name
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Role removed successfully
+        '404':
+          description: Role does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/roles/{role}/disable:
+    post:
+      summary: Disable role.
+      operationId: disable
+      tags:
+        - roles
+      parameters:
+        - name: role
+          in: path
+          required: true
+          description: Role name
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Role disabled successfully
+        '404':
+          description: Role does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/roles/{role}/enable:
+    post:
+      summary: Enable role.
+      operationId: enable
+      tags:
+        - roles
+      parameters:
+        - name: role
+          in: path
+          required: true
+          description: Role name
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Role enabled successfully
+        '404':
+          description: Role does not exist
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    Role:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        permissions:
+          type: object
+    FullRole:
+      type: object
+      required:
+        - permissions
+      properties:
+        permissions:
+          type: object
+        enabled:
+          type: string
+  responses:
+    UnauthorizedError:
+      description: "Access token is missing or invalid"
+security:
+  - bearerAuth: []
