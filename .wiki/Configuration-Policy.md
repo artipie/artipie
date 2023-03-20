@@ -24,7 +24,7 @@ meta:
     eviction_millis: 180000 # optional, default 3 min
     storage: # required
       type: fs
-      path: /tmp/artipie/sequrity
+      path: /tmp/artipie/security
 ```
 Under the hood, artipie policy uses [guava cache](https://github.com/google/guava/wiki/CachesExplained), 
 eviction time can be configured with the help of `eviction_millis` field.  
@@ -114,7 +114,7 @@ The following actions and synonyms are supported:
 - write, w, publish, push, deploy, upload
 - delete, d, remove 
 
-Action `delete` in not supported by each adapter, check specific adapter docs for more details. 
+> Action `delete` in not supported by each adapter, check specific adapter docs for more details. 
 
 Wildcard `*` is supported as for actions (check the example above) as for repository name:
 ```yaml

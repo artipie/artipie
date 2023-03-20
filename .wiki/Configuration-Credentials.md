@@ -10,7 +10,7 @@ meta:
     - type: artipie
       storage: 
         type: fs
-        path: /tmp/artipie/sequrity
+        path: /tmp/artipie/security
     - type: github
     - type: env
     - type: keycloak
@@ -22,7 +22,7 @@ meta:
     type: artipie
     storage:
       type: fs
-      path: /tmp/artipie/sequrity
+      path: /tmp/artipie/security
 ```
 Each item of `credentials` list has only one required field - `type`, which determines the type of
 authentication:
