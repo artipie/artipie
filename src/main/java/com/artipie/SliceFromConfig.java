@@ -133,7 +133,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "npm":
                 slice = new TrimPathSlice(
-                    new NpmSlice(cfg.url(), cfg.storage(), permissions, tokens.auth()),
+                    new NpmSlice(cfg.url(), cfg.storage(), policy, tokens.auth(), cfg.name()),
                     settings.layout().pattern()
                 );
                 break;
@@ -142,15 +142,15 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "helm":
                 slice = new TrimPathSlice(
-                    new HelmSlice(cfg.storage(), cfg.url().toString(), permissions, auth),
+                    new HelmSlice(cfg.storage(), cfg.url().toString(), policy, auth, cfg.name()),
                     settings.layout().pattern()
                 );
                 break;
             case "rpm":
                 slice = new TrimPathSlice(
                     new RpmSlice(
-                        cfg.storage(), permissions, auth,
-                        new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings())
+                        cfg.storage(), policy, auth,
+                        new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings(), cfg.name())
                     ),
                     settings.layout().pattern()
                 );
@@ -173,15 +173,17 @@ public final class SliceFromConfig extends Slice.Wrap {
                     new NuGet(
                         cfg.url(),
                         new com.artipie.nuget.AstoRepository(cfg.storage()),
-                        permissions,
-                        auth
+                        policy,
+                        auth,
+                        cfg.name()
                     ),
                     settings.layout().pattern()
                 );
                 break;
             case "maven":
                 slice = new TrimPathSlice(
-                    new MavenSlice(cfg.storage(), permissions, auth), settings.layout().pattern()
+                    new MavenSlice(cfg.storage(), policy, auth, cfg.name()),
+                    settings.layout().pattern()
                 );
                 break;
             case "maven-proxy":
@@ -209,7 +211,8 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "go":
                 slice = new TrimPathSlice(
-                    new GoSlice(cfg.storage(), permissions, auth), settings.layout().pattern()
+                    new GoSlice(cfg.storage(), policy, auth, cfg.name()),
+                    settings.layout().pattern()
                 );
                 break;
             case "npm-proxy":
@@ -226,7 +229,8 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "pypi":
                 slice = new TrimPathSlice(
-                    new PySlice(cfg.storage(), permissions, auth), settings.layout().pattern()
+                    new PySlice(cfg.storage(), policy, auth, cfg.name()),
+                    settings.layout().pattern()
                 );
                 break;
             case "pypi-proxy":
@@ -258,7 +262,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "deb":
                 slice = new TrimPathSlice(
                     new DebianSlice(
-                        cfg.storage(), permissions, auth,
+                        cfg.storage(), policy, auth,
                         new Config.FromYaml(cfg.name(), cfg.settings(), settings.configStorage())
                     ),
                     settings.layout().pattern()

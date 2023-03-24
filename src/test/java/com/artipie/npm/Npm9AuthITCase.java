@@ -39,7 +39,7 @@ final class Npm9AuthITCase {
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
-        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+        () -> new TestDeployment.ArtipieContainer().withConfig("artipie_with_policy.yaml")
             .withRepoConfig("npm/npm-auth.yml", "my-npm")
             .withUser("security/users/alice.yaml", "alice"),
         () -> new TestDeployment.ClientContainer("node:19-alpine")

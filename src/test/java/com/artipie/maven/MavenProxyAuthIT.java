@@ -36,7 +36,7 @@ final class MavenProxyAuthIT {
         new MapOf<>(
             new MapEntry<>(
                 "artipie",
-                () -> TestDeployment.ArtipieContainer.defaultDefinition()
+                () -> new TestDeployment.ArtipieContainer().withConfig("artipie_with_policy.yaml")
                     .withRepoConfig("maven/maven-with-perms.yml", "my-maven")
                     .withUser("security/users/alice.yaml", "alice")
             ),

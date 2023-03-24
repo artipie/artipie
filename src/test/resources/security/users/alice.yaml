@@ -1,2 +1,8 @@
 type: plain
 pass: 123
+permissions:
+  adapter_basic_permission:
+    my-maven:
+      - "*"
+    my-npm:
+      - "*"
