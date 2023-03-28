@@ -34,7 +34,7 @@ final class DockerLocalAuthIT {
      */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
-        () -> TestDeployment.ArtipieContainer.defaultDefinition()
+        () -> new TestDeployment.ArtipieContainer().withConfig("artipie_with_policy.yaml")
             .withRepoConfig("docker/registry-auth.yml", "registry")
             .withUser("security/users/alice.yaml", "alice")
             .withUser("security/users/bob.yaml", "bob"),

@@ -9,12 +9,12 @@ import com.artipie.adapters.docker.DockerProxy;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
-import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.security.policy.Policy;
 import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
 import com.artipie.settings.repo.RepoConfig;
@@ -103,7 +103,7 @@ class DockerProxyTest {
                 Yaml.createYamlInput(yaml).readYamlMapping(),
                 cache
             ),
-            Permissions.FREE,
+            Policy.FREE,
             (username, password) -> Optional.empty()
         );
     }

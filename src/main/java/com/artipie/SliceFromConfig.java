@@ -5,7 +5,6 @@
 
 package com.artipie;
 
-import com.artipie.adapters.docker.DockerPermissions;
 import com.artipie.adapters.docker.DockerProxy;
 import com.artipie.adapters.file.FileProxy;
 import com.artipie.adapters.maven.MavenProxy;
@@ -243,21 +242,23 @@ public final class SliceFromConfig extends Slice.Wrap {
                 if (standalone) {
                     slice = new DockerSlice(
                         docker,
-                        new DockerPermissions(permissions),
-                        new BasicAuthScheme(auth)
+                        policy,
+                        new BasicAuthScheme(auth),
+                        cfg.name()
                     );
                 } else {
                     slice = new DockerRoutingSlice.Reverted(
                         new DockerSlice(
                             new TrimmedDocker(docker, cfg.name()),
-                            new DockerPermissions(permissions),
-                            new BasicAuthScheme(auth)
+                            policy,
+                            new BasicAuthScheme(auth),
+                            cfg.name()
                         )
                     );
                 }
                 break;
             case "docker-proxy":
-                slice = new DockerProxy(http, standalone, cfg, permissions, auth);
+                slice = new DockerProxy(http, standalone, cfg, policy, auth);
                 break;
             case "deb":
                 slice = new TrimPathSlice(

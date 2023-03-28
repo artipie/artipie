@@ -19,9 +19,9 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
-import com.artipie.http.auth.Permissions;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.AuthClientSlice;
+import com.artipie.security.policy.Policy;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.proxy.ProxyConfig;
 import com.artipie.settings.repo.proxy.YamlProxyConfig;
@@ -54,9 +54,9 @@ public final class DockerProxy implements Slice {
     private final boolean standalone;
 
     /**
-     * Access permissions.
+     * Access policy.
      */
-    private final Permissions perms;
+    private final Policy<?> policy;
 
     /**
      * Authentication mechanism.
@@ -69,7 +69,7 @@ public final class DockerProxy implements Slice {
      * @param client HTTP client.
      * @param standalone Standalone flag.
      * @param cfg Repository configuration.
-     * @param perms Access permissions.
+     * @param policy Access policy.
      * @param auth Authentication mechanism.
      * @checkstyle ParameterNumberCheck (2 lines)
      */
@@ -77,12 +77,12 @@ public final class DockerProxy implements Slice {
         final ClientSlices client,
         final boolean standalone,
         final RepoConfig cfg,
-        final Permissions perms,
+        final Policy<?> policy,
         final Authentication auth) {
         this.client = client;
         this.cfg = cfg;
         this.standalone = standalone;
-        this.perms = perms;
+        this.policy = policy;
         this.auth = auth;
     }
 
@@ -121,8 +121,9 @@ public final class DockerProxy implements Slice {
         }
         Slice slice = new DockerSlice(
             docker,
-            new DockerPermissions(this.perms),
-            new BasicAuthScheme(this.auth)
+            this.policy,
+            new BasicAuthScheme(this.auth),
+            this.cfg.name()
         );
         if (!this.standalone) {
             slice = new DockerRoutingSlice.Reverted(slice);
