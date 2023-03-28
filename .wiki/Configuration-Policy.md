@@ -138,6 +138,51 @@ permissions:
 ```
 Grant such permissions carefully.
 
+#### Docker adapter permissions
+
+Docker supports granular repository permissions, which means, that operations can be granted for specific scope
+and image. Besides, docker adapter has registry permissions to authorise registry-specific operations:
+```yaml
+permissions:
+  docker_repository_permissions: # permission type
+    my-local-dockerhub: # repository name
+      "*": # resource/image name, * - any image
+      - * # actions list - any action is allowed
+    central-docker: # repository name
+      ubuntu-test: # image name
+        - pull
+        - push
+      alpine-production:
+        - pull
+      deb-dev:
+        - pull
+        - overwrite
+  docker_registry_permissions: # permission type
+    my-local-dockerhub: # repository name
+      - base # operations list
+      - catalog
+    central-docker:
+      - base
+```
+
+##### docker_repository_permissions 
+
+Docker repository permission is meant to control access to specific resource/image in the repository,
+settings require map of the repositories names with map of the images and allowed actions as showed
+in the example above. Supported actions:
+ - `pull` allows to pull the image from specific repository
+ - `push` allows to push the image to specific repository
+ - `overwrite` allows overwriting existing tags and creating new tags
+ - `*` means that any action is allowed
+
+Wildcard `*` is supported as for repository name as for resource/image name. 
+
+##### docker_registry_permissions
+
+Docker registry permissions are meant to control access to registry-specific operations [base](https://docs.docker.com/registry/spec/api/#base) 
+and [catalog](https://docs.docker.com/registry/spec/api/#catalog). Settings require map of the repositories 
+and list of operations. Wildcard `*` is supported as for repository name as for operations.
+
 ## Custom policy
 
 Artipie allows implementing and using custom policy. To be more precise, you can choose some other 
