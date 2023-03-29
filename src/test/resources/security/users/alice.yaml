@@ -6,7 +6,7 @@ permissions:
       - "*"
     my-npm:
       - "*"
-  docker_adapter_permissions:
+  docker_repository_permissions:
     "*":
       "*":
         - *

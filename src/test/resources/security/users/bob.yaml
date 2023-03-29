@@ -3,7 +3,7 @@ pass: qwerty
 roles:
   - readers
 permissions:
-  docker_adapter_permissions:
+  docker_repository_permissions:
     "*":
       "*":
         - pull
