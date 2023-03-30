@@ -38,7 +38,7 @@ final class UsersRestTest extends RestApiServerBase {
                 "roles:",
                 "  - readers",
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    repo1:",
                 "      - write"
             ).getBytes(StandardCharsets.UTF_8)
@@ -60,7 +60,7 @@ final class UsersRestTest extends RestApiServerBase {
                 response -> JSONAssert.assertEquals(
                     response.body().toString(),
                     // @checkstyle LineLengthCheck (1 line)
-                    "[{\"name\":\"Alice\",\"roles\":[\"readers\"], \"permissions\":{\"adapter_basic_permission\":{\"repo1\":[\"write\"]}}},{\"name\":\"Bob\",\"email\":\"bob@example.com\",\"roles\":[\"admin\"]}]",
+                    "[{\"name\":\"Alice\",\"roles\":[\"readers\"], \"permissions\":{\"adapter_basic_permissions\":{\"repo1\":[\"write\"]}}},{\"name\":\"Bob\",\"email\":\"bob@example.com\",\"roles\":[\"admin\"]}]",
                     false
                 )
             )
