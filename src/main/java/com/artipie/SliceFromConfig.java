@@ -12,7 +12,6 @@ import com.artipie.adapters.php.ComposerProxy;
 import com.artipie.adapters.pypi.PypiProxy;
 import com.artipie.asto.SubStorage;
 import com.artipie.auth.LoggingAuth;
-import com.artipie.auth.LoggingPermissions;
 import com.artipie.composer.AstoRepository;
 import com.artipie.composer.http.PhpComposer;
 import com.artipie.conda.http.CondaSlice;
@@ -35,7 +34,6 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
-import com.artipie.http.auth.Permissions;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.group.GroupSlice;
@@ -118,9 +116,6 @@ public final class SliceFromConfig extends Slice.Wrap {
         final boolean standalone
     ) {
         final Slice slice;
-        final Permissions permissions = new LoggingPermissions(
-            cfg.permissions().orElse(Permissions.FREE)
-        );
         switch (cfg.type()) {
             case "file":
                 slice = new TrimPathSlice(
@@ -276,7 +271,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "hexpm":
                 slice = new TrimPathSlice(
-                    new HexSlice(cfg.storage(), permissions, auth),
+                    new HexSlice(cfg.storage(), policy, auth, cfg.name()),
                     settings.layout().pattern()
                 );
                 break;

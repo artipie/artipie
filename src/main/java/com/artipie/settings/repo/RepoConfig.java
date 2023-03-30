@@ -10,8 +10,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.LoggingStorage;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
-import com.artipie.auth.YamlPermissions;
-import com.artipie.http.auth.Permissions;
 import com.artipie.micrometer.MicrometerStorage;
 import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
@@ -200,16 +198,6 @@ public final class RepoConfig {
      */
     public Optional<YamlMapping> settings() {
         return Optional.ofNullable(this.repoYaml().yamlMapping("settings"));
-    }
-
-    /**
-     * Repository permissions.
-     *
-     * @return Async permissions, empty if not configured.
-     */
-    public Optional<Permissions> permissions() {
-        return Optional.ofNullable(this.repoYaml().yamlMapping("permissions"))
-            .map(YamlPermissions::new);
     }
 
     /**
