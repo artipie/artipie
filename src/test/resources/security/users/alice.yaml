@@ -1,2 +1,12 @@
 type: plain
 pass: 123
+permissions:
+  adapter_basic_permissions:
+    my-maven:
+      - "*"
+    my-npm:
+      - "*"
+  docker_repository_permissions:
+    "*":
+      "*":
+        - *

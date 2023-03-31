@@ -62,7 +62,8 @@ final class DockerOnPortIT {
                     .withPort(DockerOnPortIT.PORT)
                     .toString(),
                 "my-docker"
-            ),
+            )
+            .withUser("security/users/alice.yaml", "alice"),
         () -> new TestDeployment.ClientContainer("alpine:3.11")
             .withPrivilegedMode(true)
             .withWorkingDirectory("/w")

@@ -51,7 +51,7 @@ class ManageRolesTest {
             String.join(
                 System.lineSeparator(),
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    maven:",
                 "      - write",
                 "      - read"
@@ -62,7 +62,7 @@ class ManageRolesTest {
             String.join(
                 System.lineSeparator(),
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    \"*\":",
                 "      - read"
             ).getBytes(StandardCharsets.UTF_8)
@@ -70,7 +70,7 @@ class ManageRolesTest {
         JSONAssert.assertEquals(
             this.roles.list().toString(),
             // @checkstyle LineLengthCheck (1 line)
-            "[{\"name\":\"java-dev\",\"permissions\":{\"adapter_basic_permission\":{\"maven\":[\"write\",\"read\"]}}},{\"name\":\"readers\",\"permissions\":{\"adapter_basic_permission\":{\"*\":[\"read\"]}}}]",
+            "[{\"name\":\"java-dev\",\"permissions\":{\"adapter_basic_permissions\":{\"maven\":[\"write\",\"read\"]}}},{\"name\":\"readers\",\"permissions\":{\"adapter_basic_permissions\":{\"*\":[\"read\"]}}}]",
             true
         );
     }
@@ -90,7 +90,7 @@ class ManageRolesTest {
             Json.createObjectBuilder().add(
                 "permissions",
                 Json.createObjectBuilder().add(
-                    "adapter_basic_permission",
+                    "adapter_basic_permissions",
                     Json.createObjectBuilder()
                         .add("main-pypi", Json.createArrayBuilder().add("read"))
                         .add("test-pypi", Json.createArrayBuilder().add("read").add("write"))
@@ -112,7 +112,7 @@ class ManageRolesTest {
                 String.join(
                     System.lineSeparator(),
                     "permissions:",
-                    "  adapter_basic_permission:",
+                    "  adapter_basic_permissions:",
                     "    \"main-pypi\":",
                     "      - read",
                     "    \"test-pypi\":",
@@ -130,7 +130,7 @@ class ManageRolesTest {
             String.join(
                 System.lineSeparator(),
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    test-repo:",
                 "      - write",
                 "      - read"
@@ -141,7 +141,7 @@ class ManageRolesTest {
             Json.createObjectBuilder().add(
                 "permissions",
                 Json.createObjectBuilder().add(
-                    "adapter_basic_permission",
+                    "adapter_basic_permissions",
                     Json.createObjectBuilder()
                         .add("test-maven", Json.createArrayBuilder().add("read"))
                         .add("test-pypi", Json.createArrayBuilder().add("read").add("write"))
@@ -163,7 +163,7 @@ class ManageRolesTest {
                 String.join(
                     System.lineSeparator(),
                     "permissions:",
-                    "  adapter_basic_permission:",
+                    "  adapter_basic_permissions:",
                     "    \"test-maven\":",
                     "      - read",
                     "    \"test-pypi\":",
@@ -200,7 +200,7 @@ class ManageRolesTest {
                 System.lineSeparator(),
                 "enabled: false",
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    test-repo:",
                 "      - write",
                 "      - read"
@@ -216,7 +216,7 @@ class ManageRolesTest {
                     System.lineSeparator(),
                     "enabled: true",
                     "permissions:",
-                    "  adapter_basic_permission:",
+                    "  adapter_basic_permissions:",
                     "    \"test-repo\":",
                     "      - write",
                     "      - read"
@@ -232,7 +232,7 @@ class ManageRolesTest {
             String.join(
                 System.lineSeparator(),
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    test-repo:",
                 "      - write",
                 "      - read"
@@ -247,7 +247,7 @@ class ManageRolesTest {
                 String.join(
                     System.lineSeparator(),
                     "permissions:",
-                    "  adapter_basic_permission:",
+                    "  adapter_basic_permissions:",
                     "    \"test-repo\":",
                     "      - write",
                     "      - read",

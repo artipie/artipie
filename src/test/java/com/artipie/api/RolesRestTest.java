@@ -33,7 +33,7 @@ final class RolesRestTest extends RestApiServerBase {
             String.join(
                 System.lineSeparator(),
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    maven:",
                 "      - write",
                 "      - read"
@@ -44,7 +44,7 @@ final class RolesRestTest extends RestApiServerBase {
             String.join(
                 System.lineSeparator(),
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    \"*\":",
                 "      - read"
             ).getBytes(StandardCharsets.UTF_8)
@@ -55,7 +55,7 @@ final class RolesRestTest extends RestApiServerBase {
                 response -> JSONAssert.assertEquals(
                     response.body().toString(),
                     // @checkstyle LineLengthCheck (1 line)
-                    "[{\"name\":\"java-dev\",\"permissions\":{\"adapter_basic_permission\":{\"maven\":[\"write\",\"read\"]}}},{\"name\":\"readers\",\"permissions\":{\"adapter_basic_permission\":{\"*\":[\"read\"]}}}]",
+                    "[{\"name\":\"java-dev\",\"permissions\":{\"adapter_basic_permissions\":{\"maven\":[\"write\",\"read\"]}}},{\"name\":\"readers\",\"permissions\":{\"adapter_basic_permissions\":{\"*\":[\"read\"]}}}]",
                     false
                 )
             )
@@ -69,7 +69,7 @@ final class RolesRestTest extends RestApiServerBase {
             String.join(
                 System.lineSeparator(),
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    maven:",
                 "      - write",
                 "      - read"
@@ -81,7 +81,7 @@ final class RolesRestTest extends RestApiServerBase {
                 response -> JSONAssert.assertEquals(
                     response.body().toString(),
                     // @checkstyle LineLengthCheck (1 line)
-                    "{\"name\":\"java-dev\",\"permissions\":{\"adapter_basic_permission\":{\"maven\":[\"write\",\"read\"]}}}",
+                    "{\"name\":\"java-dev\",\"permissions\":{\"adapter_basic_permissions\":{\"maven\":[\"write\",\"read\"]}}}",
                     false
                 )
             )
@@ -107,7 +107,7 @@ final class RolesRestTest extends RestApiServerBase {
             String.join(
                 System.lineSeparator(),
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    test-repo:",
                 "      - write",
                 "      - read"
@@ -118,7 +118,7 @@ final class RolesRestTest extends RestApiServerBase {
                 HttpMethod.PUT, "/api/v1/roles/testers",
                 new JsonObject().put(
                     "permissions", new JsonObject().put(
-                        "adapter_basic_permission",
+                        "adapter_basic_permissions",
                         new JsonObject().put("test-maven", JsonArray.of("read"))
                             .put("test-pypi", JsonArray.of("r", "w"))
                     )
@@ -138,7 +138,7 @@ final class RolesRestTest extends RestApiServerBase {
                         String.join(
                             System.lineSeparator(),
                             "permissions:",
-                            "  adapter_basic_permission:",
+                            "  adapter_basic_permissions:",
                             "    \"test-maven\":",
                             "      - read",
                             "    \"test-pypi\":",
