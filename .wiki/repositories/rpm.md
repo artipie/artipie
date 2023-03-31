@@ -21,12 +21,6 @@ repo:
       # or schedule the update
       on:
        cron: 0 2 * * *
-  permissions:
-    alice:
-      - upload
-      - download
-    "*":
-      - download
 ```
 Section `setting` allows to configure repository-specific parameters and is not required:
 - `digest` - digest algorithm for rpm packages checksum calculation, sha256 (default) and sha1 are supported
@@ -34,8 +28,6 @@ Section `setting` allows to configure repository-specific parameters and is not 
 - `filelists` - Calculate metadata `filelists.xml`, true by default
 - `update` section allows to set update mode: either update the repository when the package is uploaded via HTTP
   or schedule the update via cron
-
-[Permissions configuration](./Configuration-Repository-Permissions) section specifies users who can upload and download from the repository.
 
 In order to use Artipie `rpm` repository with `yum` follow the steps:
 

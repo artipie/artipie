@@ -14,12 +14,6 @@ repo:
     Architectures: amd64
     gpg_password: 1q2w3e4r5t6y7u
     gpg_secret_key: secret-keys.gpg
-  permissions:
-    alice:
-      - upload
-      - download
-    "*":
-      - download
 ```
 where 
 - `Components` is a space separated list of the repository components
@@ -29,8 +23,7 @@ supported by the repository, required;
 - Debian repository supports gpg signature, to enable it, provide gpg password in `gpg_password` field and 
 secret file location `gpg_secret_key` relatively to [Artipie configuration storage](./Configuration).
 
-Check [storage](./Configuration-Storage) and [permission](./Configuration-Repository-Permissions)
-documentations to learn more about these settings.
+Check [storage](./Configuration-Storage) documentation to learn more about storage setting.
 
 To use Artipie Debian repository, add local repository to the list of repos for `apt` by adding
 the following line to the `/etc/apt/sources.list`:

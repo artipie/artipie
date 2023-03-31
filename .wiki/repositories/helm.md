@@ -9,16 +9,12 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
-  permissions:
-    "*":
-      - download
 ```
 
 The repository configuration requires `url` field that contains repository full URL,
 `{host}` and `{port}` are Artipie service host and port, `{repository-name}`
 is the name of the repository (and repository name is the name of the repo config yaml file). Check
-[storage](./Configuration-Storage) and [permission](./Configuration-Repository-Permissions)
-documentations to learn more about these settings.
+[storage](./Configuration-Storage) documentations to learn more about storage setting.
 
 The chart can be published with simple HTTP `PUT` request:
 

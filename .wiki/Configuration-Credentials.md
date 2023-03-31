@@ -1,14 +1,16 @@
-## Credentials
+## Credentials and policy
 
 Credentials section in main Artipie configuration allows to set four various credentials sources:
-`yaml` file with users list, GitHub accounts, user from environment and Keycloak authorization. Here is the example of the
-full `credentials` section: 
+`yaml` files with users' info, GitHub accounts, user from environment and Keycloak authorization. 
+Here is the example of the full `credentials` section: 
 
 ```yaml
 meta:
   credentials:
-    - type: file
-      path: _credentials.yml
+    - type: artipie
+      storage: 
+        type: fs
+        path: /tmp/artipie/security
     - type: github
     - type: env
     - type: keycloak
@@ -16,45 +18,53 @@ meta:
       realm: realm_name
       client-id: client_application_id
       client-password: client_application_password
+  policy:
+    type: artipie
+    storage:
+      type: fs
+      path: /tmp/artipie/security
 ```
 Each item of `credentials` list has only one required field - `type`, which determines the type of
 authentication:
-- `file` stands for auth by credentials from another YAML file (path to the file is specified by 
-`path` field value, it's relative to main configuration storage)
+- `artipie` stands for auth by credentials from YAML files from specified storage. Storage configuration
+is required only if `artipie` policy is not set
 - `github` is for auth via GitHub
 - `env` authenticates by credentials from environment
 - `keycloak` is for auth via Keycloak
 
 When several credentials types are set, Artipie tries to authorize user via each method.
 
-### Credentials type `file`
+Policy section is responsible for access permissions and the only supported type out of the box 
+for now is `artipie`. If policy section is absent, access to any repository is allowed for any 
+authenticated user.
 
-If the `type` is set to `file`, another YAML file is required in the storage, with
-a list of users who can be authorized by Artipie service:
+### Credentials type `artipie`
 
-```yaml
-credentials:
-  jane:
-    type: plain
-    pass: qwerty
-    email: jane@example.com # Optional
-  john:
-    type: sha256
-    pass: xxxxxxxxxxxxxxxxxxxxxxx
-    groups: # Optional
-      - readers
-      - dev-leads
+If the `type` is set to `artipie`, configured credentials storage is expected to have the following structure:
 ```
-
+├── users
+│   ├── david.yaml
+│   ├── jane.yaml
+│   ├── Alice.yml
+│   ├── ...
+```
+where the name of the file is the name of the user (case-sensitive), both `yml` and `yaml` extensions are
+supported. File content should have the following structure:
+```yaml
+type: plain # plain and sha256 types are supported
+pass: qwerty
+email: david@example.com # Optional
+enabled: true # optional default true
+```
 where `type` is password format: `plain` and `sha256` types are supported. Required fields for each 
 user are `type` and `pass`. If `type` is `sha256`, then SHA-256 checksum of the password is expected 
 in the `pass` field.
 
 `email` field is optional, the email is not actually used anywhere for now.
 
-Users can be assigned to some groups, all repository permissions granted to the group are applied
-to the users participating in this group. More information about repository permissions can be found
-[here](./Configuration-Repository-Permissions).
+`enabled` field is optional, if set to `false` user is considered as deactivated and is not authenticated.
+
+User info file can also describe user roles and permissions, check [policy documentation](./Configuration-Policy) for more details.
 
 ### Credentials type `github`
 

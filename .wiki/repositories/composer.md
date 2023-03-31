@@ -9,17 +9,11 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
-  permissions:
-    "*":
-      - download
-    john:
-      - upload
 ```
 The Composer repository configuration requires `url` field that contains repository full URL,
 `{host}` and `{port}` are Artipie service host and port, `{repository-name}`
 is the name of the repository (and repository name is the name of the repo config yaml file). Check
-[storage](./Configuration-Storage) and [permission](./Configuration-Repository-Permissions)
-documentations to learn more about these settings.
+[storage](./Configuration-Storage) documentation to learn more about storage setting.
 
 To upload the file into repository, use `PUT` HTTP request:
 ```bash

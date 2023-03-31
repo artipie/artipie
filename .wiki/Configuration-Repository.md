@@ -8,16 +8,10 @@ repo:
   storage: 
     type: fs
     path: /tmp/artipie/data
-  permissions:
-    alice:
-      - upload
-      - download
-    "*":
-      - download
 ```
 `type` specifies the type of the repository (all supported types are listed below) and `storage` 
-[configures](./Configuration-Storage) a storage to store repository data. [Permissions section](./Configuration-Repository-Permissions)
-allows to provide upload or download access for users and groups. 
+[configures](./Configuration-Storage) a storage to store repository data. Check [policy section](./Configuration-Policy)
+and learn how to set permissions to upload or download from repository for users. 
 
 > **Warning**  
 > Name of the repository configuration file is the name of the repository.

@@ -8,14 +8,8 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
-  permissions:
-    "*":
-      - download
-    john:
-      - upload
 ```
-Check [storage](./Configuration-Storage) and [permission](./Configuration-Repository-Permissions)
-documentations to learn more about these settings.
+Check [storage](./Configuration-Storage) documentations to learn more about storage settings.
 
 To publish the packages with [twine](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives)
 specify Artipie repository url with `--repository-url` option
