@@ -2,3 +2,8 @@ type: plain
 pass: qwerty
 roles:
   - readers
+permissions:
+  docker_repository_permissions:
+    "*":
+      "*":
+        - pull

@@ -8,7 +8,6 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
-import com.artipie.auth.YamlPermissions;
 import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
 import com.artipie.test.TestStoragesCache;
@@ -17,7 +16,6 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -111,22 +109,6 @@ public final class RepoConfigTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> this.repoCustom().path()
-        );
-    }
-
-    @Test
-    public void getEmptyWhenPermissionsNotSpecified() throws Exception {
-        MatcherAssert.assertThat(
-            this.readMin().permissions(),
-            new IsEqual<>(Optional.empty())
-        );
-    }
-
-    @Test
-    public void getPermissionsPart() throws Exception {
-        MatcherAssert.assertThat(
-            this.readFull().permissions().get(),
-            new IsInstanceOf(YamlPermissions.class)
         );
     }
 

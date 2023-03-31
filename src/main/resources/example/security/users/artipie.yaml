@@ -5,6 +5,6 @@ artipie:
   roles:
     - reader
   permissions:
-    adapter_basic_permission:
+    adapter_basic_permissions:
       artipie/my-bin:
         - write

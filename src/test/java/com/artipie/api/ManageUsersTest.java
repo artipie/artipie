@@ -56,7 +56,7 @@ class ManageUsersTest {
                 "roles:",
                 "  - readers",
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    repo1:",
                 "      - write"
             ).getBytes(StandardCharsets.UTF_8)
@@ -75,7 +75,7 @@ class ManageUsersTest {
         JSONAssert.assertEquals(
             this.users.list().toString(),
             // @checkstyle LineLengthCheck (1 line)
-            "[{\"name\":\"Alice\",\"roles\":[\"readers\"], \"permissions\":{\"adapter_basic_permission\":{\"repo1\":[\"write\"]}}},{\"name\":\"Bob\",\"email\":\"bob@example.com\",\"roles\":[\"admin\"]}]",
+            "[{\"name\":\"Alice\",\"roles\":[\"readers\"], \"permissions\":{\"adapter_basic_permissions\":{\"repo1\":[\"write\"]}}},{\"name\":\"Bob\",\"email\":\"bob@example.com\",\"roles\":[\"admin\"]}]",
             true
         );
     }
@@ -195,7 +195,7 @@ class ManageUsersTest {
                 "roles:",
                 "  - java-dev",
                 "permissions:",
-                "  adapter_basic_permission:",
+                "  adapter_basic_permissions:",
                 "    repo1:",
                 "      - write"
             ).getBytes(StandardCharsets.UTF_8)
@@ -215,7 +215,7 @@ class ManageUsersTest {
                     "roles:",
                     "  - \"java-dev\"",
                     "permissions:",
-                    "  adapter_basic_permission:",
+                    "  adapter_basic_permissions:",
                     "    repo1:",
                     "      - write"
                 )
