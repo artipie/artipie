@@ -71,7 +71,7 @@ Role file content should have the following structure:
 # java-dev.yaml
 enabled: true # optional default true
 permissions:
-  adapter_basic_permission:
+  adapter_basic_permissions:
     maven-repo:
       - read
       - write
@@ -97,7 +97,7 @@ Permissions for users and roles are set in the same format.
 
 ```yaml
 permissions:
-  adapter_basic_permission:
+  adapter_basic_permissions:
     npm-repo:
       - "*" # any action is allowed
     maven-repo:
@@ -106,9 +106,9 @@ permissions:
     john/python-repo:
       - read
 ```
-`adapter_basic_permission` is the [permission type name](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/security/perms/AdapterBasicPermissionFactory.java).
+`adapter_basic_permissions` is the [permission type name](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/security/perms/AdapterBasicPermissionFactory.java).
 This type is the permission type for any repository except for docker. Permission
-config of the `adapter_basic_permission` is the set of repository names with action list. 
+config of the `adapter_basic_permissions` is the set of repository names with action list. 
 The following actions and synonyms are supported:
 - read, r, download, install, pull
 - write, w, publish, push, deploy, upload
@@ -119,7 +119,7 @@ The following actions and synonyms are supported:
 Wildcard `*` is supported as for actions (check the example above) as for repository name:
 ```yaml
 permissions:
-  adapter_basic_permission:
+  adapter_basic_permissions:
     "*":
       - read
 ```
