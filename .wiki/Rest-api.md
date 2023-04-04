@@ -38,6 +38,15 @@ YAML storages setting.
 
 ## Users management API
 
-Use Rest API to obtain list of the users, check user info, add, update or remove user. Also, it's
+Use Rest API to obtain list of the users, check user info, add, update, remove or deactivate user. Also, it's
 possible to change password by calling `POST /api/v1/{username}/alter/password` method providing
 old and new password in json request body.
+
+Users API is available if either `artipie` credentials type or `artipie` policy is used.  
+
+### Roles management API
+
+Rest API endpoint allow to create or update, obtain roles list or single role info details, 
+deactivate or remove roles. Roles API endpoints are available if `artipie` policy is used.
+
+Check [policy section](./Configuration-Policy) to learn more about users or roles info format.

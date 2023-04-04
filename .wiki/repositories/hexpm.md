@@ -11,16 +11,9 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data/
-  permissions:
-    "*":
-      - download
-    alice:
-       - upload
-       - download
 ```
 Repository name is the name of the repo config yaml file(e.g. `my_hexpm`).
-Check [storage](./Configuration-Storage) and [permission](./Configuration-Repository-Permissions) 
-documentations to learn more about these settings.
+Check [storage](./Configuration-Storage) documentation to learn more about storage settings.
 
 To use your HexPM repository in Elixir project with `mix` build tool, add the following configuration
 into `mix.exs` project file (alternatively configure it via [mix hex.config](https://hexdocs.pm/hex/Mix.Tasks.Hex.Config.html) or system environment):
