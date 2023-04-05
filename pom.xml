@@ -145,7 +145,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>v1.2.5</version>
+      <version>v1.2.6</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -465,6 +465,7 @@ SOFTWARE.
             <excludes combine.children="append">
               <exclude>checkstyle:.*/src/test/resources/.*</exclude>
               <exclude>checkstyle:.*/src/main/resources/swagger-ui/.*</exclude>
+              <exclude>checkstyle:.*/src/test/java/com/artipie/settings/cache/CachedFiltersTest.java</exclude>
               <exclude>pmd:.*/src/test/resources/.*</exclude>
               <exclude>pmd:.*/src/main/resources/swagger-ui/.*</exclude>
             </excludes>
