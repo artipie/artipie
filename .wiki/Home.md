@@ -27,7 +27,7 @@ To start Artipie Docker check [Quickstart](https://github.com/artipie/artipie#qu
 ## How to start Artipie service with a maven-proxy repository
 
 In this section we will start Artipie service with a `maven-proxy` repository using JVM. 
-Executable `jar` file can be found on the [Maven Central](https://mvnrepository.com/artifact/com.artipie/artipie). 
+Executable `jar` file can be found on the [releases page](https://github.com/artipie/artipie/releases). 
 Before running the `jar`, it's necessary to create main Artipie config `yaml` file and 
 repository config file. The simplest main Artipie config file `my-artipie.yaml`
 has the following content:
