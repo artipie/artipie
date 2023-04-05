@@ -73,14 +73,14 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param tokens Tokens: authentication and generation
      */
     public SliceFromConfig(
-        final ClientSlices http,
-        final Settings settings, final RepoConfig config,
-        final boolean standalone, final Tokens tokens) {
+            final ClientSlices http,
+            final Settings settings, final RepoConfig config,
+            final boolean standalone, final Tokens tokens) {
         super(
-            SliceFromConfig.build(
-                http, settings, new LoggingAuth(settings.authz().authentication()), tokens,
-                settings.authz().policy(), config, standalone
-            )
+                SliceFromConfig.build(
+                        http, settings, new LoggingAuth(settings.authz().authentication()), tokens,
+                        settings.authz().policy(), config, standalone
+                )
         );
     }
 
@@ -100,190 +100,276 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @checkstyle JavaNCSSCheck (500 lines)
      * @checkstyle MethodLengthCheck (500 lines)
      */
-    @SuppressWarnings(
-        {
-            "PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength",
-            "PMD.AvoidDuplicateLiterals", "PMD.NcssCount"
-        }
-    )
+//    @SuppressWarnings(
+//            {
+//                    "PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength",
+//                    "PMD.AvoidDuplicateLiterals", "PMD.NcssCount"
+//            }
+//    )
     private static Slice build(
-        final ClientSlices http,
-        final Settings settings,
-        final Authentication auth,
-        final Tokens tokens,
-        final Policy<?> policy,
-        final RepoConfig cfg,
-        final boolean standalone
+            final ClientSlices http,
+            final Settings settings,
+            final Authentication auth,
+            final Tokens tokens,
+            final Policy<?> policy,
+            final RepoConfig cfg,
+            final boolean standalone
     ) {
         final Slice slice;
         switch (cfg.type()) {
             case "file":
-                slice = new TrimPathSlice(
-                    new FilesSlice(cfg.storage(), policy, auth, cfg.name()), settings.layout().pattern()
-                );
+                slice = createFileSlice(settings, policy, auth, cfg);
                 break;
             case "file-proxy":
-                slice = new TrimPathSlice(new FileProxy(http, cfg), settings.layout().pattern());
+                slice = createFileProxySlice(settings, http, cfg);
                 break;
             case "npm":
-                slice = new TrimPathSlice(
-                    new NpmSlice(cfg.url(), cfg.storage(), policy, tokens.auth(), cfg.name()),
-                    settings.layout().pattern()
-                );
+                slice = createNpmSlice(settings, policy, tokens, cfg);
                 break;
             case "gem":
-                slice = new TrimPathSlice(new GemSlice(cfg.storage()), settings.layout().pattern());
+                slice = createGemSlice(settings, cfg);
                 break;
             case "helm":
-                slice = new TrimPathSlice(
-                    new HelmSlice(cfg.storage(), cfg.url().toString(), policy, auth, cfg.name()),
-                    settings.layout().pattern()
-                );
+                slice = createHelmSlice(settings, policy, auth, cfg);
                 break;
             case "rpm":
-                slice = new TrimPathSlice(
-                    new RpmSlice(
-                        cfg.storage(), policy, auth,
-                        new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings(), cfg.name())
-                    ),
-                    settings.layout().pattern()
-                );
+                slice = createRpmSlice(settings, policy, auth, cfg);
                 break;
             case "php":
-                slice = new TrimPathSlice(
-                    new PhpComposer(
-                        new AstoRepository(cfg.storage(), Optional.of(cfg.url().toString()))
-                    ),
-                    settings.layout().pattern()
-                );
+                slice = createPhpSlice(settings, cfg);
                 break;
             case "php-proxy":
-                slice = new TrimPathSlice(
-                    new ComposerProxy(http, cfg), settings.layout().pattern()
-                );
+                slice = createPhpProxySlice(settings, http, cfg);
                 break;
             case "nuget":
-                slice = new TrimPathSlice(
-                    new NuGet(
+                slice = createNugetSlice(settings, policy, auth, cfg);
+                break;
+            case "maven":
+                slice = createMavenSlice(settings, policy, auth, cfg);
+                break;
+            case "maven-proxy":
+                slice = createMavenProxySlice(settings, http, cfg);
+                break;
+            case "maven-group":
+                slice = createMavenGroupSlice( settings, http, standalone, tokens,cfg);
+                break;
+            case "go":
+                slice = createGoSlice(settings, policy, auth, cfg);
+                break;
+            case "npm-proxy":
+                slice = createNpmProxySlice(cfg, http);
+                break;
+            case "pypi":
+                slice = createPypiSlice(settings, policy, auth, cfg);
+                break;
+            case "pypi-proxy":
+                slice = createPypiProxySlice(settings, http, cfg);
+                break;
+            case "docker":
+                slice = createDockerSlice(settings, policy, auth, cfg, standalone);
+                break;
+            case "docker-proxy":
+                slice = createDockerProxySlice(settings, http, cfg, policy, auth, standalone);
+                break;
+            case "deb":
+                slice = createDebSlice(settings, policy, auth, cfg);
+                break;
+            case "conda":
+                slice = createCondaSlice(settings, policy, auth, tokens, cfg);
+                break;
+            case "hexpm":
+                slice = createHexpmSlice(settings, policy, auth, cfg);
+                break;
+            default:
+                throw new IllegalStateException(
+                        String.format("Unsupported repository type '%s", cfg.type())
+                );
+        }
+        return new ContinueSlice(
+                cfg.contentLengthMax()
+                        .<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
+                        .orElse(slice)
+        );
+    }
+    private static Slice createFileSlice(Settings settings, Policy<?> policy, Authentication auth, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new FilesSlice(cfg.storage(), policy, auth, cfg.name()), settings.layout().pattern()
+        );
+    }
+
+    private static Slice createFileProxySlice(Settings settings, ClientSlices http, RepoConfig cfg) {
+        return new TrimPathSlice(new FileProxy(http, cfg), settings.layout().pattern());
+    }
+
+    private static Slice createNpmSlice(Settings settings, Policy<?> policy, Tokens tokens, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new NpmSlice(cfg.url(), cfg.storage(), policy, tokens.auth(), cfg.name()),
+                settings.layout().pattern()
+        );
+    }
+
+    private static Slice createGemSlice(Settings settings, RepoConfig cfg) {
+        return new TrimPathSlice(new GemSlice(cfg.storage()), settings.layout().pattern());
+    }
+
+    private static Slice createHelmSlice(Settings settings, Policy<?> policy, Authentication auth, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new HelmSlice(cfg.storage(), cfg.url().toString(), policy, auth, cfg.name()),
+                settings.layout().pattern()
+        );
+    }
+
+    private static Slice createRpmSlice(Settings settings, Policy<?> policy, Authentication auth, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new RpmSlice(
+                        cfg.storage(), policy, auth,
+                        new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings(), cfg.name())
+                ),
+                settings.layout().pattern()
+        );
+    }
+
+    private static Slice createPhpSlice(Settings settings, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new PhpComposer(
+                        new AstoRepository(cfg.storage(), Optional.of(cfg.url().toString()))
+                ),
+                settings.layout().pattern()
+        );
+    }
+
+    private static Slice createPhpProxySlice(Settings settings, ClientSlices http, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new ComposerProxy(http, cfg), settings.layout().pattern()
+        );
+    }
+
+    private static Slice createNugetSlice(Settings settings, Policy<?> policy, Authentication auth, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new NuGet(
                         cfg.url(),
                         new com.artipie.nuget.AstoRepository(cfg.storage()),
                         policy,
                         auth,
                         cfg.name()
-                    ),
-                    settings.layout().pattern()
-                );
-                break;
-            case "maven":
-                slice = new TrimPathSlice(
-                    new MavenSlice(cfg.storage(), policy, auth, cfg.name()),
-                    settings.layout().pattern()
-                );
-                break;
-            case "maven-proxy":
-                slice = new TrimPathSlice(new MavenProxy(http, cfg), settings.layout().pattern());
-                break;
-            case "maven-group":
-                slice = new TrimPathSlice(
-                    new GroupSlice(
+                ),
+                settings.layout().pattern()
+        );
+    }
+
+    private static Slice createMavenSlice(Settings settings, Policy<?> policy, Authentication auth, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new MavenSlice(cfg.storage(), policy, auth, cfg.name()),
+                settings.layout().pattern()
+        );
+    }
+
+    private static Slice createMavenProxySlice(Settings settings, ClientSlices http, RepoConfig cfg) {
+        return new TrimPathSlice(new MavenProxy(http, cfg), settings.layout().pattern());
+    }
+
+    private static Slice createMavenGroupSlice(Settings settings, ClientSlices http, boolean standalone, Tokens tokens, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new GroupSlice(
                         cfg.settings().orElseThrow().yamlSequence("repositories").values()
-                            .stream().map(node -> node.asScalar().value())
-                            .map(
-                                name -> new AsyncSlice(
-                                    new RepositoriesFromStorage(settings)
-                                        .config(name)
-                                        .thenApply(
-                                            sub -> new SliceFromConfig(
-                                                http, settings, sub, standalone, tokens
-                                            )
+                                .stream().map(node -> node.asScalar().value())
+                                .map(
+                                        name -> new AsyncSlice(
+                                                new RepositoriesFromStorage(settings)
+                                                        .config(name)
+                                                        .thenApply(
+                                                                sub -> new SliceFromConfig(
+                                                                        http, settings, sub, standalone, tokens
+                                                                )
+                                                        )
                                         )
-                                )
-                            ).collect(Collectors.toList())
-                    ),
-                    settings.layout().pattern()
-                );
-                break;
-            case "go":
-                slice = new TrimPathSlice(
-                    new GoSlice(cfg.storage(), policy, auth, cfg.name()),
-                    settings.layout().pattern()
-                );
-                break;
-            case "npm-proxy":
-                slice = new NpmProxySlice(
-                    cfg.path(),
-                    new NpmProxy(
+                                ).collect(Collectors.toList())
+                ),
+                settings.layout().pattern()
+        );
+    }
+
+    private static Slice createGoSlice(Settings settings, Policy<?> policy, Authentication auth, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new GoSlice(cfg.storage(), policy, auth, cfg.name()),
+                settings.layout().pattern()
+        );
+    }
+
+    private static Slice createNpmProxySlice(RepoConfig cfg, ClientSlices http) {
+        return new NpmProxySlice(
+                cfg.path(),
+                new NpmProxy(
                         URI.create(
-                            cfg.settings().orElseThrow().yamlMapping("remote").string("url")
+                                cfg.settings().orElseThrow().yamlMapping("remote").string("url")
                         ),
                         cfg.storage(),
                         http
-                    )
-                );
-                break;
-            case "pypi":
-                slice = new TrimPathSlice(
-                    new PySlice(cfg.storage(), policy, auth, cfg.name()),
-                    settings.layout().pattern()
-                );
-                break;
-            case "pypi-proxy":
-                slice = new TrimPathSlice(new PypiProxy(http, cfg), settings.layout().pattern());
-                break;
-            case "docker":
-                final Docker docker = new AstoDocker(
-                    new SubStorage(RegistryRoot.V2, cfg.storage())
-                );
-                if (standalone) {
-                    slice = new DockerSlice(
-                        docker,
-                        policy,
-                        new BasicAuthScheme(auth),
-                        cfg.name()
-                    );
-                } else {
-                    slice = new DockerRoutingSlice.Reverted(
-                        new DockerSlice(
+                )
+        );
+    }
+
+    private static Slice createPypiSlice(Settings settings, Policy<?> policy, Authentication auth, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new PySlice(cfg.storage(), policy, auth, cfg.name()),
+                settings.layout().pattern()
+        );
+    }
+
+    private static Slice createPypiProxySlice(Settings settings, ClientSlices http, RepoConfig cfg) {
+        return new TrimPathSlice(new PypiProxy(http, cfg), settings.layout().pattern());
+    }
+
+    private static Slice createDockerSlice(Settings settings, Policy<?> policy, Authentication auth, RepoConfig cfg, boolean standalone) {
+        final Docker docker = new AstoDocker(
+                new SubStorage(RegistryRoot.V2, cfg.storage())
+        );
+        if (standalone) {
+            return new DockerSlice(
+                    docker,
+                    policy,
+                    new BasicAuthScheme(auth),
+                    cfg.name()
+            );
+        } else {
+            return new DockerRoutingSlice.Reverted(
+                    new DockerSlice(
                             new TrimmedDocker(docker, cfg.name()),
                             policy,
                             new BasicAuthScheme(auth),
                             cfg.name()
-                        )
-                    );
-                }
-                break;
-            case "docker-proxy":
-                slice = new DockerProxy(http, standalone, cfg, policy, auth);
-                break;
-            case "deb":
-                slice = new TrimPathSlice(
-                    new DebianSlice(
+                    )
+            );
+        }
+    }
+
+    private static Slice createDockerProxySlice(Settings settings, ClientSlices http, RepoConfig cfg, Policy<?> policy, Authentication auth, boolean standalone) {
+        return new DockerProxy(http, standalone, cfg, policy, auth);
+    }
+
+    private static Slice createDebSlice(Settings settings, Policy<?> policy, Authentication auth, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new DebianSlice(
                         cfg.storage(), policy, auth,
                         new Config.FromYaml(cfg.name(), cfg.settings(), settings.configStorage())
-                    ),
-                    settings.layout().pattern()
-                );
-                break;
-            case "conda":
-                slice = new CondaSlice(
-                    cfg.storage(), policy, auth, tokens, cfg.url().toString(), cfg.name()
-                );
-                break;
-            case "hexpm":
-                slice = new TrimPathSlice(
-                    new HexSlice(cfg.storage(), policy, auth, cfg.name()),
-                    settings.layout().pattern()
-                );
-                break;
-            default:
-                throw new IllegalStateException(
-                    String.format("Unsupported repository type '%s", cfg.type())
-                );
-        }
-        return new ContinueSlice(
-            cfg.contentLengthMax()
-                .<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
-                .orElse(slice)
+                ),
+                settings.layout().pattern()
         );
     }
+
+    private static Slice createCondaSlice(Settings settings, Policy<?> policy, Authentication auth, Tokens tokens, RepoConfig cfg) {
+        return new CondaSlice(
+                cfg.storage(), policy, auth, tokens, cfg.url().toString(), cfg.name()
+        );
+    }
+
+    private static Slice createHexpmSlice(Settings settings, Policy<?> policy, Authentication auth, RepoConfig cfg) {
+        return new TrimPathSlice(
+                new HexSlice(cfg.storage(), policy, auth, cfg.name()),
+                settings.layout().pattern()
+        );
+    }
+
 }
+
+

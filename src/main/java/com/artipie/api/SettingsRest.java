@@ -2,6 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
+
 package com.artipie.api;
 
 import io.vertx.ext.web.RoutingContext;
@@ -36,14 +37,13 @@ public final class SettingsRest extends BaseRest {
     }
 
     @Override
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-    public void init(final RouterBuilder rbr) {
+    protected void initRoutes(final RouterBuilder rbr) {
         rbr.operation("port")
-            .handler(this::portRest)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+                .handler(this::portRest)
+                .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("layout")
-            .handler(this::layoutRest)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+                .handler(this::layoutRest)
+                .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
 
     /**
@@ -54,8 +54,8 @@ public final class SettingsRest extends BaseRest {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add("port", this.port);
         context.response()
-            .setStatusCode(HttpStatus.OK_200)
-            .end(builder.build().toString());
+                .setStatusCode(HttpStatus.OK_200)
+                .end(builder.build().toString());
     }
 
     /**
@@ -66,7 +66,8 @@ public final class SettingsRest extends BaseRest {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add("layout", this.layout);
         context.response()
-            .setStatusCode(HttpStatus.OK_200)
-            .end(builder.build().toString());
+                .setStatusCode(HttpStatus.OK_200)
+                .end(builder.build().toString());
     }
 }
+

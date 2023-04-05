@@ -57,35 +57,35 @@ public final class StorageAliasesRest extends BaseRest {
     }
 
     @Override
-    public void init(final RouterBuilder rtrb) {
+    public void initRoutes(final RouterBuilder rtrb) {
         rtrb.operation("addRepoAlias")
             .handler(this::addRepoAlias)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("getRepoAliases")
             .handler(this::getRepoAliases)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("deleteRepoAlias")
             .handler(this::deleteRepoAlias)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("getAliases")
             .handler(this::getAliases)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("addAlias")
             .handler(this::addAlias)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("deleteAlias")
             .handler(this::deleteAlias)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         if (new Layout.Org().toString().equals(this.layout)) {
             rtrb.operation("getUserAliases")
                 .handler(this::getUserAliases)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+                .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rtrb.operation("addUserAlias")
                 .handler(this::addUserAlias)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+                .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rtrb.operation("deleteUserAlias")
                 .handler(this::deleteUserAlias)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+                .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         }
     }
 

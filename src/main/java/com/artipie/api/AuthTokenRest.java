@@ -51,10 +51,10 @@ public final class AuthTokenRest extends BaseRest {
     }
 
     @Override
-    public void init(final RouterBuilder rbr) {
+    protected void initRoutes(final RouterBuilder rbr) {
         rbr.operation("getJwtToken")
-            .handler(this::getJwtToken)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+                .handler(this::getJwtToken)
+                .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
 
     /**
@@ -64,15 +64,13 @@ public final class AuthTokenRest extends BaseRest {
     private void getJwtToken(final RoutingContext routing) {
         final JsonObject body = routing.body().asJsonObject();
         final Optional<AuthUser> user = this.auth.user(
-            body.getString("name"), body.getString("pass")
+                body.getString("name"), body.getString("pass")
         );
         if (user.isPresent()) {
             routing.response().setStatusCode(HttpStatus.OK_200).end(
-                new JsonObject().put("token", this.tokens.generate(user.get())).encode()
-            );
+                    new JsonObject().put("token", this.tokens.generate(user.get())).encode() );
         } else {
             routing.response().setStatusCode(HttpStatus.UNAUTHORIZED_401).send();
         }
     }
-
 }

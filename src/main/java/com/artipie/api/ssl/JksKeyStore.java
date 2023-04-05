@@ -2,6 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
+
 package com.artipie.api.ssl;
 
 import com.amihaiemil.eoyaml.YamlMapping;
@@ -22,10 +23,10 @@ class JksKeyStore extends YamlBasedKeyStore {
 
     /**
      * Ctor.
-     * @param yaml YAML.
+     * @param yamlConfig YAML.
      */
-    JksKeyStore(final YamlMapping yaml) {
-        super(yaml);
+    JksKeyStore(final YamlMapping yamlConfig) {
+        super(yamlConfig);
     }
 
     @Override
@@ -36,8 +37,8 @@ class JksKeyStore extends YamlBasedKeyStore {
     @Override
     public HttpServerOptions secureOptions(final Vertx vertx, final Storage storage) {
         return new HttpServerOptions()
-            .setSsl(true)
-            .setKeyStoreOptions(this.jksOptions(storage));
+                .setSsl(true)
+                .setKeyStoreOptions(this.jksOptions(storage));
     }
 
     /**
@@ -51,18 +52,17 @@ class JksKeyStore extends YamlBasedKeyStore {
         }
         final YamlMapping jks = node(this.yaml(), JksKeyStore.JKS);
         final JksOptions options = new JksOptions();
-        YamlBasedKeyStore.setIfExists(jks, YamlBasedKeyStore.PASSWORD, options::setPassword);
-        YamlBasedKeyStore.setIfExists(jks, YamlBasedKeyStore.ALIAS, options::setAlias);
-        YamlBasedKeyStore.setIfExists(
-            jks,
-            YamlBasedKeyStore.ALIAS_PASSWORD,
-            options::setAliasPassword
-        );
-        YamlBasedKeyStore.setIfExists(
-            jks,
-            YamlBasedKeyStore.PATH,
-            path -> options.setValue(read(storage, path))
-        );
+
+        final String password = YamlBasedKeyStore.PASSWORD;
+        final String alias = YamlBasedKeyStore.ALIAS;
+        final String aliasPassword = YamlBasedKeyStore.ALIAS_PASSWORD;
+        final String path = YamlBasedKeyStore.PATH;
+
+        YamlBasedKeyStore.setIfExists(jks, password, options::setPassword);
+        YamlBasedKeyStore.setIfExists(jks, alias, options::setAlias);
+        YamlBasedKeyStore.setIfExists(jks, aliasPassword, options::setAliasPassword);
+        YamlBasedKeyStore.setIfExists(jks, path, filePath -> options.setValue(read(storage, filePath)));
+
         return options;
     }
 }

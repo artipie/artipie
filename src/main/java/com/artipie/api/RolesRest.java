@@ -47,25 +47,25 @@ public final class RolesRest extends BaseRest {
     }
 
     @Override
-    public void init(final RouterBuilder rbr) {
+    public void initRoutes(final RouterBuilder rbr) {
         rbr.operation("listAllRoles")
             .handler(this::listAllRoles)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("getRole")
             .handler(this::getRole)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("putRole")
             .handler(this::putRole)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("deleteRole")
             .handler(this::deleteRole)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("enable")
             .handler(this::enableRole)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("disable")
             .handler(this::disableRole)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
 
     /**

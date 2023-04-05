@@ -60,28 +60,28 @@ public final class UsersRest extends BaseRest {
     }
 
     @Override
-    public void init(final RouterBuilder rbr) {
+    public void initRoutes(final RouterBuilder rbr) {
         rbr.operation("listAllUsers")
             .handler(this::listAllUsers)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("getUser")
             .handler(this::getUser)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("putUser")
             .handler(this::putUser)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("deleteUser")
             .handler(this::deleteUser)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("alterPassword")
             .handler(this::alterPassword)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("enable")
             .handler(this::enableUser)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("disable")
             .handler(this::disableUser)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+            .failureHandler(new ErrorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
 
     /**
