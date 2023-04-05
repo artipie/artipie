@@ -1,9 +1,8 @@
-reader:
-  permissions:
-    adapter_basic_permissions:
+permissions:
+  adapter_basic_permissions:
+    "*":
+      - read
+  docker_repository_permissions:
+    "*":
       "*":
-        - read
-    docker_repository_permissions:
-      "*":
-        "*":
-          - pull
+        - pull

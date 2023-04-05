@@ -1,10 +1,9 @@
-artipie:
-  type: plain
-  pass: artipie
-  email: artipie@example.com
-  roles:
-    - reader
-  permissions:
-    adapter_basic_permissions:
-      artipie/my-bin:
-        - write
+type: plain
+pass: artipie
+email: artipie@example.com
+roles:
+  - reader
+permissions:
+  adapter_basic_permissions:
+    artipie/my-bin:
+      - write
