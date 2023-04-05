@@ -169,12 +169,12 @@ public final class YamlSettings implements Settings {
             res = new AuthFromEnv();
         } else {
             final AuthLoader loader = new AuthLoader();
-            final List<Authentication> auth = creds.values().stream().map(
+            final List<Authentication> auths = creds.values().stream().map(
                 node -> node.asMapping().string(YamlSettings.NODE_TYPE)
             ).map(type -> loader.newObject(type, settings)).toList();
-            res = auth.get(0);
-            for (final Authentication users : auth.subList(1, auth.size())) {
-                res = new Authentication.Joined(res, users);
+            res = auths.get(0);
+            for (final Authentication auth : auths.subList(1, auths.size())) {
+                res = new Authentication.Joined(res, auth);
             }
         }
         return new CachedUsers(res);
