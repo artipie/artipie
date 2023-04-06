@@ -3,7 +3,7 @@
 File proxy or mirror is a general purpose files mirror. It acts like a transparent HTTP proxy for one host
 and caches all the data locally. To configure it use `file-proxy` repository type with required `remotes` section which should include
 one remote configuration. Each remote config must provide `url` for remote file server and optional `username` and `password` for authentication.
-Proxy is a read-only repository, nobody can upload to it. Only `download` permissions make sense here. Storage can be configured for
+Proxy is a read-only repository, nobody can upload to it. Storage can be configured for
 caching capabilities.
 
 *Example:*
@@ -18,9 +18,6 @@ repo:
       storage: # optional storage to cache proxy data
         type: fs
         path: tmp/files-proxy/data
-  permissions:
-    "*":
-      - download
 ```
 
 In order to download a file, send a `GET` HTTP request:
