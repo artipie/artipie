@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class CachedFilters implements FiltersCache {
     /**
-     * Cache for storages.
+     * Cache for filters.
      */
     private final Cache<String, Optional<Filters>> cache;
 
@@ -33,9 +33,9 @@ public class CachedFilters implements FiltersCache {
      */
     public CachedFilters() {
         this.cache = CacheBuilder.newBuilder()
-            .expireAfterWrite(
+            .expireAfterAccess(
                 //@checkstyle MagicNumberCheck (1 line)
-                new Property(ArtipieProperties.STORAGE_TIMEOUT).asLongOrDefault(180_000L),
+                new Property(ArtipieProperties.FILTERS_TIMEOUT).asLongOrDefault(180_000L),
                 TimeUnit.MILLISECONDS
             ).softValues()
             .build();
@@ -68,8 +68,8 @@ public class CachedFilters implements FiltersCache {
     }
 
     @Override
-    public void invalidate(final YamlMapping repoyaml) {
-        this.cache.invalidate(repoyaml);
+    public void invalidate(final String reponame) {
+        this.cache.invalidate(reponame);
     }
 
     @Override

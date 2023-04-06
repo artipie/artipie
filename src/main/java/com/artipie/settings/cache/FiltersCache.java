@@ -13,7 +13,7 @@ import java.util.Optional;
  * Cache for filters.
  * @since 0.28
  */
-public interface FiltersCache extends Cleanable<YamlMapping> {
+public interface FiltersCache extends Cleanable<String> {
     /**
      * Finds filters by specified in settings configuration cache or creates
      * a new item and caches it.

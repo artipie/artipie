@@ -148,6 +148,7 @@ public final class RestApi extends AbstractVerticle {
         this.addJwtAuth(tokenRb, repoRb, userRb, settingsRb, rolesRb);
         final BlockingStorage asto = new BlockingStorage(this.configsStorage);
         new RepositoryRest(
+            this.caches.filtersCache(),
             new ManageRepoSettings(asto),
             new RepoData(this.configsStorage, this.caches.storagesCache()), this.layout
         ).init(repoRb);

@@ -34,6 +34,12 @@ public final class TestFiltersCache extends CachedFilters {
         super.invalidateAll();
     }
 
+    @Override
+    public void invalidate(final String reponame) {
+        this.cnt.incrementAndGet();
+        super.invalidate(reponame);
+    }
+
     /**
      * Was this case invalidated?
      *
