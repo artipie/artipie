@@ -9,14 +9,7 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
-  permissions:
-    alice:
-      - upload
-      - download
-    "*":
-      - download
 ```
-Note, that Docker repository also supports [granular permissions](./Configuration-Repository-Permissions#docker-repository-granular-permissions).
 
 ### Usage example
 
