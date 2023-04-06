@@ -17,11 +17,7 @@ repo:
           type: fs
           path: /tmp/artipie/maven-central-cache
     - url: https://maven.example.com/
-  permissions:
-    "*":
-      - download
 ```
-Only `download` permissions make sense here.
 
 To use this repository as regular maven repository in Java project, add the following configuration
 into `pom` project file (alternatively [configure](https://maven.apache.org/guides/mini/guide-multiple-repositories.html)
