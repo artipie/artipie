@@ -465,7 +465,7 @@ SOFTWARE.
             <excludes combine.children="append">
               <exclude>checkstyle:.*/src/test/resources/.*</exclude>
               <exclude>checkstyle:.*/src/main/resources/swagger-ui/.*</exclude>
-              <exclude>checkstyle:.*/src/test/java/com/artipie/settings/cache/CachedFiltersTest.java</exclude>
+              <exclude>checkstyle:.*/src/test/java/com/artipie/settings/cache/GuavaFiltersCacheTest.java</exclude>
               <exclude>pmd:.*/src/test/resources/.*</exclude>
               <exclude>pmd:.*/src/main/resources/swagger-ui/.*</exclude>
             </excludes>

@@ -4,14 +4,14 @@
  */
 package com.artipie.test;
 
-import com.artipie.settings.cache.CachedFilters;
+import com.artipie.settings.cache.GuavaFiltersCache;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test filters caches.
  * @since 0.28
  */
-public final class TestFiltersCache extends CachedFilters {
+public final class TestFiltersCache extends GuavaFiltersCache {
 
     /**
      * Counter for `invalidateAll()` method calls.

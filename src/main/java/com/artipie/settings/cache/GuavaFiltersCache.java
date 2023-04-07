@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * @since 0.28
  * @checkstyle DesignForExtensionCheck (500 lines)
  */
-public class CachedFilters implements FiltersCache {
+public class GuavaFiltersCache implements FiltersCache {
     /**
      * Cache for filters.
      */
@@ -31,7 +31,7 @@ public class CachedFilters implements FiltersCache {
     /**
      * Ctor.
      */
-    public CachedFilters() {
+    public GuavaFiltersCache() {
         this.cache = CacheBuilder.newBuilder()
             .expireAfterAccess(
                 //@checkstyle MagicNumberCheck (1 line)

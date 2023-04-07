@@ -15,11 +15,11 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link CachedFilters}.
+ * Tests for {@link GuavaFiltersCache}.
  * @since 0.28
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-final class CachedFiltersTest {
+final class GuavaFiltersCacheTest {
     /**
      * Maven repository name.
      */
@@ -32,7 +32,7 @@ final class CachedFiltersTest {
 
     @Test
     void getsValueFromCache() {
-        final YamlMapping yaml = CachedFiltersTest.yaml(
+        final YamlMapping yaml = GuavaFiltersCacheTest.yaml(
             String.join(
                 System.lineSeparator(),
                 "filters:",
@@ -44,9 +44,9 @@ final class CachedFiltersTest {
                 "      - filter: **/artipie/**/*"
             )
         );
-        final CachedFilters cache = new CachedFilters();
-        final Optional<Filters> first = cache.filters(CachedFiltersTest.MAVEN_REPO, yaml);
-        final Optional<Filters> second = cache.filters(CachedFiltersTest.MAVEN_REPO, yaml);
+        final GuavaFiltersCache cache = new GuavaFiltersCache();
+        final Optional<Filters> first = cache.filters(GuavaFiltersCacheTest.MAVEN_REPO, yaml);
+        final Optional<Filters> second = cache.filters(GuavaFiltersCacheTest.MAVEN_REPO, yaml);
         MatcherAssert.assertThat(
             "Obtained filters were different",
             first.equals(second),
@@ -61,14 +61,14 @@ final class CachedFiltersTest {
 
     @Test
     void getsEmptyFilterFromCache() {
-        final YamlMapping repoyaml = CachedFiltersTest.yaml(
+        final YamlMapping repoyaml = GuavaFiltersCacheTest.yaml(
             String.join(
                 System.lineSeparator(),
                 "filters:"
             )
         );
-        final CachedFilters cache = new CachedFilters();
-        final Optional<Filters> filters = cache.filters(CachedFiltersTest.MAVEN_REPO, repoyaml);
+        final GuavaFiltersCache cache = new GuavaFiltersCache();
+        final Optional<Filters> filters = cache.filters(GuavaFiltersCacheTest.MAVEN_REPO, repoyaml);
         MatcherAssert.assertThat(
             "Obtained filters were not empty",
             filters.isEmpty(),
@@ -83,7 +83,7 @@ final class CachedFiltersTest {
 
     @Test
     void getsFilterWithEmptyListsFromCache() {
-        final YamlMapping repoyaml = CachedFiltersTest.yaml(
+        final YamlMapping repoyaml = GuavaFiltersCacheTest.yaml(
             String.join(
                 System.lineSeparator(),
                 "filters:",
@@ -91,9 +91,9 @@ final class CachedFiltersTest {
                 "  exclude:"
             )
         );
-        final CachedFilters cache = new CachedFilters();
-        final Optional<Filters> first = cache.filters(CachedFiltersTest.MAVEN_REPO, repoyaml);
-        final Optional<Filters> second = cache.filters(CachedFiltersTest.MAVEN_REPO, repoyaml);
+        final GuavaFiltersCache cache = new GuavaFiltersCache();
+        final Optional<Filters> first = cache.filters(GuavaFiltersCacheTest.MAVEN_REPO, repoyaml);
+        final Optional<Filters> second = cache.filters(GuavaFiltersCacheTest.MAVEN_REPO, repoyaml);
         MatcherAssert.assertThat(
             "Obtained filters were different",
             first.equals(second),
@@ -108,7 +108,7 @@ final class CachedFiltersTest {
 
     @Test
     void getsDifferentFilters() {
-        final YamlMapping repoyaml = CachedFiltersTest.yaml(
+        final YamlMapping repoyaml = GuavaFiltersCacheTest.yaml(
             String.join(
                 System.lineSeparator(),
                 "filters:",
@@ -118,9 +118,9 @@ final class CachedFiltersTest {
                 "  exclude:"
             )
         );
-        final CachedFilters cache = new CachedFilters();
-        cache.filters(CachedFiltersTest.MAVEN_REPO, repoyaml);
-        cache.filters(CachedFiltersTest.FILE_REPO, repoyaml);
+        final GuavaFiltersCache cache = new GuavaFiltersCache();
+        cache.filters(GuavaFiltersCacheTest.MAVEN_REPO, repoyaml);
+        cache.filters(GuavaFiltersCacheTest.FILE_REPO, repoyaml);
         MatcherAssert.assertThat(
             "Filters was not cached",
             cache.size(),
