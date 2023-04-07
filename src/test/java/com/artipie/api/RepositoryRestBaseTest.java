@@ -7,6 +7,7 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.fs.FileStorage;
+import com.artipie.test.TestFiltersCache;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -70,7 +71,12 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
             "  type: binary",
             "  storage:",
             "    type: fs",
-            String.format("    path: %s", this.temp.toString())
+            String.format("    path: %s", this.temp.toString()),
+            "  filters:",
+            "    include:",
+            "      glob:",
+            "        - filter: '**/*'",
+            "    exclude:"
         );
     }
 
@@ -216,6 +222,10 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
                     this.storage().exists(new ConfigKeys(rname.toString()).yamlKey()),
                     new IsEqual<>(true)
                 );
+                MatcherAssert.assertThat(
+                    "Filters cache should be invalidated",
+                    ((TestFiltersCache) this.settingsCaches().filtersCache()).wasInvalidated()
+                );
             }
         );
     }
@@ -246,6 +256,10 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
                 MatcherAssert.assertThat(
                     storage().value(new ConfigKeys(rname.toString()).yamlKey()).length > 0,
                     new IsEqual<>(true)
+                );
+                MatcherAssert.assertThat(
+                    "Filters cache should be invalidated",
+                    ((TestFiltersCache) this.settingsCaches().filtersCache()).wasInvalidated()
                 );
             }
         );
@@ -297,6 +311,10 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
                 );
                 Awaitility.waitAtMost(MAX_WAIT_TIME, TimeUnit.SECONDS).until(
                     () -> !this.getData().exists(alpine)
+                );
+                MatcherAssert.assertThat(
+                    "Filters cache should be invalidated",
+                    ((TestFiltersCache) this.settingsCaches().filtersCache()).wasInvalidated()
                 );
             }
         );
@@ -416,6 +434,10 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
                     () -> this.getData().exists(
                         new Key.From(String.format("%s/alpine.img", newrname))
                     )
+                );
+                MatcherAssert.assertThat(
+                    "Filters cache should be invalidated",
+                    ((TestFiltersCache) this.settingsCaches().filtersCache()).wasInvalidated()
                 );
             }
         );

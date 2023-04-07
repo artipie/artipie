@@ -6,6 +6,7 @@ package com.artipie.test;
 
 import com.artipie.asto.misc.Cleanable;
 import com.artipie.settings.cache.ArtipieCaches;
+import com.artipie.settings.cache.FiltersCache;
 import com.artipie.settings.cache.StoragesCache;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.lang3.NotImplementedException;
@@ -32,12 +33,20 @@ public final class TestArtipieCaches implements ArtipieCaches {
     private final AtomicLong cleanpolicy;
 
     /**
+     * Cache for configurations of filters.
+     * @checkstyle MemberNameCheck (5 lines)
+     */
+    @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
+    private final FiltersCache filtersCache;
+
+    /**
      * Ctor with all fake initialized caches.
      */
     public TestArtipieCaches() {
         this.strgcache = new TestStoragesCache();
         this.cleanuser = new AtomicLong();
         this.cleanpolicy = new AtomicLong();
+        this.filtersCache = new TestFiltersCache();
     }
 
     @Override
@@ -73,6 +82,11 @@ public final class TestArtipieCaches implements ArtipieCaches {
                 throw new NotImplementedException("not implemented");
             }
         };
+    }
+
+    @Override
+    public FiltersCache filtersCache() {
+        return this.filtersCache;
     }
 
     /**

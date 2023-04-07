@@ -24,6 +24,7 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.cache.CachedStorages;
 import com.artipie.settings.cache.CachedUsers;
+import com.artipie.settings.cache.GuavaFiltersCache;
 import com.jcabi.log.Logger;
 import java.util.List;
 import java.util.Locale;
@@ -103,7 +104,9 @@ public final class YamlSettings implements Settings {
         this.security = new ArtipieSecurity.FromYaml(
             this.meta(), auth, YamlSettings.initPolicyStorage(this.meta())
         );
-        this.acach = new ArtipieCaches.All(auth, new CachedStorages(), this.security.policy());
+        this.acach = new ArtipieCaches.All(
+            auth, new CachedStorages(), this.security.policy(), new GuavaFiltersCache()
+        );
         this.mctx = new MetricsContext(this.meta());
     }
 
