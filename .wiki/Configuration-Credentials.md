@@ -128,7 +128,7 @@ so, there is no need to worry about caching in your implementation.
 and add [factory annotation](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/http/auth/ArtipieAuthFactory.java) 
 with authentication type name. As an example, check [KeycloakFactory](https://github.com/artipie/artipie/blob/master/src/main/java/com/artipie/auth/AuthFromKeycloakFactory.java).
 - Add your package to Artipie class-path and to `AUTH_FACTORY_SCAN_PACKAGES` environment variable
-- Specify your authentication type in credentials list. Note, that Artipie try to authenticate 
+- Specify your authentication type in the credentials list. Note, that Artipie tries to authenticate 
 user via each listed type. So, if you are not actually using any auth type it would be better 
 to remove it from settings.
 
