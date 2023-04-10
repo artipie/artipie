@@ -36,6 +36,13 @@ public interface ArtipieCaches {
     Cleanable<String> policyCache();
 
     /**
+     * Obtains filters cache.
+     *
+     * @return Filters cache.
+     */
+    FiltersCache filtersCache();
+
+    /**
      * Implementation with all real instances of caches.
      *
      * @since 0.23
@@ -57,19 +64,30 @@ public interface ArtipieCaches {
         private final Policy<?> policy;
 
         /**
+         * Cache for configurations of filters.
+         * @checkstyle MemberNameCheck (5 line)
+         */
+        private final FiltersCache filtersCache;
+
+        /**
          * Ctor with all initialized caches.
          * @param users Users cache
          * @param strgcache Storages cache
          * @param policy Artipie policy
+         * @param filtersCache Filters cache
+         * @checkstyle ParameterNumberCheck (7 lines)
+         * @checkstyle ParameterNameCheck (7 lines)
          */
         public All(
             final Cleanable<String> users,
             final StoragesCache strgcache,
-            final Policy<?> policy
+            final Policy<?> policy,
+            final FiltersCache filtersCache
         ) {
             this.authcache = users;
             this.strgcache = strgcache;
             this.policy = policy;
+            this.filtersCache = filtersCache;
         }
 
         @Override
@@ -102,6 +120,11 @@ public interface ArtipieCaches {
                 };
             }
             return res;
+        }
+
+        @Override
+        public FiltersCache filtersCache() {
+            return this.filtersCache;
         }
     }
 }

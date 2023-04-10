@@ -41,6 +41,11 @@ public final class ArtipieProperties {
     public static final String CREDS_TIMEOUT = "artipie.credentials.file.cache.timeout";
 
     /**
+     * Expiration time for cached filters.
+     */
+    public static final String FILTERS_TIMEOUT = "artipie.cached.filters.timeout";
+
+    /**
      * Name of file with properties.
      */
     private final String filename;
