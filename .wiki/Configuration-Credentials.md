@@ -120,7 +120,7 @@ Artipie allows implementing and using custom authentication (credentials type). 
 you can choose any way to authenticate users you like, implement it in Java and use in Artipie. To do
 so:
 
-- add [`http` module](https://github.com/artipie/http) to your project dependencies 
+- Add [`http` module](https://github.com/artipie/http) to your project dependencies.
 - Implement [Authentication](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/http/auth/Authentication.java) interface 
 to verify and obtain users the way you need. Note, that authenticated users are cached on the upper level,
 so, there is no need to worry about caching in your implementation.
