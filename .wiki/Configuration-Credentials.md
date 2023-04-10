@@ -130,7 +130,7 @@ with authentication type name. As an example, check [KeycloakFactory](https://gi
 - Add your package to Artipie class-path and to `AUTH_FACTORY_SCAN_PACKAGES` environment variable
 - Specify your authentication type in the credentials list. Note, that Artipie tries to authenticate 
 user via each listed type. So, if you are not actually using any auth type it would be better 
-to remove it from settings.
+to remove it from the settings.
 
 For more details and examples, check the following packages: [com.artipie.http.auth](https://github.com/artipie/http/tree/master/src/main/java/com/artipie/http/auth) 
 and [com.artipie.auth](https://github.com/artipie/artipie/tree/master/src/main/java/com/artipie/auth).
