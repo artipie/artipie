@@ -53,19 +53,20 @@ public final class SettingsFromPath {
         final BlockingStorage bsto = new BlockingStorage(settings.configStorage());
         final Key init = new Key.From(".artipie", "initialized");
         if (initialize && !bsto.exists(init)) {
-            final List<String> resources = Arrays.asList(
-                String.format("repo/%s", AliasSettings.FILE_NAME),
-                "repo/artipie/my-bin.yaml", "repo/artipie/my-docker.yaml",
-                "repo/artipie/my-maven.yaml",
-                "security/roles/reader.yml", "security/users/artipie.yaml"
+            SettingsFromPath.copyResources(
+                Arrays.asList(
+                    AliasSettings.FILE_NAME, "artipie/my-bin.yaml",
+                    "artipie/my-docker.yaml", "artipie/my-maven.yaml"
+                ),
+                "repo", bsto
             );
-            for (final String res : resources) {
-                final Path tmp = Files.createTempFile(
-                    Path.of(res).getFileName().toString(), ".tmp"
+            if (settings.authz().policyStorage().isPresent()) {
+                final BlockingStorage policy = new BlockingStorage(
+                    settings.authz().policyStorage().get()
                 );
-                new JavaResource(String.format("example/%s", res)).copy(tmp);
-                bsto.save(new Key.From(res), Files.readAllBytes(tmp));
-                Files.delete(tmp);
+                SettingsFromPath.copyResources(
+                    Arrays.asList("roles/reader.yml", "users/artipie.yaml"), "security", policy
+                );
             }
             bsto.save(init, "true".getBytes());
             Logger.info(
@@ -81,5 +82,25 @@ public final class SettingsFromPath {
             );
         }
         return settings;
+    }
+
+    /**
+     * Copies given resources list from given directory to the blocking storage.
+     * @param resources What to copy
+     * @param dir Example resources directory
+     * @param bsto Where to copy
+     * @throws IOException On error
+     */
+    private static void copyResources(
+        final List<String> resources, final String dir, final BlockingStorage bsto
+    ) throws IOException {
+        for (final String res : resources) {
+            final Path tmp = Files.createTempFile(
+                Path.of(res).getFileName().toString(), ".tmp"
+            );
+            new JavaResource(String.format("example/%s/%s", dir, res)).copy(tmp);
+            bsto.save(new Key.From(res), Files.readAllBytes(tmp));
+            Files.delete(tmp);
+        }
     }
 }
