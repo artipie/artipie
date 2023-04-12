@@ -113,3 +113,24 @@ Artipie acts as Keycloak client application and should be configured in Keycloak
 * Client authentication: On
 * Authorization: On
 * Authentication flow: `Direct access grants`
+
+## Custom authentication
+
+Artipie allows implementing and using custom authentication (credentials type). To be more precise,
+you can choose any way to authenticate users you like, implement it in Java and use in Artipie. To do
+so:
+
+- Add [`http` module](https://github.com/artipie/http) to your project dependencies.
+- Implement [Authentication](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/http/auth/Authentication.java) interface 
+to verify and obtain users the way you need. Note, that authenticated users are cached on the upper level,
+so, there is no need to worry about caching in your implementation.
+- Implement [factory](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/http/auth/AuthFactory.java) for new authentication
+and add [factory annotation](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/http/auth/ArtipieAuthFactory.java) 
+with authentication type name. As an example, check [KeycloakFactory](https://github.com/artipie/artipie/blob/master/src/main/java/com/artipie/auth/AuthFromKeycloakFactory.java).
+- Add your package to Artipie class-path and to `AUTH_FACTORY_SCAN_PACKAGES` environment variable
+- Specify your authentication type in the credentials list. Note, that Artipie tries to authenticate 
+user via each listed type. So, if you are not actually using any auth type it would be better 
+to remove it from the settings.
+
+For more details and examples, check the following packages: [com.artipie.http.auth](https://github.com/artipie/http/tree/master/src/main/java/com/artipie/http/auth) 
+and [com.artipie.auth](https://github.com/artipie/artipie/tree/master/src/main/java/com/artipie/auth).

@@ -36,6 +36,7 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.ClientSlices;
+import com.artipie.http.filter.FilterSlice;
 import com.artipie.http.group.GroupSlice;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.http.MavenSlice;
@@ -280,10 +281,19 @@ public final class SliceFromConfig extends Slice.Wrap {
                     String.format("Unsupported repository type '%s", cfg.type())
                 );
         }
-        return new ContinueSlice(
-            cfg.contentLengthMax()
-                .<Slice>map(limit -> new ContentLengthRestriction(slice, limit))
-                .orElse(slice)
-        );
+        return settings.caches()
+            .filtersCache()
+            .filters(cfg.name(), cfg.repoYaml())
+            .<Slice>map(filters -> new FilterSlice(slice, filters))
+            .or(() -> Optional.of(slice))
+            .map(
+                res ->
+                    new ContinueSlice(
+                        cfg.contentLengthMax()
+                            .<Slice>map(limit -> new ContentLengthRestriction(res, limit))
+                            .orElse(res)
+                    )
+            )
+            .get();
     }
 }

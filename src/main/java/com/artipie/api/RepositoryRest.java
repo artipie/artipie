@@ -9,6 +9,7 @@ import com.artipie.api.verifier.ReservedNamesVerifier;
 import com.artipie.api.verifier.SettingsDuplicatesVerifier;
 import com.artipie.settings.Layout;
 import com.artipie.settings.RepoData;
+import com.artipie.settings.cache.FiltersCache;
 import com.artipie.settings.repo.CrudRepoSettings;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
@@ -24,6 +25,11 @@ import org.eclipse.jetty.http.HttpStatus;
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class RepositoryRest extends BaseRest {
+    /**
+     * Artipie filters cache.
+     */
+    private final FiltersCache cache;
+
     /**
      * Repository settings create/read/update/delete.
      */
@@ -41,11 +47,15 @@ public final class RepositoryRest extends BaseRest {
 
     /**
      * Ctor.
+     * @param cache Artipie filters cache
      * @param crs Repository settings create/read/update/delete
      * @param data Repository data management
      * @param layout Artipie layout
+     * @checkstyle ParameterNumberCheck (5 lines)
      */
-    public RepositoryRest(final CrudRepoSettings crs, final RepoData data, final String layout) {
+    public RepositoryRest(final FiltersCache cache, final CrudRepoSettings crs, final RepoData data,
+        final String layout) {
+        this.cache = cache;
         this.crs = crs;
         this.data = data;
         this.layout = layout;
@@ -198,6 +208,7 @@ public final class RepositoryRest extends BaseRest {
             );
             if (jsvalidator.validate(context)) {
                 this.crs.save(rname, json);
+                this.cache.invalidate(rname.toString());
                 context.response()
                     .setStatusCode(HttpStatus.OK_200)
                     .end();
@@ -228,6 +239,7 @@ public final class RepositoryRest extends BaseRest {
                         return null;
                     }
                 );
+            this.cache.invalidate(rname.toString());
             context.response()
                 .setStatusCode(HttpStatus.OK_200)
                 .end();
@@ -270,6 +282,7 @@ public final class RepositoryRest extends BaseRest {
             );
             if (validator.validate(context)) {
                 this.data.move(rname, newrname).thenRun(() -> this.crs.move(rname, newrname));
+                this.cache.invalidate(rname.toString());
                 context.response()
                     .setStatusCode(HttpStatus.OK_200)
                     .end();
