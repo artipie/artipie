@@ -5,12 +5,18 @@
 package com.artipie.http;
 
 import com.artipie.docker.http.BaseEntity;
+import com.artipie.docker.perms.DockerActions;
+import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.auth.Authentication;
-import com.artipie.http.auth.BasicAuthSlice;
+import com.artipie.http.auth.BasicAuthzSlice;
+import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.security.perms.EmptyPermissions;
+import com.artipie.security.perms.FreePermissions;
 import com.artipie.settings.Settings;
 import java.nio.ByteBuffer;
+import java.security.PermissionCollection;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +26,7 @@ import org.reactivestreams.Publisher;
 /**
  * Slice decorator which redirects all Docker V2 API requests to Artipie format paths.
  * @since 0.9
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class DockerRoutingSlice implements Slice {
 
@@ -54,6 +61,7 @@ public final class DockerRoutingSlice implements Slice {
     }
 
     @Override
+    @SuppressWarnings("PMD.NestedIfDepthCheck")
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         final RequestLineFrom req = new RequestLineFrom(line);
@@ -63,10 +71,20 @@ public final class DockerRoutingSlice implements Slice {
         if (matcher.matches()) {
             final String group = matcher.group(1);
             if (group.isEmpty() || group.equals("/")) {
-                rsp = new BasicAuthSlice(
+                rsp = new BasicAuthzSlice(
                     new BaseEntity(),
                     this.settings.authz().authentication(),
-                    user -> !user.equals(Authentication.ANY_USER)
+                    new OperationControl(
+                        user -> {
+                            // @checkstyle NestedIfDepthCheck (10 lines)
+                            PermissionCollection res = new FreePermissions();
+                            if (Authentication.ANY_USER.name().equals(user.name())) {
+                                res = EmptyPermissions.INSTANCE;
+                            }
+                            return res;
+                        },
+                        new DockerRepositoryPermission("*", "*", DockerActions.PULL.mask())
+                    )
                 ).response(line, headers, body);
             } else {
                 rsp = this.origin.response(

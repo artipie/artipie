@@ -34,7 +34,7 @@ public class CachedStorages implements StoragesCache {
     /**
      * Storages factory.
      */
-    private static final StoragesLoader STORAGES = new StoragesLoader();
+    public static final StoragesLoader STORAGES = new StoragesLoader();
 
     /**
      * Cache for storages.

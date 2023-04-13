@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
  * @since 0.9
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class DockerRoutingSliceTest {
 
     @Test
@@ -105,6 +106,24 @@ final class DockerRoutingSliceTest {
                 )
             ),
             path
+        );
+    }
+
+    @Test
+    void notAllowsAnyUser() {
+        MatcherAssert.assertThat(
+            new DockerRoutingSlice(
+                new SettingsWithAuth((usr, pswd) -> Optional.of(Authentication.ANY_USER)),
+                (line, headers, body) -> {
+                    throw new UnsupportedOperationException();
+                }
+            ),
+            new SliceHasResponse(
+                new RsHasStatus(RsStatus.FORBIDDEN),
+                new RequestLine(RqMethod.GET, "/v2/"),
+                new Headers.From(new Authorization.Basic("any", "ignored")),
+                Content.EMPTY
+            )
         );
     }
 
