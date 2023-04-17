@@ -19,6 +19,7 @@
     * [[Security policy and permissions|Configuration-Policy]]
     * [[Repository|Configuration-Repository]]
       * [[Single repository on port|Configuration-Repository#single-repository-on-port]]
+      * [[Filters|Configuration-Repository#filters]] 
       * [[Repositories types|Configuration-Repository#supported-repository-types]]
         * [[File|file]]
         * [[File proxy (mirror)|file-proxy-mirror]]
