@@ -1,7 +1,7 @@
 meta:
   storage:
     type: fs
-    path: /var/artipie/repo
+    path: C:\Users\g00563573\IdeaProjects\artipie\src\main\resources\example\repo
   credentials:
     - type: env
     - type: github
@@ -10,7 +10,7 @@ meta:
     type: artipie
     storage:
       type: fs
-      path: /var/artipie/security
+      path: C:\Users\g00563573\IdeaProjects\artipie\src\main\resources\example\security
   layout: org
   base_url: http://central.artipie.com/
   metrics:

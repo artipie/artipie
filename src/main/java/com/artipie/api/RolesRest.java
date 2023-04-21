@@ -4,12 +4,16 @@
  */
 package com.artipie.api;
 
+import com.artipie.api.perms.ApiRolePermission;
 import com.artipie.asto.misc.Cleanable;
+import com.artipie.http.auth.AuthUser;
+import com.artipie.security.policy.Policy;
 import com.artipie.settings.users.CrudRoles;
 import com.jcabi.log.Logger;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.io.StringReader;
+import java.security.PermissionCollection;
 import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -20,6 +24,18 @@ import org.eclipse.jetty.http.HttpStatus;
  * @since 0.27
  */
 public final class RolesRest extends BaseRest {
+
+    /**
+     * Update role permission.
+     */
+    private static final ApiRolePermission UPDATE =
+        new ApiRolePermission(ApiRolePermission.RoleAction.UPDATE);
+
+    /**
+     * Create role permission.
+     */
+    private static final ApiRolePermission CREATE =
+        new ApiRolePermission(ApiRolePermission.RoleAction.CREATE);
 
     /**
      * Role name path param.
@@ -37,33 +53,65 @@ public final class RolesRest extends BaseRest {
     private final Cleanable<String> cache;
 
     /**
+     * Artipie security policy.
+     */
+    private final Policy<?> policy;
+
+    /**
      * Ctor.
      * @param roles Crud roles object
      * @param cache Artipie authenticated roles cache
+     * @param policy Artipie policy cache
      */
-    public RolesRest(final CrudRoles roles, final Cleanable<String> cache) {
+    public RolesRest(final CrudRoles roles, final Cleanable<String> cache, final Policy<?> policy) {
         this.roles = roles;
         this.cache = cache;
+        this.policy = policy;
     }
 
     @Override
     public void init(final RouterBuilder rbr) {
         rbr.operation("listAllRoles")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiRolePermission(ApiRolePermission.RoleAction.READ)
+                )
+            )
             .handler(this::listAllRoles)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("getRole")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiRolePermission(ApiRolePermission.RoleAction.READ)
+                )
+            )
             .handler(this::getRole)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("putRole")
             .handler(this::putRole)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("deleteRole")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiRolePermission(ApiRolePermission.RoleAction.DELETE)
+                )
+            )
             .handler(this::deleteRole)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("enable")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiRolePermission(ApiRolePermission.RoleAction.ENABLE)
+                )
+            )
             .handler(this::enableRole)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rbr.operation("disable")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiRolePermission(ApiRolePermission.RoleAction.ENABLE)
+                )
+            )
             .handler(this::disableRole)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
@@ -125,12 +173,24 @@ public final class RolesRest extends BaseRest {
      */
     private void putRole(final RoutingContext context) {
         final String uname = context.pathParam(RolesRest.ROLE_NAME);
-        this.roles.addOrUpdate(
-            Json.createReader(new StringReader(context.body().asString())).readObject(),
-            uname
+        final PermissionCollection perms = this.policy.getPermissions(
+            new AuthUser(
+                context.user().principal().getString(AuthTokenRest.SUB),
+                context.user().principal().getString(AuthTokenRest.CONTEXT)
+            )
         );
-        this.cache.invalidate(uname);
-        context.response().setStatusCode(HttpStatus.CREATED_201).end();
+        final Optional<JsonObject> existing = this.roles.get(uname);
+        if (existing.isPresent() && perms.implies(RolesRest.UPDATE)
+            || existing.isEmpty() && perms.implies(RolesRest.CREATE)) {
+            this.roles.addOrUpdate(
+                Json.createReader(new StringReader(context.body().asString())).readObject(),
+                uname
+            );
+            this.cache.invalidate(uname);
+            context.response().setStatusCode(HttpStatus.CREATED_201).end();
+        } else {
+            context.response().setStatusCode(HttpStatus.FORBIDDEN_403).end();
+        }
     }
 
     /**

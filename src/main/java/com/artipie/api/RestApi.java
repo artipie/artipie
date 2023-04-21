@@ -150,19 +150,22 @@ public final class RestApi extends AbstractVerticle {
         new RepositoryRest(
             this.caches.filtersCache(),
             new ManageRepoSettings(asto),
-            new RepoData(this.configsStorage, this.caches.storagesCache()), this.layout
+            new RepoData(this.configsStorage, this.caches.storagesCache()), this.layout,
+            this.security.policy()
         ).init(repoRb);
-        new StorageAliasesRest(this.caches.storagesCache(), asto, this.layout).init(repoRb);
+        new StorageAliasesRest(
+            this.caches.storagesCache(), asto, this.layout, this.security.policy()
+        ).init(repoRb);
         if (this.security.policyStorage().isPresent()) {
             new UsersRest(
                 new ManageUsers(new BlockingStorage(this.security.policyStorage().get())),
-                this.caches.usersCache(), this.caches.policyCache(), this.security.authentication()
+                this.caches, this.security
             ).init(userRb);
         }
         if (this.security.policy() instanceof CachedYamlPolicy) {
             new RolesRest(
                 new ManageRoles(new BlockingStorage(this.security.policyStorage().get())),
-                this.caches.policyCache()
+                this.caches.policyCache(), this.security.policy()
             ).init(rolesRb);
         }
         new SettingsRest(this.port, this.layout).init(settingsRb);

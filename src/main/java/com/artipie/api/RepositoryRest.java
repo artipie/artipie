@@ -4,9 +4,12 @@
  */
 package com.artipie.api;
 
+import com.artipie.api.perms.ApiRepositoryPermission;
 import com.artipie.api.verifier.ExistenceVerifier;
 import com.artipie.api.verifier.ReservedNamesVerifier;
 import com.artipie.api.verifier.SettingsDuplicatesVerifier;
+import com.artipie.http.auth.AuthUser;
+import com.artipie.security.policy.Policy;
 import com.artipie.settings.Layout;
 import com.artipie.settings.RepoData;
 import com.artipie.settings.cache.FiltersCache;
@@ -14,6 +17,7 @@ import com.artipie.settings.repo.CrudRepoSettings;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
+import java.security.PermissionCollection;
 import javax.json.JsonObject;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -25,6 +29,19 @@ import org.eclipse.jetty.http.HttpStatus;
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class RepositoryRest extends BaseRest {
+
+    /**
+     * Update role permission.
+     */
+    private static final ApiRepositoryPermission UPDATE =
+        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.UPDATE);
+
+    /**
+     * Create role permission.
+     */
+    private static final ApiRepositoryPermission CREATE =
+        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.CREATE);
+
     /**
      * Artipie filters cache.
      */
@@ -46,59 +63,127 @@ public final class RepositoryRest extends BaseRest {
     private final String layout;
 
     /**
+     * Artipie policy.
+     */
+    private final Policy<?> policy;
+
+    /**
      * Ctor.
      * @param cache Artipie filters cache
      * @param crs Repository settings create/read/update/delete
      * @param data Repository data management
      * @param layout Artipie layout
+     * @param policy Artipie policy
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     public RepositoryRest(final FiltersCache cache, final CrudRepoSettings crs, final RepoData data,
-        final String layout) {
+        final String layout, final Policy<?> policy) {
         this.cache = cache;
         this.crs = crs;
         this.data = data;
         this.layout = layout;
+        this.policy = policy;
     }
 
     @Override
+    @SuppressWarnings("PMD.ExcessiveMethodLength")
     public void init(final RouterBuilder rbr) {
         rbr.operation("listAll")
+            .handler(
+                new AuthzHandler(
+                    this.policy,
+                    new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
+                )
+            )
             .handler(this::listAll)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         if ("flat".equals(this.layout)) {
             rbr.operation("getRepo")
+                .handler(
+                    new AuthzHandler(
+                        this.policy,
+                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
+                    )
+                )
                 .handler(this::getRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("existRepo")
+                .handler(
+                    new AuthzHandler(
+                        this.policy,
+                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
+                    )
+                )
                 .handler(this::existRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("createOrUpdateRepo")
                 .handler(this::createOrUpdateRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("removeRepo")
+                .handler(
+                    new AuthzHandler(
+                        this.policy,
+                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.DELETE)
+                    )
+                )
                 .handler(this::removeRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("moveRepo")
+                .handler(
+                    new AuthzHandler(
+                        this.policy,
+                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.MOVE)
+                    )
+                )
                 .handler(this::moveRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         } else {
             rbr.operation("list")
+                .handler(
+                    new AuthzHandler(
+                        this.policy,
+                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
+                    )
+                )
                 .handler(this::listUserRepos)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("getUserRepo")
+                .handler(
+                    new AuthzHandler(
+                        this.policy,
+                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
+                    )
+                )
                 .handler(this::getRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("existUserRepo")
+                .handler(
+                    new AuthzHandler(
+                        this.policy,
+                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
+                    )
+                )
                 .handler(this::existRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("createOrUpdateUserRepo")
                 .handler(this::createOrUpdateRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("removeUserRepo")
+                .handler(
+                    new AuthzHandler(
+                        this.policy,
+                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.DELETE)
+                    )
+                )
                 .handler(this::removeRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rbr.operation("moveUserRepo")
+                .handler(
+                    new AuthzHandler(
+                        this.policy,
+                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.MOVE)
+                    )
+                )
                 .handler(this::moveRepo)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         }
@@ -176,43 +261,47 @@ public final class RepositoryRest extends BaseRest {
         final Validator validator = new Validator.All(
             Validator.validator(new ReservedNamesVerifier(rname), HttpStatus.BAD_REQUEST_400)
         );
-        if (validator.validate(context)) {
+        final boolean exists = this.crs.exists(rname);
+        final PermissionCollection perms = this.policy.getPermissions(
+            new AuthUser(
+                context.user().principal().getString(AuthTokenRest.SUB),
+                context.user().principal().getString(AuthTokenRest.CONTEXT)
+            )
+        );
+        // @checkstyle BooleanExpressionComplexityCheck (5 lines)
+        if ((exists && perms.implies(RepositoryRest.UPDATE)
+            || !exists && perms.implies(RepositoryRest.CREATE)) && validator.validate(context)) {
             final JsonObject json = BaseRest.readJsonObject(context);
             final String repomsg = "Section `repo` is required";
             final Validator jsvalidator = new Validator.All(
                 Validator.validator(
-                    () -> json != null,
-                    "JSON body is expected",
+                    () -> json != null, "JSON body is expected",
                     HttpStatus.BAD_REQUEST_400
                 ),
                 Validator.validator(
-                    () -> json.containsKey(RepositoryRest.REPO),
-                    repomsg,
+                    () -> json.containsKey(RepositoryRest.REPO), repomsg,
                     HttpStatus.BAD_REQUEST_400
                 ),
                 Validator.validator(
-                    () -> json.getJsonObject(RepositoryRest.REPO) != null,
-                    repomsg,
+                    () -> json.getJsonObject(RepositoryRest.REPO) != null, repomsg,
                     HttpStatus.BAD_REQUEST_400
                 ),
                 Validator.validator(
                     () -> json.getJsonObject(RepositoryRest.REPO).containsKey("type"),
-                    "Repository type is required",
-                    HttpStatus.BAD_REQUEST_400
+                    "Repository type is required", HttpStatus.BAD_REQUEST_400
                 ),
                 Validator.validator(
                     () -> json.getJsonObject(RepositoryRest.REPO).containsKey("storage"),
-                    "Repository storage is required",
-                    HttpStatus.BAD_REQUEST_400
+                    "Repository storage is required", HttpStatus.BAD_REQUEST_400
                 )
             );
             if (jsvalidator.validate(context)) {
                 this.crs.save(rname, json);
                 this.cache.invalidate(rname.toString());
-                context.response()
-                    .setStatusCode(HttpStatus.OK_200)
-                    .end();
+                context.response().setStatusCode(HttpStatus.OK_200).end();
             }
+        } else {
+            context.response().setStatusCode(HttpStatus.FORBIDDEN_403).end();
         }
     }
 
