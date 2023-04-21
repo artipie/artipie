@@ -82,6 +82,12 @@ public abstract class RestApiServerBase {
     private static final long SLEEP_DURATION = Duration.ofMillis(100).toMillis();
 
     /**
+     * Test security storage.
+     * @checkstyle VisibilityModifierCheck (5 lines)
+     */
+    protected Storage ssto;
+
+    /**
      * Server port.
      */
     private int prt;
@@ -90,11 +96,6 @@ public abstract class RestApiServerBase {
      * Test storage.
      */
     private BlockingStorage asto;
-
-    /**
-     * Test security storage.
-     */
-    private Storage ssto;
 
     /**
      * Test artipie`s caches.
@@ -120,7 +121,6 @@ public abstract class RestApiServerBase {
 
             @Override
             public Policy<?> policy() {
-                //@checkstyle MagicNumberCheck (5 lines)
                 return Policy.FREE;
             }
 
@@ -237,7 +237,7 @@ public abstract class RestApiServerBase {
         this.requestAndAssert(
             vertx, ctx, rqs,
             //@checkstyle LineLengthCheck (1 line)
-            Optional.of("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbm9ueW1vdXMifQ.maJSTCP0koQO-lCx1cs4sBLepSxFMJ8liAqUQH_9-bY"),
+            Optional.of("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcnRpcGllIiwiY29udGV4dCI6InRlc3QiLCJpYXQiOjE2ODIwODgxNTh9.QjQPLQ0tQFbiRIWpE-GUtUFXvUXvXP4p7va_DOBHjTM"),
             assertion
         );
     }
