@@ -129,7 +129,7 @@ SOFTWARE.
     <maven.compiler.target>17</maven.compiler.target>
     <docker.image.name>artipie/artipie</docker.image.name>
     <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
-    <vertx.version>4.4.1</vertx.version>
+    <vertx.version>4.3.4</vertx.version>
     <asto.version>v1.15.5</asto.version>
   </properties>
   <dependencies>
