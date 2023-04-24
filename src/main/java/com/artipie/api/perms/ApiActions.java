@@ -5,10 +5,9 @@
 package com.artipie.api.perms;
 
 import com.artipie.security.perms.Action;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Api actions.
@@ -20,14 +19,14 @@ public abstract class ApiActions {
     /**
      * Action values list.
      */
-    private final Action[] values;
+    private final Collection<Action> values;
 
     /**
      * Ctor.
      * @param values Action values list
      */
     protected ApiActions(final Action[] values) {
-        this.values = values;
+        this.values = Arrays.asList(values);
     }
 
     /**
@@ -41,7 +40,7 @@ public abstract class ApiActions {
      * @return All supported actions
      */
     Collection<Action> list() {
-        return Stream.of(this.values).collect(Collectors.toList());
+        return this.values;
     }
 
     /**

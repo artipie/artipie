@@ -69,7 +69,7 @@ public abstract class RestApiPermission extends Permission {
         final boolean res;
         if (permission != null && permission.getClass() == this.getClass()) {
             final RestApiPermission that = (RestApiPermission) permission;
-            res = (this.mask & that.mask) == that.mask && this.getName().equals(that.getName());
+            res = (this.mask & that.mask) == that.mask;
         } else {
             res = false;
         }

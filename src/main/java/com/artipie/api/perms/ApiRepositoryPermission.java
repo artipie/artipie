@@ -25,11 +25,16 @@ public final class ApiRepositoryPermission extends RestApiPermission {
     private static final long serialVersionUID = 8910976571453906971L;
 
     /**
+     * Repository actions list.
+     */
+    private static final RepositoryActionList ACTION_LIST = new RepositoryActionList();
+
+    /**
      * Ctor.
      * @param action Action
      */
     public ApiRepositoryPermission(final RepositoryAction action) {
-        super(ApiRepositoryPermission.NAME, action.mask, new RepositoryActionList());
+        super(ApiRepositoryPermission.NAME, action.mask, ApiRepositoryPermission.ACTION_LIST);
     }
 
     /**
@@ -39,8 +44,8 @@ public final class ApiRepositoryPermission extends RestApiPermission {
     public ApiRepositoryPermission(final Set<String> actions) {
         super(
             ApiRepositoryPermission.NAME,
-            RestApiPermission.maskFromActions(actions, new RepositoryActionList()),
-            new RepositoryActionList()
+            RestApiPermission.maskFromActions(actions, ApiRepositoryPermission.ACTION_LIST),
+            ApiRepositoryPermission.ACTION_LIST
         );
     }
 

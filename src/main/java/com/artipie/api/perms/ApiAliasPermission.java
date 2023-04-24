@@ -26,11 +26,16 @@ public final class ApiAliasPermission extends RestApiPermission {
     private static final long serialVersionUID = -2910962571451212361L;
 
     /**
+     * Alias actions list.
+     */
+    private static final AliasActionList ACTION_LIST = new AliasActionList();
+
+    /**
      * Ctor.
      * @param action Action
      */
     public ApiAliasPermission(final AliasAction action) {
-        super(ApiAliasPermission.NAME, action.mask, new AliasActionList());
+        super(ApiAliasPermission.NAME, action.mask, ApiAliasPermission.ACTION_LIST);
     }
 
     /**
@@ -40,8 +45,8 @@ public final class ApiAliasPermission extends RestApiPermission {
     public ApiAliasPermission(final Set<String> actions) {
         super(
             ApiAliasPermission.NAME,
-            ApiAliasPermission.maskFromActions(actions, new AliasActionList()),
-            new AliasActionList()
+            ApiAliasPermission.maskFromActions(actions, ApiAliasPermission.ACTION_LIST),
+            ApiAliasPermission.ACTION_LIST
         );
     }
 

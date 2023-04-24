@@ -31,13 +31,13 @@ import org.eclipse.jetty.http.HttpStatus;
 public final class RepositoryRest extends BaseRest {
 
     /**
-     * Update role permission.
+     * Update repo permission.
      */
     private static final ApiRepositoryPermission UPDATE =
         new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.UPDATE);
 
     /**
-     * Create role permission.
+     * Create repo permission.
      */
     private static final ApiRepositoryPermission CREATE =
         new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.CREATE);

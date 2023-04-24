@@ -26,11 +26,16 @@ public final class ApiRolePermission extends RestApiPermission {
     private static final long serialVersionUID = -6000976571451236541L;
 
     /**
+     * Roles action list.
+     */
+    private static final RoleActionList ACTION_LIST = new RoleActionList();
+
+    /**
      * Ctor.
      * @param action Action
      */
     public ApiRolePermission(final RoleAction action) {
-        super(ApiRolePermission.NAME, action.mask, new RoleActionList());
+        super(ApiRolePermission.NAME, action.mask, ApiRolePermission.ACTION_LIST);
     }
 
     /**
@@ -40,8 +45,8 @@ public final class ApiRolePermission extends RestApiPermission {
     public ApiRolePermission(final Set<String> actions) {
         super(
             ApiRolePermission.NAME,
-            RestApiPermission.maskFromActions(actions, new RoleActionList()),
-            new RoleActionList()
+            RestApiPermission.maskFromActions(actions, ApiRolePermission.ACTION_LIST),
+            ApiRolePermission.ACTION_LIST
         );
     }
 
