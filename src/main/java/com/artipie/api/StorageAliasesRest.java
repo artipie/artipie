@@ -4,8 +4,10 @@
  */
 package com.artipie.api;
 
+import com.artipie.api.perms.ApiAliasPermission;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.security.policy.Policy;
 import com.artipie.settings.Layout;
 import com.artipie.settings.cache.StoragesCache;
 import io.vertx.ext.web.RoutingContext;
@@ -44,46 +46,99 @@ public final class StorageAliasesRest extends BaseRest {
     private final String layout;
 
     /**
+     * Artipie policy.
+     */
+    private final Policy<?> policy;
+
+    /**
      * Ctor.
      * @param caches Artipie settings caches
      * @param asto Artipie settings storage
      * @param layout Artipie layout
+     * @param policy Artipie policy
+     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public StorageAliasesRest(final StoragesCache caches, final BlockingStorage asto,
-        final String layout) {
+        final String layout, final Policy<?> policy) {
         this.caches = caches;
         this.asto = asto;
         this.layout = layout;
+        this.policy = policy;
     }
 
     @Override
     public void init(final RouterBuilder rtrb) {
         rtrb.operation("addRepoAlias")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.READ)
+                )
+            )
             .handler(this::addRepoAlias)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("getRepoAliases")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.READ)
+                )
+            )
             .handler(this::getRepoAliases)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("deleteRepoAlias")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.DELETE)
+                )
+            )
             .handler(this::deleteRepoAlias)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("getAliases")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.READ)
+                )
+            )
             .handler(this::getAliases)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("addAlias")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.CREATE)
+                )
+            )
             .handler(this::addAlias)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         rtrb.operation("deleteAlias")
+            .handler(
+                new AuthzHandler(
+                    this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.DELETE)
+                )
+            )
             .handler(this::deleteAlias)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         if (new Layout.Org().toString().equals(this.layout)) {
             rtrb.operation("getUserAliases")
+                .handler(
+                    new AuthzHandler(
+                        this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.READ)
+                    )
+                )
                 .handler(this::getUserAliases)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rtrb.operation("addUserAlias")
+                .handler(
+                    new AuthzHandler(
+                        this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.CREATE)
+                    )
+                )
                 .handler(this::addUserAlias)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
             rtrb.operation("deleteUserAlias")
+                .handler(
+                    new AuthzHandler(
+                        this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.DELETE)
+                    )
+                )
                 .handler(this::deleteUserAlias)
                 .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
         }

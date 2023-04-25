@@ -9,9 +9,9 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.nuget.RandomFreePort;
-import com.artipie.security.policy.CachedYamlPolicy;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.cache.ArtipieCaches;
@@ -82,6 +82,12 @@ public abstract class RestApiServerBase {
     private static final long SLEEP_DURATION = Duration.ofMillis(100).toMillis();
 
     /**
+     * Test security storage.
+     * @checkstyle VisibilityModifierCheck (5 lines)
+     */
+    protected Storage ssto;
+
+    /**
      * Server port.
      */
     private int prt;
@@ -90,11 +96,6 @@ public abstract class RestApiServerBase {
      * Test storage.
      */
     private BlockingStorage asto;
-
-    /**
-     * Test security storage.
-     */
-    private Storage ssto;
 
     /**
      * Test artipie`s caches.
@@ -115,15 +116,12 @@ public abstract class RestApiServerBase {
         return new ArtipieSecurity() {
             @Override
             public Authentication authentication() {
-                return Authentication.ANONYMOUS;
+                return (name, pswd) -> Optional.of(new AuthUser("artipie", "test"));
             }
 
             @Override
             public Policy<?> policy() {
-                //@checkstyle MagicNumberCheck (5 lines)
-                return new CachedYamlPolicy(
-                    new BlockingStorage(RestApiServerBase.this.ssto), 180_000L
-                );
+                return Policy.FREE;
             }
 
             @Override
@@ -239,7 +237,7 @@ public abstract class RestApiServerBase {
         this.requestAndAssert(
             vertx, ctx, rqs,
             //@checkstyle LineLengthCheck (1 line)
-            Optional.of("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbm9ueW1vdXMifQ.maJSTCP0koQO-lCx1cs4sBLepSxFMJ8liAqUQH_9-bY"),
+            Optional.of("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcnRpcGllIiwiY29udGV4dCI6InRlc3QiLCJpYXQiOjE2ODIwODgxNTh9.QjQPLQ0tQFbiRIWpE-GUtUFXvUXvXP4p7va_DOBHjTM"),
             assertion
         );
     }

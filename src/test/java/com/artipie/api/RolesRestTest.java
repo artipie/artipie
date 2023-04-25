@@ -5,7 +5,14 @@
 package com.artipie.api;
 
 import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
+import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.misc.UncheckedConsumer;
+import com.artipie.http.auth.AuthUser;
+import com.artipie.http.auth.Authentication;
+import com.artipie.security.policy.CachedYamlPolicy;
+import com.artipie.security.policy.Policy;
+import com.artipie.settings.ArtipieSecurity;
 import com.artipie.test.TestArtipieCaches;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
@@ -13,6 +20,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxTestContext;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -22,9 +30,44 @@ import org.skyscreamer.jsonassert.JSONAssert;
 /**
  * Test for {@link RolesRest}.
  * @since 0.27
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class RolesRestTest extends RestApiServerBase {
+
+    /**
+     * Artipie authentication.
+     * @return Authentication instance.
+     * @checkstyle AnonInnerLengthCheck (30 lines)
+     */
+    ArtipieSecurity auth() {
+        return new ArtipieSecurity() {
+            @Override
+            public Authentication authentication() {
+                return (name, pswd) -> Optional.of(new AuthUser("artipie", "test"));
+            }
+
+            @Override
+            public Policy<?> policy() {
+                final BlockingStorage asto = new BlockingStorage(RolesRestTest.super.ssto);
+                asto.save(
+                    new Key.From("users/artipie.yaml"),
+                    String.join(
+                        "\n",
+                        "permissions:",
+                        "  adapter_all_permission: {}"
+                    ).getBytes(StandardCharsets.UTF_8)
+                );
+                // @checkstyle MagicNumberCheck (1 line)
+                return new CachedYamlPolicy(asto, 60_000L);
+            }
+
+            @Override
+            public Optional<Storage> policyStorage() {
+                return Optional.of(RolesRestTest.super.ssto);
+            }
+        };
+    }
 
     @Test
     void listsRoles(final Vertx vertx, final VertxTestContext ctx) throws Exception {
