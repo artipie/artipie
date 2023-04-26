@@ -50,6 +50,30 @@ public final class ApiAliasPermission extends RestApiPermission {
         );
     }
 
+    @Override
+    public ApiAliasPermissionCollection newPermissionCollection() {
+        return new ApiAliasPermissionCollection();
+    }
+
+    /**
+     * Collection of the alias permissions.
+     * @since 0.30
+     */
+    static final class ApiAliasPermissionCollection extends RestApiPermissionCollection {
+
+        /**
+         * Required serial.
+         */
+        private static final long serialVersionUID = 3010962571451212361L;
+
+        /**
+         * Ctor.
+         */
+        ApiAliasPermissionCollection() {
+            super(ApiAliasPermission.class);
+        }
+    }
+
     /**
      * Alias actions.
      * @since 0.29

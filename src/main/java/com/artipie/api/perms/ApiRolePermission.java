@@ -50,6 +50,30 @@ public final class ApiRolePermission extends RestApiPermission {
         );
     }
 
+    @Override
+    public ApiRolePermissionCollection newPermissionCollection() {
+        return new ApiRolePermissionCollection();
+    }
+
+    /**
+     * Collection of the role permissions.
+     * @since 0.30
+     */
+    static final class ApiRolePermissionCollection extends RestApiPermissionCollection {
+
+        /**
+         * Required serial.
+         */
+        private static final long serialVersionUID = 3010962571451212361L;
+
+        /**
+         * Ctor.
+         */
+        ApiRolePermissionCollection() {
+            super(ApiRolePermission.class);
+        }
+    }
+
     /**
      * Alias actions.
      * @since 0.29
@@ -60,10 +84,9 @@ public final class ApiRolePermission extends RestApiPermission {
         READ(0x4),
         CREATE(0x2),
         UPDATE(0x1),
-        MOVE(0x10),
         DELETE(0x8),
-        ENABLE(0x20),
-        ALL(0x4 | 0x2 | 0x8 | 0x10 | 0x1 | 0x20);
+        ENABLE(0x10),
+        ALL(0x4 | 0x2 | 0x8 | 0x10 | 0x1);
 
         /**
          * Action mask.
