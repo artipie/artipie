@@ -4,6 +4,7 @@
  */
 package com.artipie.api.perms;
 
+import java.util.Set;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +26,7 @@ public class RestApiPermissionCollectionTest {
         final ApiRepositoryPermission.RepositoryAction action
     ) {
         final ApiRepositoryPermission.RestApiPermissionCollection collection =
-            new RestApiPermission.RestApiPermissionCollection(ApiRepositoryPermission.class);
+            new ApiRepositoryPermission.ApiRepositoryPermissionCollection();
         collection.add(new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.ALL));
         MatcherAssert.assertThat(
             collection.implies(new ApiRepositoryPermission(action)),
@@ -36,9 +37,9 @@ public class RestApiPermissionCollectionTest {
     @Test
     void addsAndImplies() {
         final RestApiPermission.RestApiPermissionCollection collection =
-            new RestApiPermission.RestApiPermissionCollection(ApiUserPermission.class);
+            new ApiUserPermission.ApiUserPermissionCollection();
         collection.add(new ApiUserPermission(ApiUserPermission.UserAction.CREATE));
-        collection.add(new ApiUserPermission(ApiUserPermission.UserAction.UPDATE));
+        collection.add(new ApiUserPermission(Set.of("update", "enable")));
         MatcherAssert.assertThat(
             "Implies permission with added action",
             collection.implies(new ApiUserPermission(ApiUserPermission.UserAction.CREATE)),
@@ -50,8 +51,13 @@ public class RestApiPermissionCollectionTest {
             new IsEqual<>(true)
         );
         MatcherAssert.assertThat(
+            "Implies permission with added action",
+            collection.implies(new ApiUserPermission(ApiUserPermission.UserAction.ENABLE)),
+            new IsEqual<>(true)
+        );
+        MatcherAssert.assertThat(
             "Not implies permission with not added action",
-            collection.implies(new ApiUserPermission(ApiUserPermission.UserAction.MOVE)),
+            collection.implies(new ApiUserPermission(ApiUserPermission.UserAction.DELETE)),
             new IsEqual<>(false)
         );
         MatcherAssert.assertThat(
@@ -67,7 +73,7 @@ public class RestApiPermissionCollectionTest {
     void throwsErrorIfAnotherClassAdded() {
         Assertions.assertThrows(
             IllegalArgumentException.class,
-            () -> new RestApiPermission.RestApiPermissionCollection(ApiUserPermission.class)
+            () -> new ApiAliasPermission.ApiAliasPermissionCollection()
                 .add(new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.UPDATE))
         );
     }

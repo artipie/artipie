@@ -49,6 +49,30 @@ public final class ApiRepositoryPermission extends RestApiPermission {
         );
     }
 
+    @Override
+    public ApiRepositoryPermissionCollection newPermissionCollection() {
+        return new ApiRepositoryPermissionCollection();
+    }
+
+    /**
+     * Collection of the repository permissions.
+     * @since 0.30
+     */
+    static final class ApiRepositoryPermissionCollection extends RestApiPermissionCollection {
+
+        /**
+         * Required serial.
+         */
+        private static final long serialVersionUID = -1010962571451212361L;
+
+        /**
+         * Ctor.
+         */
+        ApiRepositoryPermissionCollection() {
+            super(ApiRepositoryPermission.class);
+        }
+    }
+
     /**
      * Repository actions.
      * @since 0.29

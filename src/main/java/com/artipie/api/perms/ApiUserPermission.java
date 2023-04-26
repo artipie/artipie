@@ -50,6 +50,30 @@ public final class ApiUserPermission extends RestApiPermission {
         );
     }
 
+    @Override
+    public ApiUserPermissionCollection newPermissionCollection() {
+        return new ApiUserPermissionCollection();
+    }
+
+    /**
+     * Collection of the user permissions.
+     * @since 0.30
+     */
+    static final class ApiUserPermissionCollection extends RestApiPermissionCollection {
+
+        /**
+         * Required serial.
+         */
+        private static final long serialVersionUID = -3000962571451212361L;
+
+        /**
+         * Ctor.
+         */
+        ApiUserPermissionCollection() {
+            super(ApiUserPermission.class);
+        }
+    }
+
     /**
      * User actions.
      * @since 0.29
@@ -60,11 +84,10 @@ public final class ApiUserPermission extends RestApiPermission {
         READ(0x4),
         CREATE(0x2),
         UPDATE(0x1),
-        MOVE(0x10),
         DELETE(0x8),
-        ENABLE(0x20),
-        CHANGE_PASSWORD(0x40),
-        ALL(0x4 | 0x2 | 0x8 | 0x20 | 0x1 | 0x40 | 0x10);
+        ENABLE(0x10),
+        CHANGE_PASSWORD(0x20),
+        ALL(0x4 | 0x2 | 0x8 | 0x20 | 0x1 | 0x10);
 
         /**
          * Action mask.

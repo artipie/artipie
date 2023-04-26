@@ -7,6 +7,7 @@ package com.artipie.api;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.security.policy.CachedYamlPolicy;
 import com.artipie.security.policy.Policy;
@@ -28,29 +29,29 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for authentication in Rest API for org layout.
- * @since 0.27
+ * Test for permissions for rest api.
+ * @since 0.30
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public final class AuthRestOrgTest extends RestApiServerBase {
+public final class RestApiPermissionsTest extends RestApiServerBase {
 
     /**
      * Name of the user.
      */
-    private static final String NAME = "Aladdin";
+    private static final String NAME = "artipie";
 
     /**
      * User password.
      */
-    private static final String PASS = "opensesame";
+    private static final String PASS = "whatever";
 
     /**
      * List of the GET requests, which do not require existence of any settings.
      */
     private static final Collection<TestRequest> GET_DATA = List.of(
-        new TestRequest(HttpMethod.GET, "/api/v1/users"),
         new TestRequest(HttpMethod.GET, "/api/v1/roles"),
+        new TestRequest(HttpMethod.GET, "/api/v1/users"),
         new TestRequest(HttpMethod.GET, "/api/v1/repository/list"),
         new TestRequest(HttpMethod.GET, "/api/v1/repository/Cate/my-npm/storages"),
         new TestRequest(HttpMethod.GET, "/api/v1/storages/Oleg"),
@@ -62,52 +63,53 @@ public final class AuthRestOrgTest extends RestApiServerBase {
      */
     private static final Collection<TestRequest> RQST = Stream.concat(
         Stream.of(
-            new TestRequest(HttpMethod.PUT, "/api/v1/users/Mark"),
+            // @checkstyle LineLengthCheck (500 lines)
+            new TestRequest(HttpMethod.PUT, "/api/v1/users/Mark", new JsonObject().put("type", "plain").put("pass", "abc123")),
             new TestRequest(HttpMethod.GET, "/api/v1/users/Alice"),
             new TestRequest(HttpMethod.DELETE, "/api/v1/users/Justine"),
-            new TestRequest(HttpMethod.POST, "/api/v1/users/David/alter/password"),
+            new TestRequest(HttpMethod.POST, "/api/v1/users/David/alter/password", new JsonObject().put("old_pass", "any").put("new_pass", "ane").put("new_type", "plain")),
             new TestRequest(HttpMethod.POST, "/api/v1/users/David/enable"),
             new TestRequest(HttpMethod.POST, "/api/v1/users/David/disable"),
             new TestRequest(HttpMethod.GET, "/api/v1/roles/java-dev"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/roles/admin"),
+            new TestRequest(HttpMethod.PUT, "/api/v1/roles/admin", new JsonObject().put("permissions", new JsonObject().put("adapter_all_permission", new JsonObject()))),
             new TestRequest(HttpMethod.DELETE, "/api/v1/roles/tester"),
             new TestRequest(HttpMethod.POST, "/api/v1/roles/tester/enable"),
             new TestRequest(HttpMethod.POST, "/api/v1/roles/tester/disable"),
             new TestRequest(HttpMethod.GET, "/api/v1/repository/list/John"),
             new TestRequest(HttpMethod.GET, "/api/v1/repository/Olga/my-maven"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Jane/rpm"),
+            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Jane/rpm", new JsonObject().put("repo", new JsonObject())),
             new TestRequest(HttpMethod.DELETE, "/api/v1/repository/Sasha/my-python"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Alex/bin-files/move"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Katie/my-go/storages/local"),
+            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Alex/bin-files/move", new JsonObject().put("new_name", "any")),
+            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Katie/my-go/storages/local", new JsonObject().put("alias", "local").put("type", "file")),
             new TestRequest(HttpMethod.DELETE, "/api/v1/repository/Ann/docker/storages/s3sto"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/storages/def"),
+            new TestRequest(HttpMethod.PUT, "/api/v1/storages/def", new JsonObject().put("alias", "def").put("type", "file")),
             new TestRequest(HttpMethod.DELETE, "/api/v1/storages/local-dir"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/storages/Andrew/s3-shared"),
+            new TestRequest(HttpMethod.PUT, "/api/v1/storages/Andrew/s3-shared", new JsonObject().put("alias", "s3-shared").put("type", "file")),
             new TestRequest(HttpMethod.DELETE, "/api/v1/storages/Dmitrii/s3-amazon")
-        ), AuthRestOrgTest.GET_DATA.stream()
+        ), RestApiPermissionsTest.GET_DATA.stream()
     ).toList();
 
     @Test
-    void returnsUnauthorizedWhenTokenIsAbsent(final Vertx vertx, final VertxTestContext ctx)
+    void returnsForbiddenIfUserDoesNotHavePermissions(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
-        for (final TestRequest item : AuthRestOrgTest.RQST) {
+        final AtomicReference<String> token = this.getToken(vertx, ctx, "john", "whatever");
+        for (final TestRequest item : RestApiPermissionsTest.RQST) {
             this.requestAndAssert(
-                vertx, ctx, item, Optional.empty(),
+                vertx, ctx, item, Optional.of(token.get()),
                 response -> MatcherAssert.assertThat(
                     String.format("%s failed", item),
                     response.statusCode(),
-                    new IsEqual<>(HttpStatus.UNAUTHORIZED_401)
+                    new IsEqual<>(HttpStatus.FORBIDDEN_403)
                 )
             );
         }
     }
 
     @Test
-    void returnsOkWhenTokenIsPresent(final Vertx vertx, final VertxTestContext ctx)
+    void returnsOkIfUserHasPermissions(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
-        final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
-        for (final TestRequest item : AuthRestOrgTest.GET_DATA) {
+        final AtomicReference<String> token = this.getToken(vertx, ctx, "artipie", "whatever");
+        for (final TestRequest item : RestApiPermissionsTest.GET_DATA) {
             this.requestAndAssert(
                 vertx, ctx, item, Optional.of(token.get()),
                 response -> MatcherAssert.assertThat(
@@ -120,10 +122,10 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Test
-    void createsAndRemovesRepoWithAuth(final Vertx vertx, final VertxTestContext ctx)
+    void createsAndRemovesRepoWithPerms(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+            this.getToken(vertx, ctx, RestApiPermissionsTest.NAME, RestApiPermissionsTest.PASS);
         final String path = "/api/v1/repository/john/my-docker";
         this.requestAndAssert(
             vertx, ctx,
@@ -148,10 +150,10 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Test
-    void createsAndRemovesUserWithAuth(final Vertx vertx, final VertxTestContext ctx)
+    void createsAndRemovesUserWithPerms(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+            this.getToken(vertx, ctx, RestApiPermissionsTest.NAME, RestApiPermissionsTest.PASS);
         final String path = "/api/v1/users/Alice";
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
@@ -174,10 +176,10 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Test
-    void createsAndRemovesRoleWithAuth(final Vertx vertx, final VertxTestContext ctx)
+    void createsAndRemovesRoleWithPerms(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+            this.getToken(vertx, ctx, RestApiPermissionsTest.NAME, RestApiPermissionsTest.PASS);
         final String path = "/api/v1/roles/admin";
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
@@ -201,10 +203,10 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     }
 
     @Test
-    void createsAndRemovesStorageAliasWithAuth(final Vertx vertx, final VertxTestContext ctx)
+    void createsAndRemovesStorageAliasWithPerms(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+            this.getToken(vertx, ctx, RestApiPermissionsTest.NAME, RestApiPermissionsTest.PASS);
         final String path = "/api/v1/storages/Jane/new-alias";
         this.requestAndAssert(
             vertx, ctx,
@@ -226,26 +228,6 @@ public final class AuthRestOrgTest extends RestApiServerBase {
         );
     }
 
-    @Test
-    void returnUnauthorizedWhenOldPasswordIsNotCorrectOnAlterPassword(final Vertx vertx,
-        final VertxTestContext ctx) throws Exception {
-        final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
-        this.requestAndAssert(
-            vertx, ctx,
-            new TestRequest(
-                HttpMethod.POST,
-                String.format("/api/v1/users/%s/alter/password", AuthRestOrgTest.NAME),
-                new JsonObject().put("old_pass", "abc123").put("new_type", "plain")
-                    .put("new_pass", "xyz098")
-            ), Optional.of(token.get()),
-            response -> MatcherAssert.assertThat(
-                response.statusCode(),
-                new IsEqual<>(HttpStatus.UNAUTHORIZED_401)
-            )
-        );
-    }
-
     /**
      * Artipie authentication.
      * @return Authentication instance.
@@ -255,27 +237,41 @@ public final class AuthRestOrgTest extends RestApiServerBase {
         return new ArtipieSecurity() {
             @Override
             public Authentication authentication() {
-                return new Authentication.Single(AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+                return (name, pswd) -> Optional.of(new AuthUser(name, "test"));
             }
 
             @Override
             public Policy<?> policy() {
-                final BlockingStorage asto = new BlockingStorage(AuthRestOrgTest.super.ssto);
-                asto.save(
-                    new Key.From(String.format("users/%s.yaml", AuthRestOrgTest.NAME)),
+                final BlockingStorage blsto =
+                    new BlockingStorage(RestApiPermissionsTest.super.ssto);
+                blsto.save(
+                    new Key.From("users/artipie.yaml"),
                     String.join(
                         "\n",
                         "permissions:",
-                        "  adapter_all_permission: {}"
+                        "  api_storage_alias_permissions:",
+                        "    - read",
+                        "    - create",
+                        "    - delete",
+                        "  api_repository_permissions:",
+                        "    - *",
+                        "  api_role_permissions:",
+                        "    - read",
+                        "    - create",
+                        "    - update",
+                        "    - delete",
+                        "    - enable",
+                        "  api_user_permissions:",
+                        "    - *"
                     ).getBytes(StandardCharsets.UTF_8)
                 );
-                // @checkstyle MagicNumberCheck (1 line)
-                return new CachedYamlPolicy(asto, 60_000L);
+                // @checkstyle MagicNumberCheck (500 lines)
+                return new CachedYamlPolicy(blsto, 60_000L);
             }
 
             @Override
             public Optional<Storage> policyStorage() {
-                return Optional.of(AuthRestOrgTest.super.ssto);
+                return Optional.of(RestApiPermissionsTest.super.ssto);
             }
         };
     }

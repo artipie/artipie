@@ -6,13 +6,15 @@ package com.artipie.api.perms;
 
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
+import io.vertx.core.impl.ConcurrentHashSet;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Objects;
+import java.util.Set;
 import java.util.StringJoiner;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Base class for rest api permissions.
@@ -92,7 +94,7 @@ public abstract class RestApiPermission extends Permission {
 
     @Override
     public final int hashCode() {
-        return this.getName().hashCode();
+        return Objects.hash(this.getName(), this.mask);
     }
 
     @Override
@@ -107,11 +109,6 @@ public abstract class RestApiPermission extends Permission {
             this.actions = joiner.toString();
         }
         return this.actions;
-    }
-
-    @Override
-    public final RestApiPermissionCollection newPermissionCollection() {
-        return new RestApiPermissionCollection(this.getClass());
     }
 
     /**
@@ -135,25 +132,17 @@ public abstract class RestApiPermission extends Permission {
     }
 
     /**
-     * Key for the collection as simple concatenation of the name and int action value.
-     * @return Key for the collection
-     */
-    private String key() {
-        return String.format("%s%d", this.getName(), this.mask);
-    }
-
-    /**
      * Collection of {@link RestApiPermission} objects, can contain any child of
      * {@link RestApiPermission}. This collection is homogeneous, type class is stored in
      * {@link RestApiPermissionCollection#clazz} field.
      * <p>
      * If any action is allowed for added permission, then flag
-     * {@link RestApiPermissionCollection#any} is set to true and permission itself is not added
-     * to the collection and collection is cleared. Note, that according to
+     * {@link RestApiPermissionCollection#any} is set to true and any other permissions are cleared
+     * from the set. Note, that according to
      * the permissions model, this collection actually contains only one permission per user.
      * @since 1.2
      */
-    static final class RestApiPermissionCollection extends PermissionCollection
+    abstract static class RestApiPermissionCollection extends PermissionCollection
         implements java.io.Serializable {
 
         /**
@@ -162,11 +151,10 @@ public abstract class RestApiPermission extends Permission {
         private static final long serialVersionUID = 5843036924729092120L;
 
         /**
-         * Key is name, value is permission. All permission objects in
-         * collection must be of the same type.
-         * Not serialized; see serialization section at end of class.
+         * All permission objects in collection must be of the same type.
+         * Not serialized.
          */
-        private final transient ConcurrentHashMap<String, Permission> perms;
+        private final transient Set<Permission> perms;
 
         /**
          * This is set to {@code true} if this collection
@@ -185,7 +173,7 @@ public abstract class RestApiPermission extends Permission {
          */
         RestApiPermissionCollection(final Class<?> clazz) {
             this.clazz = clazz;
-            this.perms = new ConcurrentHashMap<>(1);
+            this.perms = new ConcurrentHashSet<>(1);
         }
 
         @Override
@@ -205,9 +193,8 @@ public abstract class RestApiPermission extends Permission {
                 if (item.any) {
                     this.any = true;
                     this.perms.clear();
-                } else {
-                    this.perms.put(item.key(), item);
                 }
+                this.perms.add(item);
             }
         }
 
@@ -218,9 +205,13 @@ public abstract class RestApiPermission extends Permission {
                 if (this.any) {
                     res = true;
                 } else {
-                    final Permission existing =
-                        this.perms.get(((RestApiPermission) permission).key());
-                    res = existing != null && existing.implies(permission);
+                    // @checkstyle NestedIfDepthCheck (10 lines)
+                    for (final Permission item : this.perms) {
+                        if (item.implies(permission)) {
+                            res = true;
+                            break;
+                        }
+                    }
                 }
             }
             return res;
@@ -228,7 +219,7 @@ public abstract class RestApiPermission extends Permission {
 
         @Override
         public Enumeration<Permission> elements() {
-            return this.perms.elements();
+            return Collections.enumeration(this.perms);
         }
     }
 }
