@@ -32,10 +32,10 @@ Supported settings for S3 storage are:
  - `bucket` (string, **required**) - bucket name
  - `region` (string, optional) - bucket region name
  - `endpoint` (string, optional) - S3 API provider URL, default is standard AWS S3 endpoint 
- - `credentials` (map, **required**):
-   - `type` (string, **required**) - authentication type, one of: `basic`
-   - `accessKeyId` (string, **required**) - access API key ID
-   - `secretAccessKey` (string, **required**) - secret key
+ - `credentials` (map, **optional**):
+   - `type` (string, **required inside the credentials map**) - authentication type, one of: `basic`
+   - `accessKeyId` (string, **required inside the credentials map**) - access API key ID
+   - `secretAccessKey` (string, **required inside the credentials map**) - secret key
 
 *Example:*
 ```yaml
@@ -49,6 +49,14 @@ storage:
     accessKeyId: asagn8as8f81
     secretAccessKey: 9889sg8nas8ng
 ```
+
+Configure the credentials that should be used to authenticate with AWS.<br>
+The default provider will attempt to identify the credentials automatically using the following checks:
+- Java System Properties - aws.accessKeyId and aws.secretKey
+- Environment Variables - AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+- Credential profiles file at the default location (~/.aws/credentials) shared by all AWS SDKs and the AWS CLI
+- Credentials delivered through the Amazon EC2 container service if AWS_CONTAINER_CREDENTIALS_RELATIVE_URI environment variable is set and security manager has permission to access the variable.
+- Instance profile credentials delivered through the Amazon EC2 metadata service
 
 ## Etcd storage
 
