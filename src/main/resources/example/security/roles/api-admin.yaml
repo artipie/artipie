@@ -1,0 +1,9 @@
+permissions:
+  api_storage_alias_permissions:
+    - *
+  api_repository_permissions:
+    - *
+  api_role_permissions:
+    - *
+  api_user_permissions:
+    - *

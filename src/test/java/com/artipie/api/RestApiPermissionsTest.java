@@ -71,7 +71,7 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
             new TestRequest(HttpMethod.POST, "/api/v1/users/David/enable"),
             new TestRequest(HttpMethod.POST, "/api/v1/users/David/disable"),
             new TestRequest(HttpMethod.GET, "/api/v1/roles/java-dev"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/roles/admin", new JsonObject().put("permissions", new JsonObject().put("adapter_all_permission", new JsonObject()))),
+            new TestRequest(HttpMethod.PUT, "/api/v1/roles/admin", new JsonObject().put("permissions", new JsonObject().put("all_permission", new JsonObject()))),
             new TestRequest(HttpMethod.DELETE, "/api/v1/roles/tester"),
             new TestRequest(HttpMethod.POST, "/api/v1/roles/tester/enable"),
             new TestRequest(HttpMethod.POST, "/api/v1/roles/tester/disable"),
@@ -185,7 +185,7 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
             vertx, ctx, new TestRequest(
                 HttpMethod.PUT, path,
                 new JsonObject().put(
-                    "permissions", new JsonObject().put("adapter_all_permission", new JsonObject())
+                    "permissions", new JsonObject().put("all_permission", new JsonObject())
                 )
             ), Optional.of(token.get()),
             response -> MatcherAssert.assertThat(

@@ -65,7 +65,9 @@ public final class SettingsFromPath {
                     settings.authz().policyStorage().get()
                 );
                 SettingsFromPath.copyResources(
-                    Arrays.asList("roles/reader.yml", "users/artipie.yaml"), "security", policy
+                    Arrays.asList(
+                        "roles/reader.yml", "roles/api-admin.yaml", "users/artipie.yaml"
+                    ), "security", policy
                 );
             }
             bsto.save(init, "true".getBytes());

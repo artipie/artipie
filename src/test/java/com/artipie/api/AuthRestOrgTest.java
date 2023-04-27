@@ -183,7 +183,7 @@ public final class AuthRestOrgTest extends RestApiServerBase {
             vertx, ctx, new TestRequest(
                 HttpMethod.PUT, path,
                 new JsonObject().put(
-                    "permissions", new JsonObject().put("adapter_all_permission", new JsonObject())
+                    "permissions", new JsonObject().put("all_permission", new JsonObject())
                 )
             ), Optional.of(token.get()),
             response -> MatcherAssert.assertThat(
@@ -266,7 +266,7 @@ public final class AuthRestOrgTest extends RestApiServerBase {
                     String.join(
                         "\n",
                         "permissions:",
-                        "  adapter_all_permission: {}"
+                        "  all_permission: {}"
                     ).getBytes(StandardCharsets.UTF_8)
                 );
                 // @checkstyle MagicNumberCheck (1 line)
