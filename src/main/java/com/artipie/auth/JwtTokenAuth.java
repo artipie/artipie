@@ -7,7 +7,7 @@ package com.artipie.auth;
 import com.artipie.api.AuthTokenRest;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.TokenAuthentication;
-import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
@@ -33,7 +33,7 @@ public final class JwtTokenAuth implements TokenAuthentication {
 
     @Override
     public CompletionStage<Optional<AuthUser>> user(final String token) {
-        return this.provider.authenticate(new JsonObject().put("token", token)).map(
+        return this.provider.authenticate(new TokenCredentials(token)).map(
             user -> {
                 Optional<AuthUser> res = Optional.empty();
                 if (user.principal().containsKey(AuthTokenRest.SUB)
