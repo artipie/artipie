@@ -130,7 +130,7 @@ SOFTWARE.
     <docker.image.name>artipie/artipie</docker.image.name>
     <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
     <vertx.version>4.3.4</vertx.version>
-    <asto.version>v1.15.5</asto.version>
+    <asto.version>v1.16.0</asto.version>
   </properties>
   <dependencies>
     <dependency>
@@ -145,7 +145,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>v1.2.10</version>
+      <version>v1.2.11</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
