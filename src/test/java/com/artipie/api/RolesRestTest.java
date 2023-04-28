@@ -55,7 +55,7 @@ final class RolesRestTest extends RestApiServerBase {
                     String.join(
                         "\n",
                         "permissions:",
-                        "  adapter_all_permission: {}"
+                        "  all_permission: {}"
                     ).getBytes(StandardCharsets.UTF_8)
                 );
                 // @checkstyle MagicNumberCheck (1 line)

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * Test for {@link RepositoryRest} with `org` laout.
+ * Test for {@link RepositoryRest} with `org` layout.
  * @since 0.26
  */
 @ExtendWith(VertxExtension.class)

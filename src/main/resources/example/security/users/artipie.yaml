@@ -3,6 +3,7 @@ pass: artipie
 email: artipie@example.com
 roles:
   - reader
+  - api-admin
 permissions:
   adapter_basic_permissions:
     artipie/my-bin:
