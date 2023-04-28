@@ -188,7 +188,7 @@ and list of operations. Wildcard `*` is supported as for repository name as for 
 Permissions for the REST API control access for API endpoints. There are several permissions types: for repository settings,
 storage aliases, users and roles management. 
 
-Each permission type has slightly different set of actions, but each type support wildcard `*` to allow any action,
+Each permission type has a slightly different set of actions, but each type supports the wildcard `*` to allow any action,
 for example:
 ```yaml
 permissions:
