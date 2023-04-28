@@ -128,13 +128,13 @@ which means that `read` actions is allowed for any repository.
 Note, that in the case of `org` layout repository name is combined from username and repository name and
 should be specified correspondingly: `jane/pypi-public` or `mark/maven-repo`.
 
-#### Adapter all permission
+#### All permission
 
-Artipie also support `adapter_all_permission` type to allow [any actions for any repository](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/security/perms/AdapterAllPermissionFactory.java):
+Artipie also support `all_permission` type to allow [any actions for any repository and API endpoints](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/security/perms/AdapterAllPermissionFactory.java):
 
 ```yaml
 permissions:
-  adapter_all_permission: {}
+  all_permission: {}
 ```
 Grant such permissions carefully.
 
@@ -182,6 +182,74 @@ Wildcard `*` is supported as for repository name as for resource/image name.
 Docker registry permissions are meant to control access to registry-specific operations [base](https://docs.docker.com/registry/spec/api/#base) 
 and [catalog](https://docs.docker.com/registry/spec/api/#catalog). Settings require map of the repositories 
 and list of operations. Wildcard `*` is supported as for repository name as for operations.
+
+### REST API Permissions
+
+Permissions for the REST API control access for API endpoints. There are several permissions types: for repository settings,
+storage aliases, users and roles management. 
+
+Each permission type has a slightly different set of actions, but each type supports the wildcard `*` to allow any action,
+for example:
+```yaml
+permissions:
+  api_storage_alias_permissions:
+    - *
+```
+Note, that `all_permission` also grants full access to the REST API. Actions synonyms are not supported for the REST API 
+permissions, actions should be listed as in the documentation.
+
+#### api_storage_alias_permissions
+
+Permission for endpoints to manage aliases (repository, user and common aliases):
+```yaml
+permissions:
+  api_storage_alias_permissions:
+    - read
+    - create
+    - delete
+```
+
+#### api_repository_permissions 
+
+Permission for endpoints to manage repository:
+```yaml
+permissions:
+  api_repository_permissions:
+    - read # allows to get repos list and repository by specific name
+    - create
+    - update
+    - move
+    - delete
+```
+
+#### api_role_permissions
+
+Permission for endpoints to manage roles:
+```yaml
+permissions:
+  api_role_permissions:
+    - read # allows to get roles' list and role by specific name
+    - create
+    - update
+    - delete
+    - enable # allows enable and disable operations
+```
+
+#### api_user_permissions
+
+Permission for endpoints to manage users:
+```yaml
+permissions:
+  api_user_permissions:
+    - read # allows to get users' list and user by specific name
+    - create
+    - update
+    - delete
+    - enable # allows enable and disable operations
+    - change_password
+```
+
+Endpoints to get token and settings (port and layout) are available for any user, no permissions required.
 
 ## Custom policy
 
