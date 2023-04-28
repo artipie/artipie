@@ -195,7 +195,7 @@ permissions:
   api_storage_alias_permissions:
     - *
 ```
-Note, that `all_permission` also grants full access to REST API. Actions synonyms are not supported for REST API 
+Note, that `all_permission` also grants full access to the REST API. Actions synonyms are not supported for the REST API 
 permissions, actions should be listed as in the documentation.
 
 #### api_storage_alias_permissions
