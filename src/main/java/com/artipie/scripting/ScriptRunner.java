@@ -37,7 +37,7 @@ public final class ScriptRunner implements Job {
                         } catch (final ScriptException exc) {
                             Logger.error(
                                 ScriptRunner.class,
-                                "Execution error in script %s %[exception]",
+                                "Execution error in script %s %[exception]s",
                                 key.toString(),
                                 exc
                             );
