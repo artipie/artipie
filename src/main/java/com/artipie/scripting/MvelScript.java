@@ -5,7 +5,7 @@
 package com.artipie.scripting;
 
 /**
- * Groovy Script.
+ * MVEL Script.
  *
  * @since 0.30
  */

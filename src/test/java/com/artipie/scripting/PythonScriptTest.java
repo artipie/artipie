@@ -12,7 +12,7 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link GroovyScript}.
+ * Tests for {@link PythonScript}.
  *
  * @since 0.30
  * @checkstyle MagicNumberCheck (500 lines)
