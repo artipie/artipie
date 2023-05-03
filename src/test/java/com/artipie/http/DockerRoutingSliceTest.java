@@ -5,6 +5,7 @@
 package com.artipie.http;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
@@ -213,6 +214,9 @@ final class DockerRoutingSliceTest {
         @Override
         public EventQueue<ArtifactEvent> events() {
             return null;
+        }
+        public Optional<YamlSequence> crontab() {
+            return Optional.empty();
         }
     }
 }

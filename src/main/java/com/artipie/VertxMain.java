@@ -15,6 +15,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.misc.ArtipieProperties;
+import com.artipie.scheduler.ArtipieScheduler;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
@@ -88,6 +89,11 @@ public final class VertxMain {
     private final List<VertxSliceServer> servers;
 
     /**
+     * Scheduler.
+     */
+    private final ArtipieScheduler scheduler;
+
+    /**
      * Ctor.
      *
      * @param http HTTP client
@@ -99,6 +105,7 @@ public final class VertxMain {
         this.config = config;
         this.port = port;
         this.servers = new ArrayList<>(0);
+        this.scheduler = new ArtipieScheduler();
     }
 
     /**
@@ -125,6 +132,8 @@ public final class VertxMain {
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
         this.startRepos(vertx, settings, this.port, jwt);
         vertx.deployVerticle(new RestApi(settings, apiport, jwt));
+        this.scheduler.start();
+        this.scheduler.loadCrontab(settings);
         return main;
     }
 
@@ -135,6 +144,7 @@ public final class VertxMain {
         for (final VertxSliceServer server : this.servers) {
             server.stop();
         }
+        this.scheduler.stop();
     }
 
     /**
