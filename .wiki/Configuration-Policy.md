@@ -103,7 +103,7 @@ permissions:
     maven-repo:
       - install
       - deploy
-    john/python-repo:
+    python-repo:
       - read
 ```
 `adapter_basic_permissions` is the [permission type name](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/security/perms/AdapterBasicPermissionFactory.java).
@@ -124,9 +124,6 @@ permissions:
       - read
 ```
 which means that `read` actions is allowed for any repository.
-
-Note, that in the case of `org` layout repository name is combined from username and repository name and
-should be specified correspondingly: `jane/pypi-public` or `mark/maven-repo`.
 
 #### All permission
 
@@ -249,7 +246,7 @@ permissions:
     - change_password
 ```
 
-Endpoints to get token and settings (port and layout) are available for any user, no permissions required.
+Endpoints to get token and settings (server-side port) are available for any user, no permissions required.
 
 ## Custom policy
 

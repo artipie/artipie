@@ -19,21 +19,19 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
- * Test for {@link StorageAliasesRest} with org layout.
+ * Test for {@link StorageAliasesRest}.
  * @since 0.27
  */
 @SuppressWarnings(
     {
         "PMD.AvoidDuplicateLiterals",
         "PMD.ProhibitPlainJunitAssertionsRule",
-        "PMD.TooManyMethods"
-    }
+        "PMD.TooManyMethods"}
 )
-public final class StorageAliasesRestOrgTest extends RestApiServerBase {
+public final class StorageAliasesRestTest extends RestApiServerBase {
 
     @Test
-    void listsCommonAliases(final Vertx vertx, final VertxTestContext ctx)
-        throws Exception {
+    void listsCommonAliases(final Vertx vertx, final VertxTestContext ctx) throws Exception {
         this.save(
             new Key.From(AliasSettings.FILE_NAME),
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
@@ -51,33 +49,14 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
     }
 
     @Test
-    void listsUserAliases(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        final String name = "alice";
-        this.save(
-            new Key.From(name, AliasSettings.FILE_NAME),
-            this.yamlAliases().getBytes(StandardCharsets.UTF_8)
-        );
-        this.requestAndAssert(
-            vertx, ctx, new TestRequest(String.format("/api/v1/storages/%s", name)),
-            new UncheckedConsumer<>(
-                response -> JSONAssert.assertEquals(
-                    response.body().toJsonArray().encode(),
-                    this.jsonAliases(),
-                    true
-                )
-            )
-        );
-    }
-
-    @Test
     void listsRepoAliases(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        final String name = "alice/docker";
+        final String rname = "my-maven";
         this.save(
-            new Key.From(name, AliasSettings.FILE_NAME),
+            new Key.From(rname, AliasSettings.FILE_NAME),
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
-            vertx, ctx, new TestRequest(String.format("/api/v1/repository/%s/storages", name)),
+            vertx, ctx, new TestRequest(String.format("/api/v1/repository/%s/storages", rname)),
             new UncheckedConsumer<>(
                 response -> JSONAssert.assertEquals(
                     response.body().toJsonArray().encode(),
@@ -89,84 +68,22 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
     }
 
     @Test
-    void addsNewUserAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        final String uname = "john";
+    void returnsEmptyArrayIfAliasesDoNotExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
         this.requestAndAssert(
-            vertx, ctx,
-            new TestRequest(
-                HttpMethod.PUT, String.format("/api/v1/storages/%s/new-alias", uname),
-                new JsonObject().put("type", "file").put("path", "john/new/alias/path")
-            ),
-            resp -> {
+            vertx, ctx, new TestRequest("/api/v1/storages"),
+            resp ->
                 MatcherAssert.assertThat(
-                    resp.statusCode(), new IsEqual<>(HttpStatus.CREATED_201)
-                );
-                MatcherAssert.assertThat(
-                    new String(
-                        this.storage().value(new Key.From(uname, AliasSettings.FILE_NAME)),
-                        StandardCharsets.UTF_8
-                    ),
-                    new IsEqual<>(
-                        String.join(
-                            System.lineSeparator(),
-                            "storages:",
-                            "  \"new-alias\":",
-                            "    type: file",
-                            "    path: john/new/alias/path"
-                        )
-                    )
-                );
-                assertStorageCacheInvalidated();
-            }
-        );
-    }
-
-    @Test
-    void updatesRepoAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        final String rname = "my-pypi";
-        final String uname = "mark";
-        final Key.From key = new Key.From(uname, rname, AliasSettings.FILE_NAME);
-        this.save(key, this.yamlAliases().getBytes(StandardCharsets.UTF_8));
-        this.requestAndAssert(
-            vertx, ctx, new TestRequest(
-                HttpMethod.PUT,
-                String.format("/api/v1/repository/%s/%s/storages/local", uname, rname),
-                new JsonObject().put("type", "file").put("path", "/var/artipie/python/local")
-            ),
-            resp -> {
-                MatcherAssert.assertThat(
-                    resp.statusCode(), new IsEqual<>(HttpStatus.CREATED_201)
-                );
-                MatcherAssert.assertThat(
-                    new String(this.storage().value(key), StandardCharsets.UTF_8),
-                    new IsEqual<>(
-                        String.join(
-                            System.lineSeparator(),
-                            "storages:",
-                            "  local:",
-                            "    type: file",
-                            "    path: /var/artipie/python/local",
-                            "  \"s3-sto\":",
-                            "    type: s3",
-                            "    bucket: any",
-                            "    region: east",
-                            "    endpoint: \"https://minio.selfhosted/s3\""
-                        )
-                    )
-                );
-                assertStorageCacheInvalidated();
-            }
+                    resp.body().toJsonArray().isEmpty(), new IsEqual<>(true)
+                )
         );
     }
 
     @Test
     void addsNewCommonAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        this.save(
-            new Key.From(AliasSettings.FILE_NAME),
-            this.yamlAliases().getBytes(StandardCharsets.UTF_8)
-        );
         this.requestAndAssert(
-            vertx, ctx, new TestRequest(
+            vertx, ctx,
+            new TestRequest(
                 HttpMethod.PUT, "/api/v1/storages/new-alias",
                 new JsonObject().put("type", "file").put("path", "new/alias/path")
             ),
@@ -183,14 +100,48 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                         String.join(
                             System.lineSeparator(),
                             "storages:",
-                            "  local:",
+                            "  \"new-alias\":",
+                            "    type: file",
+                            "    path: new/alias/path"
+                        )
+                    )
+                );
+                assertStorageCacheInvalidated();
+            }
+        );
+    }
+
+    @Test
+    void addsRepoAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        final String rname = "my-pypi";
+        this.save(
+            new Key.From(rname, AliasSettings.FILE_NAME),
+            this.yamlAliases().getBytes(StandardCharsets.UTF_8)
+        );
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.PUT, String.format("/api/v1/repository/%s/storages/new-alias", rname),
+                new JsonObject().put("type", "file").put("path", "new/alias/path")
+            ),
+            resp -> {
+                MatcherAssert.assertThat(
+                    resp.statusCode(), new IsEqual<>(HttpStatus.CREATED_201)
+                );
+                MatcherAssert.assertThat(
+                    new String(
+                        this.storage().value(new Key.From(rname, AliasSettings.FILE_NAME)),
+                        StandardCharsets.UTF_8
+                    ),
+                    new IsEqual<>(
+                        String.join(
+                            System.lineSeparator(),
+                            "storages:",
+                            "  default:",
                             "    type: fs",
-                            "    path: /var/artipie/local/data",
-                            "  \"s3-sto\":",
-                            "    type: s3",
-                            "    bucket: any",
-                            "    region: east",
-                            "    endpoint: \"https://minio.selfhosted/s3\"",
+                            "    path: /var/artipie/repo/data",
+                            "  \"redis-sto\":",
+                            "    type: redis",
+                            "    config: some",
                             "  \"new-alias\":",
                             "    type: file",
                             "    path: new/alias/path"
@@ -219,7 +170,7 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
-            vertx, ctx, new TestRequest(HttpMethod.DELETE, "/api/v1/storages/local"),
+            vertx, ctx, new TestRequest(HttpMethod.DELETE, "/api/v1/storages/redis-sto"),
             resp -> {
                 MatcherAssert.assertThat(resp.statusCode(), new IsEqual<>(HttpStatus.OK_200));
                 MatcherAssert.assertThat(
@@ -231,11 +182,9 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
                         String.join(
                             System.lineSeparator(),
                             "storages:",
-                            "  \"s3-sto\":",
-                            "    type: s3",
-                            "    bucket: any",
-                            "    region: east",
-                            "    endpoint: \"https://minio.selfhosted/s3\""
+                            "  default:",
+                            "    type: fs",
+                            "    path: /var/artipie/repo/data"
                         )
                     )
                 );
@@ -246,31 +195,29 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
 
     @Test
     void removesRepoAlias(final Vertx vertx, final VertxTestContext ctx) throws Exception {
-        final String uname = "max";
         final String rname = "my-rpm";
         this.save(
-            new Key.From(uname, rname, AliasSettings.FILE_NAME),
+            new Key.From(rname, AliasSettings.FILE_NAME),
             this.yamlAliases().getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
-                HttpMethod.DELETE,
-                String.format("/api/v1/repository/%s/%s/storages/s3-sto", uname, rname)
+                HttpMethod.DELETE, String.format("/api/v1/repository/%s/storages/default", rname)
             ),
             resp -> {
                 MatcherAssert.assertThat(resp.statusCode(), new IsEqual<>(HttpStatus.OK_200));
                 MatcherAssert.assertThat(
                     new String(
-                        this.storage().value(new Key.From(uname, rname, AliasSettings.FILE_NAME)),
+                        this.storage().value(new Key.From(rname, AliasSettings.FILE_NAME)),
                         StandardCharsets.UTF_8
                     ),
                     new IsEqual<>(
                         String.join(
                             System.lineSeparator(),
                             "storages:",
-                            "  local:",
-                            "    type: fs",
-                            "    path: /var/artipie/local/data"
+                            "  \"redis-sto\":",
+                            "    type: redis",
+                            "    config: some"
                         )
                     )
                 );
@@ -279,29 +226,21 @@ public final class StorageAliasesRestOrgTest extends RestApiServerBase {
         );
     }
 
-    @Override
-    String layout() {
-        return "org";
-    }
-
     private String yamlAliases() {
         return String.join(
             "\n",
             "storages:",
-            "  local:",
+            "  default:",
             "    type: fs",
-            "    path: /var/artipie/local/data",
-            "  s3-sto:",
-            "    type: s3",
-            "    bucket: any",
-            "    region: east",
-            "    endpoint: https://minio.selfhosted/s3"
+            "    path: /var/artipie/repo/data",
+            "  redis-sto:",
+            "    type: redis",
+            "    config: some"
         );
     }
 
     private String jsonAliases() {
         // @checkstyle LineLengthCheck (1 line)
-        return "[{\"alias\":\"local\",\"storage\":{\"type\":\"fs\",\"path\":\"/var/artipie/local/data\"}},{\"alias\":\"s3-sto\",\"storage\":{\"type\":\"s3\",\"bucket\":\"any\",\"region\":\"east\",\"endpoint\":\"https://minio.selfhosted/s3\"}}]";
+        return "[{\"alias\":\"default\",\"storage\":{\"type\":\"fs\",\"path\":\"/var/artipie/repo/data\"}},{\"alias\":\"redis-sto\",\"storage\":{\"type\":\"redis\",\"config\":\"some\"}}]";
     }
-
 }

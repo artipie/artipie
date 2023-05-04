@@ -81,8 +81,4 @@ final class AuthTokenRestTest extends RestApiServerBase {
         };
     }
 
-    @Override
-    String layout() {
-        return "flat";
-    }
 }

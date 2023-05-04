@@ -52,6 +52,7 @@ import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import java.net.URI;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -64,6 +65,11 @@ import java.util.stream.Collectors;
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 public final class SliceFromConfig extends Slice.Wrap {
+
+    /**
+     * Pattern to trim path before passing it to adapters' slice.
+     */
+    private static final Pattern PTRN = Pattern.compile("/(?:[^/.]+)(/.*)?");
 
     /**
      * Ctor.
@@ -120,25 +126,25 @@ public final class SliceFromConfig extends Slice.Wrap {
         switch (cfg.type()) {
             case "file":
                 slice = new TrimPathSlice(
-                    new FilesSlice(cfg.storage(), policy, auth, cfg.name()), settings.layout().pattern()
+                    new FilesSlice(cfg.storage(), policy, auth, cfg.name()), SliceFromConfig.PTRN
                 );
                 break;
             case "file-proxy":
-                slice = new TrimPathSlice(new FileProxy(http, cfg), settings.layout().pattern());
+                slice = new TrimPathSlice(new FileProxy(http, cfg), SliceFromConfig.PTRN);
                 break;
             case "npm":
                 slice = new TrimPathSlice(
                     new NpmSlice(cfg.url(), cfg.storage(), policy, tokens.auth(), cfg.name()),
-                    settings.layout().pattern()
+                    SliceFromConfig.PTRN
                 );
                 break;
             case "gem":
-                slice = new TrimPathSlice(new GemSlice(cfg.storage()), settings.layout().pattern());
+                slice = new TrimPathSlice(new GemSlice(cfg.storage()), SliceFromConfig.PTRN);
                 break;
             case "helm":
                 slice = new TrimPathSlice(
                     new HelmSlice(cfg.storage(), cfg.url().toString(), policy, auth, cfg.name()),
-                    settings.layout().pattern()
+                    SliceFromConfig.PTRN
                 );
                 break;
             case "rpm":
@@ -147,7 +153,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                         cfg.storage(), policy, auth,
                         new com.artipie.rpm.RepoConfig.FromYaml(cfg.settings(), cfg.name())
                     ),
-                    settings.layout().pattern()
+                    SliceFromConfig.PTRN
                 );
                 break;
             case "php":
@@ -155,13 +161,11 @@ public final class SliceFromConfig extends Slice.Wrap {
                     new PhpComposer(
                         new AstoRepository(cfg.storage(), Optional.of(cfg.url().toString()))
                     ),
-                    settings.layout().pattern()
+                    SliceFromConfig.PTRN
                 );
                 break;
             case "php-proxy":
-                slice = new TrimPathSlice(
-                    new ComposerProxy(http, cfg), settings.layout().pattern()
-                );
+                slice = new TrimPathSlice(new ComposerProxy(http, cfg), SliceFromConfig.PTRN);
                 break;
             case "nuget":
                 slice = new TrimPathSlice(
@@ -172,17 +176,16 @@ public final class SliceFromConfig extends Slice.Wrap {
                         auth,
                         cfg.name()
                     ),
-                    settings.layout().pattern()
+                    SliceFromConfig.PTRN
                 );
                 break;
             case "maven":
                 slice = new TrimPathSlice(
-                    new MavenSlice(cfg.storage(), policy, auth, cfg.name()),
-                    settings.layout().pattern()
+                    new MavenSlice(cfg.storage(), policy, auth, cfg.name()), SliceFromConfig.PTRN
                 );
                 break;
             case "maven-proxy":
-                slice = new TrimPathSlice(new MavenProxy(http, cfg), settings.layout().pattern());
+                slice = new TrimPathSlice(new MavenProxy(http, cfg), SliceFromConfig.PTRN);
                 break;
             case "maven-group":
                 slice = new TrimPathSlice(
@@ -201,13 +204,12 @@ public final class SliceFromConfig extends Slice.Wrap {
                                 )
                             ).collect(Collectors.toList())
                     ),
-                    settings.layout().pattern()
+                    SliceFromConfig.PTRN
                 );
                 break;
             case "go":
                 slice = new TrimPathSlice(
-                    new GoSlice(cfg.storage(), policy, auth, cfg.name()),
-                    settings.layout().pattern()
+                    new GoSlice(cfg.storage(), policy, auth, cfg.name()), SliceFromConfig.PTRN
                 );
                 break;
             case "npm-proxy":
@@ -224,12 +226,11 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "pypi":
                 slice = new TrimPathSlice(
-                    new PySlice(cfg.storage(), policy, auth, cfg.name()),
-                    settings.layout().pattern()
+                    new PySlice(cfg.storage(), policy, auth, cfg.name()), SliceFromConfig.PTRN
                 );
                 break;
             case "pypi-proxy":
-                slice = new TrimPathSlice(new PypiProxy(http, cfg), settings.layout().pattern());
+                slice = new TrimPathSlice(new PypiProxy(http, cfg), SliceFromConfig.PTRN);
                 break;
             case "docker":
                 final Docker docker = new AstoDocker(
@@ -262,7 +263,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                         cfg.storage(), policy, auth,
                         new Config.FromYaml(cfg.name(), cfg.settings(), settings.configStorage())
                     ),
-                    settings.layout().pattern()
+                    SliceFromConfig.PTRN
                 );
                 break;
             case "conda":
@@ -272,8 +273,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "hexpm":
                 slice = new TrimPathSlice(
-                    new HexSlice(cfg.storage(), policy, auth, cfg.name()),
-                    settings.layout().pattern()
+                    new HexSlice(cfg.storage(), policy, auth, cfg.name()), SliceFromConfig.PTRN
                 );
                 break;
             default:

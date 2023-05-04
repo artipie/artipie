@@ -45,14 +45,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * Base class for Rest API tests. When creating test for rest API verticle, extend this class
- * and implement {@link RestApiServerBase#layout()} method.
+ * Base class for Rest API tests. When creating test for rest API verticle, extend this class.
  * @since 0.27
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings("PMD.TooManyMethods")
-public abstract class RestApiServerBase {
+public class RestApiServerBase {
 
     /**
      * Max wait time for condition in seconds.
@@ -101,12 +100,6 @@ public abstract class RestApiServerBase {
      * Test artipie`s caches.
      */
     private ArtipieCaches caches;
-
-    /**
-     * Artipie layout.
-     * @return String layout: org or flat.
-     */
-    abstract String layout();
 
     /**
      * Artipie authentication, this method can be overridden if necessary.
@@ -208,7 +201,7 @@ public abstract class RestApiServerBase {
         this.ssto = new InMemoryStorage();
         vertx.deployVerticle(
             new RestApi(
-                this.caches, storage, this.layout(), this.prt,
+                this.caches, storage, this.prt,
                 this.auth(),
                 this.keyStore(),
                 JWTAuth.create(

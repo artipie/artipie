@@ -15,10 +15,6 @@ import org.eclipse.jetty.http.HttpStatus;
  * @since 0.27
  */
 public final class SettingsRest extends BaseRest {
-    /**
-     * Artipie layout.
-     */
-    private final String layout;
 
     /**
      * Artipie port.
@@ -28,11 +24,9 @@ public final class SettingsRest extends BaseRest {
     /**
      * Ctor.
      * @param port Artipie port
-     * @param layout Artipie layout
      */
-    public SettingsRest(final int port, final String layout) {
+    public SettingsRest(final int port) {
         this.port = port;
-        this.layout = layout;
     }
 
     @Override
@@ -40,9 +34,6 @@ public final class SettingsRest extends BaseRest {
     public void init(final RouterBuilder rbr) {
         rbr.operation("port")
             .handler(this::portRest)
-            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        rbr.operation("layout")
-            .handler(this::layoutRest)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
 
@@ -53,18 +44,6 @@ public final class SettingsRest extends BaseRest {
     private void portRest(final RoutingContext context) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add("port", this.port);
-        context.response()
-            .setStatusCode(HttpStatus.OK_200)
-            .end(builder.build().toString());
-    }
-
-    /**
-     * Send json with layout of repository and status code OK_200.
-     * @param context Request context
-     */
-    private void layoutRest(final RoutingContext context) {
-        final JsonObjectBuilder builder = Json.createObjectBuilder();
-        builder.add("layout", this.layout);
         context.response()
             .setStatusCode(HttpStatus.OK_200)
             .end(builder.build().toString());

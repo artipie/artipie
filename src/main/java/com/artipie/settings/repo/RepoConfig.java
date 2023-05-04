@@ -14,6 +14,7 @@ import com.artipie.micrometer.MicrometerStorage;
 import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -136,7 +137,7 @@ public final class RepoConfig {
     public URL url() {
         final String str = this.string("url");
         try {
-            return new URL(str);
+            return URI.create(str).toURL();
         } catch (final MalformedURLException ex) {
             throw new IllegalArgumentException(
                 String.format("Failed to build URL from '%s'", str),
