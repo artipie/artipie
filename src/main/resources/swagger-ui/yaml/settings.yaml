@@ -32,25 +32,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /api/v1/settings/layout:
-    get:
-      summary: Repository layout.
-      operationId: layout
-      tags:
-        - settings
-      responses:
-        '200':
-          description: Layout of repository
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Layout'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
 components:
   securitySchemes:
     bearerAuth:
@@ -65,13 +46,6 @@ components:
       properties:
         port:
           type: integer
-    Layout:
-      type: object
-      required:
-        - layout
-      properties:
-        layout:
-          type: string
     Error:
       type: object
       required:

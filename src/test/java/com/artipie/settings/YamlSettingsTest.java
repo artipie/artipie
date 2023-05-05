@@ -33,41 +33,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 class YamlSettingsTest {
 
     @Test
-    void shouldSetFlatAsDefaultLayout() throws Exception {
-        final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlInput(
-                String.join(
-                    "",
-                    "meta:\n",
-                    "  storage:\n"
-                )
-            ).readYamlMapping()
-        );
-        MatcherAssert.assertThat(
-            settings.layout(),
-            new IsInstanceOf(Layout.Flat.class)
-        );
-    }
-
-    @Test
-    void shouldBeOrgLayout() throws Exception {
-        final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlInput(
-                String.join(
-                    "",
-                    "meta:\n",
-                    "  storage: []\n",
-                    "  layout: org\n"
-                )
-            ).readYamlMapping()
-        );
-        MatcherAssert.assertThat(
-            settings.layout(),
-            new IsInstanceOf(Layout.Org.class)
-        );
-    }
-
-    @Test
     void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
             this.config("some/path")

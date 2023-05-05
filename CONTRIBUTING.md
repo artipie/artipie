@@ -20,17 +20,15 @@ pull-request will not be merged.
 
 ## How to run it locally
 
-To run Artipie server locally, build it with
-```
-mvn clean package -Passembly
-```
-and run with *(change port if needed)*:
-```java
-java -jar target/artipie-jar-with-dependencies.jar --config=example/artipie.yaml --port=8080
-```
-Example configuration uses `org` layout of Artipie with two level hierarchy,
-user `test` with password `123`, and `default` storage in `./example/storage` directory.
-To access the dashboard open `http://localhost/test` in your browser and enter user credentials.
+If you want to run Artipie locally from IntelliJ Idea directly:
+- check `example` directory with example configuration in main resources folder, change paths in the configuration 
+in accordance with your local environment; 
+- add `--config-file` parameter into run configuration pointing to `<local-full-path>/example/artipie.yaml`
+
+See logs to check running repositories, Swagger Rest API documentation URL and test user credentials.
+
+Also, you can run [Artipie from fat jar](https://github.com/artipie/artipie/wiki#how-to-start-artipie-service-with-a-maven-proxy-repository) 
+and [docker container](https://github.com/artipie/artipie#quickstart).
 
 
 ### Testing

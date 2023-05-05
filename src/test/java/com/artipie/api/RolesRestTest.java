@@ -388,8 +388,4 @@ final class RolesRestTest extends RestApiServerBase {
         );
     }
 
-    @Override
-    String layout() {
-        return "org";
-    }
 }

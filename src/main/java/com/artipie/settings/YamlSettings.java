@@ -112,11 +112,6 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public Layout layout() {
-        return Layout.valueOf(this.meta().string("layout"));
-    }
-
-    @Override
     public YamlMapping meta() {
         return Optional.ofNullable(this.content.yamlMapping("meta"))
             .orElseThrow(

@@ -20,7 +20,6 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.ArtipieSecurity;
-import com.artipie.settings.Layout;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.cache.ArtipieCaches;
@@ -176,11 +175,6 @@ final class DockerRoutingSliceTest {
                     return Optional.empty();
                 }
             };
-        }
-
-        @Override
-        public Layout layout() {
-            throw new UnsupportedOperationException();
         }
 
         @Override

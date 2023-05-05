@@ -5,7 +5,7 @@ window.onload = function() {
   window.ui = SwaggerUIBundle(
   {
     urls: [
-          {url: "./yaml/repo-flat.yaml", name: "Repositories"},
+          {url: "./yaml/repo.yaml", name: "Repositories"},
           {url: "./yaml/token-gen.yaml", name: "Auth tokens"},
           {url: "./yaml/users.yaml", name: "Users"},
           {url: "./yaml/roles.yaml", name: "Roles"},

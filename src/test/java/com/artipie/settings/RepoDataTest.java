@@ -18,7 +18,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -95,7 +94,7 @@ class RepoDataTest {
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
         new RepoData(this.storage, this.cache)
-            .remove(new RepositoryName.Flat(RepoDataTest.REPO)).toCompletableFuture().join();
+            .remove(new RepositoryName.Simple(RepoDataTest.REPO)).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are removed",
             this.waitCondition(() -> this.data.list(Key.ROOT).isEmpty())
@@ -111,78 +110,16 @@ class RepoDataTest {
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
         new RepoData(this.storage, this.cache)
-            .move(new RepositoryName.Flat(RepoDataTest.REPO), new RepositoryName.Flat("new-repo"))
-            .toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            "Repository data are moved",
-            this.waitCondition(
-                () ->
-                    this.data.list(Key.ROOT).stream()
-                        .map(Key::string).collect(Collectors.toList())
-                        .containsAll(List.of("new-repo/first.txt", "new-repo/second.txt"))
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @ValueSource(
-        strings = {"_storages.yaml", "my-repo/_storages.yaml"}
-    )
-    void movesDataWithAliasAndFlatLayout(final String key) {
-        this.stngs.save(
-            new Key.From(String.format("%s.yml", RepoDataTest.REPO)),
-            this.repoSettingsWithAlias().getBytes(StandardCharsets.UTF_8)
-        );
-        this.stngs.save(
-            new Key.From(key),
-            this.storageAlias().getBytes(StandardCharsets.UTF_8)
-        );
-        this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
-        this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
-        new RepoData(this.storage, this.cache)
-            .move(new RepositoryName.Flat(RepoDataTest.REPO), new RepositoryName.Flat("new-repo"))
-            .toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            "Repository data are moved",
-            this.waitCondition(
-                () ->
-                    this.data.list(Key.ROOT).stream()
-                        .map(Key::string).collect(Collectors.toList())
-                        .containsAll(List.of("new-repo/first.txt", "new-repo/second.txt"))
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @ValueSource(
-        strings = {"_storages.yaml", "my-repo/_storages.yaml"}
-    )
-    void movesDataWithAliasAndOrgLayout(final String key) {
-        final String uid = "john";
-        this.stngs.save(
-            new Key.From(uid, String.format("%s.yml", RepoDataTest.REPO)),
-            this.repoSettingsWithAlias().getBytes(StandardCharsets.UTF_8)
-        );
-        this.stngs.save(
-            new Key.From(uid, key),
-            this.storageAlias().getBytes(StandardCharsets.UTF_8)
-        );
-        this.data.save(new Key.From(uid, RepoDataTest.REPO, "first.txt"), new byte[]{});
-        this.data.save(new Key.From(uid, RepoDataTest.REPO, "second.txt"), new byte[]{});
-        final String nrepo = "new-repo";
-        new RepoData(this.storage, this.cache)
             .move(
-                new RepositoryName.Org(RepoDataTest.REPO, uid),
-                new RepositoryName.Org(nrepo, uid)
-            )
-            .toCompletableFuture().join();
+                new RepositoryName.Simple(RepoDataTest.REPO), new RepositoryName.Simple("new-repo")
+            ).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
             this.waitCondition(
                 () ->
                     this.data.list(Key.ROOT).stream()
-                        .map(Key::string).collect(Collectors.toList())
-                        .containsAll(List.of("john/new-repo/first.txt", "john/new-repo/second.txt"))
+                        .map(Key::string).toList()
+                        .containsAll(List.of("new-repo/first.txt", "new-repo/second.txt"))
             )
         );
     }
@@ -191,7 +128,7 @@ class RepoDataTest {
     @ValueSource(
         strings = {"_storages.yaml", "my-repo/_storages.yaml"}
     )
-    void removesDataWithAliasAndFlatLayout(final String key) {
+    void movesDataWithAlias(final String key) {
         this.stngs.save(
             new Key.From(String.format("%s.yml", RepoDataTest.REPO)),
             this.repoSettingsWithAlias().getBytes(StandardCharsets.UTF_8)
@@ -202,11 +139,17 @@ class RepoDataTest {
         );
         this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
         this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
-        new RepoData(this.storage, this.cache)
-            .remove(new RepositoryName.Flat(RepoDataTest.REPO)).toCompletableFuture().join();
+        new RepoData(this.storage, this.cache).move(
+            new RepositoryName.Simple(RepoDataTest.REPO), new RepositoryName.Simple("new-repo")
+        ).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Repository data are moved",
-            this.waitCondition(() -> this.data.list(Key.ROOT).isEmpty())
+            this.waitCondition(
+                () ->
+                    this.data.list(Key.ROOT).stream()
+                        .map(Key::string).toList()
+                        .containsAll(List.of("new-repo/first.txt", "new-repo/second.txt"))
+            )
         );
     }
 
@@ -214,22 +157,20 @@ class RepoDataTest {
     @ValueSource(
         strings = {"_storages.yaml", "my-repo/_storages.yaml"}
     )
-    void removesDataWithAliasAndOrgLayout(final String key) {
-        final String uid = "john";
+    void removesDataWithAlias(final String key) {
         this.stngs.save(
-            new Key.From(uid, String.format("%s.yml", RepoDataTest.REPO)),
+            new Key.From(String.format("%s.yml", RepoDataTest.REPO)),
             this.repoSettingsWithAlias().getBytes(StandardCharsets.UTF_8)
         );
         this.stngs.save(
-            new Key.From(uid, key),
-            this.storageAlias().getBytes(StandardCharsets.UTF_8)
+            new Key.From(key), this.storageAlias().getBytes(StandardCharsets.UTF_8)
         );
-        this.data.save(new Key.From(uid, RepoDataTest.REPO, "first.txt"), new byte[]{});
-        this.data.save(new Key.From(uid, RepoDataTest.REPO, "second.txt"), new byte[]{});
+        this.data.save(new Key.From(RepoDataTest.REPO, "first.txt"), new byte[]{});
+        this.data.save(new Key.From(RepoDataTest.REPO, "second.txt"), new byte[]{});
         new RepoData(this.storage, this.cache)
-            .remove(new RepositoryName.Org(RepoDataTest.REPO, uid)).toCompletableFuture().join();
+            .remove(new RepositoryName.Simple(RepoDataTest.REPO)).toCompletableFuture().join();
         MatcherAssert.assertThat(
-            "Repository is empty",
+            "Repository data are moved",
             this.waitCondition(() -> this.data.list(Key.ROOT).isEmpty())
         );
     }

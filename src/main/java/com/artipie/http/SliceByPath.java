@@ -4,6 +4,7 @@
  */
 package com.artipie.http;
 
+import com.artipie.RqPath;
 import com.artipie.asto.Key;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.ClientSlices;
@@ -62,7 +63,7 @@ final class SliceByPath implements Slice {
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Optional<Key> key = this.settings.layout().keyFromPath(
+        final Optional<Key> key = SliceByPath.keyFromPath(
             new RequestLineFrom(line).uri().getPath()
         );
         if (key.isEmpty()) {
@@ -75,5 +76,33 @@ final class SliceByPath implements Slice {
         return new ArtipieRepositories(this.http, this.settings, this.tokens)
             .slice(key.get(), new RequestLineFrom(line).uri().getPort())
             .response(line, headers, body);
+    }
+
+    /**
+     * Repository key from path.
+     * @param path Path to get repository key from
+     * @return Key if found
+     */
+    private static Optional<Key> keyFromPath(final String path) {
+        final String[] parts = SliceByPath.splitPath(path);
+        final Optional<Key> key;
+        if (RqPath.CONDA.test(path)) {
+            key = Optional.of(new Key.From(parts[2]));
+        } else if (parts.length >= 1 && !parts[0].isBlank()) {
+            key = Optional.of(new Key.From(parts[0]));
+        } else {
+            key = Optional.empty();
+        }
+        return key;
+    }
+
+    /**
+     * Split path into parts.
+     *
+     * @param path Path.
+     * @return Array of path parts.
+     */
+    private static String[] splitPath(final String path) {
+        return path.replaceAll("^/+", "").split("/");
     }
 }

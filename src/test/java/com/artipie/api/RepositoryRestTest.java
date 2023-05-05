@@ -16,11 +16,14 @@ import io.vertx.junit5.VertxTestContext;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.awaitility.Awaitility;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -28,10 +31,11 @@ import org.junit.jupiter.api.io.TempDir;
  * Test for {@link RepositoryRest}.
  * @since 0.26
  * @checkstyle DesignForExtensionCheck (1000 lines)
+ * @checkstyle ClassDataAbstractionCouplingCheck (1000 lines)
  */
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
-public abstract class RepositoryRestBaseTest extends RestApiServerBase {
+public final class RepositoryRestTest extends RestApiServerBase {
     /**
      * Temp dir.
      * @checkstyle VisibilityModifierCheck (500 lines)
@@ -80,15 +84,29 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void getRepoReturnsOkIfRepositoryExists(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname) throws Exception {
+    @Test
+    void listsRepos(final Vertx vertx, final VertxTestContext ctx) throws Exception {
+        this.save(new Key.From("docker-repo.yaml"), new byte[0]);
+        this.save(new Key.From("rpm-local.yml"), new byte[0]);
+        this.save(new Key.From("conda-remote.yml"), new byte[0]);
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest("/api/v1/repository/list"),
+            resp -> MatcherAssert.assertThat(
+                resp.body().toJsonArray().stream().collect(Collectors.toList()),
+                Matchers.containsInAnyOrder(
+                    "rpm-local", "docker-repo", "conda-remote"
+                )
+            )
+        );
+    }
+
+    @Test
+    void getRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("docker-repo");
         this.save(new ConfigKeys(rname.toString()).yamlKey(), this.repoSettings().getBytes());
         this.requestAndAssert(
-            vertx,
-            ctx,
-            new TestRequest(
-                String.format("/api/v1/repository/%s", rname)
-            ),
+            vertx, ctx, new TestRequest(String.format("/api/v1/repository/%s", rname)),
             res ->
                 MatcherAssert.assertThat(
                     res.statusCode(),
@@ -97,16 +115,14 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void getRepoReturnsConflictIfRepositoryHasSettingsDuplicates(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void getRepoReturnsConflictIfRepoHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("docker-repo");
         this.save(new ConfigKeys(rname.toString()).yamlKey(), new byte[0]);
         this.save(new ConfigKeys(rname.toString()).ymlKey(), new byte[0]);
         this.requestAndAssert(
-            vertx,
-            ctx,
-            new TestRequest(
-                String.format("/api/v1/repository/%s", rname)
-            ),
+            vertx, ctx, new TestRequest(String.format("/api/v1/repository/%s", rname)),
             res ->
                 MatcherAssert.assertThat(
                     res.statusCode(),
@@ -115,10 +131,11 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void getRepoReturnsNotFoundIfRepositoryDoesNotExist(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void getRepoReturnsNotFoundIfRepoDoesNotExist(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         this.requestAndAssert(
-            vertx, ctx, new TestRequest(String.format("/api/v1/repository/%s", rname)),
+            vertx, ctx, new TestRequest("/api/v1/repository/docker-repo"),
             res ->
                 MatcherAssert.assertThat(
                     res.statusCode(),
@@ -127,10 +144,11 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void getRepoReturnsBadRequestIfRepositoryHasReservedName(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void getRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         this.requestAndAssert(
-            vertx, ctx, new TestRequest(String.format("/api/v1/repository/%s", rname)),
+            vertx, ctx, new TestRequest("/api/v1/repository/_storages"),
             res ->
                 MatcherAssert.assertThat(
                     res.statusCode(),
@@ -139,12 +157,13 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void existsRepoReturnsOkIfRepositoryExists(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname) throws Exception {
+    @Test
+    void existsRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("docker-repo");
         this.save(new ConfigKeys(rname.toString()).yamlKey(), this.repoSettings().getBytes());
         this.requestAndAssert(
-            vertx,
-            ctx,
+            vertx, ctx,
             new TestRequest(HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)),
             res ->
                 MatcherAssert.assertThat(
@@ -154,13 +173,14 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void existsRepoReturnsConflictIfRepositoryHasSettingsDuplicates(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void existsRepoReturnsConflictIfRepoHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("docker-repo");
         this.save(new ConfigKeys(rname.toString()).yamlKey(), new byte[0]);
         this.save(new ConfigKeys(rname.toString()).ymlKey(), new byte[0]);
         this.requestAndAssert(
-            vertx,
-            ctx,
+            vertx, ctx,
             new TestRequest(HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)),
             res ->
                 MatcherAssert.assertThat(
@@ -170,12 +190,11 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void existsRepoReturnsNotFoundIfRepositoryDoesNotExist(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void existsRepoReturnsNotFoundIfRepoDoesNotExist(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
         this.requestAndAssert(
-            vertx, ctx, new TestRequest(
-                HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)
-            ),
+            vertx, ctx, new TestRequest(HttpMethod.HEAD, "/api/v1/repository/docker-repo"),
             res ->
                 MatcherAssert.assertThat(
                     res.statusCode(),
@@ -184,12 +203,11 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void existsRepoReturnsBadRequestIfRepositoryHasReservedName(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void existsRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         this.requestAndAssert(
-            vertx, ctx, new TestRequest(
-                HttpMethod.HEAD, String.format("/api/v1/repository/%s", rname)
-            ),
+            vertx, ctx, new TestRequest(HttpMethod.HEAD, "/api/v1/repository/_storages"),
             res ->
                 MatcherAssert.assertThat(
                     res.statusCode(),
@@ -198,11 +216,12 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void createRepoReturnsOkIfRepositoryNoExists(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname) throws Exception {
+    @Test
+    void createRepoReturnsOkIfRepoNoExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("docker-repo");
         this.requestAndAssert(
-            vertx,
-            ctx,
+            vertx, ctx,
             new TestRequest(
                 HttpMethod.PUT,
                 String.format("/api/v1/repository/%s", rname),
@@ -230,23 +249,19 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void updateRepoReturnsOkIfRepositoryAlreadyExists(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
-        this.save(
-            new ConfigKeys(rname.toString()).yamlKey(), new byte[0]
-        );
+    @Test
+    void updateRepoReturnsOkIfRepoAlreadyExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("docker-repo");
+        this.save(new ConfigKeys(rname.toString()).yamlKey(), new byte[0]);
         this.requestAndAssert(
-            vertx,
-            ctx,
+            vertx, ctx,
             new TestRequest(
                 HttpMethod.PUT,
                 String.format("/api/v1/repository/%s", rname),
-                new JsonObject()
-                    .put(
-                        "repo", new JsonObject()
-                            .put("type", "fs")
-                            .put("storage", new JsonObject())
-                    )
+                new JsonObject().put(
+                    "repo", new JsonObject().put("type", "fs").put("storage", new JsonObject())
+                )
             ),
             resp -> {
                 MatcherAssert.assertThat(
@@ -265,36 +280,32 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void createRepoReturnsBadRequestIfRepositoryHasReservedName(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void createRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
-                HttpMethod.PUT,
-                String.format("/api/v1/repository/%s", rname),
-                new JsonObject()
-                    .put(
-                        "repo", new JsonObject()
-                            .put("type", "fs")
-                            .put("storage", new JsonObject())
-                    )
-            ),
-            res ->
-                MatcherAssert.assertThat(
-                    res.statusCode(),
-                    new IsEqual<>(HttpStatus.BAD_REQUEST_400)
+                HttpMethod.PUT, "/api/v1/repository/_storages",
+                new JsonObject().put(
+                    "repo", new JsonObject().put("type", "fs").put("storage", new JsonObject())
                 )
+            ),
+            res -> MatcherAssert.assertThat(
+                res.statusCode(),
+                new IsEqual<>(HttpStatus.BAD_REQUEST_400)
+            )
         );
     }
 
-    void removeRepoReturnsOkIfRepositoryExists(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname) throws Exception {
+    @Test
+    void removeRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("docker-repo");
         this.save(
             new ConfigKeys(rname.toString()).yamlKey(),
             this.repoSettings().getBytes(StandardCharsets.UTF_8)
         );
-        final Key.From alpine = new Key.From(
-            String.format("%s/alpine.img", rname)
-        );
+        final Key.From alpine = new Key.From(String.format("%s/alpine.img", rname));
         this.getData().save(alpine, new byte[]{});
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
@@ -320,12 +331,13 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void removeRepoReturnsNotFoundIfRepositoryDoesNotExist(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void removeRepoReturnsNotFoundIfRepoDoesNotExist(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
                 HttpMethod.DELETE,
-                String.format("/api/v1/repository/%s", rname)
+                String.format("/api/v1/repository/%s", new RepositoryName.Simple("docker-repo"))
             ),
             res ->
                 MatcherAssert.assertThat(
@@ -335,12 +347,11 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void removeRepoReturnsBadRequestIfRepositoryHasReservedName(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void removeRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         this.requestAndAssert(
-            vertx, ctx, new TestRequest(
-                HttpMethod.DELETE, String.format("/api/v1/repository/%s", rname)
-            ),
+            vertx, ctx, new TestRequest(HttpMethod.DELETE, "/api/v1/repository/_storages"),
             res ->
                 MatcherAssert.assertThat(
                     res.statusCode(),
@@ -349,32 +360,16 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void removeRepoReturnsOkIfRepositoryHasWrongStorageConfiguration(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void removeRepoReturnsOkIfRepoHasWrongStorageConfiguration(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         final String repoconf = String.join(
             System.lineSeparator(),
             "repo:",
             "  type: binary",
             "  storage: fakeStorage"
         );
-        this.removeRepoReturnsOkIfRepositoryHasAnyConfiguration(vertx, ctx, rname, repoconf);
-    }
-
-    void removeRepoReturnsOkAndRepoIsRemovedIfRepositoryHasWrongConfiguration(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
-        final String repoconf = String.join(
-            System.lineSeparator(),
-            "“When you go after honey with a balloon,",
-            " the great thing is to not let the bees know you’re coming.",
-            "—Winnie the Pooh"
-        );
-        this.removeRepoReturnsOkIfRepositoryHasAnyConfiguration(vertx, ctx, rname, repoconf);
-    }
-
-    // @checkstyle ParameterNumberCheck (5 lines)
-    void removeRepoReturnsOkIfRepositoryHasAnyConfiguration(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname, final String repoconf)
-        throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("docker");
         this.save(
             new ConfigKeys(rname.toString()).yamlKey(),
             repoconf.getBytes(StandardCharsets.UTF_8)
@@ -396,25 +391,52 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    // @checkstyle ParameterNumberCheck (5 lines)
-    void moveRepoReturnsOkIfRepositoryExists(final Vertx vertx, final VertxTestContext ctx,
-        final RepositoryName rname, final RepositoryName newrname)
+    @Test
+    void removeRepoReturnsOkAndRepoIsRemovedIfRepoHasWrongConfiguration(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        final String repoconf = String.join(
+            System.lineSeparator(),
+            "“When you go after honey with a balloon,",
+            " the great thing is to not let the bees know you’re coming.",
+            "—Winnie the Pooh"
+        );
+        final RepositoryName rname = new RepositoryName.Simple("docker");
+        this.save(
+            new ConfigKeys(rname.toString()).yamlKey(),
+            repoconf.getBytes(StandardCharsets.UTF_8)
+        );
+        this.requestAndAssert(
+            vertx, ctx, new TestRequest(
+                HttpMethod.DELETE,
+                String.format("/api/v1/repository/%s", rname)
+            ),
+            res -> {
+                MatcherAssert.assertThat(
+                    res.statusCode(),
+                    new IsEqual<>(HttpStatus.OK_200)
+                );
+                Awaitility.waitAtMost(MAX_WAIT_TIME, TimeUnit.SECONDS).until(
+                    () -> !this.storage().exists(new ConfigKeys(rname.toString()).yamlKey())
+                );
+            }
+        );
+    }
+
+    @Test
+    void moveRepoReturnsOkIfRepoExists(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("docker-repo");
+        final RepositoryName newrname = new RepositoryName.Simple("docker-repo-new");
         this.save(
             new ConfigKeys(rname.toString()).yamlKey(),
             this.repoSettings().getBytes(StandardCharsets.UTF_8)
         );
-        final Key.From alpine = new Key.From(
-            String.format("%s/alpine.img", rname)
-        );
+        final Key.From alpine = new Key.From(String.format("%s/alpine.img", rname));
         this.getData().save(alpine, new byte[]{});
-        final JsonObject json = new JsonObject()
-            .put("new_name", "docker-repo-new");
+        final JsonObject json = new JsonObject().put("new_name", "docker-repo-new");
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
-                HttpMethod.PUT,
-                String.format("/api/v1/repository/%s/move", rname),
-                json
+                HttpMethod.PUT, String.format("/api/v1/repository/%s/move", rname), json
             ),
             res -> {
                 MatcherAssert.assertThat(
@@ -443,12 +465,15 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void moveRepoReturnsNotFoundIfRepositoryDoesNotExist(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void moveRepoReturnsNotFoundIfRepoDoesNotExist(final Vertx vertx, final VertxTestContext ctx)
+        throws Exception {
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
                 HttpMethod.PUT,
-                String.format("/api/v1/repository/%s/move", rname),
+                String.format(
+                    "/api/v1/repository/%s/move", new RepositoryName.Simple("docker-repo")
+                ),
                 new JsonObject().put("new_name", "docker-repo-new")
             ),
             res ->
@@ -459,15 +484,11 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void moveRepoReturnsConflictIfRepositoryHasSettingsDuplicates(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
-        new ConfigKeys(rname.toString()).keys().forEach(
-            key ->
-                this.save(
-                    key,
-                    new byte[0]
-                )
-        );
+    @Test
+    void moveRepoReturnsConflictIfRepoHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("docker-repo");
+        new ConfigKeys(rname.toString()).keys().forEach(key -> this.save(key, new byte[0]));
         this.requestAndAssert(
             vertx, ctx,
             new TestRequest(
@@ -483,13 +504,14 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    void moveRepoReturnsBadRequestIfRepositoryHasReservedName(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname) throws Exception {
+    @Test
+    void moveRepoReturnsBadRequestIfRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
         this.requestAndAssert(
             vertx, ctx,
             new TestRequest(
                 HttpMethod.PUT,
-                String.format("/api/v1/repository/%s/move", rname),
+                "/api/v1/repository/_storages/move",
                 new JsonObject().put("new_name", "docker-repo-new")
             ),
             res ->
@@ -500,10 +522,10 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    // @checkstyle ParameterNumberCheck (3 lines)
-    void moveRepoReturnsBadRequestIfNewRepositoryHasReservedName(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname, final RepositoryName newrname)
-        throws Exception {
+    @Test
+    void moveRepoReturnsBadRequestIfNewRepoHasReservedName(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("doker-repo");
         this.save(
             new ConfigKeys(rname.toString()).yamlKey(),
             this.repoSettings().getBytes(StandardCharsets.UTF_8)
@@ -514,7 +536,7 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
                 HttpMethod.PUT,
                 String.format("/api/v1/repository/%s/move", rname),
                 new JsonObject()
-                    .put("new_name", newrname.toString())
+                    .put("new_name", "_storages")
             ),
             res ->
                 MatcherAssert.assertThat(
@@ -524,27 +546,16 @@ public abstract class RepositoryRestBaseTest extends RestApiServerBase {
         );
     }
 
-    // @checkstyle ParameterNumberCheck (3 lines)
-    void moveRepoReturnsBadRequestIfNewRepositoryHasSettingsDuplicates(final Vertx vertx,
-        final VertxTestContext ctx, final RepositoryName rname, final String newrname)
-        throws Exception {
+    @Test
+    void moveRepoReturnsBadRequestIfNewRepoHasSettingsDuplicates(final Vertx vertx,
+        final VertxTestContext ctx) throws Exception {
+        final RepositoryName rname = new RepositoryName.Simple("doker-repo");
+        final String newrname = "docker-repo-new";
         this.save(
             new ConfigKeys(rname.toString()).yamlKey(),
             this.repoSettings().getBytes(StandardCharsets.UTF_8)
         );
-        final String newrnamepath;
-        if ("flat".equals(layout())) {
-            newrnamepath = newrname;
-        } else {
-            newrnamepath = String.format("Alice/%s", newrname);
-        }
-        new ConfigKeys(newrnamepath).keys().forEach(
-            key ->
-                this.save(
-                    key,
-                    new byte[0]
-                )
-        );
+        new ConfigKeys(newrname).keys().forEach(key -> this.save(key, new byte[0]));
         this.requestAndAssert(
             vertx, ctx,
             new TestRequest(

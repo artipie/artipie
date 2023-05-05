@@ -8,7 +8,6 @@ import com.artipie.api.perms.ApiAliasPermission;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.security.policy.Policy;
-import com.artipie.settings.Layout;
 import com.artipie.settings.cache.StoragesCache;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
@@ -41,11 +40,6 @@ public final class StorageAliasesRest extends BaseRest {
     private final BlockingStorage asto;
 
     /**
-     * Artipie layout.
-     */
-    private final String layout;
-
-    /**
      * Artipie policy.
      */
     private final Policy<?> policy;
@@ -54,15 +48,13 @@ public final class StorageAliasesRest extends BaseRest {
      * Ctor.
      * @param caches Artipie settings caches
      * @param asto Artipie settings storage
-     * @param layout Artipie layout
      * @param policy Artipie policy
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     public StorageAliasesRest(final StoragesCache caches, final BlockingStorage asto,
-        final String layout, final Policy<?> policy) {
+        final Policy<?> policy) {
         this.caches = caches;
         this.asto = asto;
-        this.layout = layout;
         this.policy = policy;
     }
 
@@ -116,32 +108,6 @@ public final class StorageAliasesRest extends BaseRest {
             )
             .handler(this::deleteAlias)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        if (new Layout.Org().toString().equals(this.layout)) {
-            rtrb.operation("getUserAliases")
-                .handler(
-                    new AuthzHandler(
-                        this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.READ)
-                    )
-                )
-                .handler(this::getUserAliases)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rtrb.operation("addUserAlias")
-                .handler(
-                    new AuthzHandler(
-                        this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.CREATE)
-                    )
-                )
-                .handler(this::addUserAlias)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rtrb.operation("deleteUserAlias")
-                .handler(
-                    new AuthzHandler(
-                        this.policy, new ApiAliasPermission(ApiAliasPermission.AliasAction.DELETE)
-                    )
-                )
-                .handler(this::deleteUserAlias)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        }
     }
 
     /**
@@ -151,7 +117,7 @@ public final class StorageAliasesRest extends BaseRest {
     private void deleteRepoAlias(final RoutingContext context) {
         this.delete(
             context, Optional.of(
-                new Key.From(new RepositoryName.FromRequest(context, this.layout).toString())
+                new Key.From(new RepositoryName.FromRequest(context).toString())
             )
         );
     }
@@ -165,22 +131,12 @@ public final class StorageAliasesRest extends BaseRest {
     }
 
     /**
-     * Delete user alias.
-     * @param context Routing context
-     */
-    private void deleteUserAlias(final RoutingContext context) {
-        this.delete(
-            context, Optional.of(new Key.From(context.pathParam(RepositoryName.USER_NAME)))
-        );
-    }
-
-    /**
      * Add repository alias.
      * @param context Routing context
      */
     private void addRepoAlias(final RoutingContext context) {
         new ManageStorageAliases(
-            new Key.From(new RepositoryName.FromRequest(context, this.layout).toString()), this.asto
+            new Key.From(new RepositoryName.FromRequest(context).toString()), this.asto
         ).add(
             context.pathParam(StorageAliasesRest.ANAME),
             StorageAliasesRest.jsonFromRequest(context)
@@ -195,21 +151,6 @@ public final class StorageAliasesRest extends BaseRest {
      */
     private void addAlias(final RoutingContext context) {
         new ManageStorageAliases(this.asto).add(
-            context.pathParam(StorageAliasesRest.ANAME),
-            StorageAliasesRest.jsonFromRequest(context)
-        );
-        this.caches.invalidateAll();
-        context.response().setStatusCode(HttpStatus.CREATED_201).end();
-    }
-
-    /**
-     * Add repository alias.
-     * @param context Routing context
-     */
-    private void addUserAlias(final RoutingContext context) {
-        new ManageStorageAliases(
-            new Key.From(context.pathParam(RepositoryName.USER_NAME)), this.asto
-        ).add(
             context.pathParam(StorageAliasesRest.ANAME),
             StorageAliasesRest.jsonFromRequest(context)
         );
@@ -234,19 +175,9 @@ public final class StorageAliasesRest extends BaseRest {
         context.response().setStatusCode(HttpStatus.OK_200).end(
             this.aliases(
                 Optional.of(
-                    new Key.From(new RepositoryName.FromRequest(context, this.layout).toString())
+                    new Key.From(new RepositoryName.FromRequest(context).toString())
                 )
             )
-        );
-    }
-
-    /**
-     * Get user aliases.
-     * @param context Routing context
-     */
-    private void getUserAliases(final RoutingContext context) {
-        context.response().setStatusCode(HttpStatus.OK_200).end(
-            this.aliases(Optional.of(new Key.From(context.pathParam(RepositoryName.USER_NAME))))
         );
     }
 

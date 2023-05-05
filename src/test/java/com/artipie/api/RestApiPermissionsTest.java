@@ -53,13 +53,12 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
         new TestRequest(HttpMethod.GET, "/api/v1/roles"),
         new TestRequest(HttpMethod.GET, "/api/v1/users"),
         new TestRequest(HttpMethod.GET, "/api/v1/repository/list"),
-        new TestRequest(HttpMethod.GET, "/api/v1/repository/Cate/my-npm/storages"),
-        new TestRequest(HttpMethod.GET, "/api/v1/storages/Oleg"),
+        new TestRequest(HttpMethod.GET, "/api/v1/repository/my-npm/storages"),
         new TestRequest(HttpMethod.GET, "/api/v1/storages")
     );
 
     /**
-     * List of the existing requests for org layout.
+     * List of the existing requests.
      */
     private static final Collection<TestRequest> RQST = Stream.concat(
         Stream.of(
@@ -75,17 +74,14 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
             new TestRequest(HttpMethod.DELETE, "/api/v1/roles/tester"),
             new TestRequest(HttpMethod.POST, "/api/v1/roles/tester/enable"),
             new TestRequest(HttpMethod.POST, "/api/v1/roles/tester/disable"),
-            new TestRequest(HttpMethod.GET, "/api/v1/repository/list/John"),
-            new TestRequest(HttpMethod.GET, "/api/v1/repository/Olga/my-maven"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Jane/rpm", new JsonObject().put("repo", new JsonObject())),
-            new TestRequest(HttpMethod.DELETE, "/api/v1/repository/Sasha/my-python"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Alex/bin-files/move", new JsonObject().put("new_name", "any")),
-            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Katie/my-go/storages/local", new JsonObject().put("alias", "local").put("type", "file")),
-            new TestRequest(HttpMethod.DELETE, "/api/v1/repository/Ann/docker/storages/s3sto"),
+            new TestRequest(HttpMethod.GET, "/api/v1/repository/my-maven"),
+            new TestRequest(HttpMethod.PUT, "/api/v1/repository/rpm", new JsonObject().put("repo", new JsonObject())),
+            new TestRequest(HttpMethod.DELETE, "/api/v1/repository/my-python"),
+            new TestRequest(HttpMethod.PUT, "/api/v1/repository/bin-files/move", new JsonObject().put("new_name", "any")),
+            new TestRequest(HttpMethod.PUT, "/api/v1/repository/my-go/storages/local", new JsonObject().put("alias", "local").put("type", "file")),
+            new TestRequest(HttpMethod.DELETE, "/api/v1/repository/docker/storages/s3sto"),
             new TestRequest(HttpMethod.PUT, "/api/v1/storages/def", new JsonObject().put("alias", "def").put("type", "file")),
-            new TestRequest(HttpMethod.DELETE, "/api/v1/storages/local-dir"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/storages/Andrew/s3-shared", new JsonObject().put("alias", "s3-shared").put("type", "file")),
-            new TestRequest(HttpMethod.DELETE, "/api/v1/storages/Dmitrii/s3-amazon")
+            new TestRequest(HttpMethod.DELETE, "/api/v1/storages/local-dir")
         ), RestApiPermissionsTest.GET_DATA.stream()
     ).toList();
 
@@ -126,7 +122,7 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
         throws Exception {
         final AtomicReference<String> token =
             this.getToken(vertx, ctx, RestApiPermissionsTest.NAME, RestApiPermissionsTest.PASS);
-        final String path = "/api/v1/repository/john/my-docker";
+        final String path = "/api/v1/repository/my-docker";
         this.requestAndAssert(
             vertx, ctx,
             new TestRequest(
@@ -207,12 +203,12 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
         throws Exception {
         final AtomicReference<String> token =
             this.getToken(vertx, ctx, RestApiPermissionsTest.NAME, RestApiPermissionsTest.PASS);
-        final String path = "/api/v1/storages/Jane/new-alias";
+        final String path = "/api/v1/storages/new-alias";
         this.requestAndAssert(
             vertx, ctx,
             new TestRequest(
                 HttpMethod.PUT, path,
-                new JsonObject().put("type", "file").put("path", "jane/new/alias/path")
+                new JsonObject().put("type", "file").put("path", "new/alias/path")
             ), Optional.of(token.get()),
             resp -> MatcherAssert.assertThat(
                 resp.statusCode(),
@@ -274,10 +270,5 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
                 return Optional.of(RestApiPermissionsTest.super.ssto);
             }
         };
-    }
-
-    @Override
-    String layout() {
-        return "org";
     }
 }

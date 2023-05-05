@@ -66,8 +66,4 @@ abstract class SSLBaseRestTest extends RestApiServerBase {
         };
     }
 
-    @Override
-    String layout() {
-        return "flat";
-    }
 }

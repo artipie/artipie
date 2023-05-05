@@ -10,7 +10,6 @@ import com.artipie.api.verifier.ReservedNamesVerifier;
 import com.artipie.api.verifier.SettingsDuplicatesVerifier;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.security.policy.Policy;
-import com.artipie.settings.Layout;
 import com.artipie.settings.RepoData;
 import com.artipie.settings.cache.FiltersCache;
 import com.artipie.settings.repo.CrudRepoSettings;
@@ -58,11 +57,6 @@ public final class RepositoryRest extends BaseRest {
     private final RepoData data;
 
     /**
-     * Artipie layout.
-     */
-    private final String layout;
-
-    /**
      * Artipie policy.
      */
     private final Policy<?> policy;
@@ -72,16 +66,14 @@ public final class RepositoryRest extends BaseRest {
      * @param cache Artipie filters cache
      * @param crs Repository settings create/read/update/delete
      * @param data Repository data management
-     * @param layout Artipie layout
      * @param policy Artipie policy
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     public RepositoryRest(final FiltersCache cache, final CrudRepoSettings crs, final RepoData data,
-        final String layout, final Policy<?> policy) {
+        final Policy<?> policy) {
         this.cache = cache;
         this.crs = crs;
         this.data = data;
-        this.layout = layout;
         this.policy = policy;
     }
 
@@ -97,96 +89,45 @@ public final class RepositoryRest extends BaseRest {
             )
             .handler(this::listAll)
             .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        if ("flat".equals(this.layout)) {
-            rbr.operation("getRepo")
-                .handler(
-                    new AuthzHandler(
-                        this.policy,
-                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
-                    )
+        rbr.operation("getRepo")
+            .handler(
+                new AuthzHandler(
+                    this.policy,
+                    new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
                 )
-                .handler(this::getRepo)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("existRepo")
-                .handler(
-                    new AuthzHandler(
-                        this.policy,
-                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
-                    )
+            )
+            .handler(this::getRepo)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rbr.operation("existRepo")
+            .handler(
+                new AuthzHandler(
+                    this.policy,
+                    new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
                 )
-                .handler(this::existRepo)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("createOrUpdateRepo")
-                .handler(this::createOrUpdateRepo)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("removeRepo")
-                .handler(
-                    new AuthzHandler(
-                        this.policy,
-                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.DELETE)
-                    )
+            )
+            .handler(this::existRepo)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rbr.operation("createOrUpdateRepo")
+            .handler(this::createOrUpdateRepo)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rbr.operation("removeRepo")
+            .handler(
+                new AuthzHandler(
+                    this.policy,
+                    new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.DELETE)
                 )
-                .handler(this::removeRepo)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("moveRepo")
-                .handler(
-                    new AuthzHandler(
-                        this.policy,
-                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.MOVE)
-                    )
+            )
+            .handler(this::removeRepo)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
+        rbr.operation("moveRepo")
+            .handler(
+                new AuthzHandler(
+                    this.policy,
+                    new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.MOVE)
                 )
-                .handler(this::moveRepo)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        } else {
-            rbr.operation("list")
-                .handler(
-                    new AuthzHandler(
-                        this.policy,
-                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
-                    )
-                )
-                .handler(this::listUserRepos)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("getUserRepo")
-                .handler(
-                    new AuthzHandler(
-                        this.policy,
-                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
-                    )
-                )
-                .handler(this::getRepo)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("existUserRepo")
-                .handler(
-                    new AuthzHandler(
-                        this.policy,
-                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.READ)
-                    )
-                )
-                .handler(this::existRepo)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("createOrUpdateUserRepo")
-                .handler(this::createOrUpdateRepo)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("removeUserRepo")
-                .handler(
-                    new AuthzHandler(
-                        this.policy,
-                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.DELETE)
-                    )
-                )
-                .handler(this::removeRepo)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-            rbr.operation("moveUserRepo")
-                .handler(
-                    new AuthzHandler(
-                        this.policy,
-                        new ApiRepositoryPermission(ApiRepositoryPermission.RepositoryAction.MOVE)
-                    )
-                )
-                .handler(this::moveRepo)
-                .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
-        }
+            )
+            .handler(this::moveRepo)
+            .failureHandler(this.errorHandler(HttpStatus.INTERNAL_SERVER_ERROR_500));
     }
 
     /**
@@ -194,7 +135,7 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void getRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final RepositoryName rname = new RepositoryName.FromRequest(context);
         final Validator validator = new Validator.All(
             Validator.validator(new ReservedNamesVerifier(rname), HttpStatus.BAD_REQUEST_400),
             Validator.validator(new ExistenceVerifier(rname, this.crs), HttpStatus.NOT_FOUND_404),
@@ -215,7 +156,7 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void existRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final RepositoryName rname = new RepositoryName.FromRequest(context);
         final Validator validator = new Validator.All(
             Validator.validator(new ReservedNamesVerifier(rname), HttpStatus.BAD_REQUEST_400),
             Validator.validator(new ExistenceVerifier(rname, this.crs), HttpStatus.NOT_FOUND_404),
@@ -242,22 +183,11 @@ public final class RepositoryRest extends BaseRest {
     }
 
     /**
-     * List user's repositories.
-     * @param context Routing context
-     */
-    private void listUserRepos(final RoutingContext context) {
-        context.response().setStatusCode(HttpStatus.OK_200).end(
-            JsonArray.of(this.crs.list(context.pathParam(RepositoryName.USER_NAME)).toArray())
-                .encode()
-        );
-    }
-
-    /**
      * Create a repository.
      * @param context Routing context
      */
     private void createOrUpdateRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final RepositoryName rname = new RepositoryName.FromRequest(context);
         final Validator validator = new Validator.All(
             Validator.validator(new ReservedNamesVerifier(rname), HttpStatus.BAD_REQUEST_400)
         );
@@ -310,7 +240,7 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void removeRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final RepositoryName rname = new RepositoryName.FromRequest(context);
         final Validator validator = new Validator.All(
             Validator.validator(new ReservedNamesVerifier(rname), HttpStatus.BAD_REQUEST_400),
             Validator.validator(
@@ -340,41 +270,30 @@ public final class RepositoryRest extends BaseRest {
      * @param context Routing context
      */
     private void moveRepo(final RoutingContext context) {
-        final RepositoryName rname = new RepositoryName.FromRequest(context, this.layout);
+        final RepositoryName rname = new RepositoryName.FromRequest(context);
         Validator validator = new Validator.All(
             Validator.validator(new ReservedNamesVerifier(rname), HttpStatus.BAD_REQUEST_400),
             Validator.validator(new ExistenceVerifier(rname, this.crs), HttpStatus.NOT_FOUND_404),
             Validator.validator(
-                new SettingsDuplicatesVerifier(rname, this.crs),
-                HttpStatus.CONFLICT_409
+                new SettingsDuplicatesVerifier(rname, this.crs), HttpStatus.CONFLICT_409
             )
         );
         if (validator.validate(context)) {
-            final String newname = BaseRest.readJsonObject(context).getString("new_name");
-            final RepositoryName newrname;
-            if (new Layout.Flat().toString().equals(this.layout)) {
-                newrname = new RepositoryName.Flat(newname);
-            } else {
-                newrname = new RepositoryName.Org(
-                    newname, context.pathParam(RepositoryName.USER_NAME)
-                );
-            }
+            final RepositoryName newrname = new RepositoryName.Simple(
+                BaseRest.readJsonObject(context).getString("new_name")
+            );
             validator = new Validator.All(
                 Validator.validator(
-                    new ReservedNamesVerifier(newrname),
-                    HttpStatus.BAD_REQUEST_400
+                    new ReservedNamesVerifier(newrname), HttpStatus.BAD_REQUEST_400
                 ),
                 Validator.validator(
-                    new SettingsDuplicatesVerifier(newrname, this.crs),
-                    HttpStatus.CONFLICT_409
+                    new SettingsDuplicatesVerifier(newrname, this.crs), HttpStatus.CONFLICT_409
                 )
             );
             if (validator.validate(context)) {
                 this.data.move(rname, newrname).thenRun(() -> this.crs.move(rname, newrname));
                 this.cache.invalidate(rname.toString());
-                context.response()
-                    .setStatusCode(HttpStatus.OK_200)
-                    .end();
+                context.response().setStatusCode(HttpStatus.OK_200).end();
             }
         }
     }

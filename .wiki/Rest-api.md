@@ -2,8 +2,7 @@
 
 Artipie provides Rest API to manage [repositories](./Configuration-Repository), [users](./Configuration-Credentials) 
 and [storages aliases](./Configuration-Storage#Storage-Aliases). API is self-documented with [Swagger](https://swagger.io/)
-interface, Swagger documentation pages are available on URLs `http://{host}:{api}/api/index-{layout}.html` where
-`{layout}` is the layout you run Artipie with, `org` or `flat`.
+interface, Swagger documentation pages are available on URLs `http://{host}:{api}/api/index.html`.
 
 In Swagger documentation have three definitions - Repositories, Users and Auth Token. You can switch
 between the definitions with the help of "Select a definition" listbox.
@@ -24,7 +23,7 @@ Choose repository you are interested in from [this table](./Configuration-Reposi
 to learn all the details. 
 
 Rest API provides method to rename repository `PUT /api/v1/{repo_name}/move` (`{repo_name}` is the 
-name of the repository, includes username in the case of `org` layout) and move all the data
+name of the repository) and move all the data
 from repository with the `{repo_name}` to repository with new name (new name is provided in json 
 request body, check Swagger docs to learn the format). Response is returned immediately, but data 
 manipulation is performed in asynchronous mode, so to make sure data transfer is complete, 

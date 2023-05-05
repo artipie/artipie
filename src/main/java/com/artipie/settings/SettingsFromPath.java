@@ -55,10 +55,8 @@ public final class SettingsFromPath {
         if (initialize && !bsto.exists(init)) {
             SettingsFromPath.copyResources(
                 Arrays.asList(
-                    AliasSettings.FILE_NAME, "artipie/my-bin.yaml",
-                    "artipie/my-docker.yaml", "artipie/my-maven.yaml"
-                ),
-                "repo", bsto
+                    AliasSettings.FILE_NAME, "my-bin.yaml", "my-docker.yaml", "my-maven.yaml"
+                ), "repo", bsto
             );
             if (settings.authz().policyStorage().isPresent()) {
                 final BlockingStorage policy = new BlockingStorage(

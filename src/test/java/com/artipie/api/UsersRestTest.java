@@ -428,8 +428,4 @@ final class UsersRestTest extends RestApiServerBase {
         );
     }
 
-    @Override
-    String layout() {
-        return "org";
-    }
 }

@@ -10,7 +10,6 @@ import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.settings.ArtipieSecurity;
-import com.artipie.settings.Layout;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.cache.ArtipieCaches;
@@ -33,11 +32,6 @@ public final class TestSettings implements Settings {
      * Yaml `meta` mapping.
      */
     private final YamlMapping meta;
-
-    /**
-     * Layout.
-     */
-    private final Layout layout;
 
     /**
      * KeyStore.
@@ -71,30 +65,6 @@ public final class TestSettings implements Settings {
     /**
      * Ctor.
      *
-     * @param layout Layout
-     */
-    public TestSettings(final Layout layout) {
-        this(new InMemoryStorage(), layout);
-    }
-
-    /**
-     * Ctor.
-     *
-     * @param storage Storage
-     * @param layout Layout
-     */
-    public TestSettings(final Storage storage, final Layout layout) {
-        this(
-            storage,
-            Yaml.createYamlMappingBuilder().build(),
-            layout,
-            Optional.empty()
-        );
-    }
-
-    /**
-     * Ctor.
-     *
      * @param meta Yaml `meta` mapping
      */
     public TestSettings(final YamlMapping meta) {
@@ -109,7 +79,7 @@ public final class TestSettings implements Settings {
      * @checkstyle ParameterNumberCheck (2 lines)
      */
     public TestSettings(final Storage storage, final YamlMapping meta) {
-        this(storage, meta, new Layout.Flat(), Optional.empty());
+        this(storage, meta, Optional.empty());
     }
 
     /**
@@ -117,19 +87,16 @@ public final class TestSettings implements Settings {
      *
      * @param storage Storage
      * @param meta Yaml `meta` mapping
-     * @param layout Layout
      * @param keystore KeyStore
      * @checkstyle ParameterNumberCheck (2 lines)
      */
     public TestSettings(
         final Storage storage,
         final YamlMapping meta,
-        final Layout layout,
         final Optional<KeyStore> keystore
     ) {
         this.storage = storage;
         this.meta = meta;
-        this.layout = layout;
         this.keystore = keystore;
         this.caches = new TestArtipieCaches();
     }
@@ -142,11 +109,6 @@ public final class TestSettings implements Settings {
     @Override
     public ArtipieSecurity authz() {
         return null;
-    }
-
-    @Override
-    public Layout layout() {
-        return this.layout;
     }
 
     @Override

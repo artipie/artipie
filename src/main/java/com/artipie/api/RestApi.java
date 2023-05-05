@@ -49,11 +49,6 @@ public final class RestApi extends AbstractVerticle {
     private final Storage configsStorage;
 
     /**
-     * Artipie layout.
-     */
-    private final String layout;
-
-    /**
      * Application port.
      */
     private final int port;
@@ -77,7 +72,6 @@ public final class RestApi extends AbstractVerticle {
      * Primary ctor.
      * @param caches Artipie settings caches
      * @param configsStorage Artipie settings storage
-     * @param layout Artipie layout
      * @param port Port to run API on
      * @param security Artipie security
      * @param keystore KeyStore
@@ -87,7 +81,6 @@ public final class RestApi extends AbstractVerticle {
     public RestApi(
         final ArtipieCaches caches,
         final Storage configsStorage,
-        final String layout,
         final int port,
         final ArtipieSecurity security,
         final Optional<KeyStore> keystore,
@@ -95,7 +88,6 @@ public final class RestApi extends AbstractVerticle {
     ) {
         this.caches = caches;
         this.configsStorage = configsStorage;
-        this.layout = layout;
         this.port = port;
         this.security = security;
         this.keystore = keystore;
@@ -111,7 +103,7 @@ public final class RestApi extends AbstractVerticle {
      */
     public RestApi(final Settings settings, final int port, final JWTAuth jwt) {
         this(
-            settings.caches(), settings.configStorage(), settings.layout().toString(),
+            settings.caches(), settings.configStorage(),
             port, settings.authz(), settings.keyStore(), jwt
         );
     }
@@ -119,7 +111,7 @@ public final class RestApi extends AbstractVerticle {
     @Override
     public void start() throws Exception {
         //@checkstyle LineLengthCheck (10 line)
-        RouterBuilder.create(this.vertx, String.format("swagger-ui/yaml/repo-%s.yaml", this.layout)).compose(
+        RouterBuilder.create(this.vertx, "swagger-ui/yaml/repo.yaml").compose(
             repoRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").compose(
                 userRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/token-gen.yaml").compose(
                     tokenRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/settings.yaml").compose(
@@ -150,11 +142,11 @@ public final class RestApi extends AbstractVerticle {
         new RepositoryRest(
             this.caches.filtersCache(),
             new ManageRepoSettings(asto),
-            new RepoData(this.configsStorage, this.caches.storagesCache()), this.layout,
+            new RepoData(this.configsStorage, this.caches.storagesCache()),
             this.security.policy()
         ).init(repoRb);
         new StorageAliasesRest(
-            this.caches.storagesCache(), asto, this.layout, this.security.policy()
+            this.caches.storagesCache(), asto, this.security.policy()
         ).init(repoRb);
         if (this.security.policyStorage().isPresent()) {
             new UsersRest(
@@ -168,15 +160,14 @@ public final class RestApi extends AbstractVerticle {
                 this.caches.policyCache(), this.security.policy()
             ).init(rolesRb);
         }
-        new SettingsRest(this.port, this.layout).init(settingsRb);
+        new SettingsRest(this.port).init(settingsRb);
         final Router router = repoRb.createRouter();
         router.route("/*").subRouter(rolesRb.createRouter());
         router.route("/*").subRouter(userRb.createRouter());
         router.route("/*").subRouter(tokenRb.createRouter());
         router.route("/*").subRouter(settingsRb.createRouter());
         router.route("/api/*").handler(
-            StaticHandler.create("swagger-ui")
-                .setIndexPage(String.format("index-%s.html", this.layout))
+            StaticHandler.create("swagger-ui").setIndexPage("index.html")
         );
         final HttpServer server;
         final String schema;
@@ -192,7 +183,7 @@ public final class RestApi extends AbstractVerticle {
         server.requestHandler(router)
             .listen(this.port)
             //@checkstyle LineLengthCheck (1 line)
-            .onComplete(res -> Logger.info(this, String.format("Rest API started on port %d, swagger is available on %s://localhost:%d/api/index-%s.html", this.port, schema, this.port, this.layout)))
+            .onComplete(res -> Logger.info(this, "Rest API started on port %d, swagger is available on %s://localhost:%d/api/index.html", this.port, schema, this.port))
             .onFailure(err -> Logger.error(this, err.getMessage()));
     }
 

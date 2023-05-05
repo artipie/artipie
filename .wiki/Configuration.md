@@ -6,7 +6,6 @@ with `--config-file` (or short alternative `-f`) option. Artipie docker image de
 of this file is `/etc/artipie/artipie.yml`. 
 
 Yaml configuration file contains server meta configuration, such as:
- - `layout` - `flat` or `org` string, not required, default value is `flat`;
  - `storage` - repositories definition storage config, required;
  - `credentials` - user [credentials config](./Configuration-Credentials);
  - `configs` - repository config files location, not required, the storage key relative to the 
@@ -17,38 +16,35 @@ Example:
 ```yaml
 # /etc/artipie/artipie.yml
 meta:
-  layout: org
   storage:
     type: fs
     path: /tmp/artipie/configs
   configs: repo
   credentials:
-    type: file
-    path: _credentials.yml
+    - type: artipie
+    - type: env
+  policy:
+    type: artipie
+    storage:
+      type: fs
+      path: /tmp/artipie/security
   metrics:
-    type: log
+    endpoint: "/metrics/vertx"
+    port: 8087
 ```
 
-Layout specifies the URI path layout for Artipie. In case of `flat` layout,
-Artipie provides repositories at first path level, e.g. `{host}:{port}/maven`,
-`{host}:{port}/repo2`. For `org` layouts URI path has two parts: `<username>/<repo>`,
-where `<username>` is the name of the user who owns the repository, and `<repo>` the name of repository,
-e.g. `{host}:{port}/john/maven` - John's `maven` repository.
-In `org` layout, repositories have a maintainer (owner) who can manage
-repositories and permissions; the maintainer can add,
-delete and edit repositories, add granular permissions for other users for each repository.
+Artipie provides repositories at first path level, e.g. `{host}:{port}/maven`, `{host}:{port}/test-pypi`.
 
 Storage - is a [storage configuration](./Configuration-Storage)
 for [repository definitions](./Configuration-Repository).
 It sets a storage where all config files for each repository are located. Keep in mind,
 Artipie user should have read and write permissions for this storage.
 
-Here is the example of Artipie configuration files structure for `flat` layout based on 
+Here is the example of Artipie configuration files structure based on 
 `/etc/artipie/artipie.yml` example above:
 ```
 /tmp/artipie/configs
-│   _storages.yaml
-│   _credentials.yaml    
+│   _storages.yaml 
 │
 └───repo
 │   │   my-maven.yml
@@ -56,28 +52,13 @@ Here is the example of Artipie configuration files structure for `flat` layout b
 │   │   docker-registry.yaml
 ```
 
-If the layout is `org`, then repository configurations will be located in users' subdirectories:
-```
-/tmp/artipie/configs
-│   _storages.yaml
-│   _credentials.yaml    
-│
-└───repo
-│   │───john
-│   │   │   go-repo.yaml
-│   │   │   docker-repo.yaml
-│   │   │   _storages.yaml
-│   │───mark
-│   │   │   maven-repo.yaml
-│   │   │   nuget-repo.yaml
-```
+In the examples above `_storages.yaml` is a file for [storages aliases](./Configuration-Storage#storage-aliases),
+file name for the aliases is fixed and should be `_storages` as shown above,
+`repo` subdirectory (as configured with `configs` field in `/etc/artipie/artipie.yml`) contains configs for 
+repositories. If `configs` setting is omitted in `/etc/artipie/artipie.yml`, then repo configs will be located 
+in `/tmp/artipie/configs` directly.
 
-In the examples above `_storages.yaml` is a file for [storages aliases](./Configuration-Storage#storage-aliases)
-(note, that is the case of `org` layout it can be added for users individually) and
-`_credentials.yaml` describes Artipie [users](./Configuration-Credentials). `repo` subdirectory
-(as configured with `configs` field in `/etc/artipie/artipie.yml`) contains configs for repositories. If `configs` 
-setting is omitted in `/etc/artipie/artipie.yml`, then repo configs will be located in `/tmp/artipie/configs`
-directly.
+Credentials and policy sections are responsible for [user credentials](./Configuration-Credentials) and [security policy](./Configuration-Policy).
 
 Note that Artipie understands both extensions: `yml` and `yaml`.
 

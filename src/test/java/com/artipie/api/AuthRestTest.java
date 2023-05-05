@@ -28,12 +28,12 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for authentication in Rest API for org layout.
+ * Test for authentication in Rest API.
  * @since 0.27
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public final class AuthRestOrgTest extends RestApiServerBase {
+public final class AuthRestTest extends RestApiServerBase {
 
     /**
      * Name of the user.
@@ -52,13 +52,12 @@ public final class AuthRestOrgTest extends RestApiServerBase {
         new TestRequest(HttpMethod.GET, "/api/v1/users"),
         new TestRequest(HttpMethod.GET, "/api/v1/roles"),
         new TestRequest(HttpMethod.GET, "/api/v1/repository/list"),
-        new TestRequest(HttpMethod.GET, "/api/v1/repository/Cate/my-npm/storages"),
-        new TestRequest(HttpMethod.GET, "/api/v1/storages/Oleg"),
+        new TestRequest(HttpMethod.GET, "/api/v1/repository/my-npm/storages"),
         new TestRequest(HttpMethod.GET, "/api/v1/storages")
     );
 
     /**
-     * List of the existing requests for org layout.
+     * List of the existing requests.
      */
     private static final Collection<TestRequest> RQST = Stream.concat(
         Stream.of(
@@ -73,24 +72,21 @@ public final class AuthRestOrgTest extends RestApiServerBase {
             new TestRequest(HttpMethod.DELETE, "/api/v1/roles/tester"),
             new TestRequest(HttpMethod.POST, "/api/v1/roles/tester/enable"),
             new TestRequest(HttpMethod.POST, "/api/v1/roles/tester/disable"),
-            new TestRequest(HttpMethod.GET, "/api/v1/repository/list/John"),
-            new TestRequest(HttpMethod.GET, "/api/v1/repository/Olga/my-maven"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Jane/rpm"),
-            new TestRequest(HttpMethod.DELETE, "/api/v1/repository/Sasha/my-python"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Alex/bin-files/move"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/repository/Katie/my-go/storages/local"),
-            new TestRequest(HttpMethod.DELETE, "/api/v1/repository/Ann/docker/storages/s3sto"),
+            new TestRequest(HttpMethod.GET, "/api/v1/repository/my-maven"),
+            new TestRequest(HttpMethod.PUT, "/api/v1/repository/rpm"),
+            new TestRequest(HttpMethod.DELETE, "/api/v1/repository/my-python"),
+            new TestRequest(HttpMethod.PUT, "/api/v1/repository/bin-files/move"),
+            new TestRequest(HttpMethod.PUT, "/api/v1/repository/my-go/storages/local"),
+            new TestRequest(HttpMethod.DELETE, "/api/v1/repository/docker/storages/s3sto"),
             new TestRequest(HttpMethod.PUT, "/api/v1/storages/def"),
-            new TestRequest(HttpMethod.DELETE, "/api/v1/storages/local-dir"),
-            new TestRequest(HttpMethod.PUT, "/api/v1/storages/Andrew/s3-shared"),
-            new TestRequest(HttpMethod.DELETE, "/api/v1/storages/Dmitrii/s3-amazon")
-        ), AuthRestOrgTest.GET_DATA.stream()
+            new TestRequest(HttpMethod.DELETE, "/api/v1/storages/local-dir")
+        ), AuthRestTest.GET_DATA.stream()
     ).toList();
 
     @Test
     void returnsUnauthorizedWhenTokenIsAbsent(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
-        for (final TestRequest item : AuthRestOrgTest.RQST) {
+        for (final TestRequest item : AuthRestTest.RQST) {
             this.requestAndAssert(
                 vertx, ctx, item, Optional.empty(),
                 response -> MatcherAssert.assertThat(
@@ -106,8 +102,8 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     void returnsOkWhenTokenIsPresent(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
-        for (final TestRequest item : AuthRestOrgTest.GET_DATA) {
+            this.getToken(vertx, ctx, AuthRestTest.NAME, AuthRestTest.PASS);
+        for (final TestRequest item : AuthRestTest.GET_DATA) {
             this.requestAndAssert(
                 vertx, ctx, item, Optional.of(token.get()),
                 response -> MatcherAssert.assertThat(
@@ -123,8 +119,8 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     void createsAndRemovesRepoWithAuth(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
-        final String path = "/api/v1/repository/john/my-docker";
+            this.getToken(vertx, ctx, AuthRestTest.NAME, AuthRestTest.PASS);
+        final String path = "/api/v1/repository/my-docker";
         this.requestAndAssert(
             vertx, ctx,
             new TestRequest(
@@ -151,7 +147,7 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     void createsAndRemovesUserWithAuth(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+            this.getToken(vertx, ctx, AuthRestTest.NAME, AuthRestTest.PASS);
         final String path = "/api/v1/users/Alice";
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
@@ -177,7 +173,7 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     void createsAndRemovesRoleWithAuth(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+            this.getToken(vertx, ctx, AuthRestTest.NAME, AuthRestTest.PASS);
         final String path = "/api/v1/roles/admin";
         this.requestAndAssert(
             vertx, ctx, new TestRequest(
@@ -204,13 +200,13 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     void createsAndRemovesStorageAliasWithAuth(final Vertx vertx, final VertxTestContext ctx)
         throws Exception {
         final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
-        final String path = "/api/v1/storages/Jane/new-alias";
+            this.getToken(vertx, ctx, AuthRestTest.NAME, AuthRestTest.PASS);
+        final String path = "/api/v1/storages/new-alias";
         this.requestAndAssert(
             vertx, ctx,
             new TestRequest(
                 HttpMethod.PUT, path,
-                new JsonObject().put("type", "file").put("path", "jane/new/alias/path")
+                new JsonObject().put("type", "file").put("path", "new/alias/path")
             ), Optional.of(token.get()),
             resp -> MatcherAssert.assertThat(
                 resp.statusCode(),
@@ -230,12 +226,12 @@ public final class AuthRestOrgTest extends RestApiServerBase {
     void returnUnauthorizedWhenOldPasswordIsNotCorrectOnAlterPassword(final Vertx vertx,
         final VertxTestContext ctx) throws Exception {
         final AtomicReference<String> token =
-            this.getToken(vertx, ctx, AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+            this.getToken(vertx, ctx, AuthRestTest.NAME, AuthRestTest.PASS);
         this.requestAndAssert(
             vertx, ctx,
             new TestRequest(
                 HttpMethod.POST,
-                String.format("/api/v1/users/%s/alter/password", AuthRestOrgTest.NAME),
+                String.format("/api/v1/users/%s/alter/password", AuthRestTest.NAME),
                 new JsonObject().put("old_pass", "abc123").put("new_type", "plain")
                     .put("new_pass", "xyz098")
             ), Optional.of(token.get()),
@@ -255,14 +251,14 @@ public final class AuthRestOrgTest extends RestApiServerBase {
         return new ArtipieSecurity() {
             @Override
             public Authentication authentication() {
-                return new Authentication.Single(AuthRestOrgTest.NAME, AuthRestOrgTest.PASS);
+                return new Authentication.Single(AuthRestTest.NAME, AuthRestTest.PASS);
             }
 
             @Override
             public Policy<?> policy() {
-                final BlockingStorage asto = new BlockingStorage(AuthRestOrgTest.super.ssto);
+                final BlockingStorage asto = new BlockingStorage(AuthRestTest.super.ssto);
                 asto.save(
-                    new Key.From(String.format("users/%s.yaml", AuthRestOrgTest.NAME)),
+                    new Key.From(String.format("users/%s.yaml", AuthRestTest.NAME)),
                     String.join(
                         "\n",
                         "permissions:",
@@ -275,13 +271,8 @@ public final class AuthRestOrgTest extends RestApiServerBase {
 
             @Override
             public Optional<Storage> policyStorage() {
-                return Optional.of(AuthRestOrgTest.super.ssto);
+                return Optional.of(AuthRestTest.super.ssto);
             }
         };
-    }
-
-    @Override
-    String layout() {
-        return "org";
     }
 }

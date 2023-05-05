@@ -31,12 +31,6 @@ public interface Settings {
     ArtipieSecurity authz();
 
     /**
-     * Repository layout.
-     * @return Repository layout
-     */
-    Layout layout();
-
-    /**
      * Artipie meta configuration.
      * @return Yaml mapping
      */

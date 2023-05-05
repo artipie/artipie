@@ -29,6 +29,11 @@ import org.eclipse.jetty.http.HttpStatus;
 public final class UsersRest extends BaseRest {
 
     /**
+     * User name path param.
+     */
+    private static final String USER_NAME = "uname";
+
+    /**
      * Update user permission.
      */
     private static final ApiUserPermission UPDATE =
@@ -140,7 +145,7 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void deleteUser(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryName.USER_NAME);
+        final String uname = context.pathParam(UsersRest.USER_NAME);
         try {
             this.users.remove(uname);
         } catch (final IllegalStateException err) {
@@ -158,7 +163,7 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void enableUser(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryName.USER_NAME);
+        final String uname = context.pathParam(UsersRest.USER_NAME);
         try {
             this.users.enable(uname);
         } catch (final IllegalStateException err) {
@@ -176,7 +181,7 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void disableUser(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryName.USER_NAME);
+        final String uname = context.pathParam(UsersRest.USER_NAME);
         try {
             this.users.disable(uname);
         } catch (final IllegalStateException err) {
@@ -195,7 +200,7 @@ public final class UsersRest extends BaseRest {
      * @param context Request context
      */
     private void putUser(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryName.USER_NAME);
+        final String uname = context.pathParam(UsersRest.USER_NAME);
         final Optional<JsonObject> existing = this.users.get(uname);
         final PermissionCollection perms = this.policy.getPermissions(
             new AuthUser(
@@ -222,7 +227,7 @@ public final class UsersRest extends BaseRest {
      */
     private void getUser(final RoutingContext context) {
         final Optional<JsonObject> usr = this.users.get(
-            context.pathParam(RepositoryName.USER_NAME)
+            context.pathParam(UsersRest.USER_NAME)
         );
         if (usr.isPresent()) {
             context.response().setStatusCode(HttpStatus.OK_200).end(usr.get().toString());
@@ -244,7 +249,7 @@ public final class UsersRest extends BaseRest {
      * @param context Routing context
      */
     private void alterPassword(final RoutingContext context) {
-        final String uname = context.pathParam(RepositoryName.USER_NAME);
+        final String uname = context.pathParam(UsersRest.USER_NAME);
         final JsonObject body = readJsonObject(context);
         final Optional<AuthUser> usr = this.auth.user(uname, body.getString("old_pass"));
         if (usr.isPresent()) {
