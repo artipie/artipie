@@ -1,0 +1,17 @@
+permissions:
+  adapter_basic_permissions:
+    "*":
+      - read
+  docker_repository_permissions:
+    "*":
+      "*":
+        - pull
+  docker_registry_permissions:
+    "*":
+      - base
+  api_repository_permissions:
+    - read
+  api_role_permissions:
+    - read
+  api_user_permissions:
+    - read

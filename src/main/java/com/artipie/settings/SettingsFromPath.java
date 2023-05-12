@@ -64,7 +64,8 @@ public final class SettingsFromPath {
                 );
                 SettingsFromPath.copyResources(
                     Arrays.asList(
-                        "roles/reader.yml", "roles/api-admin.yaml", "users/artipie.yaml"
+                        "roles/reader.yml", "roles/default/github.yml", "roles/api-admin.yaml",
+                        "users/artipie.yaml"
                     ), "security", policy
                 );
             }
