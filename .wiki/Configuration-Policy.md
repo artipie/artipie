@@ -31,6 +31,10 @@ eviction time can be configured with the help of `eviction_millis` field.
 Policy storage is supposed to have the following format:
 ```
 ├── roles
+│   ├── default
+│   │   ├──  keycloack.yaml
+│   │   ├──  env.yml
+│   │   ├──  artipie.yaml
 │   ├── java-dev.yaml
 │   ├── admin.yaml
 │   ├── testers.yml
@@ -42,7 +46,8 @@ Policy storage is supposed to have the following format:
 │   ├── ...
 ```
 where the name of the file is the name of the user or role (case-sensitive), both `yml` and `yaml` 
-extensions are supported.  
+extensions are supported. Subfolder `roles/default` contains [default permissions](./Configuration-Policy#default-permissions) 
+for specific authentication type. 
 User file content should have the following structure:
 ```yaml
 # user auth info for credentials type `artipie`
@@ -247,6 +252,47 @@ permissions:
 ```
 
 Endpoints to get token and settings (server-side port) are available for any user, no permissions required.
+
+## Default permissions
+
+Each authenticated user in Artipie by default has role with the name of [authentication type](./Configuration-Credentials).
+You can set some default permissions for these authentication type roles. Files with these default 
+permissions MUST be put into `roles/default` subfolder and MUST be named in accordance with authentication type name:
+```
+├── roles
+│   ├── default
+│   │   ├──  keycloack.yaml # permissions for users authenticated via keyclock
+│   │   ├──  env.yml # permissions for user from environment variable
+│   │   ├──  artipie.yaml # permissions for users authenticated via `artipie` auth type
+│   │   ├──  github.yaml # permissions for users authenticated via github
+```
+
+Internals of these files are the same as for any role file. For example, if you want to give read access to all repos and
+API endpoints for all `keycloack` users, create the following `roles/default/keycloack.yaml` file:
+```yaml
+permissions:
+  adapter_basic_permissions:
+    "*":
+      - read
+  docker_repository_permissions:
+    "*":
+      "*":
+        - pull
+  docker_registry_permissions:
+    "*":
+      - base
+  api_repository_permissions:
+    - read
+  api_role_permissions:
+    - read
+  api_user_permissions:
+    - read
+```
+
+Default roles permissions files are not required. 
+In order default permissions work with [custom authentication implementation](./Configuration-Credentials#Custom-authentication),
+make sure authentication type is set as [authentication context](https://github.com/artipie/http/blob/92cf5ec1c015a1b472f6ac20ef335a92fd4174ca/src/main/java/com/artipie/http/auth/AuthUser.java#L32) 
+of [AuthUser](https://github.com/artipie/http/blob/master/src/main/java/com/artipie/http/auth/AuthUser.java) object.
 
 ## Custom policy
 
