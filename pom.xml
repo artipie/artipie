@@ -349,6 +349,11 @@ SOFTWARE.
       <artifactId>micrometer-registry-prometheus</artifactId>
       <version>1.9.5</version>
     </dependency>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.42.0.0</version>
+    </dependency>
     <!-- Hamcrest is required in the main code for github auth -->
     <dependency>
       <groupId>org.hamcrest</groupId>
