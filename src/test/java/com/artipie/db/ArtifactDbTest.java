@@ -38,11 +38,13 @@ class ArtifactDbTest {
     @BeforeEach
     void init() throws SQLException {
         this.source = new ArtifactDbFactory(
-            Yaml.createYamlMappingBuilder()
-                .add(
+            Yaml.createYamlMappingBuilder().add(
+                "artifacts_database",
+                Yaml.createYamlMappingBuilder().add(
                     ArtifactDbFactory.PATH,
                     String.format("jdbc:sqlite:%s", this.temp.resolve("test.db"))
                 ).build()
+            ).build()
         ).initialize();
     }
 
