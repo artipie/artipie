@@ -5,6 +5,7 @@
 package com.artipie.db;
 
 import com.amihaiemil.eoyaml.Yaml;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -12,6 +13,7 @@ import javax.sql.DataSource;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Test for artifacts db.
@@ -21,13 +23,13 @@ import org.junit.jupiter.api.Test;
 class ArtifactDbTest {
 
     @Test
-    void createsTable() throws SQLException {
+    void createsTable(final @TempDir Path path) throws SQLException {
         final DataSource source = new ArtifactDbFactory(
             Yaml.createYamlMappingBuilder().add(
                 "artifacts_database",
                 Yaml.createYamlMappingBuilder().add(
                     ArtifactDbFactory.PATH,
-                    "jdbc:sqlite::memory:"
+                    path.resolve("test.db").toString()
                 ).build()
             ).build()
         ).initialize();
