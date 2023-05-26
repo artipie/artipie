@@ -25,14 +25,13 @@ import org.junit.jupiter.api.Test;
 class ArtifactDbTest {
 
     @Test
-    void createsTable() throws SQLException, IOException {
-        final Path path = Files.createTempFile("sqlite-test-", ".db");
+    void createsTable() throws SQLException {
         final DataSource source = new ArtifactDbFactory(
             Yaml.createYamlMappingBuilder().add(
                 "artifacts_database",
                 Yaml.createYamlMappingBuilder().add(
                     ArtifactDbFactory.PATH,
-                    String.format("jdbc:sqlite:%s", path)
+                    "jdbc:sqlite::memory:"
                 ).build()
             ).build()
         ).initialize();
@@ -46,7 +45,6 @@ class ArtifactDbTest {
                 new IsEqual<>(0)
             );
         }
-        FileUtils.deleteQuietly(path.toFile());
     }
 
 }
