@@ -5,16 +5,17 @@
 package com.artipie.db;
 
 import com.amihaiemil.eoyaml.Yaml;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.DataSource;
+import org.apache.commons.io.FileUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Test for artifacts db.
@@ -23,35 +24,20 @@ import org.junit.jupiter.api.io.TempDir;
  */
 class ArtifactDbTest {
 
-    /**
-     * Temp directory.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     */
-    @TempDir
-    Path temp;
-
-    /**
-     * Data source.
-     */
-    private DataSource source;
-
-    @BeforeEach
-    void init() throws SQLException {
-        this.source = new ArtifactDbFactory(
+    @Test
+    void createsTable() throws SQLException, IOException {
+        final Path path = Files.createTempFile("sqlite-test-", ".db");
+        final DataSource source = new ArtifactDbFactory(
             Yaml.createYamlMappingBuilder().add(
                 "artifacts_database",
                 Yaml.createYamlMappingBuilder().add(
                     ArtifactDbFactory.PATH,
-                    String.format("jdbc:sqlite:%s", this.temp.resolve("test.db"))
+                    String.format("jdbc:sqlite:%s", path)
                 ).build()
             ).build()
         ).initialize();
-    }
-
-    @Test
-    void createsTable() throws SQLException {
         try (
-            Connection conn = this.source.getConnection();
+            Connection conn = source.getConnection();
             Statement stat = conn.createStatement()
         ) {
             stat.execute("select count(*) from artifacts");
@@ -60,6 +46,7 @@ class ArtifactDbTest {
                 new IsEqual<>(0)
             );
         }
+        FileUtils.deleteQuietly(path.toFile());
     }
 
 }
