@@ -20,18 +20,37 @@ import org.junit.jupiter.api.io.TempDir;
  * @since 0.31
  * @checkstyle MagicNumberCheck (1000 lines)
  */
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class ArtifactDbTest {
 
     @Test
-    void createsTable(final @TempDir Path path) throws SQLException {
+    void createsSourceFromYamlSettings(final @TempDir Path path) throws SQLException {
         final DataSource source = new ArtifactDbFactory(
             Yaml.createYamlMappingBuilder().add(
                 "artifacts_database",
                 Yaml.createYamlMappingBuilder().add(
-                    ArtifactDbFactory.PATH,
+                    ArtifactDbFactory.YAML_PATH,
                     path.resolve("test.db").toString()
                 ).build()
-            ).build()
+            ).build(),
+            Path.of("some/not/existing")
+        ).initialize();
+        try (
+            Connection conn = source.getConnection();
+            Statement stat = conn.createStatement()
+        ) {
+            stat.execute("select count(*) from artifacts");
+            MatcherAssert.assertThat(
+                stat.getResultSet().getInt(1),
+                new IsEqual<>(0)
+            );
+        }
+    }
+
+    @Test
+    void createsSourceFromDefaultLocation(final @TempDir Path path) throws SQLException {
+        final DataSource source = new ArtifactDbFactory(
+            Yaml.createYamlMappingBuilder().build(), path
         ).initialize();
         try (
             Connection conn = source.getConnection();

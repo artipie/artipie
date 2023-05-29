@@ -5,6 +5,7 @@
 package com.artipie.db;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,6 +16,7 @@ import org.sqlite.SQLiteDataSource;
  * Factory to create and initialize artifacts SqLite database.
  * <p/>
  * Factory accepts Artipie yaml settings file and creates database source and database structure.
+ * Is settings are absent in config yaml, db file is created in the provided `def` directory.
  * <p/>
  * Artifacts db settings section in artipie yaml:
  * <pre>{@code
@@ -32,12 +34,12 @@ public final class ArtifactDbFactory {
     /**
      * Sqlite database file path.
      */
-    static final String PATH = "sqlite_data_file_path";
+    static final String YAML_PATH = "sqlite_data_file_path";
 
     /**
-     * Default path to database file.
+     * Sqlite database default file name.
      */
-    private static final String DEF_PATH = "/var/artipie/artifacts.db";
+    static final String DB_NAME = "artifacts.db";
 
     /**
      * Settings yaml.
@@ -45,26 +47,34 @@ public final class ArtifactDbFactory {
     private final YamlMapping yaml;
 
     /**
+     * Default path to create database file.
+     */
+    private final Path def;
+
+    /**
      * Ctor.
      * @param yaml Settings yaml
+     * @param def Default location for db file
      */
-    public ArtifactDbFactory(final YamlMapping yaml) {
+    public ArtifactDbFactory(final YamlMapping yaml, final Path def) {
         this.yaml = yaml;
+        this.def = def;
     }
 
     /**
      * Initialize artifacts database and mechanism to gather artifacts metadata and
      * write to db.
-     * If some settings are absent or errors occurred while initialization, artifacts db is
-     * disabled with corresponding error logged.
+     * If yaml settings are absent, default path and db name are used.
      * @return Queue to add artifacts metadata into
      * @throws SQLException On error
      */
     public DataSource initialize() throws SQLException {
         final YamlMapping config = this.yaml.yamlMapping("artifacts_database");
-        String path = ArtifactDbFactory.DEF_PATH;
-        if (config != null) {
-            path = config.string(ArtifactDbFactory.PATH);
+        final String path;
+        if (config == null || config.string(ArtifactDbFactory.YAML_PATH) == null) {
+            path = this.def.resolve(ArtifactDbFactory.DB_NAME).toAbsolutePath().toString();
+        } else {
+            path = config.string(ArtifactDbFactory.YAML_PATH);
         }
         final SQLiteDataSource source = new SQLiteDataSource();
         source.setUrl(String.format("jdbc:sqlite:%s", path));
