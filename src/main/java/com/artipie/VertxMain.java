@@ -5,9 +5,12 @@
 
 package com.artipie;
 
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.RestApi;
 import com.artipie.asto.Key;
 import com.artipie.auth.JwtTokens;
+import com.artipie.db.ArtifactDbFactory;
+import com.artipie.db.DbConsumer;
 import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -15,6 +18,9 @@ import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.misc.ArtipieProperties;
+import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.scheduling.EventQueue;
+import com.artipie.scheduling.QuartsService;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
@@ -40,17 +46,20 @@ import io.vertx.micrometer.backends.BackendRegistries;
 import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.sql.DataSource;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.tuple.Pair;
+import org.quartz.SchedulerException;
 
 /**
  * Vertx server entry point.
@@ -116,14 +125,15 @@ public final class VertxMain {
                 new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
             )
         );
+        final EventQueue<ArtifactEvent> events = this.initArtifactsEvents(settings.meta());
         final int main = this.listenOn(
-            new MainSlice(this.http, settings, new JwtTokens(jwt)),
+            new MainSlice(this.http, settings, new JwtTokens(jwt), events),
             this.port,
             vertx,
             settings.metrics()
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
-        this.startRepos(vertx, settings, this.port, jwt);
+        this.startRepos(vertx, settings, this.port, jwt, events);
         vertx.deployVerticle(new RestApi(settings, apiport, jwt));
         return main;
     }
@@ -184,13 +194,15 @@ public final class VertxMain {
      * @param settings Settings.
      * @param mport Artipie service main port
      * @param jwt Jwt authentication
+     * @param events Artifact events
      * @checkstyle ParameterNumberCheck (5 lines)
      */
     private void startRepos(
         final Vertx vertx,
         final Settings settings,
         final int mport,
-        final JWTAuth jwt
+        final JWTAuth jwt,
+        final EventQueue<ArtifactEvent> events
     ) {
         final Collection<RepoConfig> configs = settings.repoConfigsStorage().list(Key.ROOT)
             .thenApply(
@@ -208,7 +220,7 @@ public final class VertxMain {
                         final String name = new ConfigFile(repo.name()).name();
                         this.listenOn(
                             new ArtipieRepositories(
-                                this.http, settings, new JwtTokens(jwt)
+                                this.http, settings, new JwtTokens(jwt), events
                             ).slice(new Key.From(name), prt),
                             prt, vertx, settings.metrics()
                         );
@@ -295,5 +307,37 @@ public final class VertxMain {
             res = Vertx.vertx();
         }
         return res;
+    }
+
+    /**
+     * Initialize artifacts sqlite database and schedule mechanism to gather artifact events
+     * (adding and removing artifacts) and add corresponding records into db.
+     * @param settings Artipie settings
+     * @return Event queue to gather artifacts events
+     */
+    private EventQueue<ArtifactEvent> initArtifactsEvents(final YamlMapping settings) {
+        try {
+            final DataSource source =
+                new ArtifactDbFactory(settings, this.config.getParent()).initialize();
+            final QuartsService quarts = new QuartsService();
+            final YamlMapping prop = settings.yamlMapping("artifacts_database");
+            final int threads;
+            final int interval;
+            if (prop == null) {
+                threads = 1;
+                interval = 1;
+            } else {
+                threads = Math.max(1, prop.integer("threads_count"));
+                interval = Math.max(1, prop.integer("interval_seconds"));
+            }
+            final EventQueue<ArtifactEvent> res = quarts.addPeriodicEventsProcessor(
+                new DbConsumer(source.getConnection()),
+                threads, interval
+            );
+            quarts.start();
+            return res;
+        } catch (final SQLException | SchedulerException error) {
+            throw new ArtipieException(error);
+        }
     }
 }

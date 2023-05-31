@@ -100,7 +100,7 @@ public final class ArtifactDbFactory {
                     "   name VARCHAR NOT NULL,",
                     "   version CHAR(20) NOT NULL,",
                     "   size DOUBLE NOT NULL,",
-                    "   created_date REAL NOT NULL,",
+                    "   created_date DATETIME NOT NULL,",
                     "   owner VARCHAR NOT NULL,",
                     "   UNIQUE (repo_name, name, version) ",
                     ");"

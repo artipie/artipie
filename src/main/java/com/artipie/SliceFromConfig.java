@@ -46,6 +46,8 @@ import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.pypi.http.PySlice;
 import com.artipie.rpm.http.RpmSlice;
+import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.scheduling.EventQueue;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.Settings;
 import com.artipie.settings.repo.RepoConfig;
@@ -78,15 +80,17 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param config Repo config
      * @param standalone Standalone flag
      * @param tokens Tokens: authentication and generation
+     * @param events Events queue
      */
     public SliceFromConfig(
         final ClientSlices http,
         final Settings settings, final RepoConfig config,
-        final boolean standalone, final Tokens tokens) {
+        final boolean standalone, final Tokens tokens,
+        final EventQueue<ArtifactEvent> events) {
         super(
             SliceFromConfig.build(
                 http, settings, new LoggingAuth(settings.authz().authentication()), tokens,
-                settings.authz().policy(), config, standalone
+                settings.authz().policy(), config, standalone, events
             )
         );
     }
@@ -101,6 +105,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param policy Security policy
      * @param cfg Repository config
      * @param standalone Standalone flag
+     * @param events Events queue
      * @return Slice completionStage
      * @checkstyle LineLengthCheck (150 lines)
      * @checkstyle ExecutableStatementCountCheck (100 lines)
@@ -120,7 +125,8 @@ public final class SliceFromConfig extends Slice.Wrap {
         final Tokens tokens,
         final Policy<?> policy,
         final RepoConfig cfg,
-        final boolean standalone
+        final boolean standalone,
+        final EventQueue<ArtifactEvent> events
     ) {
         final Slice slice;
         switch (cfg.type()) {
@@ -198,7 +204,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                                         .config(name)
                                         .thenApply(
                                             sub -> new SliceFromConfig(
-                                                http, settings, sub, standalone, tokens
+                                                http, settings, sub, standalone, tokens, events
                                             )
                                         )
                                 )

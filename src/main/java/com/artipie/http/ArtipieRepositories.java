@@ -12,6 +12,8 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
+import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.scheduling.EventQueue;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.Settings;
 import com.artipie.settings.repo.RepositoriesFromStorage;
@@ -41,19 +43,28 @@ public final class ArtipieRepositories {
     private final Tokens tokens;
 
     /**
+     * Events queue.
+     */
+    private final EventQueue<ArtifactEvent> events;
+
+    /**
      * New Artipie repositories.
      * @param http HTTP client
      * @param settings Artipie settings
      * @param tokens Tokens: authentication and generation
+     * @param events Events queue
+     * @checkstyle ParameterNumberCheck (10 lines)
      */
     public ArtipieRepositories(
         final ClientSlices http,
         final Settings settings,
-        final Tokens tokens
+        final Tokens tokens,
+        final EventQueue<ArtifactEvent> events
     ) {
         this.http = http;
         this.settings = settings;
         this.tokens = tokens;
+        this.events = events;
     }
 
     /**
@@ -99,7 +110,8 @@ public final class ArtipieRepositories {
                             this.settings,
                             config,
                             config.port().isPresent(),
-                            this.tokens
+                            this.tokens,
+                            this.events
                         );
                     } else {
                         res = new SliceSimple(new RsRepoNotFound(name));

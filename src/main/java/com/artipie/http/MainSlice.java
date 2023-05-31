@@ -16,6 +16,8 @@ import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.misc.ArtipieProperties;
+import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.scheduling.EventQueue;
 import com.artipie.settings.Settings;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -52,12 +54,14 @@ public final class MainSlice extends Slice.Wrap {
      * @param http HTTP client.
      * @param settings Artipie settings.
      * @param tokens Tokens: authentication and generation
+     * @param events Artifacts event
      * @checkstyle ParameterNumberCheck (10 lines)
      */
     public MainSlice(
         final ClientSlices http,
         final Settings settings,
-        final Tokens tokens
+        final Tokens tokens,
+        final EventQueue<ArtifactEvent> events
     ) {
         super(
             new SliceRoute(
@@ -75,7 +79,9 @@ public final class MainSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new DockerRoutingSlice(settings, new SliceByPath(http, settings, tokens))
+                    new DockerRoutingSlice(
+                        settings, new SliceByPath(http, settings, tokens, events)
+                    )
                 )
             )
         );
