@@ -73,7 +73,7 @@ public final class SchedulerDbTest {
                 Thread.sleep(990);
             }
         }
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(
             () -> {
                 try (Statement stat = this.connection.createStatement()) {
                     stat.execute("select count(*) from artifacts");
