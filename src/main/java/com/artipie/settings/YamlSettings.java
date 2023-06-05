@@ -10,6 +10,7 @@ import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.ArtipieException;
 import com.artipie.api.ssl.KeyStore;
 import com.artipie.api.ssl.KeyStoreFactory;
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
@@ -31,6 +32,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import javax.sql.DataSource;
 import org.quartz.SchedulerException;
@@ -127,7 +129,7 @@ public final class YamlSettings implements Settings {
 
     @Override
     public Storage configStorage() {
-        return this.acach.storagesCache().storage(this);
+        return new DelayedStorage(this.acach.storagesCache().storage(this));
     }
 
     @Override
@@ -305,4 +307,49 @@ public final class YamlSettings implements Settings {
         }
     }
 
+    /**
+     * Delayed storage wrapper to test performance.
+     * @since 0.1
+     */
+    private static final class DelayedStorage extends Storage.Wrap {
+
+        /**
+         * Delay in ms.
+         */
+        private static final int DELAY = 100;
+
+        /**
+         * Creating delayed storage.
+         * @param delegate Wrapping storage instance.
+         */
+        protected DelayedStorage(final Storage delegate) {
+            super(delegate);
+        }
+
+        @Override
+        public CompletableFuture<Void> save(final Key key, final Content content) {
+            try {
+                Thread.sleep(DelayedStorage.DELAY, 0);
+            } catch (final InterruptedException ex) {
+                Logger.error(
+                    DelayedStorage.class,
+                    String.join("", "sleep failed in DelayedStorage.save(): ", ex.toString())
+                );
+            }
+            return super.save(key, content);
+        }
+
+        @Override
+        public CompletableFuture<Content> value(final Key key) {
+            try {
+                Thread.sleep(DelayedStorage.DELAY, 0);
+            } catch (final InterruptedException ex) {
+                Logger.error(
+                    DelayedStorage.class,
+                    String.join("", "sleep failed in DelayedStorage.value(): ", ex.toString())
+                );
+            }
+            return super.value(key);
+        }
+    }
 }
