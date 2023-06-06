@@ -53,8 +53,9 @@ class DbConsumerTest {
     }
 
     @Test
-    void addsAndRemovesRecord() throws SQLException {
+    void addsAndRemovesRecord() throws SQLException, InterruptedException {
         final DbConsumer consumer = new DbConsumer(this.source);
+        Thread.sleep(1000);
         final long created = System.currentTimeMillis();
         final ArtifactEvent record = new ArtifactEvent(
             "rpm", "my-rpm", "Alice", "org.time", "1.2", 1250L, created
