@@ -12,11 +12,11 @@ import com.artipie.scheduling.EventQueue;
 import com.artipie.scheduling.QuartsService;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -43,7 +43,7 @@ public final class SchedulerDbTest {
     /**
      * Test connection.
      */
-    private Connection connection;
+    private DataSource source;
 
     /**
      * Quartz service to test.
@@ -51,18 +51,20 @@ public final class SchedulerDbTest {
     private QuartsService service;
 
     @BeforeEach
-    void init() throws SQLException {
-        this.connection = new ArtifactDbFactory(Yaml.createYamlMappingBuilder().build(), this.path)
-            .initialize().getConnection();
+    void init() {
+        this.source = new ArtifactDbFactory(Yaml.createYamlMappingBuilder().build(), this.path)
+            .initialize();
         this.service = new QuartsService();
     }
 
     @Test
     void insertsRecords() throws SchedulerException, InterruptedException {
-        final EventQueue<ArtifactEvent> queue =
-            this.service.addPeriodicEventsProcessor(new DbConsumer(this.connection), 4, 1);
-        final long created = System.currentTimeMillis();
         this.service.start();
+        final EventQueue<ArtifactEvent> queue = this.service.addPeriodicEventsProcessor(
+            1, List.of(new DbConsumer(this.source), new DbConsumer(this.source))
+        );
+        Thread.sleep(500);
+        final long created = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             queue.put(
                 new ArtifactEvent(
@@ -73,19 +75,17 @@ public final class SchedulerDbTest {
                 Thread.sleep(990);
             }
         }
-        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).until(
             () -> {
-                try (Statement stat = this.connection.createStatement()) {
+                try (
+                    Connection conn = this.source.getConnection();
+                    Statement stat = conn.createStatement()
+                ) {
                     stat.execute("select count(*) from artifacts");
                     return stat.getResultSet().getInt(1) == 1000;
                 }
             }
         );
-    }
-
-    @AfterEach
-    void close() throws SQLException {
-        this.connection.close();
     }
 
 }

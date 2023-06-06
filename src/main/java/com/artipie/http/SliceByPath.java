@@ -12,8 +12,6 @@ import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import com.artipie.scheduling.ArtifactEvent;
-import com.artipie.scheduling.EventQueue;
 import com.artipie.settings.Settings;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -43,29 +41,20 @@ final class SliceByPath implements Slice {
     private final Tokens tokens;
 
     /**
-     * Events queue.
-     */
-    private final EventQueue<ArtifactEvent> events;
-
-    /**
      * New slice from settings.
      *
      * @param http HTTP client
      * @param settings Artipie settings
      * @param tokens Tokens: authentication and generation
-     * @param events Artifacts event
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     SliceByPath(
         final ClientSlices http,
         final Settings settings,
-        final Tokens tokens,
-        final EventQueue<ArtifactEvent> events
+        final Tokens tokens
     ) {
         this.http = http;
         this.settings = settings;
         this.tokens = tokens;
-        this.events = events;
     }
 
     // @checkstyle ReturnCountCheck (20 lines)
@@ -83,7 +72,7 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
-        return new ArtipieRepositories(this.http, this.settings, this.tokens, this.events)
+        return new ArtipieRepositories(this.http, this.settings, this.tokens)
             .slice(key.get(), new RequestLineFrom(line).uri().getPort())
             .response(line, headers, body);
     }

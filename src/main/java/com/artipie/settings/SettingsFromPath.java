@@ -48,7 +48,7 @@ public final class SettingsFromPath {
             initialize = true;
         }
         final Settings settings = new YamlSettings(
-            Yaml.createYamlInput(this.path.toFile()).readYamlMapping()
+            Yaml.createYamlInput(this.path.toFile()).readYamlMapping(), this.path.getParent()
         );
         final BlockingStorage bsto = new BlockingStorage(settings.configStorage());
         final Key init = new Key.From(".artipie", "initialized");

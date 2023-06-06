@@ -36,6 +36,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -105,6 +106,13 @@ public class AuthFromKeycloakTest {
     private static Set<URL> sources;
 
     /**
+     * Test directory.
+     * @checkstyle VisibilityModifierCheck (5 lines)
+     */
+    @TempDir
+    Path path;
+
+    /**
      * Compiles, loads 'keycloak.KeycloakDockerInitializer' class and start 'main'-method.
      * Runtime compilation is required because 'keycloak.KeycloakDockerInitializer' class
      * has a clash of dependencies with Artipie's dependency 'com.jcabi:jcabi-github:1.3.2'.
@@ -126,7 +134,7 @@ public class AuthFromKeycloakTest {
     void authenticateExistingUserReturnsUserWithRealm() {
         final String login = "user1";
         final String password = "password";
-        final YamlSettings settings = AuthFromKeycloakTest.settings(
+        final YamlSettings settings = this.settings(
             AuthFromKeycloakTest.keycloakUrl(),
             AuthFromKeycloakTest.REALM,
             AuthFromKeycloakTest.CLIENT_ID,
@@ -147,7 +155,7 @@ public class AuthFromKeycloakTest {
     @Test
     void authenticateNoExistingUser() {
         final String fake = "fake";
-        final YamlSettings settings = AuthFromKeycloakTest.settings(
+        final YamlSettings settings = this.settings(
             AuthFromKeycloakTest.keycloakUrl(),
             AuthFromKeycloakTest.REALM,
             AuthFromKeycloakTest.CLIENT_ID,
@@ -169,7 +177,7 @@ public class AuthFromKeycloakTest {
      * @checkstyle ParameterNumberCheck (3 lines)
      */
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    private static YamlSettings settings(final String url, final String realm,
+    private YamlSettings settings(final String url, final String realm,
         final String client, final String password) {
         return new YamlSettings(
             Yaml.createYamlMappingBuilder().add(
@@ -187,7 +195,8 @@ public class AuthFromKeycloakTest {
                                 .build()
                         ).build()
                 ).build()
-            ).build()
+            ).build(),
+            this.path
         );
     }
 
