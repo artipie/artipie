@@ -159,7 +159,10 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "php":
                 slice = new TrimPathSlice(
                     new PhpComposer(
-                        new AstoRepository(cfg.storage(), Optional.of(cfg.url().toString()))
+                        new AstoRepository(cfg.storage(), Optional.of(cfg.url().toString())),
+                        policy,
+                        auth,
+                        cfg.name()
                     ),
                     SliceFromConfig.PTRN
                 );
