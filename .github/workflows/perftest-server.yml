@@ -22,7 +22,7 @@ jobs:
           docker image rm -f artipie/artipie:1.0-SNAPSHOT || :
           docker ps
       - name: Maven build
-        run: timeout 600 mvn clean install
+        run: timeout 600 mvn clean install -Pdocker-build -DskipTests
       - name: Check docker image
         run: docker image inspect artipie/artipie:1.0-SNAPSHOT|head -n50
       - name: Checkout results repo/branch
