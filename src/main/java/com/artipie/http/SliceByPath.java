@@ -46,7 +46,6 @@ final class SliceByPath implements Slice {
      * @param http HTTP client
      * @param settings Artipie settings
      * @param tokens Tokens: authentication and generation
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     SliceByPath(
         final ClientSlices http,

@@ -8,7 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
-import com.artipie.settings.YamlSettings;
+import com.artipie.test.TestSettings;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -39,7 +39,7 @@ final class SSLPemRestTest extends SSLBaseRestTest {
             new Key.From(SSLPemRestTest.CERT_PEM),
             new TestResource(String.format("ssl/%s", SSLPemRestTest.CERT_PEM)).asBytes()
         );
-        return new YamlSettings(
+        return new TestSettings(
             Yaml.createYamlInput(
                 String.join(
                     "",

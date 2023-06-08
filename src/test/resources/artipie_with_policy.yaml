@@ -10,3 +10,5 @@ meta:
     storage:
       type: fs
       path: /var/artipie/security
+  artifacts_database:
+    sqlite_data_file_path: /var/artipie/artifacts.db

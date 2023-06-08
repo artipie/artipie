@@ -9,10 +9,12 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
 import com.artipie.settings.Settings;
 import com.artipie.settings.YamlSettings;
+import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Tests for {@link CachedStorages}.
@@ -21,12 +23,19 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CachedStoragesTest {
 
+    /**
+     * Test directory.
+     * @checkstyle VisibilityModifierCheck (5 lines)
+     */
+    @TempDir
+    Path temp;
+
     @Test
     void getsValueFromCache() {
         final String path = "same/path/for/storage";
         final CachedStorages cache = new CachedStorages();
-        final Storage strg = cache.storage(CachedStoragesTest.config(path));
-        final Storage same = cache.storage(CachedStoragesTest.config(path));
+        final Storage strg = cache.storage(this.config(path));
+        final Storage same = cache.storage(this.config(path));
         MatcherAssert.assertThat(
             "Obtained configurations were different",
             strg.equals(same),
@@ -42,8 +51,8 @@ final class CachedStoragesTest {
     @Test
     void getsOriginForDifferentConfiguration() {
         final CachedStorages cache = new CachedStorages();
-        final Storage frst = cache.storage(CachedStoragesTest.config("first"));
-        final Storage scnd = cache.storage(CachedStoragesTest.config("second"));
+        final Storage frst = cache.storage(this.config("first"));
+        final Storage scnd = cache.storage(this.config("second"));
         MatcherAssert.assertThat(
             "Obtained configurations were the same",
             frst.equals(scnd),
@@ -64,13 +73,13 @@ final class CachedStoragesTest {
                 new YamlSettings(
                     Yaml.createYamlMappingBuilder()
                         .add("meta", Yaml.createYamlMappingBuilder().build())
-                        .build()
+                        .build(), Path.of("a/b/c")
                 )
             )
         );
     }
 
-    private static Settings config(final String stpath) {
+    private Settings config(final String stpath) {
         return new YamlSettings(
             Yaml.createYamlMappingBuilder()
                 .add(
@@ -81,7 +90,7 @@ final class CachedStoragesTest {
                             .add("type", "fs")
                             .add("path", stpath).build()
                     ).build()
-                ).build()
+                ).build(), this.temp
         );
     }
 }
