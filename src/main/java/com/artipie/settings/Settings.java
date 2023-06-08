@@ -7,8 +7,11 @@ package com.artipie.settings;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Storage;
+import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.scheduling.EventQueue;
 import com.artipie.settings.cache.ArtipieCaches;
 import java.util.Optional;
+import javax.sql.DataSource;
 
 /**
  * Application settings.
@@ -60,5 +63,17 @@ public interface Settings {
      * @return The caches
      */
     ArtipieCaches caches();
+
+    /**
+     * Database source.
+     * @return Database
+     */
+    DataSource databaseSource();
+
+    /**
+     * Artifact events queue.
+     * @return Artifact events queue
+     */
+    EventQueue<ArtifactEvent> events();
 
 }

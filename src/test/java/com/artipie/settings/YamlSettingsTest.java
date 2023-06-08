@@ -32,10 +32,17 @@ import org.junit.jupiter.params.provider.ValueSource;
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class YamlSettingsTest {
 
+    /**
+     * Test directory.
+     * @checkstyle VisibilityModifierCheck (5 lines)
+     */
+    @TempDir
+    Path temp;
+
     @Test
     void shouldBuildFileStorageFromSettings() throws Exception {
         final YamlSettings settings = new YamlSettings(
-            this.config("some/path")
+            this.config("some/path"), this.temp
         );
         MatcherAssert.assertThat(
             settings.configStorage(),
@@ -47,7 +54,7 @@ class YamlSettingsTest {
     void returnsRepoConfigs(@TempDir final Path tmp) {
         MatcherAssert.assertThat(
             new YamlSettings(
-                this.config(tmp.toString())
+                this.config(tmp.toString()), tmp
             ).repoConfigsStorage(),
             new IsInstanceOf(SubStorage.class)
         );
@@ -57,7 +64,7 @@ class YamlSettingsTest {
     @MethodSource("badYamls")
     void shouldFailProvideStorageFromBadYaml(final String yaml) throws IOException {
         final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlInput(yaml).readYamlMapping()
+            Yaml.createYamlInput(yaml).readYamlMapping(), this.temp
         );
         Assertions.assertThrows(RuntimeException.class, settings::configStorage);
     }
@@ -67,14 +74,14 @@ class YamlSettingsTest {
     void throwsErrorIfMetaSectionIsAbsentOrEmpty(final String yaml) {
         Assertions.assertThrows(
             IllegalStateException.class,
-            () -> new YamlSettings(Yaml.createYamlInput(yaml).readYamlMapping()).meta()
+            () -> new YamlSettings(Yaml.createYamlInput(yaml).readYamlMapping(), this.temp).meta()
         );
     }
 
     @Test
     void initializesEnvAuth() throws IOException {
         final YamlSettings authz = new YamlSettings(
-            Yaml.createYamlInput(this.envCreds()).readYamlMapping()
+            Yaml.createYamlInput(this.envCreds()).readYamlMapping(), this.temp
         );
         MatcherAssert.assertThat(
             "Env credentials are initialized",
@@ -95,7 +102,7 @@ class YamlSettingsTest {
     @Test
     void initializesGithubAuth() throws IOException {
         final YamlSettings authz = new YamlSettings(
-            Yaml.createYamlInput(this.githubCreds()).readYamlMapping()
+            Yaml.createYamlInput(this.githubCreds()).readYamlMapping(), this.temp
         );
         MatcherAssert.assertThat(
             "Github auth created",
@@ -116,7 +123,7 @@ class YamlSettingsTest {
     @Test
     void initializesKeycloakAuth() throws IOException {
         final YamlSettings authz = new YamlSettings(
-            Yaml.createYamlInput(this.keycloakCreds()).readYamlMapping()
+            Yaml.createYamlInput(this.keycloakCreds()).readYamlMapping(), this.temp
         );
         MatcherAssert.assertThat(
             "Keycloak storage created",
@@ -137,7 +144,7 @@ class YamlSettingsTest {
     @Test
     void initializesArtipieAuth() throws IOException {
         final YamlSettings authz = new YamlSettings(
-            Yaml.createYamlInput(this.artipieCreds()).readYamlMapping()
+            Yaml.createYamlInput(this.artipieCreds()).readYamlMapping(), this.temp
         );
         MatcherAssert.assertThat(
             "Auth from storage initiated",
@@ -158,7 +165,7 @@ class YamlSettingsTest {
     @Test
     void initializesArtipieAuthAndPolicy() throws IOException {
         final YamlSettings authz = new YamlSettings(
-            Yaml.createYamlInput(this.artipieCredsWithPolicy()).readYamlMapping()
+            Yaml.createYamlInput(this.artipieCredsWithPolicy()).readYamlMapping(), this.temp
         );
         MatcherAssert.assertThat(
             "Auth from storage initiated",
@@ -179,7 +186,7 @@ class YamlSettingsTest {
     @Test
     void initializesAllAuths() throws IOException {
         final YamlSettings authz = new YamlSettings(
-            Yaml.createYamlInput(this.artipieGithubKeycloakEnvCreds()).readYamlMapping()
+            Yaml.createYamlInput(this.artipieGithubKeycloakEnvCreds()).readYamlMapping(), this.temp
         );
         MatcherAssert.assertThat(
             "Auth from storage, github, env and keycloak initiated",
@@ -205,7 +212,8 @@ class YamlSettingsTest {
     @Test
     void initializesAllAuthsAndPolicy() throws IOException {
         final YamlSettings settings = new YamlSettings(
-            Yaml.createYamlInput(this.artipieGithubKeycloakEnvCredsAndPolicy()).readYamlMapping()
+            Yaml.createYamlInput(this.artipieGithubKeycloakEnvCredsAndPolicy()).readYamlMapping(),
+            this.temp
         );
         MatcherAssert.assertThat(
             "Auth from storage, github, env and keycloak initiated",

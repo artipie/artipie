@@ -5,6 +5,7 @@
 package com.artipie.db;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.ArtipieException;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -66,9 +67,9 @@ public final class ArtifactDbFactory {
      * write to db.
      * If yaml settings are absent, default path and db name are used.
      * @return Queue to add artifacts metadata into
-     * @throws SQLException On error
+     * @throws ArtipieException On error
      */
-    public DataSource initialize() throws SQLException {
+    public DataSource initialize() {
         final YamlMapping config = this.yaml.yamlMapping("artifacts_database");
         final String path;
         if (config == null || config.string(ArtifactDbFactory.YAML_PATH) == null) {
@@ -85,9 +86,9 @@ public final class ArtifactDbFactory {
     /**
      * Create db structure to write artifacts data.
      * @param source Database source
-     * @throws SQLException On error
+     * @throws ArtipieException On error
      */
-    private static void createStructure(final DataSource source) throws SQLException {
+    private static void createStructure(final DataSource source) {
         try (Connection conn = source.getConnection();
             Statement statement = conn.createStatement()) {
             statement.executeUpdate(
@@ -100,12 +101,14 @@ public final class ArtifactDbFactory {
                     "   name VARCHAR NOT NULL,",
                     "   version CHAR(20) NOT NULL,",
                     "   size DOUBLE NOT NULL,",
-                    "   created_date REAL NOT NULL,",
+                    "   created_date DATETIME NOT NULL,",
                     "   owner VARCHAR NOT NULL,",
                     "   UNIQUE (repo_name, name, version) ",
                     ");"
                 )
             );
+        } catch (final SQLException error) {
+            throw new ArtipieException(error);
         }
     }
 }

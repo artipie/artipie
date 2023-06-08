@@ -7,13 +7,20 @@ package com.artipie.test;
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.api.ssl.KeyStore;
+import com.artipie.api.ssl.KeyStoreFactory;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.auth.AuthFromEnv;
+import com.artipie.http.auth.Authentication;
+import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.scheduling.EventQueue;
+import com.artipie.security.policy.Policy;
 import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.cache.ArtipieCaches;
 import java.util.Optional;
+import javax.sql.DataSource;
 
 /**
  * Test {@link Settings} implementation.
@@ -32,11 +39,6 @@ public final class TestSettings implements Settings {
      * Yaml `meta` mapping.
      */
     private final YamlMapping meta;
-
-    /**
-     * KeyStore.
-     */
-    private final Optional<KeyStore> keystore;
 
     /**
      * Test caches.
@@ -78,26 +80,12 @@ public final class TestSettings implements Settings {
      * @param meta Yaml `meta` mapping
      * @checkstyle ParameterNumberCheck (2 lines)
      */
-    public TestSettings(final Storage storage, final YamlMapping meta) {
-        this(storage, meta, Optional.empty());
-    }
-
-    /**
-     * Primary ctor.
-     *
-     * @param storage Storage
-     * @param meta Yaml `meta` mapping
-     * @param keystore KeyStore
-     * @checkstyle ParameterNumberCheck (2 lines)
-     */
     public TestSettings(
         final Storage storage,
-        final YamlMapping meta,
-        final Optional<KeyStore> keystore
+        final YamlMapping meta
     ) {
         this.storage = storage;
         this.meta = meta;
-        this.keystore = keystore;
         this.caches = new TestArtipieCaches();
     }
 
@@ -108,7 +96,22 @@ public final class TestSettings implements Settings {
 
     @Override
     public ArtipieSecurity authz() {
-        return null;
+        return new ArtipieSecurity() {
+            @Override
+            public Authentication authentication() {
+                return new AuthFromEnv();
+            }
+
+            @Override
+            public Policy<?> policy() {
+                return Policy.FREE;
+            }
+
+            @Override
+            public Optional<Storage> policyStorage() {
+                return Optional.empty();
+            }
+        };
     }
 
     @Override
@@ -123,7 +126,8 @@ public final class TestSettings implements Settings {
 
     @Override
     public Optional<KeyStore> keyStore() {
-        return this.keystore;
+        return Optional.ofNullable(this.meta().yamlMapping("ssl"))
+            .map(KeyStoreFactory::newInstance);
     }
 
     @Override
@@ -134,5 +138,15 @@ public final class TestSettings implements Settings {
     @Override
     public ArtipieCaches caches() {
         return this.caches;
+    }
+
+    @Override
+    public DataSource databaseSource() {
+        return null;
+    }
+
+    @Override
+    public EventQueue<ArtifactEvent> events() {
+        return null;
     }
 }

@@ -18,6 +18,8 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.scheduling.EventQueue;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.MetricsContext;
@@ -31,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import javax.sql.DataSource;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.Test;
@@ -200,6 +203,16 @@ final class DockerRoutingSliceTest {
         @Override
         public ArtipieCaches caches() {
             return new TestArtipieCaches();
+        }
+
+        @Override
+        public DataSource databaseSource() {
+            return null;
+        }
+
+        @Override
+        public EventQueue<ArtifactEvent> events() {
+            return null;
         }
     }
 }

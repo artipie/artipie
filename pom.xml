@@ -129,7 +129,7 @@ SOFTWARE.
     <maven.compiler.target>17</maven.compiler.target>
     <docker.image.name>artipie/artipie</docker.image.name>
     <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
-    <vertx.version>4.3.4</vertx.version>
+    <vertx.version>4.4.2</vertx.version>
     <asto.version>v1.16.0</asto.version>
   </properties>
   <dependencies>
@@ -145,7 +145,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>v1.2.12</version>
+      <version>v1.2.16</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -252,7 +252,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>gem-adapter</artifactId>
-      <version>v1.3.3</version>
+      <version>v1.3.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -277,7 +277,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>helm-adapter</artifactId>
-      <version>v1.1.3</version>
+      <version>v1.1.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -332,7 +332,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-yaml</artifactId>
-      <version>2.13.1</version>
+      <version>2.15.2</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
