@@ -1,0 +1,158 @@
+name: Run Artipie perftests
+concurrency: perftest_env
+on:
+  workflow_run:
+    workflows: [Prepare Artipie for perftests]
+    types: [ completed ]
+
+jobs:
+  perf-test2:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: [wsl-client]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+      - run: env;git branch -a; git status
+      - name: Check connection
+        run: . "/opt/.benchvars" && curl -v "http://$SERVER_HOST:$REPO_PORT/bintest"
+      - name: Check variables
+        run: test ! -f /opt/.benchvars && exit 1;exit 0
+      - name: Checkout benchmarks repo
+        run: git clone --depth=1 https://github.com/artipie/benchmarks.git
+      - name: Checkout benchmarks branch
+        run: |
+          pwd; ls -lah; git branch -a
+          git fetch --all
+          git checkout master
+          git pull --ff-only
+          cd loadtests
+        working-directory: benchmarks
+      - name: Prepare JMeter
+        run: |
+          [ ! -s $HOME/apache-jmeter-5.5.tgz ] && wget https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-5.5.tgz -O $HOME/apache-jmeter-5.5.tgz
+          tar xf $HOME/apache-jmeter-5.5.tgz
+        working-directory: benchmarks/loadtests
+      - name: Prepare artifacts repo
+        run: time ./prep-maven-dyn.py --total-artifacts 100 && du -ms ./test-data/maven-dyn
+        working-directory: benchmarks/loadtests
+      - name: Run upload test
+        run: |
+          . "/opt/.benchvars"
+          perfRes="./_perf_results"
+          rm -rf "$perfRes"
+          mkdir -p "$perfRes"
+          tests="jmx-files-maven-ul jmx-files-maven-dl jmx-files-ul jmx-files-dl jmx-maven-ul jmx-maven-dl"
+          set -x
+          for testName in $tests ; do
+            echo "Running test $testName for $SERVER_HOST with $REPO_PORT port ..."
+            timeout 300 "./$testName.sh" "$SERVER_HOST" "$REPO_PORT" 180 maven-dyn
+            DOCKER_HOST="$SERVER_HOST:$DOCKER_PORT" docker exec artipie jcmd 1 GC.run
+            sleep 10
+            testRes=`readlink -f last_test_result`
+            mv -fv "$testRes" "$perfRes/$testName"
+            ls -lah "$perfRes/$testName"
+            rm -fv last_test_result
+          done
+        working-directory: benchmarks/loadtests
+      - name: Extract JFR log
+        run: |
+          . "/opt/.benchvars"
+          DOCKER_HOST="$SERVER_HOST:$DOCKER_PORT" docker exec artipie jcmd 1 JFR.dump filename=/var/artipie/.storage/data/bintest/artipie.jfr
+          sleep 30
+          rm -fv artipie.jfr artipie.jfr.tar.xz
+          timeout 30 wget "http://$SERVER_HOST:$REPO_PORT/bintest/artipie.jfr"
+          tar cJf artipie.jfr.tar.xz artipie.jfr
+        working-directory: benchmarks/loadtests
+      - name: Uploading results
+        env:
+          GITHUB_TAG: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          ls -lah && pwd
+          tag="$GITHUB_TAG"
+          if [ -z "$tag" ] ; then
+            hash=`git rev-parse HEAD`
+            tag="$hash"
+            echo "Error: tag is empty with commit $hash"
+            exit 1
+          fi
+          . /opt/.benchvars
+          cd "benchmarks/loadtests"
+
+          perftestsRepo='./perftests_repo'
+          rm -rfv "$perftestsRepo"
+          dstDir="$perftestsRepo/perftests/$tag"
+          mkdir -p "$dstDir"
+          perfRes="./_perf_results"
+          for t in "$perfRes"/* ; do
+            dst="./$dstDir/$(basename $t)"
+            mkdir -p "$dst"
+            ls -lah "$t"
+            cp -fv "$t/statistics.json" "$dst"
+          done
+          tree "$perftestsRepo"
+          ls -lah "$dstDir"
+
+          time ./sync_perftests.sh https://central.artipie.com/artipie/benchmarks "${UPLOAD_LOGIN}" "${UPLOAD_PASSWORD}"
+
+          git config --global user.name "Perftest Action"
+          git config --global user.email "perftest@test.com"
+
+          url="https://central.artipie.com/artipie/benchmarks/perftests_repo/jfr/artipie.last.jfr.tar.xz"
+          curl -vT "./artipie.jfr.tar.xz" -u"${UPLOAD_LOGIN}:${UPLOAD_PASSWORD}" "$url"
+
+          env
+          rm -rf "$perfRes"
+          echo "Uploaded all test results for tag: $tag; commit: $hash"
+      - name: Generating graphs
+        working-directory: benchmarks/loadtests
+        run: |
+          pip3 install packaging==21.3 matplotlib==3.6.3 mdutils==1.6.0
+
+          . "/opt/.benchvars"
+          rm -rfv ./graphs
+          time ./perfplot.py perftests_repo/perftests ./graphs
+          for f in ./graphs/* ; do
+            echo "$f"
+            url="https://central.artipie.com/artipie/benchmarks/perftests_repo/graphs/$(basename $f)"
+            echo curl -vT "$f" -u"UPLOAD_LOGIN:UPLOAD_PASSWORD" "$url"
+            curl -vT "$f" -u"${UPLOAD_LOGIN}:${UPLOAD_PASSWORD}" "$url"
+          done
+
+          tmpDir="perftests_repo/tmp"
+
+          # For v* tags:
+          rm -rfv "$tmpDir"
+          mkdir -p "$tmpDir"
+          if [ -n "`find perftests_repo/perftests -maxdepth 1 -name 'v*'`" ] ; then
+            mv -fv "perftests_repo/perftests"/v* "$tmpDir"
+            rm -rfv ./graphs_v
+            time ./perfplot.py "$tmpDir" ./graphs_v
+            for f in ./graphs_v/* ; do
+              echo "$f"
+              url="https://central.artipie.com/artipie/benchmarks/perftests_repo/graphs_v/$(basename $f)"
+              echo curl -vT "$f" -u"UPLOAD_LOGIN:UPLOAD_PASSWORD" "$url"
+              curl -vT "$f" -u"${UPLOAD_LOGIN}:${UPLOAD_PASSWORD}" "$url"
+            done
+          else
+            echo "No v* tag results in perftests_repo/perftests"
+          fi
+
+          # For t* tags:
+          rm -rfv "$tmpDir"
+          mkdir -p "$tmpDir"
+          if [ -n "`find perftests_repo/perftests -maxdepth 1 -name 't*'`" ] ; then
+            mv -fv "perftests_repo/perftests"/t* "$tmpDir"
+            rm -rfv ./graphs_t
+            time ./perfplot.py "$tmpDir" ./graphs_t
+            for f in ./graphs_t/* ; do
+              echo "$f"
+              url="https://central.artipie.com/artipie/benchmarks/perftests_repo/graphs_t/$(basename $f)"
+              echo curl -vT "$f" -u"UPLOAD_LOGIN:UPLOAD_PASSWORD" "$url"
+              curl -vT "$f" -u"${UPLOAD_LOGIN}:${UPLOAD_PASSWORD}" "$url"
+            done
+          else
+            echo "No t* tag results in perftests_repo/perftests"
+          fi
+
+          rm -rfv "$tmpDir"
