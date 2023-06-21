@@ -52,7 +52,7 @@ jobs:
         run: |
           . "/opt/.benchvars"
           perfRes="./_perf_results"
-          rm -rf "$perfRes"
+          rm -rf "$perfRes" ./root/var/.storage/data
           mkdir -p "$perfRes"
           tests="jmx-files-maven-ul jmx-files-maven-dl jmx-files-ul jmx-files-dl jmx-maven-ul jmx-maven-dl"
           set -x
