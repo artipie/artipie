@@ -26,7 +26,7 @@ jobs:
       - name: Check docker image
         run: docker image inspect artipie/artipie:1.0-SNAPSHOT|head -n50
       - name: Checkout results repo/branch
-        run: git clone --depth=1 https://github.com/artipie/benchmarks.git
+        run: git clone --depth=1 https://github.com/chgen/benchmarks.git
       - name: Branch + Artipie server
         run: |
           pwd; ls -lah; git branch -a
@@ -35,10 +35,13 @@ jobs:
           git pull --ff-only
           cd loadtests
           ./artipie-snapshot.sh 8081
+          sleep 10
           docker ps
           tree ./root
           ls -lah root/var/repo/artipie
         working-directory: benchmarks
+      - name: Check connection
+        run: . "/opt/.benchvars" && timeout 30 curl -v "http://$SERVER_HOST:$REPO_PORT/bintest"
 
       - name: Prepare JMeter
         run: |
@@ -135,7 +138,7 @@ jobs:
           rm -rfv "$tmpDir"
           mkdir -p "$tmpDir"
           if [ -n "`find perftests_repo/perftests -maxdepth 1 -name 'v*'`" ] ; then
-            mv -fv "perftests_repo/perftests"/v* "$tmpDir"
+            cp -rfv "perftests_repo/perftests"/v* "$tmpDir"
             rm -rfv ./graphs_v
             time ./perfplot.py "$tmpDir" ./graphs_v
             for f in ./graphs_v/* ; do
@@ -152,7 +155,7 @@ jobs:
           rm -rfv "$tmpDir"
           mkdir -p "$tmpDir"
           if [ -n "`find perftests_repo/perftests -maxdepth 1 -name 't*'`" ] ; then
-            mv -fv "perftests_repo/perftests"/t* "$tmpDir"
+            cp -rfv "perftests_repo/perftests"/t* "$tmpDir"
             rm -rfv ./graphs_t
             time ./perfplot.py "$tmpDir" ./graphs_t
             for f in ./graphs_t/* ; do
@@ -166,3 +169,37 @@ jobs:
           fi
 
           rm -rfv "$tmpDir"
+
+      - name: Check perfromance difference stability
+        working-directory: benchmarks/loadtests
+        run: |
+          tag="$GITHUB_REF_NAME" # GITHUB_TAG
+          hash=`git rev-parse HEAD`
+          if [ -z "$tag" ] ; then
+            tag="$hash"
+            echo "Error: tag is empty with commit $hash"
+            exit 1
+          fi
+
+          tmpDir="perftests_repo/tmp" # compare with previous tag of the same type
+          rm -rfv "$tmpDir"
+          mkdir -p "$tmpDir"
+          if [[ "$tag" =~ ^v.*$ ]] ; then
+            cp -rfv "perftests_repo/perftests"/v* "$tmpDir"
+          elif [[ "$tag" =~ ^t.*$ ]] ; then
+            cp -rfv "perftests_repo/perftests"/t* "$tmpDir"
+          else
+            cp -rfv "perftests_repo/perftests"/* "$tmpDir"
+          fi
+
+          diffLimit="7.0"
+          ls -lah perftests_repo/perftests
+          if ./checkstats.py perftests_repo/perftests "$diffLimit" ; then # TODO: 3 types of tags: *;v*;t*;...
+            echo "Performance difference withit limit range"
+          else
+            echo "WARNING: Performance difference out of range. Sending emails..."
+            email="Subject: Artipie perftests\n\nArtipie perfrormance testing warning:\n\nPerformance difference is out of range in perftest-server.yml with threshold ${diffLimit}%.
+              Please check GitHub Actions logs for Artipie git tag: $tag; commit hash: $hash\n"
+            echo -e "$email" | ssmtp artipiebox@gmail.com chgenn.x@gmail.com
+          fi
+          rm -rf "$tmpDir"
