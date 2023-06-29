@@ -26,7 +26,7 @@ jobs:
       - name: Check docker image
         run: docker image inspect artipie/artipie:1.0-SNAPSHOT|head -n50
       - name: Checkout results repo/branch
-        run: git clone --depth=1 https://github.com/chgen/benchmarks.git
+        run: git clone --depth=1 https://github.com/artipie/benchmarks.git
       - name: Branch + Artipie server
         run: |
           pwd; ls -lah; git branch -a

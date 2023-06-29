@@ -19,7 +19,7 @@ jobs:
       - name: Check variables
         run: test ! -f /opt/.benchvars && exit 1;exit 0
       - name: Checkout benchmarks repo
-        run: git clone --depth=1 https://github.com/chgen/benchmarks.git
+        run: git clone --depth=1 https://github.com/artipie/benchmarks.git
       - name: Checkout benchmarks branch
         run: |
           pwd; ls -lah; git branch -a
