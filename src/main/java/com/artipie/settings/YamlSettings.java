@@ -178,6 +178,7 @@ public final class YamlSettings implements Settings {
         return this.queue;
     }
 
+    @Override
     public Optional<YamlSequence> crontab() {
         return Optional.ofNullable(this.meta().yamlSequence("crontab"));
     }

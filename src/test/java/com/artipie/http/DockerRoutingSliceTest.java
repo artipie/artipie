@@ -215,6 +215,8 @@ final class DockerRoutingSliceTest {
         public EventQueue<ArtifactEvent> events() {
             return null;
         }
+
+        @Override
         public Optional<YamlSequence> crontab() {
             return Optional.empty();
         }

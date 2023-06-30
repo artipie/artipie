@@ -92,7 +92,7 @@ public class ArtipieSchedulerTest {
                     "    - key: scripts/script.groovy",
                     "      cronexp: */3 * * * * ?"
                 )
-            ).readYamlMapping()
+            ).readYamlMapping(), this.temp
         );
         final String filename = this.temp.resolve("scripts/result.txt").toString();
         final String script = String.join(
