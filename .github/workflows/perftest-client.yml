@@ -183,7 +183,7 @@ jobs:
 
           diffLimit="15.0" # wsl client <--> wsl server currently less stable
           ls -lah perftests_repo/perftests
-          if ./checkstats.py perftests_repo/perftests "$diffLimit" ; then # TODO: 3 types of tags: *;v*;t*;...
+          if ./checkstats.py perftests_repo/perftests "$diffLimit"
             echo "Performance difference withit limit range"
           else
             echo "WARNING: Performance difference out of range. Sending emails..."
