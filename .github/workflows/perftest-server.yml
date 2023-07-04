@@ -170,7 +170,7 @@ jobs:
 
           rm -rfv "$tmpDir"
 
-      - name: Check perfromance difference stability
+      - name: Check performance difference stability
         working-directory: benchmarks/loadtests
         run: |
           tag="$GITHUB_REF_NAME" # GITHUB_TAG
@@ -194,7 +194,7 @@ jobs:
 
           diffLimit="7.0"
           ls -lah perftests_repo/perftests
-          if ./checkstats.py perftests_repo/perftests "$diffLimit"
+          if ./checkstats.py perftests_repo/perftests "$diffLimit" ; then
             echo "Performance difference withit limit range"
           else
             echo "WARNING: Performance difference out of range. Sending emails..."

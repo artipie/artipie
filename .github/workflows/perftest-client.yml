@@ -157,7 +157,7 @@ jobs:
 
           rm -rfv "$tmpDir"
 
-      - name: Check perfromance difference stability
+      - name: Check performance difference stability
         env:
           GITHUB_TAG: ${{ github.event.workflow_run.head_branch }}
         working-directory: benchmarks/loadtests
@@ -183,7 +183,7 @@ jobs:
 
           diffLimit="15.0" # wsl client <--> wsl server currently less stable
           ls -lah perftests_repo/perftests
-          if ./checkstats.py perftests_repo/perftests "$diffLimit"
+          if ./checkstats.py perftests_repo/perftests "$diffLimit" ; then
             echo "Performance difference withit limit range"
           else
             echo "WARNING: Performance difference out of range. Sending emails..."
