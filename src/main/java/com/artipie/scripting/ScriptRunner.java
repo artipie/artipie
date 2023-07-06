@@ -7,7 +7,10 @@ package com.artipie.scripting;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.settings.Settings;
+import com.artipie.settings.repo.RepositoriesFromStorage;
 import com.jcabi.log.Logger;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import javax.script.ScriptException;
 import org.quartz.Job;
@@ -33,7 +36,10 @@ public final class ScriptRunner implements Job {
                     script -> {
                         Optional<Script.Result> result;
                         try {
-                            result = Optional.of(script.call());
+                            final Map<String, Object> vars = new HashMap<>();
+                            vars.put("_settings", settings);
+                            vars.put("_repositories", new RepositoriesFromStorage(settings));
+                            result = Optional.of(script.call(vars));
                         } catch (final ScriptException exc) {
                             Logger.error(
                                 ScriptRunner.class,

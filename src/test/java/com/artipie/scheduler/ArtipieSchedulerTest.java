@@ -5,10 +5,17 @@
 package com.artipie.scheduler;
 
 import com.amihaiemil.eoyaml.Yaml;
+import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.fs.FileStorage;
+import com.artipie.scripting.ScriptRunner;
+import com.artipie.settings.Settings;
 import com.artipie.settings.YamlSettings;
+import com.artipie.settings.repo.RepoConfig;
+import com.artipie.settings.repo.RepoConfigYaml;
+import com.artipie.settings.repo.Repositories;
+import com.artipie.settings.repo.RepositoriesFromStorage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
@@ -19,11 +26,17 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
 
 /**
  * Test for ArtipieScheduler.
@@ -34,6 +47,17 @@ import org.quartz.JobExecutionException;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class ArtipieSchedulerTest {
+
+    /**
+     * Path to the test script file.
+     */
+    private static final String SCRIPT_PATH = "scripts/script.groovy";
+
+    /**
+     * Path to the test results file.
+     */
+    private static final String RESULTS_PATH = "scripts/result.txt";
+
     /**
      * Temp dir.
      */
@@ -79,7 +103,95 @@ public class ArtipieSchedulerTest {
     }
 
     @Test
-    void runCronJob() throws IOException {
+    void runSimpleCronJob() throws IOException {
+        final Key result = new Key.From(ArtipieSchedulerTest.RESULTS_PATH);
+        this.runCronScript(
+            String.join(
+                "\n",
+                "File file = new File('%1$s')",
+                "file.write 'Hello world'"
+            )
+        );
+        MatcherAssert.assertThat(
+            new String(this.data.value(result)),
+            new IsEqual<>("Hello world")
+        );
+    }
+
+    @Test
+    void runCronJobWithSettingsObject() throws IOException {
+        final Key result = new Key.From(ArtipieSchedulerTest.RESULTS_PATH);
+        final YamlSettings settings = this.runCronScript(
+            String.join(
+                "\n",
+                "File file = new File('%1$s')",
+                "mapping = _settings.crontab().get().values().iterator().next().asMapping()",
+                "file.write mapping.string('key') + mapping.string('cronexp')"
+            )
+        );
+        final YamlMapping mapping = settings.crontab().get().values().iterator().next().asMapping();
+        final String key = mapping.string("key");
+        final String cronexp = mapping.string("cronexp");
+        MatcherAssert.assertThat(
+            new String(this.data.value(result)),
+            new IsEqual<>(String.join("", key, cronexp))
+        );
+    }
+
+    @Test
+    void runCronJobWithReposObject() throws Exception {
+        final String repo = "my-repo";
+        new RepoConfigYaml("maven")
+            .withPath("/artipie/test/maven")
+            .withUrl("http://test.url/artipie")
+            .saveTo(new FileStorage(this.temp), repo);
+        final Key result = new Key.From(ArtipieSchedulerTest.RESULTS_PATH);
+        final YamlSettings settings = this.runCronScript(
+            String.join(
+                "\n",
+                "File file = new File('%1$s')",
+                "cfg = _repositories.config('my-repo').toCompletableFuture().join()",
+                "file.write cfg.toString()"
+            )
+        );
+        final Repositories repos = new RepositoriesFromStorage(settings);
+        final RepoConfig cfg = repos.config(repo).toCompletableFuture().join();
+        MatcherAssert.assertThat(
+            new String(this.data.value(result)),
+            new IsEqual<>(cfg.toString())
+        );
+    }
+
+    @Test
+    void testScriptRunner() throws Exception {
+        final Key key = new Key.From("");
+        final String cronexp = "*/3 * * * * ?";
+        final Settings settings = null;
+        final StdSchedulerFactory factory = new StdSchedulerFactory();
+        final Scheduler scheduler = factory.getScheduler();
+        scheduler.start();
+        final JobDataMap jobdata = new JobDataMap();
+        jobdata.put("key", key);
+        jobdata.put("settings", settings);
+        final JobDetail job = JobBuilder
+            .newJob()
+            .ofType(ScriptRunner.class)
+            .withIdentity(String.format("%s %s", cronexp, key))
+            .setJobData(jobdata)
+            .build();
+        final Trigger trigger = TriggerBuilder.newTrigger()
+            .withIdentity(
+                String.format("trigger-%s", job.getKey()),
+                "cron-group"
+            )
+            .withSchedule(CronScheduleBuilder.cronSchedule(cronexp))
+            .forJob(job)
+            .build();
+        scheduler.scheduleJob(job, trigger);
+        scheduler.shutdown(true);
+    }
+
+    private YamlSettings runCronScript(final String cronscript) throws IOException {
         final YamlSettings settings = new YamlSettings(
             Yaml.createYamlInput(
                 String.join(
@@ -89,28 +201,23 @@ public class ArtipieSchedulerTest {
                     "    type: fs",
                     String.format("    path: %s", this.temp.toString()),
                     "  crontab:",
-                    "    - key: scripts/script.groovy",
+                    String.format("    - key: %s", ArtipieSchedulerTest.SCRIPT_PATH),
                     "      cronexp: */3 * * * * ?"
                 )
-            ).readYamlMapping(), this.temp
+            )
+            .readYamlMapping(),
+            this.temp
         );
-        final String filename = this.temp.resolve("scripts/result.txt").toString();
-        final String script = String.join(
-            System.lineSeparator(),
-            String.format("File file = new File('%s')", filename.replace("\\", "\\\\")),
-            "file.write 'Hello world'"
-        );
-        this.data.save(new Key.From("scripts/script.groovy"), script.getBytes());
+        final String filename = this.temp.resolve(ArtipieSchedulerTest.RESULTS_PATH).toString();
+        final String script = String.format(cronscript, filename.replace("\\", "\\\\"));
+        this.data.save(new Key.From(ArtipieSchedulerTest.SCRIPT_PATH), script.getBytes());
         final ArtipieScheduler scheduler = new ArtipieScheduler();
         scheduler.start();
         scheduler.loadCrontab(settings);
-        final Key result = new Key.From("scripts/result.txt");
+        final Key result = new Key.From(ArtipieSchedulerTest.RESULTS_PATH);
         Awaitility.waitAtMost(1, TimeUnit.MINUTES).until(() -> this.data.exists(result));
         scheduler.stop();
-        MatcherAssert.assertThat(
-            new String(this.data.value(result)),
-            new IsEqual<>("Hello world")
-        );
+        return settings;
     }
 
     /**
@@ -121,8 +228,8 @@ public class ArtipieSchedulerTest {
         @SuppressWarnings("unchecked")
         @Override
         public void execute(final JobExecutionContext context) throws JobExecutionException {
-            final AtomicReference<String> ref =
-                (AtomicReference<String>) context.getJobDetail().getJobDataMap().get("ref");
+            final AtomicReference<String> ref = (AtomicReference<String>) context.getJobDetail()
+                .getJobDataMap().get("ref");
             ref.set("TestJob is done");
         }
     }
