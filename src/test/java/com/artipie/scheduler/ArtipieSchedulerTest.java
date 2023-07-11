@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.awaitility.Awaitility;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -218,6 +219,35 @@ public class ArtipieSchedulerTest {
         Awaitility.waitAtMost(1, TimeUnit.MINUTES).until(() -> this.data.exists(result));
         scheduler.stop();
         return settings;
+    }
+
+    @Test
+    void runReposObjectFail2() throws Exception {
+        final YamlSettings settings = runCronScript(
+                String.join(
+                        "\n",
+                        "File file = new File('%1$s')",
+                        "file.write 'Hello world'"
+                )
+        );
+        final Key result = new Key.From(ArtipieSchedulerTest.RESULTS_PATH);
+
+        // #1
+        final Object cfg0 = new RepositoriesFromStorage(settings).config("my-repo"); //.toCompletableFuture().join();
+
+        // #2
+        new RepoConfigYaml("maven")
+                .withPath("/artipie/test/maven")
+                .withPort(7777)
+                .withUrl("http://test.url/artipie")
+                .saveTo(new FileStorage(this.temp), "my-repo");
+
+        // #3
+        final RepoConfig cfg = new RepositoriesFromStorage(settings).config("my-repo").toCompletableFuture().join();
+        MatcherAssert.assertThat(
+                new String(this.data.value(result)),
+                new IsNot<>(new IsEqual<>(cfg.toString()))
+        );
     }
 
     /**
