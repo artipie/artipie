@@ -4,6 +4,9 @@
  */
 package com.artipie.scripting;
 
+import com.artipie.scripting.Script.PrecompiledScript;
+import com.artipie.scripting.Script.ScriptType;
+import com.artipie.scripting.Script.StandardScript;
 import java.util.HashMap;
 import java.util.Map;
 import javax.script.ScriptException;
@@ -12,7 +15,7 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link PythonScript}.
+ * Tests for Python support by {@link Script}.
  *
  * @since 0.30
  * @checkstyle MagicNumberCheck (500 lines)
@@ -22,17 +25,17 @@ public class PythonScriptTest {
     @Test
     public void standardScript() throws ScriptException {
         final Map<String, Object> variables = new HashMap<>();
-        PythonScript.newScript("print(1)").call();
+        new StandardScript(ScriptType.PYTHON, "print(1)").call();
         variables.put("a", 2);
-        PythonScript.newScript("print(a)").call(variables);
+        new StandardScript(ScriptType.PYTHON, "print(a)").call(variables);
         variables.put("a", 3);
         MatcherAssert.assertThat(
-            PythonScript.newScript("a * 2").call(variables).value(),
+            new StandardScript(ScriptType.PYTHON, "a * 2").call(variables).value(),
             new IsEqual<>(6)
         );
         variables.put("a", 4);
         MatcherAssert.assertThat(
-            PythonScript.newScript("a = a * 3").call(variables).variable("a"),
+            new StandardScript(ScriptType.PYTHON, "a = a * 3").call(variables).variable("a"),
             new IsEqual<>(12)
         );
     }
@@ -40,17 +43,17 @@ public class PythonScriptTest {
     @Test
     public void precompiledScript() throws ScriptException {
         final Map<String, Object> variables = new HashMap<>();
-        PythonScript.newCompiledScript("print(1)").call();
+        new PrecompiledScript(ScriptType.PYTHON, "print(1)").call();
         variables.put("a", 2);
-        PythonScript.newCompiledScript("print(a)").call(variables);
+        new PrecompiledScript(ScriptType.PYTHON, "print(a)").call(variables);
         variables.put("a", 3);
         MatcherAssert.assertThat(
-            PythonScript.newCompiledScript("a * 2").call(variables).value(),
+            new PrecompiledScript(ScriptType.PYTHON, "a * 2").call(variables).value(),
             new IsEqual<>(6)
         );
         variables.put("a", 4);
         MatcherAssert.assertThat(
-            PythonScript.newCompiledScript("a = a * 3").call(variables).variable("a"),
+            new PrecompiledScript(ScriptType.PYTHON, "a = a * 3").call(variables).variable("a"),
             new IsEqual<>(12)
         );
     }

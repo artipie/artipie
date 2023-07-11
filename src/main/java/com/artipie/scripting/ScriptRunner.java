@@ -64,25 +64,18 @@ public final class ScriptRunner implements Job {
      * @return Script instance
      */
     private static Optional<Script> script(final String ext, final String script) {
-        final Optional<Script> res;
-        switch (ext) {
-            case "groovy":
-                res = Optional.of(GroovyScript.newScript(script));
-                break;
-            case "py":
-                res = Optional.of(PythonScript.newScript(script));
-                break;
-            case "ruby":
-                res = Optional.of(RubyScript.newScript(script));
-                break;
-            case "mvel":
-                res = Optional.of(MvelScript.newScript(script));
-                break;
-            default:
-                res = Optional.empty();
-                break;
+        final Map<String, Script.ScriptType> map = Map.of(
+            "groovy", Script.ScriptType.GROOVY,
+            "py", Script.ScriptType.PYTHON,
+            "ruby", Script.ScriptType.RUBY,
+            "mvel", Script.ScriptType.MVEL
+        );
+        Optional<Script> result = Optional.empty();
+        final Script.ScriptType type = map.getOrDefault(ext, Script.ScriptType.NONE);
+        if (!type.equals(Script.ScriptType.NONE)) {
+            result = Optional.of(new Script.StandardScript(type, script));
         }
-        return res;
+        return result;
     }
 
     /**

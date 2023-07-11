@@ -22,6 +22,56 @@ import javax.script.SimpleScriptContext;
  * @since 0.30
  */
 public interface Script {
+
+    /**
+     * Script type values, known by javax.script.ScriptEngineManager.
+     */
+    enum ScriptType {
+
+        /**
+         * No valid script type was provided.
+         */
+        NONE(""),
+
+        /**
+         * Groovy script type.
+         */
+        GROOVY("groovy"),
+
+        /**
+         * Mvel script type.
+         */
+        MVEL("mvel"),
+
+        /**
+         * PPython script type.
+         */
+        PYTHON("python"),
+
+        /**
+         * Ruby script type.
+         */
+        RUBY("ruby");
+
+        /**
+         * Script language name, for ScriptEngineManager.
+         */
+        private final String value;
+
+        /**
+         * Script type value ctor.
+         * @param value Script language name.
+         */
+        ScriptType(final String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return this.value;
+        }
+    }
+
     /**
      * Script engine manager.
      */
@@ -43,30 +93,6 @@ public interface Script {
     Result call(Map<String, Object> vars) throws ScriptException;
 
     /**
-     * Create instance of {@link Script}.
-     * @param name Name of scripting engine.
-     * @param script Script code
-     * @return Script
-     */
-    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
-    static Script newScript(final String name, final String script) {
-        final ScriptEngine engine = Script.MANAGER.getEngineByName(name);
-        return new StandardScript(engine, script);
-    }
-
-    /**
-     * Create precompiled instance of {@link Script}.
-     * @param name Name of scripting engine.
-     * @param script Script code
-     * @return Script
-     */
-    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
-    static Script newCompiledScript(final String name, final String script) {
-        final ScriptEngine engine = Script.MANAGER.getEngineByName(name);
-        return new PrecompiledScript(engine, script);
-    }
-
-    /**
      * Standard implementation of {@link Script}.
      * @since 0.30
      */
@@ -83,11 +109,11 @@ public interface Script {
 
         /**
          * Ctor.
-         * @param engine Scripting engine
+         * @param type Name of scripting engine.
          * @param script Script code
          */
-        public StandardScript(final ScriptEngine engine, final String script) {
-            this.engine = engine;
+        public StandardScript(final ScriptType type, final String script) {
+            this.engine = Script.MANAGER.getEngineByName(type.toString());
             this.script = Objects.requireNonNull(script, "Script is null");
         }
 
@@ -120,10 +146,11 @@ public interface Script {
 
         /**
          * Ctor.
-         * @param engine Scripting engine
+         * @param type Name of scripting engine.
          * @param script Script code
          */
-        public PrecompiledScript(final ScriptEngine engine, final String script) {
+        public PrecompiledScript(final ScriptType type, final String script) {
+            final ScriptEngine engine = Script.MANAGER.getEngineByName(type.toString());
             if (!(engine instanceof Compilable)) {
                 throw new ArtipieException(
                     String.format("Scripting engine '%s' does not support compilation", engine)
