@@ -1,6 +1,6 @@
 /*
- * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
- * https://github.com/artipie/http/blob/master/LICENSE.txt
+ * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
+ * https://github.com/artipie/artipie/LICENSE.txt
  */
 package com.artipie.scheduling;
 
@@ -10,13 +10,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.SimpleTrigger;
+import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -128,6 +131,34 @@ public final class QuartsService {
     }
 
     /**
+     * Schedule jobs for class `clazz` to be performed according to `cronexp` cron format schedule.
+     * @param cronexp Cron expression in format {@link org.quartz.CronExpression}
+     * @param clazz Class of the Job.
+     * @param data JobDataMap for job.
+     * @param <T> Class type parameter.
+     * @throws SchedulerException On error.
+     */
+    public <T extends Job> void schedulePeriodicJob(
+        final String cronexp, final Class<T> clazz, final JobDataMap data
+    ) throws SchedulerException {
+        final JobDetail job = JobBuilder
+            .newJob()
+            .ofType(clazz)
+            .withIdentity(String.format("%s-%s", cronexp, clazz.getCanonicalName()))
+            .setJobData(data)
+            .build();
+        final Trigger trigger = TriggerBuilder.newTrigger()
+            .withIdentity(
+                String.format("trigger-%s", job.getKey()),
+                "cron-group"
+            )
+            .withSchedule(CronScheduleBuilder.cronSchedule(cronexp))
+            .forJob(job)
+            .build();
+        this.scheduler.scheduleJob(job, trigger);
+    }
+
+    /**
      * Start quartz.
      */
     public void start() {
@@ -135,6 +166,17 @@ public final class QuartsService {
             this.scheduler.start();
         } catch (final SchedulerException error) {
             throw new ArtipieException(error);
+        }
+    }
+
+    /**
+     * Stop scheduler.
+     */
+    public void stop() {
+        try {
+            this.scheduler.shutdown(true);
+        } catch (final SchedulerException exc) {
+            throw new ArtipieException(exc);
         }
     }
 
