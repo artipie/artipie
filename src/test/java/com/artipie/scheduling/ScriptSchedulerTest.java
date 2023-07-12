@@ -2,7 +2,7 @@
  * The MIT License (MIT) Copyright (c) 2020-2021 artipie.com
  * https://github.com/artipie/artipie/LICENSE.txt
  */
-package com.artipie.scheduler;
+package com.artipie.scheduling;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
@@ -18,6 +18,7 @@ import com.artipie.settings.repo.Repositories;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.awaitility.Awaitility;
@@ -34,19 +35,19 @@ import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 
 /**
  * Test for ArtipieScheduler.
- *
  * @since 0.30
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle VisibilityModifierCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public class ArtipieSchedulerTest {
+public class ScriptSchedulerTest {
 
     /**
      * Path to the test script file.
@@ -79,21 +80,11 @@ public class ArtipieSchedulerTest {
     }
 
     @Test
-    void scheduleJob() {
+    void scheduleJob() throws SchedulerException {
         final AtomicReference<String> ref = new AtomicReference<>();
-        final ArtipieScheduler scheduler = new ArtipieScheduler();
+        final ScriptScheduler scheduler = new ScriptScheduler();
         scheduler.start();
-        final JobDataMap vars = new JobDataMap();
-        vars.put("ref", ref);
-        scheduler.scheduleJob(
-            JobBuilder
-                .newJob()
-                .ofType(TestJob.class)
-                .withIdentity("test-job")
-                .setJobData(vars)
-                .build(),
-            "0/5 * * * * ?"
-        );
+        scheduler.scheduleJob("0/5 * * * * ?", TestJob.class, Map.of("ref", ref));
         Awaitility.waitAtMost(1, TimeUnit.MINUTES).until(() -> ref.get() != null);
         scheduler.stop();
         MatcherAssert.assertThat(
@@ -104,7 +95,7 @@ public class ArtipieSchedulerTest {
 
     @Test
     void runSimpleCronJob() throws IOException {
-        final Key result = new Key.From(ArtipieSchedulerTest.RESULTS_PATH);
+        final Key result = new Key.From(ScriptSchedulerTest.RESULTS_PATH);
         this.runCronScript(
             String.join(
                 "\n",
@@ -120,7 +111,7 @@ public class ArtipieSchedulerTest {
 
     @Test
     void runCronJobWithSettingsObject() throws IOException {
-        final Key result = new Key.From(ArtipieSchedulerTest.RESULTS_PATH);
+        final Key result = new Key.From(ScriptSchedulerTest.RESULTS_PATH);
         final YamlSettings settings = this.runCronScript(
             String.join(
                 "\n",
@@ -145,7 +136,7 @@ public class ArtipieSchedulerTest {
             .withPath("/artipie/test/maven")
             .withUrl("http://test.url/artipie")
             .saveTo(new FileStorage(this.temp), repo);
-        final Key result = new Key.From(ArtipieSchedulerTest.RESULTS_PATH);
+        final Key result = new Key.From(ScriptSchedulerTest.RESULTS_PATH);
         final YamlSettings settings = this.runCronScript(
             String.join(
                 "\n",
@@ -201,20 +192,20 @@ public class ArtipieSchedulerTest {
                     "    type: fs",
                     String.format("    path: %s", this.temp.toString()),
                     "  crontab:",
-                    String.format("    - key: %s", ArtipieSchedulerTest.SCRIPT_PATH),
+                    String.format("    - key: %s", ScriptSchedulerTest.SCRIPT_PATH),
                     "      cronexp: */3 * * * * ?"
                 )
             )
             .readYamlMapping(),
             this.temp
         );
-        final String filename = this.temp.resolve(ArtipieSchedulerTest.RESULTS_PATH).toString();
+        final String filename = this.temp.resolve(ScriptSchedulerTest.RESULTS_PATH).toString();
         final String script = String.format(cronscript, filename.replace("\\", "\\\\"));
-        this.data.save(new Key.From(ArtipieSchedulerTest.SCRIPT_PATH), script.getBytes());
-        final ArtipieScheduler scheduler = new ArtipieScheduler();
+        this.data.save(new Key.From(ScriptSchedulerTest.SCRIPT_PATH), script.getBytes());
+        final ScriptScheduler scheduler = new ScriptScheduler();
         scheduler.start();
         scheduler.loadCrontab(settings);
-        final Key result = new Key.From(ArtipieSchedulerTest.RESULTS_PATH);
+        final Key result = new Key.From(ScriptSchedulerTest.RESULTS_PATH);
         Awaitility.waitAtMost(1, TimeUnit.MINUTES).until(() -> this.data.exists(result));
         scheduler.stop();
         return settings;

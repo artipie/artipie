@@ -3,7 +3,7 @@
  * https://github.com/artipie/artipie/LICENSE.txt
  */
 
-package com.artipie.scheduler;
+package com.artipie.scheduling;
 
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.ArtipieException;
@@ -14,50 +14,42 @@ import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import com.jcabi.log.Logger;
+import java.util.Map;
 import java.util.stream.Collectors;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.JobBuilder;
+import org.quartz.Job;
 import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.impl.StdSchedulerFactory;
 
 /**
- * Scheduler.
+ * Scheduler for Artipie scripts.
  * @since 0.30
  */
-public final class ArtipieScheduler {
+public final class ScriptScheduler {
+
     /**
-     * Scheduler.
+     * Quarts service for scheduling.
      */
-    private Scheduler scheduler;
+    private final QuartsService service;
+
+    /**
+     * Initializes new instance of scheduler.
+     */
+    public ScriptScheduler() {
+        this.service = new QuartsService();
+    }
 
     /**
      * Start scheduler.
      */
     public void start() {
-        try {
-            final StdSchedulerFactory factory = new StdSchedulerFactory();
-            this.scheduler = factory.getScheduler();
-            this.scheduler.start();
-        } catch (final SchedulerException exc) {
-            throw new ArtipieException(exc);
-        }
+        this.service.start();
     }
 
     /**
      * Stop scheduler.
      */
     public void stop() {
-        try {
-            this.scheduler.shutdown(true);
-        } catch (final SchedulerException exc) {
-            throw new ArtipieException(exc);
-        }
+        this.service.stop();
     }
 
     /**
@@ -68,43 +60,16 @@ public final class ArtipieScheduler {
      *     <li>"0 0 11-15 * * ?" means "11AM and 3PM every day"</li>
      *     <li>"0 0 11-15 * * SAT-SUN" means "between 11AM and 3PM on weekends SAT-SUN"</li>
      * </ul>
-     * @param job Job details
      * @param cronexp Cron expression in format {@link org.quartz.CronExpression}
+     * @param clazz Class of the Job.
+     * @param data Map Data for the job's JobDataMap.
+     * @param <T> Class type parameter.
      */
-    public void scheduleJob(final JobDetail job, final String cronexp) {
+    public <T extends Job> void scheduleJob(
+        final String cronexp, final Class<T> clazz, final Map<String, Object> data
+    ) {
         try {
-            final Trigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity(
-                    String.format("trigger-%s", job.getKey()),
-                    "cron-group"
-                )
-                .withSchedule(CronScheduleBuilder.cronSchedule(cronexp))
-                .forJob(job)
-                .build();
-            this.scheduler.scheduleJob(job, trigger);
-        } catch (final SchedulerException exc) {
-            throw new ArtipieException(exc);
-        }
-    }
-
-    /**
-     * Clear all jobs and triggers.
-     */
-    public void clearAll() {
-        try {
-            this.scheduler.clear();
-        } catch (final SchedulerException exc) {
-            throw new ArtipieException(exc);
-        }
-    }
-
-    /**
-     * Cancel job.
-     * @param job Job key
-     */
-    public void cancelJob(final JobKey job) {
-        try {
-            this.scheduler.deleteJob(job);
+            this.service.schedulePeriodicJob(cronexp, clazz, new JobDataMap(data));
         } catch (final SchedulerException exc) {
             throw new ArtipieException(exc);
         }
@@ -143,7 +108,7 @@ public final class ArtipieScheduler {
                                     valid = true;
                                 } catch (final IllegalArgumentException exc) {
                                     Logger.error(
-                                        ArtipieScheduler.class,
+                                        ScriptScheduler.class,
                                         "Invalid cron expression %s %[exception]s",
                                         cronexp,
                                         exc
@@ -153,13 +118,13 @@ public final class ArtipieScheduler {
                                     final JobDataMap data = new JobDataMap();
                                     data.put("key", key);
                                     data.put("settings", settings);
-                                    final JobDetail job = JobBuilder
-                                        .newJob()
-                                        .ofType(ScriptRunner.class)
-                                        .withIdentity(String.format("%s %s", cronexp, key))
-                                        .setJobData(data)
-                                        .build();
-                                    this.scheduleJob(job, cronexp);
+                                    try {
+                                        this.service.schedulePeriodicJob(
+                                            cronexp, ScriptRunner.class, data
+                                        );
+                                    } catch (final SchedulerException ex) {
+                                        throw new ArtipieException(ex);
+                                    }
                                 }
                                 return null;
                             })

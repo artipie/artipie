@@ -4,8 +4,8 @@
  */
 
 /**
- * Artipie scheduler.
+ * Tests for scheduler classes.
  *
  * @since 0.30
  */
-package com.artipie.scheduler;
+package com.artipie.scheduling;

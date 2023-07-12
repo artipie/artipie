@@ -15,7 +15,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.misc.ArtipieProperties;
-import com.artipie.scheduler.ArtipieScheduler;
+import com.artipie.scheduling.ScriptScheduler;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
@@ -91,7 +91,7 @@ public final class VertxMain {
     /**
      * Scheduler.
      */
-    private final ArtipieScheduler scheduler;
+    private final ScriptScheduler scheduler;
 
     /**
      * Ctor.
@@ -105,7 +105,7 @@ public final class VertxMain {
         this.config = config;
         this.port = port;
         this.servers = new ArrayList<>(0);
-        this.scheduler = new ArtipieScheduler();
+        this.scheduler = new ScriptScheduler();
     }
 
     /**

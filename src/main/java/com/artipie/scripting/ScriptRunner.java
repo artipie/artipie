@@ -4,6 +4,7 @@
  */
 package com.artipie.scripting;
 
+import com.artipie.ArtipieException;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.settings.Settings;
@@ -16,6 +17,9 @@ import javax.script.ScriptException;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
+import org.quartz.SchedulerException;
+import org.quartz.impl.StdSchedulerFactory;
 
 /**
  * Script runner.
@@ -29,6 +33,10 @@ public final class ScriptRunner implements Job {
         final Settings settings = (Settings) context.getJobDetail().getJobDataMap().get("settings");
         final Key key = new Key.From(context.getJobDetail().getJobDataMap().getString("key"));
         final BlockingStorage storage = new BlockingStorage(settings.configStorage());
+        if (settings == null || key == null || storage == null) {
+            this.stopJob(context);
+            return;
+        }
         if (storage.exists(key)) {
             extension(key.toString())
                 .flatMap(ext -> script(ext, new String(storage.value(key))))
@@ -54,6 +62,22 @@ public final class ScriptRunner implements Job {
                 );
         } else {
             Logger.warn(ScriptRunner.class, "Cannot find script %s", key.toString());
+        }
+    }
+
+    /**
+     * Stops the job and logs error.
+     * @param context Job context
+     */
+    private void stopJob(final JobExecutionContext context) {
+        final JobKey key = context.getJobDetail().getKey();
+        try {
+            Logger.error(this, String.format("Force stopping job %s...", key));
+            new StdSchedulerFactory().getScheduler().deleteJob(key);
+            Logger.error(this, String.format("Job %s stopped.", key));
+        } catch (final SchedulerException error) {
+            Logger.error(this, String.format("Error while stopping job %s", key));
+            throw new ArtipieException(error);
         }
     }
 
