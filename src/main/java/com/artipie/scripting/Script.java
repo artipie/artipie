@@ -26,32 +26,33 @@ public interface Script {
     /**
      * Script type values, known by javax.script.ScriptEngineManager.
      */
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     enum ScriptType {
 
         /**
          * No valid script type was provided.
          */
-        NONE(""),
+        NONE("", ""),
 
         /**
          * Groovy script type.
          */
-        GROOVY("groovy"),
+        GROOVY("groovy", "groovy"),
 
         /**
          * Mvel script type.
          */
-        MVEL("mvel"),
+        MVEL("mvel", "mvel"),
 
         /**
          * PPython script type.
          */
-        PYTHON("python"),
+        PYTHON("python", "py"),
 
         /**
          * Ruby script type.
          */
-        RUBY("ruby");
+        RUBY("ruby", "rb");
 
         /**
          * Script language name, for ScriptEngineManager.
@@ -59,16 +60,31 @@ public interface Script {
         private final String value;
 
         /**
+         * Corresponding file extension.
+         */
+        private final String ext;
+
+        /**
          * Script type value ctor.
          * @param value Script language name.
+         * @param ext Corresponding file extension.
          */
-        ScriptType(final String value) {
+        ScriptType(final String value, final String ext) {
             this.value = value;
+            this.ext = ext;
         }
 
         @Override
         public String toString() {
             return this.value;
+        }
+
+        /**
+         * Returns corresponding file extension.
+         * @return File extension as String.
+         */
+        public String ext() {
+            return this.ext;
         }
     }
 
@@ -195,7 +211,7 @@ public interface Script {
         private final ScriptContext context;
 
         /**
-         * Resulting value.
+         * Resulting value on script evaluation (like eval()).
          */
         private Object val;
 
@@ -216,7 +232,7 @@ public interface Script {
         }
 
         /**
-         * Resulting value.
+         * Resulting value on script evaluation.
          * @return Value
          */
         public Object value() {

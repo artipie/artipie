@@ -10,6 +10,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.settings.Settings;
 import com.artipie.settings.repo.RepositoriesFromStorage;
 import com.jcabi.log.Logger;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -88,14 +89,9 @@ public final class ScriptRunner implements Job {
      * @return Script instance
      */
     private static Optional<Script> script(final String ext, final String script) {
-        final Map<String, Script.ScriptType> map = Map.of(
-            "groovy", Script.ScriptType.GROOVY,
-            "py", Script.ScriptType.PYTHON,
-            "ruby", Script.ScriptType.RUBY,
-            "mvel", Script.ScriptType.MVEL
-        );
+        final Script.ScriptType type = Arrays.stream(Script.ScriptType.values())
+            .filter(val -> val.ext().equals(ext)).findFirst().orElse(Script.ScriptType.NONE);
         Optional<Script> result = Optional.empty();
-        final Script.ScriptType type = map.getOrDefault(ext, Script.ScriptType.NONE);
         if (!type.equals(Script.ScriptType.NONE)) {
             result = Optional.of(new Script.StandardScript(type, script));
         }
