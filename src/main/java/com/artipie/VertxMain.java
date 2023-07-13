@@ -138,16 +138,6 @@ public final class VertxMain {
     }
 
     /**
-     * Stops server releasing all resources.
-     */
-    public void stop() {
-        for (final VertxSliceServer server : this.servers) {
-            server.stop();
-        }
-        this.scheduler.stop();
-    }
-
-    /**
      * Entry point.
      * @param args CLI args
      * @throws Exception If fails
