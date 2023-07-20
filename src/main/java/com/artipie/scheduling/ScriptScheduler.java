@@ -15,7 +15,6 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.parser.CronParser;
 import com.jcabi.log.Logger;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.SchedulerException;
@@ -94,11 +93,11 @@ public final class ScriptScheduler {
             CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
         final CronParser parser = new CronParser(crondef);
         settings.crontab()
-            .map(
+            .ifPresent(
                 crontab ->
                     crontab.values().stream()
                         .map(YamlNode::asMapping)
-                        .map(
+                        .forEach(
                             yaml -> {
                                 final String key = yaml.string("key");
                                 final String cronexp = yaml.string("cronexp");
@@ -126,9 +125,7 @@ public final class ScriptScheduler {
                                         throw new ArtipieException(ex);
                                     }
                                 }
-                                return null;
                             })
-                        .collect(Collectors.toList())
             );
     }
 }
