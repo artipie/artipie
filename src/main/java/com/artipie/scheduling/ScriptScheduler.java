@@ -80,9 +80,9 @@ public final class ScriptScheduler {
      * <pre>
      *     meta:
      *       crontab:
-     *         - key: scripts/script1.groovy
+     *         - path: scripts/script1.groovy
      *           cronexp: * * 10 * * ?
-     *         - key: scripts/script2.groovy
+     *         - path: scripts/script2.groovy
      *           cronexp: * * 11 * * ?
      * </pre>
      * @param settings Artipie settings
@@ -99,7 +99,7 @@ public final class ScriptScheduler {
                         .map(YamlNode::asMapping)
                         .forEach(
                             yaml -> {
-                                final String key = yaml.string("key");
+                                final String key = yaml.string("path");
                                 final String cronexp = yaml.string("cronexp");
                                 boolean valid = false;
                                 try {

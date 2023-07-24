@@ -192,7 +192,7 @@ public class ScriptSchedulerTest {
                     "    type: fs",
                     String.format("    path: %s", this.temp.toString()),
                     "  crontab:",
-                    String.format("    - key: %s", ScriptSchedulerTest.SCRIPT_PATH),
+                    String.format("    - path: %s", ScriptSchedulerTest.SCRIPT_PATH),
                     "      cronexp: */3 * * * * ?"
                 )
             )
