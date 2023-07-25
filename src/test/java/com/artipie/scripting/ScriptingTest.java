@@ -19,52 +19,29 @@ import org.junit.Test;
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class ScriptingTest {
 
+    /**
+     * Source code for scripts testing. Currently identical for all languages.
+     */
+    private static String srccode = "a = a * 3;\nb = a + 1;";
+
     @Test
-    public void groovyStdTest() throws ScriptException {
-        final String code = "a = a * 3\nb = a + 1";
-        this.testScript(Script.ScriptType.GROOVY, code);
+    public void groovyTest() throws ScriptException {
+        this.testScript(Script.ScriptType.GROOVY, ScriptingTest.srccode);
     }
 
     @Test
-    public void groovyPrecompTest() throws ScriptException {
-        final String code = "a = a * 3\nb = a + 1";
-        this.testScript(Script.ScriptType.GROOVY, code);
+    public void mvelTest() throws ScriptException {
+        this.testScript(Script.ScriptType.MVEL, ScriptingTest.srccode);
     }
 
     @Test
-    public void mvelStdTest() throws ScriptException {
-        final String code = "a = a * 3;\nb = a + 1";
-        this.testScript(Script.ScriptType.MVEL, code);
+    public void pythonTest() throws ScriptException {
+        this.testScript(Script.ScriptType.PYTHON, ScriptingTest.srccode);
     }
 
     @Test
-    public void mvelPrecompTest() throws ScriptException {
-        final String code = "a = a * 3;\nb = a + 1";
-        this.testScript(Script.ScriptType.MVEL, code);
-    }
-
-    @Test
-    public void pythonStdTest() throws ScriptException {
-        final String code = "a = a * 3\nb = a + 1";
-        this.testScript(Script.ScriptType.PYTHON, code);
-    }
-
-    @Test
-    public void pythonPrecompTest() throws ScriptException {
-        final String code = "a = a * 3\nb = a + 1";
-        this.testScript(Script.ScriptType.PYTHON, code);
-    }
-
-    @Test
-    public void rubyStdTest() throws ScriptException {
-        final String code = "a = a * 3;\nb = a + 1;";
-        this.testScript(Script.ScriptType.RUBY, code);
-    }
-
-    @Test
-    public void rubyPrecompTest() throws ScriptException {
-        final String code = "a = a * 3;\nb = a + 1;";
-        this.testScript(Script.ScriptType.RUBY, code);
+    public void rubyTest() throws ScriptException {
+        this.testScript(Script.ScriptType.RUBY, ScriptingTest.srccode);
     }
 
     private Long toLong(final Object value) {

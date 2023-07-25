@@ -44,19 +44,15 @@ public final class ScriptRunner implements Job {
     private static LoadingCache<ScriptRunner.FilesContent, Script.PrecompiledScript> scripts;
 
     static {
-        final long duration = new Property(ArtipieProperties.SCRIPTS_TIMEOUT)
-            .asLongOrDefault(120_000L);
-        ScriptRunner.scripts = CacheBuilder.newBuilder()
-            .expireAfterWrite(duration, TimeUnit.MILLISECONDS)
-            .softValues()
-            .build(
-                new CacheLoader<>() {
-                    @Override
-                    public Script.PrecompiledScript load(final ScriptRunner.FilesContent content) {
-                        return content.precompiledScript();
-                    }
-                }
-            );
+        ScriptRunner.scripts = ScriptRunner.createCache();
+    }
+
+    /**
+     * Remove all cached script objects.
+     */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static void clearCache() {
+        ScriptRunner.scripts.invalidateAll();
     }
 
     @Override
@@ -94,6 +90,26 @@ public final class ScriptRunner implements Job {
         } else {
             Logger.warn(ScriptRunner.class, "Cannot find script %s", key.toString());
         }
+    }
+
+    /**
+     * Create cache for script objects.
+     * @return LoadingCache<> instance for scripts.
+     */
+    static LoadingCache<ScriptRunner.FilesContent, Script.PrecompiledScript> createCache() {
+        final long duration = new Property(ArtipieProperties.SCRIPTS_TIMEOUT)
+            .asLongOrDefault(120_000L);
+        return CacheBuilder.newBuilder()
+            .expireAfterWrite(duration, TimeUnit.MILLISECONDS)
+            .softValues()
+            .build(
+                new CacheLoader<>() {
+                    @Override
+                    public Script.PrecompiledScript load(final ScriptRunner.FilesContent content) {
+                        return content.precompiledScript();
+                    }
+                }
+            );
     }
 
     /**
@@ -152,7 +168,7 @@ public final class ScriptRunner implements Job {
      * Extra class for caching precompiled scripts.
      * @since 0.1
      */
-    private static final class FilesContent {
+    static final class FilesContent {
         /**
          * Key.
          */
@@ -168,14 +184,14 @@ public final class ScriptRunner implements Job {
          * @param key Key
          * @param storage Storage
          */
-        private FilesContent(final Key key, final BlockingStorage storage) {
+        FilesContent(final Key key, final BlockingStorage storage) {
             this.key = key;
             this.storage = storage;
         }
 
         @Override
         public int hashCode() {
-            return this.key.hashCode() ^ this.storage.hashCode();
+            return this.key.hashCode();
         }
 
         @Override
@@ -185,8 +201,7 @@ public final class ScriptRunner implements Job {
                 res = true;
             } else if (obj instanceof ScriptRunner.FilesContent) {
                 final ScriptRunner.FilesContent data = (ScriptRunner.FilesContent) obj;
-                res = Objects.equals(this.key, data.key)
-                    && Objects.equals(data.storage, this.storage);
+                res = Objects.equals(this.key, data.key);
             } else {
                 res = false;
             }
@@ -223,22 +238,6 @@ public final class ScriptRunner implements Job {
                 res = "";
             }
             return res;
-        }
-
-        /**
-         * Create instance of Script by script-file extension and script code.
-         * @param ext Extension of script-file.
-         * @param script Script code.
-         * @return Script instance
-         */
-        private static Optional<Script> script(final String ext, final String script) {
-            final Script.ScriptType type = Arrays.stream(Script.ScriptType.values())
-                .filter(val -> val.ext().equals(ext)).findFirst().orElse(Script.ScriptType.NONE);
-            Optional<Script> result = Optional.empty();
-            if (!type.equals(Script.ScriptType.NONE)) {
-                result = Optional.of(new Script.PrecompiledScript(type, script));
-            }
-            return result;
         }
     }
 }
