@@ -77,7 +77,6 @@ public class ScriptSchedulerTest {
     @BeforeEach
     void init() {
         this.data = new BlockingStorage(new FileStorage(this.temp));
-        ScriptRunner.clearCache();
     }
 
     @Test

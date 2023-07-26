@@ -7,8 +7,12 @@ package com.artipie.scheduling;
 
 import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.ArtipieException;
+import com.artipie.asto.Key;
+import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.scripting.ScriptContext;
 import com.artipie.scripting.ScriptRunner;
 import com.artipie.settings.Settings;
+import com.artipie.settings.repo.RepositoriesFromStorage;
 import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
@@ -22,6 +26,7 @@ import org.quartz.SchedulerException;
 /**
  * Scheduler for Artipie scripts.
  * @since 0.30
+ * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class ScriptScheduler {
 
@@ -92,6 +97,10 @@ public final class ScriptScheduler {
         final CronDefinition crondef =
             CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
         final CronParser parser = new CronParser(crondef);
+        final ScriptContext context = new ScriptContext(
+            new RepositoriesFromStorage(settings),
+            new BlockingStorage(settings.configStorage()), settings
+        );
         settings.crontab()
             .ifPresent(
                 crontab ->
@@ -99,7 +108,7 @@ public final class ScriptScheduler {
                         .map(YamlNode::asMapping)
                         .forEach(
                             yaml -> {
-                                final String key = yaml.string("path");
+                                final Key key = new Key.From(yaml.string("path"));
                                 final String cronexp = yaml.string("cronexp");
                                 boolean valid = false;
                                 try {
@@ -116,7 +125,7 @@ public final class ScriptScheduler {
                                 if (valid) {
                                     final JobDataMap data = new JobDataMap();
                                     data.put("key", key);
-                                    data.put("settings", settings);
+                                    data.put("context", context);
                                     try {
                                         this.service.schedulePeriodicJob(
                                             cronexp, ScriptRunner.class, data
@@ -128,4 +137,5 @@ public final class ScriptScheduler {
                             })
             );
     }
+
 }

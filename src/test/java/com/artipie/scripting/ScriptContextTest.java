@@ -15,11 +15,11 @@ import org.junit.jupiter.api.Test;
 import org.llorllale.cactoos.matchers.IsTrue;
 
 /**
- * Tests for {@link ScriptRunner}.
+ * Tests for {@link ScriptContext}.
  * @since 0.30
  * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
-class ScriptRunnerTest {
+class ScriptContextTest {
 
     @Test
     void testFcEqual() {
@@ -27,8 +27,8 @@ class ScriptRunnerTest {
         final Key.From keya = new Key.From(path);
         final Key.From keyb = new Key.From(path);
         final BlockingStorage storage = new BlockingStorage(new InMemoryStorage());
-        final ScriptRunner.FilesContent fca = new ScriptRunner.FilesContent(keya, storage);
-        final ScriptRunner.FilesContent fcb = new ScriptRunner.FilesContent(keyb, storage);
+        final ScriptContext.FilesContent fca = new ScriptContext.FilesContent(keya, storage);
+        final ScriptContext.FilesContent fcb = new ScriptContext.FilesContent(keyb, storage);
         MatcherAssert.assertThat(fca.equals(fcb), new IsTrue());
         MatcherAssert.assertThat(fca.hashCode(), new IsEqual<>(fcb.hashCode()));
     }
@@ -38,8 +38,8 @@ class ScriptRunnerTest {
         final Key.From keya = new Key.From("/usr/bin/testA");
         final Key.From keyb = new Key.From("/usr/bin/testB");
         final BlockingStorage storage = new BlockingStorage(new InMemoryStorage());
-        final ScriptRunner.FilesContent fca = new ScriptRunner.FilesContent(keya, storage);
-        final ScriptRunner.FilesContent fcb = new ScriptRunner.FilesContent(keyb, storage);
+        final ScriptContext.FilesContent fca = new ScriptContext.FilesContent(keya, storage);
+        final ScriptContext.FilesContent fcb = new ScriptContext.FilesContent(keyb, storage);
         MatcherAssert.assertThat(fca.equals(fcb), new IsEqual<>(false));
         MatcherAssert.assertThat(fca.hashCode(), new IsNot<>(new IsEqual<>(fcb.hashCode())));
     }
@@ -51,8 +51,8 @@ class ScriptRunnerTest {
         final Key.From keyb = new Key.From(path);
         final BlockingStorage storagea = new BlockingStorage(new InMemoryStorage());
         final BlockingStorage storageb = new BlockingStorage(new InMemoryStorage());
-        final ScriptRunner.FilesContent fca = new ScriptRunner.FilesContent(keya, storagea);
-        final ScriptRunner.FilesContent fcb = new ScriptRunner.FilesContent(keyb, storageb);
+        final ScriptContext.FilesContent fca = new ScriptContext.FilesContent(keya, storagea);
+        final ScriptContext.FilesContent fcb = new ScriptContext.FilesContent(keyb, storageb);
         MatcherAssert.assertThat(storagea.equals(storageb), new IsEqual<>(false));
         MatcherAssert.assertThat(
             storagea.hashCode(), new IsNot<>(new IsEqual<>(storageb.hashCode()))
@@ -63,8 +63,8 @@ class ScriptRunnerTest {
 
     @Test
     void testCache() {
-        final LoadingCache<ScriptRunner.FilesContent, Script.PrecompiledScript> scripts;
-        scripts = ScriptRunner.createCache();
+        final LoadingCache<ScriptContext.FilesContent, Script.PrecompiledScript> scripts;
+        scripts = ScriptContext.createCache();
         final Key.From keya = new Key.From("usr/bin/testA.groovy");
         final Key.From keyb = new Key.From("usr/bin/testB.groovy");
         final String srccode = "a = a * 3;\nb = a + 1;";
@@ -73,23 +73,23 @@ class ScriptRunnerTest {
         storage.save(keyb, srccode.getBytes());
         MatcherAssert.assertThat(scripts.size(), new IsEqual<>(0L));
         final Script.PrecompiledScript saa = scripts.getUnchecked(
-            new ScriptRunner.FilesContent(keya, storage)
+            new ScriptContext.FilesContent(keya, storage)
         );
         MatcherAssert.assertThat(saa, new IsNot<>(new IsEqual<>(null)));
         MatcherAssert.assertThat(scripts.size(), new IsEqual<>(1L));
         final Script.PrecompiledScript sab = scripts.getUnchecked(
-            new ScriptRunner.FilesContent(keya, storage)
+            new ScriptContext.FilesContent(keya, storage)
         );
         MatcherAssert.assertThat(sab, new IsNot<>(new IsEqual<>(null)));
         MatcherAssert.assertThat(scripts.size(), new IsEqual<>(1L));
         MatcherAssert.assertThat(saa, new IsEqual<>(sab));
         final Script.PrecompiledScript sba = scripts.getUnchecked(
-            new ScriptRunner.FilesContent(keyb, storage)
+            new ScriptContext.FilesContent(keyb, storage)
         );
         MatcherAssert.assertThat(sba, new IsNot<>(new IsEqual<>(null)));
         MatcherAssert.assertThat(scripts.size(), new IsEqual<>(2L));
         final Script.PrecompiledScript sbb = scripts.getUnchecked(
-            new ScriptRunner.FilesContent(keyb, storage)
+            new ScriptContext.FilesContent(keyb, storage)
         );
         MatcherAssert.assertThat(sbb, new IsNot<>(new IsEqual<>(null)));
         MatcherAssert.assertThat(scripts.size(), new IsEqual<>(2L));

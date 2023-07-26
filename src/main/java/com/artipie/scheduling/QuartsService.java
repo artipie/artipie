@@ -233,5 +233,4 @@ public final class QuartsService {
     private static String triggerId(final String id, final int item) {
         return String.join("-", "trigger", id, String.valueOf(item));
     }
-
 }
