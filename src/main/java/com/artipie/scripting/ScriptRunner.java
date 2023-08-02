@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.script.ScriptException;
+import org.apache.commons.io.FilenameUtils;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -79,29 +80,13 @@ public final class ScriptRunner implements Job {
     }
 
     /**
-     * Obtain extension of filename.
-     * @param filename Name of file.
-     * @return Extension.
-     */
-    private static String extension(final String filename) {
-        final int pos = filename.lastIndexOf('.');
-        final String res;
-        if (pos >= 0) {
-            res = filename.substring(pos + 1);
-        } else {
-            res = "";
-        }
-        return res;
-    }
-
-    /**
      * Returns cached script. Scripts objects are handled by LoadingCache.
      * @param key Key in the `scontext` storage for the script.
      * @param scontext Target scontext object.
      * @return Returns cached script or empty Optional in case of error.
      */
     private static Optional<Script> cachedScript(final Key key, final ScriptContext scontext) {
-        final String ext = ScriptRunner.extension(key.string());
+        final String ext = FilenameUtils.getExtension(key.string());
         final Script.ScriptType type = Arrays.stream(Script.ScriptType.values())
             .filter(val -> val.ext().equals(ext)).findFirst().orElse(Script.ScriptType.NONE);
         Optional<Script> result = Optional.empty();

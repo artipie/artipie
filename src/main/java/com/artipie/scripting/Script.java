@@ -141,14 +141,14 @@ public interface Script {
         @Override
         public Result call() throws ScriptException {
             final Result result = new Result();
-            result.value(this.script.eval(result.context()));
+            result.setValue(this.script.eval(result.context()));
             return result;
         }
 
         @Override
         public Result call(final Map<String, Object> vars) throws ScriptException {
             final Result result = new Result(vars);
-            result.value(this.script.eval(result.context()));
+            result.setValue(this.script.eval(result.context()));
             return result;
         }
     }
@@ -219,7 +219,7 @@ public interface Script {
          * Setter for resulting value.
          * @param value Resulting value
          */
-        private void value(final Object value) {
+        private void setValue(final Object value) {
             this.val = value;
         }
     }

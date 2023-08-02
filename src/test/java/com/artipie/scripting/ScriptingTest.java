@@ -44,6 +44,13 @@ public class ScriptingTest {
         this.testScript(Script.ScriptType.RUBY, ScriptingTest.srccode);
     }
 
+    @Test
+    public void evalValueTest() throws ScriptException {
+        final Script.Result result =
+            new Script.PrecompiledScript(Script.ScriptType.GROOVY, "2 + 3").call();
+        MatcherAssert.assertThat(this.toLong(result.value()), new IsEqual<>(5L));
+    }
+
     private Long toLong(final Object value) {
         final Long result;
         if (value instanceof Long) {

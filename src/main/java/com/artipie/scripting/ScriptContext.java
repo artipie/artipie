@@ -16,6 +16,7 @@ import com.google.common.cache.LoadingCache;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * Context class for running scripts. Holds required Artipie objects.
@@ -161,7 +162,7 @@ public final class ScriptContext {
          * @return Returns precompiled script object instance.
          */
         public Script.PrecompiledScript precompiledScript() {
-            final String ext = FilesContent.extension(this.key.string());
+            final String ext = FilenameUtils.getExtension(this.key.string());
             final Script.ScriptType type = Arrays.stream(Script.ScriptType.values())
                 .filter(val -> val.ext().equals(ext)).findFirst().orElse(Script.ScriptType.NONE);
             Script.PrecompiledScript result = null;
@@ -170,22 +171,6 @@ public final class ScriptContext {
                 result = new Script.PrecompiledScript(type, script);
             }
             return result;
-        }
-
-        /**
-         * Obtain extension of filename.
-         * @param filename Name of file.
-         * @return Extension.
-         */
-        private static String extension(final String filename) {
-            final int pos = filename.lastIndexOf('.');
-            final String res;
-            if (pos >= 0) {
-                res = filename.substring(pos + 1);
-            } else {
-                res = "";
-            }
-            return res;
         }
     }
 }
