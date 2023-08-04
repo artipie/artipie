@@ -5,6 +5,9 @@
 package com.artipie.scripting;
 
 import com.artipie.ArtipieException;
+import com.artipie.asto.Key;
+import com.artipie.asto.blocking.BlockingStorage;
+import java.util.Arrays;
 import java.util.Map;
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -14,6 +17,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 import javax.script.SimpleScriptContext;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * Script.
@@ -121,6 +125,15 @@ public interface Script {
 
         /**
          * Ctor.
+         * @param key Key for the script in the storage.
+         * @param storage Target storage.
+         */
+        public PrecompiledScript(final Key key, final BlockingStorage storage) {
+            this(PrecompiledScript.getScriptType(key), new String(storage.value(key)));
+        }
+
+        /**
+         * Ctor.
          * @param type Name of scripting engine.
          * @param script Script code
          */
@@ -150,6 +163,24 @@ public interface Script {
             final Result result = new Result(vars);
             result.setValue(this.script.eval(result.context()));
             return result;
+        }
+
+        /**
+         * Provides script type based on the storage key of the script.
+         * @param key Storage Key of the script.
+         * @return ScriptType on success.
+         * @throws ArtipieException in case of the unknown script type.
+         */
+        private static ScriptType getScriptType(final Key key) {
+            final String ext = FilenameUtils.getExtension(key.string());
+            final ScriptType type = Arrays.stream(ScriptType.values())
+                .filter(val -> val.ext().equals(ext)).findFirst().orElse(ScriptType.NONE);
+            if (type.equals(ScriptType.NONE)) {
+                throw new ArtipieException(
+                    String.join("", "Unknown script type for key: ", key.string())
+                );
+            }
+            return type;
         }
     }
 

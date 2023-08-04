@@ -13,10 +13,7 @@ import com.artipie.settings.repo.RepositoriesFromStorage;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.io.FilenameUtils;
 
 /**
  * Context class for running scripts. Holds required Artipie objects.
@@ -27,7 +24,7 @@ public final class ScriptContext {
     /**
      * Precompiled scripts instances cache.
      */
-    private final LoadingCache<FilesContent, Script.PrecompiledScript> scripts;
+    private final LoadingCache<Key, Script.PrecompiledScript> scripts;
 
     /**
      * Repositories info API, available in scripts.
@@ -58,14 +55,14 @@ public final class ScriptContext {
         this.repositories = repositories;
         this.storage = storage;
         this.settings = settings;
-        this.scripts = ScriptContext.createCache();
+        this.scripts = ScriptContext.createCache(storage);
     }
 
     /**
      * Getter for precompiled scripts instances cache.
      * @return LoadingCache<> object.
      */
-    LoadingCache<FilesContent, Script.PrecompiledScript> getScripts() {
+    LoadingCache<Key, Script.PrecompiledScript> getScripts() {
         return this.scripts;
     }
 
@@ -95,9 +92,10 @@ public final class ScriptContext {
 
     /**
      * Create cache for script objects.
+     * @param storage Storage which contains scripts.
      * @return LoadingCache<> instance for scripts.
      */
-    static LoadingCache<FilesContent, Script.PrecompiledScript> createCache() {
+    static LoadingCache<Key, Script.PrecompiledScript> createCache(final BlockingStorage storage) {
         final long duration = new Property(ArtipieProperties.SCRIPTS_TIMEOUT)
             .asLongOrDefault(120_000L);
         return CacheBuilder.newBuilder()
@@ -106,71 +104,10 @@ public final class ScriptContext {
             .build(
                 new CacheLoader<>() {
                     @Override
-                    public Script.PrecompiledScript load(final FilesContent ctx) {
-                        return ctx.precompiledScript();
+                    public Script.PrecompiledScript load(final Key key) {
+                        return new Script.PrecompiledScript(key, storage);
                     }
                 }
             );
-    }
-
-    /**
-     * Extra class for caching precompiled scripts.
-     * @since 0.1
-     */
-    static final class FilesContent {
-        /**
-         * Key.
-         */
-        private final Key key;
-
-        /**
-         * Storage.
-         */
-        private final BlockingStorage storage;
-
-        /**
-         * Ctor.
-         * @param key Key
-         * @param storage Storage
-         */
-        FilesContent(final Key key, final BlockingStorage storage) {
-            this.key = key;
-            this.storage = storage;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.key.hashCode();
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            final boolean res;
-            if (obj == this) {
-                res = true;
-            } else if (obj instanceof ScriptContext.FilesContent) {
-                final ScriptContext.FilesContent data = (ScriptContext.FilesContent) obj;
-                res = Objects.equals(this.key, data.key);
-            } else {
-                res = false;
-            }
-            return res;
-        }
-
-        /**
-         * Returns precompiled script for stored key & storage.
-         * @return Returns precompiled script object instance.
-         */
-        public Script.PrecompiledScript precompiledScript() {
-            final String ext = FilenameUtils.getExtension(this.key.string());
-            final Script.ScriptType type = Arrays.stream(Script.ScriptType.values())
-                .filter(val -> val.ext().equals(ext)).findFirst().orElse(Script.ScriptType.NONE);
-            Script.PrecompiledScript result = null;
-            if (!type.equals(Script.ScriptType.NONE)) {
-                final String script = new String(this.storage.value(this.key));
-                result = new Script.PrecompiledScript(type, script);
-            }
-            return result;
-        }
     }
 }
