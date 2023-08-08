@@ -179,6 +179,11 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
+    public Optional<YamlSequence> crontab() {
+        return Optional.ofNullable(this.meta().yamlSequence("crontab"));
+    }
+
+    @Override
     public String toString() {
         return String.format("YamlSettings{\n%s\n}", this.content.toString());
     }

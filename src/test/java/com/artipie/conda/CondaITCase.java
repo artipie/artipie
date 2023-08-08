@@ -52,16 +52,8 @@ public final class CondaITCase {
     @BeforeEach
     void init() throws IOException {
         this.containers.assertExec(
-            "Conda-build install failed", new ContainerResultMatcher(),
-            "conda", "install", "-y", "conda-build"
-        );
-        this.containers.assertExec(
-            "Conda-verify install failed", new ContainerResultMatcher(),
-            "conda", "install", "-y", "conda-verify"
-        );
-        this.containers.assertExec(
-            "Conda-client install failed", new ContainerResultMatcher(),
-            "conda", "install", "-y", "anaconda-client"
+            "Conda dependencies installation failed", new ContainerResultMatcher(),
+            "conda", "install", "-y", "conda-build", "conda-verify", "anaconda-client"
         );
     }
 

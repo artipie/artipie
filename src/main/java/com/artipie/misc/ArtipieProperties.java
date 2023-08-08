@@ -36,6 +36,11 @@ public final class ArtipieProperties {
     public static final String CONFIG_TIMEOUT = "artipie.config.cache.timeout";
 
     /**
+     * Expiration time for cache of configuration files.
+     */
+    public static final String SCRIPTS_TIMEOUT = "artipie.scripts.cache.timeout";
+
+    /**
      * Expiration time for cache of credential setting.
      */
     public static final String CREDS_TIMEOUT = "artipie.credentials.file.cache.timeout";
