@@ -159,7 +159,7 @@ create_network
 create_volume
 start_artipie
 
-sleep 1 #sometimes artipie container needs extra time to load
+sleep 3 #sometimes artipie container needs extra time to load
 
 if [[ -z "$1" ]]; then
   declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda pypi hexpm)
