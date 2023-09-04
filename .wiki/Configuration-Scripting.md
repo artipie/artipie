@@ -35,3 +35,10 @@ Table with available objects is given below.
 |-------------------|---------------------------------------------|
 | `_settings`       | com.artipie.settings.Settings               |
 | `_repositories`   | com.artipie.settings.repo.Repositories      |
+
+Groovy snippet using Artipie `_repositories` objects, example:
+```groovy
+File file = new File('/my-repo/info/cfg.log')
+cfg = _repositories.config('my-repo').toCompletableFuture().join()
+file.write cfg.toString()
+```
