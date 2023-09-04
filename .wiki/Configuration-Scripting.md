@@ -1,11 +1,11 @@
 ## Scripting support
 
-Artipie provides custom scripting support. It allows to run custom logic server-side without Artipie source code modifications.
-Artipie relies on JVM scripting engine for this functionality. 
+Artipie provides custom scripting support. It allows running custom logic server-side without Artipie source code modifications.
+Artipie relies on the JVM scripting engine for this functionality.
 
 ### Configuration
 
-To run script, add `crontab` section to Artipie main configuration file, then add script as key/value pair:
+To run the script, add `crontab` section to Artipie main configuration file, then add the script as a key/value pair:
 ```
 meta:
 ...
@@ -17,7 +17,7 @@ meta:
 
 ### File extensions
 
-Scrips must have file extension corresponding to one of the supported scripting languages.
+Scrips must have a file extension corresponding to one of the supported scripting languages.
 
 | Scripting language | File extension |
 |--------------------|----------------|
@@ -29,12 +29,12 @@ Scrips must have file extension corresponding to one of the supported scripting 
 ### Accessing Artipie objects
 
 Some Artipie objects could be accessed from the scripts. Such objects have names starting with underscore `_`.
-Table with available objects is given below.
+The table with available objects is given below.
 
-| Object name       | Artipie type                                |
-|-------------------|---------------------------------------------|
-| `_settings`       | com.artipie.settings.Settings               |
-| `_repositories`   | com.artipie.settings.repo.Repositories      |
+| Object name       | Artipie type                                                                                                                                       |
+|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `_settings`       | [com.artipie.settings.Settings](https://github.com/artipie/artipie/blob/master/src/main/java/com/artipie/settings/Settings.java)                   |
+| `_repositories`   | [com.artipie.settings.repo.Repositories](https://github.com/artipie/artipie/blob/master/src/main/java/com/artipie/settings/repo/Repositories.java) |
 
 Groovy snippet using Artipie `_repositories` objects, example:
 ```groovy
