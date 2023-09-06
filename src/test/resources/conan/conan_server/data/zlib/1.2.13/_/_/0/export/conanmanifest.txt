@@ -1,0 +1,5 @@
+1682597480
+conandata.yml: 41a217da74f4c7277f52f64c4c938e6e
+conanfile.py: 116817773d1167723b1b1da25d4887df
+export_source/patches/1.2.13/0001-Fix-cmake.patch: ec838d7f7b7e0c288d9d49dad91e3d8d
+export_source/patches/1.2.x/0002-gzguts-xcode12-compile-fix.patch: 86d7b5fa099f2ba64f4999f84185be87
