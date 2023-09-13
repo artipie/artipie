@@ -10,11 +10,11 @@ import com.artipie.test.TestDeployment;
 import java.io.IOException;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 
 /**
  * Integration tests for Conan repository.
@@ -56,10 +56,10 @@ public final class ConanITCase {
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
+            .withUser("security/users/alice.yaml", "alice")
             .withRepoConfig("conan/conan.yml", "my-conan")
             .withExposedPorts(9301),
-        () -> new TestDeployment.ClientContainer("conanio/gcc11")
-            .withWorkingDirectory("/opt")
+        ConanITCase::prepareClientContainer
     );
 
     @Test
@@ -140,19 +140,56 @@ public final class ConanITCase {
         );
     }
 
-    @BeforeEach
-    void init() throws IOException {
+    @Test
+    void testPackageReupload() throws IOException, InterruptedException {
         this.containers.assertExec(
-            "Conan profile init failed", new ContainerResultMatcher(),
-            "conan profile new --detect default".split(" ")
+            "Conan install (conancenter) failed", new ContainerResultMatcher(),
+            "conan install zlib/1.2.13@ -r conancenter".split(" ")
         );
         this.containers.assertExec(
-            "Conan profile update failed", new ContainerResultMatcher(),
-            "conan profile update settings.compiler.libcxx=libstdc++11 default".split(" ")
+            "Conan upload failed", new ContainerResultMatcher(),
+            "conan upload zlib/1.2.13@ -r conan-test --all".split(" ")
         );
         this.containers.assertExec(
-            "Conan remote add failed", new ContainerResultMatcher(),
-            "conan remote add conan-test http://artipie:9301 False".split(" ")
+            "rm cache failed", new ContainerResultMatcher(),
+            "rm -rf /home/conan/.conan/data".split(" ")
         );
+        this.containers.assertExec(
+            "Conan install (conan-test) failed", new ContainerResultMatcher(),
+            "conan install zlib/1.2.13@ -r conan-test".split(" ")
+        );
+    }
+
+    /**
+     * Prepares base docker image instance for tests.
+     *
+     * @return ImageFromDockerfile of testcontainers.
+     * @checkstyle LineLengthCheck (99 lines)
+     */
+    @SuppressWarnings("PMD.LineLengthCheck")
+    private static TestDeployment.ClientContainer prepareClientContainer() {
+        final ImageFromDockerfile image = new ImageFromDockerfile().withDockerfileFromBuilder(
+            builder -> builder
+                .from("ubuntu:22.04")
+                .env("CONAN_TRACE_FILE", "/tmp/conan_trace.log")
+                .env("DEBIAN_FRONTEND", "noninteractive")
+                .env("CONAN_VERBOSE_TRACEBACK", "1")
+                .env("CONAN_NON_INTERACTIVE", "1")
+                .env("no_proxy", "host.docker.internal,host.testcontainers.internal,localhost,127.0.0.1")
+                .workDir("/home")
+                .run("apt clean -y && apt update -y -o APT::Update::Error-Mode=any")
+                .run("apt install --no-install-recommends -y python3-pip curl g++ git make cmake")
+                .run("pip3 install -U pip setuptools")
+                .run("pip3 install -U conan==1.60.2")
+                .run("conan profile new --detect default")
+                .run("conan profile update settings.compiler.libcxx=libstdc++11 default")
+                .run("conan remote add conancenter https://center.conan.io False --force")
+                .run("conan remote add conan-center https://conan.bintray.com False --force")
+                .run("conan remote add conan-test http://artipie:9301 False --force")
+                .build()
+        );
+        return new TestDeployment.ClientContainer(image)
+            .withCommand("tail", "-f", "/dev/null")
+            .withReuse(true);
     }
 }
