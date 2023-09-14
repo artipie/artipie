@@ -8,12 +8,12 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.db.ArtifactDbFactory;
 import com.artipie.db.DbConsumer;
 import com.artipie.scheduling.ArtifactEvent;
-import com.artipie.scheduling.EventQueue;
-import com.artipie.scheduling.QuartsService;
+import com.artipie.scheduling.QuartzService;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.awaitility.Awaitility;
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.quartz.SchedulerException;
 
 /**
- * Test for {@link com.artipie.scheduling.QuartsService} and
+ * Test for {@link QuartzService} and
  * {@link com.artipie.db.DbConsumer}.
  * @since 0.31
  * @checkstyle MagicNumberCheck (1000 lines)
@@ -48,25 +48,25 @@ public final class SchedulerDbTest {
     /**
      * Quartz service to test.
      */
-    private QuartsService service;
+    private QuartzService service;
 
     @BeforeEach
     void init() {
         this.source = new ArtifactDbFactory(Yaml.createYamlMappingBuilder().build(), this.path)
             .initialize();
-        this.service = new QuartsService();
+        this.service = new QuartzService();
     }
 
     @Test
     void insertsRecords() throws SchedulerException, InterruptedException {
         this.service.start();
-        final EventQueue<ArtifactEvent> queue = this.service.addPeriodicEventsProcessor(
+        final Queue<ArtifactEvent> queue = this.service.addPeriodicEventsProcessor(
             1, List.of(new DbConsumer(this.source), new DbConsumer(this.source))
         );
         Thread.sleep(500);
         final long created = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
-            queue.put(
+            queue.add(
                 new ArtifactEvent(
                     "rpm", "my-rpm", "Alice", "org.time", String.valueOf(i), 1250L, created
                 )

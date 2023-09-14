@@ -208,7 +208,8 @@ public class RestApiServerBase {
                     vertx, new JWTAuthOptions().addPubSecKey(
                         new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
                     )
-                )
+                ),
+                Optional.empty()
             ),
             context.succeedingThenComplete()
         );

@@ -30,7 +30,10 @@ import org.junit.jupiter.api.io.TempDir;
  * @checkstyle IllegalTokenCheck (1000 lines)
  */
 @SuppressWarnings(
-    {"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods", "PMD.CheckResultSet", "PMD.CloseResource"}
+    {
+        "PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods", "PMD.CheckResultSet",
+        "PMD.CloseResource", "PMD.UseUnderscoresInNumericLiterals"
+    }
 )
 class DbConsumerTest {
 
@@ -115,7 +118,7 @@ class DbConsumerTest {
         consumer.accept(
             new ArtifactEvent(
                 "rpm", "my-rpm", "Alice", "org.time", "1.2", 1250L, created,
-                ArtifactEvent.Type.DELETE
+                ArtifactEvent.Type.DELETE_VERSION
             )
         );
         Awaitility.await().atMost(20, TimeUnit.SECONDS).until(
@@ -170,7 +173,7 @@ class DbConsumerTest {
                 consumer.accept(
                     new ArtifactEvent(
                         "rpm", "my-rpm", "Alice", "org.time", String.valueOf(i - 500), 1250L,
-                        created - i, ArtifactEvent.Type.DELETE
+                        created - i, ArtifactEvent.Type.DELETE_VERSION
                     )
                 );
             }
@@ -186,5 +189,93 @@ class DbConsumerTest {
                 }
             }
         );
+    }
+
+    @Test
+    void removesAllByName() throws InterruptedException {
+        final DbConsumer consumer = new DbConsumer(this.source);
+        Thread.sleep(1000);
+        final long created = System.currentTimeMillis();
+        for (int i = 0; i < 10; i++) {
+            consumer.accept(
+                new ArtifactEvent(
+                    "maven", "my-maven", "Alice", "com.artipie.asto",
+                    String.valueOf(i), 1250L, created - i
+                )
+            );
+        }
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
+            () -> {
+                try (
+                    Connection conn = this.source.getConnection();
+                    Statement stat = conn.createStatement()
+                ) {
+                    stat.execute("select count(*) from artifacts");
+                    return stat.getResultSet().getInt(1) == 10;
+                }
+            }
+        );
+        consumer.accept(new ArtifactEvent("maven", "my-maven", "com.artipie.asto"));
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
+            () -> {
+                try (
+                    Connection conn = this.source.getConnection();
+                    Statement stat = conn.createStatement()
+                ) {
+                    stat.execute("select count(*) from artifacts");
+                    return stat.getResultSet().getInt(1) == 0;
+                }
+            }
+        );
+    }
+
+    @Test
+    void replacesOnConflict() throws InterruptedException, SQLException {
+        final DbConsumer consumer = new DbConsumer(this.source);
+        Thread.sleep(1000);
+        final long first = System.currentTimeMillis();
+        consumer.accept(
+            new ArtifactEvent(
+                "docker", "my-docker", "Alice", "linux/alpine", "latest", 12550L, first
+            )
+        );
+        final long size = 56950L;
+        final long second = first + 65854L;
+        consumer.accept(
+            new ArtifactEvent(
+                "docker", "my-docker", "Alice", "linux/alpine", "latest", size, second
+            )
+        );
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
+            () -> {
+                try (
+                    Connection conn = this.source.getConnection();
+                    Statement stat = conn.createStatement()
+                ) {
+                    stat.execute("select count(*) from artifacts");
+                    return stat.getResultSet().getInt(1) == 1;
+                }
+            }
+        );
+        try (
+            Connection conn = this.source.getConnection();
+            Statement stat = conn.createStatement()
+        ) {
+            stat.execute("select * from artifacts");
+            final ResultSet res = stat.getResultSet();
+            res.next();
+            MatcherAssert.assertThat(
+                res.getLong("size"),
+                new IsEqual<>(size)
+            );
+            MatcherAssert.assertThat(
+                res.getDate("created_date"),
+                new IsEqual<>(new Date(second))
+            );
+            MatcherAssert.assertThat(
+                "ResultSet does not have more records",
+                res.next(), new IsEqual<>(false)
+            );
+        }
     }
 }

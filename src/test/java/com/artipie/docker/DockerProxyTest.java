@@ -104,7 +104,8 @@ class DockerProxyTest {
                 cache
             ),
             Policy.FREE,
-            (username, password) -> Optional.empty()
+            (username, password) -> Optional.empty(),
+            Optional.empty()
         );
     }
 

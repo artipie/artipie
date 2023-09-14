@@ -20,8 +20,8 @@ import com.artipie.db.DbConsumer;
 import com.artipie.http.auth.AuthLoader;
 import com.artipie.http.auth.Authentication;
 import com.artipie.scheduling.ArtifactEvent;
-import com.artipie.scheduling.EventQueue;
-import com.artipie.scheduling.QuartsService;
+import com.artipie.scheduling.MetadataEventQueues;
+import com.artipie.scheduling.QuartzService;
 import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.cache.CachedStorages;
 import com.artipie.settings.cache.CachedUsers;
@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.function.Consumer;
 import javax.sql.DataSource;
 import org.quartz.SchedulerException;
@@ -103,15 +104,16 @@ public final class YamlSettings implements Settings {
     /**
      * Artifacts event queue.
      */
-    private final EventQueue<ArtifactEvent> queue;
+    private final Optional<MetadataEventQueues> events;
 
     /**
      * Ctor.
      * @param content YAML file content.
      * @param path Path to the folder with yaml settings file
+     * @param quartz Quartz service
      */
     @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
-    public YamlSettings(final YamlMapping content, final Path path) {
+    public YamlSettings(final YamlMapping content, final Path path, final QuartzService quartz) {
         this.content = content;
         final CachedUsers auth = YamlSettings.initAuth(this.meta());
         this.security = new ArtipieSecurity.FromYaml(
@@ -122,7 +124,7 @@ public final class YamlSettings implements Settings {
         );
         this.mctx = new MetricsContext(this.meta());
         this.database = new ArtifactDbFactory(this.meta(), path).initialize();
-        this.queue = YamlSettings.initArtifactsEvents(this.meta(), this.database);
+        this.events = YamlSettings.initArtifactsEvents(this.meta(), this.database, quartz);
     }
 
     @Override
@@ -174,8 +176,8 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
-    public EventQueue<ArtifactEvent> events() {
-        return this.queue;
+    public Optional<MetadataEventQueues> artifactMetadata() {
+        return this.events;
     }
 
     @Override
@@ -217,34 +219,30 @@ public final class YamlSettings implements Settings {
     }
 
     /**
-     * Initialize schedule mechanism to gather artifact events
-     * (adding and removing artifacts) and add corresponding records into db.
+     * Initialize and scheduled mechanism to gather artifact events
+     * (adding and removing artifacts) and create {@link MetadataEventQueues} instance.
      * @param settings Artipie settings
      * @param database Database source
+     * @param quartz Quartz service
      * @return Event queue to gather artifacts events
      */
-    private static EventQueue<ArtifactEvent> initArtifactsEvents(
-        final YamlMapping settings, final DataSource database
+    @SuppressWarnings("PMD.OnlyOneReturn")
+    private static Optional<MetadataEventQueues> initArtifactsEvents(
+        final YamlMapping settings, final DataSource database, final QuartzService quartz
     ) {
+        final YamlMapping prop = settings.yamlMapping("artifacts_database");
+        if (prop.isEmpty()) {
+            return Optional.empty();
+        }
         try {
-            final QuartsService quarts = new QuartsService();
-            final YamlMapping prop = settings.yamlMapping("artifacts_database");
-            final int threads;
-            final int interval;
-            if (prop == null) {
-                threads = 1;
-                interval = 1;
-            } else {
-                threads = Math.max(1, prop.integer("threads_count"));
-                interval = Math.max(1, prop.integer("interval_seconds"));
-            }
+            final int threads = Math.max(1, prop.integer("threads_count"));
+            final int interval = Math.max(1, prop.integer("interval_seconds"));
             final List<Consumer<ArtifactEvent>> list = new ArrayList<>(threads);
             for (int cnt = 0; cnt < threads; cnt = cnt + 1) {
                 list.add(new DbConsumer(database));
             }
-            final EventQueue<ArtifactEvent> res = quarts.addPeriodicEventsProcessor(interval, list);
-            quarts.start();
-            return res;
+            final Queue<ArtifactEvent> res = quartz.addPeriodicEventsProcessor(interval, list);
+            return Optional.of(new MetadataEventQueues(res, quartz));
         } catch (final SchedulerException error) {
             throw new ArtipieException(error);
         }

@@ -6,15 +6,20 @@ package com.artipie.scheduling;
 
 import com.artipie.ArtipieException;
 import com.jcabi.log.Logger;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
@@ -27,7 +32,7 @@ import org.quartz.impl.StdSchedulerFactory;
  * Start quarts scheduling service.
  * @since 1.3
  */
-public final class QuartsService {
+public final class QuartzService {
 
     /**
      * Quartz scheduler.
@@ -38,7 +43,7 @@ public final class QuartsService {
      * Ctor.
      */
     @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
-    public QuartsService() {
+    public QuartzService() {
         try {
             this.scheduler = new StdSchedulerFactory().getScheduler();
             Runtime.getRuntime().addShutdownHook(
@@ -46,7 +51,7 @@ public final class QuartsService {
                     @Override
                     public void run() {
                         try {
-                            QuartsService.this.scheduler.shutdown();
+                            QuartzService.this.scheduler.shutdown();
                         } catch (final SchedulerException error) {
                             Logger.error(this, error.getMessage());
                         }
@@ -69,9 +74,9 @@ public final class QuartsService {
      * @return Queue to add the events into
      * @throws SchedulerException On error
      */
-    public <T> EventQueue<T> addPeriodicEventsProcessor(
+    public <T> Queue<T> addPeriodicEventsProcessor(
         final int seconds, final List<Consumer<T>> consumer) throws SchedulerException {
-        final EventQueue<T> queue = new EventQueue<>();
+        final Queue<T> queue = new ConcurrentLinkedDeque<>();
         final String id = String.join(
             "-", EventsProcessor.class.getSimpleName(), UUID.randomUUID().toString()
         );
@@ -84,10 +89,10 @@ public final class QuartsService {
             data.put("action", Objects.requireNonNull(consumer.get(item)));
             this.scheduler.scheduleJob(
                 JobBuilder.newJob(EventsProcessor.class).setJobData(data).withIdentity(
-                    QuartsService.jobId(id, item), EventsProcessor.class.getSimpleName()
+                    QuartzService.jobId(id, item), EventsProcessor.class.getSimpleName()
                 ).build(),
                 trigger.withIdentity(
-                    QuartsService.triggerId(id, item),
+                    QuartzService.triggerId(id, item),
                     EventsProcessor.class.getSimpleName()
                 ).build()
             );
@@ -105,10 +110,11 @@ public final class QuartsService {
      * @param clazz Job class, implementation of {@link org.quartz.Job}
      * @param data Job data map
      * @param <T> Class type parameter
+     * @return Set of the started quartz job keys
      * @throws SchedulerException On error
      * @checkstyle ParameterNumberCheck (7 lines)
      */
-    public <T extends Job> void schedulePeriodicJob(
+    public <T extends Job> Set<JobKey> schedulePeriodicJob(
         final int seconds, final int threads, final Class<T> clazz, final JobDataMap data
     ) throws SchedulerException {
         final String id = String.join(
@@ -117,17 +123,20 @@ public final class QuartsService {
         final TriggerBuilder<SimpleTrigger> trigger = TriggerBuilder.newTrigger()
             .startNow().withSchedule(SimpleScheduleBuilder.repeatSecondlyForever(seconds));
         final int count = this.parallelJobs(threads);
+        final Set<JobKey> res = new HashSet<>(count);
         for (int item = 0; item < count; item = item + 1) {
+            final JobKey key = new JobKey(QuartzService.jobId(id, item), clazz.getSimpleName());
             this.scheduler.scheduleJob(
-                JobBuilder.newJob(clazz).setJobData(data)
-                    .withIdentity(QuartsService.jobId(id, item), clazz.getSimpleName()).build(),
+                JobBuilder.newJob(clazz).setJobData(data).withIdentity(key).build(),
                 trigger.withIdentity(
-                    QuartsService.triggerId(id, item),
+                    QuartzService.triggerId(id, item),
                     clazz.getSimpleName()
                 ).build()
             );
+            res.add(key);
         }
         this.log(count, clazz.getSimpleName(), seconds);
+        return res;
     }
 
     /**
@@ -156,6 +165,20 @@ public final class QuartsService {
             .forJob(job)
             .build();
         this.scheduler.scheduleJob(job, trigger);
+    }
+
+    /**
+     * Delete quartz job by key.
+     * @param key Job key
+     */
+    public void deleteJob(final JobKey key) {
+        try {
+            this.scheduler.deleteJob(key);
+        } catch (final SchedulerException err) {
+            Logger.error(
+                this, "Error while deleting quartz job %s:\n%s", key.toString(), err.getMessage()
+            );
+        }
     }
 
     /**

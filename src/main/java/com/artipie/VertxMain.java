@@ -15,6 +15,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.misc.ArtipieProperties;
+import com.artipie.scheduling.QuartzService;
 import com.artipie.scheduling.ScriptScheduler;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.MetricsContext;
@@ -89,11 +90,6 @@ public final class VertxMain {
     private final List<VertxSliceServer> servers;
 
     /**
-     * Scheduler.
-     */
-    private final ScriptScheduler scheduler;
-
-    /**
      * Ctor.
      *
      * @param http HTTP client
@@ -105,7 +101,6 @@ public final class VertxMain {
         this.config = config;
         this.port = port;
         this.servers = new ArrayList<>(0);
-        this.scheduler = new ScriptScheduler();
     }
 
     /**
@@ -116,7 +111,8 @@ public final class VertxMain {
      * @throws IOException In case of error reading settings.
      */
     public int start(final int apiport) throws IOException {
-        final Settings settings = new SettingsFromPath(this.config).find();
+        final QuartzService quartz = new QuartzService();
+        final Settings settings = new SettingsFromPath(this.config).find(quartz);
         final Vertx vertx = VertxMain.vertx(settings.metrics());
         final JWTAuth jwt = JWTAuth.create(
             vertx.getDelegate(), new JWTAuthOptions().addPubSecKey(
@@ -132,8 +128,8 @@ public final class VertxMain {
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
         this.startRepos(vertx, settings, this.port, jwt);
         vertx.deployVerticle(new RestApi(settings, apiport, jwt));
-        this.scheduler.start();
-        this.scheduler.loadCrontab(settings);
+        quartz.start();
+        new ScriptScheduler(quartz).loadCrontab(settings);
         return main;
     }
 

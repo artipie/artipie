@@ -4,6 +4,7 @@
  */
 package com.artipie.scheduling;
 
+import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -18,21 +19,21 @@ import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
 
 /**
- * Test for {@link QuartsService}.
+ * Test for {@link QuartzService}.
  * @since 1.3
  * @checkstyle IllegalTokenCheck (500 lines)
  * @checkstyle MagicNumberCheck (500 lines)
  */
-public final class QuartsServiceTest {
+public final class QuartzServiceTest {
 
     /**
      * Quartz service to test.
      */
-    private QuartsService service;
+    private QuartzService service;
 
     @BeforeEach
     void init() {
-        this.service = new QuartsService();
+        this.service = new QuartzService();
     }
 
     @Test
@@ -40,12 +41,12 @@ public final class QuartsServiceTest {
         final TestConsumer first = new TestConsumer();
         final TestConsumer second = new TestConsumer();
         final TestConsumer third = new TestConsumer();
-        final EventQueue<Character> queue = this.service.addPeriodicEventsProcessor(
+        final Queue<Character> queue = this.service.addPeriodicEventsProcessor(
             1, new ListOf<Consumer<Character>>(first, second, third)
         );
         this.service.start();
         for (char sym = 'a'; sym <= 'z'; sym++) {
-            queue.put(sym);
+            queue.add(sym);
             if ((int) sym % 5 == 0) {
                 Thread.sleep(1500);
             }
