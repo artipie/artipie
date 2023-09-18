@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import org.awaitility.Awaitility;
 import org.cactoos.list.ListOf;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.quartz.Job;
@@ -34,6 +35,11 @@ public final class QuartzServiceTest {
     @BeforeEach
     void init() {
         this.service = new QuartzService();
+    }
+
+    @AfterEach
+    void stop() {
+        this.service.stop();
     }
 
     @Test
