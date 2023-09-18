@@ -231,7 +231,7 @@ public final class YamlSettings implements Settings {
         final YamlMapping settings, final DataSource database, final QuartzService quartz
     ) {
         final YamlMapping prop = settings.yamlMapping("artifacts_database");
-        if (prop.isEmpty()) {
+        if (prop == null) {
             return Optional.empty();
         }
         try {
