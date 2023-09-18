@@ -17,6 +17,7 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -55,6 +56,11 @@ public final class SchedulerDbTest {
         this.source = new ArtifactDbFactory(Yaml.createYamlMappingBuilder().build(), this.path)
             .initialize();
         this.service = new QuartzService();
+    }
+
+    @AfterEach
+    void stop() {
+        this.service.stop();
     }
 
     @Test
