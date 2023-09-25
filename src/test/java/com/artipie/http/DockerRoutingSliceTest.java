@@ -19,8 +19,7 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.scheduling.ArtifactEvent;
-import com.artipie.scheduling.EventQueue;
+import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.MetricsContext;
@@ -212,8 +211,8 @@ final class DockerRoutingSliceTest {
         }
 
         @Override
-        public EventQueue<ArtifactEvent> events() {
-            return null;
+        public Optional<MetadataEventQueues> artifactMetadata() {
+            return Optional.empty();
         }
 
         @Override

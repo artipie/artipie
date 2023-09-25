@@ -8,6 +8,7 @@ import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.auth.JwtTokens;
+import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.security.policy.CachedYamlPolicy;
 import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.RepoData;
@@ -69,6 +70,11 @@ public final class RestApi extends AbstractVerticle {
     private final JWTAuth jwt;
 
     /**
+     * Artifact metadata events queue.
+     */
+    private final Optional<MetadataEventQueues> events;
+
+    /**
      * Primary ctor.
      * @param caches Artipie settings caches
      * @param configsStorage Artipie settings storage
@@ -76,6 +82,7 @@ public final class RestApi extends AbstractVerticle {
      * @param security Artipie security
      * @param keystore KeyStore
      * @param jwt Jwt authentication provider
+     * @param events Artifact metadata events queue
      * @checkstyle ParameterNumberCheck (10 lines)
      */
     public RestApi(
@@ -84,7 +91,8 @@ public final class RestApi extends AbstractVerticle {
         final int port,
         final ArtipieSecurity security,
         final Optional<KeyStore> keystore,
-        final JWTAuth jwt
+        final JWTAuth jwt,
+        final Optional<MetadataEventQueues> events
     ) {
         this.caches = caches;
         this.configsStorage = configsStorage;
@@ -92,6 +100,7 @@ public final class RestApi extends AbstractVerticle {
         this.security = security;
         this.keystore = keystore;
         this.jwt = jwt;
+        this.events = events;
     }
 
     /**
@@ -104,7 +113,7 @@ public final class RestApi extends AbstractVerticle {
     public RestApi(final Settings settings, final int port, final JWTAuth jwt) {
         this(
             settings.caches(), settings.configStorage(),
-            port, settings.authz(), settings.keyStore(), jwt
+            port, settings.authz(), settings.keyStore(), jwt, settings.artifactMetadata()
         );
     }
 
@@ -143,7 +152,7 @@ public final class RestApi extends AbstractVerticle {
             this.caches.filtersCache(),
             new ManageRepoSettings(asto),
             new RepoData(this.configsStorage, this.caches.storagesCache()),
-            this.security.policy()
+            this.security.policy(), this.events
         ).init(repoRb);
         new StorageAliasesRest(
             this.caches.storagesCache(), asto, this.security.policy()

@@ -48,6 +48,8 @@ import com.artipie.npm.proxy.http.NpmProxySlice;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.pypi.http.PySlice;
 import com.artipie.rpm.http.RpmSlice;
+import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.Settings;
 import com.artipie.settings.repo.RepoConfig;
@@ -55,6 +57,7 @@ import com.artipie.settings.repo.RepositoriesFromStorage;
 import io.vertx.core.Vertx;
 import java.net.URI;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -127,18 +130,23 @@ public final class SliceFromConfig extends Slice.Wrap {
         final boolean standalone
     ) {
         final Slice slice;
+        final Optional<Queue<ArtifactEvent>> events =
+            settings.artifactMetadata().map(MetadataEventQueues::eventQueue);
         switch (cfg.type()) {
             case "file":
                 slice = new TrimPathSlice(
-                    new FilesSlice(cfg.storage(), policy, auth, cfg.name()), SliceFromConfig.PTRN
+                    new FilesSlice(cfg.storage(), policy, auth, cfg.name(), events),
+                    SliceFromConfig.PTRN
                 );
                 break;
             case "file-proxy":
-                slice = new TrimPathSlice(new FileProxy(http, cfg), SliceFromConfig.PTRN);
+                slice = new TrimPathSlice(new FileProxy(http, cfg, events), SliceFromConfig.PTRN);
                 break;
             case "npm":
                 slice = new TrimPathSlice(
-                    new NpmSlice(cfg.url(), cfg.storage(), policy, tokens.auth(), cfg.name()),
+                    new NpmSlice(
+                        cfg.url(), cfg.storage(), policy, tokens.auth(), cfg.name(), events
+                    ),
                     SliceFromConfig.PTRN
                 );
                 break;
@@ -147,7 +155,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "helm":
                 slice = new TrimPathSlice(
-                    new HelmSlice(cfg.storage(), cfg.url().toString(), policy, auth, cfg.name()),
+                    new HelmSlice(
+                        cfg.storage(), cfg.url().toString(), policy, auth, cfg.name(), events
+                    ),
                     SliceFromConfig.PTRN
                 );
                 break;
@@ -166,7 +176,8 @@ public final class SliceFromConfig extends Slice.Wrap {
                         new AstoRepository(cfg.storage(), Optional.of(cfg.url().toString())),
                         policy,
                         auth,
-                        cfg.name()
+                        cfg.name(),
+                        events
                     ),
                     SliceFromConfig.PTRN
                 );
@@ -188,11 +199,18 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "maven":
                 slice = new TrimPathSlice(
-                    new MavenSlice(cfg.storage(), policy, auth, cfg.name()), SliceFromConfig.PTRN
+                    new MavenSlice(cfg.storage(), policy, auth, cfg.name(), events),
+                    SliceFromConfig.PTRN
                 );
                 break;
             case "maven-proxy":
-                slice = new TrimPathSlice(new MavenProxy(http, cfg), SliceFromConfig.PTRN);
+                slice = new TrimPathSlice(
+                    new MavenProxy(
+                        http, cfg,
+                        settings.artifactMetadata().flatMap(queues -> queues.proxyEventQueues(cfg))
+                    ),
+                    SliceFromConfig.PTRN
+                );
                 break;
             case "maven-group":
                 slice = new TrimPathSlice(
@@ -228,16 +246,24 @@ public final class SliceFromConfig extends Slice.Wrap {
                         ),
                         cfg.storage(),
                         http
-                    )
+                    ),
+                    settings.artifactMetadata().flatMap(queues -> queues.proxyEventQueues(cfg))
                 );
                 break;
             case "pypi":
                 slice = new TrimPathSlice(
-                    new PySlice(cfg.storage(), policy, auth, cfg.name()), SliceFromConfig.PTRN
+                    new PySlice(cfg.storage(), policy, auth, cfg.name(), events),
+                    SliceFromConfig.PTRN
                 );
                 break;
             case "pypi-proxy":
-                slice = new TrimPathSlice(new PypiProxy(http, cfg), SliceFromConfig.PTRN);
+                slice = new TrimPathSlice(
+                    new PypiProxy(
+                        http, cfg, settings.artifactMetadata()
+                            .flatMap(queues -> queues.proxyEventQueues(cfg))
+                    ),
+                    SliceFromConfig.PTRN
+                );
                 break;
             case "docker":
                 final Docker docker = new AstoDocker(
@@ -248,6 +274,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                         docker,
                         policy,
                         new BasicAuthScheme(auth),
+                        events,
                         cfg.name()
                     );
                 } else {
@@ -256,26 +283,28 @@ public final class SliceFromConfig extends Slice.Wrap {
                             new TrimmedDocker(docker, cfg.name()),
                             policy,
                             new BasicAuthScheme(auth),
+                            events,
                             cfg.name()
                         )
                     );
                 }
                 break;
             case "docker-proxy":
-                slice = new DockerProxy(http, standalone, cfg, policy, auth);
+                slice = new DockerProxy(http, standalone, cfg, policy, auth, events);
                 break;
             case "deb":
                 slice = new TrimPathSlice(
                     new DebianSlice(
                         cfg.storage(), policy, auth,
-                        new Config.FromYaml(cfg.name(), cfg.settings(), settings.configStorage())
+                        new Config.FromYaml(cfg.name(), cfg.settings(), settings.configStorage()),
+                        events
                     ),
                     SliceFromConfig.PTRN
                 );
                 break;
             case "conda":
                 slice = new CondaSlice(
-                    cfg.storage(), policy, auth, tokens, cfg.url().toString(), cfg.name()
+                    cfg.storage(), policy, auth, tokens, cfg.url().toString(), cfg.name(), events
                 );
                 break;
             case "conan":
@@ -286,7 +315,8 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "hexpm":
                 slice = new TrimPathSlice(
-                    new HexSlice(cfg.storage(), policy, auth, cfg.name()), SliceFromConfig.PTRN
+                    new HexSlice(cfg.storage(), policy, auth, events, cfg.name()),
+                    SliceFromConfig.PTRN
                 );
                 break;
             default:

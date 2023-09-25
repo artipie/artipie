@@ -145,7 +145,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http</artifactId>
-      <version>v1.2.16</version>
+      <version>v1.2.20</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -182,7 +182,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>hexpm-adapter</artifactId>
-      <version>v0.1.2</version>
+      <version>v0.1.3</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -216,12 +216,12 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>files-adapter</artifactId>
-      <version>v1.1.0</version>
+      <version>v1.1.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>npm-adapter</artifactId>
-      <version>v0.11.1</version>
+      <version>v0.11.4</version>
     </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
@@ -236,7 +236,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>maven-adapter</artifactId>
-      <version>0.9.11</version>
+      <version>0.9.12</version>
       <exclusions>
         <exclusion>
           <groupId>com.jcabi</groupId>
@@ -247,17 +247,17 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>rpm-adapter</artifactId>
-      <version>1.10.4</version>
+      <version>v1.10.11</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>gem-adapter</artifactId>
-      <version>v1.3.4</version>
+      <version>v1.3.7</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>composer-adapter</artifactId>
-      <version>v1.0.3</version>
+      <version>v1.0.7</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -267,32 +267,32 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>nuget-adapter</artifactId>
-      <version>v1.5.6</version>
+      <version>v1.5.7</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>pypi-adapter</artifactId>
-      <version>v0.8.8</version>
+      <version>v0.8.10</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>helm-adapter</artifactId>
-      <version>v1.1.4</version>
+      <version>v1.1.6</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>v0.18.2</version>
+      <version>v0.18.4</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>debian-adapter</artifactId>
-      <version>v0.8.4</version>
+      <version>v0.8.6</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>conda-adapter</artifactId>
-      <version>v0.6.2</version>
+      <version>v0.6.3</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>

@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieException;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.auth.AuthUser;
+import com.artipie.scheduling.QuartzService;
 import com.artipie.settings.YamlSettings;
 import com.artipie.tools.CodeBlob;
 import com.artipie.tools.CodeClassLoader;
@@ -196,7 +197,8 @@ public class AuthFromKeycloakTest {
                         ).build()
                 ).build()
             ).build(),
-            this.path
+            this.path,
+            new QuartzService()
         );
     }
 

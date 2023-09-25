@@ -7,6 +7,7 @@ package com.artipie.settings.cache;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
+import com.artipie.scheduling.QuartzService;
 import com.artipie.settings.Settings;
 import com.artipie.settings.YamlSettings;
 import java.nio.file.Path;
@@ -73,7 +74,7 @@ final class CachedStoragesTest {
                 new YamlSettings(
                     Yaml.createYamlMappingBuilder()
                         .add("meta", Yaml.createYamlMappingBuilder().build())
-                        .build(), Path.of("a/b/c")
+                        .build(), Path.of("a/b/c"), new QuartzService()
                 )
             )
         );
@@ -90,7 +91,7 @@ final class CachedStoragesTest {
                             .add("type", "fs")
                             .add("path", stpath).build()
                     ).build()
-                ).build(), this.temp
+                ).build(), this.temp, new QuartzService()
         );
     }
 }

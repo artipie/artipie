@@ -9,6 +9,7 @@ import com.artipie.VertxMain;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.misc.JavaResource;
+import com.artipie.scheduling.QuartzService;
 import com.jcabi.log.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,17 +39,19 @@ public final class SettingsFromPath {
     /**
      * Searches settings by the provided path, if no settings are found,
      * example settings are used.
+     * @param quartz Quartz service
      * @return Artipie settings
      * @throws IOException On IO error
      */
-    public Settings find() throws IOException {
+    public Settings find(final QuartzService quartz) throws IOException {
         boolean initialize = Boolean.parseBoolean(System.getenv("ARTIPIE_INIT"));
         if (!Files.exists(this.path)) {
             new JavaResource("example/artipie.yaml").copy(this.path);
             initialize = true;
         }
         final Settings settings = new YamlSettings(
-            Yaml.createYamlInput(this.path.toFile()).readYamlMapping(), this.path.getParent()
+            Yaml.createYamlInput(this.path.toFile()).readYamlMapping(),
+            this.path.getParent(), quartz
         );
         final BlockingStorage bsto = new BlockingStorage(settings.configStorage());
         final Key init = new Key.From(".artipie", "initialized");

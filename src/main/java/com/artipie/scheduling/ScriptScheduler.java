@@ -33,27 +33,14 @@ public final class ScriptScheduler {
     /**
      * Quarts service for scheduling.
      */
-    private final QuartsService service;
+    private final QuartzService service;
 
     /**
      * Initializes new instance of scheduler.
+     * @param service Quartz service
      */
-    public ScriptScheduler() {
-        this.service = new QuartsService();
-    }
-
-    /**
-     * Start scheduler.
-     */
-    public void start() {
-        this.service.start();
-    }
-
-    /**
-     * Stop scheduler.
-     */
-    public void stop() {
-        this.service.stop();
+    public ScriptScheduler(final QuartzService service) {
+        this.service = service;
     }
 
     /**

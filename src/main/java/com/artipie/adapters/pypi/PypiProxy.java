@@ -8,6 +8,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.pypi.http.PyProxySlice;
+import com.artipie.scheduling.ProxyArtifactEvent;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.proxy.ProxyConfig;
 import com.artipie.settings.repo.proxy.YamlProxyConfig;
@@ -15,6 +16,8 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
 import org.reactivestreams.Publisher;
 
 /**
@@ -34,14 +37,22 @@ public final class PypiProxy implements Slice {
     private final RepoConfig cfg;
 
     /**
+     * Artifact metadata events queue.
+     */
+    private final Optional<Queue<ProxyArtifactEvent>> queue;
+
+    /**
      * Ctor.
      *
      * @param client HTTP client.
      * @param cfg Repository configuration.
+     * @param queue Artifact events queue
      */
-    public PypiProxy(final ClientSlices client, final RepoConfig cfg) {
+    public PypiProxy(final ClientSlices client, final RepoConfig cfg,
+        final Optional<Queue<ProxyArtifactEvent>> queue) {
         this.client = client;
         this.cfg = cfg;
+        this.queue = queue;
     }
 
     @Override
@@ -62,7 +73,9 @@ public final class PypiProxy implements Slice {
             remote.auth(),
             remote.cache().orElseThrow(
                 () -> new IllegalStateException("Python proxy requires proxy storage to be set")
-            ).storage()
+            ).storage(),
+            this.queue,
+            this.cfg.name()
         ).response(line, headers, body);
     }
 }

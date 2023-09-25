@@ -13,8 +13,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.auth.AuthFromEnv;
 import com.artipie.http.auth.Authentication;
-import com.artipie.scheduling.ArtifactEvent;
-import com.artipie.scheduling.EventQueue;
+import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.ArtipieSecurity;
 import com.artipie.settings.MetricsContext;
@@ -147,8 +146,8 @@ public final class TestSettings implements Settings {
     }
 
     @Override
-    public EventQueue<ArtifactEvent> events() {
-        return null;
+    public Optional<MetadataEventQueues> artifactMetadata() {
+        return Optional.empty();
     }
 
     @Override
