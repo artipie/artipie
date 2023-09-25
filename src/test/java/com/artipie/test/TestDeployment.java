@@ -189,6 +189,16 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     }
 
     /**
+     * Get binary file from Artipie container.
+     * @param path Path in container
+     */
+    public byte[] getArtipieContent(final String path) {
+        return this.artipie.get(TestDeployment.DEF).copyFileFromContainer(
+            path, IOUtils::toByteArray
+        );
+    }
+
+    /**
      * Exec command in client container and assert result.
      * @param msg Assertion message on failure
      * @param matcher Exec result matcher
