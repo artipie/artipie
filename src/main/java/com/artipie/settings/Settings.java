@@ -8,8 +8,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Storage;
-import com.artipie.scheduling.ArtifactEvent;
-import com.artipie.scheduling.EventQueue;
+import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.settings.cache.ArtipieCaches;
 import java.util.Optional;
 import javax.sql.DataSource;
@@ -72,10 +71,10 @@ public interface Settings {
     DataSource databaseSource();
 
     /**
-     * Artifact events queue.
+     * Artifact metadata events queue.
      * @return Artifact events queue
      */
-    EventQueue<ArtifactEvent> events();
+    Optional<MetadataEventQueues> artifactMetadata();
 
     /**
      * Crontab settings.

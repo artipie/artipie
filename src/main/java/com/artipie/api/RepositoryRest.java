@@ -9,6 +9,7 @@ import com.artipie.api.verifier.ExistenceVerifier;
 import com.artipie.api.verifier.ReservedNamesVerifier;
 import com.artipie.api.verifier.SettingsDuplicatesVerifier;
 import com.artipie.http.auth.AuthUser;
+import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.RepoData;
 import com.artipie.settings.cache.FiltersCache;
@@ -17,6 +18,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.security.PermissionCollection;
+import java.util.Optional;
 import javax.json.JsonObject;
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -62,19 +64,28 @@ public final class RepositoryRest extends BaseRest {
     private final Policy<?> policy;
 
     /**
+     * Artifact metadata events queue.
+     */
+    private final Optional<MetadataEventQueues> events;
+
+    /**
      * Ctor.
      * @param cache Artipie filters cache
      * @param crs Repository settings create/read/update/delete
      * @param data Repository data management
      * @param policy Artipie policy
+     * @param events Artifact events queue
      * @checkstyle ParameterNumberCheck (5 lines)
      */
-    public RepositoryRest(final FiltersCache cache, final CrudRepoSettings crs, final RepoData data,
-        final Policy<?> policy) {
+    public RepositoryRest(
+        final FiltersCache cache, final CrudRepoSettings crs, final RepoData data,
+        final Policy<?> policy, final Optional<MetadataEventQueues> events
+    ) {
         this.cache = cache;
         this.crs = crs;
         this.data = data;
         this.policy = policy;
+        this.events = events;
     }
 
     @Override
@@ -259,6 +270,7 @@ public final class RepositoryRest extends BaseRest {
                     }
                 );
             this.cache.invalidate(rname.toString());
+            this.events.ifPresent(item -> item.stopProxyMetadataProcessing(rname.toString()));
             context.response()
                 .setStatusCode(HttpStatus.OK_200)
                 .end();

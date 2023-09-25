@@ -108,6 +108,16 @@ public final class RepoConfigYaml {
     }
 
     /**
+     * Adds remote in settings section to config.
+     * @param yaml Settings mapping
+     * @return Itself
+     */
+    public RepoConfigYaml withSettings(final YamlMapping yaml) {
+        this.builder = this.builder.add("settings", yaml);
+        return this;
+    }
+
+    /**
      * Adds remote to config.
      * @param url URL
      * @return Itself

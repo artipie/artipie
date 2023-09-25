@@ -80,10 +80,13 @@ public final class DbConsumer implements Consumer<ArtifactEvent> {
                 Connection conn = DbConsumer.this.source.getConnection();
                 PreparedStatement insert = conn.prepareStatement(
                     // @checkstyle LineLengthCheck (1 line)
-                    "insert into artifacts (repo_type, repo_name, name, version, size, created_date, owner) VALUES (?,?,?,?,?,?,?);"
+                    "insert or replace into artifacts (repo_type, repo_name, name, version, size, created_date, owner) VALUES (?,?,?,?,?,?,?);"
+                );
+                PreparedStatement deletev = conn.prepareStatement(
+                    "delete from artifacts where repo_name = ? and name = ? and version = ?;"
                 );
                 PreparedStatement delete = conn.prepareStatement(
-                    "delete from artifacts where repo_name = ? and name = ? and version = ?;"
+                    "delete from artifacts where repo_name = ? and name = ?;"
                 )
             ) {
                 conn.setAutoCommit(false);
@@ -99,10 +102,14 @@ public final class DbConsumer implements Consumer<ArtifactEvent> {
                             insert.setDate(6, new Date(record.createdDate()));
                             insert.setString(7, record.owner());
                             insert.execute();
-                        } else if (record.eventType() == ArtifactEvent.Type.DELETE) {
+                        } else if (record.eventType() == ArtifactEvent.Type.DELETE_VERSION) {
+                            deletev.setString(1, record.repoName());
+                            deletev.setString(2, record.artifactName());
+                            deletev.setString(3, record.artifactVersion());
+                            deletev.execute();
+                        } else if (record.eventType() == ArtifactEvent.Type.DELETE_ALL) {
                             delete.setString(1, record.repoName());
                             delete.setString(2, record.artifactName());
-                            delete.setString(3, record.artifactVersion());
                             delete.execute();
                         }
                     } catch (final SQLException ex) {

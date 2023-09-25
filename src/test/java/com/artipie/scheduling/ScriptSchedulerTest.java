@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.awaitility.Awaitility;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -47,7 +48,7 @@ import org.quartz.impl.StdSchedulerFactory;
  * @checkstyle VisibilityModifierCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public class ScriptSchedulerTest {
+public final class ScriptSchedulerTest {
 
     /**
      * Path to the test script file.
@@ -71,22 +72,32 @@ public class ScriptSchedulerTest {
     private BlockingStorage data;
 
     /**
+     * Quartz service.
+     */
+    private QuartzService service;
+
+    /**
      * Before each method creates test data storage instance.
      * @since 0.30
      */
     @BeforeEach
     void init() {
+        this.service = new QuartzService();
+        this.service.start();
         this.data = new BlockingStorage(new FileStorage(this.temp));
+    }
+
+    @AfterEach
+    void stop() {
+        this.service.stop();
     }
 
     @Test
     void scheduleJob() throws SchedulerException {
         final AtomicReference<String> ref = new AtomicReference<>();
-        final ScriptScheduler scheduler = new ScriptScheduler();
-        scheduler.start();
+        final ScriptScheduler scheduler = new ScriptScheduler(this.service);
         scheduler.scheduleJob("0/5 * * * * ?", TestJob.class, Map.of("ref", ref));
         Awaitility.waitAtMost(1, TimeUnit.MINUTES).until(() -> ref.get() != null);
-        scheduler.stop();
         MatcherAssert.assertThat(
             ref.get(),
             new IsEqual<>("TestJob is done")
@@ -197,17 +208,16 @@ public class ScriptSchedulerTest {
                 )
             )
             .readYamlMapping(),
-            this.temp
+            this.temp,
+            this.service
         );
         final String filename = this.temp.resolve(ScriptSchedulerTest.RESULTS_PATH).toString();
         final String script = String.format(cronscript, filename.replace("\\", "\\\\"));
         this.data.save(new Key.From(ScriptSchedulerTest.SCRIPT_PATH), script.getBytes());
-        final ScriptScheduler scheduler = new ScriptScheduler();
-        scheduler.start();
+        final ScriptScheduler scheduler = new ScriptScheduler(this.service);
         scheduler.loadCrontab(settings);
         final Key result = new Key.From(ScriptSchedulerTest.RESULTS_PATH);
         Awaitility.waitAtMost(1, TimeUnit.MINUTES).until(() -> this.data.exists(result));
-        scheduler.stop();
         return settings;
     }
 
