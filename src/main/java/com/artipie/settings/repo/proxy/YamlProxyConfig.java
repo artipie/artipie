@@ -6,18 +6,12 @@ package com.artipie.settings.repo.proxy;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.amihaiemil.eoyaml.YamlNode;
-import com.artipie.asto.Key;
-import com.artipie.asto.LoggingStorage;
-import com.artipie.asto.Storage;
-import com.artipie.asto.SubStorage;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.settings.repo.RepoConfig;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -31,19 +25,9 @@ import java.util.stream.StreamSupport;
 public final class YamlProxyConfig implements ProxyConfig {
 
     /**
-     * HTTP client.
-     */
-    private final ClientSlices http;
-
-    /**
      * Repository config.
      */
     private final RepoConfig repoConfig;
-
-    /**
-     * Cache storage prefix.
-     */
-    private final Key prefix;
 
     /**
      * Source YAML.
@@ -53,32 +37,25 @@ public final class YamlProxyConfig implements ProxyConfig {
     /**
      * Ctor.
      *
-     * @param http HTTP client
      * @param repoConfig Repository config.
-     * @param prefix Cache storage prefix.
      * @param yaml Source YAML.
      * @checkstyle ParameterNumberCheck (10 lines)
      */
     public YamlProxyConfig(
-        final ClientSlices http,
         final RepoConfig repoConfig,
-        final Key prefix,
         final YamlMapping yaml
     ) {
-        this.http = http;
         this.repoConfig = repoConfig;
-        this.prefix = prefix;
         this.yaml = yaml;
     }
 
     /**
      * Ctor.
      *
-     * @param http HTTP client
      * @param repoConfig Repo configuration.
      */
-    public YamlProxyConfig(final ClientSlices http, final RepoConfig repoConfig) {
-        this(http, repoConfig, new Key.From(repoConfig.name()), repoConfig.repoYaml());
+    public YamlProxyConfig(final RepoConfig repoConfig) {
+        this(repoConfig, repoConfig.repoYaml());
     }
 
     @Override
@@ -102,20 +79,9 @@ public final class YamlProxyConfig implements ProxyConfig {
         ).collect(Collectors.toList());
     }
 
-    /**
-     * Creates proxy storage.
-     *
-     * @param node Storage config or alias.
-     * @return Storage.
-     */
-    Storage storageForProxy(final YamlNode node) {
-        return new SubStorage(
-            this.prefix,
-            new LoggingStorage(
-                Level.INFO,
-                this.repoConfig.storagesCache().storage(this.repoConfig.storageAliases(), node)
-            )
-        );
+    @Override
+    public Optional<CacheStorage> cache() {
+        return this.repoConfig.storageOpt().map(YamlProxyStorage::new);
     }
 
     /**
@@ -147,12 +113,12 @@ public final class YamlProxyConfig implements ProxyConfig {
         }
 
         @Override
-        public Authenticator auth() {
+        public Authenticator auth(final ClientSlices client) {
             final Authenticator result;
             final String username = this.source.string("username");
             final String password = this.source.string("password");
             if (username == null && password == null) {
-                result = new GenericAuthenticator(YamlProxyConfig.this.http);
+                result = new GenericAuthenticator(client);
             } else {
                 if (username == null) {
                     throw new IllegalStateException(
@@ -164,20 +130,9 @@ public final class YamlProxyConfig implements ProxyConfig {
                         "`password` is not specified for proxy remote"
                     );
                 }
-                result = new GenericAuthenticator(YamlProxyConfig.this.http, username, password);
+                result = new GenericAuthenticator(client, username, password);
             }
             return result;
-        }
-
-        @Override
-        public Optional<CacheStorage> cache() {
-            return Optional.ofNullable(this.source.yamlMapping("cache")).flatMap(
-                root -> Optional.ofNullable(root.value("storage")).map(
-                    node -> new YamlProxyStorage(
-                        YamlProxyConfig.this.storageForProxy(node)
-                    )
-                )
-            );
         }
     }
 }

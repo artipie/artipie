@@ -96,7 +96,8 @@ public final class MetadataEventQueues {
     public Optional<Queue<ProxyArtifactEvent>> proxyEventQueues(final RepoConfig config) {
         Optional<Queue<ProxyArtifactEvent>> result =
             Optional.ofNullable(this.queues.get(config.name()));
-        if (result.isEmpty()) {
+        final boolean caching = config.storageOpt().isPresent();
+        if (result.isEmpty() && caching) {
             try {
                 final Queue<ProxyArtifactEvent> events = this.queues.computeIfAbsent(
                     config.name(),

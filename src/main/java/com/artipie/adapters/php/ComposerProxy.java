@@ -4,6 +4,7 @@
  */
 package com.artipie.adapters.php;
 
+import com.artipie.asto.Storage;
 import com.artipie.composer.AstoRepository;
 import com.artipie.composer.http.proxy.ComposerProxySlice;
 import com.artipie.composer.http.proxy.ComposerStorageCache;
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import org.reactivestreams.Publisher;
 
 /**
@@ -51,7 +53,7 @@ public final class ComposerProxy implements Slice {
         final Publisher<ByteBuffer> body
     ) {
         final Collection<? extends ProxyConfig.Remote> remotes =
-            new YamlProxyConfig(this.client, this.cfg).remotes();
+            new YamlProxyConfig(this.cfg).remotes();
         if (remotes.isEmpty()) {
             throw new IllegalArgumentException("No remotes were specified");
         }
@@ -59,20 +61,21 @@ public final class ComposerProxy implements Slice {
             throw new IllegalArgumentException("Only one remote is allowed");
         }
         final ProxyConfig.Remote remote = remotes.iterator().next();
-        return remote.cache().map(
+        final Optional<Storage> asto = this.cfg.storageOpt();
+        return asto.map(
             cache -> new ComposerProxySlice(
                 this.client,
                 URI.create(remote.url()),
                 new AstoRepository(this.cfg.storage()),
-                remote.auth(),
-                new ComposerStorageCache(new AstoRepository(cache.storage()))
+                remote.auth(this.client),
+                new ComposerStorageCache(new AstoRepository(cache))
             )
         ).orElseGet(
             () -> new ComposerProxySlice(
                 this.client,
                 URI.create(remote.url()),
                 new AstoRepository(this.cfg.storage()),
-                remote.auth()
+                remote.auth(this.client)
             )
         ).response(line, headers, body);
     }

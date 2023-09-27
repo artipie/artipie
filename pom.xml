@@ -282,7 +282,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>v0.18.4</version>
+      <version>v0.18.6</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>

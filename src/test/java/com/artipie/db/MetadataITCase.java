@@ -24,7 +24,9 @@ import org.testcontainers.containers.BindMode;
  * Integration test for artifact metadata
  * database.
  * @since 0.31
+ * @checkstyle MagicNumberCheck (500 lines)
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class MetadataITCase {
 
     /**
@@ -45,7 +47,7 @@ public class MetadataITCase {
     );
 
     @Test
-    void deploysArtifact(@TempDir Path temp) throws Exception {
+    void deploysArtifact(final @TempDir Path temp) throws Exception {
         this.containers.putBinaryToClient(
             new TestResource("helloworld-src/pom.xml").asBytes(), "/w/pom.xml"
         );

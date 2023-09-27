@@ -191,6 +191,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     /**
      * Get binary file from Artipie container.
      * @param path Path in container
+     * @return Binary data
      */
     public byte[] getArtipieContent(final String path) {
         return this.artipie.get(TestDeployment.DEF).copyFileFromContainer(

@@ -31,13 +31,11 @@ import com.artipie.http.ContinueSlice;
 import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.GoSlice;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.filter.FilterSlice;
-import com.artipie.http.group.GroupSlice;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.http.MavenSlice;
 import com.artipie.npm.http.NpmSlice;
@@ -51,12 +49,10 @@ import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.Settings;
 import com.artipie.settings.repo.RepoConfig;
-import com.artipie.settings.repo.RepositoriesFromStorage;
 import java.net.URI;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Slice from repo config.
@@ -205,26 +201,6 @@ public final class SliceFromConfig extends Slice.Wrap {
                     new MavenProxy(
                         http, cfg,
                         settings.artifactMetadata().flatMap(queues -> queues.proxyEventQueues(cfg))
-                    ),
-                    SliceFromConfig.PTRN
-                );
-                break;
-            case "maven-group":
-                slice = new TrimPathSlice(
-                    new GroupSlice(
-                        cfg.settings().orElseThrow().yamlSequence("repositories").values()
-                            .stream().map(node -> node.asScalar().value())
-                            .map(
-                                name -> new AsyncSlice(
-                                    new RepositoriesFromStorage(settings)
-                                        .config(name)
-                                        .thenApply(
-                                            sub -> new SliceFromConfig(
-                                                http, settings, sub, standalone, tokens
-                                            )
-                                        )
-                                )
-                            ).collect(Collectors.toList())
                     ),
                     SliceFromConfig.PTRN
                 );
