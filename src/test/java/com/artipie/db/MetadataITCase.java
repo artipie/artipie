@@ -64,8 +64,7 @@ public class MetadataITCase {
         );
         Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
             () -> {
-                final Path data = temp.resolve(UUID.randomUUID().toString())
-                    .resolve("artifacts.db");
+                final Path data = temp.resolve(String.format("%s-artifacts.db", UUID.randomUUID()));
                 Files.write(data, this.containers.getArtipieContent("/var/artipie/artifacts.db"));
                 final SQLiteDataSource source = new SQLiteDataSource();
                 source.setUrl(String.format("jdbc:sqlite:%s", data));
