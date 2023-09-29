@@ -128,9 +128,7 @@ public final class DockerProxy implements Slice {
                 }
             )
             .orElse(proxies);
-        if (!this.standalone) {
-            docker = new TrimmedDocker(docker, this.cfg.name());
-        }
+        docker = new TrimmedDocker(docker, this.cfg.name());
         Slice slice = new DockerSlice(
             docker,
             this.policy,

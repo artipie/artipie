@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
@@ -101,11 +101,11 @@ public final class MetadataEventQueues {
                 final Queue<ProxyArtifactEvent> events = this.queues.computeIfAbsent(
                     config.name(),
                     key -> {
-                        final Queue<ProxyArtifactEvent> res = new ConcurrentLinkedDeque<>();
+                        final Queue<ProxyArtifactEvent> res = new ConcurrentLinkedQueue<>();
                         final JobDataMap data = new JobDataMap();
-                        data.put("events", res);
-                        data.put("packages", this.queue);
+                        data.put("packages", res);
                         data.put("storage", config.storage());
+                        data.put("events", this.queue);
                         final ProxyRepoType type = ProxyRepoType.type(config.type());
                         if (type == ProxyRepoType.NPM_PROXY) {
                             data.put(MetadataEventQueues.HOST, artipieHost(config));

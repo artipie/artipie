@@ -4,21 +4,24 @@
  */
 package com.artipie.db;
 
+import com.artipie.asto.misc.UncheckedSupplier;
 import com.artipie.asto.test.TestResource;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.sqlite.SQLiteDataSource;
-import org.testcontainers.containers.BindMode;
 
 /**
  * Integration test for artifact metadata
@@ -27,7 +30,7 @@ import org.testcontainers.containers.BindMode;
  * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public class MetadataITCase {
+public final class MetadataMavenITCase {
 
     /**
      * Test deployments.
@@ -41,13 +44,11 @@ public class MetadataITCase {
             .withRepoConfig("maven/maven-proxy.yml", "my-maven-proxy"),
         () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
             .withWorkingDirectory("/w")
-            .withClasspathResourceMapping(
-                "maven/maven-settings.xml", "/w/settings.xml", BindMode.READ_ONLY
-            )
     );
 
     @Test
-    void deploysArtifact(final @TempDir Path temp) throws Exception {
+    void deploysArtifactIntoMaven(final @TempDir Path temp) throws Exception {
+        this.containers.putClasspathResourceToClient("maven/maven-settings.xml", "/w/settings.xml");
         this.containers.putBinaryToClient(
             new TestResource("helloworld-src/pom.xml").asBytes(), "/w/pom.xml"
         );
@@ -56,16 +57,44 @@ public class MetadataITCase {
             new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
             "mvn", "-B", "-q", "-s", "settings.xml", "deploy", "-Dmaven.install.skip=true"
         );
-        this.containers.assertExec(
-            "Download failed",
-            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
-            "mvn", "-B", "-q", "-s", "settings.xml", "-U", "dependency:get",
-            "-Dartifact=com.artipie:helloworld:0.1"
+        this.containers.putBinaryToClient(
+            new TestResource("snapshot-src/pom.xml").asBytes(), "/w/pom.xml"
         );
+        this.containers.assertExec(
+            "Deploy failed",
+            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
+            "mvn", "-B", "-q", "-s", "settings.xml", "deploy", "-Dmaven.install.skip=true"
+        );
+        awaitDbRecords(
+            this.containers, temp, rs -> new UncheckedSupplier<>(() -> rs.getInt(1) == 2).get()
+        );
+    }
+
+    @Test
+    void downloadFromProxy(final @TempDir Path temp) throws IOException {
+        this.containers.putClasspathResourceToClient(
+            "maven/maven-settings-proxy-metadata.xml", "/w/settings.xml"
+        );
+        this.containers.putBinaryToClient(
+            new TestResource("maven/pom-with-deps/pom.xml").asBytes(), "/w/pom.xml"
+        );
+        this.containers.assertExec(
+            "Uploading dependencies failed",
+            new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),
+            "mvn", "-s", "settings.xml", "dependency:resolve"
+        );
+        awaitDbRecords(
+            this.containers, temp, rs -> new UncheckedSupplier<>(() -> rs.getInt(1) > 300).get()
+        );
+    }
+
+    static void awaitDbRecords(
+        final TestDeployment containers, final Path temp, final Predicate<ResultSet> condition
+    ) {
         Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
             () -> {
                 final Path data = temp.resolve(String.format("%s-artifacts.db", UUID.randomUUID()));
-                Files.write(data, this.containers.getArtipieContent("/var/artipie/artifacts.db"));
+                Files.write(data, containers.getArtipieContent("/var/artipie/artifacts.db"));
                 final SQLiteDataSource source = new SQLiteDataSource();
                 source.setUrl(String.format("jdbc:sqlite:%s", data));
                 try (
@@ -73,7 +102,7 @@ public class MetadataITCase {
                     Statement stat = conn.createStatement()
                 ) {
                     stat.execute("select count(*) from artifacts");
-                    return stat.getResultSet().getInt(1) == 1;
+                    return condition.test(stat.getResultSet());
                 }
             }
         );

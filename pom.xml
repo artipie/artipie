@@ -132,12 +132,6 @@ SOFTWARE.
     <vertx.version>4.4.2</vertx.version>
     <asto.version>v1.16.0</asto.version>
   </properties>
-  <repositories>
-    <repository>
-      <id>local</id>
-      <url>file://</url>
-    </repository>
-  </repositories>
   <dependencies>
     <dependency>
       <groupId>com.amihaiemil.web</groupId>
@@ -288,7 +282,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>docker-adapter</artifactId>
-      <version>v0.18.6</version>
+      <version>v0.18.7</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
