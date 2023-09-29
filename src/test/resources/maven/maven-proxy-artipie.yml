@@ -1,6 +1,9 @@
 ---
 repo:
   type: maven-proxy
+  storage:
+    type: fs
+    path: /var/artipie/data
   remotes:
     - url: http://artipie:8080/my-maven
       username: alice
