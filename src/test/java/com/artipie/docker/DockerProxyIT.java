@@ -57,13 +57,12 @@ final class DockerProxyIT {
     @Test
     void shouldPullRemote() throws Exception {
         final Image image = new Image.ForOs();
-        String img = new Image.From(
+        final String img = new Image.From(
             "artipie:8080",
             String.format("my-docker/%s", image.name()),
             image.digest(),
             image.layer()
         ).remoteByDigest();
-        img = "artipie:8080/my-docker/debian:stable-slim";
         new TestDeployment.DockerTest(this.deployment, "artipie:8080")
             .loginAsAlice()
             .pull(
