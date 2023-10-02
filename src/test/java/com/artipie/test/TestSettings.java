@@ -20,7 +20,6 @@ import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.cache.ArtipieCaches;
 import java.util.Optional;
-import javax.sql.DataSource;
 
 /**
  * Test {@link Settings} implementation.
@@ -138,11 +137,6 @@ public final class TestSettings implements Settings {
     @Override
     public ArtipieCaches caches() {
         return this.caches;
-    }
-
-    @Override
-    public DataSource databaseSource() {
-        return null;
     }
 
     @Override

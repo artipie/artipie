@@ -11,7 +11,6 @@ import com.artipie.asto.Storage;
 import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.settings.cache.ArtipieCaches;
 import java.util.Optional;
-import javax.sql.DataSource;
 
 /**
  * Application settings.
@@ -63,12 +62,6 @@ public interface Settings {
      * @return The caches
      */
     ArtipieCaches caches();
-
-    /**
-     * Database source.
-     * @return Database
-     */
-    DataSource databaseSource();
 
     /**
      * Artifact metadata events queue.

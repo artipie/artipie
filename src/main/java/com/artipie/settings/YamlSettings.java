@@ -97,11 +97,6 @@ public final class YamlSettings implements Settings {
     private final ArtipieSecurity security;
 
     /**
-     * Database source.
-     */
-    private final DataSource database;
-
-    /**
      * Artifacts event queue.
      */
     private final Optional<MetadataEventQueues> events;
@@ -123,8 +118,7 @@ public final class YamlSettings implements Settings {
             auth, new CachedStorages(), this.security.policy(), new GuavaFiltersCache()
         );
         this.mctx = new MetricsContext(this.meta());
-        this.database = new ArtifactDbFactory(this.meta(), path).initialize();
-        this.events = YamlSettings.initArtifactsEvents(this.meta(), this.database, quartz);
+        this.events = YamlSettings.initArtifactsEvents(this.meta(), quartz, path);
     }
 
     @Override
@@ -168,11 +162,6 @@ public final class YamlSettings implements Settings {
     @Override
     public ArtipieCaches caches() {
         return this.acach;
-    }
-
-    @Override
-    public DataSource databaseSource() {
-        return this.database;
     }
 
     @Override
@@ -222,19 +211,20 @@ public final class YamlSettings implements Settings {
      * Initialize and scheduled mechanism to gather artifact events
      * (adding and removing artifacts) and create {@link MetadataEventQueues} instance.
      * @param settings Artipie settings
-     * @param database Database source
      * @param quartz Quartz service
+     * @param path Default location for db file
      * @return Event queue to gather artifacts events
      */
     @SuppressWarnings("PMD.OnlyOneReturn")
     private static Optional<MetadataEventQueues> initArtifactsEvents(
-        final YamlMapping settings, final DataSource database, final QuartzService quartz
+        final YamlMapping settings, final QuartzService quartz, final Path path
     ) {
         final YamlMapping prop = settings.yamlMapping("artifacts_database");
         if (prop == null) {
             return Optional.empty();
         }
         try {
+            final DataSource database = new ArtifactDbFactory(settings, path).initialize();
             final int threads = Math.max(1, prop.integer("threads_count"));
             final int interval = Math.max(1, prop.integer("interval_seconds"));
             final List<Consumer<ArtifactEvent>> list = new ArrayList<>(threads);

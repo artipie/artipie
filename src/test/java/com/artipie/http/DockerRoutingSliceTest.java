@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import javax.sql.DataSource;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.Test;
@@ -203,11 +202,6 @@ final class DockerRoutingSliceTest {
         @Override
         public ArtipieCaches caches() {
             return new TestArtipieCaches();
-        }
-
-        @Override
-        public DataSource databaseSource() {
-            return null;
         }
 
         @Override
