@@ -21,3 +21,4 @@ Repository types with links to full description in wiki:
 | [Debian](https://github.com/artipie/artipie/wiki/debian)     |
 | [Anaconda](https://github.com/artipie/artipie/wiki/anaconda) |
 | [Hexpm](https://github.com/artipie/artipie/wiki/hexpm)       |
+| [Conan](https://github.com/artipie/artipie/wiki/conan)       |

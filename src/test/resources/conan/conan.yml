@@ -1,0 +1,8 @@
+---
+repo:
+  type: conan
+  port: 9301
+  url: http://artipie:8080/my-conan
+  storage:
+    type: fs
+    path: /var/artipie/data/
