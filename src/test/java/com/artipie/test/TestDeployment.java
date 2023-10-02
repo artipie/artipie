@@ -35,6 +35,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.utility.DockerImageName;
@@ -533,6 +534,15 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
          */
         public ClientContainer(final String name) {
             super(DockerImageName.parse(name));
+        }
+
+        /**
+         * New client container with custom image.
+         *
+         * @param image Custom docker image
+         */
+        public ClientContainer(final ImageFromDockerfile image) {
+            super(image);
         }
     }
 

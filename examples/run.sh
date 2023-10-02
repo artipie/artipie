@@ -162,7 +162,7 @@ start_artipie
 sleep 3 #sometimes artipie container needs extra time to load
 
 if [[ -z "$1" ]]; then
-  declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda pypi hexpm)
+  declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda pypi hexpm conan)
 else
   declare -a tests=("$@")
 fi

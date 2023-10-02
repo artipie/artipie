@@ -14,6 +14,8 @@ import com.artipie.asto.SubStorage;
 import com.artipie.auth.LoggingAuth;
 import com.artipie.composer.AstoRepository;
 import com.artipie.composer.http.PhpComposer;
+import com.artipie.conan.ItemTokenizer;
+import com.artipie.conan.http.ConanSlice;
 import com.artipie.conda.http.CondaSlice;
 import com.artipie.debian.Config;
 import com.artipie.debian.http.DebianSlice;
@@ -49,6 +51,7 @@ import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.Settings;
 import com.artipie.settings.repo.RepoConfig;
+import io.vertx.core.Vertx;
 import java.net.URI;
 import java.util.Optional;
 import java.util.Queue;
@@ -278,6 +281,12 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "conda":
                 slice = new CondaSlice(
                     cfg.storage(), policy, auth, tokens, cfg.url().toString(), cfg.name(), events
+                );
+                break;
+            case "conan":
+                slice = new ConanSlice(
+                    cfg.storage(), policy, auth, tokens, new ItemTokenizer(Vertx.vertx()),
+                    cfg.name()
                 );
                 break;
             case "hexpm":
