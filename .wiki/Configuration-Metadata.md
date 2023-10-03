@@ -41,7 +41,7 @@ saved to cash storage artifacts and adds metadata common mechanism and database.
 enabled when artifacts database is enabled and proxy repository storage is configured. 
 It's possible to configure `threads_count` and `interval_seconds` for [Maven-proxy](maven-proxy), [npm-proxy](npm-proxy) 
 and [python-proxy](pypi-proxy) repositories individually.
-Just add these fields into repository setting file, for example:
+Just add these fields into the repository setting file, for example:
 ```yaml
 repo:
   type: maven-proxy
