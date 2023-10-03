@@ -18,16 +18,16 @@ can be [configured separately](http://www.quartz-scheduler.org/documentation/qua
 by default it uses `org.quartz.simpl.SimpleThreadPool` with 10 threads. If `threads_count` is larger than thread pool size,
 threads amount is limited to the thread pool size.
 
-The database has only one table with the following structure:
+The database has only one table `artifacts` with the following structure:
 
 | Name         | Type     | Description                              |
 |--------------|----------|------------------------------------------|
-| id           | bigint   | Unique identification, primary key       |
+| id           | int      | Unique identification, primary key       |
 | repo_type    | char(10) | Repository type (maven, docker, npm etc) |
 | repo_name    | char(20) | Repository name                          |
 | name         | varchar  | Artifact full name                       |
 | version      | varchar  | Artifact version                         |
-| size         | bigint   | Artifact size                            |
+| size         | bigint   | Artifact size in bytes                   |
 | created_date | datetime | Date uploaded                            |
 | owner        | varchar  | Artifact uploader login                  |
 
