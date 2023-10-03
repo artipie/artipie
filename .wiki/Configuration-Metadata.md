@@ -18,7 +18,7 @@ can be [configured separately](http://www.quartz-scheduler.org/documentation/qua
 by default it uses `org.quartz.simpl.SimpleThreadPool` with 10 threads. If `threads_count` is larger than thread pool size,
 threads amount is limited to the thread pool size.
 
-Database has only one table with the following structure:
+The database has only one table with the following structure:
 
 | Name         | Type     | Description                              |
 |--------------|----------|------------------------------------------|
