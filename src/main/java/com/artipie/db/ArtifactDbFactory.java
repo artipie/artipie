@@ -95,7 +95,7 @@ public final class ArtifactDbFactory {
                 String.join(
                     "\n",
                     "create TABLE if NOT EXISTS artifacts(",
-                    "   id BIGINT PRIMARY KEY AUTOINCREMENT,",
+                    "   id INTEGER PRIMARY KEY AUTOINCREMENT,",
                     "   repo_type CHAR(10) NOT NULL,",
                     "   repo_name CHAR(20) NOT NULL,",
                     "   name VARCHAR NOT NULL,",
