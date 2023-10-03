@@ -16,7 +16,7 @@ database file will be created at the parent location (directory) of the main con
 mechanism uses [quartz](http://www.quartz-scheduler.org/) scheduler to process artifacts metadata under the hood. Quartz
 can be [configured separately](http://www.quartz-scheduler.org/documentation/quartz-2.1.7/configuration/ConfigMain.html),
 by default it uses `org.quartz.simpl.SimpleThreadPool` with 10 threads. If `threads_count` is lager than thread pool size,
-threads amount is limited to thread pool size.
+threads amount is limited to the thread pool size.
 
 Database has only one table with the following structure:
 
