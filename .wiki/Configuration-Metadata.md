@@ -12,7 +12,7 @@ meta:
 ```
 
 The essential here is `artifacts_database` section, other fields are optional. If `sqlite_data_file_path` field is absent,
-database file will be created at the parent location (directory) of the main configuration file. Metadata gathering
+a database file will be created at the parent location (directory) of the main configuration file. The metadata gathering
 mechanism uses [quartz](http://www.quartz-scheduler.org/) scheduler to process artifacts metadata under the hood. Quartz
 can be [configured separately](http://www.quartz-scheduler.org/documentation/quartz-2.1.7/configuration/ConfigMain.html),
 by default it uses `org.quartz.simpl.SimpleThreadPool` with 10 threads. If `threads_count` is larger than thread pool size,
