@@ -190,6 +190,17 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     }
 
     /**
+     * Get binary file from Artipie container.
+     * @param path Path in container
+     * @return Binary data
+     */
+    public byte[] getArtipieContent(final String path) {
+        return this.artipie.get(TestDeployment.DEF).copyFileFromContainer(
+            path, IOUtils::toByteArray
+        );
+    }
+
+    /**
      * Exec command in client container and assert result.
      * @param msg Assertion message on failure
      * @param matcher Exec result matcher
@@ -321,10 +332,10 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
     /**
      * Sets up client environment for docker tests.
      *
-     * @param port Artipie port
+     * @param ports Artipie port
      * @throws IOException On error
      */
-    public void setUpForDockerTests(final int port) throws IOException {
+    public void setUpForDockerTests(final int... ports) throws IOException {
         // @checkstyle MethodBodyCommentsCheck (18 lines)
         // @checkstyle LineLengthCheck (10 lines)
         this.clientExec("apk", "add", "--update", "--no-cache", "openrc", "docker");
@@ -333,12 +344,13 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
         // this flag file is needed to tell openrc working in non-boot mode
         this.clientExec("touch", "/run/openrc/softlevel");
         // allow artipie:8080 insecure connection before starting docker daemon
+        final StringBuilder sbl = new StringBuilder(30);
+        for (final int port : ports) {
+            sbl.append("--insecure-registry=artipie:").append(port).append(' ');
+        }
         this.clientExec(
             "sed", "-i",
-            String.format(
-                "s/DOCKER_OPTS=\"\"/DOCKER_OPTS=\"--insecure-registry=artipie:%d\"/g",
-                port
-            ),
+            String.format("s/DOCKER_OPTS=\"\"/DOCKER_OPTS=\"%s\"/g", sbl),
             "/etc/conf.d/docker"
         );
         this.clientExec("rc-service", "docker", "start");

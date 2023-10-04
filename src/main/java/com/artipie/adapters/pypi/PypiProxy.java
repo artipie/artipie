@@ -59,7 +59,7 @@ public final class PypiProxy implements Slice {
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         final Collection<? extends ProxyConfig.Remote> remotes =
-            new YamlProxyConfig(this.client, this.cfg).remotes();
+            new YamlProxyConfig(this.cfg).remotes();
         if (remotes.isEmpty()) {
             throw new IllegalArgumentException("No remotes specified");
         }
@@ -70,10 +70,10 @@ public final class PypiProxy implements Slice {
         return new PyProxySlice(
             this.client,
             URI.create(remote.url()),
-            remote.auth(),
-            remote.cache().orElseThrow(
+            remote.auth(this.client),
+            this.cfg.storageOpt().orElseThrow(
                 () -> new IllegalStateException("Python proxy requires proxy storage to be set")
-            ).storage(),
+            ),
             this.queue,
             this.cfg.name()
         ).response(line, headers, body);

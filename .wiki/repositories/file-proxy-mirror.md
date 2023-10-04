@@ -10,14 +10,14 @@ caching capabilities.
 ```yaml
 repo:
   type: file-proxy
-  storage: default
+  storage: # optional storage to cache proxy data
+    type: fs
+    path: tmp/files-proxy/data
   remotes:
     - url: "https://remote-server.com"
       username: "alice" # optional username
       password: "qwerty" # optional password
-      storage: # optional storage to cache proxy data
-        type: fs
-        path: tmp/files-proxy/data
+     
 ```
 
 In order to download a file, send a `GET` HTTP request:

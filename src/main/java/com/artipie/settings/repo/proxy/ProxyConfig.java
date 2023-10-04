@@ -5,6 +5,7 @@
 package com.artipie.settings.repo.proxy;
 
 import com.artipie.asto.Storage;
+import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.Authenticator;
 import java.time.Duration;
 import java.util.Collection;
@@ -25,6 +26,12 @@ public interface ProxyConfig {
     Collection<? extends Remote> remotes();
 
     /**
+     * Proxy cache storage.
+     * @return Cache storage if configured.
+     */
+    Optional<CacheStorage> cache();
+
+    /**
      * Proxy repository remote.
      *
      * @since 0.12
@@ -40,17 +47,11 @@ public interface ProxyConfig {
 
         /**
          * Get authenticator.
-         *
+         * @param client Http client
          * @return Authenticator.
          */
-        Authenticator auth();
+        Authenticator auth(ClientSlices client);
 
-        /**
-         * Get cache storage.
-         *
-         * @return Cache storage, empty if not configured.
-         */
-        Optional<CacheStorage> cache();
     }
 
     /**

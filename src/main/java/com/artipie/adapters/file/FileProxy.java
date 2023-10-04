@@ -4,6 +4,7 @@
  */
 package com.artipie.adapters.file;
 
+import com.artipie.asto.Storage;
 import com.artipie.asto.cache.Cache;
 import com.artipie.asto.cache.FromStorageCache;
 import com.artipie.files.FileProxySlice;
@@ -67,7 +68,7 @@ public final class FileProxy implements Slice {
         final Publisher<ByteBuffer> body
     ) {
         final Collection<? extends ProxyConfig.Remote> remotes =
-            new YamlProxyConfig(this.client, this.cfg).remotes();
+            new YamlProxyConfig(this.cfg).remotes();
         if (remotes.isEmpty()) {
             throw new IllegalArgumentException("No remotes specified");
         }
@@ -75,13 +76,13 @@ public final class FileProxy implements Slice {
             throw new IllegalArgumentException("Only one remote is allowed");
         }
         final ProxyConfig.Remote remote = remotes.iterator().next();
+        final Optional<Storage> asto = this.cfg.storageOpt();
         return new FileProxySlice(
             new AuthClientSlice(
-                new UriClientSlice(this.client, URI.create(remote.url())), remote.auth()
+                new UriClientSlice(this.client, URI.create(remote.url())), remote.auth(this.client)
             ),
-            remote.cache().<Cache>map(cache -> new FromStorageCache(cache.storage()))
-                .orElse(Cache.NOP),
-            remote.cache().flatMap(ignored -> this.events),
+            asto.<Cache>map(FromStorageCache::new).orElse(Cache.NOP),
+            asto.flatMap(ignored -> this.events),
             this.cfg.name()
         ).response(line, headers, body);
     }

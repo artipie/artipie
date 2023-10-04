@@ -2,20 +2,19 @@
 
 Maven proxy repository will redirect all the requests to the remotes. Repository configuration allows
 to specify several remotes, Artipie will try to obtain the artifact from the remotes list one by one
-while the artifact is not found. If caching is enabled, previously downloaded packages will be
+while the artifact is not found. If storage is configured, previously downloaded packages will be
 available when source repository is down:
 
 ```yaml
 repo:
   type: maven-proxy
+  storage:
+    type: fs
+    path: /tmp/artipie/maven-central-cache
   remotes:
     - url: https://repo.maven.apache.org/maven2
       username: Aladdin # optional
       password: OpenSesame # optional
-      cache: # optional
-        storage:
-          type: fs
-          path: /tmp/artipie/maven-central-cache
     - url: https://maven.example.com/
 ```
 

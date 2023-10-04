@@ -114,8 +114,8 @@ public final class DockerProxy implements Slice {
      */
     private Slice delegate() {
         final Docker proxies = new MultiReadDocker(
-            new YamlProxyConfig(this.client, this.cfg)
-                .remotes().stream().map(remote -> proxy(this.client, remote))
+            new YamlProxyConfig(this.cfg)
+                .remotes().stream().map(this::proxy)
                 .collect(Collectors.toList())
         );
         Docker docker = this.cfg.storageOpt()
@@ -128,9 +128,7 @@ public final class DockerProxy implements Slice {
                 }
             )
             .orElse(proxies);
-        if (!this.standalone) {
-            docker = new TrimmedDocker(docker, this.cfg.name());
-        }
+        docker = new TrimmedDocker(docker, this.cfg.name());
         Slice slice = new DockerSlice(
             docker,
             this.policy,
@@ -146,18 +144,18 @@ public final class DockerProxy implements Slice {
     /**
      * Create proxy from YAML config.
      *
-     * @param slices HTTP client slices.
      * @param remote YAML remote config.
      * @return Docker proxy.
      */
-    private static Docker proxy(final ClientSlices slices, final ProxyConfig.Remote remote) {
+    private Docker proxy(final ProxyConfig.Remote remote) {
         final Docker proxy = new ProxyDocker(
-            new AuthClientSlice(slices.https(remote.url()), remote.auth())
+            new AuthClientSlice(this.client.https(remote.url()), remote.auth(this.client))
         );
-        return remote.cache().<Docker>map(
+        return this.cfg.storageOpt().<Docker>map(
             cache -> new CacheDocker(
                 proxy,
-                new AstoDocker(new SubStorage(RegistryRoot.V2, cache.storage()))
+                new AstoDocker(new SubStorage(RegistryRoot.V2, cache)),
+                this.events, this.cfg.name()
             )
         ).orElse(proxy);
     }

@@ -5,18 +5,17 @@ packages into configured storage:
 ```yaml
 repo:
   type: pypi-proxy
+  storage:
+    type: fs
+    path: /var/artipie/data
   remotes:
     - url: https://pypi.org/simple/
       username: alice
       password: 123
-      cache:
-        storage:
-          type: fs
-          path: /var/artipie/data
 ```
-In the settings `remotes` section should have one `url` item with cache storage (the cache storage is required),
-username and password are optional credentials for remote. Caching feature makes all previously accessed 
-indexes and packages available when remote repository is down.
+In the settings `remotes` section should have one `url` item, where
+username and password are optional credentials for remote. Provided storage is used as caching feature and 
+makes all previously accessed indexes and packages available when remote repository is down.
 Check [storage](./Configuration-Storage) documentations to learn more about storage properties.
 
 To install the package with `pip install` specify Artipie repository url with `--index-url` option:

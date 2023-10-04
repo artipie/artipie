@@ -43,3 +43,4 @@
     * [[Metrics|Configuration-Metrics]]
     * [[Artipie`s JFR Events|jfr-events]]
     * [[Scripting support|Configuration-Scripting]]
+    * [[Artifacts metadata|Configuration-Metadata]]

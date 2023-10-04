@@ -4,6 +4,7 @@
  */
 package com.artipie.adapters.maven;
 
+import com.artipie.asto.Storage;
 import com.artipie.asto.cache.Cache;
 import com.artipie.asto.cache.FromStorageCache;
 import com.artipie.http.Response;
@@ -64,16 +65,15 @@ public final class MavenProxy implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
+        final Optional<Storage> asto = this.cfg.storageOpt();
         return new GroupSlice(
-            new YamlProxyConfig(this.client, this.cfg).remotes().stream().map(
+            new YamlProxyConfig(this.cfg).remotes().stream().map(
                 remote -> new MavenProxySlice(
                     this.client,
                     URI.create(remote.url()),
-                    remote.auth(),
-                    remote.cache().<Cache>map(
-                        cache -> new FromStorageCache(cache.storage())
-                    ).orElse(Cache.NOP),
-                    this.queue,
+                    remote.auth(this.client),
+                    asto.<Cache>map(FromStorageCache::new).orElse(Cache.NOP),
+                    asto.flatMap(ignored -> this.queue),
                     this.cfg.name()
                 )
             ).collect(Collectors.toList())

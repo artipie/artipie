@@ -33,32 +33,26 @@ public final class YamlProxyConfigTest {
     public void parsesConfig() {
         final String firsturl = "https://artipie.com";
         final String secondurl = "http://localhost:8080/path";
-        final Collection<YamlProxyConfig.YamlRemote> remotes = this.remotes(
+        final YamlProxyConfig config = this.proxyConfig(
             Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
                     Yaml.createYamlMappingBuilder()
                         .add("url", firsturl)
                         .add("username", "alice")
-                        .add("password", "qwerty")
-                        .build()
-                ).add(
-                    Yaml.createYamlMappingBuilder()
-                        .add("url", secondurl)
-                        .add(
-                            "cache",
-                            Yaml.createYamlMappingBuilder().add(
-                                "storage",
-                                Yaml.createYamlMappingBuilder()
-                                    .add("type", "fs")
-                                    .add("path", "/var/artipie/data")
-                                    .build()
-                            ).build()
-                        )
-                        .build()
-                ).build()
+                        .add("password", "qwerty").build()
+                ).add(Yaml.createYamlMappingBuilder().add("url", secondurl).build()).build()
+            ).add(
+                "storage",
+                Yaml.createYamlMappingBuilder().add("type", "fs").add("path", "a/b/c").build()
             ).build()
         );
+        MatcherAssert.assertThat(
+            "Storage cache is present",
+            config.cache().isPresent(),
+            new IsEqual<>(true)
+        );
+        final Collection<YamlProxyConfig.YamlRemote> remotes = config.remotes();
         MatcherAssert.assertThat(
             "Both remotes parsed",
             remotes.size(),
@@ -72,13 +66,8 @@ public final class YamlProxyConfigTest {
         );
         MatcherAssert.assertThat(
             "First remote authenticator is GenericAuthenticator",
-            first.auth(),
+            first.auth(new JettyClientSlices()),
             new IsInstanceOf(GenericAuthenticator.class)
-        );
-        MatcherAssert.assertThat(
-            "Second remote is absent",
-            first.cache().isPresent(),
-            new IsEqual<>(false)
         );
         final ProxyConfig.Remote second = remotes.stream().skip(1).findFirst().get();
         MatcherAssert.assertThat(
@@ -88,24 +77,19 @@ public final class YamlProxyConfigTest {
         );
         MatcherAssert.assertThat(
             "Second remote authenticator is GenericAuthenticator",
-            second.auth(),
+            second.auth(new JettyClientSlices()),
             new IsInstanceOf(GenericAuthenticator.class)
-        );
-        MatcherAssert.assertThat(
-            "Second remote has cache",
-            second.cache().isPresent(),
-            new IsEqual<>(true)
         );
     }
 
     @Test
     public void parsesEmpty() {
-        final Collection<? extends ProxyConfig.Remote> remotes = this.remotes(
+        final Collection<? extends ProxyConfig.Remote> remotes = this.proxyConfig(
             Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().build()
             ).build()
-        );
+        ).remotes();
         MatcherAssert.assertThat(
             remotes,
             new IsEmptyCollection<>()
@@ -114,14 +98,14 @@ public final class YamlProxyConfigTest {
 
     @Test
     public void failsToGetUrlWhenNotSpecified() {
-        final ProxyConfig.Remote remote = this.remotes(
+        final ProxyConfig.Remote remote = this.proxyConfig(
             Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
                     Yaml.createYamlMappingBuilder().add("attr", "value").build()
                 ).build()
             ).build()
-        ).iterator().next();
+        ).remotes().iterator().next();
         Assertions.assertThrows(
             IllegalStateException.class,
             remote::url
@@ -130,7 +114,7 @@ public final class YamlProxyConfigTest {
 
     @Test
     public void failsToGetAuthWhenUsernameOnly() {
-        final ProxyConfig.Remote remote = this.remotes(
+        final ProxyConfig.Remote remote = this.proxyConfig(
             Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
@@ -140,16 +124,15 @@ public final class YamlProxyConfigTest {
                         .build()
                 ).build()
             ).build()
-        ).iterator().next();
+        ).remotes().iterator().next();
         Assertions.assertThrows(
-            IllegalStateException.class,
-            remote::auth
+            IllegalStateException.class, () -> remote.auth(new JettyClientSlices())
         );
     }
 
     @Test
     public void failsToGetAuthWhenPasswordOnly() {
-        final ProxyConfig.Remote remote = this.remotes(
+        final ProxyConfig.Remote remote = this.proxyConfig(
             Yaml.createYamlMappingBuilder().add(
                 "remotes",
                 Yaml.createYamlSequenceBuilder().add(
@@ -159,17 +142,16 @@ public final class YamlProxyConfigTest {
                         .build()
                 ).build()
             ).build()
-        ).iterator().next();
+        ).remotes().iterator().next();
         Assertions.assertThrows(
-            IllegalStateException.class,
-            remote::auth
+            IllegalStateException.class, () -> remote.auth(new JettyClientSlices())
         );
     }
 
     @Test
     public void returnsEmptyCollectionWhenYamlEmpty() {
         final Collection<YamlProxyConfig.YamlRemote> remote =
-            this.remotes(Yaml.createYamlMappingBuilder().build());
+            this.proxyConfig(Yaml.createYamlMappingBuilder().build()).remotes();
         MatcherAssert.assertThat(
             remote.isEmpty(),
             new IsEqual<>(true)
@@ -180,8 +162,8 @@ public final class YamlProxyConfigTest {
     public void throwsExceptionWhenYamlRemotesIsNotMapping() {
         Assertions.assertThrows(
             IllegalStateException.class,
-            () ->
-                this.remotes(Yaml.createYamlMappingBuilder().add(
+            () -> this.proxyConfig(
+                Yaml.createYamlMappingBuilder().add(
                     "remotes",
                     Yaml.createYamlSequenceBuilder().add(
                         Yaml.createYamlSequenceBuilder()
@@ -191,22 +173,20 @@ public final class YamlProxyConfigTest {
                             .build()
                     ).build()
                 ).build()
-            )
+            ).remotes()
         );
     }
 
-    private Collection<YamlProxyConfig.YamlRemote> remotes(final YamlMapping yaml) {
+    private YamlProxyConfig proxyConfig(final YamlMapping yaml) {
         return new YamlProxyConfig(
-            new JettyClientSlices(),
             new RepoConfig(
                 new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
                 Key.ROOT,
-                yaml,
+                Yaml.createYamlMappingBuilder().add("repo", yaml).build(),
                 new TestStoragesCache()
             ),
-            Key.ROOT,
             yaml
-        ).remotes();
+        );
     }
 
 }
