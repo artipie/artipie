@@ -209,6 +209,17 @@ SOFTWARE.
       <version>1.0.0</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.jetty.http3</groupId>
+      <artifactId>http3-server</artifactId>
+      <version>11.0.16</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.http3</groupId>
+      <artifactId>http3-client</artifactId>
+      <version>11.0.16</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http-client</artifactId>
       <version>0.3.9</version>
