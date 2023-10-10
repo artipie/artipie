@@ -11,6 +11,8 @@ import com.artipie.http.rq.RequestLine;
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.http3.api.Session;
@@ -114,18 +116,20 @@ public final class Http3Server {
                         .map(field -> new Header(field.getName(), field.getValue()))
                         .collect(Collectors.toList()),
                     Content.EMPTY
-                ).send(new Http3Connection(stream)).toCompletableFuture().join();
+                ).send(new Http3Connection(stream));
                 return null;
             } else {
                 stream.demand();
-                final ByteBuffer buffer =
-                    ByteBuffer.allocate((int) request.getContentLength());
+                final List<ByteBuffer> buffers = new LinkedList<>();
                 return new Stream.Server.Listener() {
                     @Override
                     public void onDataAvailable(final Stream.Server stream) {
                         final Stream.Data data = stream.readData();
                         if (data != null) {
-                            buffer.put(data.getByteBuffer());
+                            final ByteBuffer item = data.getByteBuffer();
+                            final ByteBuffer copy = ByteBuffer.allocate(item.capacity());
+                            copy.put(item);
+                            buffers.add(copy.position(0));
                             data.complete();
                             if (data.isLast()) {
                                 Http3Server.this.slice.response(
@@ -136,7 +140,7 @@ public final class Http3Server {
                                     request.getFields().stream().map(
                                         field -> new Header(field.getName(), field.getValue())
                                     ).collect(Collectors.toList()),
-                                    Flowable.fromArray(buffer.position(0))
+                                    Flowable.fromArray(buffers.toArray(ByteBuffer[]::new))
                                 ).send(new Http3Connection(stream));
                             }
                         }

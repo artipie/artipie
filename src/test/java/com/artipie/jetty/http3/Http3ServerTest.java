@@ -19,14 +19,12 @@ import com.artipie.nuget.RandomFreePort;
 import io.reactivex.Flowable;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.http.HttpVersion;
@@ -229,7 +227,7 @@ class Http3ServerTest {
         final MetaData.Request request = new MetaData.Request(
             "PUT", HttpURI.from(String.format("http://localhost:%d/return_back", this.port)),
             HttpVersion.HTTP_3,
-            HttpFields.from(new HttpField("content-length", String.valueOf(size * 2)))
+            HttpFields.build()
         );
         final CountDownLatch rlatch = new CountDownLatch(1);
         final CountDownLatch dlatch = new CountDownLatch(1);
@@ -263,10 +261,10 @@ class Http3ServerTest {
             .get(5, TimeUnit.SECONDS);
         MatcherAssert.assertThat("Response was not received", rlatch.await(10, TimeUnit.SECONDS));
         MatcherAssert.assertThat("Data were not received", dlatch.await(60, TimeUnit.SECONDS));
-        MatcherAssert.assertThat(Arrays.copyOf(resp.array(), size), new IsEqual<>(data));
-        MatcherAssert.assertThat(
-            Arrays.copyOfRange(resp.array(), size, size * 2), new IsEqual<>(data)
-        );
+        final ByteBuffer copy = ByteBuffer.allocate(size * 2);
+        copy.put(data);
+        copy.put(data);
+        MatcherAssert.assertThat(resp.array(), new IsEqual<>(copy.array()));
     }
 
     /**
