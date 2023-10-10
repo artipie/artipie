@@ -14,6 +14,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.StreamSupport;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.http3.api.Stream;
@@ -44,8 +45,10 @@ public final class Http3Connection implements Connection {
     public CompletionStage<Void> accept(
         final RsStatus status, final Headers headers, final Publisher<ByteBuffer> body
     ) {
+        final int stat = Integer.parseInt(status.code());
         final MetaData.Response response = new MetaData.Response(
-            HttpVersion.HTTP_3, Integer.parseInt(status.code()),
+            stat, HttpStatus.getMessage(stat),
+            HttpVersion.HTTP_3,
             HttpFields.from(
                 StreamSupport.stream(headers.spliterator(), false)
                     .map(item -> new HttpField(item.getKey(), item.getValue()))

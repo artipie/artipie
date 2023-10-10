@@ -133,7 +133,7 @@ class Http3ServerTest {
                     final MetaData meta = frame.getMetaData();
                     final MetaData.Response response = (MetaData.Response) meta;
                     MatcherAssert.assertThat(
-                        response.getFields().get(Http3ServerTest.RQ_METHOD),
+                        response.getHttpFields().get(Http3ServerTest.RQ_METHOD),
                         new IsEqual<>(method)
                     );
                     count.countDown();
@@ -168,7 +168,7 @@ class Http3ServerTest {
                     final Stream.Data data = stream.readData();
                     if (data != null) {
                         resp.put(data.getByteBuffer());
-                        data.complete();
+                        data.release();
                         if (data.isLast()) {
                             dlatch.countDown();
                         }
@@ -206,7 +206,7 @@ class Http3ServerTest {
                     final Stream.Data data = stream.readData();
                     if (data != null) {
                         resp.put(data.getByteBuffer());
-                        data.complete();
+                        data.release();
                         if (data.isLast()) {
                             dlatch.countDown();
                         }
@@ -248,7 +248,7 @@ class Http3ServerTest {
                     final Stream.Data data = stream.readData();
                     if (data != null) {
                         resp.put(data.getByteBuffer());
-                        data.complete();
+                        data.release();
                         if (data.isLast()) {
                             dlatch.countDown();
                         }

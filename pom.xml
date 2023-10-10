@@ -210,13 +210,13 @@ SOFTWARE.
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.http3</groupId>
-      <artifactId>http3-server</artifactId>
-      <version>11.0.16</version>
+      <artifactId>jetty-http3-server</artifactId>
+      <version>12.0.1</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty.http3</groupId>
-      <artifactId>http3-client</artifactId>
-      <version>11.0.16</version>
+      <artifactId>jetty-http3-client</artifactId>
+      <version>12.0.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>

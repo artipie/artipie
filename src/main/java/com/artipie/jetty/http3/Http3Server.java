@@ -110,9 +110,9 @@ public final class Http3Server {
             if (frame.isLast()) {
                 Http3Server.this.slice.response(
                     new RequestLine(
-                        request.getMethod(), request.getURIString(), request.getProtocol()
+                        request.getMethod(), request.getHttpURI().asString(), request.getProtocol()
                     ).toString(),
-                    request.getFields().stream()
+                    request.getHttpFields().stream()
                         .map(field -> new Header(field.getName(), field.getValue()))
                         .collect(Collectors.toList()),
                     Content.EMPTY
@@ -130,14 +130,14 @@ public final class Http3Server {
                             final ByteBuffer copy = ByteBuffer.allocate(item.capacity());
                             copy.put(item);
                             buffers.add(copy.position(0));
-                            data.complete();
+                            data.release();
                             if (data.isLast()) {
                                 Http3Server.this.slice.response(
                                     new RequestLine(
-                                        request.getMethod(), request.getURIString(),
+                                        request.getMethod(), request.getHttpURI().asString(),
                                         request.getProtocol()
                                     ).toString(),
-                                    request.getFields().stream().map(
+                                    request.getHttpFields().stream().map(
                                         field -> new Header(field.getName(), field.getValue())
                                     ).collect(Collectors.toList()),
                                     Flowable.fromArray(buffers.toArray(ByteBuffer[]::new))
