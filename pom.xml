@@ -222,7 +222,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http-client</artifactId>
-      <version>0.3.9</version>
+      <version>0.3.11</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
