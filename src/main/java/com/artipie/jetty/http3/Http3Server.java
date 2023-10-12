@@ -4,6 +4,7 @@
  */
 package com.artipie.jetty.http3;
 
+import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
@@ -67,9 +68,10 @@ public final class Http3Server {
 
     /**
      * Starts http3 server.
-     * @throws Exception On Error
+     * @throws com.artipie.ArtipieException On Error
      */
-    public void start() throws Exception {
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
+    public void start() {
         final RawHTTP3ServerConnectionFactory factory =
             new RawHTTP3ServerConnectionFactory(new SliceListener());
         factory.getHTTP3Configuration().setStreamIdleTimeout(15_000);
@@ -77,10 +79,15 @@ public final class Http3Server {
             new HTTP3ServerConnector(this.server, this.ssl, factory);
         connector.getQuicConfiguration().setMaxBidirectionalRemoteStreams(1024);
         connector.setPort(this.port);
-        connector.getQuicConfiguration()
-            .setPemWorkDirectory(Files.createTempDirectory("http3-pem"));
-        this.server.addConnector(connector);
-        this.server.start();
+        try {
+            connector.getQuicConfiguration()
+                .setPemWorkDirectory(Files.createTempDirectory("http3-pem"));
+            this.server.addConnector(connector);
+            this.server.start();
+        // @checkstyle IllegalCatchCheck (5 lines)
+        } catch (final Exception err) {
+            throw new ArtipieException(err);
+        }
     }
 
     /**

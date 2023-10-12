@@ -44,3 +44,4 @@
     * [[Artipie`s JFR Events|jfr-events]]
     * [[Scripting support|Configuration-Scripting]]
     * [[Artifacts metadata|Configuration-Metadata]]
+    * [[HTTP3 support|Configuration-http3]]
