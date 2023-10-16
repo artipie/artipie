@@ -14,6 +14,7 @@ import com.artipie.http.MainSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
+import com.artipie.http.slice.LoggingSlice;
 import com.artipie.jetty.http3.Http3Server;
 import com.artipie.jetty.http3.SslFactoryFromYaml;
 import com.artipie.misc.ArtipieProperties;
@@ -220,7 +221,8 @@ public final class VertxMain {
                             this.http3.computeIfAbsent(
                                 prt, key -> {
                                     final Http3Server server = new Http3Server(
-                                        slice, prt, new SslFactoryFromYaml(repo.repoYaml()).build()
+                                        new LoggingSlice(slice), prt,
+                                        new SslFactoryFromYaml(repo.repoYaml()).build()
                                     );
                                     server.start();
                                     return server;

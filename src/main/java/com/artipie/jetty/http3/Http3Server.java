@@ -33,6 +33,11 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 public final class Http3Server {
 
     /**
+     * Protocol version.
+     */
+    private static final String HTTP_3 = "HTTP/3";
+
+    /**
      * Artipie slice.
      */
     private final Slice slice;
@@ -117,7 +122,7 @@ public final class Http3Server {
             if (frame.isLast()) {
                 Http3Server.this.slice.response(
                     new RequestLine(
-                        request.getMethod(), request.getHttpURI().asString(), request.getProtocol()
+                        request.getMethod(), request.getHttpURI().getPath(), Http3Server.HTTP_3
                     ).toString(),
                     request.getHttpFields().stream()
                         .map(field -> new Header(field.getName(), field.getValue()))
@@ -141,8 +146,8 @@ public final class Http3Server {
                             if (data.isLast()) {
                                 Http3Server.this.slice.response(
                                     new RequestLine(
-                                        request.getMethod(), request.getHttpURI().asString(),
-                                        request.getProtocol()
+                                        request.getMethod(), request.getHttpURI().getPath(),
+                                        Http3Server.HTTP_3
                                     ).toString(),
                                     request.getHttpFields().stream().map(
                                         field -> new Header(field.getName(), field.getValue())
