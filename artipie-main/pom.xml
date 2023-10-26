@@ -186,8 +186,8 @@ SOFTWARE.
         <dependency>
             <groupId>com.artipie</groupId>
             <artifactId>gem-adapter</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>v1.3.7</version>
+<!--            <scope>compile</scope>-->
         </dependency>
         <dependency>
             <groupId>com.artipie</groupId>
@@ -308,23 +308,6 @@ SOFTWARE.
                         <artifactId>maven-deploy-plugin</artifactId>
                         <configuration>
                             <skip>true</skip>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.gaul</groupId>
-                        <artifactId>modernizer-maven-plugin</artifactId>
-                        <version>2.7.0</version>
-                        <executions>
-                            <execution>
-                                <id>modernizer</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>modernizer</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <javaVersion>${maven.compiler.source}</javaVersion>
                         </configuration>
                     </plugin>
                     <plugin>
