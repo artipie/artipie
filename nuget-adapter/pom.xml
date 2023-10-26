@@ -71,7 +71,7 @@ SOFTWARE.
     <testResources>
       <testResource>
         <directory>${basedir}/src/test/resources</directory>
-        <filtering>true</filtering>
+        <filtering>false</filtering>
       </testResource>
       <testResource>
         <directory>${basedir}/src/test/resources-binary</directory>
