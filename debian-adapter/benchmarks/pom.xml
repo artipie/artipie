@@ -28,6 +28,7 @@ SOFTWARE.
     <groupId>com.artipie</groupId>
     <artifactId>artipie</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <relativePath>/../../pom.xml</relativePath>
   </parent>
   <artifactId>debian-bench</artifactId>
   <version>1.0-SNAPSHOT</version>
