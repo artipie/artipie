@@ -21,7 +21,7 @@ jobs:
         with:
           distribution: jdkfile
           jdkFile: ${{ runner.temp }}/jdk-21_linux-x64_bin.tar.gz
-          java-version: 17
+          java-version: 21
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
