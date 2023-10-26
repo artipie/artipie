@@ -1,0 +1,17 @@
+meta:
+  storage:
+    type: fs
+    path: C:\Users\g00563573\IdeaProjects\artipie\test-start
+  credentials:
+    - type: env
+    - type: github
+    - type: artipie
+  policy:
+    type: artipie
+    storage:
+      type: fs
+      path: C:\Users\g00563573\IdeaProjects\artipie\test-start\security
+  base_url: http://central.artipie.com/
+  metrics:
+    port: 8087
+    endpoint: "/metrics"

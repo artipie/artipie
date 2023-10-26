@@ -1,0 +1,13 @@
+1650313018
+conandata.yml: adbb0af738ca5247fc61290448fc486e
+conanfile.py: b2fae6e7b975794f0e8b87cf9bd79ed7
+export_source/patches/2.69-0001-autom4te-relocatable.patch: 0ba8bfad0c773e7af7348c73667773e8
+export_source/patches/2.69-0002-no-perl-path-in-shebang.patch: c0079227d63a80406a7ff96816da3f90
+export_source/patches/2.69-0003-uppercase-autom4te_perllibdir.patch: c58317860a8f3c280ebc5bac36b29113
+export_source/patches/2.69-0004-no-embedded-m4-paths.patch: 0892dc16db563a4dce95462083f23d77
+export_source/patches/2.71-0001-autom4te-relocatable.patch: 09eed29dc4f97ef99774058398b69a65
+export_source/patches/2.71-0002-no-perl-path-in-shebang.patch: 0f80ccb95df8132dee1b293bbb238d26
+export_source/patches/2.71-0003-uppercase-autom4te_perllibdir.patch: b63dcb646811378505f756d8eff0b023
+export_source/patches/2.71-0004-no-embedded-m4-paths.patch: 5a92d18c413c233295e764ff61380a9b
+export_source/patches/2.71-0005-disable-man-regeneration.patch: 50ebaa73ad5d8a1b55e27f0e30de68ed
+export_source/patches/2.71-0006-autoconf-no-embedded-trailer_m4-path.patch: 2da1b0de544f6290a3cf1f2d4be212b7

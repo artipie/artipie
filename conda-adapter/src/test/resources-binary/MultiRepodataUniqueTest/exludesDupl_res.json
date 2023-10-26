@@ -1,0 +1,123 @@
+{
+  "packages" : {
+    "decorator-4.2.1-py27_0.tar.bz2" : {
+      "build" : "py27_0",
+      "build_number" : 0,
+      "depends" : [ "python >=2.7,<2.8.0a0" ],
+      "license" : "BSD 3-Clause",
+      "md5" : "0ebe0cb0d62eae6cd237444ba8fded66",
+      "name" : "decorator",
+      "sha256" : "b5f77880181b37fb2e180766869da6242648aaec5bdd6de89296d9dacd764c14",
+      "size" : 15638,
+      "subdir" : "linux-64",
+      "timestamp" : 1516376429792,
+      "version" : "4.2.1"
+    },
+    "cram-0.7-py36_1.tar.bz2" : {
+      "build" : "py36_1",
+      "build_number" : 1,
+      "depends" : [ "python >=3.6,<3.7.0a0" ],
+      "license" : "GPL-2.0",
+      "license_family" : "GPL2",
+      "md5" : "609e6545899d1d098f4160dd98fbc74d",
+      "name" : "cram",
+      "sha256" : "4b36cb59651f6218449bd71a7d37182f062f545240b502eebed319f77fa54b08",
+      "size" : 40151,
+      "subdir" : "linux-64",
+      "timestamp" : 1539182927005,
+      "version" : "0.7"
+    },
+    "pyqt-5.6.0-py36h0386399_5.tar.bz2" : {
+      "build" : "py36h0386399_5",
+      "build_number" : 5,
+      "depends" : [ "dbus >=1.10.22,<2.0a0", "libgcc-ng >=7.2.0", "libstdcxx-ng >=7.2.0", "python >=3.6,<3.7.0a0", "qt 5.6.*", "sip 4.18.*" ],
+      "license" : "Commercial, GPL-2.0, GPL-3.0",
+      "license_family" : "GPL",
+      "md5" : "b1624f76a6bba705869f849f7456bd39",
+      "name" : "pyqt",
+      "sha256" : "b37f144a5c2349b1c58ef17a663cb79086a1f2f49e35503e4f411f6f698cee1a",
+      "size" : 5715107,
+      "subdir" : "linux-64",
+      "timestamp" : 1505739175210,
+      "version" : "5.6.0"
+    },
+    "pylint-2.4.4-py36_0.tar.bz2": {
+      "build": "py36_0",
+      "build_number": 0,
+      "depends": [
+        "astroid >=2.3.0,<2.4",
+        "isort >=4.2.5,<5",
+        "mccabe >=0.6,<0.7",
+        "python >=3.6,<3.7.0a0"
+      ],
+      "license": "GPL 2",
+      "md5": "ad4fe4f85089f8c2251db9ee93cfbef0",
+      "name": "pylint",
+      "sha256": "418cd348abef8c432efb73e50028541dfce9c01870e8862ce04b5cb412129718",
+      "size": 444104,
+      "subdir": "linux-64",
+      "timestamp": 1573939943157,
+      "version": "2.4.4"
+    }
+  },
+  "packages.conda" : {
+    "notebook-6.1.1-py38_0.conda" : {
+      "app_cli_opts" : [ {
+        "args" : "--port %s",
+        "default" : "8080",
+        "name" : "port",
+        "summary" : "Server port ..."
+      } ],
+      "app_entry" : "jupyter-notebook",
+      "app_type" : "web",
+      "build" : "py38_0",
+      "build_number" : 0,
+      "depends" : [ "argon2-cffi", "ipykernel", "ipython_genutils", "jinja2", "send2trash", "terminado >=0.8.1", "tornado >=5.0", "traitlets >=4.2.1" ],
+      "icon" : "df7feebede9861a203b480c119e38b49.png",
+      "license" : "BSD-3-Clause",
+      "license_family" : "BSD",
+      "md5" : "0a90b675d8e46db6dd92b48f085df274",
+      "name" : "notebook",
+      "sha256" : "be2a62bd5a3a6abda7f2309f4f2ddce7bededb40adb91341f18438b246d7fc7e",
+      "size" : 4233953,
+      "subdir" : "linux-64",
+      "summary" : "Jupyter Notebook",
+      "timestamp" : 1596838674769,
+      "type" : "app",
+      "version" : "6.1.1"
+    },
+    "numexpr-2.7.2-py38h4be448d_0.conda": {
+      "build": "py38h4be448d_0",
+      "build_number": 0,
+      "depends": [
+        "blas * openblas",
+        "libgcc-ng >=7.3.0",
+        "libopenblas >=0.3.3,<1.0a0",
+        "libstdcxx-ng >=7.3.0",
+        "numpy >=1.16.6,<2.0a0",
+        "python >=3.8,<3.9.0a0"
+      ],
+      "license": "MIT",
+      "md5": "4fda29b6a8052ca499d8106db7b918a4",
+      "name": "numexpr",
+      "sha256": "030c112c93e5c6c0aea6a2119e06016c72201e5df945d6a40753dc7b478749dd",
+      "size": 189031,
+      "subdir": "linux-64",
+      "timestamp": 1609354670825,
+      "version": "2.7.2"
+    },
+    "tenacity-6.2.0-py37_0.conda" : {
+      "build" : "py37_0",
+      "build_number" : 0,
+      "depends" : [ "python >=3.7,<3.8.0a0", "six >=1.9.0" ],
+      "license" : "Apache 2.0",
+      "md5" : "e5a8af970f391f432c96b1480f535c43",
+      "name" : "tenacity",
+      "sha256" : "47d6dd01a1cff52af31804bbfffb4341fd8676c75d00d120cc66d9709e78ea7f",
+      "size" : 40072,
+      "subdir" : "linux-64",
+      "timestamp" : 1597706734992,
+      "version" : "6.2.0"
+    }
+  }
+}

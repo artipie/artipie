@@ -1,0 +1,14 @@
+{
+  "packages": {
+    "vendor/package": {
+      "1.2.0": {
+        "name": "vendor/package",
+        "version": "1.2.0",
+        "dist": {
+          "url": "https://www.example.com/files/content.zip",
+          "type": "zip"
+        }
+      }
+    }
+  }
+}

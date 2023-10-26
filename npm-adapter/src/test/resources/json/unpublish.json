@@ -1,0 +1,52 @@
+{
+  "name":"@hello/simple-npm-project",
+  "time":{
+    "created":"2021-02-09T14:57:26.0818604",
+    "modified":"2021-02-09T14:57:26.1318618",
+    "1.0.1":"2021-02-09T14:57:26.0858613",
+    "1.0.2":"2021-02-09T14:57:26.1318618"
+  },
+  "users":{
+
+  },
+  "versions":{
+    "1.0.1":{
+      "name":"@hello/simple-npm-project",
+      "version":"1.0.1",
+      "description":"",
+      "main":"index.js",
+      "scripts":{
+        "test":"echo \"Error: no test specified\" && exit 1"
+      },
+      "author":"",
+      "license":"ISC",
+      "dist":{
+        "integrity":"sha512-R6b7GPSbDu6gqzF6ZeViwdV1yUU8QDj+lMYkJLwETkUpygwn9Zy/RT1js1Kh5ci8ParktgaNyNlP4jbwno02xw==",
+        "shasum":"798e92517c95cbb09ce1f4051996d2631c3ba331",
+        "tarball":"/@hello/simple-npm-project/-/@hello/simple-npm-project-1.0.1.tgz"
+      },
+      "_id":"@hello/simple-npm-project@1.0.1"
+    },
+    "1.0.2":{
+      "name":"@hello/simple-npm-project",
+      "version":"1.0.2",
+      "description":"New version",
+      "main":"index.js",
+      "scripts":{
+        "test":"echo \"Error: no test specified\" && exit 1"
+      },
+      "author":"",
+      "license":"ISC",
+      "dist":{
+        "integrity":"sha512-U1+taDQaCNV3TsQxnHVWH9bF88fWyXehuNh2Dg0diZst5ZdP3ecqmu7BSZQ5ETznUDcPs5ORk+LuLDABMuEnjQ==",
+        "shasum":"bc6727ae3a40b72e573fe6d204243976b72a899b",
+        "tarball":"/@hello/simple-npm-project/-/@hello/simple-npm-project-1.0.2.tgz"
+      },
+      "_id":"@hello/simple-npm-project@1.0.2"
+    }
+  },
+  "dist-tags":{
+    "latest":"1.0.2",
+    "1.0.2":"Description for 1.0.2 version"
+  }
+}

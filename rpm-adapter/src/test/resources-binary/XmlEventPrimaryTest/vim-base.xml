@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns="http://linux.duke.edu/metadata/common" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>vim-base</name>
+        <arch>x86_64</arch>
+        <version epoch="0" rel="8.15.2" ver="7.2"/>
+        <checksum type="sha256" pkgid="YES">6064809b1f833e5a6c0224d7c443ec970110db8815b0b12c38d168dae3d88abb</checksum>
+        <summary>Vi IMproved</summary>
+        <description>Vim (Vi IMproved) is an almost compatible version of the UNIX editor
+            vi. Almost every possible command can be performed using only ASCII
+            characters. Only the 'Q' command is missing (you do not need it). Many
+            new features have been added: multilevel undo, command line history,
+            file name completion, block operations, and editing of binary data.
+
+            Vi is available for the AMIGA, MS-DOS, Windows NT, and various versions
+            of UNIX.
+
+            For SuSE Linux, Vim is used as /usr/bin/vi.
+
+            Package vim-base contains the common files needed for all different vim
+            versions. You still need to select at least one of the vim,
+            vim-enhanced or gvim packages. For full runtime support you might also
+            want to install the vim-data package.
+
+
+            Authors:
+            --------
+            Bram Moolenaar &lt;bram@vim.org>
+        </description>
+        <packager>http://bugs.opensuse.org</packager>
+        <url>http://www.vim.org/</url>
+        <time build="1328349201" file="1328349193"/>
+        <size installed="328760" archive="0" package="173035"/>
+        <location href="vim-base-7.2-8.15.2.x86_64.rpm"/>
+        <format>
+            <rpm:license>Other uncritical OpenSource License</rpm:license>
+            <rpm:vendor>SUSE LINUX Products GmbH, Nuernberg, Germany</rpm:vendor>
+            <rpm:group>Productivity/Editors/Vi</rpm:group>
+            <rpm:buildhost>gubaidulina</rpm:buildhost>
+            <rpm:sourcerpm>vim-7.2-8.15.2.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="616" end="25028"/>
+            <rpm:provides>
+                <rpm:entry name="vim-base" ver="7.2" epoch="0" rel="8.15.2" flags="EQ"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="update-alternatives" pre="1"/>
+                <rpm:entry name="/bin/sh" pre="1"/>
+                <rpm:entry name="libc.so.6(GLIBC_2.4)(64bit)"/>
+            </rpm:requires>
+            <file>/bin/ex</file>
+            <file>/bin/vi</file>
+            <file>/bin/vim</file>
+            <file type="ghost">/etc/alternatives/vim</file>
+            <file>/etc/vimrc</file>
+            <file>/usr/bin/edit</file>
+            <file>/usr/bin/ex</file>
+            <file>/usr/bin/gvimtutor</file>
+            <file>/usr/bin/rview</file>
+            <file>/usr/bin/rvim</file>
+            <file>/usr/bin/vi</file>
+            <file>/usr/bin/view</file>
+            <file>/usr/bin/vim</file>
+            <file>/usr/bin/vimdiff</file>
+            <file>/usr/bin/vimtutor</file>
+            <file>/usr/bin/vitmp</file>
+            <file>/usr/bin/xxd</file>
+        </format>
+    </package>
+</metadata>

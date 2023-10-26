@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<otherdata xmlns="http://linux.duke.edu/metadata/other" packages="3">
+    <package pkgid="ce6f64001104e098d5e799d6a10e7cfeadf2320b8955c86e3f8d15872d1544fd" name="mesa-libxatracker" arch="i686">
+        <version epoch="0" ver="18.3.4" rel="10.el7"/>
+        <changelog author="Dave Airlie &lt;airlied@redhat.com&gt; - 18.3.4-1" date="1550577600">- mesa 18.3.4</changelog>
+        <changelog author="Dave Airlie &lt;airlied@redhat.com&gt; - 18.3.4-2" date="1551441600">- add shm fix</changelog>
+        <changelog author="Dave Airlie &lt;airlied@redhat.com&gt; - 18.3.4-3" date="1553601600">- fix remote shm</changelog>
+        <changelog author="Dave Airlie &lt;airlied@redhat.com&gt; - 18.3.4-4" date="1553688000">- Enable i686 vulkan drivers for 32-bit apps</changelog>
+        <changelog author="Dave Airlie &lt;airlied@redhat.com&gt; - 18.3.4-5" date="1554379200">- fix remote shm patch</changelog>
+        <changelog author="Ben Crocker &lt;bcrocker@redhat.com&gt; - 18.3.4-6" date="1578312000">- Patch to require Large CodeModel for llvmpipe on ppc64/ppc64le (#1543572)</changelog>
+        <changelog author="Tomas Pelka &lt;tpelka@redhat.com&gt; - 18.3.4-7" date="1579780800">- bump version and rebuild to avoind conflict with 7.7.z build (#1543572)</changelog>
+        <changelog author="Dave Airlie &lt;airlied@redhat.com&gt; - 18.3.4-8" date="1584100800">- Backport put/get shm fixes to EL7 (#1749699)</changelog>
+        <changelog author="Adam Jackson &lt;ajax@redhat.com&gt; - 18.3.4-9" date="1587384000">- Fix context sharing with multiple screens for i965</changelog>
+        <changelog author="Adam Jackson &lt;ajax@redhat.com&gt; - 18.3.4-10" date="1592481600">- Revert the previous fix due to regressions in Firefox, Chrome, etc.</changelog>
+    </package>
+    <package pkgid="47bbb8b2401e8853812e6340f4197252b92463c132f64a257e18c0c8c83ae462" name="libdeflt1_0" arch="armv7hl">
+        <version epoch="0" ver="2020.03.27" rel="25.1"/>
+    </package>
+    <package pkgid="b9d10ae3485a5c5f71f0afb1eaf682bfbea4ea667cc3c3975057d6e3d8f2e905" name="abc" arch="ppc64le">
+        <version epoch="0" ver="1.01" rel="26.git20200127.fc32"/>
+    </package>
+</otherdata>

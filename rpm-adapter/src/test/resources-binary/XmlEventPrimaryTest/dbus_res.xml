@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns="http://linux.duke.edu/metadata/common"
+          xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>dbus</name>
+        <arch>x86_64</arch>
+        <version epoch="1" rel="17.el7" ver="1.6.12"/>
+        <checksum type="sha256" pkgid="YES">
+            183d651f08ecf355689143dd373e9251120db3c9874e39a1c5e7702aa90918d6
+        </checksum>
+        <summary>D-BUS message bus</summary>
+        <description>D-BUS is a system for sending messages between applications. It is
+            used both for the system-wide message bus service, and as a
+            per-user-login-session messaging facility.
+        </description>
+        <packager>CentOS BuildSystem &lt;http://bugs.centos.org></packager>
+        <url>http://www.freedesktop.org/software/dbus/</url>
+        <time build="1478463754" file="1478463585"/>
+        <size installed="875656" archive="0" package="314388"/>
+        <location href="dbus-1.6.12-17.el7.x86_64.rpm"/>
+        <format>
+            <rpm:license>GPLv2+ or AFL</rpm:license>
+            <rpm:vendor>CentOS</rpm:vendor>
+            <rpm:group>System Environment/Libraries</rpm:group>
+            <rpm:buildhost>worker1.bsys.centos.org</rpm:buildhost>
+            <rpm:sourcerpm>dbus-1.6.12-17.el7.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="1384" end="37500"/>
+            <rpm:provides>
+                <rpm:entry name="config(dbus)" ver="1.6.12" epoch="1" rel="17.el7" flags="EQ"/>
+                <rpm:entry name="dbus" ver="1.6.12" epoch="1" rel="17.el7" flags="EQ"/>
+                <rpm:entry name="dbus(x86-64)" ver="1.6.12" epoch="1" rel="17.el7" flags="EQ"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="/bin/sh"/>
+                <rpm:entry name="/usr/sbin/useradd" pre="1"/>
+                <rpm:entry name="chkconfig" pre="1"/>
+                <rpm:entry name="dbus-libs(x86-64)" ver="1.6.12" epoch="1" rel="17.el7" flags="EQ"/>
+                <rpm:entry name="libaudit.so.1()(64bit)"/>
+                <rpm:entry name="libcap-ng.so.0()(64bit)"/>
+                <rpm:entry name="libdbus-1.so.3()(64bit)"/>
+                <rpm:entry name="libexpat.so.1()(64bit)"/>
+                <rpm:entry name="libpthread.so.0()(64bit)"/>
+                <rpm:entry name="libpthread.so.0(GLIBC_2.2.5)(64bit)"/>
+                <rpm:entry name="libpthread.so.0(GLIBC_2.3.2)(64bit)"/>
+                <rpm:entry name="libpthread.so.0(GLIBC_2.3.3)(64bit)"/>
+                <rpm:entry name="librt.so.1()(64bit)"/>
+                <rpm:entry name="librt.so.1(GLIBC_2.2.5)(64bit)"/>
+                <rpm:entry name="libselinux(x86-64)" ver="1.15.2" epoch="0" flags="GE"/>
+                <rpm:entry name="libselinux.so.1()(64bit)"/>
+                <rpm:entry name="rtld(GNU_HASH)"/>
+                <rpm:entry name="systemd-units" pre="1"/>
+                <rpm:entry name="libc.so.6(GLIBC_2.14)(64bit)"/>
+            </rpm:requires>
+            <file>/bin/dbus-cleanup-sockets</file>
+            <file>/bin/dbus-daemon</file>
+            <file>/bin/dbus-monitor</file>
+            <file>/bin/dbus-send</file>
+            <file>/bin/dbus-uuidgen</file>
+            <file type="dir">/etc/dbus-1</file>
+            <file>/etc/dbus-1/session.conf</file>
+            <file type="dir">/etc/dbus-1/session.d</file>
+            <file>/etc/dbus-1/system.conf</file>
+            <file type="dir">/etc/dbus-1/system.d</file>
+        </format>
+    </package>
+</metadata>

@@ -1,0 +1,48 @@
+[settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=11
+    os=Linux
+
+[requires]
+    zeromq/4.Y.Z
+
+[options]
+    fPIC=True
+    shared=False
+
+[full_settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=11
+    os=Linux
+
+[full_requires]
+    libsodium/1.0.18:419002c76981df3dbb7d8e203de10ef0cc29df7c
+    zeromq/4.3.4:fe18233b49ca2ffb0e25dcb16ab72fd8e3ce3443
+
+[full_options]
+    fPIC=True
+    shared=False
+    libsodium:PIE=False
+    libsodium:fPIC=True
+    libsodium:shared=False
+    libsodium:use_soname=True
+    zeromq:encryption=libsodium
+    zeromq:fPIC=True
+    zeromq:poller=None
+    zeromq:shared=False
+    zeromq:with_draft_api=False
+    zeromq:with_norm=False
+    zeromq:with_radix_tree=False
+    zeromq:with_websocket=False
+
+[recipe_hash]
+    fe5b43012174ba4f24442812f4c78313
+
+[env]
+

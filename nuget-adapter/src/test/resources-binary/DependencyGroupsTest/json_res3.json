@@ -1,0 +1,31 @@
+{
+  "DependencyGroups": [
+    {
+      "dependencies": [
+        {
+          "id": "xyz",
+          "range": "0.0.1"
+        }
+      ],
+      "targetFramework": "XyzFrame"
+    },
+    {
+      "dependencies": [
+        {
+          "id": "",
+          "range": ""
+        }
+      ],
+      "targetFramework": "EmptyFramework"
+    },
+    {
+      "dependencies": [
+        {
+          "id": "def",
+          "range": ""
+        }
+      ],
+      "targetFramework": "DefFrame"
+    }
+  ]
+}

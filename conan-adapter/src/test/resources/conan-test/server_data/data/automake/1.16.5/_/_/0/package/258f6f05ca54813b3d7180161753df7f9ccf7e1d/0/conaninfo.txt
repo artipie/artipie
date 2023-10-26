@@ -1,0 +1,27 @@
+[settings]
+    os=Linux
+
+[requires]
+    autoconf/2.Y.Z
+
+[options]
+
+
+[full_settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.version=5
+    os=Linux
+
+[full_requires]
+    autoconf/2.71:5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9
+
+[full_options]
+
+
+[recipe_hash]
+    3fd8b734acc0986a1ee59f372f810410
+
+[env]
+

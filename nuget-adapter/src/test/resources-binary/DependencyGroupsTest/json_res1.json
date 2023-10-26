@@ -1,0 +1,26 @@
+{
+  "DependencyGroups": [
+    {
+      "dependencies": [
+        {
+          "id": "one",
+          "range": "0.1"
+        },
+        {
+          "id": "two",
+          "range": "0.2"
+        }
+      ],
+      "targetFramework": "AnyFramework"
+    },
+    {
+      "dependencies": [
+        {
+          "id": "another",
+          "range": "0.1"
+        }
+      ],
+      "targetFramework": "anotherFrameWork"
+    }
+  ]
+}

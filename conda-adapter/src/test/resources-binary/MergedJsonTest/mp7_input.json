@@ -1,0 +1,17 @@
+{
+  "packages" : {
+    "decorator-4.2.1-py27_0.tar.bz2" : {
+      "build" : "py27_0",
+      "build_number" : 0,
+      "depends" : [ "python >=2.7,<2.8.0a0" ],
+      "license" : "BSD 3-Clause",
+      "md5" : "abc123",
+      "name" : "decorator",
+      "sha256" : "xyz098",
+      "size" : 15638,
+      "subdir" : "linux-64",
+      "timestamp" : 1516376429792,
+      "version" : "4.2.1"
+    }
+  }
+}

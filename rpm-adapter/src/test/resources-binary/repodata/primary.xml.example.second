@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common" xmlns:rpm="http://linux.duke.edu/metadata/rpm" packages="2">
+<package type="rpm">
+  <name>nginx</name>
+  <arch>x86_64</arch>
+  <version epoch="1" ver="1.16.1" rel="1.el8.ngx"/>
+  <checksum type="sha256" pkgid="YES">54f1d9a1114fa85cd748174c57986004857b800fe9545fbf23af53f4791b31e2</checksum>
+  <summary>High performance web server</summary>
+  <description>nginx [engine x] is an HTTP and reverse proxy server, as well as
+a mail proxy server.</description>
+  <packager></packager>
+  <url>http://nginx.org/</url>
+  <time file="1583848125" build="1565708687"/>
+  <size package="816120" installed="3003616" archive="3009208"/>
+  <location href="nginx-1.16.1-1.el8.ngx.x86_64.rpm"/>
+  <format>
+    <rpm:license>2-clause BSD-like license</rpm:license>
+    <rpm:vendor>Nginx, Inc.</rpm:vendor>
+    <rpm:group>System Environment/Daemons</rpm:group>
+    <rpm:buildhost>rhel8-amd64-builder-builder.gnt.nginx.com</rpm:buildhost>
+    <rpm:sourcerpm>nginx-1.16.1-1.el8.ngx.src.rpm</rpm:sourcerpm>
+    <rpm:header-range start="5112" end="22964"/>
+    <rpm:provides>
+      <rpm:entry name="config(nginx)" flags="EQ" epoch="1" ver="1.16.1" rel="1.el8.ngx"/>
+      <rpm:entry name="nginx" flags="EQ" epoch="1" ver="1.16.1" rel="1.el8.ngx"/>
+      <rpm:entry name="nginx(x86-64)" flags="EQ" epoch="1" ver="1.16.1" rel="1.el8.ngx"/>
+      <rpm:entry name="webserver"/>
+    </rpm:provides>
+    <rpm:requires>
+      <rpm:entry name="/bin/sh" pre="1"/>
+      <rpm:entry name="/bin/sh"/>
+      <rpm:entry name="libcrypt.so.1()(64bit)"/>
+      <rpm:entry name="libcrypt.so.1(XCRYPT_2.0)(64bit)"/>
+      <rpm:entry name="libcrypto.so.1.1()(64bit)"/>
+      <rpm:entry name="libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)"/>
+      <rpm:entry name="libdl.so.2()(64bit)"/>
+      <rpm:entry name="libdl.so.2(GLIBC_2.2.5)(64bit)"/>
+      <rpm:entry name="libpcre.so.1()(64bit)"/>
+      <rpm:entry name="libpthread.so.0()(64bit)"/>
+      <rpm:entry name="libpthread.so.0(GLIBC_2.2.5)(64bit)"/>
+      <rpm:entry name="libpthread.so.0(GLIBC_2.3.2)(64bit)"/>
+      <rpm:entry name="libssl.so.1.1()(64bit)"/>
+      <rpm:entry name="libssl.so.1.1(OPENSSL_1_1_0)(64bit)"/>
+      <rpm:entry name="libssl.so.1.1(OPENSSL_1_1_1)(64bit)"/>
+      <rpm:entry name="libz.so.1()(64bit)"/>
+      <rpm:entry name="rtld(GNU_HASH)"/>
+      <rpm:entry name="shadow-utils" pre="1"/>
+      <rpm:entry name="systemd" pre="1"/>
+      <rpm:entry name="systemd"/>
+      <rpm:entry name="libc.so.6(GLIBC_2.28)(64bit)"/>
+    </rpm:requires>
+    <file>/etc/logrotate.d/nginx</file>
+    <file type="dir">/etc/nginx</file>
+    <file type="dir">/etc/nginx/conf.d</file>
+    <file>/etc/nginx/conf.d/default.conf</file>
+    <file>/etc/nginx/fastcgi_params</file>
+    <file>/etc/nginx/koi-utf</file>
+    <file>/etc/nginx/koi-win</file>
+    <file>/etc/nginx/mime.types</file>
+    <file>/etc/nginx/modules</file>
+    <file>/etc/nginx/nginx.conf</file>
+    <file>/etc/nginx/scgi_params</file>
+    <file>/etc/nginx/uwsgi_params</file>
+    <file>/etc/nginx/win-utf</file>
+    <file>/etc/sysconfig/nginx</file>
+    <file>/etc/sysconfig/nginx-debug</file>
+    <file>/usr/sbin/nginx</file>
+    <file>/usr/sbin/nginx-debug</file>
+  </format>
+</package>
+</metadata>

@@ -1,0 +1,14 @@
+{
+  "packages":{
+    "psr/log":{
+      "1.1.4":{
+        "name":"psr/log",
+        "version":"1.1.4",
+        "dist":{
+          "url":"http://host.testcontainers.internal:56667/c43df023-6e12-47d3-b620-b94cc1f52a77",
+          "type":"zip"
+        }
+      }
+    }
+  }
+}

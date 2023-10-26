@@ -1,0 +1,33 @@
+[settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.version=11
+    os=Linux
+
+[requires]
+
+
+[options]
+    fPIC=True
+    shared=False
+
+[full_settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.version=11
+    os=Linux
+
+[full_requires]
+
+
+[full_options]
+    fPIC=True
+    shared=False
+
+[recipe_hash]
+    fda1d3f94212a981cafc239bdac9ff72
+
+[env]
+

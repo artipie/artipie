@@ -1,0 +1,8 @@
+1642181186
+conandata.yml: 1e50db8f4c518265803c3eb2c125871d
+conanfile.py: 310e5fabac9296cde7c998f2cc53cc98
+export_source/CMakeLists.txt: ce21033ab96b0f507d73987f550a96fc
+export_source/patches/0001-allow-cmake-subproject.patch: 2a2d5bf6e32e2ea9b6b6d0c0060408dc
+export_source/patches/0002-dont-build-zmakecert.patch: 31eab362cba0ceaf3235785a0e126128
+export_source/patches/0003-fix-cmake-find-package.patch: 3e4ff461c6e6ab867823916099bef4aa
+export_source/patches/0004-make-czmq-link-using-cxx-compiler.patch: 3e91cbc780d698607e6d06951c4fee94

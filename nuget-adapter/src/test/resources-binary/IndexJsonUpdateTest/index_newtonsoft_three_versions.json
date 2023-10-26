@@ -1,0 +1,86 @@
+{
+  "count": 1,
+  "items": [
+    {
+      "@id": "null",
+      "count": 3,
+      "upper": "13.0.1",
+      "lower": "0.13.1",
+      "items": [
+        {
+          "@id": "null",
+          "packageContent": "null",
+          "catalogEntry": {
+            "@id": "null",
+            "id": "newtonsoft.json",
+            "version": "13.0.1",
+            "description": "Json.NET is a popular high-performance JSON framework for .NET",
+            "authors": "James Newton-King",
+            "dependencyGroups": [
+              {
+                "targetFramework": ".NETStandard1.0",
+                "dependencies": [
+                  {
+                    "id": "Microsoft.CSharp",
+                    "range": "[4.3.0, )"
+                  },
+                  {
+                    "id": "System.Runtime.Serialization.Primitives",
+                    "range": "[4.3.0, )"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "@id": "null",
+          "packageContent": "null",
+          "catalogEntry": {
+            "@id": "null",
+            "id": "newtonsoft.json",
+            "version": "0.13.1",
+            "description": "Json.NET is a popular high-performance JSON framework for .NET",
+            "authors": "James Newton-King",
+            "dependencyGroups": [
+              {
+                "targetFramework": ".NETFramework2.0",
+                "dependencies": []
+              }
+            ]
+          }
+        },
+        {
+          "@id": "null",
+          "packageContent": "null",
+          "catalogEntry": {
+            "@id": "null",
+            "id": "newtonsoft.json",
+            "version": "11.3.0",
+            "description": "Json.NET is a popular high-performance JSON framework for .NET",
+            "authors": "James Newton-King",
+            "dependencyGroups": [
+              {
+                "targetFramework": ".NETStandard1.3",
+                "dependencies": [
+                  {
+                    "id": "Microsoft.CSharp",
+                    "range": "[4.3.0, )"
+                  },
+                  {
+                    "id": "System.Runtime.Serialization.Formatters",
+                    "range": "[4.3.0, )"
+                  },
+                  {
+                    "id": "System.Xml.XmlDocument",
+                    "range": "[4.3.0, )"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

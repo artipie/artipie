@@ -1,0 +1,51 @@
+[settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=11
+    os=Linux
+
+[requires]
+    libsodium/1.Y.Z
+
+[options]
+    encryption=libsodium
+    fPIC=True
+    poller=None
+    shared=False
+    with_draft_api=False
+    with_norm=False
+    with_radix_tree=False
+    with_websocket=False
+
+[full_settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=11
+    os=Linux
+
+[full_requires]
+    libsodium/1.0.18:419002c76981df3dbb7d8e203de10ef0cc29df7c
+
+[full_options]
+    encryption=libsodium
+    fPIC=True
+    poller=None
+    shared=False
+    with_draft_api=False
+    with_norm=False
+    with_radix_tree=False
+    with_websocket=False
+    libsodium:PIE=False
+    libsodium:fPIC=True
+    libsodium:shared=False
+    libsodium:use_soname=True
+
+[recipe_hash]
+    9c76439900f607a2acfc94816d70433c
+
+[env]
+

@@ -1,0 +1,55 @@
+{
+  "packages": {
+    "anaconda-navigator-1.8.4-py35_0.tar.bz2": {
+      "arch": "x86_64",
+      "build": "py35_0",
+      "build_number": 0,
+      "depends": [
+        "anaconda-client",
+        "anaconda-project",
+        "chardet",
+        "pillow",
+        "psutil",
+        "pyqt",
+        "python >=3.5,<3.6.0a0",
+        "pyyaml",
+        "qtpy",
+        "requests",
+        "setuptools"
+      ],
+      "license": "proprietary - Continuum Analytics, Inc.",
+      "license_family": "Proprietary",
+      "name": "anaconda-navigator",
+      "platform": "linux",
+      "subdir": "linux-64",
+      "timestamp": 1524671586445,
+      "version": "1.8.4",
+      "size":4945616,
+      "md5": "59d3f961b42514317356f3de172d2fec",
+      "sha256": "e913054e89f0a38cd0c9c02940a297da9275022ee062eec9b6c60dc991ecb58a"
+    }
+  },
+  "packages.conda": {
+    "7zip-19.00-h59b6b97_2.conda": {
+      "arch": "x86_64",
+      "build": "h59b6b97_2",
+      "build_number": 2,
+      "constrains": [
+        "7za <0.0.0a"
+      ],
+      "depends": [
+        "vc >=14.1,<15.0a0",
+        "vs2015_runtime >=14.16.27012,<15.0a0"
+      ],
+      "license": "LGPL-2.1-or-later AND LGPL-2.1-or-later WITH unRAR-restriction",
+      "name": "7zip",
+      "platform": "win",
+      "subdir": "win-64",
+      "timestamp": 1619516322562,
+      "version": "19.00",
+      "size":1038932,
+      "md5": "894aa30299e976ce59fbf418da258cb2",
+      "sha256": "c42631a38255a13181787c3475b27933fe71609a94346bab67e7138d4aae8f0b"
+    }
+  }
+}

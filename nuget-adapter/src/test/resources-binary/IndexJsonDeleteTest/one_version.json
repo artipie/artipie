@@ -1,0 +1,30 @@
+{
+  "count": 1,
+  "items": [
+    {
+      "@id": "null",
+      "count": 1,
+      "upper": "0.13.1",
+      "lower": "0.13.1",
+      "items": [
+        {
+          "@id": "null",
+          "packageContent": "null",
+          "catalogEntry": {
+            "@id": "null",
+            "id": "newtonsoft.json",
+            "version": "0.13.1",
+            "description": "Json.NET is a popular high-performance JSON framework for .NET",
+            "authors": "James Newton-King",
+            "dependencyGroups": [
+              {
+                "targetFramework": ".NETFramework2.0",
+                "dependencies": []
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

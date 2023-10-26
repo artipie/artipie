@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns="http://linux.duke.edu/metadata/common"
+          xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>nmap</name>
+        <arch>x86_64</arch>
+        <version epoch="2" rel="1.h1.eulerosv2r9" ver="7.80"/>
+        <checksum type="sha256" pkgid="YES">
+            7838e330bd67fbf6a55fecc2fd0733b5a627d21ccccdb32322a8907a07a4f6e4
+        </checksum>
+        <summary>A tool for network discovery and security auditing.</summary>
+        <description>Nmap ("Network Mapper") is a free and open source (license) utility for network
+            discovery and security \
+            auditing. It was designed to rapidly scan large networks, but works fine against single
+            hosts.
+        </description>
+        <packager>https://euleros.huawei.com/repos</packager>
+        <url>https://nmap.org/</url>
+        <time build="1640768426" file="1640768426"/>
+        <size installed="25171806" archive="0" package="6085652"/>
+        <location href="nmap-7.80-1.h1.eulerosv2r9.x86_64.rpm"/>
+        <format>
+            <rpm:license>Nmap</rpm:license>
+            <rpm:vendor>HUAWEI TECHNOLOGIES CO.,LTD</rpm:vendor>
+            <rpm:group>Unspecified</rpm:group>
+            <rpm:buildhost>szxrtosci10000</rpm:buildhost>
+            <rpm:sourcerpm>nmap-7.80-1.h1.eulerosv2r9.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="880" end="125592"/>
+            <rpm:provides>
+                <rpm:entry name="nc"/>
+                <rpm:entry name="nc6"/>
+                <rpm:entry name="nmap" ver="7.80" epoch="2" rel="1.h1.eulerosv2r9" flags="EQ"/>
+                <rpm:entry name="nmap(x86-64)" ver="7.80" epoch="2" rel="1.h1.eulerosv2r9" flags="EQ"/>
+                <rpm:entry name="nmap-frontend"/>
+                <rpm:entry name="nmap-ncat"/>
+                <rpm:entry name="nmap-ndiff"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="libcrypto.so.1.1()(64bit)"/>
+                <rpm:entry name="libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)"/>
+                <rpm:entry name="libdl.so.2()(64bit)"/>
+                <rpm:entry name="libdl.so.2(GLIBC_2.2.5)(64bit)"/>
+                <rpm:entry name="libgcc_s.so.1()(64bit)"/>
+                <rpm:entry name="libgcc_s.so.1(GCC_3.0)(64bit)"/>
+                <rpm:entry name="libm.so.6()(64bit)"/>
+                <rpm:entry name="libm.so.6(GLIBC_2.2.5)(64bit)"/>
+                <rpm:entry name="libpcap.so.1()(64bit)"/>
+                <rpm:entry name="libpcre.so.1()(64bit)"/>
+                <rpm:entry name="libssh2.so.1()(64bit)"/>
+                <rpm:entry name="libssl.so.1.1()(64bit)"/>
+                <rpm:entry name="libssl.so.1.1(OPENSSL_1_1_0)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6()(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(CXXABI_1.3)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(CXXABI_1.3.8)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(CXXABI_1.3.9)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.11)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.15)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.20)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.21)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.9)(64bit)"/>
+                <rpm:entry name="libz.so.1()(64bit)"/>
+                <rpm:entry name="rtld(GNU_HASH)"/>
+                <rpm:entry name="libc.so.6(GLIBC_2.15)(64bit)"/>
+            </rpm:requires>
+            <rpm:obsoletes>
+                <rpm:entry name="nc" ver="1.109.20120711" epoch="0" rel="2" flags="LT"/>
+                <rpm:entry name="nc6" ver="1.00" epoch="0" rel="22" flags="LT"/>
+                <rpm:entry name="nmap-frontend"/>
+                <rpm:entry name="nmap-ncat"/>
+                <rpm:entry name="nmap-ndiff"/>
+            </rpm:obsoletes>
+            <file>/etc/ima/digest_lists.sig/0-metadata_list-compact-nmap-7.80-1.h1.eulerosv2r9.x86_64.sig</file>
+            <file>/etc/ima/digest_lists.tlv/0-metadata_list-compact_tlv-nmap-7.80-1.h1.eulerosv2r9.x86_64</file>
+            <file>/etc/ima/digest_lists/0-metadata_list-compact-nmap-7.80-1.h1.eulerosv2r9.x86_64</file>
+            <file>/usr/bin/nc</file>
+            <file>/usr/bin/ncat</file>
+            <file>/usr/bin/nmap</file>
+            <file>/usr/bin/nping</file>
+        </format>
+    </package>
+</metadata>

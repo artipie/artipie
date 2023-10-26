@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns="http://linux.duke.edu/metadata/common"
+          xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>openssl-devel</name>
+        <arch>x86_64</arch>
+        <version epoch="1" rel="19.el7" ver="1.0.2k"/>
+        <checksum type="sha256" pkgid="YES">
+            00a702e913cb10d7ee36dc1602ec30353df6efdf229ffc23a8d7c8a614e46bb6
+        </checksum>
+        <summary>Files for development of applications which will use OpenSSL</summary>
+        <description>OpenSSL is a toolkit for supporting cryptography. The openssl-devel
+            package contains include files needed to develop applications which
+            support various cryptographic algorithms and protocols.
+        </description>
+        <packager>CentOS BuildSystem &lt;http://bugs.centos.org></packager>
+        <url>http://www.openssl.org/</url>
+        <time build="1565314802" file="1565314700"/>
+        <size installed="3268775" archive="0" package="1581408"/>
+        <location href="openssl-devel-1.0.2k-19.el7.x86_64.rpm"/>
+        <format>
+            <rpm:license>OpenSSL</rpm:license>
+            <rpm:vendor>CentOS</rpm:vendor>
+            <rpm:group>Development/Libraries</rpm:group>
+            <rpm:buildhost>x86-02.bsys.centos.org</rpm:buildhost>
+            <rpm:sourcerpm>openssl-1.0.2k-19.el7.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="1384" end="247900"/>
+            <rpm:provides>
+                <rpm:entry name="openssl-devel" ver="1.0.2k" epoch="1" rel="19.el7" flags="EQ"/>
+                <rpm:entry name="openssl-devel(x86-64)" ver="1.0.2k" epoch="1" rel="19.el7" flags="EQ"/>
+                <rpm:entry name="pkgconfig(libcrypto)" ver="1.0.2k" epoch="0" flags="EQ"/>
+                <rpm:entry name="pkgconfig(libssl)" ver="1.0.2k" epoch="0" flags="EQ"/>
+                <rpm:entry name="pkgconfig(openssl)" ver="1.0.2k" epoch="0" flags="EQ"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="/usr/bin/pkg-config"/>
+                <rpm:entry name="krb5-devel(x86-64)"/>
+                <rpm:entry name="libcrypto.so.10()(64bit)"/>
+                <rpm:entry name="libssl.so.10()(64bit)"/>
+                <rpm:entry name="openssl-libs(x86-64)" ver="1.0.2k" epoch="1" rel="19.el7" flags="EQ"/>
+                <rpm:entry name="pkgconfig"/>
+                <rpm:entry name="zlib-devel(x86-64)"/>
+            </rpm:requires>
+        </format>
+    </package>
+</metadata>

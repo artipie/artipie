@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<filelists xmlns="http://linux.duke.edu/metadata/filelists" packages="-1">
+<package pkgid="abc123" name="libdeflt1_0" arch="armv7hl">
+    <version epoch="0" ver="2020.03.27" rel="25.1"/>
+    <file>/usr/lib/libdeflt.so.1.0</file>
+    <file>/usr/share/licenses/libdeflt1_0/CDDL.Schily.txt</file>
+    <file type="dir">/usr/share/licenses/libdeflt1_0</file>
+</package>
+</filelists>

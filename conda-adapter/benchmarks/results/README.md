@@ -1,0 +1,1 @@
+This folder contains results of benchmarks for different versions of Conda.

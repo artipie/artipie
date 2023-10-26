@@ -1,0 +1,59 @@
+{
+  "_id": "asdas",
+  "_rev": "2-a72e29284ebf401cd7cd8f1aca69af9b",
+  "name": "asdas",
+  "dist-tags": {
+    "latest": "1.0.0"
+  },
+  "versions": {
+    "1.0.0": {
+      "name": "asdas",
+      "version": "1.0.0",
+      "description": "",
+      "main": "1.js",
+      "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+      },
+      "author": "",
+      "license": "ISC",
+      "_id": "asdas@1.0.0",
+      "_npmVersion": "5.4.2",
+      "_nodeVersion": "8.8.0",
+      "_npmUser": {
+        "name": "parasoltree",
+        "email": "shilijingtian@outlook.com"
+      },
+      "dist": {
+        "integrity": "sha512-kHJzGk3NudKHGhrYS4lhDS8K/QUMbPLEtk22yXiQbcQWD5pSbhOI4A9yk1owav8IVyW1RlAQHkKn7IjONV8Kdg==",
+        "shasum": "6470dd80b94c00db02420e5f7bc6a87d026e76e4",
+        "tarball": "https://registry.npmjs.org/asdas/-/asdas-1.0.0.tgz"
+      },
+      "maintainers": [
+        {
+          "name": "parasoltree",
+          "email": "shilijingtian@outlook.com"
+        }
+      ],
+      "_npmOperationalInternal": {
+        "host": "s3://npm-registry-packages",
+        "tmp": "tmp/asdas-1.0.0.tgz_1511792387536_0.039010856533423066"
+      },
+      "directories": {},
+      "deprecated": "deprecated"
+    }
+  },
+  "readme": "ERROR: No README data found!",
+  "maintainers": [
+    {
+      "name": "parasoltree",
+      "email": "shilijingtian@outlook.com"
+    }
+  ],
+  "time": {
+    "modified": "2018-12-26T02:15:33.808Z",
+    "created": "2017-11-27T14:19:47.631Z",
+    "1.0.0": "2017-11-27T14:19:47.631Z"
+  },
+  "license": "ISC",
+  "readmeFilename": ""
+}

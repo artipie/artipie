@@ -1,0 +1,16 @@
+1654434965
+bin/curl-config: 374d05953dfe321afccfa03bdd92bf76
+conaninfo.txt: 9aa48f4fd27ebeee11927ee11c413a90
+include/curl/curl.h: dc14f78844f36c763dfc75f013f6d6cd
+include/curl/curlver.h: a54d4970656b0ec451f57a91bf4f390e
+include/curl/easy.h: 126fe24f2477136f24478b12102d95f4
+include/curl/mprintf.h: 4eed4bf84411012624f4a25c3bb767ca
+include/curl/multi.h: da541365500eeff0e23470331d584040
+include/curl/options.h: 215ef2a5fcd339ef4f8efa1104b34605
+include/curl/stdcheaders.h: 885513d17ab74d55c39c89e13cd7c5d9
+include/curl/system.h: b451f6ef9adc1146ae0613d89136d065
+include/curl/typecheck-gcc.h: 66459989b31321ca4fce4ca9246c2c08
+include/curl/urlapi.h: 8221cdc41cd20399f0b805ab4d11130a
+lib/libcurl.a: e1b6440922fc4a71c2a717706982715d
+licenses/COPYING: 425f6fdc767cc067518eef9bbdf4ab7b
+res/cacert.pem: aa5ac583708ca35225ac2d230f4acb62

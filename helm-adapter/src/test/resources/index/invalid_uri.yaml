@@ -1,0 +1,14 @@
+generated: '2021-01-11T16:21:01.285921500+03:00'
+entries:
+  tomcat:
+    - urls:
+        - illegal/space/ tomcat-0.4.1.tgz
+      appVersion: '7.0'
+      apiVersion: v1
+      created: '2021-01-11T16:21:01.376598500+03:00'
+      digest: d8dcdcfcb512595960979cbd44728a8d8b0194c88335d0f84543e84b3939b8ce
+      name: tomcat
+      description: Deploy a basic tomcat application server with sidecar as web archive
+        container
+      version: 0.4.1
+apiVersion: v1
