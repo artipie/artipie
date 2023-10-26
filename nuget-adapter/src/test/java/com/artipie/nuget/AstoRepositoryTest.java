@@ -100,7 +100,7 @@ class AstoRepositoryTest {
         final String nuspec = "newtonsoft.json.nuspec";
         MatcherAssert.assertThat(
             this.storage.value(identity.nuspecKey()),
-            Matchers.equalTo(new NewtonJsonResource(nuspec).bytes())
+            new IsEqual<>(new NewtonJsonResource(nuspec).bytes())
         );
         MatcherAssert.assertThat(
             this.versions(new PackageKeys(id).versionsKey()),
