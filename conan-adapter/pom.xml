@@ -65,39 +65,5 @@ SOFTWARE.
         <filtering>false</filtering>
       </testResource>
     </testResources>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>com.qulice</groupId>
-          <artifactId>qulice-maven-plugin</artifactId>
-          <configuration>
-            <excludes combine.children="append">
-              <exclude>checkstyle:.*/src/test/resources/.*</exclude>
-              <exclude>pmd:.*/src/test/resources/.*</exclude>
-            </excludes>
-            <license>file:${basedir}/LICENSE.txt</license>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    <plugins>
-      <plugin>
-        <groupId>org.gaul</groupId>
-        <artifactId>modernizer-maven-plugin</artifactId>
-        <version>2.3.0</version>
-        <executions>
-          <execution>
-            <id>modernizer</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>modernizer</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <javaVersion>${maven.compiler.source}</javaVersion>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
 </project>

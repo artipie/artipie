@@ -32,8 +32,8 @@ SOFTWARE.
     <artifactId>artipie-main</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.source>20</maven.compiler.source>
-        <maven.compiler.target>20</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <docker.image.name>artipie/artipie</docker.image.name>
     </properties>
     <dependencies>
