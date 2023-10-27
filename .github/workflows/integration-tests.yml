@@ -11,7 +11,7 @@ jobs:
   maven-it:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v
+      - uses: actions/checkout@v2
       - name: Download JDK
         run: |
           wget --no-verbose --directory-prefix ${{ runner.temp }} \
