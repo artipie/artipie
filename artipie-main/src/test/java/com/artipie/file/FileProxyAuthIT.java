@@ -7,8 +7,8 @@ package com.artipie.file;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
+import java.util.Map;
 import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ final class FileProxyAuthIT {
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
-        new MapOf<>(
+        Map.ofEntries(
             new MapEntry<>(
                 "artipie",
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()

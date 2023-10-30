@@ -7,8 +7,8 @@ package com.artipie;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import java.io.IOException;
+import java.util.Map;
 import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ final class VertxMainITCase {
      */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
-        new MapOf<>(
+        Map.ofEntries(
             new MapEntry<>(
                 "artipie-config-key-present",
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()

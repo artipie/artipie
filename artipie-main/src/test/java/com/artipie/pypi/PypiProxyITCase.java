@@ -7,8 +7,8 @@ package com.artipie.pypi;
 import com.artipie.asto.test.TestResource;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
+import java.util.Map;
 import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Disabled;
@@ -33,7 +33,7 @@ public final class PypiProxyITCase {
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
-        new MapOf<>(
+        Map.ofEntries(
             new MapEntry<>(
                 "artipie",
                 () -> TestDeployment.ArtipieContainer.defaultDefinition()

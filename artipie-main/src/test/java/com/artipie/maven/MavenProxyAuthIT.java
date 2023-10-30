@@ -7,8 +7,8 @@ package com.artipie.maven;
 import com.artipie.asto.test.TestResource;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
+import java.util.Map;
 import org.cactoos.map.MapEntry;
-import org.cactoos.map.MapOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ final class MavenProxyAuthIT {
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
-        new MapOf<>(
+        Map.ofEntries(
             new MapEntry<>(
                 "artipie",
                 () -> new TestDeployment.ArtipieContainer().withConfig("artipie_with_policy.yaml")
