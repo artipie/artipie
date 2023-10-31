@@ -32,6 +32,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
+import org.eclipse.jetty.http.MimeTypes;
 import org.reactivestreams.Publisher;
 
 /**
@@ -148,13 +149,20 @@ final class ProxySlice implements Slice {
      */
     private static Header contentType(final Headers headers, final String line) {
         final String name = "content-type";
-        return StreamSupport.stream(headers.spliterator(), false)
-            .filter(header -> header.getKey().equalsIgnoreCase(name))
-            .findFirst().map(Header::new).orElseGet(
+        return Optional.ofNullable(headers).flatMap(
+            hdrs -> StreamSupport.stream(hdrs.spliterator(), false)
+                .filter(header -> header.getKey().equalsIgnoreCase(name)).findFirst()
+                .map(Header::new)
+            ).orElseGet(
                 () -> {
                     Header res = new Header(name, "text/html");
-                    if (new RequestLineFrom(line).uri().toString().matches(ProxySlice.FORMATS)) {
-                        res = new Header(name, "multipart/form-data");
+                    final String ext = new RequestLineFrom(line).uri().toString();
+                    if (ext.matches(ProxySlice.FORMATS)) {
+                        res = new Header(
+                            name,
+                            Optional.ofNullable(MimeTypes.getDefaultMimeByExtension(ext))
+                                .orElse("*")
+                        );
                     }
                     return res;
                 }
