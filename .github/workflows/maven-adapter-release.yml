@@ -2,7 +2,7 @@ name: Create Maven release
 on:
   push:
     tags:
-      - '*'
+      - '*_*'
 jobs:
   build:
     name: Build release
