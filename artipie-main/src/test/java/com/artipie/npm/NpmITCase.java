@@ -10,6 +10,7 @@ import com.artipie.test.TestDeployment;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import javax.json.Json;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsAnything;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
@@ -19,7 +20,6 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.llorllale.cactoos.matchers.MatcherOf;
 
 /**
  * Integration tests for Npm repository.
@@ -114,18 +114,16 @@ final class NpmITCase {
             ),
             "npm", "publish", NpmITCase.PROJ, "--registry", this.repoUrl(port, repo)
         );
-        this.containers.assertArtipieContent(
+        final byte[] content = this.containers.getArtipieContent(
+            String.format("/var/artipie/data/%s/%s/meta.json", repo, NpmITCase.PROJ)
+        );
+        MatcherAssert.assertThat(
             "Meta json is incorrect",
-            String.format("/var/artipie/data/%s/%s/meta.json", repo, NpmITCase.PROJ),
-            new MatcherOf<>(
-                bytes -> {
-                    return Json.createReader(new ByteArrayInputStream(bytes)).readObject()
-                        .getJsonObject("versions")
-                        .getJsonObject("1.0.1")
-                        .getJsonObject("dist")
-                        .getString("tarball").equals(String.format("/%s", tgz));
-                }
-            )
+            Json.createReader(new ByteArrayInputStream(content)).readObject()
+                .getJsonObject("versions")
+                .getJsonObject("1.0.1")
+                .getJsonObject("dist")
+                .getString("tarball").equals(String.format("/%s", tgz))
         );
         this.containers.assertArtipieContent(
             "Tarball should be added to storage",
