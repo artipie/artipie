@@ -96,7 +96,9 @@ class ProxySliceTest {
     @ParameterizedTest
     @CsvSource({
         "my project versions list in html,text/html,my-project",
-        "my project wheel,multipart/form-data,my-project.whl"
+        "my project wheel,*,my-project.whl",
+        "my project zip,application/zip,my-project.zip",
+        "my project tar,application/x-gtar,my-project.tar.gz"
     })
     void getsFromCacheOnError(final String data, final String header, final String key) {
         final byte[] body = data.getBytes();
