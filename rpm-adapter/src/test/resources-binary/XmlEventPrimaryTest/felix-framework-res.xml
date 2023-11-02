@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns="http://linux.duke.edu/metadata/common" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>felix-framework</name>
+        <arch>noarch</arch>
+        <version epoch="0" rel="5.el7" ver="4.2.1"/>
+        <checksum type="sha256" pkgid="YES">bdaf05b37775e1706fa3b885e7f31d53166a7b3e9bf2d708546520ed3253a82a</checksum>
+        <summary>Apache Felix Framework</summary>
+        <description>Apache Felix Framework Interfaces and Classes.</description>
+        <packager>CentOS BuildSystem &lt;http://bugs.centos.org></packager>
+        <url>http://felix.apache.org</url>
+        <time build="1402355053" file="1402355051"/>
+        <size installed="550196" archive="0" package="492596"/>
+        <location href="felix-framework-4.2.1-5.el7.noarch.rpm"/>
+        <format>
+            <rpm:license>ASL 2.0</rpm:license>
+            <rpm:vendor>CentOS</rpm:vendor>
+            <rpm:group>Development/Libraries</rpm:group>
+            <rpm:buildhost>worker1.bsys.centos.org</rpm:buildhost>
+            <rpm:sourcerpm>felix-framework-4.2.1-5.el7.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="1384" end="6500"/>
+            <rpm:provides>
+                <rpm:entry name="felix-framework" ver="4.2.1" epoch="0" rel="5.el7" flags="EQ"/>
+                <rpm:entry name="mvn(org.apache.felix:org.apache.felix.framework)" ver="4.2.1" epoch="0" flags="EQ"/>
+                <rpm:entry name="osgi(org.apache.felix.framework)" ver="4.2.1" epoch="0" flags="EQ"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="java" ver="1.5" epoch="0" flags="GE"/>
+                <rpm:entry name="jpackage-utils"/>
+            </rpm:requires>
+        </format>
+    </package>
+</metadata>

@@ -1,0 +1,36 @@
+{
+  "name": "@hello/simple-npm-project",
+  "_id": "@hello/simple-npm-project",
+  "readme": "ERROR: No README data found!",
+  "time": {
+    "created": "2020-05-13T16:30:30.381999"
+  },
+  "users": {},
+  "versions": {
+    "1.0.1": {
+      "name": "@hello/simple-npm-project",
+      "version": "1.0.1",
+      "description": "",
+      "main": "index.js",
+      "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+      },
+      "author": "",
+      "license": "ISC",
+      "readme": "ERROR: No README data found!",
+      "_id": "@hello/simple-npm-project@1.0.1",
+      "_nodeVersion": "10.19.0",
+      "_npmVersion": "6.14.3",
+      "maintainers": [
+        {}
+      ],
+      "dist": {
+        "integrity": "sha512-IfsPak/s42nS1GjXQL40RtSC0KBr/hMhUz3kd6wkRrKx0BxraM4K0EWTC0jAiMeepREthbpjH/6NYVXZ7Qu8JQ==",
+        "tarball": "/@hello/simple-npm-project/-/@hello/simple-npm-project-1.0.1.tgz"
+      }
+    }
+  },
+  "dist-tags": {
+    "latest": "1.0.1"
+  }
+}

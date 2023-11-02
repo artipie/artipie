@@ -1,0 +1,8 @@
+1655963401
+conaninfo.txt: dff61a500b3329b34cc018709f82cb62
+include/zmq.h: 8b3e8f59042ada6583c41e35c2cadfd7
+include/zmq_utils.h: 5561e56be35201dd26243e7ea761279a
+lib/cmake/conan-official-zeromq-targets.cmake: 2491ef155ace85b65d1969cc6e32f0f4
+lib/libzmq.a: 28963e8197b062e16a7b7cacb1dad5ac
+licenses/COPYING: f7b40df666d41e6508d03e1c207d498f
+licenses/COPYING.LESSER: d5311495d952062e0e4fbba39cbf3de1

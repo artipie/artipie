@@ -1,0 +1,13 @@
+{
+  "build" : "py37_0",
+  "build_number" : 0,
+  "depends" : [ "python >=3.7,<3.8.0a0", "six >=1.9.0" ],
+  "license" : "Apache 2.0",
+  "md5" : "e5a8af970f391f432c96b1480f535c43",
+  "name" : "tenacity",
+  "sha256" : "47d6dd01a1cff52af31804bbfffb4341fd8676c75d00d120cc66d9709e78ea7f",
+  "size" : 40072,
+  "subdir" : "linux-64",
+  "timestamp" : 1597706734992,
+  "version" : "6.2.0"
+}

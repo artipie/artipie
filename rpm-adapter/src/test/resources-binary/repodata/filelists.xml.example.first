@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<filelists xmlns="http://linux.duke.edu/metadata/filelists" packages="2">
+<package pkgid="7eaefd1cb4f9740558da7f12f9cb5a6141a47f5d064a98d46c29959869af1a44" name="aom" arch="aarch64">
+  <version epoch="0" ver="1.0.0" rel="8.20190810git9666276.el8"/>
+  <file>/usr/bin/aomdec</file>
+  <file>/usr/bin/aomenc</file>
+  <file type="dir">/usr/lib/.build-id</file>
+  <file type="dir">/usr/lib/.build-id/ad</file>
+  <file>/usr/lib/.build-id/ad/0d9bb7eef540a7b614aa3928178015639d61f3</file>
+  <file type="dir">/usr/lib/.build-id/b7</file>
+  <file>/usr/lib/.build-id/b7/aeec6c1b3eb863d4c2545249c0fbe095209832</file>
+  <file type="dir">/usr/share/doc/aom</file>
+  <file>/usr/share/doc/aom/AUTHORS</file>
+  <file>/usr/share/doc/aom/CHANGELOG</file>
+  <file>/usr/share/doc/aom/README.md</file>
+  <file type="dir">/usr/share/licenses/aom</file>
+  <file>/usr/share/licenses/aom/LICENSE</file>
+  <file>/usr/share/licenses/aom/PATENTS</file>
+</package>
+</filelists>

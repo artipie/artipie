@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+The MIT License (MIT)
+
+Copyright (c) 2020 artipie.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+  <revision>1585928825</revision>
+  <data type="primary">
+    <checksum type="sha256">3b37791217014b834f63bc33fa0575b5673ab61a36089d81b02e98ab2a554a02</checksum>
+    <open-checksum type="sha256">7e19eabdf41d1707ea13ed3c9ec639751fb3fb4999c8f9504fe8ddca4f0ac656</open-checksum>
+    <location href="repodata/primary.xml.gz"/>
+    <timestamp>1585928825</timestamp>
+    <size>1742</size>
+    <open-size>6142</open-size>
+  </data>
+  <data type="filelists">
+    <checksum type="sha256">afc1db81d813536bb709c7f1080b76e8482b0ae85e17b2f6fc94247cf8403c52</checksum>
+    <open-checksum type="sha256">15c8ff0a236172a2af68a65b3c3ff43f434b011738797d1135bba2cbb703d847</open-checksum>
+    <location href="repodata/filelists.xml.gz"/>
+    <timestamp>1585928825</timestamp>
+    <size>875</size>
+    <open-size>2933</open-size>
+  </data>
+  <data type="other">
+    <checksum type="sha256">f4cf156be36b128523e156aa734521b87db7f8af646c8fe2a0cdf931edcbb0ba</checksum>
+    <open-checksum type="sha256">b79de20735fa800069392e5971a1c2c19b69d59095d6af3883ff3cd8c1437091</open-checksum>
+    <location href="repodata/other.xml.gz"/>
+    <timestamp>1585928825</timestamp>
+    <size>915</size>
+    <open-size>3102</open-size>
+  </data>
+</repomd>

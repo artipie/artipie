@@ -18,41 +18,36 @@ jobs:
       - name: Download Linux JDK
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          curl --silent -o ${{ runner.temp }}/jdk-17_linux-x64_bin.tar.gz \
-            https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz
+          curl --silent -o ${{ runner.temp }}/jdk-21_linux-x64_bin.tar.gz \
+            https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.tar.gz
       - name: Set up Linux JDK
         uses: actions/setup-java@v2
         if: ${{ matrix.os == 'ubuntu-latest' }}
         with:
           distribution: jdkfile
-          jdkFile: ${{ runner.temp }}/jdk-17_linux-x64_bin.tar.gz
-          java-version: 17
+          jdkFile: ${{ runner.temp }}/jdk-21_linux-x64_bin.tar.gz
+          java-version: 21
       - name: Download Windows JDK
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          curl --silent -o ${{ runner.temp }}/jdk-17_windows-x64_bin.zip https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.zip
+          curl --silent -o ${{ runner.temp }}/jdk-21_windows-x64_bin.zip https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.zip
       - name: Set up Windows JDK
         uses: actions/setup-java@v2
         if: ${{ matrix.os == 'windows-latest' }}
         with:
           distribution: jdkfile
-          jdkFile: ${{ runner.temp }}/jdk-17_windows-x64_bin.zip
-          java-version: 17
+          jdkFile: ${{ runner.temp }}/jdk-21_windows-x64_bin.zip
+          java-version: 21
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-jdk-17-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-jdk-21-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-jdk-17-maven-
+            ${{ runner.os }}-jdk-21-maven-
       - name: Build it with Maven
-        run: mvn -B verify -Pqulice
+        run: mvn -B install -Pqulice
   xcop-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: g4s8/xcop-action@master
-  pdd-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: g4s8/pdd-action@master

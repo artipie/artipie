@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>libnss-mymachines2</name>
+        <arch>x86_64</arch>
+        <version epoch="1" ver="245" rel="1"/>
+        <checksum type="sha256" pkgid="YES">bbb880fcc332c846a4504a31fcda07c3f00c1a6ef2aca5bb90cb8725c905cbfa</checksum>
+        <summary>Systemd nss-mymachines library</summary>
+        <description>Systemd nss-mymachines library</description>
+        <packager></packager>
+        <url>http://www.freedesktop.org/wiki/Software/systemd</url>
+        <time file="1624995132" build="1624995133"/>
+        <size package="833818" installed="3627488" archive="0"/>
+        <location href="libnss-mymachines2-245-1.x86_64.rpm"/>
+        <format>
+            <rpm:license>GPLv2 &amp; LGPLv2.1</rpm:license>
+            <rpm:vendor/>
+            <rpm:group>base/shell</rpm:group>
+            <rpm:buildhost>bluewhale-slave-jxqvaull-5dcd6d59bf-btddj</rpm:buildhost>
+            <rpm:sourcerpm>systemd-245-1.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="280" end="2138"/>
+            <rpm:provides>
+                <rpm:entry name="libnss-mymachines" flags="EQ" epoch="0" ver="245"/>
+                <rpm:entry name="libnss-mymachines2" flags="EQ" epoch="1" ver="245" rel="1"/>
+                <rpm:entry name="libnss-mymachines2(x86-64)" flags="EQ" epoch="1" ver="245" rel="1"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="libc6" flags="GE" epoch="0" ver="2.31"/>
+                <rpm:entry name="libcap2" flags="GE" epoch="0" ver="2.32"/>
+                <rpm:entry name="libselinux1" flags="GE" epoch="0" ver="3.0"/>
+                <rpm:entry name="libc6" flags="GE" epoch="0" ver="2.31" pre="1"/>
+                <rpm:entry name="libcap2" flags="GE" epoch="0" ver="2.32" pre="1"/>
+                <rpm:entry name="libselinux1" flags="GE" epoch="0" ver="3.0" pre="1"/>
+                <rpm:entry name="/bin/sh" pre="1"/>
+            </rpm:requires>
+        </format>
+    </package>
+</metadata>

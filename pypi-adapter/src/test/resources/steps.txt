@@ -1,0 +1,6 @@
+sudo tcpdump -A -s 0 'tcp port 80 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)'
+sudo tcpflow -p -c -i wlp4s0  port 80 | grep -oE '(GET|POST|HEAD) .* HTTP/1.[01]|Host: .*'
+
+python setup.py sdist bdist_wheel
+pip install --index-url http://localhost/simple/ --no-deps artipietestpkg
+python -m pip install --index-url https://test.pypi.org/simple/ --no-deps  artipietestpkg

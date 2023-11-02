@@ -1,0 +1,166 @@
+[settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=11
+    os=Linux
+
+[requires]
+    libcurl/7.Y.Z
+    libuuid/1.Y.Z
+    lz4/1.Y.Z
+    openssl/1.Y.Z
+    zeromq/4.Y.Z
+
+[options]
+    fPIC=True
+    shared=False
+    with_libcurl=True
+    with_libuuid=True
+    with_lz4=True
+
+[full_settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=11
+    os=Linux
+
+[full_requires]
+    libcurl/7.80.0:0c5339e3252a17695b86faf7d8701a95bdc6c4ef
+    libsodium/1.0.18:419002c76981df3dbb7d8e203de10ef0cc29df7c
+    libuuid/1.0.3:dfbe50feef7f3c6223a476cd5aeadb687084a646
+    lz4/1.9.3:dfbe50feef7f3c6223a476cd5aeadb687084a646
+    openssl/1.1.1m:dfbe50feef7f3c6223a476cd5aeadb687084a646
+    zeromq/4.3.3:fe18233b49ca2ffb0e25dcb16ab72fd8e3ce3443
+    zlib/1.2.11:dfbe50feef7f3c6223a476cd5aeadb687084a646
+
+[full_options]
+    fPIC=True
+    shared=False
+    with_libcurl=True
+    with_libuuid=True
+    with_lz4=True
+    libcurl:fPIC=True
+    libcurl:shared=False
+    libcurl:with_brotli=False
+    libcurl:with_c_ares=False
+    libcurl:with_ca_bundle=None
+    libcurl:with_ca_path=None
+    libcurl:with_cookies=True
+    libcurl:with_crypto_auth=True
+    libcurl:with_dict=True
+    libcurl:with_docs=False
+    libcurl:with_file=True
+    libcurl:with_ftp=True
+    libcurl:with_gopher=True
+    libcurl:with_http=True
+    libcurl:with_imap=True
+    libcurl:with_ipv6=True
+    libcurl:with_largemaxwritesize=False
+    libcurl:with_ldap=False
+    libcurl:with_libidn=False
+    libcurl:with_libpsl=False
+    libcurl:with_librtmp=False
+    libcurl:with_libssh2=False
+    libcurl:with_mqtt=True
+    libcurl:with_nghttp2=False
+    libcurl:with_ntlm=True
+    libcurl:with_ntlm_wb=True
+    libcurl:with_pop3=True
+    libcurl:with_proxy=True
+    libcurl:with_rtsp=True
+    libcurl:with_smb=True
+    libcurl:with_smtp=True
+    libcurl:with_ssl=openssl
+    libcurl:with_symbol_hiding=False
+    libcurl:with_telnet=True
+    libcurl:with_tftp=True
+    libcurl:with_threaded_resolver=True
+    libcurl:with_unix_sockets=True
+    libcurl:with_verbose_debug=True
+    libcurl:with_verbose_strings=True
+    libcurl:with_zlib=True
+    libcurl:with_zstd=False
+    libsodium:PIE=False
+    libsodium:fPIC=True
+    libsodium:shared=False
+    libsodium:use_soname=True
+    libuuid:fPIC=True
+    libuuid:shared=False
+    lz4:fPIC=True
+    lz4:shared=False
+    openssl:386=False
+    openssl:enable_weak_ssl_ciphers=False
+    openssl:fPIC=True
+    openssl:no_aria=False
+    openssl:no_asm=False
+    openssl:no_async=False
+    openssl:no_bf=False
+    openssl:no_blake2=False
+    openssl:no_camellia=False
+    openssl:no_cast=False
+    openssl:no_chacha=False
+    openssl:no_cms=False
+    openssl:no_comp=False
+    openssl:no_ct=False
+    openssl:no_deprecated=False
+    openssl:no_des=False
+    openssl:no_dgram=False
+    openssl:no_dh=False
+    openssl:no_dsa=False
+    openssl:no_dso=False
+    openssl:no_ec=False
+    openssl:no_ecdh=False
+    openssl:no_ecdsa=False
+    openssl:no_engine=False
+    openssl:no_filenames=False
+    openssl:no_gost=False
+    openssl:no_hmac=False
+    openssl:no_idea=False
+    openssl:no_md4=False
+    openssl:no_md5=False
+    openssl:no_mdc2=False
+    openssl:no_ocsp=False
+    openssl:no_pinshared=False
+    openssl:no_rc2=False
+    openssl:no_rfc3779=False
+    openssl:no_rmd160=False
+    openssl:no_rsa=False
+    openssl:no_seed=False
+    openssl:no_sha=False
+    openssl:no_sm2=False
+    openssl:no_sm3=False
+    openssl:no_sm4=False
+    openssl:no_sock=False
+    openssl:no_srp=False
+    openssl:no_srtp=False
+    openssl:no_sse2=False
+    openssl:no_ssl=False
+    openssl:no_ssl3=False
+    openssl:no_stdio=False
+    openssl:no_tests=False
+    openssl:no_threads=False
+    openssl:no_tls1=False
+    openssl:no_ts=False
+    openssl:no_whirlpool=False
+    openssl:openssldir=None
+    openssl:shared=False
+    zeromq:encryption=libsodium
+    zeromq:fPIC=True
+    zeromq:poller=None
+    zeromq:shared=False
+    zeromq:with_draft_api=False
+    zeromq:with_norm=False
+    zeromq:with_radix_tree=False
+    zeromq:with_websocket=False
+    zlib:fPIC=True
+    zlib:shared=False
+
+[recipe_hash]
+    1101344cca5acf971cb6f6f70703259c
+
+[env]
+

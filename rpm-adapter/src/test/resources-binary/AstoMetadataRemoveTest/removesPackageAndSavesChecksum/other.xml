@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<otherdata xmlns="http://linux.duke.edu/metadata/other" packages="1">
+<package pkgid="54f1d9a1114fa85cd748174c57986004857b800fe9545fbf23af53f4791b31e2" name="nginx" arch="x86_64">
+  <version epoch="1" ver="1.16.1" rel="1.el8.ngx"/>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1538481600">- 1.15.5</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1541505600">- 1.15.6
+- Fixes CVE-2018-16843
+- Fixes CVE-2018-16844
+- Fixes CVE-2018-16845</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1543320000">- 1.15.7</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1545739200">- 1.15.8</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1551182400">- 1.15.9</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1553601600">- 1.15.10</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1554811200">- 1.15.11</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1555416000">- 1.15.12</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1556020800">- 1.16.0</changelog>
+  <changelog author="Andrei Belov &lt;defan@nginx.com&gt;" date="1565697600">- 1.16.1</changelog>
+</package>
+</otherdata>

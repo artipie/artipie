@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns="http://linux.duke.edu/metadata/common"
+          xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>compat-db47</name>
+        <arch>i686</arch>
+        <version epoch="0" rel="28.el7" ver="4.7.25"/>
+        <checksum type="sha256" pkgid="YES">7531e31ceaa1f844fa5bd7c51bd8b640d27fd0a9a37edade1d8eecc1ca1b2ebf</checksum>
+        <summary>The Berkeley DB database 4.7.25 compatibility library</summary>
+        <description>The Berkeley Database (Berkeley DB) is a programmatic toolkit that provides
+            embedded database support for both traditional and client/server applications.
+            This package contains Berkeley DB library version 4.7.25 used for compatibility.
+        </description>
+        <packager>CentOS BuildSystem &lt;http://bugs.centos.org></packager>
+        <url>http://www.oracle.com/database/berkeley-db/</url>
+        <time build="1410457291" file="1410457286"/>
+        <size installed="3544555" archive="0" package="830976"/>
+        <location href="compat-db47-4.7.25-28.el7.i686.rpm"/>
+        <format>
+            <rpm:license>BSD</rpm:license>
+            <rpm:vendor>CentOS</rpm:vendor>
+            <rpm:group>System Environment/Libraries</rpm:group>
+            <rpm:buildhost>worker1.bsys.centos.org</rpm:buildhost>
+            <rpm:sourcerpm>compat-db-4.7.25-28.el7.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="1384" end="21152"/>
+            <rpm:provides>
+                <rpm:entry name="compat-db47" ver="4.7.25" epoch="0" rel="28.el7" flags="EQ"/>
+                <rpm:entry name="compat-db47(x86-32)" ver="4.7.25" epoch="0" rel="28.el7" flags="EQ"/>
+                <rpm:entry name="libdb-4.7.so"/>
+                <rpm:entry name="libdb_cxx-4.7.so"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="compat-db-headers" ver="4.7.25" epoch="0" rel="28.el7" flags="EQ"/>
+                <rpm:entry name="libgcc_s.so.1"/>
+                <rpm:entry name="libgcc_s.so.1(GCC_3.0)"/>
+                <rpm:entry name="libm.so.6"/>
+                <rpm:entry name="libpthread.so.0"/>
+                <rpm:entry name="libpthread.so.0(GLIBC_2.0)"/>
+                <rpm:entry name="libpthread.so.0(GLIBC_2.1)"/>
+                <rpm:entry name="libpthread.so.0(GLIBC_2.2)"/>
+                <rpm:entry name="libpthread.so.0(GLIBC_2.3.2)"/>
+                <rpm:entry name="libstdc++.so.6"/>
+                <rpm:entry name="libstdc++.so.6(CXXABI_1.3)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.9)"/>
+                <rpm:entry name="rtld(GNU_HASH)"/>
+                <rpm:entry name="libc.so.6(GLIBC_2.17)"/>
+            </rpm:requires>
+            <rpm:obsoletes>
+                <rpm:entry name="db1"/>
+                <rpm:entry name="db1-devel"/>
+                <rpm:entry name="db2"/>
+                <rpm:entry name="db2-devel"/>
+                <rpm:entry name="db2-utils"/>
+                <rpm:entry name="db3"/>
+                <rpm:entry name="db3-devel"/>
+                <rpm:entry name="db3-utils"/>
+                <rpm:entry name="db31"/>
+                <rpm:entry name="db32"/>
+                <rpm:entry name="db3x"/>
+                <rpm:entry name="db4" ver="4.7" epoch="0" flags="LT"/>
+                <rpm:entry name="db4-devel" ver="4.7" epoch="0" flags="LT"/>
+                <rpm:entry name="db4-utils" ver="4.7" epoch="0" flags="LT"/>
+                <rpm:entry name="db4-tcl" ver="4.7" epoch="0" flags="LT"/>
+                <rpm:entry name="db4-java" ver="4.7" epoch="0" flags="LT"/>
+                <rpm:entry name="compat-db" ver="4.6.21" epoch="0" rel="5" flags="LT"/>
+            </rpm:obsoletes>
+            <file>/usr/bin/berkeley_db47_svc</file>
+            <file>/usr/bin/db47_archive</file>
+            <file>/usr/bin/db47_checkpoint</file>
+            <file>/usr/bin/db47_codegen</file>
+            <file>/usr/bin/db47_deadlock</file>
+            <file>/usr/bin/db47_dump</file>
+            <file>/usr/bin/db47_hotbackup</file>
+            <file>/usr/bin/db47_load</file>
+            <file>/usr/bin/db47_printlog</file>
+            <file>/usr/bin/db47_recover</file>
+            <file>/usr/bin/db47_stat</file>
+            <file>/usr/bin/db47_upgrade</file>
+            <file>/usr/bin/db47_verify</file>
+        </format>
+    </package>
+</metadata>

@@ -1,0 +1,26 @@
+{
+  "packages.conda" : {
+    "pylint-1.9.2-py27_0.conda": {
+      "build": "py27_0",
+      "build_number": 0,
+      "depends": [
+        "astroid >=1.6,<2.0",
+        "backports.functools_lru_cache",
+        "configparser",
+        "isort >=4.2.5",
+        "mccabe",
+        "python >=2.7,<2.8.0a0",
+        "singledispatch",
+        "six"
+      ],
+      "license": "GPL",
+      "md5": "643b10cc5e25b5ae7912233056e26868",
+      "name": "pylint",
+      "sha256": "f31c3c8488f1a14e5df4a5cf32cb1dd96472b96ce479a2c72f268b577dab1f99",
+      "size": 752501,
+      "subdir": "linux-64",
+      "timestamp": 1528899388109,
+      "version": "1.9.2"
+    }
+  }
+}

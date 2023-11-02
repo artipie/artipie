@@ -5,7 +5,7 @@
 [![EO principles respected here](https://www.elegantobjects.org/badge.svg)](https://www.elegantobjects.org)
 [![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
 
-[![Javadoc](http://www.javadoc.io/badge/com.artipie/http-client.svg)](http://www.javadoc.io/doc/com.artipie/http-client)
+[![Javadoc](http://www.javadoc.io/badge/com.artipie/artipie.svg)](http://www.javadoc.io/doc/com.artipie/artipie)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
 [![codecov](https://codecov.io/gh/artipie/artipie/branch/master/graph/badge.svg)](https://app.codecov.io/gh/artipie/artipie)
 [![Hits-of-Code](https://hitsofcode.com/github/artipie/artipie)](https://hitsofcode.com/view/github/artipie/artipie)
@@ -25,18 +25,18 @@ The following set of features makes Artipie unique among all others:
   * It is horizontally scalable, you can add servers easily
   * It is written in reactive Java (using [Vert.x](https://vertx.io/))
   * It supports
-    [Maven](https://github.com/artipie/artipie/wiki/repositories/maven),
-    [Docker](https://github.com/artipie/artipie/wiki/repositories/docker),
-    [Rubygems](./examples/gem),
-    [Go](https://github.com/artipie/artipie/wiki/repositories/go),
-    [Helm](https://github.com/artipie/artipie/wiki/repositories/helm),
-    [Npm](https://github.com/artipie/artipie/wiki/repositories/npm),
-    [NuGet](https://github.com/artipie/artipie/wiki/repositories/nuget),
-    [Composer](https://github.com/artipie/artipie/wiki/repositories/composer),
-    [Pip](https://github.com/artipie/artipie/wiki/repositories/pypi),
-    [Rpm](https://github.com/artipie/artipie/wiki/repositories/rpm),
-    [Debian](https://github.com/artipie/artipie/wiki/repositories/debian),
-    [Anaconda](https://github.com/artipie/artipie/wiki/repositories/anaconda)
+    [Maven](https://github.com/artipie/artipie/wiki/maven),
+    [Docker](https://github.com/artipie/artipie/wiki/docker),
+    [Rubygems](https://github.com/artipie/artipie/wiki/gem),
+    [Go](https://github.com/artipie/artipie/wiki/go),
+    [Helm](https://github.com/artipie/artipie/wiki/helm),
+    [Npm](https://github.com/artipie/artipie/wiki/npm),
+    [NuGet](https://github.com/artipie/artipie/wiki/nuget),
+    [Composer](https://github.com/artipie/artipie/wiki/composer),
+    [Pip](https://github.com/artipie/artipie/wiki/pypi),
+    [Rpm](https://github.com/artipie/artipie/wiki/rpm),
+    [Debian](https://github.com/artipie/artipie/wiki/debian),
+    [Anaconda](https://github.com/artipie/artipie/wiki/anaconda)
     and [others](https://github.com/artipie/artipie/wiki/Configuration-Repository#supported-repository-types)
   * It is database-free
   * It can host the data in the file system, [Amazon S3](https://aws.amazon.com/s3/) or in a storage defined by user

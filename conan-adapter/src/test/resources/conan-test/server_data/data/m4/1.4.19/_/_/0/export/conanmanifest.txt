@@ -1,0 +1,16 @@
+1649879113
+conandata.yml: 5c14f84b2cd26201763e6f92d514bacf
+conanfile.py: 75dbb892f84ac0f6a345e4b93902ca09
+export_source/patches/1.4.18-0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch: 0b612e3db3181de533b0f5a0d9dba652
+export_source/patches/1.4.18-0002-fflush-be-more-paranoid-about-libio.h-change.patch: 71cc3dd715fee50e2f8fb29b966f0fa9
+export_source/patches/1.4.18-0003-secure_snprintf.patch: 43b8381ff4f750c3726c093cdd800a9e
+export_source/patches/1.4.18-0004-fix-checks.patch: f21f891519ae228d3e58fc4e74b4bd45
+export_source/patches/1.4.18-0005-vasnprintf-Fix-for-MSVC-14.patch: b6022b38eb7b4337bbcf810f67b0da9c
+export_source/patches/1.4.18-0006-manywarnings-update-for-gcc-7.patch: 4e7926ef9dc3da1348998306bfa7d548
+export_source/patches/1.4.18-0007-vasnprintf-port-to-macos-10.13.patch: 8c4369e6912e9ab03a7e1c3a5f6466d3
+export_source/patches/1.4.18-0008-open-files-in-binary-mode.patch: e7baeb057b547bd23d7183fffb76c403
+export_source/patches/1.4.18-0009-disable-hardening-in-source.patch: f17744b57ea825ec6d51c5a8246da1eb
+export_source/patches/1.4.18-0010-c-stack-stop-using-SIGSTKSZ.patch: ac9d6e63484cb1e8200971ba649a58de
+export_source/patches/1.4.19-0001-open-files-in-binary-mode.patch: c4cbb541e496ff1be8872b59b3b19d56
+export_source/patches/1.4.19-0002-ar-lib.patch: c00ed888233bcddc1eb90c6c207c7046
+export_source/patches/1.4.19-0003-msvc-debug-assertion.patch: accc6b762972b8606d1c91d25467bc53

@@ -1,0 +1,9 @@
+package:
+  name: "example-package"
+  version: "0.0.2"
+about:
+  summary: "An example package"
+source:
+  path: ".."
+build:
+  script: "python setup.py install"

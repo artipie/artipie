@@ -1,0 +1,7 @@
+1628594342
+conandata.yml: cbab88e3ab5fca8c81e67a948751196c
+conanfile.py: cae703d7d5c655bf39542723656fe6ca
+export_source/CMakeLists.txt: b1f2468820d754fe596fcbf1d90634c3
+export_source/patches/0001-fix-cmake.patch: 9079324ec142c625870109de589a95e9
+export_source/patches/0002-missing-includes.patch: 19cc7ee9671f9ea3debce9fcf0bd885d
+export_source/patches/0003-Allow-building-with-Werror-undef.patch: 53f9d3db8e55b3228cbfc7dbf993da26

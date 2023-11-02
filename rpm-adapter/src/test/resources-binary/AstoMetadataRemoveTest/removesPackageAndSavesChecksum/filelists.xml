@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<filelists xmlns="http://linux.duke.edu/metadata/filelists" packages="1">
+<package pkgid="54f1d9a1114fa85cd748174c57986004857b800fe9545fbf23af53f4791b31e2" name="nginx" arch="x86_64">
+  <version epoch="1" ver="1.16.1" rel="1.el8.ngx"/>
+  <file>/etc/logrotate.d/nginx</file>
+  <file type="dir">/etc/nginx</file>
+  <file type="dir">/etc/nginx/conf.d</file>
+  <file>/etc/nginx/conf.d/default.conf</file>
+  <file>/etc/nginx/fastcgi_params</file>
+  <file>/etc/nginx/koi-utf</file>
+  <file>/etc/nginx/koi-win</file>
+  <file>/etc/nginx/mime.types</file>
+  <file>/etc/nginx/modules</file>
+  <file>/etc/nginx/nginx.conf</file>
+  <file>/etc/nginx/scgi_params</file>
+  <file>/etc/nginx/uwsgi_params</file>
+  <file>/etc/nginx/win-utf</file>
+  <file>/etc/sysconfig/nginx</file>
+  <file>/etc/sysconfig/nginx-debug</file>
+  <file type="dir">/usr/lib/.build-id</file>
+  <file type="dir">/usr/lib/.build-id/25</file>
+  <file>/usr/lib/.build-id/25/6232e97c72486552b6d3e6191b227e0cc4346e</file>
+  <file type="dir">/usr/lib/.build-id/e3</file>
+  <file>/usr/lib/.build-id/e3/ecb20ef2cf6bb52027480d1802530bda5b311c</file>
+  <file>/usr/lib/systemd/system/nginx-debug.service</file>
+  <file>/usr/lib/systemd/system/nginx.service</file>
+  <file type="dir">/usr/lib64/nginx</file>
+  <file type="dir">/usr/lib64/nginx/modules</file>
+  <file type="dir">/usr/libexec/initscripts/legacy-actions/nginx</file>
+  <file>/usr/libexec/initscripts/legacy-actions/nginx/check-reload</file>
+  <file>/usr/libexec/initscripts/legacy-actions/nginx/upgrade</file>
+  <file>/usr/sbin/nginx</file>
+  <file>/usr/sbin/nginx-debug</file>
+  <file type="dir">/usr/share/doc/nginx-1.16.1</file>
+  <file>/usr/share/doc/nginx-1.16.1/COPYRIGHT</file>
+  <file>/usr/share/man/man8/nginx.8.gz</file>
+  <file type="dir">/usr/share/nginx</file>
+  <file type="dir">/usr/share/nginx/html</file>
+  <file>/usr/share/nginx/html/50x.html</file>
+  <file>/usr/share/nginx/html/index.html</file>
+  <file type="dir">/var/cache/nginx</file>
+  <file type="dir">/var/log/nginx</file>
+</package>
+</filelists>

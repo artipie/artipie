@@ -1,0 +1,44 @@
+{
+  "totalHits": 2,
+  "data": [
+    {
+      "id": "AbcPackage",
+      "version": "0.0.1",
+      "packageTypes": [
+        "Dependency"
+      ],
+      "versions": [
+        {
+          "version": "0.0.1",
+          "downloads": 123,
+          "@id": "http://link"
+        }
+      ]
+    },
+    {
+      "id": "XyzPackage",
+      "version": "0.1.2",
+      "packageTypes": [
+        "Library",
+        "Dependency"
+      ],
+      "versions": [
+        {
+          "version": "0.1",
+          "downloads": 345,
+          "@id": "http://link/0.1"
+        },
+        {
+          "version": "0.1.2",
+          "downloads": 23,
+          "@id": "http://link/0.1.2"
+        },
+        {
+          "version": "0.0.1",
+          "downloads": 1,
+          "@id": "http://link/0.0.1"
+        }
+      ]
+    }
+  ]
+}

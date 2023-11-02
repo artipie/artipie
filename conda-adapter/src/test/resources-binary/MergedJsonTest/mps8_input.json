@@ -1,0 +1,39 @@
+{
+  "packages" : {
+    "pyqt-5.6.0-py36h0386399_5.tar.bz2" : {
+      "build" : "py36h0386399_5",
+      "build_number" : 5,
+      "depends" : [ "dbus >=1.10.22,<2.0a0"],
+      "license" : "Commercial, GPL-2.0, GPL-3.0",
+      "license_family" : "GPL",
+      "md5" : "abc123",
+      "name" : "pyqt",
+      "sha256" : "xyz098",
+      "size" : 5715107,
+      "subdir" : "linux-64",
+      "timestamp" : 1505739175210,
+      "version" : "5.6.0"
+    }
+  },
+  "packages.conda" : {
+    "notebook-6.1.1-py38_0.conda" : {
+      "app_entry" : "jupyter-notebook",
+      "app_type" : "web",
+      "build" : "py38_0",
+      "build_number" : 0,
+      "depends" : [ "argon2-cffi"],
+      "icon" : "df7feebede9861a203b480c119e38b49.png",
+      "license" : "BSD-3-Clause",
+      "license_family" : "BSD",
+      "md5" : "abc123",
+      "name" : "notebook",
+      "sha256" : "xyz098",
+      "size" : 4233953,
+      "subdir" : "linux-64",
+      "summary" : "Jupyter Notebook",
+      "timestamp" : 1596838674769,
+      "type" : "app",
+      "version" : "6.1.1"
+    }
+  }
+}

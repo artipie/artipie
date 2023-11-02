@@ -1,0 +1,7 @@
+1652450136
+conandata.yml: 29bdbb0698a2fab7db82fb15aa140d8b
+conanfile.py: c90f08981a3463493f71311f6dcb5923
+export_source/CMakeLists.txt: 5f1f3fdaa49068c2313e5aeeb0245523
+export_source/patches/0001-fix-cmake.patch: 314cda92d32eb0630b8dab2abc1b8861
+export_source/patches/0002-gzguts-xcode12-compile-fix.patch: 86d7b5fa099f2ba64f4999f84185be87
+export_source/patches/0003-gzguts-fix-widechar-condition.patch: c999913d4b7e8ebda0be63e342d7202c

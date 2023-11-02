@@ -1,0 +1,2 @@
+{"dfbe50feef7f3c6223a476cd5aeadb687084a646":{"requires":{},"env":{},"settings":{"compiler":"gcc","arch":"x86_64","os":"Linux","build_type":"Release","compiler.version":"11"},"recipe_hash":"6579cd83d7728bdb0df70b512d9b1a11","full_requires":{},"options":{"fPIC":"True","shared":"False"},"full_settings":{"compiler":"gcc","arch":"x86_64","compiler.version":"11","build_type":"Release","os":"Linux"},"full_options":{"shared":"False","fPIC":"True"}}}
+

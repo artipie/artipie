@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<filelists xmlns="http://linux.duke.edu/metadata/filelists" packages="3">
+
+    <package pkgid="ce6f64001104e098d5e799d6a10e7cfeadf2320b8955c86e3f8d15872d1544fd" name="mesa-libxatracker" arch="i686">
+        <version epoch="0" ver="18.3.4" rel="10.el7"/>
+        <file>/usr/lib/libxatracker.so.2</file>
+        <file>/usr/lib/libxatracker.so.2.4.0</file>
+    </package>
+    <package pkgid="47bbb8b2401e8853812e6340f4197252b92463c132f64a257e18c0c8c83ae462" name="libdeflt1_0" arch="armv7hl">
+        <version epoch="0" ver="2020.03.27" rel="25.1"/>
+        <file>/usr/lib/libdeflt.so.1.0</file>
+        <file type="dir">/usr/share/licenses/libdeflt1_0</file>
+        <file>/usr/share/licenses/libdeflt1_0/CDDL.Schily.txt</file>
+    </package>
+    <package pkgid="b9d10ae3485a5c5f71f0afb1eaf682bfbea4ea667cc3c3975057d6e3d8f2e905" name="abc" arch="ppc64le">
+        <version epoch="0" ver="1.01" rel="26.git20200127.fc32"/>
+        <file>/usr/bin/abc</file>
+        <file type="dir">/usr/lib/.build-id/cb</file>
+        <file>/usr/lib/.build-id/cb/263ca8bdb2d581b1a12e604c0e30635e69c889</file>
+        <file type="dir">/usr/share/doc/abc</file>
+        <file>/usr/share/doc/abc/README.md</file>
+        <file>/usr/share/doc/abc/readmeaig</file>
+        <file>/usr/share/man/man1/abc.1.gz</file>
+    </package>
+</filelists>
