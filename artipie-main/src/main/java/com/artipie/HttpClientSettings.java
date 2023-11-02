@@ -28,7 +28,7 @@ final class HttpClientSettings implements com.artipie.http.client.Settings {
     /**
      * Use http3 protocol.
      */
-    static final String HTTP3 = "http3.client";
+    static final String USE_HTTP3 = "http3.client";
 
     @Override
     public Optional<Proxy> proxy() {
@@ -67,6 +67,6 @@ final class HttpClientSettings implements com.artipie.http.client.Settings {
 
     @Override
     public boolean http3() {
-        return Boolean.parseBoolean(System.getenv(HttpClientSettings.HTTP3));
+        return Boolean.parseBoolean(System.getenv(HttpClientSettings.USE_HTTP3));
     }
 }
