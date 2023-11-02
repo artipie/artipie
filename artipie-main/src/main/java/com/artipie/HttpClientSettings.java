@@ -25,6 +25,11 @@ final class HttpClientSettings implements com.artipie.http.client.Settings {
      */
     static final String PROXY_PORT = "http.proxyPort";
 
+    /**
+     * Use http3 protocol.
+     */
+    static final String HTTP3 = "http3.client";
+
     @Override
     public Optional<Proxy> proxy() {
         final Optional<Proxy> result;
@@ -58,5 +63,10 @@ final class HttpClientSettings implements com.artipie.http.client.Settings {
     public long idleTimeout() {
         final int seconds = 30;
         return TimeUnit.SECONDS.toMillis(seconds);
+    }
+
+    @Override
+    public boolean http3() {
+        return Boolean.parseBoolean(System.getenv(HttpClientSettings.HTTP3));
     }
 }
