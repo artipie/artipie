@@ -203,7 +203,7 @@ SOFTWARE.
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>http-client</artifactId>
-      <version>0.3.9</version>
+      <version>0.4.3</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
