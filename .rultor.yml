@@ -1,0 +1,30 @@
+docker:
+  image: g4s8/rultor-jdk11:alpine3.10
+assets:
+  settings.xml: "yegor256/artipie-keys#settings.xml"
+  pubring.gpg: "yegor256/artipie-keys#pubring.gpg"
+  secring.gpg: "yegor256/artipie-keys#secring.gpg"
+env:
+  JAVA_HOME: /usr/lib/jvm/java-11-openjdk
+install: |
+  export LC_ALL=en_US.UTF-8
+  export LANG=en_US.UTF-8
+  export LANGUAGE=en_US.UTF-8
+merge:
+  script: |
+    echo We don't merge via Rultor
+    exit 1
+deploy:
+  script: |
+    echo There is nothing to deploy
+    exit 1
+release:
+  sensitive:
+    - settings.xml
+  script: |-
+    echo done
+architect:
+  - g4s8
+  - yegor256
+  - olegmoz
+  - olenagerasimova

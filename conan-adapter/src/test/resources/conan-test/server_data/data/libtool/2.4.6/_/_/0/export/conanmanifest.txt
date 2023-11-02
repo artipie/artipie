@@ -1,5 +1,0 @@
-1654987539
-conandata.yml: 37ffe60aa29971e66ef59b3eb50ebb87
-conanfile.py: 0c4d87ed72015816f752c01d7593db0f
-export_source/patches/0001-libtool-relocatable.patch: f0948cc4288d7e4ae84310b42beb38d6
-export_source/patches/0002-libtool-fix-type-libtool.patch: 6b112b7afffcb2edc08c83aec429322d

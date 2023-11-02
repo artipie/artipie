@@ -1,7 +1,0 @@
-{
-  "name": "vendor/package",
-  "dist": {
-    "url": "https://www.example.com/files/content.zip",
-    "type": "zip"
-  }
-}

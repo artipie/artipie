@@ -6,5 +6,3 @@
 *.java ident
 *.xml ident
 *.png binary
-*.nupkg binary
-*.nuspec binary

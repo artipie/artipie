@@ -1,4 +1,0 @@
-1653316303
-conandata.yml: 43af9ebc0762991d6c5ccb1b2a5cd890
-conanfile.py: c5e393dfd872d9f40d35fc1c64abad53
-export_source/patches/0001-1.0.18-msvc_props.patch: 7a7e1435574ddec94cc2b44bf4f5984a

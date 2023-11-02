@@ -1,5 +1,0 @@
-1643369021
-conandata.yml: 824c42231a13ce8373c275b256274f2c
-conanfile.py: c6ef09e8ccaefdf4c7caade80d67b0ac
-export_source/CMakeLists.txt: 93de4a35517bd21e4f286ff36801bbd6
-export_source/patches/0003-rpath-macos-4.3.3.patch: b56e7e21ee459155ef53e404f99170de

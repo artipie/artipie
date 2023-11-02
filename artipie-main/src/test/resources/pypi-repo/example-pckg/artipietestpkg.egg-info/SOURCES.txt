@@ -1,6 +1,0 @@
-README.md
-setup.py
-artipietestpkg.egg-info/PKG-INFO
-artipietestpkg.egg-info/SOURCES.txt
-artipietestpkg.egg-info/dependency_links.txt
-artipietestpkg.egg-info/top_level.txt

@@ -15,19 +15,17 @@ jobs:
       - name: Download JDK
         run: |
           wget --no-verbose --directory-prefix ${{ runner.temp }} \
-            https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.tar.gz
+            https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.tar.gz
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
           distribution: jdkfile
-          jdkFile: ${{ runner.temp }}/jdk-21_linux-x64_bin.tar.gz
-          java-version: 21
+          jdkFile: ${{ runner.temp }}/jdk-17_linux-x64_bin.tar.gz
+          java-version: 17
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
-          key: ubuntu-latest-jdk-21-maven-${{ hashFiles('**/pom.xml') }}
+          key: ubuntu-latest-jdk-17-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ubuntu-latest-jdk-21-maven-
-      - run: mvn -B install -Pitcase -pl "!:artipie-main"
-      - run: mvn -B verify -Pdocker-build -Pitcase
-        working-directory: artipie-main
+            ubuntu-latest-jdk-17-maven-
+      - run: mvn -B verify -Pitcase

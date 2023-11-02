@@ -1,0 +1,26 @@
+--source=.
+--verbose
+--exclude logo.png
+--exclude target/**/*
+--exclude src/main/resources/swagger-ui/**/*
+--exclude src/main/resources/images/**/*
+--exclude src/test/resources/com/artipie/snapshot/1.0-SNAPSHOT/*
+--exclude src/test/resources/com/artipie/helloworld/0.1/*
+--exclude src/test/resources/pypi-repo/**/*
+--exclude src/test/resources/npm/**/*
+--exclude src/test/resources/rpm/*
+--exclude src/test/resources/helm/*
+--exclude src/test/resources/gem/*
+--exclude src/test/resources/debian/*
+--exclude src/test/resources/nuget/**/*
+--exclude src/test/resources/conda/**/*
+--exclude src/test/resources/composer/**/*
+--exclude .idea/**/*
+--exclude examples/**/*
+--exclude examples/helm/tomcat-0.4.1.tgz
+--exclude CHANGELOG.md
+--exclude CODE_OF_CONDUCT.md
+--exclude CONTRIBUTING.md
+--rule min-words:16
+--rule min-estimate:15
+--rule max-estimate:90
