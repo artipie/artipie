@@ -21,8 +21,11 @@ jobs:
           docker rm -fv artipie || :
           docker image rm -f artipie/artipie:1.0-SNAPSHOT || :
           docker ps
-      - name: Maven build
+      - name: Maven adapters build
+        run: mvn install -DskipTests
+      - name: Artipie docker image build
         run: timeout 600 mvn clean install -Pdocker-build -DskipTests
+        working-directory: artpie-main
       - name: Check docker image
         run: docker image inspect artipie/artipie:1.0-SNAPSHOT|head -n50
       - name: Checkout results repo/branch

@@ -27,7 +27,6 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - run: mvn install -DskipTests
       - run: mvn versions:set -DnewVersion=${{ env.RELEASE_VERSION }}
-        working-directory: artipie-main
       - run: mvn -B deploy -Pdocker -Ddocker.image.name=${{ secrets.DOCKERHUB_REPO }}
         working-directory: artipie-main
       - run: mvn versions:set -DnewVersion=latest

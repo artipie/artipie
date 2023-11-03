@@ -6,7 +6,7 @@
 [![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
 
 [![Javadoc](http://www.javadoc.io/badge/com.artipie/artipie.svg)](http://www.javadoc.io/doc/com.artipie/artipie)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/LICENSE.txt)
 [![codecov](https://codecov.io/gh/artipie/artipie/branch/master/graph/badge.svg)](https://app.codecov.io/gh/artipie/artipie)
 [![Hits-of-Code](https://hitsofcode.com/github/artipie/artipie)](https://hitsofcode.com/view/github/artipie/artipie)
 ![Docker Pulls](https://img.shields.io/docker/pulls/artipie/artipie)
@@ -21,7 +21,7 @@ Artipie is a binary artifact management tool, similar to
 and many others.
 The following set of features makes Artipie unique among all others:
 
-  * It is open source ([MIT license](https://github.com/artipie/artipie/blob/master/LICENSE.txt))
+  * It is open source ([MIT license](https://github.com/artipie/artipie/LICENSE.txt))
   * It is horizontally scalable, you can add servers easily
   * It is written in reactive Java (using [Vert.x](https://vertx.io/))
   * It supports
@@ -126,3 +126,23 @@ To avoid build errors use Maven 3.2+ and please read
 
 Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the logo.
 
+## How to release
+
+Artipie service is released in two formats: 
+- [docker image in DockerHub](https://hub.docker.com/r/artipie/artipie)
+- jar archive with dependencies in GitHub release page ([example](https://github.com/artipie/artipie/releases/tag/v0.30.1))
+
+These two distributions are created by one GitHub action `[docker-release.yml](.github/workflows/docker-release.yml)`. To
+publish release, push tag (starting with `v` into this repository masted branch):
+```bash
+git tag v1.2.0
+git push --tags origin
+```
+Also, each adapter can be released into Maven Central individually. To do that, push git tag of the following format:
+```text
+[adapter-name]_[version]_[java-version]
+rpm-adapter_v1.2.3_8 
+```
+On this tag, GitHub action [maven-adapter-release.yml](.github%2Fworkflows%2Fmaven-adapter-release.yml) will run to
+release specified adapter using specified java version. Note, that required Java Version is also set in adapters' pom 
+files and should correspond to version in release tag. 
