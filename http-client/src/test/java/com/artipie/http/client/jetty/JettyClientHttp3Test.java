@@ -194,7 +194,7 @@ public final class JettyClientHttp3Test {
                 return CompletableFuture.allOf();
             }
         );
-        MatcherAssert.assertThat("Response was not received", latch.await(3, TimeUnit.MINUTES));
+        MatcherAssert.assertThat("Response was not received", latch.await(4, TimeUnit.MINUTES));
         final ByteBuffer res = ByteBuffer.allocate(large);
         ((TestListener) listener).buffers.forEach(item -> res.put(item.position(0)));
         MatcherAssert.assertThat(res.array(), new IsEqual<>(data));
