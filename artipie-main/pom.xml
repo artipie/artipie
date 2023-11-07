@@ -59,7 +59,8 @@ SOFTWARE.
         <dependency>
             <groupId>com.artipie</groupId>
             <artifactId>vertx-server</artifactId>
-            <version>1.0.0</version>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -186,8 +187,8 @@ SOFTWARE.
         <dependency>
             <groupId>com.artipie</groupId>
             <artifactId>gem-adapter</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>v1.3.7</version>
+<!--            <scope>compile</scope>-->
         </dependency>
         <dependency>
             <groupId>com.artipie</groupId>

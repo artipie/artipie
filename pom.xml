@@ -54,6 +54,7 @@ SOFTWARE.
     <module>go-adapter</module>
     <module>rpm-adapter</module>
     <module>rpm-adapter/benchmarks</module>
+    <module>vertx-server</module>
   </modules>
   <description>Binary Artifact Management Tool</description>
   <url>https://github.com/artipie/artipie</url>
@@ -61,7 +62,7 @@ SOFTWARE.
   <licenses>
     <license>
       <name>MIT</name>
-      <url>https://github.com/artipie/artipie/blob/master/LICENSE.txt</url>
+      <url>https://github.com/artipie/artipie/LICENSE.txt</url>
     </license>
   </licenses>
   <developers>
@@ -246,12 +247,6 @@ SOFTWARE.
       <version>2.0.9</version>
     </dependency>
     <!-- Test scope-->
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>vertx-server</artifactId>
-      <version>1.0.0</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-matchers</artifactId>

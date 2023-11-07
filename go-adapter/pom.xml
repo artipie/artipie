@@ -35,6 +35,14 @@ SOFTWARE.
   <name>goproxy</name>
   <description>Turns your files/objects into Go repository</description>
   <inceptionYear>2019</inceptionYear>
+  <dependencies>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>vertx-server</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
   <build>
     <testResources>
       <testResource>
