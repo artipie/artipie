@@ -59,6 +59,12 @@ SOFTWARE.
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
+      <artifactId>http-client</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
       <artifactId>files-adapter</artifactId>
       <version>1.0-SNAPSHOT</version>
       <scope>test</scope>

@@ -61,6 +61,12 @@ SOFTWARE.
       <artifactId>jcabi-xml</artifactId>
       <version>0.22.2</version>
     </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>http-client</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
     <!-- Test -->
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>

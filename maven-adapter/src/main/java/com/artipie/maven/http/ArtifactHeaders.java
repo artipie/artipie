@@ -8,11 +8,11 @@ import com.artipie.asto.Key;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Header;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.jetty.http.MimeTypes;
 
 /**
  * Artifact response headers for {@code GET} and {@code HEAD} requests.
@@ -85,7 +85,7 @@ final class ArtifactHeaders extends Headers.Wrap {
                 type = "application/x-maven-pom+xml";
                 break;
             default:
-                type = MimeTypes.getDefaultMimeByExtension(src);
+                type = URLConnection.guessContentTypeFromName(src);
                 break;
         }
         return new Header("Content-Type", Optional.ofNullable(type).orElse("*"));

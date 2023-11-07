@@ -1,8 +1,8 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 MIT License
 
-Copyright (c) 2021-2023 Artipie
+Copyright (c) 2020-2022 Artipie
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,68 +29,70 @@ SOFTWARE.
     <artifactId>artipie</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>conda-adapter</artifactId>
+  <artifactId>http-client</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>conda-adapter</name>
-  <description>Turns your files/objects into conda repository</description>
-  <inceptionYear>2021</inceptionYear>
+  <name>Artipie HTTP client</name>
+  <url>https://github.com/artipie/http-client</url>
+  <description>HTTP client for Artipie</description>
   <developers>
     <developer>
-      <id>1</id>
-      <name>Alena Gerasimova</name>
-      <email>olena.gerasimova@gmail.com</email>
-      <roles>
-        <role>Architect</role>
-        <role>Developer</role>
-      </roles>
-      <timezone>+3</timezone>
+      <name>Oleg Mozzhechkov</name>
+      <email>oleg.mozzhechkov@gmail.com</email>
     </developer>
   </developers>
-  <contributors>
-    <contributor>
-      <name>Olivier B. OURA</name>
-      <email>baudoliver7@gmail.com</email>
-      <organization>baudoliver7.com</organization>
-      <organizationUrl>https://www.baudoliver7.com</organizationUrl>
-      <roles>
-        <role>Developer</role>
-      </roles>
-      <timezone>+0</timezone>
-    </contributor>
-  </contributors>
+  <scm>
+    <connection>scm:git:git://github.com/artipie/http-client.git</connection>
+    <developerConnection>scm:git:ssh://github.com:artipie/http-client.git</developerConnection>
+    <url>https://github.com/artipie/http-client/tree/master</url>
+  </scm>
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <jettyVersion>12.0.3</jettyVersion>
   </properties>
   <dependencies>
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>2.14.2</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-reactive-httpclient</artifactId>
+      <version>4.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-http</artifactId>
+      <version>${jettyVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.http3</groupId>
+      <artifactId>jetty-http3-client</artifactId>
+      <version>${jettyVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.http3</groupId>
+      <artifactId>jetty-http3-client-transport</artifactId>
+      <version>${jettyVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.http3</groupId>
+      <artifactId>jetty-http3-qpack</artifactId>
+      <version>${jettyVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.http3</groupId>
+      <artifactId>jetty-http3-server</artifactId>
+      <version>${jettyVersion}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.json</groupId>
+      <artifactId>javax.json-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>javax.json</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.14.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>30.1.1-jre</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.luben</groupId>
-      <artifactId>zstd-jni</artifactId>
-      <version>1.5.0-2</version>
-    </dependency>
+    <!-- Test only dependencies -->
     <dependency>
       <groupId>org.cactoos</groupId>
       <artifactId>cactoos</artifactId>
-      <version>0.46</version>
+      <version>0.50</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -103,12 +105,18 @@ SOFTWARE.
   <build>
     <testResources>
       <testResource>
-        <directory>${basedir}/src/test/resources</directory>
         <filtering>true</filtering>
+        <directory>${project.basedir}/src/test/resources</directory>
+        <excludes>
+          <exclude>keystore</exclude>
+        </excludes>
       </testResource>
       <testResource>
-        <directory>${basedir}/src/test/resources-binary</directory>
         <filtering>false</filtering>
+        <directory>${project.basedir}/src/test/resources</directory>
+        <includes>
+          <include>keystore</include>
+        </includes>
       </testResource>
     </testResources>
   </build>

@@ -55,6 +55,7 @@ SOFTWARE.
     <module>rpm-adapter</module>
     <module>rpm-adapter/benchmarks</module>
     <module>vertx-server</module>
+    <module>http-client</module>
   </modules>
   <description>Binary Artifact Management Tool</description>
   <url>https://github.com/artipie/artipie</url>
@@ -200,11 +201,6 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>asto-vertx-file</artifactId>
       <version>${asto.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>http-client</artifactId>
-      <version>0.3.9</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

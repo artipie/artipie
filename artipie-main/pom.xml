@@ -63,6 +63,12 @@ SOFTWARE.
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>com.artipie</groupId>
+            <artifactId>http-client</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>30.0-jre</version>

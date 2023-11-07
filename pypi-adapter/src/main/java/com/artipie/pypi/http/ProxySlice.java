@@ -24,6 +24,7 @@ import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import io.reactivex.Flowable;
 import java.net.URI;
+import java.net.URLConnection;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
@@ -32,7 +33,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
-import org.eclipse.jetty.http.MimeTypes;
 import org.reactivestreams.Publisher;
 
 /**
@@ -160,7 +160,7 @@ final class ProxySlice implements Slice {
                     if (ext.matches(ProxySlice.FORMATS)) {
                         res = new Header(
                             name,
-                            Optional.ofNullable(MimeTypes.getDefaultMimeByExtension(ext))
+                            Optional.ofNullable(URLConnection.guessContentTypeFromName(ext))
                                 .orElse("*")
                         );
                     }
