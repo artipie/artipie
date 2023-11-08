@@ -10,6 +10,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
@@ -157,12 +158,18 @@ final class JettyClientSlice implements Slice {
                 type = Optional.of(header.getValue());
             }
         }
-        final Flowable<Content.Chunk> content = Flowable.concat(
-            Flowable.fromPublisher(body).map(buffer -> Content.Chunk.from(buffer, false)),
-            Flowable.just(Content.Chunk.from(ByteBuffer.wrap(new byte[]{}), true))
-        );
-        return ReactiveRequest.newBuilder(request)
-            .content(ReactiveRequest.Content.fromPublisher(content, type.orElse("*"))).build();
+        final ReactiveRequest res;
+        if (req.method() == RqMethod.HEAD) {
+            res = ReactiveRequest.newBuilder(request).build();
+        } else {
+            final Flowable<Content.Chunk> content = Flowable.concat(
+                Flowable.fromPublisher(body).map(buffer -> Content.Chunk.from(buffer, false)),
+                Flowable.just(Content.Chunk.from(ByteBuffer.wrap(new byte[]{}), true))
+            );
+            res = ReactiveRequest.newBuilder(request)
+                .content(ReactiveRequest.Content.fromPublisher(content, type.orElse("*"))).build();
+        }
+        return res;
     }
 
     /**
