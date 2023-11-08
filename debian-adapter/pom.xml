@@ -35,18 +35,6 @@ SOFTWARE.
   <name>debian-adapter</name>
   <description>Debian adapter</description>
   <inceptionYear>2020</inceptionYear>
-  <developers>
-    <developer>
-      <id>1</id>
-      <name>Alena Gerasimova</name>
-      <email>olena.gerasimova@gmail.com</email>
-      <roles>
-        <role>Architect</role>
-        <role>Developer</role>
-      </roles>
-      <timezone>+3</timezone>
-    </developer>
-  </developers>
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -54,11 +42,6 @@ SOFTWARE.
     <jmh.version>1.29</jmh.version>
   </properties>
   <dependencies>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>vertx-server</artifactId>
-      <version>1.0.0</version>
-    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>

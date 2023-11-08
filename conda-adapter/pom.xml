@@ -34,30 +34,6 @@ SOFTWARE.
   <name>conda-adapter</name>
   <description>Turns your files/objects into conda repository</description>
   <inceptionYear>2021</inceptionYear>
-  <developers>
-    <developer>
-      <id>1</id>
-      <name>Alena Gerasimova</name>
-      <email>olena.gerasimova@gmail.com</email>
-      <roles>
-        <role>Architect</role>
-        <role>Developer</role>
-      </roles>
-      <timezone>+3</timezone>
-    </developer>
-  </developers>
-  <contributors>
-    <contributor>
-      <name>Olivier B. OURA</name>
-      <email>baudoliver7@gmail.com</email>
-      <organization>baudoliver7.com</organization>
-      <organizationUrl>https://www.baudoliver7.com</organizationUrl>
-      <roles>
-        <role>Developer</role>
-      </roles>
-      <timezone>+0</timezone>
-    </contributor>
-  </contributors>
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>

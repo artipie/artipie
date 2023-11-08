@@ -13,6 +13,7 @@ import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
+import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
 import java.net.URI;
@@ -100,7 +101,7 @@ final class JettyClientSlice implements Slice {
                                         chunk.release();
                                         return buf;
                                     }
-                                )
+                                ).doOnError(error -> Logger.error(this, "Error on pub"))
                             );
                             return origin.send(connection).handle(
                                 (nothing, throwable) -> {

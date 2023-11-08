@@ -33,18 +33,6 @@ SOFTWARE.
   <version>1.0-SNAPSHOT</version>
   <name>Artipie HTTP client</name>
   <url>https://github.com/artipie/http-client</url>
-  <description>HTTP client for Artipie</description>
-  <developers>
-    <developer>
-      <name>Oleg Mozzhechkov</name>
-      <email>oleg.mozzhechkov@gmail.com</email>
-    </developer>
-  </developers>
-  <scm>
-    <connection>scm:git:git://github.com/artipie/http-client.git</connection>
-    <developerConnection>scm:git:ssh://github.com:artipie/http-client.git</developerConnection>
-    <url>https://github.com/artipie/http-client/tree/master</url>
-  </scm>
   <properties>
     <jettyVersion>12.0.3</jettyVersion>
   </properties>

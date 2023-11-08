@@ -32,12 +32,6 @@ SOFTWARE.
     <version>1.0-SNAPSHOT</version>
   </parent>
   <name>docker-adapter</name>
-  <developers>
-    <developer>
-      <name>Kirill Che.</name>
-      <email>g4s8.public@gmail.com</email>
-    </developer>
-  </developers>
   <dependencies>
     <dependency>
       <groupId>com.artipie</groupId>
