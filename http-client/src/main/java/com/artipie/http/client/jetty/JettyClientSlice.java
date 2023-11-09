@@ -10,6 +10,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.jcabi.log.Logger;
@@ -87,14 +88,18 @@ final class JettyClientSlice implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final Request request = this.buildRequest(headers, new RequestLineFrom(line));
-        final AsyncRequestContent async = new AsyncRequestContent();
-        Flowable.fromPublisher(body).doOnComplete(async::close).forEach(
-            buf -> async.write(buf, Callback.NOOP)
-        );
+        final RequestLineFrom req = new RequestLineFrom(line);
+        final Request request = this.buildRequest(headers, req);
         final CompletableFuture<Response> res = new CompletableFuture<>();
         final List<Content.Chunk> buffers = new LinkedList<>();
-        request.body(async).onResponseContentSource(
+        if (req.method() != RqMethod.HEAD) {
+            final AsyncRequestContent async = new AsyncRequestContent();
+            Flowable.fromPublisher(body).doOnComplete(async::close).forEach(
+                buf -> async.write(buf, Callback.NOOP)
+            );
+            request.body(async);
+        }
+        request.onResponseContentSource(
             (response, source) -> {
                 // The function (as a Runnable) that reads the response content.
                 final Runnable demander = new Demander(source, response, buffers);
