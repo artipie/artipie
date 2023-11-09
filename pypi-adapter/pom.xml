@@ -33,20 +33,6 @@ SOFTWARE.
   <version>1.0-SNAPSHOT</version>
   <name>pypi-adapter</name>
   <url>https://github.com/artipie/pypi-adapter</url>
-  <developers>
-    <developer>
-      <name>Guseyn</name>
-      <email>guseynism@gmail.com</email>
-    </developer>
-    <developer>
-      <name>artem.lazarev</name>
-      <email>artem.lazarev@gmail.com</email>
-    </developer>
-    <developer>
-      <name>Alena Gerasimova</name>
-      <email>olena.gerasimova@gmail.com</email>
-    </developer>
-  </developers>
   <properties>
     <apache.httpcomponents.version>4.5.14</apache.httpcomponents.version>
   </properties>
@@ -60,6 +46,12 @@ SOFTWARE.
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-xml</artifactId>
       <version>0.22.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>http-client</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
     </dependency>
     <!-- Test -->
     <dependency>

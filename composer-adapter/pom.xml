@@ -38,24 +38,16 @@ SOFTWARE.
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
   </properties>
-  <developers>
-    <developer>
-      <id>1</id>
-      <name>Yegor Bugayenko</name>
-      <email>yegor256@gmail.com</email>
-      <organization>yegor256.com</organization>
-      <organizationUrl>https://www.yegor256.com</organizationUrl>
-      <roles>
-        <role>Architect</role>
-        <role>Developer</role>
-      </roles>
-      <timezone>+1</timezone>
-    </developer>
-  </developers>
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>http-client</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>

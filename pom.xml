@@ -55,6 +55,7 @@ SOFTWARE.
     <module>rpm-adapter</module>
     <module>rpm-adapter/benchmarks</module>
     <module>vertx-server</module>
+    <module>http-client</module>
   </modules>
   <description>Binary Artifact Management Tool</description>
   <url>https://github.com/artipie/artipie</url>
@@ -65,88 +66,13 @@ SOFTWARE.
       <url>https://github.com/artipie/artipie/LICENSE.txt</url>
     </license>
   </licenses>
-  <developers>
-    <developer>
-      <id>1</id>
-      <name>Yegor Bugayenko</name>
-      <email>yegor256@gmail.com</email>
-      <organization>yegor256.com</organization>
-      <organizationUrl>https://www.yegor256.com</organizationUrl>
-      <roles>
-        <role>Architect</role>
-        <role>Developer</role>
-      </roles>
-      <timezone>+1</timezone>
-    </developer>
-    <developer>
-      <id>2</id>
-      <name>Oleg Mozzhechkov</name>
-      <email>oleg.mozzhechkov@gmail.com</email>
-      <roles>
-        <role>Architect</role>
-        <role>Developer</role>
-      </roles>
-      <timezone>+3</timezone>
-    </developer>
-    <developer>
-      <id>3</id>
-      <name>Alena Gerasimova</name>
-      <email>olena.gerasimova@gmail.com</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-      <timezone>+3</timezone>
-    </developer>
-    <developer>
-      <id>4</id>
-      <name>Aleksandr Krasnov</name>
-      <email>aakrasnov19@gmail.com</email>
-      <roles>
-        <role>Developer</role>
-      </roles>
-      <timezone>+3</timezone>
-    </developer>
-    <developer>
-      <id>5</id>
-      <name>Kirill Chernyavskiy</name>
-      <email>g4s8.public@gmail.com</email>
-      <roles>
-        <role>Architect</role>
-      </roles>
-      <timezone>+3</timezone>
-    </developer>
-  </developers>
-  <contributors>
-    <contributor>
-      <name>Olivier B. OURA</name>
-      <email>baudoliver7@gmail.com</email>
-      <organization>baudoliver7.com</organization>
-      <organizationUrl>https://www.baudoliver7.com</organizationUrl>
-      <roles>
-        <role>Developer</role>
-      </roles>
-      <timezone>+0</timezone>
-    </contributor>
-  </contributors>
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/artipie/artipie/issues</url>
   </issueManagement>
   <scm>
-    <connection>scm:git:git@github.com:artipie/artipie.git</connection>
-    <developerConnection>scm:git:git@github.com:artipie/artipie.git</developerConnection>
     <url>https://github.com/artipie/artipie</url>
   </scm>
-  <ciManagement>
-    <system>rultor</system>
-    <url>https://www.rultor.com/s/artipie</url>
-  </ciManagement>
-  <distributionManagement>
-    <site>
-      <id>github-pages</id>
-      <url>https://github.com/artipie/artipie</url>
-    </site>
-  </distributionManagement>
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
@@ -200,11 +126,6 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>asto-vertx-file</artifactId>
       <version>${asto.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>http-client</artifactId>
-      <version>0.3.9</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

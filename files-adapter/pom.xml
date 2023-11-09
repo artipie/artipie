@@ -35,45 +35,17 @@ SOFTWARE.
   <name>files-adapter</name>
   <description>A simple adapter for storing files</description>
   <inceptionYear>2020</inceptionYear>
-  <developers>
-    <developer>
-      <id>g4s8</id>
-      <name>Kirill Che.</name>
-      <email>g4s8.public@gmail.com</email>
-      <organization>Artipie</organization>
-      <organizationUrl>https://www.artipie.com</organizationUrl>
-      <roles>
-        <role>maintainer</role>
-      </roles>
-    </developer>
-  </developers>
-  <contributors>
-    <contributor>
-      <name>Yegor Bugayenko</name>
-      <email>yegor256@gmail.com</email>
-      <organization>yegor256.com</organization>
-      <organizationUrl>https://www.yegor256.com</organizationUrl>
-      <roles>
-        <role>Developer</role>
-      </roles>
-      <timezone>+1</timezone>
-    </contributor>
-    <contributor>
-      <name>Olivier B. OURA</name>
-      <email>baudoliver7@gmail.com</email>
-      <organization>baudoliver7.com</organization>
-      <organizationUrl>https://www.baudoliver7.com</organizationUrl>
-      <roles>
-        <role>Developer</role>
-      </roles>
-      <timezone>+0</timezone>
-    </contributor>
-  </contributors>
   <dependencies>
     <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>vertx-server</artifactId>
       <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>http-client</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>

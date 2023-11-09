@@ -20,20 +20,6 @@ https://github.com/artipie/artipie/LICENSE.txt
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  <developers>
-    <developer>
-      <id>1</id>
-      <name>Yegor Bugayenko</name>
-      <email>yegor256@gmail.com</email>
-      <organization>yegor256.com</organization>
-      <organizationUrl>https://www.yegor256.com</organizationUrl>
-      <roles>
-        <role>Architect</role>
-        <role>Developer</role>
-      </roles>
-      <timezone>+1</timezone>
-    </developer>
-  </developers>
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>
