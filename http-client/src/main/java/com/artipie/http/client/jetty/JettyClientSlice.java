@@ -10,32 +10,33 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLineFrom;
-import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.jcabi.log.Logger;
-import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.http.client.utils.URIBuilder;
+import org.eclipse.jetty.client.AsyncRequestContent;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.io.Content;
-import org.eclipse.jetty.reactive.client.ReactiveRequest;
-import org.eclipse.jetty.reactive.client.ReactiveResponse;
+import org.eclipse.jetty.util.Callback;
 import org.reactivestreams.Publisher;
 
 /**
  * ClientSlices implementation using Jetty HTTP client as back-end.
- *
+ * <a href="https://eclipse.dev/jetty/documentation/jetty-12/programming-guide/index.html#pg-client-http-non-blocking">Docs</a>
  * @since 0.1
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle MethodBodyCommentsCheck (500 lines)
+ * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 final class JettyClientSlice implements Slice {
 
@@ -86,56 +87,54 @@ final class JettyClientSlice implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        return new AsyncResponse(
-            Flowable.fromPublisher(
-                this.request(line, headers, body).response(
-                    (response, rsbody) -> Flowable.just(
-                        (Response) connection -> {
-                            final ClosablePublisher closable = new ClosablePublisher(rsbody);
-                            final RsFull origin = new RsFull(
-                                new RsStatus.ByCode(response.getStatus()).find(),
-                                new ResponseHeaders(response),
-                                Flowable.fromPublisher(closable).map(
-                                    chunk -> {
-                                        final ByteBuffer buf = chunk.getByteBuffer();
-                                        chunk.release();
-                                        return buf;
-                                    }
-                                ).doOnError(error -> Logger.error(this, "Error on pub"))
-                            );
-                            return origin.send(connection).handle(
-                                (nothing, throwable) -> {
-                                    final CompletableFuture<Void> original;
-                                    if (throwable == null) {
-                                        original = CompletableFuture.allOf();
-                                    } else {
-                                        original = new CompletableFuture<>();
-                                        original.completeExceptionally(throwable);
-                                    }
-                                    return closable.close().thenCompose(nthng -> original);
-                                }
-                            ).thenCompose(Function.identity());
-                        }
-                    )
-                )
-            ).singleOrError().to(SingleInterop.get())
+        final Request request = this.buildRequest(headers, new RequestLineFrom(line));
+        final AsyncRequestContent async = new AsyncRequestContent();
+        Flowable.fromPublisher(body).doOnComplete(async::close).forEach(
+            buf -> async.write(buf, Callback.NOOP)
         );
+        final CompletableFuture<Response> res = new CompletableFuture<>();
+        final List<Content.Chunk> buffers = new LinkedList<>();
+        request.body(async).onResponseContentSource(
+            (response, source) -> {
+                // The function (as a Runnable) that reads the response content.
+                final Runnable demander = new Demander(source, response, buffers);
+                // Initiate the reads.
+                demander.run();
+            }
+        ).send(
+            result -> {
+                if (result.getFailure() == null) {
+                    res.complete(
+                        new RsFull(
+                            new RsStatus.ByCode(result.getResponse().getStatus()).find(),
+                            new ResponseHeaders(result.getResponse().getHeaders()),
+                            Flowable.fromIterable(buffers).map(
+                                chunk -> {
+                                    final ByteBuffer item = chunk.getByteBuffer();
+                                    chunk.release();
+                                    return item;
+                                }
+                            )
+                        )
+                    );
+                } else {
+                    res.completeExceptionally(result.getFailure());
+                }
+            }
+        );
+        return new AsyncResponse(res);
     }
 
     /**
-     * Create request.
-     *
-     * @param line Request line.
-     * @param headers Request headers.
-     * @param body Request body.
-     * @return Request built from parameters.
+     * Builds jetty basic request from artipie request line and headers.
+     * @param headers Headers
+     * @param req Artipie request line
+     * @return Jetty request
      */
-    private ReactiveRequest request(
-        final String line,
+    private Request buildRequest(
         final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLineFrom req
     ) {
-        final RequestLineFrom req = new RequestLineFrom(line);
         final String scheme;
         if (this.secure) {
             scheme = "https";
@@ -152,29 +151,14 @@ final class JettyClientSlice implements Slice {
                 .setCustomQuery(uri.getQuery())
                 .toString()
         ).method(req.method().value());
-        Optional<String> type = Optional.empty();
         for (final Map.Entry<String, String> header : headers) {
             request.headers(mutable -> mutable.add(header.getKey(), header.getValue()));
-            if (header.getKey().equalsIgnoreCase("content-type")) {
-                type = Optional.of(header.getValue());
-            }
         }
-        final ReactiveRequest res;
-        if (req.method() == RqMethod.HEAD) {
-            res = ReactiveRequest.newBuilder(request).build();
-        } else {
-            final Flowable<Content.Chunk> content = Flowable.concat(
-                Flowable.fromPublisher(body).map(buffer -> Content.Chunk.from(buffer, false)),
-                Flowable.just(Content.Chunk.from(ByteBuffer.wrap(new byte[]{}), true))
-            );
-            res = ReactiveRequest.newBuilder(request)
-                .content(ReactiveRequest.Content.fromPublisher(content, type.orElse("*"))).build();
-        }
-        return res;
+        return request;
     }
 
     /**
-     * Headers from {@link ReactiveResponse}.
+     * Headers from {@link HttpFields}.
      *
      * @since 0.1
      */
@@ -185,14 +169,91 @@ final class JettyClientSlice implements Slice {
          *
          * @param response Response to extract headers from.
          */
-        ResponseHeaders(final ReactiveResponse response) {
+        ResponseHeaders(final HttpFields response) {
             super(
                 new Headers.From(
-                    response.getHeaders().stream()
+                    response.stream()
                         .map(header -> new Header(header.getName(), header.getValue()))
                         .collect(Collectors.toList())
                 )
             );
+        }
+    }
+
+    /**
+     * Demander.This class reads response content from request asynchronously piece by piece.
+     * See <a href="https://eclipse.dev/jetty/documentation/jetty-12/programming-guide/index.html#pg-client-http-content-response">jetty docs</a>
+     * for more details.
+     * @since 0.3
+     * @checkstyle ReturnCountCheck (500 lines)
+     */
+    @SuppressWarnings("PMD.OnlyOneReturn")
+    private static final class Demander implements Runnable {
+
+        /**
+         * Content source.
+         */
+        private final Content.Source source;
+
+        /**
+         * Response.
+         */
+        private final org.eclipse.jetty.client.Response response;
+
+        /**
+         * Content chunks.
+         */
+        private final List<Content.Chunk> chunks;
+
+        /**
+         * Ctor.
+         * @param source Content source
+         * @param response Response
+         * @param chunks Content chunks for further process
+         */
+        private Demander(
+            final Content.Source source,
+            final org.eclipse.jetty.client.Response response,
+            final List<Content.Chunk> chunks
+        ) {
+            this.source = source;
+            this.response = response;
+            this.chunks = chunks;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                final Content.Chunk chunk = this.source.read();
+                if (chunk == null) {
+                    this.source.demand(this);
+                    return;
+                }
+                if (Content.Chunk.isFailure(chunk)) {
+                    final Throwable failure = chunk.getFailure();
+                    if (chunk.isLast()) {
+                        this.response.abort(failure);
+                        Logger.error(this, failure.getMessage());
+                        return;
+                    } else {
+                        // A transient failure such as a read timeout.
+                        if (new RsStatus.ByCode(this.response.getStatus()).find().success()) {
+                            // Try to read again.
+                            continue;
+                        } else {
+                            // The transient failure is treated as a terminal failure.
+                            this.response.abort(failure);
+                            Logger.error(this, failure.getMessage());
+                            return;
+                        }
+                    }
+                }
+                chunk.retain();
+                this.chunks.add(chunk);
+                if (chunk.isLast()) {
+                    return;
+                }
+            }
         }
     }
 }
