@@ -122,6 +122,15 @@ public final class RepoConfig {
     }
 
     /**
+     * Start repo on http3 version?
+     * @return True if so
+     * @checkstyle MethodNameCheck (5 lines)
+     */
+    public boolean startOnHttp3() {
+        return Boolean.parseBoolean(this.repoYaml().string("http3"));
+    }
+
+    /**
      * Repository path.
      * @return Async string of path
      */

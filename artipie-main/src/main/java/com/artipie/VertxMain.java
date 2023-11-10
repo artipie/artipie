@@ -14,6 +14,9 @@ import com.artipie.http.MainSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
+import com.artipie.http.slice.LoggingSlice;
+import com.artipie.jetty.http3.Http3Server;
+import com.artipie.jetty.http3.SslFactoryFromYaml;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.scheduling.QuartzService;
 import com.artipie.scheduling.ScriptScheduler;
@@ -45,7 +48,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
@@ -90,6 +95,12 @@ public final class VertxMain {
     private final List<VertxSliceServer> servers;
 
     /**
+     * Port and http3 server.
+     * @checkstyle MemberNameCheck (5 lines)
+     */
+    private final Map<Integer, Http3Server> http3;
+
+    /**
      * Ctor.
      *
      * @param http HTTP client
@@ -101,6 +112,7 @@ public final class VertxMain {
         this.config = config;
         this.port = port;
         this.servers = new ArrayList<>(0);
+        this.http3 = new ConcurrentHashMap<>(0);
     }
 
     /**
@@ -202,18 +214,31 @@ public final class VertxMain {
                 repo.port().ifPresentOrElse(
                     prt -> {
                         final String name = new ConfigFile(repo.name()).name();
-                        this.listenOn(
-                            new ArtipieRepositories(
-                                this.http, settings, new JwtTokens(jwt)
-                            ).slice(new Key.From(name), prt),
-                            prt, vertx, settings.metrics()
-                        );
+                        final Slice slice = new ArtipieRepositories(
+                            this.http, settings, new JwtTokens(jwt)
+                        ).slice(new Key.From(name), prt);
+                        if (repo.startOnHttp3()) {
+                            this.http3.computeIfAbsent(
+                                prt, key -> {
+                                    final Http3Server server = new Http3Server(
+                                        new LoggingSlice(slice), prt,
+                                        new SslFactoryFromYaml(repo.repoYaml()).build()
+                                    );
+                                    server.start();
+                                    return server;
+                                }
+                            );
+                        } else {
+                            this.listenOn(slice, prt, vertx, settings.metrics());
+                        }
                         VertxMain.logRepo(prt, name);
                     },
                     () -> VertxMain.logRepo(mport, repo.name())
                 );
             } catch (final IllegalStateException err) {
                 Logger.error(this, "Invalid repo config file %s: %[exception]s", repo.name(), err);
+            } catch (final ArtipieException err) {
+                Logger.error(this, "Failed to start repo %s: %[exception]s", repo.name(), err);
             }
         }
     }
