@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!--
+The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
+https://github.com/artipie/artipie/LICENSE.txt
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.artipie</groupId>
+    <artifactId>artipie</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>vertx-server</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>The Vert.x server</name>
+  <description>A Vert.x which can serve artipie slices</description>
+  <url>https://github.com/artipie/vertx-server</url>
+  <inceptionYear>2020</inceptionYear>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-rx-java2</artifactId>
+    </dependency>
+    <!-- Test only dependencies -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

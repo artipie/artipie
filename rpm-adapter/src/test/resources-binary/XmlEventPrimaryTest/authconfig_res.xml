@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns="http://linux.duke.edu/metadata/common"
+          xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>authconfig</name>
+        <arch>x86_64</arch>
+        <version epoch="0" rel="30.el7" ver="6.2.8"/>
+        <checksum type="sha256" pkgid="YES">
+            5c18d010813f07216eac2bef06a4fdd5febe7ebc469fe45a8c8e1926df0f1ad3
+        </checksum>
+        <summary>Command line tool for setting up authentication from network services</summary>
+        <description>Authconfig is a command line utility which can configure a workstation
+            to use shadow (more secure) passwords. Authconfig can also configure a
+            system to be a client for certain networked user information and
+            authentication schemes.
+        </description>
+        <packager>CentOS BuildSystem &lt;http://bugs.centos.org></packager>
+        <url>https://fedorahosted.org/authconfig</url>
+        <time build="1501837538" file="1501837535"/>
+        <size installed="2316601" archive="0" package="434312"/>
+        <location href="authconfig-6.2.8-30.el7.x86_64.rpm"/>
+        <format>
+            <rpm:license>GPLv2+</rpm:license>
+            <rpm:vendor>CentOS</rpm:vendor>
+            <rpm:group>System Environment/Base</rpm:group>
+            <rpm:buildhost>c1bm.rdu2.centos.org</rpm:buildhost>
+            <rpm:sourcerpm>authconfig-6.2.8-30.el7.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="1384" end="55448"/>
+            <rpm:provides>
+                <rpm:entry name="authconfig" ver="6.2.8" epoch="0" rel="30.el7" flags="EQ"/>
+                <rpm:entry name="authconfig(x86-64)" ver="6.2.8" epoch="0" rel="30.el7" flags="EQ"/>
+                <rpm:entry name="config(authconfig)" ver="6.2.8" epoch="0" rel="30.el7" flags="EQ"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="/bin/sh"/>
+                <rpm:entry name="/usr/bin/openssl"/>
+                <rpm:entry name="/usr/bin/python"/>
+                <rpm:entry name="libpwquality" ver="0.9" epoch="0" flags="GT"/>
+                <rpm:entry name="libresolv.so.2()(64bit)"/>
+                <rpm:entry name="libresolv.so.2(GLIBC_2.2.5)(64bit)"/>
+                <rpm:entry name="newt-python"/>
+                <rpm:entry name="pam" ver="0.99.10.0" epoch="0" flags="GE"/>
+                <rpm:entry name="policycoreutils"/>
+                <rpm:entry name="python"/>
+                <rpm:entry name="python(abi)" ver="2.7" epoch="0" flags="EQ"/>
+                <rpm:entry name="rtld(GNU_HASH)"/>
+                <rpm:entry name="libc.so.6(GLIBC_2.4)(64bit)"/>
+            </rpm:requires>
+            <rpm:conflicts>
+                <rpm:entry name="pam_krb5" ver="1.49" epoch="0" flags="LT"/>
+                <rpm:entry name="samba-common" ver="3.0" epoch="0" flags="LT"/>
+                <rpm:entry name="samba-client" ver="3.0" epoch="0" flags="LT"/>
+                <rpm:entry name="nss_ldap" ver="254" epoch="0" flags="LT"/>
+                <rpm:entry name="sssd" ver="1.15.1" epoch="0" flags="LT"/>
+                <rpm:entry name="freeipa-client" ver="2.2.0" epoch="0" flags="LT"/>
+                <rpm:entry name="ipa-client" ver="2.2.0" epoch="0" flags="LT"/>
+            </rpm:conflicts>
+            <file type="ghost">/etc/pam.d/fingerprint-auth-ac</file>
+            <file type="ghost">/etc/pam.d/password-auth-ac</file>
+            <file type="ghost">/etc/pam.d/postlogin-ac</file>
+            <file type="ghost">/etc/pam.d/smartcard-auth-ac</file>
+            <file type="ghost">/etc/pam.d/system-auth-ac</file>
+            <file>/etc/sysconfig/authconfig</file>
+            <file>/usr/sbin/authconfig</file>
+            <file>/usr/sbin/authconfig-tui</file>
+            <file>/usr/sbin/cacertdir_rehash</file>
+        </format>
+    </package>
+</metadata>

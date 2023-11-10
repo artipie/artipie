@@ -1,0 +1,13 @@
+[requires]
+hiredis/0.14.1
+cryptopp/8.2.0
+zeromq/4.3.3
+czmq/4.2.0
+zmqpp/4.2.0
+cryptopp/8.2.0
+nlohmann_json/3.9.1
+zlib/1.2.11
+
+[generators]
+cmake_find_package
+

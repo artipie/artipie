@@ -1,0 +1,5 @@
+1652247131
+conandata.yml: 478acd43be4704114847cc2bd1379627
+conanfile.py: 10d9bc58aa53b0f63c58049ed78b9957
+export_source/CMakeLists.txt: 5ca76d5197cdfbeb5db0a2333395d799
+export_source/patches/fix-cmake.patch: 393fe4b56496ad42ecaaf4457a2d475f

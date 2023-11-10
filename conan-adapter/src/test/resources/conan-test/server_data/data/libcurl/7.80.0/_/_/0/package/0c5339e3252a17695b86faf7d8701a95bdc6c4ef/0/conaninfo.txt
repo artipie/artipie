@@ -1,0 +1,171 @@
+[settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.version=11
+    os=Linux
+
+[requires]
+    openssl/1.Y.Z
+    zlib/1.Y.Z
+
+[options]
+    fPIC=True
+    shared=False
+    with_brotli=False
+    with_c_ares=False
+    with_ca_bundle=None
+    with_ca_path=None
+    with_cookies=True
+    with_crypto_auth=True
+    with_dict=True
+    with_docs=False
+    with_file=True
+    with_ftp=True
+    with_gopher=True
+    with_http=True
+    with_imap=True
+    with_ipv6=True
+    with_largemaxwritesize=False
+    with_ldap=False
+    with_libidn=False
+    with_libpsl=False
+    with_librtmp=False
+    with_libssh2=False
+    with_mqtt=True
+    with_nghttp2=False
+    with_ntlm=True
+    with_ntlm_wb=True
+    with_pop3=True
+    with_proxy=True
+    with_rtsp=True
+    with_smb=True
+    with_smtp=True
+    with_ssl=openssl
+    with_symbol_hiding=False
+    with_telnet=True
+    with_tftp=True
+    with_threaded_resolver=True
+    with_unix_sockets=True
+    with_verbose_debug=True
+    with_verbose_strings=True
+    with_zlib=True
+    with_zstd=False
+
+[full_settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.version=11
+    os=Linux
+
+[full_requires]
+    openssl/1.1.1o:dfbe50feef7f3c6223a476cd5aeadb687084a646
+    zlib/1.2.12:dfbe50feef7f3c6223a476cd5aeadb687084a646
+
+[full_options]
+    fPIC=True
+    shared=False
+    with_brotli=False
+    with_c_ares=False
+    with_ca_bundle=None
+    with_ca_path=None
+    with_cookies=True
+    with_crypto_auth=True
+    with_dict=True
+    with_docs=False
+    with_file=True
+    with_ftp=True
+    with_gopher=True
+    with_http=True
+    with_imap=True
+    with_ipv6=True
+    with_largemaxwritesize=False
+    with_ldap=False
+    with_libidn=False
+    with_libpsl=False
+    with_librtmp=False
+    with_libssh2=False
+    with_mqtt=True
+    with_nghttp2=False
+    with_ntlm=True
+    with_ntlm_wb=True
+    with_pop3=True
+    with_proxy=True
+    with_rtsp=True
+    with_smb=True
+    with_smtp=True
+    with_ssl=openssl
+    with_symbol_hiding=False
+    with_telnet=True
+    with_tftp=True
+    with_threaded_resolver=True
+    with_unix_sockets=True
+    with_verbose_debug=True
+    with_verbose_strings=True
+    with_zlib=True
+    with_zstd=False
+    openssl:386=False
+    openssl:enable_weak_ssl_ciphers=False
+    openssl:fPIC=True
+    openssl:no_aria=False
+    openssl:no_asm=False
+    openssl:no_async=False
+    openssl:no_bf=False
+    openssl:no_blake2=False
+    openssl:no_camellia=False
+    openssl:no_cast=False
+    openssl:no_chacha=False
+    openssl:no_cms=False
+    openssl:no_comp=False
+    openssl:no_ct=False
+    openssl:no_deprecated=False
+    openssl:no_des=False
+    openssl:no_dgram=False
+    openssl:no_dh=False
+    openssl:no_dsa=False
+    openssl:no_dso=False
+    openssl:no_ec=False
+    openssl:no_ecdh=False
+    openssl:no_ecdsa=False
+    openssl:no_engine=False
+    openssl:no_filenames=False
+    openssl:no_gost=False
+    openssl:no_hmac=False
+    openssl:no_idea=False
+    openssl:no_md4=False
+    openssl:no_md5=False
+    openssl:no_mdc2=False
+    openssl:no_ocsp=False
+    openssl:no_pinshared=False
+    openssl:no_rc2=False
+    openssl:no_rfc3779=False
+    openssl:no_rmd160=False
+    openssl:no_rsa=False
+    openssl:no_seed=False
+    openssl:no_sha=False
+    openssl:no_sm2=False
+    openssl:no_sm3=False
+    openssl:no_sm4=False
+    openssl:no_sock=False
+    openssl:no_srp=False
+    openssl:no_srtp=False
+    openssl:no_sse2=False
+    openssl:no_ssl=False
+    openssl:no_ssl3=False
+    openssl:no_stdio=False
+    openssl:no_tests=False
+    openssl:no_threads=False
+    openssl:no_tls1=False
+    openssl:no_ts=False
+    openssl:no_whirlpool=False
+    openssl:openssldir=None
+    openssl:shared=False
+    zlib:fPIC=True
+    zlib:shared=False
+
+[recipe_hash]
+    533e9c8be46a25525f06ee6aca6a3421
+
+[env]
+

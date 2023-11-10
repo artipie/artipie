@@ -1,0 +1,170 @@
+# WARNING: JMH lock is ignored by user request, make sure no other JMH instances are running
+# JMH version: 1.29
+# VM version: JDK 11.0.11, OpenJDK 64-Bit Server VM, 11.0.11+9-Ubuntu-0ubuntu2.20.04
+# VM invoker: /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+# VM options: -Djmh.ignoreLock=true
+# Blackhole mode: full + dont-inline hint
+# Warmup: 5 iterations, 10 s each
+# Measurement: 20 iterations, 10 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: com.artipie.helm.HelmAstoAddBench.run
+
+# Run progress: 0.00% complete, ETA 00:20:50
+# Fork: 1 of 5
+# Warmup Iteration   1: 60.967 ms/op
+# Warmup Iteration   2: 50.461 ms/op
+# Warmup Iteration   3: 50.350 ms/op
+# Warmup Iteration   4: 50.589 ms/op
+# Warmup Iteration   5: 50.503 ms/op
+Iteration   1: 50.473 ms/op
+Iteration   2: 50.460 ms/op
+Iteration   3: 50.460 ms/op
+Iteration   4: 50.350 ms/op
+Iteration   5: 50.411 ms/op
+Iteration   6: 50.319 ms/op
+Iteration   7: 50.488 ms/op
+Iteration   8: 50.511 ms/op
+Iteration   9: 50.441 ms/op
+Iteration  10: 50.427 ms/op
+Iteration  11: 50.300 ms/op
+Iteration  12: 50.379 ms/op
+Iteration  13: 50.466 ms/op
+Iteration  14: 50.589 ms/op
+Iteration  15: 50.906 ms/op
+Iteration  16: 50.737 ms/op
+Iteration  17: 50.804 ms/op
+Iteration  18: 50.797 ms/op
+Iteration  19: 50.736 ms/op
+Iteration  20: 50.534 ms/op
+
+# Run progress: 20.00% complete, ETA 00:16:45
+# Fork: 2 of 5
+# Warmup Iteration   1: 60.432 ms/op
+# Warmup Iteration   2: 50.868 ms/op
+# Warmup Iteration   3: 50.867 ms/op
+# Warmup Iteration   4: 51.162 ms/op
+# Warmup Iteration   5: 50.844 ms/op
+Iteration   1: 50.729 ms/op
+Iteration   2: 50.652 ms/op
+Iteration   3: 50.950 ms/op
+Iteration   4: 50.875 ms/op
+Iteration   5: 50.770 ms/op
+Iteration   6: 50.679 ms/op
+Iteration   7: 50.806 ms/op
+Iteration   8: 50.859 ms/op
+Iteration   9: 50.619 ms/op
+Iteration  10: 50.638 ms/op
+Iteration  11: 50.490 ms/op
+Iteration  12: 50.569 ms/op
+Iteration  13: 50.502 ms/op
+Iteration  14: 50.665 ms/op
+Iteration  15: 50.700 ms/op
+Iteration  16: 50.671 ms/op
+Iteration  17: 50.665 ms/op
+Iteration  18: 50.641 ms/op
+Iteration  19: 50.746 ms/op
+Iteration  20: 50.634 ms/op
+
+# Run progress: 40.00% complete, ETA 00:12:34
+# Fork: 3 of 5
+# Warmup Iteration   1: 60.683 ms/op
+# Warmup Iteration   2: 51.156 ms/op
+# Warmup Iteration   3: 50.943 ms/op
+# Warmup Iteration   4: 51.088 ms/op
+# Warmup Iteration   5: 51.088 ms/op
+Iteration   1: 51.009 ms/op
+Iteration   2: 50.861 ms/op
+Iteration   3: 50.866 ms/op
+Iteration   4: 50.885 ms/op
+Iteration   5: 50.924 ms/op
+Iteration   6: 50.920 ms/op
+Iteration   7: 50.894 ms/op
+Iteration   8: 50.897 ms/op
+Iteration   9: 51.017 ms/op
+Iteration  10: 50.729 ms/op
+Iteration  11: 50.707 ms/op
+Iteration  12: 50.719 ms/op
+Iteration  13: 50.848 ms/op
+Iteration  14: 50.697 ms/op
+Iteration  15: 50.902 ms/op
+Iteration  16: 50.901 ms/op
+Iteration  17: 50.750 ms/op
+Iteration  18: 50.793 ms/op
+Iteration  19: 50.641 ms/op
+Iteration  20: 50.722 ms/op
+
+# Run progress: 60.00% complete, ETA 00:08:22
+# Fork: 4 of 5
+# Warmup Iteration   1: 60.400 ms/op
+# Warmup Iteration   2: 50.567 ms/op
+# Warmup Iteration   3: 50.313 ms/op
+# Warmup Iteration   4: 50.391 ms/op
+# Warmup Iteration   5: 50.313 ms/op
+Iteration   1: 50.130 ms/op
+Iteration   2: 50.185 ms/op
+Iteration   3: 50.014 ms/op
+Iteration   4: 50.088 ms/op
+Iteration   5: 50.111 ms/op
+Iteration   6: 50.166 ms/op
+Iteration   7: 50.017 ms/op
+Iteration   8: 50.227 ms/op
+Iteration   9: 50.210 ms/op
+Iteration  10: 50.089 ms/op
+Iteration  11: 50.059 ms/op
+Iteration  12: 49.970 ms/op
+Iteration  13: 49.927 ms/op
+Iteration  14: 50.120 ms/op
+Iteration  15: 50.151 ms/op
+Iteration  16: 50.123 ms/op
+Iteration  17: 50.219 ms/op
+Iteration  18: 49.969 ms/op
+Iteration  19: 49.953 ms/op
+Iteration  20: 49.778 ms/op
+
+# Run progress: 80.00% complete, ETA 00:04:11
+# Fork: 5 of 5
+# Warmup Iteration   1: 60.325 ms/op
+# Warmup Iteration   2: 50.525 ms/op
+# Warmup Iteration   3: 50.402 ms/op
+# Warmup Iteration   4: 50.296 ms/op
+# Warmup Iteration   5: 50.390 ms/op
+Iteration   1: 50.344 ms/op
+Iteration   2: 50.266 ms/op
+Iteration   3: 50.149 ms/op
+Iteration   4: 50.236 ms/op
+Iteration   5: 50.252 ms/op
+Iteration   6: 50.192 ms/op
+Iteration   7: 50.218 ms/op
+Iteration   8: 50.125 ms/op
+Iteration   9: 50.047 ms/op
+Iteration  10: 50.030 ms/op
+Iteration  11: 50.016 ms/op
+Iteration  12: 50.192 ms/op
+Iteration  13: 49.842 ms/op
+Iteration  14: 49.912 ms/op
+Iteration  15: 50.249 ms/op
+Iteration  16: 50.270 ms/op
+Iteration  17: 50.100 ms/op
+Iteration  18: 50.121 ms/op
+Iteration  19: 50.179 ms/op
+Iteration  20: 50.011 ms/op
+
+
+Result "com.artipie.helm.HelmAstoAddBench.run":
+  50.454 ±(99.9%) 0.111 ms/op [Average]
+  (min, avg, max) = (49.778, 50.454, 51.017), stdev = 0.328
+  CI (99.9%): [50.343, 50.565] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:20:56
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+Benchmark             Mode  Cnt   Score   Error  Units
+HelmAstoAddBench.run  avgt  100  50.454 ± 0.111  ms/op

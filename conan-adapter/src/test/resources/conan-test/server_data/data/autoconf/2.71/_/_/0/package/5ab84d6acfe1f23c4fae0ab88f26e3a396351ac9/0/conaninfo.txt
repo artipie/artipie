@@ -1,0 +1,28 @@
+[settings]
+
+
+[requires]
+
+
+[options]
+
+
+[full_settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=5
+    os=Linux
+
+[full_requires]
+    m4/1.4.19:24647d9fe8ec489125dfbae4b3ebefaf7581674c
+
+[full_options]
+
+
+[recipe_hash]
+    5f54664379c48aa8bdebe61effc62629
+
+[env]
+

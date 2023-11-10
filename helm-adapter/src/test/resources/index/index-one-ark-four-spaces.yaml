@@ -1,0 +1,22 @@
+generated: '2021-01-11T16:21:01.285921500+03:00'
+entries:
+    ark:
+        -
+            maintainers:
+            - email: d-caruso@hotmail.it
+              name: domcar
+            - email: unguiculus@gmail.com
+              name: unguiculus
+            appVersion: 0.8.2
+            urls:
+                - ark-1.0.1.tgz
+            apiVersion: v1
+            sources:
+                - https://github.com/heptio/ark
+            created: '2021-01-11T16:21:01.461400100+03:00'
+            digest: b2f648cc0e2caad299ad008ecbb1d7330f61cc44cef5020b9de265cdd457a0dd
+            name: ark
+            description: A Helm chart for ark
+            version: 1.0.1
+            home: https://heptio.com/products/#heptio-ark
+apiVersion: v1

@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns="http://linux.duke.edu/metadata/common"
+          xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>systemtap-client</name>
+        <arch>x86_64</arch>
+        <version epoch="0" rel="6.eulerosv2r9" ver="4.1"/>
+        <checksum type="sha256" pkgid="YES">
+            52eb406b7cbee57e49448ccbd069afa07960a59802ef86e01b95df6c209f07ed
+        </checksum>
+        <summary>Programmable system-wide instrumentation system - client</summary>
+        <description>This package contains/requires the components needed to develop
+            systemtap scripts, and compile them using a local systemtap-devel
+            or a remote systemtap-server installation, then run them using a
+            local or remote systemtap-runtime. It includes script samples and
+            documentation, and a copy of the tapset library for reference.
+        </description>
+        <packager>https://euleros.huawei.com/repos</packager>
+        <url>http://sourceware.org/systemtap</url>
+        <time build="1592647618" file="1592647618"/>
+        <size installed="10138772" archive="0" package="2959560"/>
+        <location href="systemtap-client-4.1-6.eulerosv2r9.x86_64.rpm"/>
+        <format>
+            <rpm:license>GPLv2+</rpm:license>
+            <rpm:vendor>HUAWEI TECHNOLOGIES CO.,LTD</rpm:vendor>
+            <rpm:group>Unspecified</rpm:group>
+            <rpm:buildhost>szxrtosci10000</rpm:buildhost>
+            <rpm:sourcerpm>systemtap-4.1-6.eulerosv2r9.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="880" end="171488"/>
+            <rpm:provides>
+                <rpm:entry name="systemtap-client" ver="4.1" epoch="0" rel="6.eulerosv2r9" flags="EQ"/>
+                <rpm:entry name="systemtap-client(x86-64)" ver="4.1" epoch="0" rel="6.eulerosv2r9" flags="EQ"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="/bin/bash"/>
+                <rpm:entry name="/bin/sh"/>
+                <rpm:entry name="/usr/bin/perl"/>
+                <rpm:entry name="coreutils"/>
+                <rpm:entry name="grep"/>
+                <rpm:entry name="libavahi-client.so.3()(64bit)"/>
+                <rpm:entry name="libavahi-common.so.3()(64bit)"/>
+                <rpm:entry name="libdw.so.1()(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.122)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.126)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.127)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.130)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.138)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.142)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.143)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.148)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.149)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.157)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.158)(64bit)"/>
+                <rpm:entry name="libdw.so.1(ELFUTILS_0.167)(64bit)"/>
+                <rpm:entry name="libelf.so.1()(64bit)"/>
+                <rpm:entry name="libelf.so.1(ELFUTILS_1.0)(64bit)"/>
+                <rpm:entry name="libelf.so.1(ELFUTILS_1.3)(64bit)"/>
+                <rpm:entry name="libelf.so.1(ELFUTILS_1.5)(64bit)"/>
+                <rpm:entry name="libgcc_s.so.1()(64bit)"/>
+                <rpm:entry name="libgcc_s.so.1(GCC_3.0)(64bit)"/>
+                <rpm:entry name="libm.so.6()(64bit)"/>
+                <rpm:entry name="libm.so.6(GLIBC_2.2.5)(64bit)"/>
+                <rpm:entry name="libnspr4.so()(64bit)"/>
+                <rpm:entry name="libnss3.so()(64bit)"/>
+                <rpm:entry name="libnss3.so(NSS_3.10)(64bit)"/>
+                <rpm:entry name="libnss3.so(NSS_3.12.5)(64bit)"/>
+                <rpm:entry name="libnss3.so(NSS_3.2)(64bit)"/>
+                <rpm:entry name="libnss3.so(NSS_3.4)(64bit)"/>
+                <rpm:entry name="libnss3.so(NSS_3.5)(64bit)"/>
+                <rpm:entry name="libnss3.so(NSS_3.6)(64bit)"/>
+                <rpm:entry name="libnss3.so(NSS_3.7)(64bit)"/>
+                <rpm:entry name="libnss3.so(NSS_3.9.2)(64bit)"/>
+                <rpm:entry name="libnssutil3.so()(64bit)"/>
+                <rpm:entry name="libplc4.so()(64bit)"/>
+                <rpm:entry name="libplds4.so()(64bit)"/>
+                <rpm:entry name="libpthread.so.0()(64bit)"/>
+                <rpm:entry name="libpthread.so.0(GLIBC_2.2.5)(64bit)"/>
+                <rpm:entry name="libreadline.so.8()(64bit)"/>
+                <rpm:entry name="librpm.so.9()(64bit)"/>
+                <rpm:entry name="librpmio.so.9()(64bit)"/>
+                <rpm:entry name="libsmime3.so()(64bit)"/>
+                <rpm:entry name="libsmime3.so(NSS_3.4)(64bit)"/>
+                <rpm:entry name="libsqlite3.so.0()(64bit)"/>
+                <rpm:entry name="libssl3.so()(64bit)"/>
+                <rpm:entry name="libssl3.so(NSS_3.12.6)(64bit)"/>
+                <rpm:entry name="libssl3.so(NSS_3.2)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6()(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(CXXABI_1.3)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(CXXABI_1.3.5)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(CXXABI_1.3.8)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(CXXABI_1.3.9)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.11)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.15)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.17)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.18)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.20)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.21)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.22)(64bit)"/>
+                <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.9)(64bit)"/>
+                <rpm:entry name="mokutil"/>
+                <rpm:entry name="openssh-clients"/>
+                <rpm:entry name="rtld(GNU_HASH)"/>
+                <rpm:entry name="sed"/>
+                <rpm:entry name="systemtap-runtime" ver="4.1" epoch="0" rel="6.eulerosv2r9" flags="EQ"/>
+                <rpm:entry name="unzip"/>
+                <rpm:entry name="zip"/>
+                <rpm:entry name="libc.so.6(GLIBC_2.27)(64bit)"/>
+            </rpm:requires>
+            <file>/usr/bin/stap</file>
+            <file>/usr/bin/stap-prep</file>
+            <file>/usr/bin/stap-report</file>
+        </format>
+    </package>
+</metadata>

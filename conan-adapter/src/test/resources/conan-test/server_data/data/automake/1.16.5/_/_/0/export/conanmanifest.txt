@@ -1,0 +1,17 @@
+1654987272
+conandata.yml: c5a27866586392eeeabd7ff790f9e834
+conanfile.py: 7460955a7102ddf5485fa4a4260a41d0
+export_source/patches/0001-help2man-no-discard-stderr-0.16.1.patch: 9a63fee639a1e94c22b1e18bd5169fde
+export_source/patches/0001-help2man-no-discard-stderr-0.16.2.patch: a103278148fe15ea6d576ed96269f310
+export_source/patches/0001-help2man-no-discard-stderr-0.16.3.patch: a4868e0f65d96eecc7aaf89c2b9ce699
+export_source/patches/0001-help2man-no-discard-stderr-0.16.4.patch: 6ec0c7714b84d8de9d7b4b360fb23a77
+export_source/patches/0002-no-perl-path-in-shebang-0.16.1.patch: 1273d57355516accf5e15c33a2e487d4
+export_source/patches/0002-no-perl-path-in-shebang-0.16.2.patch: 12efc667537f4a751ceaa0b94a38be16
+export_source/patches/0002-no-perl-path-in-shebang-0.16.3.patch: 8d68c2720519c087fe7acf51fff1be19
+export_source/patches/0002-no-perl-path-in-shebang-0.16.4.patch: 06d7d5e1721c8f63b80ef6ff35f394c4
+export_source/patches/0003-remove-embedded-datadirs-introduce-automake-conan-includes-0.16.1.patch: 43f5b4fc512181523ef5a0e548da4dfd
+export_source/patches/0003-remove-embedded-datadirs-introduce-automake-conan-includes-0.16.2.patch: 18c6bd911a43d05b01cdd0fc145eb4d5
+export_source/patches/0003-remove-embedded-datadirs-introduce-automake-conan-includes-0.16.3.patch: 7793dd544442089316478944f9cc4f73
+export_source/patches/0004-introduce-automake_perllibdir-0.16.1.patch: feba7208b970dc92d7062273e91ab335
+export_source/patches/0004-introduce-automake_perllibdir-0.16.2.patch: c630d0f88f0fec519005e5f4432c2a4e
+export_source/patches/0004-introduce-automake_perllibdir-0.16.3.patch: 5e5c523710de1ba94549cedf095801c2

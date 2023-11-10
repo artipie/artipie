@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://linux.duke.edu/metadata/common" xmlns:rpm="http://linux.duke.edu/metadata/rpm" packages="-1">
+<package type="rpm">
+  <name>aom</name>
+  <arch>aarch64</arch>
+  <version epoch="0" ver="1.0.0" rel="8.20190810git9666276.el8"/>
+  <checksum type="sha256" pkgid="YES">7eaefd1cb4f9740558da7f12f9cb5a6141a47f5d064a98d46c29959869af1a44</checksum>
+  <summary>Royalty-free next-generation video format</summary>
+  <description>The Alliance for Open Media's focus is to deliver a next-generation
+video format that is:
+
+ - Interoperable and open;
+ - Optimized for the Internet;
+ - Scalable to any modern device at any bandwidth;
+ - Designed with a low computational footprint and optimized for hardware;
+ - Capable of consistent, highest-quality, real-time video delivery; and
+ - Flexible for both commercial and non-commercial content, including
+   user-generated content.
+
+This package contains the reference encoder and decoder.</description>
+  <packager>Fedora Project</packager>
+  <url>http://aomedia.org/</url>
+  <time file="1583929109" build="1565445971"/>
+  <size package="215876" installed="832964" archive="835132"/>
+  <location href="aom-1.0.0-8.20190810git9666276.el8.aarch64.rpm"/>
+  <format>
+    <rpm:license>BSD</rpm:license>
+    <rpm:vendor>Fedora Project</rpm:vendor>
+    <rpm:group>Unspecified</rpm:group>
+    <rpm:buildhost>buildvm-aarch64-12.arm.fedoraproject.org</rpm:buildhost>
+    <rpm:sourcerpm>aom-1.0.0-8.20190810git9666276.el8.src.rpm</rpm:sourcerpm>
+    <rpm:header-range start="4504" end="11024"/>
+    <rpm:provides>
+      <rpm:entry name="aom" flags="EQ" epoch="0" ver="1.0.0" rel="8.20190810git9666276.el8"/>
+      <rpm:entry name="aom(aarch-64)" flags="EQ" epoch="0" ver="1.0.0" rel="8.20190810git9666276.el8"/>
+      <rpm:entry name="av1" flags="EQ" epoch="0" ver="1.0.0" rel="8.20190810git9666276.el8"/>
+    </rpm:provides>
+    <rpm:requires>
+      <rpm:entry name="ld-linux-aarch64.so.1()(64bit)"/>
+      <rpm:entry name="ld-linux-aarch64.so.1(GLIBC_2.17)(64bit)"/>
+      <rpm:entry name="libaom(aarch-64)" flags="EQ" epoch="0" ver="1.0.0" rel="8.20190810git9666276.el8"/>
+      <rpm:entry name="libaom.so.0()(64bit)"/>
+      <rpm:entry name="libgcc_s.so.1()(64bit)"/>
+      <rpm:entry name="libgcc_s.so.1(GCC_3.0)(64bit)"/>
+      <rpm:entry name="libm.so.6()(64bit)"/>
+      <rpm:entry name="libm.so.6(GLIBC_2.17)(64bit)"/>
+      <rpm:entry name="libpthread.so.0()(64bit)"/>
+      <rpm:entry name="libpthread.so.0(GLIBC_2.17)(64bit)"/>
+      <rpm:entry name="libstdc++.so.6()(64bit)"/>
+      <rpm:entry name="libstdc++.so.6(CXXABI_1.3)(64bit)"/>
+      <rpm:entry name="libstdc++.so.6(CXXABI_1.3.8)(64bit)"/>
+      <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4)(64bit)"/>
+      <rpm:entry name="libstdc++.so.6(GLIBCXX_3.4.15)(64bit)"/>
+      <rpm:entry name="rtld(GNU_HASH)"/>
+      <rpm:entry name="libc.so.6(GLIBC_2.17)(64bit)"/>
+    </rpm:requires>
+    <file>/usr/bin/aomdec</file>
+    <file>/usr/bin/aomenc</file>
+  </format>
+</package>
+</metadata>

@@ -1,0 +1,19 @@
+{
+  "packages" : {
+    "pickleshare-0.7.4-py35hd57304d_0.tar.bz2": {
+      "build": "py35hd57304d_0",
+      "build_number": 0,
+      "depends": [
+        "python >=3.5,<3.6.0a0"
+      ],
+      "license": "MIT",
+      "md5": "d044a0b9f019284d70210383ba23f065",
+      "name": "pickleshare",
+      "sha256": "be7a8551c80718e5d6504f7a36d954aea4a0848528f666e3b35e133002a6ebc4",
+      "size": 11731,
+      "subdir": "linux-64",
+      "timestamp": 1505690128538,
+      "version": "0.7.4"
+    }
+  }
+}

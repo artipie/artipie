@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<otherdata xmlns="http://linux.duke.edu/metadata/other" packages="3">
+<package pkgid="7eaefd1cb4f9740558da7f12f9cb5a6141a47f5d064a98d46c29959869af1a44" name="aom" arch="aarch64">
+  <version epoch="0" ver="1.0.0" rel="8.20190810git9666276.el8"/>
+  <changelog author="Robert-Andr&#xE9; Mauchin &lt;zebob.m@gmail.com&gt; - 1.0.0-1" date="1520424000">- First RPM release</changelog>
+  <changelog author="Fedora Release Engineering &lt;releng@fedoraproject.org&gt; - 1.0.0-2" date="1531396800">- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild</changelog>
+  <changelog author="Robert-Andr&#xE9; Mauchin &lt;zebob.m@gmail.com&gt; - 1.0.0-3" date="1536667200">- Update the archive in order to detect the correct version from the changelog</changelog>
+  <changelog author="Robert-Andr&#xE9; Mauchin &lt;zebob.m@gmail.com&gt; - 1.0.0-4" date="1536840000">- Split the package into libs/tools</changelog>
+  <changelog author="Robert-Andr&#xE9; Mauchin &lt;zebob.m@gmail.com&gt; - 1.0.0-5.20180925gitd0076f5" date="1537876800">- Update to commit d0076f507a6027455540e2e4f25f84ca38803e07
+- Set CONFIG_LOWBITDEPTH to 1
+- Fix #1632658</changelog>
+  <changelog author="Fedora Release Engineering &lt;releng@fedoraproject.org&gt; - 1.0.0-6.20180925gitd0076f5" date="1548936000">- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild</changelog>
+  <changelog author="Fedora Release Engineering &lt;releng@fedoraproject.org&gt; - 1.0.0-7.20180925gitd0076f5" date="1563969600">- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild</changelog>
+  <changelog author="Robert-Andr&#xE9; Mauchin &lt;zebob.m@gmail.com&gt; - 1.0.0-8.20190810git9666276" date="1565372723">- Update to commit 9666276accea505cd14cbcb9e3f7ff5033da9172</changelog>
+</package>
+<package pkgid="54f1d9a1114fa85cd748174c57986004857b800fe9545fbf23af53f4791b31e2" name="nginx" arch="x86_64">
+  <version epoch="1" ver="1.16.1" rel="1.el8.ngx"/>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1538481600">- 1.15.5</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1541505600">- 1.15.6
+- Fixes CVE-2018-16843
+- Fixes CVE-2018-16844
+- Fixes CVE-2018-16845</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1543320000">- 1.15.7</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1545739200">- 1.15.8</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1551182400">- 1.15.9</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1553601600">- 1.15.10</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1554811200">- 1.15.11</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1555416000">- 1.15.12</changelog>
+  <changelog author="Konstantin Pavlov &lt;thresh@nginx.com&gt;" date="1556020800">- 1.16.0</changelog>
+  <changelog author="Andrei Belov &lt;defan@nginx.com&gt;" date="1565697600">- 1.16.1</changelog>
+</package>
+</otherdata>

@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns="http://linux.duke.edu/metadata/common" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>python3-pyasn1</name>
+        <arch>noarch</arch>
+        <version epoch="0" rel="8.eulerosv2r9" ver="0.3.7"/>
+        <checksum type="sha256" pkgid="YES">69b56a971f5a297e9284ec64233bb78f523afadbadb8b9deeb32be2be3aa7ab7</checksum>
+        <summary>Pyasn1 in python 3</summary>
+        <description>Pyasn1 in python 3.</description>
+        <packager>https://euleros.huawei.com/repos</packager>
+        <url>http://pyasn1.sourceforge.net/</url>
+        <time build="1640768426" file="1640768426"/>
+        <size installed="1208408" archive="0" package="228224"/>
+        <location href="python3-pyasn1-0.3.7-8.eulerosv2r9.noarch.rpm"/>
+        <format>
+            <rpm:license>BSD</rpm:license>
+            <rpm:vendor>HUAWEI TECHNOLOGIES CO.,LTD</rpm:vendor>
+            <rpm:group>Unspecified</rpm:group>
+            <rpm:buildhost>szxrtosci10000</rpm:buildhost>
+            <rpm:sourcerpm>python-pyasn1-0.3.7-8.eulerosv2r9.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="880" end="37184"/>
+            <rpm:provides>
+                <rpm:entry name="python-modules" ver="0.3.7" epoch="0" rel="8.eulerosv2r9" flags="EQ"/>
+                <rpm:entry name="python-pyasn1" ver="0.3.7" epoch="0" rel="8.eulerosv2r9" flags="EQ"/>
+                <rpm:entry name="python3-pyasn1" ver="0.3.7" epoch="0" rel="8.eulerosv2r9" flags="EQ"/>
+                <rpm:entry name="python3-pyasn1-modules"/>
+                <rpm:entry name="python3.7dist(pyasn1)" ver="0.3.7" epoch="0" flags="EQ"/>
+                <rpm:entry name="python3.7dist(pyasn1-modules)" ver="0.1.5" epoch="0" flags="EQ"/>
+                <rpm:entry name="python3dist(pyasn1)" ver="0.3.7" epoch="0" flags="EQ"/>
+                <rpm:entry name="python3dist(pyasn1-modules)" ver="0.1.5" epoch="0" flags="EQ"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="python(abi)" ver="3.7" epoch="0" flags="EQ"/>
+            </rpm:requires>
+            <rpm:obsoletes>
+                <rpm:entry name="python-modules" ver="0.3.7" epoch="0" rel="8.eulerosv2r9" flags="LT"/>
+                <rpm:entry name="python-pyasn1" ver="0.3.7" epoch="0" rel="8.eulerosv2r9" flags="LT"/>
+                <rpm:entry name="python3-pyasn1-modules"/>
+            </rpm:obsoletes>
+            <file>/etc/ima/digest_lists.sig/0-metadata_list-compact-python3-pyasn1-0.3.7-8.eulerosv2r9.noarch.sig</file>
+            <file>/etc/ima/digest_lists.tlv/0-metadata_list-compact_tlv-python3-pyasn1-0.3.7-8.eulerosv2r9.noarch</file>
+            <file>/etc/ima/digest_lists/0-metadata_list-compact-python3-pyasn1-0.3.7-8.eulerosv2r9.noarch</file>
+        </format>
+    </package>
+</metadata>

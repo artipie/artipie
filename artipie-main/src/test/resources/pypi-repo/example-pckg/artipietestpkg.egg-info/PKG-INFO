@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: artipietestpkg
+Version: 0.0.3
+Summary: A small example package for the integration test of Artipie
+Home-page: https://github.com/artemlazarev/pypi-adapter
+Author: Artem Lazarev
+Author-email: artem.lazarev@gmail.com
+License: UNKNOWN
+Description: # Example Package
+        for integration test of Artipie project
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 2.7
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=2.6
+Description-Content-Type: text/markdown

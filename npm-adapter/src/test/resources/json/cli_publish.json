@@ -1,0 +1,48 @@
+{
+  "_id":"@hello/simple-npm-project",
+  "name":"@hello/simple-npm-project",
+  "description":"",
+  "dist-tags":{
+    "latest":"1.0.1"
+  },
+  "versions":{
+    "1.0.1":{
+      "name":"@hello/simple-npm-project",
+      "version":"1.0.1",
+      "description":"",
+      "main":"index.js",
+      "scripts":{
+        "test":"echo \"Error: no test specified\" && exit 1"
+      },
+      "author":"",
+      "license":"ISC",
+      "readme":"ERROR: No README data found!",
+      "_id":"@hello/simple-npm-project@1.0.1",
+      "_nodeVersion":"14.15.0",
+      "_npmVersion":"6.14.8",
+      "maintainers":[
+        {
+
+        }
+      ],
+      "dist":{
+        "integrity":"sha512-BzGfRpCCjNChOS9X+osLM1l0sbYtFtXRbsCHOI2Q9hNothBbmWYofMGp5zyxwa4IXtcmK2eYifUudzicfdZrbw==",
+        "shasum":"88068462ce206e94be902b6881105be2aa2da933",
+        "tarball":"http://host.testcontainers.internal:65533/@hello/simple-npm-project/-/@hello/simple-npm-project-1.0.1.tgz"
+      }
+    }
+  },
+  "readme":"ERROR: No README data found!",
+  "maintainers":[
+    {
+
+    }
+  ],
+  "_attachments":{
+    "@hello/simple-npm-project-1.0.1.tgz":{
+      "content_type":"application/octet-stream",
+      "data":"H4sIAAAAAAAAA+2VTUvEMBCG99xfMeSwKLjdhNoW1osggp697qWk4zZrmoQkqwuy/930Q4VF8aBVhDyXSd6ZZCaHmZiKP1QbXApV4z7dutkEUErLsoSP9J7sHGZZXlDGioKGNWW0zFiwUxRzzM75yoZSvnvP8BR4s/8ErpXTElOpNyfkBqXU8KStrMnpRfLXtUWmx4z9P9owAbT66Rxf9H+W5cf9z/K8iP3/GzwnAERVLZIVkMumGwBLJ1ojcaFMuzBWb5F7ctaFPaJ1QqsukqU0ZYNao+NWGD96BrGtRL97/VYGdQh0wdGlDYJH57sw5I2GNbm2VtsVKA2dA5xBLu4F1msC8zngXnhgJJw89LdVO99o+55TCo7K9Q+5vbsiySEOsEgkEvmcFxgilRYADAAA",
+      "length":306
+    }
+  }
+}

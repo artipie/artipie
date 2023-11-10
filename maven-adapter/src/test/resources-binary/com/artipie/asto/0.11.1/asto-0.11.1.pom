@@ -1,0 +1,219 @@
+<?xml version="1.0"?>
+<!--
+The MIT License (MIT)
+
+Copyright (c) 2020 artipie.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <properties>
+    <rxjava.version>3.0.0-RC6</rxjava.version>
+  </properties>
+  <parent>
+    <groupId>com.jcabi</groupId>
+    <artifactId>parent</artifactId>
+    <version>0.49.5</version>
+  </parent>
+  <groupId>com.artipie</groupId>
+  <artifactId>asto</artifactId>
+  <version>0.11.1</version>
+  <packaging>jar</packaging>
+  <name>asto</name>
+  <description>A simple Java storage</description>
+  <url>https://github.com/artipie/asto</url>
+  <inceptionYear>2019</inceptionYear>
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>https://github.com/artipie/asto/blob/master/LICENSE.txt</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>1</id>
+      <name>Yegor Bugayenko</name>
+      <email>yegor256@gmail.com</email>
+      <organization>yegor256.com</organization>
+      <organizationUrl>https://www.yegor256.com</organizationUrl>
+      <roles>
+        <role>Architect</role>
+        <role>Developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/artipie/asto/issues</url>
+  </issueManagement>
+  <scm>
+    <connection>scm:git:git@github.com:artipie/asto.git</connection>
+    <developerConnection>scm:git:git@github.com:artipie/asto.git</developerConnection>
+    <url>https://github.com/artipie/asto</url>
+  </scm>
+  <ciManagement>
+    <system>rultor</system>
+    <url>https://www.rultor.com/s/asto</url>
+  </ciManagement>
+  <distributionManagement>
+    <site>
+      <id>github-pages</id>
+      <url>https://github.com/artipie/asto</url>
+    </site>
+  </distributionManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.jcabi</groupId>
+      <artifactId>jcabi-log</artifactId>
+      <version>0.18.1</version>
+    </dependency>
+    <dependency>
+      <groupId>io.reactivex.rxjava3</groupId>
+      <artifactId>rxjava</artifactId>
+      <version>${rxjava.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.akarnokd</groupId>
+      <artifactId>rxjava3-jdk8-interop</artifactId>
+      <version>${rxjava.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.21</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <testDirectory>${build.directory}/tests</testDirectory>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>9</source>
+          <target>9</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <parallel>none</parallel>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <source>8</source>
+        </configuration>
+      </plugin>
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>2.7</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.1.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+  <profiles>
+    <profile>
+      <id>qulice</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.qulice</groupId>
+            <artifactId>qulice-maven-plugin</artifactId>
+            <version>0.18.19</version>
+            <configuration>
+              <excludes combine.children="append">
+                <exclude>findbugs:.*</exclude>
+                <exclude>duplicatefinder:.*</exclude>
+                <exclude>xml:/src/it/settings.xml</exclude>
+                <exclude>dependencies:.*</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>gpg-sign</id>
+      <activation>
+        <property>
+          <name>gpg.keyname</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>jcabi-sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

@@ -1,0 +1,41 @@
+{
+   "name":"@hello/simple-npm-project",
+   "time":{
+      "created":"2021-02-04T07:38:44.0757469",
+      "modified":"2021-02-04T07:38:44.9975437",
+      "1.0.2":"2021-02-04T07:38:44.9975437"
+   },
+   "users":{
+   },
+   "versions":{
+      "1.0.2":{
+         "name":"@hello/simple-npm-project",
+         "version":"1.0.2",
+         "description":"New version",
+         "main":"index.js",
+         "scripts":{
+            "test":"echo \"Error: no test specified\" && exit 1"
+         },
+         "author":"",
+         "license":"ISC",
+         "readme":"ERROR: No README data found!",
+         "_id":"@hello/simple-npm-project@1.0.2",
+         "_nodeVersion":"14.15.0",
+         "_npmVersion":"6.14.8",
+         "maintainers":[
+            {
+            }
+         ],
+         "dist":{
+            "integrity":"sha512-HHERcSxBqQTyckMsbk+luPsv66OaaHchODGE/+jRZlPoG2wl6BoJzAZd3l/3EKWUOm3B09a4JU5NWf3bog8bJA==",
+            "shasum":"3efd3e7ba0a607e6925e255def99eeb41feae6a8",
+            "tarball":"/@hello/simple-npm-project/-/@hello/simple-npm-project-1.0.2.tgz"
+         }
+      }
+   },
+   "_id":"@hello/simple-npm-project",
+   "readme":"ERROR: No README data found!",
+   "dist-tags":{
+      "latest":"1.0.2"
+   }
+}
