@@ -32,8 +32,7 @@ SOFTWARE.
     <artifactId>artipie-main</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <jettyVersion>12.0.3</jettyVersion>
         <docker.image.name>artipie/artipie</docker.image.name>
     </properties>
     <dependencies>
@@ -153,6 +152,11 @@ SOFTWARE.
             <artifactId>jruby</artifactId>
             <version>9.4.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.http3</groupId>
+            <artifactId>jetty-http3-server</artifactId>
+            <version>${jettyVersion}</version>
+        </dependency>
         <!--        adapters      -->
         <dependency>
             <groupId>com.artipie</groupId>
@@ -193,8 +197,8 @@ SOFTWARE.
         <dependency>
             <groupId>com.artipie</groupId>
             <artifactId>gem-adapter</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>v1.3.7</version>
+<!--            <scope>compile</scope>-->
         </dependency>
         <dependency>
             <groupId>com.artipie</groupId>
