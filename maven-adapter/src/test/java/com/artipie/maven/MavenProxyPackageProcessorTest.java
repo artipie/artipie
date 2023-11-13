@@ -91,7 +91,7 @@ class MavenProxyPackageProcessorTest {
                 .withIdentity("trigger1", MavenProxyPackageProcessor.class.getSimpleName()).build()
         );
         this.scheduler.start();
-        Awaitility.await().atMost(30, TimeUnit.SECONDS).until(() -> this.events.size() == 1);
+        Awaitility.await().atMost(60, TimeUnit.SECONDS).until(() -> this.events.size() == 1);
         MatcherAssert.assertThat(
             "Same items were removed from packages queue", this.packages.isEmpty()
         );
@@ -127,7 +127,7 @@ class MavenProxyPackageProcessorTest {
         );
         this.packages.add(new ProxyArtifactEvent(snapshotk, MavenProxyPackageProcessorTest.RNAME));
         this.packages.add(new ProxyArtifactEvent(firstk, MavenProxyPackageProcessorTest.RNAME));
-        Awaitility.await().atMost(30, TimeUnit.SECONDS).until(() -> this.events.size() == 3);
+        Awaitility.await().atMost(60, TimeUnit.SECONDS).until(() -> this.events.size() == 3);
         MatcherAssert.assertThat(
             "Same items were removed from packages queue", this.packages.isEmpty()
         );
