@@ -31,18 +31,8 @@ jobs:
         with:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
-      - name: Build vertx-server
-        run: mvn -B install -DskipTests
-        working-directory: vertx-server
-      - name: Build http-client
-        run: mvn -B install -DskipTests
-        working-directory: http-client
-      - name: Build files-adapter
-        run: mvn -B install -DskipTests
-        working-directory: files-adapter
       - name: Set version
         run: mvn -B versions:set -DnewVersion=${{ steps.split.outputs._1 }} versions:commit
-        working-directory: ${{steps.split.outputs._0}}
       - name: Create settings.xml
         uses: whelk-io/maven-settings-xml-action@v15
         with:
@@ -64,8 +54,13 @@ jobs:
                 }
               }
             ]
-      - name: Deploy artifacts
-        run: mvn deploy -Partipie,publish,sonatype,gpg-sign -DskipITs --errors
+      - run: mvn -B install -DskipTests
+        working-directory: vertx-server
+      - run: mvn -B install -DskipTests
+        working-directory: http-client
+      - run: mvn -B install -DskipTests
+        working-directory: files-adapter
+      - run: mvn deploy -Partipie,publish,sonatype,gpg-sign -DskipITs --errors
         working-directory: ${{steps.split.outputs._0}}
       - name: Create Github Release
         id: create_release
