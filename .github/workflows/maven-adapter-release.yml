@@ -61,12 +61,7 @@ jobs:
           restore-keys: |
             ubuntu-latest-jdk-${{steps.split.outputs._2}}-maven-
       - run: mvn -B install -DskipTests
-        working-directory: vertx-server
-      - run: mvn -B install -DskipTests
-        working-directory: http-client
-      - run: mvn -B install -DskipTests
-        working-directory: files-adapter
-      - run: mvn deploy -Partipie,publish,sonatype,gpg-sign -DskipITs --errors
+      - run: mvn deploy -Partipie,publish,sonatype,gpg-sign -DskipTests --errors
         working-directory: ${{steps.split.outputs._0}}
       - name: Create Github Release
         id: create_release
