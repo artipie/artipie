@@ -52,7 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artipie-main/target/artipie-latest-jar-with-dependencies.jar
+          asset_path: ./artipie-main/target/artipie-main-latest-jar-with-dependencies.jar
           asset_name: artipie-${{ env.RELEASE_VERSION }}-jar-with-dependencies.jar
           asset_content_type: application/jar
           working-directory: artipie-main
