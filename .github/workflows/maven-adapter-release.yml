@@ -54,6 +54,12 @@ jobs:
                 }
               }
             ]
+      - uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ubuntu-latest-jdk-${{steps.split.outputs._2}}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ubuntu-latest-jdk-${{steps.split.outputs._2}}-maven-
       - run: mvn -B install -DskipTests
         working-directory: vertx-server
       - run: mvn -B install -DskipTests

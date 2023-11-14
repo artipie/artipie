@@ -27,10 +27,11 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - run: mvn versions:set -DnewVersion=${{ env.RELEASE_VERSION }}
       - run: mvn install -DskipTests
-      - run: mvn -B deploy -Pdocker -Ddocker.image.name=${{ secrets.DOCKERHUB_REPO }}
+      - run: mvn -B deploy -Pdocker-build -Ddocker.image.name=${{ secrets.DOCKERHUB_REPO }} -DskipTests
         working-directory: artipie-main
       - run: mvn versions:set -DnewVersion=latest
-      - run: mvn -B deploy -Pdocker -Ddocker.image.name=${{ secrets.DOCKERHUB_REPO }}
+      - run: mvn install -DskipTests
+      - run: mvn -B deploy -Pdocker-build -Ddocker.image.name=${{ secrets.DOCKERHUB_REPO }} -DskipTests
         working-directory: artipie-main
       - run: mvn package -Pjar-build -DskipTests
         working-directory: artipie-main
