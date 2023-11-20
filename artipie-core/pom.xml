@@ -98,35 +98,12 @@
       <version>4.3.2.1</version>
       <scope>test</scope>
     </dependency>
-
-    <!--<dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>vertx-server</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>-->
-    <!--<dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <scope>test</scope>
-    </dependency>-->
-    <!--<dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <scope>test</scope>
-    </dependency>-->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.32</version>
       <scope>test</scope>
     </dependency>
-    <!--<dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-params</artifactId>
-      <version>${junit-platform.version}</version>
-      <scope>test</scope>
-    </dependency>-->
     <dependency>
       <groupId>org.llorllale</groupId>
       <artifactId>cactoos-matchers</artifactId>
@@ -157,18 +134,6 @@
       <version>10.0.15</version>
       <scope>test</scope>
     </dependency>
-    <!--<dependency>
-      <groupId>wtf.g4s8</groupId>
-      <artifactId>matchers-json</artifactId>
-      <version>1.4.0</version>
-      <scope>test</scope>
-    </dependency>-->
-    <!--<dependency>
-      <groupId>org.awaitility</groupId>
-      <artifactId>awaitility</artifactId>
-      <version>4.2.0</version>
-      <scope>test</scope>
-    </dependency>-->
     <!-- integration tests -->
     <dependency>
       <groupId>org.apache.httpcomponents.client5</groupId>
@@ -183,13 +148,12 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire.version}</version>
+        <version>3.1.2</version>
         <dependencies>
           <dependency>
             <groupId>org.junit.jupiter</groupId>
