@@ -150,11 +150,7 @@
   </dependencies>
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-      </plugin>
-      <plugin>
+      <!--<plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.1.2</version>
@@ -171,23 +167,23 @@
           </dependency>
         </dependencies>
         <executions>
-          <!-- FIXME: reactive TCK tests are not executed for multipart processor -->
-          <!-- <execution> -->
-          <!--   <id>surefire-testng</id> -->
-          <!--   <phase>test</phase> -->
-          <!--   <goals> -->
-          <!--     <goal>test</goal> -->
-          <!--   </goals> -->
-          <!--   <configuration> -->
-          <!--     <skip>false</skip> -->
-          <!--     <includes> -->
-          <!--       <include>com.artipie.http.rq.multipart.MultipartTckTest</include> -->
-          <!--       <include>com.artipie.http.rq.multipart.MultipartsTckTest</include> -->
-          <!--     </includes> -->
-          <!--     <junitArtifactName>none:none</junitArtifactName> -->
-          <!--   </configuration> -->
-          <!-- </execution> -->
-          <!--<execution>
+          &lt;!&ndash; FIXME: reactive TCK tests are not executed for multipart processor &ndash;&gt;
+          &lt;!&ndash; <execution> &ndash;&gt;
+          &lt;!&ndash;   <id>surefire-testng</id> &ndash;&gt;
+          &lt;!&ndash;   <phase>test</phase> &ndash;&gt;
+          &lt;!&ndash;   <goals> &ndash;&gt;
+          &lt;!&ndash;     <goal>test</goal> &ndash;&gt;
+          &lt;!&ndash;   </goals> &ndash;&gt;
+          &lt;!&ndash;   <configuration> &ndash;&gt;
+          &lt;!&ndash;     <skip>false</skip> &ndash;&gt;
+          &lt;!&ndash;     <includes> &ndash;&gt;
+          &lt;!&ndash;       <include>com.artipie.http.rq.multipart.MultipartTckTest</include> &ndash;&gt;
+          &lt;!&ndash;       <include>com.artipie.http.rq.multipart.MultipartsTckTest</include> &ndash;&gt;
+          &lt;!&ndash;     </includes> &ndash;&gt;
+          &lt;!&ndash;     <junitArtifactName>none:none</junitArtifactName> &ndash;&gt;
+          &lt;!&ndash;   </configuration> &ndash;&gt;
+          &lt;!&ndash; </execution> &ndash;&gt;
+          &lt;!&ndash;<execution>
             <id>surefire-junit</id>
             <phase>test</phase>
             <goals>
@@ -201,9 +197,9 @@
               </excludes>
               <testNGArtifactName>none:none</testNGArtifactName>
             </configuration>
-          </execution>-->
+          </execution>&ndash;&gt;
         </executions>
-      </plugin>
+      </plugin>-->
     </plugins>
   </build>
 
