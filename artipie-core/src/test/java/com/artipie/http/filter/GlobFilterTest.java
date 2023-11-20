@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
- * https://github.com/artipie/http/blob/master/LICENSE.txt
+ * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
 package com.artipie.http.filter;
 
@@ -64,10 +64,7 @@ class GlobFilterTest {
         final Filter filter = new FilterFactoryLoader().newObject(
             "glob",
             Yaml.createYamlMappingBuilder()
-                .add(
-                    "filter",
-                    "**/com/artipie/**/*"
-                ).build()
+                .add("filter", "**/com/artipie/**/*").build()
         );
         MatcherAssert.assertThat(
             filter.check(
@@ -83,10 +80,7 @@ class GlobFilterTest {
         final Filter filter = new FilterFactoryLoader().newObject(
             "glob",
             Yaml.createYamlMappingBuilder()
-                .add(
-                    "filter",
-                    "**/com/artipie/**/*.pom"
-                ).build()
+                .add("filter", "**/com/artipie/**/*.pom").build()
         );
         MatcherAssert.assertThat(
             filter.check(

@@ -6,7 +6,7 @@
 [![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
 
 [![Javadoc](http://www.javadoc.io/badge/com.artipie/artipie.svg)](http://www.javadoc.io/doc/com.artipie/artipie)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/LICENSE.txt)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
 [![codecov](https://codecov.io/gh/artipie/artipie/branch/master/graph/badge.svg)](https://app.codecov.io/gh/artipie/artipie)
 [![Hits-of-Code](https://hitsofcode.com/github/artipie/artipie)](https://hitsofcode.com/view/github/artipie/artipie)
 ![Docker Pulls](https://img.shields.io/docker/pulls/artipie/artipie)
@@ -21,7 +21,7 @@ Artipie is a binary artifact management tool, similar to
 and many others.
 The following set of features makes Artipie unique among all others:
 
-  * It is open source ([MIT license](https://github.com/artipie/artipie/LICENSE.txt))
+  * It is open source ([MIT license](https://github.com/artipie/artipie/blob/master/LICENSE.txt))
   * It is horizontally scalable, you can add servers easily
   * It is written in reactive Java (using [Vert.x](https://vertx.io/))
   * It supports

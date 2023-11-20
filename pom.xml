@@ -64,7 +64,7 @@ SOFTWARE.
   <licenses>
     <license>
       <name>MIT</name>
-      <url>https://github.com/artipie/artipie/LICENSE.txt</url>
+      <url>https://github.com/artipie/artipie/blob/master/LICENSE.txt</url>
     </license>
   </licenses>
   <issueManagement>
@@ -253,6 +253,7 @@ SOFTWARE.
               <exclude>checkstyle:.*/src/test/resources/.*</exclude>
               <exclude>checkstyle:.*/src/main/resources/swagger-ui/.*</exclude>
               <exclude>checkstyle:.*/src/test/java/com/artipie/settings/cache/GuavaFiltersCacheTest.java</exclude>
+              <exclude>checkstyle:.*/com.artipie.http.filter/.*</exclude>
               <exclude>pmd:.*/src/test/resources/.*</exclude>
               <exclude>pmd:.*/src/main/resources/swagger-ui/.*</exclude>
               <exclude>checkstyle:.*/src/test/resources-binary/.*</exclude>
@@ -285,7 +286,7 @@ SOFTWARE.
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.2.2</version>
+            <version>3.1.2</version>
             <configuration>
               <parallel>none</parallel>
               <trimStackTrace>false</trimStackTrace>

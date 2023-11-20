@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
- * https://github.com/artipie/http/blob/master/LICENSE.txt
+ * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
 package com.artipie.security.perms;
 
@@ -53,19 +53,18 @@ public final class UserPermissions extends PermissionCollection {
 
     /**
      * Lock object.
-     * todo it looks like we shouldn't use cache here; otherwise there's no sense in Serializable
      */
-    transient private final Object lock;
+    private final transient Object lock;
 
     /**
      * Role permissions.
      */
-    transient private final Function<String, PermissionCollection> rperms;
+    private final transient Function<String, PermissionCollection> rperms;
 
     /**
      * User with his roles and individual permissions.
      */
-    transient private final Supplier<User> user;
+    private final transient Supplier<User> user;
 
     /**
      * The name of the group, which implied the permission in the previous

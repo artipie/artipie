@@ -7,7 +7,7 @@
 [![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
 
 [![Javadoc](http://www.javadoc.io/badge/com.artipie/files-adapter.svg)](http://www.javadoc.io/doc/com.artipie/files-adapter)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/LICENSE.txt)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
 [![codecov](https://codecov.io/gh/artipie/files-adapter/branch/master/graph/badge.svg)](https://codecov.io/gh/artipie/files-adapter)
 [![Hits-of-Code](https://hitsofcode.com/github/artipie/files-adapter)](https://hitsofcode.com/view/github/artipie/files-adapter)
 [![Maven Central](https://img.shields.io/maven-central/v/com.artipie/files-adapter.svg)](https://maven-badges.herokuapp.com/maven-central/com.artipie/files-adapter)
