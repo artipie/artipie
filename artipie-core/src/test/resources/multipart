@@ -1,0 +1,172 @@
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="name"
+
+AlarmTime
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="version"
+
+0.1.5
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="filetype"
+
+
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="pyversion"
+
+
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="metadata_version"
+
+2.1
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="summary"
+
+For calculating time difference from current time to Target time and can detect a time from our natural language
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="home_page"
+
+https://github.com/shohan98/alarm_time_claculate
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="author"
+
+Md. Shohanur Rahman
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="author_email"
+
+dshohan112@gmail.com
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="maintainer"
+
+
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="maintainer_email"
+
+
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="license"
+
+MIT
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="description"
+
+from AlarmTime.AlarmTime import DetectDate
+
+##############################################
+
+# =============================================================================
+# t = DetectDate(1570000023345)
+# print(t.now) #2019-10-02 13:07:39.393012
+# t = DetectDate('2019/5/2/14/5')
+# print(t.now) #2019-05-02 14:05:39.393185
+# t = DetectDate()
+# print(t.now) #2019-04-21 12:26:12.542967
+# =============================================================================
+############################################
+
+t = DetectDate()
+
+target_time = t.DateTimeDetect('detect the time and date on December 16 8 p.m') print(target_time)
+
+target_time = t.DateTimeDetect('detect the time and date on December 16 ') print(target_time)
+
+target_time = t.DateTimeDetect('after 700 days') print(target_time)
+
+target_time = t.DateTimeDetect('after 6 month 700 days 8 hour 5 minute') print(target_time)
+
+target_time = t.DateTimeDetect('after 700 days') print(target_time)
+
+now we can get the value of target year, day, month, hour, minute, second
+print(target_time.day)
+
+#=============================================================================
+# =============================================================================
+# 2019-04-21 12:26:12.542967
+# 2019-12-16 20:00:00.542967
+# 2019-12-16 00:00:00.542967
+# 2021-03-21 12:26:12.542967
+# 2021-09-20 20:31:12.542967
+# 2021-03-21 12:26:12.542967
+# 21
+# =============================================================================
+#=============================================================================
+minute_diff = t.minute_diff_from_now('after 1 days')
+
+print(minute_diff) #1440.0
+
+hour_diff = t.hour_diff_from_now('after 1 days')
+
+print(hour_diff) #24.0
+
+day_diff = t.day_diff_from_now('after 1 days')
+
+print(day_diff) #1.0
+
+sec_diff = t.second_diff_from_now('after 1 days')
+
+print(sec_diff) #86400.0
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="keywords"
+
+
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="platform"
+
+UNKNOWN
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="classifiers"
+
+Programming Language :: Python :: 3
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="classifiers"
+
+Operating System :: OS Independent
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="download_url"
+
+
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="comment"
+
+
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="sha256_digest"
+
+ffa8da9bf90a84fc28bbe25dcbf07ec51d61b6db4c45e2ba79fa46e135bf6042
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="requires_python"
+
+
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="description_content_type"
+
+text/markdown
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="md5_digest"
+
+e5784966254944ad960ec7413e1f6e6b
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="blake2_256_digest"
+
+d9eabfe300b95c16b092381604bb1d9fef1074d9c9fc01243119e6fd1332fdc0
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name=":action"
+
+file_upload
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="protocol_version"
+
+1
+--92fd51d48f874720a066238b824c0146
+Content-Disposition: form-data; name="content"; filename="alarmtime-0.1.5.tar.gz"
+Content-Type: application/octet-stream
+
+L���p�����nE���B�����H�y��)v\���a��P�T2���Ll����k�NB��+���Z��s��K��cZ�yGA7 6���+��.�4x05���:T/������uH�O�WJ���u@\�0:;��y�w5P���mwt[��x��r���R:0�3�l���#/�DJ'a]��F">	�4�3�������dpOB����/��]�S�2S/ss2�Q���6#L5;�"c�����SN���MA�!p��n�8��oPb�4�\
+��9��~
+w��\�Al�����a��=�$os����$n����V�"(��L�t�������T9C��6ZYP0]��+j�3�"�\�,��"T��[z���v#��69��c!��1� wukx��1���:(gYM'���bzm�����E��.\��.��CS
+��n�j�M�]jE+��Z�C�����[!9q���e�
+�L*9=E��)G����L��gWA���gM��yP��K������9s���m""�Z
+5�]����^���6� �G���AB?mxk�����P���cf�g�c�+j9~�F�W���
+���:��<Z�M������P��X�-��]K�~�_�E���.�G�H��?����a���z�}�a��}�tU����?���&{����{�V�Z��~���m�3������@�����B����k�x������~��?�izv�uu��������&����S?�=wL��&��0&�\���l�Ho��%��H~�]����MC���E�NZk������9�LN�l8���_�a�L��^#6���k�/i:�1����S�f�
+��d��`����p�����e7�'���{��&�cF���|.<L^N;�-�
+��������ti���L#D���u�5�\����
+--92fd51d48f874720a066238b824c0146--

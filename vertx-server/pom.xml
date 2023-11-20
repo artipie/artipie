@@ -25,6 +25,11 @@ https://github.com/artipie/artipie/LICENSE.txt
       <groupId>io.vertx</groupId>
       <artifactId>vertx-rx-java2</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>artipie-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
     <!-- Test only dependencies -->
     <dependency>
       <groupId>io.vertx</groupId>

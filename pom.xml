@@ -34,6 +34,7 @@ SOFTWARE.
   <packaging>pom</packaging>
   <name>artipie</name>
   <modules>
+    <module>artipie-core</module>
     <module>artipie-main</module>
     <module>pypi-adapter</module>
     <module>maven-adapter</module>
@@ -89,11 +90,6 @@ SOFTWARE.
     <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-log</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>http</artifactId>
-      <version>v1.2.20</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -232,12 +228,6 @@ SOFTWARE.
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.skyscreamer</groupId>
-      <artifactId>jsonassert</artifactId>
-      <version>1.5.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.awaitility</groupId>
       <artifactId>awaitility</artifactId>
       <version>4.2.0</version>
@@ -293,8 +283,9 @@ SOFTWARE.
       <build>
         <plugins>
           <plugin>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>3.1.2</version>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.2.2</version>
             <configuration>
               <parallel>none</parallel>
               <trimStackTrace>false</trimStackTrace>

@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.artipie</groupId>
+    <artifactId>artipie</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>artipie-core</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
+    <surefire.version>3.0.0-M5</surefire.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.github.akarnokd</groupId>
+      <artifactId>rxjava2-jdk8-interop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>4.4</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.json</groupId>
+      <artifactId>javax.json-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!--<dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>asto-core</artifactId>
+      <version>v1.16.0</version>
+    </dependency>-->
+    <dependency>
+      <groupId>org.cqfn</groupId>
+      <artifactId>rio</artifactId>
+      <version>0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>wtf.g4s8</groupId>
+      <artifactId>mime</artifactId>
+      <version>v2.3.2+java8</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>31.1-jre</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.13</version>
+    </dependency>
+    <dependency>
+      <groupId>org.quartz-scheduler</groupId>
+      <artifactId>quartz</artifactId>
+      <version>2.3.2</version>
+    </dependency>
+    <!-- provided serlet deps for wrappers -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>4.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Test only dependencies -->
+    <dependency>
+      <groupId>org.reactivestreams</groupId>
+      <artifactId>reactive-streams-tck</artifactId>
+      <version>1.0.4</version>
+      <exclusions>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+      </exclusions>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
+      <version>4.3.2.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!--<dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>vertx-server</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>-->
+    <!--<dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>-->
+    <!--<dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>-->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.32</version>
+      <scope>test</scope>
+    </dependency>
+    <!--<dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit-platform.version}</version>
+      <scope>test</scope>
+    </dependency>-->
+    <dependency>
+      <groupId>org.llorllale</groupId>
+      <artifactId>cactoos-matchers</artifactId>
+      <version>0.18</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.cactoos</groupId>
+      <artifactId>cactoos</artifactId>
+      <version>0.46</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>${javax.json.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>10.0.15</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+      <version>10.0.15</version>
+      <scope>test</scope>
+    </dependency>
+    <!--<dependency>
+      <groupId>wtf.g4s8</groupId>
+      <artifactId>matchers-json</artifactId>
+      <version>1.4.0</version>
+      <scope>test</scope>
+    </dependency>-->
+    <!--<dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>4.2.0</version>
+      <scope>test</scope>
+    </dependency>-->
+    <!-- integration tests -->
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+      <version>5.1.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5-fluent</artifactId>
+      <version>5.1.3</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.1</version>
+          </dependency>
+          <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.7.1</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <!-- FIXME: reactive TCK tests are not executed for multipart processor -->
+          <!-- <execution> -->
+          <!--   <id>surefire-testng</id> -->
+          <!--   <phase>test</phase> -->
+          <!--   <goals> -->
+          <!--     <goal>test</goal> -->
+          <!--   </goals> -->
+          <!--   <configuration> -->
+          <!--     <skip>false</skip> -->
+          <!--     <includes> -->
+          <!--       <include>com.artipie.http.rq.multipart.MultipartTckTest</include> -->
+          <!--       <include>com.artipie.http.rq.multipart.MultipartsTckTest</include> -->
+          <!--     </includes> -->
+          <!--     <junitArtifactName>none:none</junitArtifactName> -->
+          <!--   </configuration> -->
+          <!-- </execution> -->
+          <!--<execution>
+            <id>surefire-junit</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <skip>false</skip>
+              <excludes>
+                <exclude>com.artipie.http.rq.multipart.MultipartTckTest</exclude>
+                <exclude>com.artipie.http.rq.multipart.MultipartsTckTest</exclude>
+              </excludes>
+              <testNGArtifactName>none:none</testNGArtifactName>
+            </configuration>
+          </execution>-->
+        </executions>
+      </plugin>
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.qulice</groupId>
+          <artifactId>qulice-maven-plugin</artifactId>
+          <version>0.19.0</version>
+          <configuration>
+            <excludes combine.children="append">
+              <exclude>checkstyle:.*/src/test/java/com/artipie/http/filter/GlobFilterTest.java</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>skip-itcases-old-jdk</id>
+      <activation>
+        <jdk>1.8</jdk>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                <testExcludes>
+                  <exclude>**/com/artipie/http/servlet/**</exclude>
+                  <exclude>**/com/artipie/http/slice/SliceITCase.java</exclude>
+                </testExcludes>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+  </profiles>
+
+</project>
