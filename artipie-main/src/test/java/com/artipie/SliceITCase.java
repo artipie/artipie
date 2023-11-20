@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
 
-
 /**
  * Slices integration tests.
  * @since 0.20
