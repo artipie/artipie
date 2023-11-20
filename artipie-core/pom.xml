@@ -15,8 +15,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <qulice.license>${project.basedir}/LICENSE.header</qulice.license>
-    <surefire.version>3.0.0-M5</surefire.version>
   </properties>
 
   <dependencies>
