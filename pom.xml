@@ -299,7 +299,6 @@ SOFTWARE.
               <execution>
                 <goals>
                   <goal>test</goal>
-                  <goal>verify</goal>
                 </goals>
               </execution>
             </executions>
