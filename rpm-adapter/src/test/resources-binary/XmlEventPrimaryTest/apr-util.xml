@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<metadata xmlns="http://linux.duke.edu/metadata/common" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+    <package type="rpm">
+        <name>apr-util</name>
+        <arch>x86_64</arch>
+        <version epoch="0" rel="13.h1.eulerosv2r12" ver="1.6.1"/>
+        <checksum type="sha256" pkgid="YES">93b8f2e819db2431e0d60fdcca560029dbcd78c9678811a5767ca863e40407ff</checksum>
+        <summary>apr-util provides a number of helpful abstractions on top of APR.</summary>
+        <description>The mission of the Apache Portable Runtime (APR) project is to create and maintain software
+            libraries that provide a predictable and consistent interface to underlying platform-specific
+            implementations. The primary goal is to provide an API to which software developers may
+            code and be assured of predictable if not identical behaviour regardless of the platform on
+            which their software is built, relieving them of the need to code special-case conditions to
+            work around or take advantage of platform-specific deficiencies or features.
+        </description>
+        <packager>https://euleros.huawei.com/repos</packager>
+        <url>http://apr.apache.org</url>
+        <time file="1700039149" build="1700039149"/>
+        <size installed="339199" package="117653" archive="0"/>
+        <location href="apr-util-1.6.1-13.h1.eulerosv2r12.x86_64.rpm"/>
+        <format>
+            <rpm:license>ASL 2.0</rpm:license>
+            <rpm:vendor>HUAWEI TECHNOLOGIES CO.,LTD</rpm:vendor>
+            <rpm:group>Unspecified</rpm:group>
+            <rpm:buildhost>szxrtosci10000</rpm:buildhost>
+            <rpm:sourcerpm>apr-util-1.6.1-13.h1.eulerosv2r12.src.rpm</rpm:sourcerpm>
+            <rpm:header-range start="1392" end="10321"/>
+            <rpm:provides>
+                <rpm:entry name="apr-util" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="EQ"/>
+                <rpm:entry name="apr-util(x86-64)" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="EQ"/>
+                <rpm:entry name="apr-util-bdb" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="EQ"/>
+                <rpm:entry name="apr-util-ldap" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="EQ"/>
+                <rpm:entry name="apr-util-mysql" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="EQ"/>
+                <rpm:entry name="apr-util-openssl" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="EQ"/>
+                <rpm:entry name="apr-util-sqlite" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="EQ"/>
+                <rpm:entry name="libaprutil-1.so.0()(64bit)"/>
+            </rpm:provides>
+            <rpm:requires>
+                <rpm:entry name="/bin/sh" pre="1"/>
+                <rpm:entry name="libapr-1.so.0()(64bit)"/>
+                <rpm:entry name="libcrypt.so.1()(64bit)"/>
+                <rpm:entry name="libcrypt.so.1(XCRYPT_2.0)(64bit)"/>
+                <rpm:entry name="libcrypto.so.1.1()(64bit)"/>
+                <rpm:entry name="libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)"/>
+                <rpm:entry name="libexpat.so.1()(64bit)"/>
+                <rpm:entry name="libgdbm.so.6()(64bit)"/>
+                <rpm:entry name="liblber.so.2()(64bit)"/>
+                <rpm:entry name="libldap.so.2()(64bit)"/>
+                <rpm:entry name="libldap.so.2(OPENLDAP_2.200)(64bit)"/>
+                <rpm:entry name="libmariadb.so.3()(64bit)"/>
+                <rpm:entry name="libmariadb.so.3(libmysqlclient_18)(64bit)"/>
+                <rpm:entry name="libsqlite3.so.0()(64bit)"/>
+                <rpm:entry name="libssl.so.1.1()(64bit)"/>
+                <rpm:entry name="libuuid.so.1()(64bit)"/>
+                <rpm:entry name="rtld(GNU_HASH)"/>
+                <rpm:entry name="libc.so.6(GLIBC_2.25)(64bit)"/>
+            </rpm:requires>
+            <rpm:obsoletes>
+                <rpm:entry name="apr-util-bdb" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="LT"/>
+                <rpm:entry name="apr-util-ldap" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="LT"/>
+                <rpm:entry name="apr-util-mysql" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="LT"/>
+                <rpm:entry name="apr-util-openssl" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="LT"/>
+                <rpm:entry name="apr-util-sqlite" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="LT"/>
+            </rpm:obsoletes>
+            <rpm:recommends>
+                <rpm:entry name="apr-util-bdb(x86-64)" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="EQ"/>
+                <rpm:entry name="apr-util-openssl(x86-64)" ver="1.6.1" epoch="0" rel="13.h1.eulerosv2r12" flags="EQ"/>
+            </rpm:recommends>
+            <file>/etc/dim/digest_list/apr-util-1.6.1-13.h1.eulerosv2r12.x86_64.hash</file>
+            <file>/etc/dim/digest_list/apr-util-1.6.1-13.h1.eulerosv2r12.x86_64.hash.sig</file>
+            <file>/etc/ima/digest_lists.tlv/0-metadata_list-compact_tlv-apr-util-1.6.1-13.h1.eulerosv2r12.x86_64</file>
+            <file>/etc/ima/digest_lists/0-metadata_list-compact-apr-util-1.6.1-13.h1.eulerosv2r12.x86_64</file>
+        </format>
+    </package>
+</metadata>
