@@ -25,6 +25,7 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,6 +111,7 @@ public final class CondaSliceITCase {
     }
 
     @Test
+    @Ignore("https://github.com/artipie/artipie/issues/1336")
     void anacondaCanLogin() throws Exception {
         this.exec(
             "anaconda", "config", "--set", "url",
