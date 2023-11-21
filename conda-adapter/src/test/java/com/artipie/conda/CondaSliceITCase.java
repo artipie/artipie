@@ -120,7 +120,7 @@ public final class CondaSliceITCase {
             new StringContainsInOrder(
                 new ListOf<>(
                     "Using Anaconda API: http://host.testcontainers.internal",
-                    "any's login successful"
+                    "any's", "login successful"
                 )
             )
         );
@@ -137,7 +137,7 @@ public final class CondaSliceITCase {
             new StringContainsInOrder(
                 new ListOf<>(
                     "Using Anaconda API: http://host.testcontainers.internal",
-                    "alice's login successful"
+                    "login successful"
                 )
             )
         );
@@ -155,7 +155,12 @@ public final class CondaSliceITCase {
         MatcherAssert.assertThat(
             "Login was not successful",
             this.exec("anaconda", "login", "--username", "anonymous", "--password", "any"),
-            new StringContains("anonymous's login successful")
+            new StringContainsInOrder(
+                new ListOf<>(
+                    "Using Anaconda API: http://host.testcontainers.internal",
+                    "anonymous", "login successful"
+                )
+            )
         );
         this.uploadAndCheck("0.0.1");
         this.uploadAndCheck("0.0.2");

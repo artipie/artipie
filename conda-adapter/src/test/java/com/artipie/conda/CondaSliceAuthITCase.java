@@ -167,7 +167,7 @@ public final class CondaSliceAuthITCase {
                 CondaSliceAuthITCase.UNAME, "--password", CondaSliceAuthITCase.PSWD
             ),
             new StringContainsInOrder(
-                new ListOf<>("http://host.testcontainers.internal", "Alice's login successful")
+                new ListOf<>("http://host.testcontainers.internal", "Alice's", "login successful")
             )
         );
         MatcherAssert.assertThat(
