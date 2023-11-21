@@ -28,6 +28,7 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -111,7 +112,7 @@ public final class CondaSliceITCase {
     }
 
     @Test
-    @Ignore("https://github.com/artipie/artipie/issues/1336")
+    @Disabled("https://github.com/artipie/artipie/issues/1336")
     void anacondaCanLogin() throws Exception {
         this.exec(
             "anaconda", "config", "--set", "url",
