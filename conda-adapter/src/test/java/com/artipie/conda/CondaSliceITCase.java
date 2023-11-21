@@ -23,6 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,7 +120,7 @@ public final class CondaSliceITCase {
             new StringContainsInOrder(
                 new ListOf<>(
                     "Using Anaconda API: http://host.testcontainers.internal",
-                    "any's", "login successful"
+                    "any's login successful"
                 )
             )
         );
@@ -136,7 +137,7 @@ public final class CondaSliceITCase {
             new StringContainsInOrder(
                 new ListOf<>(
                     "Using Anaconda API: http://host.testcontainers.internal",
-                    "login successful"
+                    "alice's login successful"
                 )
             )
         );
@@ -154,12 +155,7 @@ public final class CondaSliceITCase {
         MatcherAssert.assertThat(
             "Login was not successful",
             this.exec("anaconda", "login", "--username", "anonymous", "--password", "any"),
-            new StringContainsInOrder(
-                new ListOf<>(
-                    "Using Anaconda API: http://host.testcontainers.internal",
-                    "anonymous", "login successful"
-                )
-            )
+            new StringContains("anonymous's login successful")
         );
         this.uploadAndCheck("0.0.1");
         this.uploadAndCheck("0.0.2");
