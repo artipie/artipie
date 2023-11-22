@@ -5,8 +5,10 @@
 package com.artipie.rpm.meta;
 
 import com.artipie.rpm.misc.UncheckedConsumer;
+import com.artipie.rpm.pkg.DependencySection;
 import com.artipie.rpm.pkg.HeaderTags;
 import com.artipie.rpm.pkg.Package;
+import com.artipie.rpm.pkg.WeakDepsTags;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +26,7 @@ import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.redline_rpm.header.Header;
 
 /**
  * Implementation of {@link XmlEvent} to build event for {@link XmlPackage#PRIMARY} package.
@@ -64,6 +67,62 @@ public final class XmlEventPrimary implements XmlEvent {
      */
     private static final String NS_URL =
         XmlPackage.PRIMARY.xmlNamespaces().get(XmlEventPrimary.PRFX);
+
+    /**
+     * Provides dependencies group.
+     */
+    private static final DependencySection PROVIDES = new DependencySection(
+        "provides", Header.HeaderTag.PROVIDENAME, Header.HeaderTag.PROVIDEVERSION,
+        Header.HeaderTag.PROVIDEFLAGS
+    );
+
+    /**
+     * Conflicts dependencies group.
+     */
+    private static final DependencySection CONFLICTS = new DependencySection(
+        "conflicts", Header.HeaderTag.CONFLICTNAME, Header.HeaderTag.CONFLICTVERSION,
+        Header.HeaderTag.CONFLICTFLAGS
+    );
+
+    /**
+     * Obsoletes dependencies group.
+     */
+    private static final DependencySection OBSOLETES = new DependencySection(
+        "obsoletes", Header.HeaderTag.OBSOLETENAME, Header.HeaderTag.OBSOLETEVERSION,
+        Header.HeaderTag.OBSOLETEFLAGS
+    );
+
+    /**
+     * Recommends dependencies group.
+     */
+    private static final DependencySection RECOMMENDS = new DependencySection(
+        "recommends", WeakDepsTags.RECOMMENDNAME, WeakDepsTags.RECOMMENDVERSION,
+        WeakDepsTags.RECOMMENDFLAGS
+    );
+
+    /**
+     * Suggests dependencies group.
+     */
+    private static final DependencySection SUGGESTS = new DependencySection(
+        "suggests", WeakDepsTags.SUGGESTNAME, WeakDepsTags.SUGGESTVERSION,
+        WeakDepsTags.SUGGESTFLAGS
+    );
+
+    /**
+     * Supplements dependencies group.
+     */
+    private static final DependencySection SUPPLEMENTS = new DependencySection(
+        "supplements", WeakDepsTags.SUPPLEMENTNAME, WeakDepsTags.SUPPLEMENTVERSION,
+        WeakDepsTags.SUPPLEMENTFLAGS
+    );
+
+    /**
+     * Enhances dependencies group.
+     */
+    private static final DependencySection ENHANCES = new DependencySection(
+        "enhances", WeakDepsTags.ENHANCENAME, WeakDepsTags.ENHANCEVERSION,
+        WeakDepsTags.ENHANCEFLAGS
+    );
 
     @Override
     public void add(final XMLEventWriter writer, final Package.Meta meta) throws IOException {
@@ -124,50 +183,20 @@ public final class XmlEventPrimary implements XmlEvent {
                     new ImmutablePair<>("end", String.valueOf(meta.range()[1]))
                 ).collect(Collectors.toMap(Pair::getKey, Pair::getValue))
             );
-            XmlEventPrimary.addProvides(writer, tags);
+            XmlEventPrimary.addDependencySection(writer, tags, XmlEventPrimary.PROVIDES);
             XmlEventPrimary.addRequires(writer, tags);
-            XmlEventPrimary.addObsoletes(writer, tags);
-            XmlEventPrimary.addConflicts(writer, tags);
+            XmlEventPrimary.addDependencySection(writer, tags, XmlEventPrimary.OBSOLETES);
+            XmlEventPrimary.addDependencySection(writer, tags, XmlEventPrimary.CONFLICTS);
+            XmlEventPrimary.addDependencySection(writer, tags, XmlEventPrimary.RECOMMENDS);
+            XmlEventPrimary.addDependencySection(writer, tags, XmlEventPrimary.SUGGESTS);
+            XmlEventPrimary.addDependencySection(writer, tags, XmlEventPrimary.SUPPLEMENTS);
+            XmlEventPrimary.addDependencySection(writer, tags, XmlEventPrimary.ENHANCES);
             new Files(XmlEventPrimary.filesFilter()).add(writer, meta);
             writer.add(events.createEndElement("", "", "format"));
             writer.add(events.createEndElement("", "", "package"));
         } catch (final XMLStreamException err) {
             throw new IOException(err);
         }
-    }
-
-    /**
-     * Builds `provides` tag. Attribute `flags` should be present if the version is present and
-     * in `provides` the only possible flag value is `EQ`.
-     *
-     * @param writer Xml event writer
-     * @param tags Tag info
-     * @throws XMLStreamException On error
-     */
-    private static void addProvides(final XMLEventWriter writer, final HeaderTags tags)
-        throws XMLStreamException {
-        final XMLEventFactory events = XMLEventFactory.newFactory();
-        writer.add(
-            events.createStartElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "provides")
-        );
-        final List<String> names = tags.providesNames();
-        final List<Optional<String>> flags = tags.providesFlags();
-        final List<HeaderTags.Version> versions = tags.providesVer();
-        for (int ind = 0; ind < names.size(); ind = ind + 1) {
-            writer.add(
-                events.createStartElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "entry")
-            );
-            writer.add(events.createAttribute("name", names.get(ind)));
-            XmlEventPrimary.addEntryAttr(
-                writer, events, versions, ind, flags, HeaderTags.Flags.EQUAL.notation()
-            );
-            writer.add(
-                events.createEndElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "entry")
-            );
-        }
-        writer.add(
-            events.createEndElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "provides")
-        );
     }
 
     /**
@@ -186,16 +215,18 @@ public final class XmlEventPrimary implements XmlEvent {
         writer.add(
             events.createStartElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "requires")
         );
-        final List<String> names = tags.requires();
-        final List<Optional<String>> flags = tags.requireFlags();
+        final List<String> names = tags.dependencyNames(Header.HeaderTag.REQUIRENAME);
+        final List<Optional<String>> flags = tags.dependencyFlags(Header.HeaderTag.REQUIREFLAGS);
         final List<Integer> intflags = tags.requireFlagsInts();
-        final List<HeaderTags.Version> versions = tags.requiresVer();
+        final List<HeaderTags.Version> versions =
+            tags.dependencyVers(Header.HeaderTag.REQUIREVERSION);
         final Map<String, Integer> items = new HashMap<>(names.size());
         final Set<String> duplicates = new HashSet<>(names.size());
         final Set<String> files = new XmlEvent.Files(XmlEventPrimary.filesFilter()).files(tags);
         final List<String> libcso = new ArrayList<>(names.size());
-        final List<String> nprovides = tags.providesNames();
-        final List<HeaderTags.Version> vprovides = tags.providesVer();
+        final List<String> nprovides = tags.dependencyNames(Header.HeaderTag.PROVIDENAME);
+        final List<HeaderTags.Version> vprovides =
+            tags.dependencyVers(Header.HeaderTag.PROVIDEVERSION);
         for (int ind = 0; ind < names.size(); ind = ind + 1) {
             final String name = names.get(ind);
             if (XmlEventPrimary.checkRequiresInProvides(
@@ -260,60 +291,26 @@ public final class XmlEventPrimary implements XmlEvent {
     }
 
     /**
-     * Builds `obsoletes` tag.
+     * Builds provided dependency section, checking for duplicates.
      *
      * @param writer Xml event writer
      * @param tags Tag info
+     * @param dep Dependency section to build
      * @throws XMLStreamException On error
      */
-    private static void addObsoletes(final XMLEventWriter writer, final HeaderTags tags)
-        throws XMLStreamException {
-        final List<String> names = tags.obsoletes();
+    private static void addDependencySection(
+        final XMLEventWriter writer, final HeaderTags tags, final DependencySection dep
+    ) throws XMLStreamException {
+        final List<String> names = tags.dependencyNames(dep.tagForNames());
         if (names.isEmpty()) {
             return;
         }
         final XMLEventFactory events = XMLEventFactory.newFactory();
         writer.add(
-            events.createStartElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "obsoletes")
+            events.createStartElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, dep.xmlName())
         );
-        final List<Optional<String>> flags = tags.obsoletesFlags();
-        final List<HeaderTags.Version> versions = tags.obsoletesVer();
-        for (int ind = 0; ind < names.size(); ind = ind + 1) {
-            writer.add(
-                events.createStartElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "entry")
-            );
-            writer.add(events.createAttribute("name", names.get(ind)));
-            XmlEventPrimary.addEntryAttr(
-                writer, events, versions, ind, flags, HeaderTags.Flags.EQUAL.notation()
-            );
-            writer.add(
-                events.createEndElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "entry")
-            );
-        }
-        writer.add(
-            events.createEndElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "obsoletes")
-        );
-    }
-
-    /**
-     * Builds `conflicts` tag.
-     *
-     * @param writer Xml event writer
-     * @param tags Tag info
-     * @throws XMLStreamException On error
-     */
-    private static void addConflicts(final XMLEventWriter writer, final HeaderTags tags)
-        throws XMLStreamException {
-        final List<String> names = tags.conflicts();
-        if (names.isEmpty()) {
-            return;
-        }
-        final XMLEventFactory events = XMLEventFactory.newFactory();
-        writer.add(
-            events.createStartElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "conflicts")
-        );
-        final List<Optional<String>> flags = tags.conflictsFlags();
-        final List<HeaderTags.Version> versions = tags.conflictsVer();
+        final List<Optional<String>> flags = tags.dependencyFlags(dep.tagForFlags());
+        final List<HeaderTags.Version> versions = tags.dependencyVers(dep.tagForVersions());
         final Set<String> items = new HashSet<>(names.size());
         for (int ind = 0; ind < names.size(); ind = ind + 1) {
             final String concat = names.get(ind).concat(versions.get(ind).toString())
@@ -334,7 +331,7 @@ public final class XmlEventPrimary implements XmlEvent {
             );
         }
         writer.add(
-            events.createEndElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "conflicts")
+            events.createEndElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, dep.xmlName())
         );
     }
 

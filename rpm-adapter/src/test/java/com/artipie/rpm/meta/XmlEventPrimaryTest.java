@@ -50,7 +50,8 @@ class XmlEventPrimaryTest {
         "nmap-7.80-1.h1.eulerosv2r9.x86_64.rpm,nmap_res.xml",
         "systemtap-client-4.1-6.eulerosv2r9.x86_64.rpm,systemtap_res.xml",
         "python3-pyasn1-0.3.7-8.eulerosv2r9.noarch.rpm,python.xml",
-        "vim-base-7.2-8.15.2.x86_64.rpm,vim-base.xml"
+        "vim-base-7.2-8.15.2.x86_64.rpm,vim-base.xml",
+        "apr-util-1.6.1-13.h1.eulerosv2r12.x86_64.rpm,apr-util.xml"
     })
     void writesPackageInfo(final String rpm, final String res) throws XMLStreamException,
         IOException {
@@ -96,7 +97,7 @@ class XmlEventPrimaryTest {
                 String.join(
                     "",
                     // @checkstyle LineLengthCheck (1 line)
-                    "<?xml version='1.0' encoding='UTF-8'?><metadata xmlns=\"http://linux.duke.edu/metadata/common\" xmlns:rpm=\"http://linux.duke.edu/metadata/rpm\"><package type=\"rpm\"><name></name><arch></arch><version epoch=\"0\" rel=\"\" ver=\"\"/><checksum type=\"sha256\" pkgid=\"YES\">d6a7cd2a7371b1a15d543196979ff74fdb027023ebf187d5d329be11055c77fd</checksum><summary></summary><description></description><packager></packager><url></url><time file=\"0\" build=\"0\"/><size installed=\"0\" package=\"3\" archive=\"0\"/><location href=\"test.rpm\"/><format><rpm:license></rpm:license><rpm:vendor></rpm:vendor><rpm:group></rpm:group><rpm:buildhost></rpm:buildhost><rpm:sourcerpm></rpm:sourcerpm><rpm:header-range start=\"0\" end=\"0\"/><rpm:provides/><rpm:requires/>",
+                    "<?xml version='1.0' encoding='UTF-8'?><metadata xmlns=\"http://linux.duke.edu/metadata/common\" xmlns:rpm=\"http://linux.duke.edu/metadata/rpm\"><package type=\"rpm\"><name></name><arch></arch><version epoch=\"0\" rel=\"\" ver=\"\"/><checksum type=\"sha256\" pkgid=\"YES\">d6a7cd2a7371b1a15d543196979ff74fdb027023ebf187d5d329be11055c77fd</checksum><summary></summary><description></description><packager></packager><url></url><time file=\"0\" build=\"0\"/><size installed=\"0\" package=\"3\" archive=\"0\"/><location href=\"test.rpm\"/><format><rpm:license></rpm:license><rpm:vendor></rpm:vendor><rpm:group></rpm:group><rpm:buildhost></rpm:buildhost><rpm:sourcerpm></rpm:sourcerpm><rpm:header-range start=\"0\" end=\"0\"/><rpm:requires/>",
                     "<rpm:conflicts>",
                     "<rpm:entry name=\"one\" ver=\"0.1\" epoch=\"0\" flags=\"LT\"/>",
                     "<rpm:entry name=\"two\" ver=\"0.2\" epoch=\"0\" flags=\"EQ\"/>",
@@ -146,7 +147,7 @@ class XmlEventPrimaryTest {
                     // @checkstyle LineLengthCheck (5 lines)
                     "<?xml version='1.0' encoding='UTF-8'?><metadata xmlns=\"http://linux.duke.edu/metadata/common\" xmlns:rpm=\"http://linux.duke.edu/metadata/rpm\"><package type=\"rpm\">",
                     String.format("<name>%s</name>", name),
-                    "<arch></arch><version epoch=\"0\" rel=\"\" ver=\"\"/><checksum type=\"sha256\" pkgid=\"YES\">d6a7cd2a7371b1a15d543196979ff74fdb027023ebf187d5d329be11055c77fd</checksum><summary></summary><description></description><packager></packager><url></url><time file=\"0\" build=\"0\"/><size installed=\"0\" package=\"3\" archive=\"0\"/><location href=\"test.rpm\"/><format><rpm:license></rpm:license><rpm:vendor></rpm:vendor><rpm:group></rpm:group><rpm:buildhost></rpm:buildhost><rpm:sourcerpm></rpm:sourcerpm><rpm:header-range start=\"0\" end=\"0\"/><rpm:provides/>",
+                    "<arch></arch><version epoch=\"0\" rel=\"\" ver=\"\"/><checksum type=\"sha256\" pkgid=\"YES\">d6a7cd2a7371b1a15d543196979ff74fdb027023ebf187d5d329be11055c77fd</checksum><summary></summary><description></description><packager></packager><url></url><time file=\"0\" build=\"0\"/><size installed=\"0\" package=\"3\" archive=\"0\"/><location href=\"test.rpm\"/><format><rpm:license></rpm:license><rpm:vendor></rpm:vendor><rpm:group></rpm:group><rpm:buildhost></rpm:buildhost><rpm:sourcerpm></rpm:sourcerpm><rpm:header-range start=\"0\" end=\"0\"/>",
                     "<rpm:requires>",
                     "<rpm:entry name=\"one\" ver=\"0.1\" epoch=\"0\" flags=\"EQ\"/>",
                     "<rpm:entry name=\"two\" ver=\"0.2\" epoch=\"0\" flags=\"EQ\"/>",
