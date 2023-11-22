@@ -54,7 +54,7 @@ jobs:
                 }
               }
             ]
-      - run: mvn -B install -DskipTests
+      - run: mvn -B install -DskipTests -Dmaven.compiler.source=${{steps.split.outputs._2}} -Dmaven.compiler.target=${{steps.split.outputs._2}}
       - run: mvn deploy -Partipie,publish,sonatype,gpg-sign -DskipTests --errors
         working-directory: ${{steps.split.outputs._0}}
         env:
