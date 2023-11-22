@@ -34,6 +34,7 @@ SOFTWARE.
   <packaging>pom</packaging>
   <name>artipie</name>
   <modules>
+    <module>artipie-core</module>
     <module>artipie-main</module>
     <module>pypi-adapter</module>
     <module>maven-adapter</module>
@@ -63,7 +64,7 @@ SOFTWARE.
   <licenses>
     <license>
       <name>MIT</name>
-      <url>https://github.com/artipie/artipie/LICENSE.txt</url>
+      <url>https://github.com/artipie/artipie/blob/master/LICENSE.txt</url>
     </license>
   </licenses>
   <issueManagement>
@@ -89,11 +90,6 @@ SOFTWARE.
     <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-log</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>http</artifactId>
-      <version>v1.2.20</version>
     </dependency>
     <dependency>
       <groupId>com.artipie</groupId>
@@ -232,12 +228,6 @@ SOFTWARE.
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.skyscreamer</groupId>
-      <artifactId>jsonassert</artifactId>
-      <version>1.5.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.awaitility</groupId>
       <artifactId>awaitility</artifactId>
       <version>4.2.0</version>
@@ -263,6 +253,7 @@ SOFTWARE.
               <exclude>checkstyle:.*/src/test/resources/.*</exclude>
               <exclude>checkstyle:.*/src/main/resources/swagger-ui/.*</exclude>
               <exclude>checkstyle:.*/src/test/java/com/artipie/settings/cache/GuavaFiltersCacheTest.java</exclude>
+              <exclude>checkstyle:.*/com.artipie.http.filter/.*</exclude>
               <exclude>pmd:.*/src/test/resources/.*</exclude>
               <exclude>pmd:.*/src/main/resources/swagger-ui/.*</exclude>
               <exclude>checkstyle:.*/src/test/resources-binary/.*</exclude>

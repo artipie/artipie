@@ -109,7 +109,7 @@ meta:
 
 To interact with Keycloak server the Artipie uses `Direct Access Grants` authentication flow 
 and directly requests user login and password. 
-Artipie acts as Keycloak client application and should be configured in Keycloak with following settings :
+Artipie acts as Keycloak client application and should be configured in Keycloak with following settings:
 * Client authentication: On
 * Authorization: On
 * Authentication flow: `Direct access grants`

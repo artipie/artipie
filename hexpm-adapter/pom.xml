@@ -40,23 +40,15 @@ SOFTWARE.
       <url>https://github.com/artipie/hexpm-adapter/blob/master/LICENSE.txt</url>
     </license>
   </licenses>
-  <developers>
-    <developer>
-      <id>github.com/Swizbiz</id>
-      <name>Aleksei Borodin</name>
-      <email>swizbizy@gmail.com</email>
-      <organization>Artipie</organization>
-      <organizationUrl>https://www.artipie.com</organizationUrl>
-      <roles>
-        <role>Developer</role>
-      </roles>
-      <timezone>+3</timezone>
-    </developer>
-  </developers>
   <properties>
     <protobuf.version>3.21.10</protobuf.version>
   </properties>
   <dependencies>
+    <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>artipie-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>

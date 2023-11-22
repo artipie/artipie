@@ -41,6 +41,11 @@ SOFTWARE.
   </properties>
   <dependencies>
     <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>artipie-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-xml</artifactId>
       <version>0.29.0</version>
@@ -64,6 +69,8 @@ SOFTWARE.
       <artifactId>maven-artifact</artifactId>
       <version>3.9.1</version>
     </dependency>
+
+    <!-- Test scope -->
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpmime</artifactId>
@@ -74,6 +81,12 @@ SOFTWARE.
       <groupId>com.artipie</groupId>
       <artifactId>vertx-server</artifactId>
       <version>1.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.skyscreamer</groupId>
+      <artifactId>jsonassert</artifactId>
+      <version>1.5.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
