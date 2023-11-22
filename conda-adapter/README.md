@@ -14,7 +14,7 @@
 [![PDD status](http://www.0pdd.com/svg?name=artipie/conda-adapter)](http://www.0pdd.com/p?name=artipie/conda-adapter)
 
 This Java library turns your binary storage (files, S3 objects, anything) into Conda repository.
-You may add it to your binary storage and it will become a fully-functionable Conda repository, 
+You may add it to your binary storage and it will become a fully-functionable Conda repository,
 which [anaconda](https://anaconda.org/) will perfectly understand.
 
 If you have any question or suggestions, do not hesitate to [create an issue](https://github.com/artipie/conda-adapter/issues/new)
@@ -46,10 +46,10 @@ new CondaRepodata.Append(Optional.of(input), output).perform(
     )
 );
 ```
-where `CondaRepodata.Append` constructor accepts optional of existing `repodata.json` file input stream 
+where `CondaRepodata.Append` constructor accepts optional of existing `repodata.json` file input stream
 (pass empty optional if `repodata.json` file does not exist) and output stream to write the result into.
-`CondaRepodata.Append#perform` method requires list of the `CondaRepodata.PackageItem`, 
-`CondaRepodata.PackageItem` can be created by passing conda package input stream, its name, checksums and 
+`CondaRepodata.Append#perform` method requires list of the `CondaRepodata.PackageItem`,
+`CondaRepodata.PackageItem` can be created by passing conda package input stream, its name, checksums and
 size into constructor.
 
 To remove packages from `repodata.json` file call
@@ -58,7 +58,7 @@ new CondaRepodata.Remove(input, output).perform(
     Set.of("sha256-1", "sha256-2")
 );
 ```
-where `CondaRepodata.Remove` constructor accepts existing `repodata.json` file input stream and 
+where `CondaRepodata.Remove` constructor accepts existing `repodata.json` file input stream and
 output stream to write the result into. `CondaRepodata.Remove#perform` method requires set of the
 SHA-256 checksums of the conda packages to remove from `repodata.json` file.
 
@@ -68,14 +68,14 @@ new MultiRepodata.Unique().merge(
     Lists.newArrayList(input_one, input_two), output
 );
 ```
-where `MultiRepodata.Unique()#merge` method accepts list of `repodata.json` files input streams to 
+where `MultiRepodata.Unique()#merge` method accepts list of `repodata.json` files input streams to
 merge and output stream to write the result into. While merging, all conda packages duplicates will
 be removed.
 
 ## Conda repository structure
 
-Conda repository is [structured directory tree](https://docs.conda.io/projects/conda-build/en/latest/resources/package-spec.html#repository-structure-and-index) 
-with platform subdirectories, each platform subdirectory contains index file and conda packages. 
+Conda repository is [structured directory tree](https://docs.conda.io/projects/conda-build/en/latest/resources/package-spec.html#repository-structure-and-index)
+with platform subdirectories, each platform subdirectory contains index file and conda packages.
 
 ```commandline
 <root>/linux-64/repodata.json
@@ -88,7 +88,7 @@ with platform subdirectories, each platform subdirectory contains index file and
 
 ### Repodata file
 
-Repodata json [contains](https://docs.conda.io/projects/conda-build/en/latest/concepts/generating-index.html#repodata-json) 
+Repodata json [contains](https://docs.conda.io/projects/conda-build/en/latest/concepts/generating-index.html#repodata-json)
 list of the packages metadata in platform directory and subdir where package is located:
 
 ```json
@@ -129,8 +129,8 @@ list of the packages metadata in platform directory and subdir where package is 
   }
 }
 ```
-`tar.bz2` packages are listed under `packages` element, `.conda` packages are listed under 
-`packages.conda` element. `Repodata.json` can also contain some other info 
+`tar.bz2` packages are listed under `packages` element, `.conda` packages are listed under
+`packages.conda` element. `Repodata.json` can also contain some other info
 (for example, subdir name) on the root level.
 
 ## How to contribute

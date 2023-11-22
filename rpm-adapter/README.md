@@ -7,7 +7,7 @@
 [![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
 
 [![Javadoc](http://www.javadoc.io/badge/com.artipie/rpm-adapter.svg)](http://www.javadoc.io/doc/com.artipie/rpm-adapter)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/LICENSE.txt)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
 [![codecov](https://codecov.io/gh/artipie/artipie/branch/master/graph/badge.svg)](https://codecov.io/gh/artipie/rpm-adapter)
 [![Hits-of-Code](https://hitsofcode.com/github/artipie/rpm-adapter)](https://hitsofcode.com/view/github/artipie/rpm-adapter)
 [![Maven Central](https://img.shields.io/maven-central/v/com.artipie/rpm-adapter.svg)](https://maven-badges.herokuapp.com/maven-central/com.artipie/rpm-adapter)

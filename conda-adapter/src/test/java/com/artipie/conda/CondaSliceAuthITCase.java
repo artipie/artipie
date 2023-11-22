@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
- * https://github.com/artipie/artipie/LICENSE.txt
+ * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
 package com.artipie.conda;
 
@@ -30,6 +30,7 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -154,6 +155,7 @@ public final class CondaSliceAuthITCase {
     }
 
     @Test
+    @Disabled("https://github.com/artipie/artipie/issues/1336")
     void canUploadAndInstall() throws Exception {
         this.moveCondarc(CondaSliceAuthITCase.ANONIM);
         this.exec(

@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
- * https://github.com/artipie/artipie/LICENSE.txt
+ * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
 
 package com.artipie.npm.misc;
@@ -83,7 +83,6 @@ public class NextSafeAvailablePort {
      * @checkstyle FinalParametersCheck (50 lines)
      * @checkstyle EmptyCatchBlock (50 lines)
      * @checkstyle MethodBodyCommentsCheck (50 lines)
-     * @checkstyle RegexpSinglelineCheck (50 lines)
      */
     @SuppressWarnings({"PMD.EmptyCatchBlock", "PMD.OnlyOneReturn"})
     private static boolean available(final int port) {
