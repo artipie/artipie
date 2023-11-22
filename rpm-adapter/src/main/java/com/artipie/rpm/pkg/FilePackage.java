@@ -76,7 +76,7 @@ public final class FilePackage implements Package {
         }
 
         @Override
-        public MetaHeader header(final Header.HeaderTag tag) {
+        public MetaHeader header(final AbstractHeader.Tag tag) {
             return new EntryHeader(this.hdr.getEntry(tag));
         }
 

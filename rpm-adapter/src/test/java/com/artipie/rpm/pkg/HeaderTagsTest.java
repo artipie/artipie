@@ -15,6 +15,7 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
+import org.redline_rpm.header.Header;
 
 /**
  * Test for {@link HeaderTags}.
@@ -25,12 +26,46 @@ import org.junit.jupiter.api.Test;
 class HeaderTagsTest {
 
     @Test
+    void readsRecommends() throws IOException {
+        final Path file = new TestResource("apr-util-1.6.1-13.h1.eulerosv2r12.x86_64.rpm").asPath();
+        MatcherAssert.assertThat(
+            new HeaderTags(
+                new FilePackage.Headers(new FilePackageHeader(file).header(), file, Digest.SHA256)
+            ).dependencyNames(WeakDepsTags.RECOMMENDNAME),
+            Matchers.contains("apr-util-bdb(x86-64)", "apr-util-openssl(x86-64)")
+        );
+    }
+
+    @Test
+    void readsRecommendsVers() throws IOException {
+        final Path file = new TestResource("apr-util-1.6.1-13.h1.eulerosv2r12.x86_64.rpm").asPath();
+        MatcherAssert.assertThat(
+            new HeaderTags(
+                new FilePackage.Headers(new FilePackageHeader(file).header(), file, Digest.SHA256)
+            ).dependencyVers(WeakDepsTags.RECOMMENDVERSION).stream()
+                .map(HeaderTags.Version::toString).collect(Collectors.toList()),
+            Matchers.contains("1.6.1-13.h1.eulerosv2r12", "1.6.1-13.h1.eulerosv2r12")
+        );
+    }
+
+    @Test
+    void readsRecommendsFlags() throws IOException {
+        final Path file = new TestResource("apr-util-1.6.1-13.h1.eulerosv2r12.x86_64.rpm").asPath();
+        MatcherAssert.assertThat(
+            new HeaderTags(
+                new FilePackage.Headers(new FilePackageHeader(file).header(), file, Digest.SHA256)
+            ).dependencyFlags(WeakDepsTags.RECOMMENDFLAGS),
+            Matchers.contains(Optional.of("EQ"), Optional.of("EQ"))
+        );
+    }
+
+    @Test
     void readsObsoletesNames() throws IOException {
         final Path file = new TestResource("ant-1.9.4-2.el7.noarch.rpm").asPath();
         MatcherAssert.assertThat(
             new HeaderTags(
                 new FilePackage.Headers(new FilePackageHeader(file).header(), file, Digest.SHA256)
-            ).obsoletes(),
+            ).dependencyNames(Header.HeaderTag.OBSOLETENAME),
             Matchers.contains("ant-scripts")
         );
     }
@@ -41,7 +76,7 @@ class HeaderTagsTest {
         MatcherAssert.assertThat(
             new HeaderTags(
                 new FilePackage.Headers(new FilePackageHeader(file).header(), file, Digest.SHA256)
-            ).obsoletesVer()
+            ).dependencyVers(Header.HeaderTag.OBSOLETEVERSION)
                 .stream().map(HeaderTags.Version::toString).collect(Collectors.toList()),
             Matchers.contains("0:1.9.4-2.el7")
         );
@@ -53,7 +88,7 @@ class HeaderTagsTest {
         MatcherAssert.assertThat(
             new HeaderTags(
                 new FilePackage.Headers(new FilePackageHeader(file).header(), file, Digest.SHA256)
-            ).obsoletesFlags(),
+            ).dependencyFlags(Header.HeaderTag.OBSOLETEFLAGS),
             Matchers.contains(Optional.of("LT"))
         );
     }
@@ -64,7 +99,7 @@ class HeaderTagsTest {
         MatcherAssert.assertThat(
             new HeaderTags(
                 new FilePackage.Headers(new FilePackageHeader(file).header(), file, Digest.SHA256)
-            ).conflicts(),
+            ).dependencyNames(Header.HeaderTag.CONFLICTNAME),
             Matchers.containsInAnyOrder(
                 "pam_krb5", "samba-common",
                 "samba-client", "nss_ldap", "ipa-client",
@@ -79,7 +114,7 @@ class HeaderTagsTest {
         MatcherAssert.assertThat(
             new HeaderTags(
                 new FilePackage.Headers(new FilePackageHeader(file).header(), file, Digest.SHA256)
-            ).conflictsVer()
+            ).dependencyVers(Header.HeaderTag.CONFLICTVERSION)
                 .stream().map(HeaderTags.Version::toString).collect(Collectors.toList()),
             Matchers.containsInAnyOrder("1.49", "3.0", "3.0", "1.15.1", "254", "2.2.0", "2.2.0")
         );
@@ -90,7 +125,7 @@ class HeaderTagsTest {
         final Path file = new TestResource("authconfig-6.2.8-30.el7.x86_64.rpm").asPath();
         final List<Optional<String>> res = new HeaderTags(
             new FilePackage.Headers(new FilePackageHeader(file).header(), file, Digest.SHA256)
-        ).conflictsFlags();
+        ).dependencyFlags(Header.HeaderTag.CONFLICTFLAGS);
         MatcherAssert.assertThat(
             "Conflicts flags list should have 7 items",
             res, Matchers.iterableWithSize(7)

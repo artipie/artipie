@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.redline_rpm.header.AbstractHeader;
 import org.redline_rpm.header.Header;
 
 /**
@@ -180,122 +181,43 @@ public final class HeaderTags {
     }
 
     /**
-     * Get the provides libraries names.
-     * @return Value of header tag PROVIDENAME.
-     */
-    public List<String> providesNames() {
-        return this.meta.header(Header.HeaderTag.PROVIDENAME).asStrings();
-    }
-
-    /**
-     * Get the provides libraries versions.
-     * @return Value of header tag PROVIDEVERSION.
-     */
-    public List<HeaderTags.Version> providesVer() {
-        return this.meta.header(Header.HeaderTag.PROVIDEVERSION).asStrings().stream()
-            .map(HeaderTags.Version::new).collect(Collectors.toList());
-    }
-
-    /**
-     * Get the provides flags header.
-     * @return Value of header tag PROVIDEFLAGS.
-     */
-    public List<Optional<String>> providesFlags() {
-        final int[] array = this.meta.header(Header.HeaderTag.PROVIDEFLAGS).asInts();
-        return Arrays.stream(array)
-            .mapToObj(Flags::find).collect(Collectors.toList());
-    }
-
-    /**
-     * Get the require name header.
-     * @return Value of header tag REQUIRENAME.
-     */
-    public List<String> requires() {
-        return this.meta.header(Header.HeaderTag.REQUIRENAME).asStrings();
-    }
-
-    /**
-     * Get the require version header.
-     * @return Value of header tag REQUIREVERSION.
-     */
-    public List<HeaderTags.Version> requiresVer() {
-        return this.meta.header(Header.HeaderTag.REQUIREVERSION).asStrings().stream()
-            .map(HeaderTags.Version::new).collect(Collectors.toList());
-    }
-
-    /**
-     * Get the require flags header as strings.
-     * @return Value of header tag REQUIREFLAGS.
-     */
-    public List<Optional<String>> requireFlags() {
-        // @checkstyle MagicNumberCheck (1 line)
-        return this.requireFlagsInts().stream().map(flag -> flag & 0xf)
-            .map(Flags::find).collect(Collectors.toList());
-    }
-
-    /**
-     * Get the obsolete name header.
-     * @return Value of header tag OBSOLETENAME.
-     */
-    public List<String> obsoletes() {
-        return this.meta.header(Header.HeaderTag.OBSOLETENAME).asStrings();
-    }
-
-    /**
-     * Get the obsolete versions header.
-     * @return Value of header tag OBSOLETEVERSION.
-     */
-    public List<HeaderTags.Version> obsoletesVer() {
-        return this.meta.header(Header.HeaderTag.OBSOLETEVERSION).asStrings()
-            .stream().map(HeaderTags.Version::new).collect(Collectors.toList());
-    }
-
-    /**
-     * Get the obsolete flags header.
-     * @return Value of header tag OBSOLETEFLAGS.
-     */
-    public List<Optional<String>> obsoletesFlags() {
-        // @checkstyle MagicNumberCheck (2 lines)
-        return Arrays.stream(this.meta.header(Header.HeaderTag.OBSOLETEFLAGS).asInts())
-            .map(flag -> flag & 0xf)
-            .mapToObj(Flags::find).collect(Collectors.toList());
-    }
-
-    /**
-     * Get the conflicts name header.
-     * @return Value of header tag CONFLICTNAME.
-     */
-    public List<String> conflicts() {
-        return this.meta.header(Header.HeaderTag.CONFLICTNAME).asStrings();
-    }
-
-    /**
-     * Get the conflicts versions header.
-     * @return Value of header tag CONFLICTVERSION.
-     */
-    public List<HeaderTags.Version> conflictsVer() {
-        return this.meta.header(Header.HeaderTag.CONFLICTVERSION).asStrings()
-            .stream().map(HeaderTags.Version::new).collect(Collectors.toList());
-    }
-
-    /**
-     * Get the conflicts flags header.
-     * @return Value of header tag CONFLICTFLAGS.
-     */
-    public List<Optional<String>> conflictsFlags() {
-        // @checkstyle MagicNumberCheck (2 lines)
-        return Arrays.stream(this.meta.header(Header.HeaderTag.CONFLICTFLAGS).asInts())
-            .map(flag -> flag & 0xf)
-            .mapToObj(Flags::find).collect(Collectors.toList());
-    }
-
-    /**
      * Get the require flags headers as ints.
      * @return Value of header tag REQUIREFLAGS.
      */
     public List<Integer> requireFlagsInts() {
         final int[] array = this.meta.header(Header.HeaderTag.REQUIREFLAGS).asInts();
         return Arrays.stream(array).boxed().collect(Collectors.toList());
+    }
+
+    /**
+     * Dependencies names list.
+     * @param tag Dependency tag
+     * @return List of the recommends dependencies
+     */
+    public List<String> dependencyNames(final AbstractHeader.Tag tag) {
+        return this.meta.header(tag).asStrings();
+    }
+
+    /**
+     * Dependencies versions list.
+     * @param tag Dependency version tag
+     * @return List of the recommends dependencies versions
+     */
+    public List<HeaderTags.Version> dependencyVers(final AbstractHeader.Tag tag) {
+        return this.meta.header(tag).asStrings()
+            .stream().map(HeaderTags.Version::new).collect(Collectors.toList());
+    }
+
+    /**
+     * Dependencies flags list.
+     * @param tag Dependency flags tag
+     * @return List of the recommends dependencies flags
+     */
+    public List<Optional<String>> dependencyFlags(final AbstractHeader.Tag tag) {
+        // @checkstyle MagicNumberCheck (2 lines)
+        return Arrays.stream(this.meta.header(tag).asInts())
+            .map(flag -> flag & 0xf)
+            .mapToObj(Flags::find).collect(Collectors.toList());
     }
 
     /**

@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import javax.xml.stream.XMLEventFactory;
 import org.codehaus.stax2.XMLOutputFactory2;
+import org.redline_rpm.header.AbstractHeader;
 import org.redline_rpm.header.Header;
 
 /**
@@ -347,7 +348,7 @@ public interface RpmMetadata {
         }
 
         @Override
-        public Package.MetaHeader header(final Header.HeaderTag tag) {
+        public Package.MetaHeader header(final AbstractHeader.Tag tag) {
             return new FilePackage.EntryHeader(this.header.getEntry(tag));
         }
 
