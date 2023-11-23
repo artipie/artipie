@@ -59,7 +59,8 @@ jobs:
         with:
           java-version: ${{steps.split.outputs._2}}
           distribution: adopt
-      - run: mvn deploy -Partipie,publish,sonatype,gpg-sign -DskipTests --errors
+      - name: Build adapter
+        run: mvn deploy -Partipie,publish,sonatype,gpg-sign -DskipTests --errors
         working-directory: ${{steps.split.outputs._0}}
         env:
           MAVEN_OPTS: --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED
