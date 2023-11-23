@@ -34,10 +34,6 @@ SOFTWARE.
   <packaging>jar</packaging>
   <name>composer-files</name>
   <description>Turns your files/objects into PHP Composer artifacts</description>
-  <properties>
-    <maven.compiler.source>8</maven.compiler.source>
-    <maven.compiler.target>8</maven.compiler.target>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
