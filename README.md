@@ -140,9 +140,9 @@ git push --tags origin
 ```
 Also, each adapter can be released into Maven Central individually. To do that, push git tag of the following format:
 ```text
-[adapter-name]_[version]_[java-version]
-rpm-adapter_v1.2.3_8 
+[adapter-name]_[version]
+rpm-adapter_v1.2.3
 ```
 On this tag, GitHub action [maven-adapter-release.yml](.github%2Fworkflows%2Fmaven-adapter-release.yml) will run to
-release specified adapter using specified java version. Note, that required Java Version is also set in adapters' pom 
-files and should correspond to version in release tag. 
+release specified adapter. Note, that some of the adapters should be compatible with java 8. To achieve that, we use 
+[--release=8](https://www.baeldung.com/java-compiler-release-option) option for the main code.

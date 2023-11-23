@@ -75,8 +75,6 @@ SOFTWARE.
     <url>https://github.com/artipie/artipie</url>
   </scm>
   <properties>
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
     <docker.image.name>artipie/artipie</docker.image.name>
     <qulice.license>${project.basedir}/../LICENSE.header</qulice.license>
     <asto.version>v1.16.0</asto.version>
@@ -235,6 +233,29 @@ SOFTWARE.
     </dependency>
   </dependencies>
   <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+<!--          <source>21</source>-->
+<!--          <target>21</target>-->
+          <release>8</release>
+        </configuration>
+        <executions>
+          <execution>
+            <id>test-compile</id>
+            <phase>process-test-sources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+            <configuration>
+              <release>21</release>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
