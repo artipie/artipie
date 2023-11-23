@@ -4,14 +4,10 @@ meta:
     path: /var/artipie/repo
   credentials:
     - type: env
-    - type: github
-    - type: artipie
-  policy:
-    type: artipie
-    storage:
-      type: fs
-      path: /var/artipie/security
   base_url: http://central.artipie.com/
+  crontab:
+    - path: C:\Users\g00563573\IdeaProjects\artipie\data\del_docker.rb
+      cronexp: "*/1 * * * * ?"
   metrics:
     port: 8087
     endpoint: "/metrics"

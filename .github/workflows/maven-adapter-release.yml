@@ -62,6 +62,7 @@ jobs:
       - name: Build adapter
         run: mvn deploy -Partipie,publish,sonatype,gpg-sign -DskipTests --errors
         working-directory: ${{steps.split.outputs._0}}
+        if: ${{steps.split.outputs._2 == '21'}}
         env:
           MAVEN_OPTS: --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED
       - name: Create Github Release
