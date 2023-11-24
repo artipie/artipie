@@ -9,6 +9,7 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.gem.http.GemSlice;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.Header;
@@ -20,6 +21,7 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.perms.EmptyPermissions;
+import com.artipie.security.policy.Policy;
 import com.artipie.security.policy.PolicyByUsername;
 import io.reactivex.Flowable;
 import java.io.IOException;
@@ -27,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.PermissionCollection;
 import java.util.Arrays;
+import java.util.Optional;
 import org.cactoos.text.Base64Encoded;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
@@ -48,7 +51,12 @@ public class AuthTest {
             new Authorization(String.format("Basic %s", token))
         );
         MatcherAssert.assertThat(
-            new GemSlice(new InMemoryStorage()).response(
+            new GemSlice(
+                new InMemoryStorage(),
+                Policy.FREE,
+                (name, pwd) -> Optional.of(new AuthUser("user", "test")),
+                ""
+            ).response(
                 new RequestLine("GET", "/api/v1/api_key").toString(),
                 headers,
                 Flowable.empty()
