@@ -25,7 +25,9 @@ import org.reactivestreams.Publisher;
  * Responses on api key requests.
  *
  * @since 0.3
+ * @checkstyle ReturnCountCheck (500 lines)
  */
+@SuppressWarnings("PMD.OnlyOneReturn")
 final class ApiKeySlice implements Slice {
 
     /**
@@ -51,15 +53,16 @@ final class ApiKeySlice implements Slice {
                 .authenticate(headers)
                 .thenApply(
                     result -> {
-                        Optional<String> key = Optional.empty();
                         if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
-                            key = new RqHeaders(headers, Authorization.NAME).stream()
+                            Optional<String> key = new RqHeaders(headers, Authorization.NAME).stream()
                             .filter(val -> val.startsWith(BasicAuthScheme.NAME))
                             .map(val -> val.substring(BasicAuthScheme.NAME.length() + 1))
-                                .findFirst();
+                            .findFirst();
+                            if (key.isPresent()) {
+                                return new RsWithBody(key.get(), StandardCharsets.US_ASCII);
+                            }
                         }
-                        return key.<Response>map(val -> new RsWithBody(val, StandardCharsets.US_ASCII))
-                            .orElseGet(() -> new RsWithStatus(RsStatus.UNAUTHORIZED));
+                        return new RsWithStatus(RsStatus.UNAUTHORIZED);
                     }
                 )
         );
