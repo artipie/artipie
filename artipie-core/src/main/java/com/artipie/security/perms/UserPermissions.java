@@ -4,7 +4,6 @@
  */
 package com.artipie.security.perms;
 
-import java.io.Serial;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Enumeration;
@@ -48,7 +47,6 @@ public final class UserPermissions extends PermissionCollection {
     /**
      * Required serial.
      */
-    @Serial
     private static final long serialVersionUID = -7546496571951236695L;
 
     /**

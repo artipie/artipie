@@ -21,7 +21,9 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.TimeUnit;
 import org.apache.http.client.utils.URIBuilder;
+import org.awaitility.Awaitility;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterEach;
@@ -131,7 +133,7 @@ final class FileProxySliceITCase {
             new BlockingStorage(cache).value(new Key.From("any")),
             new IsEqual<>(data)
         );
-        MatcherAssert.assertThat("Event was added to queue", events.size() == 1);
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).until(() -> events.size() == 1);
         final ArtifactEvent item = events.element();
         MatcherAssert.assertThat(
             item.artifactName(),

@@ -35,10 +35,6 @@ SOFTWARE.
   <name>npm-adapter</name>
   <description>Turns your files/objects into NPM artifacts</description>
   <inceptionYear>2019</inceptionYear>
-  <properties>
-    <maven.compiler.source>8</maven.compiler.source>
-    <maven.compiler.target>8</maven.compiler.target>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.apache.commons</groupId>
