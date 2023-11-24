@@ -26,6 +26,7 @@ import com.artipie.security.policy.PolicyByUsername;
 import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -57,7 +58,7 @@ class BasicAuthzSliceTest {
     }
 
     @Test
-    void returnsUnauthorizedErrorIfUnableToAuthenticate() {
+    void returnsUnauthorizedErrorIfCredentialsAreWrong() {
         MatcherAssert.assertThat(
             new BasicAuthzSlice(
                 new SliceSimple(StandardRs.OK),
@@ -72,6 +73,7 @@ class BasicAuthzSliceTest {
                     new RsHasStatus(RsStatus.UNAUTHORIZED),
                     new RsHasHeaders(new Header("WWW-Authenticate", "Basic realm=\"artipie\""))
                 ),
+                new Headers.From(new Authorization.Basic("aaa", "bbbb")),
                 new RequestLine("POST", "/bar", "HTTP/1.2")
             )
         );
@@ -93,6 +95,32 @@ class BasicAuthzSliceTest {
                 new RsHasStatus(RsStatus.FORBIDDEN),
                 new RequestLine("DELETE", "/baz", "HTTP/1.3"),
                 new Headers.From(new Authorization.Basic(name, "123")),
+                Content.EMPTY
+            )
+        );
+    }
+
+    @Test
+    void returnsForbiddenForAnonymousUser() {
+        MatcherAssert.assertThat(
+            new BasicAuthzSlice(
+                new SliceSimple(new RsWithStatus(RsStatus.OK)),
+                (user, pswd) -> Assertions.fail("Shouldn't be called"),
+                new OperationControl(
+                    user -> {
+                        MatcherAssert.assertThat(
+                            user.name(),
+                            Matchers.anyOf(Matchers.is("anonymous"), Matchers.is("*"))
+                        );
+                        return EmptyPermissions.INSTANCE;
+                    },
+                    new AdapterBasicPermission("any", Action.NONE)
+                )
+            ),
+            new SliceHasResponse(
+                new RsHasStatus(RsStatus.FORBIDDEN),
+                new RequestLine("DELETE", "/baz", "HTTP/1.3"),
+                new Headers.From(new Header("WWW-Authenticate", "Basic realm=\"artipie\"")),
                 Content.EMPTY
             )
         );

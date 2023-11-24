@@ -7,6 +7,7 @@ package  com.artipie.conan.http;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
@@ -89,8 +90,9 @@ public final class UsersEntity {
             final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
             return new AsyncResponse(
                 new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
-                    usr -> {
-                        final String token = this.tokens.generate(usr.user().get());
+                    authResult -> {
+                        assert authResult.status() != AuthScheme.AuthStatus.FAILED;
+                        final String token = this.tokens.generate(authResult.user());
                         final Response result;
                         if (Strings.isNullOrEmpty(token)) {
                             result = new RsWithBody(

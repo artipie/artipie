@@ -47,6 +47,18 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
     }
 
     /**
+     * New response matcher for slice with request line.
+     *
+     * @param rsp Response matcher
+     * @param headers Headers
+     * @param line Request line
+     */
+    public SliceHasResponse(final Matcher<? extends Response> rsp, final Headers headers,
+        final RequestLine line) {
+        this(rsp, line, headers, new Content.From(Flowable.empty()));
+    }
+
+    /**
      * New response matcher for slice with request line, headers and body.
      * @param rsp Response matcher
      * @param line Request line

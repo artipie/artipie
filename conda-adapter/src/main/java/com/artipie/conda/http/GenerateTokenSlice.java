@@ -8,6 +8,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
@@ -53,18 +54,18 @@ final class GenerateTokenSlice implements Slice {
         final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
-                usr -> {
+                result -> {
                     final Response res;
-                    if (usr.user().isPresent()) {
+                    if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
                         res = new RsJson(
                             () -> Json.createObjectBuilder()
-                                .add("token", this.tokens.generate(usr.user().get())).build(),
+                                .add("token", this.tokens.generate(result.user())).build(),
                             StandardCharsets.UTF_8
                         );
                     } else {
                         res = new RsWithHeaders(
                             new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            new Headers.From(new WwwAuthenticate(usr.challenge()))
+                            new Headers.From(new WwwAuthenticate(result.challenge()))
                         );
                     }
                     return res;
