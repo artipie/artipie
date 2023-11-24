@@ -18,6 +18,7 @@ import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import org.reactivestreams.Publisher;
 
 /**
@@ -48,17 +49,18 @@ final class ApiKeySlice implements Slice {
         return new AsyncResponse(
             new BasicAuthScheme(this.auth)
                 .authenticate(headers)
-                .thenApply(AuthScheme.Result::user)
                 .thenApply(
-                    opt -> opt.flatMap(
-                        user -> new RqHeaders(headers, Authorization.NAME).stream()
+                    result -> {
+                        Optional<String> key = Optional.empty();
+                        if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
+                            key = new RqHeaders(headers, Authorization.NAME).stream()
                             .filter(val -> val.startsWith(BasicAuthScheme.NAME))
                             .map(val -> val.substring(BasicAuthScheme.NAME.length() + 1))
-                            .findFirst()
-                    )
-                ).thenApply(
-                    key -> key.<Response>map(val -> new RsWithBody(val, StandardCharsets.US_ASCII))
-                        .orElseGet(() -> new RsWithStatus(RsStatus.UNAUTHORIZED))
+                                .findFirst();
+                        }
+                        return key.<Response>map(val -> new RsWithBody(val, StandardCharsets.US_ASCII))
+                            .orElseGet(() -> new RsWithStatus(RsStatus.UNAUTHORIZED));
+                    }
                 )
         );
     }

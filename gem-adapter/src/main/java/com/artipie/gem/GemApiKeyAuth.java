@@ -49,72 +49,15 @@ public final class GemApiKeyAuth implements AuthScheme {
                     if (str.startsWith(BasicAuthScheme.NAME)) {
                         res = new BasicAuthScheme(this.auth).authenticate(headers);
                     } else {
-                        res = CompletableFuture.completedFuture(
-                            Optional.of(str)
-                                .map(item -> item.getBytes(StandardCharsets.UTF_8))
-                                .map(Base64::decodeBase64)
-                                .map(String::new)
-                                .map(dec -> dec.split(":"))
-                                .flatMap(
-                                    cred -> this.auth.user(cred[0].trim(), cred[1].trim())
-                                )
-                                .<Result>map(Success::new)
-                                .orElseGet(Failure::new)
-                        );
+                        final String[] cred = new String(
+                            Base64.encodeBase64(str.getBytes(StandardCharsets.UTF_8))
+                        ).split(":");
+                        final Optional<AuthUser> user = this.auth.user(cred[0].trim(), cred[1].trim());
+                        res = CompletableFuture.completedFuture(AuthScheme.result(user, ""));
                     }
                     return res;
                 }
             )
             .get();
-    }
-
-    /**
-     * Successful result with authenticated user.
-     *
-     * @since 0.5.4
-     */
-    private static class Success implements AuthScheme.Result {
-
-        /**
-         * Authenticated user.
-         */
-        private final AuthUser usr;
-
-        /**
-         * Ctor.
-         *
-         * @param user Authenticated user.
-         */
-        Success(final AuthUser user) {
-            this.usr = user;
-        }
-
-        @Override
-        public Optional<AuthUser> user() {
-            return Optional.of(this.usr);
-        }
-
-        @Override
-        public String challenge() {
-            return "";
-        }
-    }
-
-    /**
-     * Failed result without authenticated user.
-     *
-     * @since 0.5.4
-     */
-    private static class Failure implements AuthScheme.Result {
-
-        @Override
-        public Optional<AuthUser> user() {
-            return Optional.empty();
-        }
-
-        @Override
-        public String challenge() {
-            return "";
-        }
     }
 }

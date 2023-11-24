@@ -36,7 +36,9 @@ import java.nio.ByteBuffer;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
@@ -48,6 +50,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.testcontainers.shaded.com.google.common.collect.Sets;
 
 /**
  * Tests for {@link DockerSlice}.
@@ -73,10 +76,12 @@ public final class AuthTest {
 
     @ParameterizedTest
     @MethodSource("setups")
-    void shouldForbiddenOkForAnonymousUser(final Method method, final RequestLine line) {
+    void shouldForbiddenForAnonymousUser(final Method method, final RequestLine line) {
         MatcherAssert.assertThat(
             method.slice(
-                new DockerRepositoryPermission("*", "whatever", DockerActions.PULL.mask())
+                new TestPolicy(
+                    new DockerRepositoryPermission("*", "whatever", DockerActions.PULL.mask())
+                )
             ).response(line.toString(), Headers.EMPTY, Content.EMPTY),
             new IsDeniedResponse()
         );
@@ -204,6 +209,26 @@ public final class AuthTest {
         );
     }
 
+    @ParameterizedTest
+    @MethodSource("setups")
+    void shouldOkWhenAnonymousUserHasPermissions(
+        final Method method,
+        final RequestLine line,
+        final Permission permission
+    ) {
+        final Response response = method.slice(new TestPolicy(permission, "anonymous", "Alice"))
+            .response(line.toString(), Headers.EMPTY, Content.EMPTY);
+        MatcherAssert.assertThat(
+            response,
+            new AllOf<>(
+                Arrays.asList(
+                    new IsNot<>(new RsHasStatus(RsStatus.FORBIDDEN)),
+                    new IsNot<>(new RsHasStatus(RsStatus.UNAUTHORIZED))
+                )
+            )
+        );
+    }
+
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static Stream<Arguments> setups() {
         return Stream.of(new Basic(), new Bearer()).flatMap(AuthTest::setups);
@@ -303,7 +328,11 @@ public final class AuthTest {
      */
     private interface Method {
 
-        Slice slice(Permission perm);
+        default Slice slice(final Permission perm) {
+            return slice(new TestPolicy(perm));
+        }
+
+        Slice slice(final Policy<PermissionCollection> policy);
 
         Headers headers(TestAuthentication.User user);
 
@@ -330,10 +359,10 @@ public final class AuthTest {
         }
 
         @Override
-        public Slice slice(final Permission perm) {
+        public Slice slice(final Policy<PermissionCollection> policy) {
             return new DockerSlice(
                 this.docker,
-                new TestPolicy(perm),
+                policy,
                 new BasicAuthScheme(new TestAuthentication()),
                 Optional.empty(),
                 "*"
@@ -359,10 +388,10 @@ public final class AuthTest {
     private static final class Bearer implements Method {
 
         @Override
-        public Slice slice(final Permission action) {
+        public Slice slice(final Policy<PermissionCollection> policy) {
             return new DockerSlice(
                 new AstoDocker(new InMemoryStorage()),
-                new TestPolicy(action),
+                policy,
                 new BearerAuthScheme(
                     token -> CompletableFuture.completedFuture(
                         Stream.of(TestAuthentication.ALICE, TestAuthentication.BOB)
@@ -406,14 +435,22 @@ public final class AuthTest {
          */
         private final Permission perm;
 
+        private final Set<String> users;
+
         TestPolicy(final Permission perm) {
             this.perm = perm;
+            this.users = Collections.singleton("Alice");
+        }
+
+        TestPolicy(final Permission perm, String... users) {
+            this.perm = perm;
+            this.users = Sets.newHashSet(users);
         }
 
         @Override
         public PermissionCollection getPermissions(final AuthUser user) {
             final PermissionCollection res;
-            if (user.name().equals(TestAuthentication.ALICE.name())) {
+            if (this.users.contains(user.name())) {
                 res = this.perm.newPermissionCollection();
                 res.add(this.perm);
             } else {
