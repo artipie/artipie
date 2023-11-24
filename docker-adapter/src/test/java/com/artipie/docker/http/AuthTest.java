@@ -58,10 +58,12 @@ import org.testcontainers.shaded.com.google.common.collect.Sets;
  *
  * @since 0.8
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle ClassFanOutComplexityCheck (500 lines)
+ * @checkstyle JavadocVariableCheck (500 lines)
  * @todo #434:30min test `shouldReturnForbiddenWhenUserHasNoRequiredPermissionOnSecondManifestPut`
  *  fails in github actions, locally it works fine. Figure out what is the problem and fix it.
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "OnlyOneConstructorShouldDoInitialization"})
 public final class AuthTest {
 
     /**
@@ -329,10 +331,10 @@ public final class AuthTest {
     private interface Method {
 
         default Slice slice(final Permission perm) {
-            return slice(new TestPolicy(perm));
+            return this.slice(new TestPolicy(perm));
         }
 
-        Slice slice(final Policy<PermissionCollection> policy);
+        Slice slice(Policy<PermissionCollection> policy);
 
         Headers headers(TestAuthentication.User user);
 
@@ -442,7 +444,7 @@ public final class AuthTest {
             this.users = Collections.singleton("Alice");
         }
 
-        TestPolicy(final Permission perm, String... users) {
+        TestPolicy(final Permission perm, final String... users) {
             this.perm = perm;
             this.users = Sets.newHashSet(users);
         }
