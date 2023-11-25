@@ -54,10 +54,11 @@ final class ApiKeySlice implements Slice {
                 .thenApply(
                     result -> {
                         if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
-                            Optional<String> key = new RqHeaders(headers, Authorization.NAME).stream()
-                            .filter(val -> val.startsWith(BasicAuthScheme.NAME))
-                            .map(val -> val.substring(BasicAuthScheme.NAME.length() + 1))
-                            .findFirst();
+                            final Optional<String> key = new RqHeaders(headers, Authorization.NAME)
+                                .stream()
+                                .filter(val -> val.startsWith(BasicAuthScheme.NAME))
+                                .map(val -> val.substring(BasicAuthScheme.NAME.length() + 1))
+                                .findFirst();
                             if (key.isPresent()) {
                                 return new RsWithBody(key.get(), StandardCharsets.US_ASCII);
                             }
