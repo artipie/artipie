@@ -146,7 +146,7 @@ class NuGetPackageMetadataTest {
     }
 
     @Test
-    void shouldFailGetRegistrationForAnonymousUser() {
+    void shouldUnauthorizedGetRegistrationForAnonymousUser() {
         MatcherAssert.assertThat(
             this.nuget.response(
                 new RequestLine(
@@ -157,7 +157,7 @@ class NuGetPackageMetadataTest {
                 Flowable.empty()
             ),
             new ResponseMatcher(
-                RsStatus.FORBIDDEN, Headers.EMPTY
+                RsStatus.UNAUTHORIZED, Headers.EMPTY
             )
         );
     }

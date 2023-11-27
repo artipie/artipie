@@ -112,7 +112,7 @@ class NuGetPackagePublishTest {
     }
 
     @Test
-    void shouldFailPutPackageForAnonymousUser() {
+    void shouldUnauthorizedPutPackageForAnonymousUser() {
         MatcherAssert.assertThat(
             this.nuget.response(
                 new RequestLine(RqMethod.PUT, "/package").toString(),
@@ -120,7 +120,7 @@ class NuGetPackagePublishTest {
                 Flowable.fromArray(ByteBuffer.wrap("data".getBytes()))
             ),
             new ResponseMatcher(
-                RsStatus.FORBIDDEN, Headers.EMPTY
+                RsStatus.UNAUTHORIZED, Headers.EMPTY
             )
         );
         MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());

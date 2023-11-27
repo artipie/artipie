@@ -78,14 +78,14 @@ public final class AuthTest {
 
     @ParameterizedTest
     @MethodSource("setups")
-    void shouldForbiddenForAnonymousUser(final Method method, final RequestLine line) {
+    void shouldUnauthorizedForAnonymousUser(final Method method, final RequestLine line) {
         MatcherAssert.assertThat(
             method.slice(
                 new TestPolicy(
                     new DockerRepositoryPermission("*", "whatever", DockerActions.PULL.mask())
                 )
             ).response(line.toString(), Headers.EMPTY, Content.EMPTY),
-            new IsDeniedResponse()
+            new IsUnauthorizedResponse()
         );
     }
 

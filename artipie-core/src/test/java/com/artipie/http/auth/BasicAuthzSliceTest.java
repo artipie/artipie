@@ -101,7 +101,7 @@ class BasicAuthzSliceTest {
     }
 
     @Test
-    void returnsForbiddenForAnonymousUser() {
+    void returnsUnauthorizedForAnonymousUser() {
         MatcherAssert.assertThat(
             new BasicAuthzSlice(
                 new SliceSimple(new RsWithStatus(RsStatus.OK)),
@@ -118,7 +118,7 @@ class BasicAuthzSliceTest {
                 )
             ),
             new SliceHasResponse(
-                new RsHasStatus(RsStatus.FORBIDDEN),
+                new RsHasStatus(RsStatus.UNAUTHORIZED),
                 new RequestLine("DELETE", "/baz", "HTTP/1.3"),
                 new Headers.From(new Header("WWW-Authenticate", "Basic realm=\"artipie\"")),
                 Content.EMPTY

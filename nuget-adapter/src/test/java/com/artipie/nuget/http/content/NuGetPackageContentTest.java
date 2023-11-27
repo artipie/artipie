@@ -64,7 +64,7 @@ class NuGetPackageContentTest {
     }
 
     @Test
-    void shouldGetPackageContent() throws Exception {
+    void shouldGetPackageContent() {
         final byte[] data = "data".getBytes();
         new BlockingStorage(this.storage).save(
             new Key.From("package", "1.0.0", "content.nupkg"),
@@ -123,7 +123,7 @@ class NuGetPackageContentTest {
     }
 
     @Test
-    void shouldGetPackageVersions() throws Exception {
+    void shouldGetPackageVersions() {
         final byte[] data = "example".getBytes();
         new BlockingStorage(this.storage).save(
             new Key.From("package2", "index.json"),
@@ -161,7 +161,7 @@ class NuGetPackageContentTest {
     }
 
     @Test
-    void shouldFailGetPackageContentByAnonymousUser() {
+    void shouldUnauthorizedGetPackageContentByAnonymousUser() {
         MatcherAssert.assertThat(
             this.nuget.response(
                 new RequestLine(
@@ -171,7 +171,7 @@ class NuGetPackageContentTest {
                 Headers.EMPTY,
                 Flowable.empty()
             ),
-            new ResponseMatcher(RsStatus.FORBIDDEN, Headers.EMPTY)
+            new ResponseMatcher(RsStatus.UNAUTHORIZED, Headers.EMPTY)
         );
     }
 }

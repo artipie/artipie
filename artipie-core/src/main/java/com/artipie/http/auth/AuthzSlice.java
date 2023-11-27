@@ -23,6 +23,8 @@ import org.reactivestreams.Publisher;
  * @checkstyle ReturnCountCheck (500 lines)
  * @checkstyle JavadocMethodCheck (500 lines)
  * @checkstyle ParameterNumberCheck (500 lines)
+ * @checkstyle NestedIfDepthCheck (500 lines)
+ * @checkstyle MethodBodyCommentsCheck (500 lines)
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class AuthzSlice implements Slice {
@@ -77,10 +79,29 @@ public final class AuthzSlice implements Slice {
             response = new AsyncResponse(
                 this.auth.authenticate(headers, line).thenApply(
                     result -> {
-                        if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED
-                            || result.status() == AuthScheme.AuthStatus.NO_CREDENTIALS) {
-                            return this.authorizeAndResponse(
-                                result.user(), line, headers, body
+                        if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
+                            if (this.control.allowed(result.user())) {
+                                return this.origin.response(
+                                    line,
+                                    new Headers.From(
+                                        headers, AuthzSlice.LOGIN_HDR,
+                                        result.user().name()
+                                    ),
+                                    body
+                                );
+                            }
+                            return new RsWithStatus(RsStatus.FORBIDDEN);
+                        }
+                        // The case of anonymous user
+                        if (result.status() == AuthScheme.AuthStatus.NO_CREDENTIALS
+                            && this.control.allowed(result.user())) {
+                            return this.origin.response(
+                                line,
+                                new Headers.From(
+                                    headers, AuthzSlice.LOGIN_HDR,
+                                    result.user().name()
+                                ),
+                                body
                             );
                         }
                         return new RsWithHeaders(
@@ -92,19 +113,5 @@ public final class AuthzSlice implements Slice {
             );
         }
         return response;
-    }
-
-    private Response authorizeAndResponse(final AuthUser usr,
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
-        if (this.control.allowed(usr)) {
-            return this.origin.response(
-                line,
-                new Headers.From(headers, AuthzSlice.LOGIN_HDR, usr.name()),
-                body
-            );
-        }
-        return new RsWithStatus(RsStatus.FORBIDDEN);
     }
 }
