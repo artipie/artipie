@@ -363,7 +363,7 @@ SOFTWARE.
             </build>
         </profile>
         <profile>
-            <id>docker-ubuntu</id>
+            <id>ubuntu-docker</id>
             <activation>
                 <file>
                     <exists>/var/run/docker.sock</exists>
