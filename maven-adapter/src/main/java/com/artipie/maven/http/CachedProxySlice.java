@@ -109,7 +109,7 @@ final class CachedProxySlice implements Slice {
         final Publisher<ByteBuffer> body) {
         final RequestLineFrom req = new RequestLineFrom(line);
         final Key key = new KeyFromPath(req.uri().getPath());
-        final AtomicReference<Headers> rshdr = new AtomicReference<>();
+        final AtomicReference<Headers> rshdr = new AtomicReference<>(Headers.EMPTY);
         return new AsyncResponse(
             new RepoHead(this.client)
                 .head(req.uri().getPath()).thenCompose(
@@ -157,8 +157,10 @@ final class CachedProxySlice implements Slice {
                                     new Content.From(content.get())
                                 );
                             } else {
-                                Logger.error(this, throwable.getMessage());
                                 result = StandardRs.NOT_FOUND;
+                                if (throwable != null) {
+                                    Logger.error(this, throwable.getMessage());
+                                }
                             }
                             return result;
                         }
