@@ -80,6 +80,7 @@ public final class FilesSlice extends Slice.Wrap {
     /**
      * Ctor.
      * @param storage The storage. And default parameters for free access.
+     * @param auth Authentication.
      */
     public FilesSlice(final Storage storage, final Authentication auth) {
         this(storage, Policy.FREE, auth, FilesSlice.ANY_REPO, Optional.empty());
