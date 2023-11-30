@@ -38,19 +38,6 @@ public final class HelmSlice extends Slice.Wrap {
      *
      * @param storage The storage.
      * @param base The base path the slice is expected to be accessed from. Example: https://central.artipie.com/helm
-     * @param events Events queue
-     */
-    public HelmSlice(
-        final Storage storage, final String base, final Optional<Queue<ArtifactEvent>> events
-    ) {
-        this(storage, base, Policy.FREE, Authentication.ANONYMOUS, "*", events);
-    }
-
-    /**
-     * Ctor.
-     *
-     * @param storage The storage.
-     * @param base The base path the slice is expected to be accessed from. Example: https://central.artipie.com/helm
      * @param policy Access policy.
      * @param auth Authentication.
      * @param name Repository name

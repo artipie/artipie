@@ -9,11 +9,13 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.helm.test.ContentOfIndex;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
 import java.net.HttpURLConnection;
@@ -76,6 +78,9 @@ final class HelmDeleteIT {
             new LoggingSlice(
                 new HelmSlice(
                     this.storage, String.format("http://localhost:%d", this.port),
+                    Policy.FREE,
+                    (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+                    "*",
                     Optional.of(this.events)
                 )
             ),

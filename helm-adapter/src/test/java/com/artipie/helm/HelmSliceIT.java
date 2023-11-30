@@ -14,6 +14,7 @@ import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.security.policy.PolicyByUsername;
 import com.artipie.vertx.VertxSliceServer;
 import com.google.common.io.ByteStreams;
@@ -188,7 +189,16 @@ final class HelmSliceIT {
         if (anonymous) {
             this.server = new VertxSliceServer(
                 HelmSliceIT.VERTX,
-                new LoggingSlice(new HelmSlice(this.storage, this.url, Optional.of(this.events))),
+                new LoggingSlice(
+                    new HelmSlice(
+                        this.storage,
+                        this.url,
+                        Policy.FREE,
+                        (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+                        "*",
+                        Optional.of(this.events)
+                    )
+                ),
                 this.port
             );
         } else {
