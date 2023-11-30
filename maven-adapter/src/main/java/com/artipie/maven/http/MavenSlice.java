@@ -62,10 +62,11 @@ public final class MavenSlice extends Slice.Wrap {
     /**
      * Ctor.
      * @param storage The storage and default parameters for free access.
+     * todo remove this?
      */
-    public MavenSlice(final Storage storage) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, "*", Optional.empty());
-    }
+    /*MavenSlice(final Storage storage, final Authentication auth) {
+        this(storage, Policy.FREE, auth, "*", Optional.empty());
+    }*/
 
     /**
      * Private ctor since Artipie doesn't know about `Identities` implementation.

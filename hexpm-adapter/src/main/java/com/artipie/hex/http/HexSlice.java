@@ -40,7 +40,7 @@ public final class HexSlice extends Slice.Wrap {
         this(
             storage,
             Policy.FREE,
-            Authentication.ANONYMOUS,
+            (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
             Optional.empty(),
             "*"
         );

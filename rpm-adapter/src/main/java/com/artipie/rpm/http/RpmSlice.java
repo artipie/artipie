@@ -36,12 +36,12 @@ public final class RpmSlice extends Slice.Wrap {
      * Ctor.
      * @param storage The storage.
      */
-    public RpmSlice(final Storage storage) {
+    /*public RpmSlice(final Storage storage) {
         this(
             storage, Policy.FREE, Authentication.ANONYMOUS,
             new RepoConfig.Simple(), Optional.empty()
         );
-    }
+    }*/
 
     /**
      * Ctor.

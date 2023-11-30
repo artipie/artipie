@@ -183,7 +183,10 @@ final class HexITCase {
     private Pair<Policy<?>, Authentication> auth(final boolean anonymous) {
         final Pair<Policy<?>, Authentication> res;
         if (anonymous) {
-            res = new ImmutablePair<>(Policy.FREE, Authentication.ANONYMOUS);
+            res = new ImmutablePair<>(
+                Policy.FREE,
+                (usr, pwd) -> Optional.of(Authentication.ANONYMOUS)
+            );
         } else {
             res = new ImmutablePair<>(
                 new PolicyByUsername(HexITCase.USER.getKey()),

@@ -8,6 +8,8 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.auth.ArtipieAuthFactory;
 import com.artipie.http.auth.AuthFactory;
 import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.TestAuthentication;
+import java.util.Optional;
 
 /**
  * Test auth.
@@ -18,6 +20,6 @@ public final class SecondAuth implements AuthFactory {
 
     @Override
     public Authentication getAuthentication(final YamlMapping conf) {
-        return Authentication.ANONYMOUS;
+        return new TestAuthentication();
     }
 }

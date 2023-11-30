@@ -31,7 +31,7 @@ class AuthLoaderTest {
                 "first",
                 Yaml.createYamlMappingBuilder().build()
             ),
-            new IsInstanceOf(Authentication.ANONYMOUS.getClass())
+            new IsInstanceOf(TestAuthentication.class)
         );
         MatcherAssert.assertThat(
             "second auth was created",
@@ -39,7 +39,7 @@ class AuthLoaderTest {
                 "second",
                 Yaml.createYamlMappingBuilder().build()
             ),
-            new IsInstanceOf(Authentication.ANONYMOUS.getClass())
+            new IsInstanceOf(TestAuthentication.class)
         );
     }
 

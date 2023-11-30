@@ -21,6 +21,7 @@ import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.text.StringContainsInOrder;
@@ -88,7 +89,12 @@ public final class RpmSliceITCase {
     })
     void canListAndInstallFromArtipieRepo(final String linux,
         final String mngr, final String rey) throws Exception {
-        this.start(Policy.FREE, Authentication.ANONYMOUS, "", linux);
+        this.start(
+            Policy.FREE,
+            (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+            "",
+            linux
+        );
         MatcherAssert.assertThat(
             "Lists 'time' package",
             this.exec(mngr, rey, "list"),

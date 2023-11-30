@@ -9,6 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.SliceHasResponse;
@@ -19,9 +20,12 @@ import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.TimeUnit;
 import org.apache.http.client.utils.URIBuilder;
+import org.awaitility.Awaitility;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterEach;
@@ -71,7 +75,13 @@ final class FileProxySliceITCase {
     void setUp() throws Exception {
         this.vertx = Vertx.vertx();
         this.storage = new InMemoryStorage();
-        this.server = new VertxSliceServer(this.vertx, new FilesSlice(this.storage));
+        this.server = new VertxSliceServer(
+            this.vertx,
+            new FilesSlice(
+                this.storage,
+                (usr, pwd) -> Optional.of(Authentication.ANONYMOUS)
+            )
+        );
         this.port = this.server.start();
         this.clients.start();
     }
@@ -131,7 +141,9 @@ final class FileProxySliceITCase {
             new BlockingStorage(cache).value(new Key.From("any")),
             new IsEqual<>(data)
         );
-        MatcherAssert.assertThat("Event was added to queue", events.size() == 1);
+
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).until(() -> events.size() == 1);
+
         final ArtifactEvent item = events.element();
         MatcherAssert.assertThat(
             item.artifactName(),

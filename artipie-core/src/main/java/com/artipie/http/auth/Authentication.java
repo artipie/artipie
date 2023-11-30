@@ -16,13 +16,11 @@ import java.util.stream.Stream;
  */
 public interface Authentication {
 
-    /**
-     * Resolve anyone as an anonymous user.
-     */
-    Authentication ANONYMOUS = (name, pswd) -> Optional.of(new AuthUser("anonymous", "unknown"));
+    AuthUser ANONYMOUS = new AuthUser("anonymous", "unknown");
 
     /**
      * Any user instance.
+     * todo Do we have the notion of `any user`?
      */
     AuthUser ANY_USER = new AuthUser("*", "any");
 

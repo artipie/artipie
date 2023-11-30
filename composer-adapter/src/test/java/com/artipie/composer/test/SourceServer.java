@@ -9,10 +9,12 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.files.FilesSlice;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
 import java.io.Closeable;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -45,7 +47,13 @@ public final class SourceServer implements Closeable {
         this.port = port;
         this.storage = new InMemoryStorage();
         this.server = new VertxSliceServer(
-            vertx, new LoggingSlice(new FilesSlice(this.storage)), port
+            vertx,
+            new LoggingSlice(
+                new FilesSlice(
+                    this.storage,
+                    (usr, pwd) -> Optional.of(Authentication.ANONYMOUS)
+                )
+            ), port
         );
         this.server.start();
     }

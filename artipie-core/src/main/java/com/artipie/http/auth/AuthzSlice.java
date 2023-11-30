@@ -63,7 +63,8 @@ public final class AuthzSlice implements Slice {
         final Publisher<ByteBuffer> body
     ) {
         final Response response;
-        if (this.control.allowed(Authentication.ANY_USER)) {
+        if (this.control.allowed(Authentication.ANY_USER)
+            || this.control.allowed(Authentication.ANONYMOUS)) {
             response = this.origin.response(
                 line,
                 new Headers.From(headers, AuthzSlice.LOGIN_HDR, Authentication.ANY_USER.name()),

@@ -41,10 +41,6 @@ import java.util.regex.Pattern;
  * A {@link Slice} which servers binary files.
  *
  * @since 0.1
- * @todo #91:30min Test FileSlice when listing blobs by prefix in JSON.
- *  We previously introduced {@link BlobListJsonFormat}
- *  to list blobs in JSON from a prefix. We should now test that the type
- *  and value of response's content are correct when we make a request.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.ExcessiveMethodLength")
@@ -85,8 +81,8 @@ public final class FilesSlice extends Slice.Wrap {
      * Ctor.
      * @param storage The storage. And default parameters for free access.
      */
-    public FilesSlice(final Storage storage) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, FilesSlice.ANY_REPO, Optional.empty());
+    public FilesSlice(final Storage storage, final Authentication auth) {
+        this(storage, Policy.FREE, auth, FilesSlice.ANY_REPO, Optional.empty());
     }
 
     /**
@@ -221,8 +217,11 @@ public final class FilesSlice extends Slice.Wrap {
         final int port = 8080;
         final VertxSliceServer server = new VertxSliceServer(
             new FilesSlice(
-                new InMemoryStorage(), Policy.FREE, Authentication.ANONYMOUS,
-                FilesSlice.ANY_REPO, Optional.empty()
+                new InMemoryStorage(),
+                Policy.FREE,
+                (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+                FilesSlice.ANY_REPO,
+                Optional.empty()
             ),
             port
         );

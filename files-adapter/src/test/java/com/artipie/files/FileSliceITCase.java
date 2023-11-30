@@ -8,6 +8,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Accept;
 import com.artipie.http.headers.ContentType;
 import com.artipie.vertx.VertxSliceServer;
@@ -17,6 +18,7 @@ import io.vertx.reactivex.ext.web.client.HttpResponse;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -61,7 +63,13 @@ final class FileSliceITCase {
     void setUp() {
         this.vertx = Vertx.vertx();
         this.storage = new InMemoryStorage();
-        this.server = new VertxSliceServer(this.vertx, new FilesSlice(this.storage));
+        this.server = new VertxSliceServer(
+            this.vertx,
+            new FilesSlice(
+                this.storage,
+                (usr, pwd) -> Optional.of(Authentication.ANONYMOUS)
+            )
+        );
         this.port = this.server.start();
     }
 
