@@ -9,7 +9,6 @@ import com.artipie.http.auth.ArtipieAuthFactory;
 import com.artipie.http.auth.AuthFactory;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.TestAuthentication;
-import java.util.Optional;
 
 /**
  * Test auth.
