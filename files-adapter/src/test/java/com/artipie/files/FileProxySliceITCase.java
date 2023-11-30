@@ -20,7 +20,6 @@ import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
@@ -141,9 +140,7 @@ final class FileProxySliceITCase {
             new BlockingStorage(cache).value(new Key.From("any")),
             new IsEqual<>(data)
         );
-
         Awaitility.await().atMost(30, TimeUnit.SECONDS).until(() -> events.size() == 1);
-
         final ArtifactEvent item = events.element();
         MatcherAssert.assertThat(
             item.artifactName(),

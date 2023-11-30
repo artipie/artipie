@@ -18,9 +18,11 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsWithBody;
+import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ProxyArtifactEvent;
+import com.jcabi.log.Logger;
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
 import java.util.Locale;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -106,6 +109,7 @@ final class CachedProxySlice implements Slice {
         final Publisher<ByteBuffer> body) {
         final RequestLineFrom req = new RequestLineFrom(line);
         final Key key = new KeyFromPath(req.uri().getPath());
+        final AtomicReference<Headers> rshdr = new AtomicReference<>(Headers.EMPTY);
         return new AsyncResponse(
             new RepoHead(this.client)
                 .head(req.uri().getPath()).thenCompose(
@@ -129,6 +133,7 @@ final class CachedProxySlice implements Slice {
                                         } else {
                                             promise.complete(Optional.empty());
                                         }
+                                        rshdr.set(rsheaders);
                                         return term;
                                     }
                                 );
@@ -148,10 +153,14 @@ final class CachedProxySlice implements Slice {
                             final Response result;
                             if (throwable == null && content.isPresent()) {
                                 result = new RsWithBody(
-                                    StandardRs.OK, new Content.From(content.get())
+                                    new RsWithHeaders(StandardRs.OK, rshdr.get()),
+                                    new Content.From(content.get())
                                 );
                             } else {
                                 result = StandardRs.NOT_FOUND;
+                                if (throwable != null) {
+                                    Logger.error(this, throwable.getMessage());
+                                }
                             }
                             return result;
                         }

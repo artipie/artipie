@@ -34,10 +34,6 @@ SOFTWARE.
   <name>conda-adapter</name>
   <description>Turns your files/objects into conda repository</description>
   <inceptionYear>2021</inceptionYear>
-  <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>com.artipie</groupId>

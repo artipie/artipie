@@ -36,8 +36,6 @@ SOFTWARE.
   <description>Debian adapter</description>
   <inceptionYear>2020</inceptionYear>
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
     <org.bouncycastle.version>1.70</org.bouncycastle.version>
     <jmh.version>1.29</jmh.version>
   </properties>
