@@ -44,25 +44,6 @@ public final class ConanSlice extends Slice.Wrap {
     private static final String TEST_CONTEXT = "test";
 
     /**
-     * Anonymous tokens.
-     */
-    private static final Tokens ANONYMOUS = new Tokens() {
-
-        @Override
-        public TokenAuthentication auth() {
-            return token ->
-                CompletableFuture.completedFuture(
-                    Optional.of(new AuthUser("anonymous", ConanSlice.TEST_CONTEXT))
-                );
-        }
-
-        @Override
-        public String generate(final AuthUser user) {
-            return "123qwe";
-        }
-    };
-
-    /**
      * Fake implementation of {@link Tokens} for the single user.
      * @since 0.5
      */

@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 public final class DockerAuthSliceTest {
 
     @Test
-    void shouldReturnErrorsWhenUnathorized() {
+    void shouldReturnErrorsWhenUnauthorized() {
         final Headers headers = new Headers.From(
             new WwwAuthenticate("Basic"),
             new Header("X-Something", "Value")
