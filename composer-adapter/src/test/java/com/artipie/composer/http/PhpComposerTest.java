@@ -13,14 +13,17 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.composer.AllPackages;
 import com.artipie.composer.AstoRepository;
 import com.artipie.http.Response;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.security.policy.Policy;
 import io.reactivex.Flowable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +58,13 @@ class PhpComposerTest {
     @BeforeEach
     void init() {
         this.storage = new InMemoryStorage();
-        this.php = new PhpComposer(new AstoRepository(this.storage));
+        this.php = new PhpComposer(
+            new AstoRepository(this.storage),
+            Policy.FREE,
+            (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+            "*",
+            Optional.empty()
+        );
     }
 
     @Test

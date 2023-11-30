@@ -10,8 +10,10 @@ import com.artipie.composer.test.ComposerSimple;
 import com.artipie.composer.test.HttpUrlUpload;
 import com.artipie.composer.test.PackageSimple;
 import com.artipie.composer.test.SourceServer;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.slice.LoggingSlice;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
@@ -92,7 +94,13 @@ class RepositoryHttpIT {
         this.server = new VertxSliceServer(
             RepositoryHttpIT.VERTX,
             new LoggingSlice(
-                new PhpComposer(new AstoRepository(new InMemoryStorage()))
+                new PhpComposer(
+                    new AstoRepository(new InMemoryStorage()),
+                    Policy.FREE,
+                    (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+                    "*",
+                    Optional.empty()
+                )
             )
         );
         this.port = this.server.start();

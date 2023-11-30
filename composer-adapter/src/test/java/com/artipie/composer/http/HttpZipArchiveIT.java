@@ -9,9 +9,11 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.composer.AstoRepository;
 import com.artipie.composer.test.ComposerSimple;
 import com.artipie.composer.test.HttpUrlUpload;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
@@ -93,7 +95,15 @@ final class HttpZipArchiveIT {
         );
         this.server = new VertxSliceServer(
             HttpZipArchiveIT.VERTX,
-            new LoggingSlice(new PhpComposer(asto, this.events)),
+            new LoggingSlice(
+                new PhpComposer(
+                    asto,
+                    Policy.FREE,
+                    (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+                    "*",
+                    Optional.of(this.events)
+                )
+            ),
             this.port
         );
         this.server.start();
@@ -151,7 +161,7 @@ final class HttpZipArchiveIT {
         MatcherAssert.assertThat(
             this.exec("composer", "install", "--verbose", "--no-cache"),
             new AllOf<>(
-                new ListOf<Matcher<? super String>>(
+                new ListOf<>(
                     new StringContains(false, "Installs: psr/log:1.1.3"),
                     new StringContains(false, "- Downloading psr/log (1.1.3)"),
                     new StringContains(
