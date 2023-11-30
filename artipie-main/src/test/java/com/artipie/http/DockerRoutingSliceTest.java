@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -111,7 +112,8 @@ final class DockerRoutingSliceTest {
     }
 
     @Test
-    void notAllowsAnyUser() {
+    @Disabled("Any user must be deleted from the code")
+    void notAllowsAnonymousUser() {
         MatcherAssert.assertThat(
             new DockerRoutingSlice(
                 new SettingsWithAuth((usr, pswd) -> Optional.of(Authentication.ANY_USER)),

@@ -42,7 +42,10 @@ class BasicAuthzSliceTest {
             new BasicAuthzSlice(
                 (rqline, headers, body) -> new RsWithHeaders(StandardRs.OK, headers),
                 (user, pswd) -> Optional.empty(),
-                new OperationControl(Policy.FREE, new AdapterBasicPermission("any", Action.ALL))
+                new OperationControl(Policy.FREE, new AdapterBasicPermission(
+                    "anonymous",
+                    Action.ALL)
+                )
             ),
             new SliceHasResponse(
                 Matchers.allOf(
@@ -132,7 +135,7 @@ class BasicAuthzSliceTest {
                     throw new IllegalStateException("Should not be invoked");
                 },
                 new OperationControl(
-                    new PolicyByUsername(Authentication.ANY_USER.name()),
+                    new PolicyByUsername("anonymous"),
                     new AdapterBasicPermission("any", Action.ALL)
                 )
             ),
