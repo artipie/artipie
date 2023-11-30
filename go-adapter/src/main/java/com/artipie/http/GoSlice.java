@@ -47,14 +47,6 @@ public final class GoSlice implements Slice {
     /**
      * Ctor.
      * @param storage Storage
-     */
-    public GoSlice(final Storage storage) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, "*");
-    }
-
-    /**
-     * Ctor.
-     * @param storage Storage
      * @param policy Security policy
      * @param users Users
      * @param name Repository name
