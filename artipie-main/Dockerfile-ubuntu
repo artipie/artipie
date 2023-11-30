@@ -1,0 +1,46 @@
+
+FROM ubuntu:22.04
+
+# this is a non-interactive automated build - avoid some warning messages
+ENV DEBIAN_FRONTEND noninteractive
+
+# update dpkg repositories
+RUN apt-get update
+
+# install wget
+RUN apt-get install -y wget
+
+# set shell variables for java installation
+ENV java_version 21
+ENV filename jdk-21_linux-x64_bin.tar.gz
+ENV downloadlink https://download.oracle.com/java/21/latest/$filename
+
+# download java, accepting the license agreement
+RUN wget --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" -O /tmp/$filename $downloadlink
+
+# unpack java
+RUN mkdir /opt/java-oracle/ && mkdir /opt/java-oracle/jdk21/ && tar -zxf /tmp/$filename -C /opt/java-oracle/jdk21/ --strip-components 1
+ENV JAVA_HOME /opt/java-oracle/jdk21
+ENV PATH $JAVA_HOME/bin:$PATH
+
+# configure symbolic links for the java and javac executables
+RUN update-alternatives --install /usr/bin/java java $JAVA_HOME/bin/java 20000 && update-alternatives --install /usr/bin/javac javac $JAVA_HOME/bin/javac 20000
+
+ARG JAR_FILE
+ENV JVM_OPTS=""
+
+RUN groupadd -r -g 2020 artipie && \
+    useradd -M -r -g artipie -u 2021 -s /sbin/nologin artipie && \
+    mkdir -p /etc/artipie /usr/lib/artipie /var/artipie && \
+    chown artipie:artipie -R /etc/artipie /usr/lib/artipie /var/artipie
+USER 2021:2020
+
+COPY target/dependency  /usr/lib/artipie/lib
+COPY target/${JAR_FILE} /usr/lib/artipie/artipie.jar
+COPY src/test/resources/ssl/keystore.jks /var/artipie/keystore.jks
+
+VOLUME /var/artipie /etc/artipie
+WORKDIR /var/artipie
+EXPOSE 8080 8086 8091
+CMD [ "sh", "-c", "java $JVM_ARGS --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -cp /usr/lib/artipie/artipie.jar:/usr/lib/artipie/lib/* com.artipie.VertxMain --config-file=/etc/artipie/artipie.yml --port=8080 --api-port=8086" ]
+
