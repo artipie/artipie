@@ -267,7 +267,7 @@ public final class CondaSliceITCase {
     /**
      * Anonymous tokens.
      */
-    private static final Tokens ANONYMOUS = new Tokens() {
+    private final static Tokens ANONYMOUS = new Tokens() {
         @Override
         public TokenAuthentication auth() {
             return TokenAuth.ANONYMOUS;
