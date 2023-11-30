@@ -35,27 +35,6 @@ public final class DebianSlice extends Slice.Wrap {
     /**
      * Ctor.
      * @param storage Storage
-     * @param config Repository configuration
-     */
-    public DebianSlice(final Storage storage, final Config config) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, config, Optional.empty());
-    }
-
-    /**
-     * Ctor.
-     * @param storage Storage
-     * @param config Repository configuration
-     * @param events Artifact events queue
-     */
-    public DebianSlice(
-        final Storage storage, final Config config, final Optional<Queue<ArtifactEvent>> events
-    ) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, config, events);
-    }
-
-    /**
-     * Ctor.
-     * @param storage Storage
      * @param policy Policy
      * @param users Users
      * @param config Repository configuration

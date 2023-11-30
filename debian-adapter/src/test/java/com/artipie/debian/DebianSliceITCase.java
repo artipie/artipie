@@ -10,9 +10,11 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.debian.http.DebianSlice;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
@@ -102,6 +104,8 @@ public final class DebianSliceITCase {
             new LoggingSlice(
                 new DebianSlice(
                     this.storage,
+                    Policy.FREE,
+                    (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
                     new Config.FromYaml(
                         "artipie",
                         Yaml.createYamlMappingBuilder()
@@ -109,7 +113,8 @@ public final class DebianSliceITCase {
                             .add("Architectures", "amd64")
                             .build(),
                         new InMemoryStorage()
-                    ), Optional.ofNullable(this.events)
+                    ),
+                    Optional.of(this.events)
                 )
             )
         );
