@@ -21,16 +21,18 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class ArtipieSecurityTest {
 
+    private final Authentication test = (usr, pwd) -> Optional.empty();
+
     @Test
     void initiatesPolicy() throws IOException {
         final ArtipieSecurity security = new ArtipieSecurity.FromYaml(
             Yaml.createYamlInput(this.policy()).readYamlMapping(),
-            Authentication.ANONYMOUS, Optional.empty()
+            test, Optional.empty()
         );
         MatcherAssert.assertThat(
             "Returns provided authentication",
             security.authentication(),
-            new IsInstanceOf(Authentication.ANONYMOUS.getClass())
+            new IsInstanceOf(test.getClass())
         );
         MatcherAssert.assertThat(
             "Returns provided empty optional",
@@ -49,7 +51,7 @@ class ArtipieSecurityTest {
             "Initiates policy",
             new ArtipieSecurity.FromYaml(
                 Yaml.createYamlMappingBuilder().build(),
-                Authentication.ANONYMOUS, Optional.empty()
+                test, Optional.empty()
             ).policy(),
             new IsInstanceOf(Policy.FREE.getClass())
         );

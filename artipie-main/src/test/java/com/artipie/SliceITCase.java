@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Optional;
 import javax.json.Json;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -56,7 +57,7 @@ public final class SliceITCase {
                         () -> Json.createObjectBuilder().add("any", "any").build()
                     )
                 ),
-                Authentication.ANONYMOUS,
+                (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
                 new OperationControl(Policy.FREE, new AdapterBasicPermission("test", Action.ALL))
             )
         )
