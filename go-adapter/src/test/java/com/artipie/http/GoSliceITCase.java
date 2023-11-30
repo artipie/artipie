@@ -17,6 +17,7 @@ import com.artipie.security.policy.Policy;
 import com.artipie.security.policy.PolicyByUsername;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
+import java.util.Optional;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.MatcherAssert;
@@ -143,7 +144,7 @@ public final class GoSliceITCase {
     private static Authentication users(final boolean anonymous) {
         final Authentication res;
         if (anonymous) {
-            res = Authentication.ANONYMOUS;
+            res = (usr, pwd) -> Optional.of(Authentication.ANONYMOUS);
         } else {
             res = new Authentication.Single(
                 GoSliceITCase.USER.getKey(), GoSliceITCase.USER.getValue()
