@@ -19,6 +19,7 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.security.policy.Policy;
 import com.artipie.security.policy.PolicyByUsername;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -141,7 +142,7 @@ class GoSliceTest {
         }
         final Authentication users;
         if (anonymous) {
-            users = Authentication.ANONYMOUS;
+            users = (usr, pwd) -> Optional.of(Authentication.ANONYMOUS);
         } else {
             users = new Authentication.Single(USER.getKey(), USER.getValue());
         }
