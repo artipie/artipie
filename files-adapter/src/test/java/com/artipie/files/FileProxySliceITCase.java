@@ -20,6 +20,7 @@ import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
