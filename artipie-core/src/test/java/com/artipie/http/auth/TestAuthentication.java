@@ -10,7 +10,7 @@ import java.util.Optional;
  * Test Authentication implementation.
  * @since 0.8
  */
-final public class TestAuthentication implements Authentication {
+public final class TestAuthentication implements Authentication {
     @Override
     public Optional<AuthUser> user(final String username, final String password) {
         return Optional.of(Authentication.ANONYMOUS);
