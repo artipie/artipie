@@ -9,14 +9,21 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.conda.http.CondaSlice;
+import com.artipie.conda.http.auth.TokenAuth;
+import com.artipie.http.auth.AuthUser;
+import com.artipie.http.auth.Authentication;
+import com.artipie.http.auth.TokenAuthentication;
+import com.artipie.http.auth.Tokens;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import org.apache.commons.io.FileUtils;
@@ -88,7 +95,19 @@ public final class CondaSliceITCase {
         final String url = String.format("http://host.testcontainers.internal:%d", this.port);
         this.server = new VertxSliceServer(
             CondaSliceITCase.VERTX,
-            new LoggingSlice(new BodyLoggingSlice(new CondaSlice(this.storage, url, this.events))),
+            new LoggingSlice(
+                new BodyLoggingSlice(
+                    new CondaSlice(
+                        this.storage,
+                        Policy.FREE,
+                        (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+                        CondaSliceITCase.ANONYMOUS,
+                        url,
+                        "*",
+                        Optional.of(this.events)
+                    )
+                )
+            ),
             this.port
         );
         this.server.start();
@@ -244,4 +263,19 @@ public final class CondaSliceITCase {
             new IsEqual<>(true)
         );
     }
+
+    /**
+     * Anonymous tokens.
+     */
+    private static final Tokens ANONYMOUS = new Tokens() {
+        @Override
+        public TokenAuthentication auth() {
+            return TokenAuth.ANONYMOUS;
+        }
+
+        @Override
+        public String generate(final AuthUser user) {
+            return "abc123";
+        }
+    };
 }

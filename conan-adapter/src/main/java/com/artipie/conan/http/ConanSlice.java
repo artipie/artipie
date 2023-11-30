@@ -111,15 +111,6 @@ public final class ConanSlice extends Slice.Wrap {
     /**
      * Ctor.
      * @param storage Storage object.
-     * @param tokenizer Tokenizer for repository items.
-     */
-    public ConanSlice(final Storage storage, final ItemTokenizer tokenizer) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, ConanSlice.ANONYMOUS, tokenizer, "*");
-    }
-
-    /**
-     * Ctor.
-     * @param storage Storage object.
      * @param policy Access policy.
      * @param auth Authentication parameters.
      * @param tokens User auth token generator.

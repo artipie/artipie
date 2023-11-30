@@ -10,11 +10,9 @@ import com.artipie.conda.http.auth.TokenAuth;
 import com.artipie.conda.http.auth.TokenAuthScheme;
 import com.artipie.conda.http.auth.TokenAuthSlice;
 import com.artipie.http.Slice;
-import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
-import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.StandardRs;
@@ -57,48 +55,6 @@ public final class CondaSlice extends Slice.Wrap {
      * Transform pattern for download slice.
      */
     private static final Pattern PTRN = Pattern.compile(".*/(.*/.*(\\.tar\\.bz2|\\.conda))$");
-
-    /**
-     * Anonymous tokens.
-     */
-    private static final Tokens ANONYMOUS = new Tokens() {
-        @Override
-        public TokenAuthentication auth() {
-            return TokenAuth.ANONYMOUS;
-        }
-
-        @Override
-        public String generate(final AuthUser user) {
-            return "abc123";
-        }
-    };
-
-    /**
-     * Ctor.
-     * @param storage Storage
-     * @param url Application url
-     */
-    public CondaSlice(final Storage storage, final String url) {
-        this(
-            storage, Policy.FREE, Authentication.ANONYMOUS, CondaSlice.ANONYMOUS,
-            url, "*", Optional.empty()
-        );
-    }
-
-    /**
-     * Ctor.
-     * @param storage Storage
-     * @param url Application url
-     * @param events Artifact events
-     */
-    public CondaSlice(
-        final Storage storage, final String url, final Queue<ArtifactEvent> events
-    ) {
-        this(
-            storage, Policy.FREE, Authentication.ANONYMOUS, CondaSlice.ANONYMOUS,
-            url, "*", Optional.of(events)
-        );
-    }
 
     /**
      * Ctor.
