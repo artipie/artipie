@@ -43,7 +43,13 @@ public final class GemSlice extends Slice.Wrap {
      * @param storage The storage.
      */
     public GemSlice(final Storage storage) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, "", Optional.empty());
+        this(
+            storage,
+            Policy.FREE,
+            (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+            "",
+            Optional.empty()
+        );
     }
 
     /**
@@ -53,7 +59,13 @@ public final class GemSlice extends Slice.Wrap {
      * @param events Artifact events queue
      */
     public GemSlice(final Storage storage, final Optional<Queue<ArtifactEvent>> events) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, "", events);
+        this(
+            storage,
+            Policy.FREE,
+            (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+            "",
+            events
+        );
     }
 
     /**
