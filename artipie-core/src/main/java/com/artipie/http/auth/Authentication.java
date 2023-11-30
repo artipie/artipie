@@ -16,6 +16,9 @@ import java.util.stream.Stream;
  */
 public interface Authentication {
 
+    /**
+     * Anonymous user.
+     */
     AuthUser ANONYMOUS = new AuthUser("anonymous", "unknown");
 
     /**
