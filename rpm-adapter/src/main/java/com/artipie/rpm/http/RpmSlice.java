@@ -31,18 +31,6 @@ import java.util.Queue;
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class RpmSlice extends Slice.Wrap {
-
-    /**
-     * Ctor.
-     * @param storage The storage.
-     */
-    /*public RpmSlice(final Storage storage) {
-        this(
-            storage, Policy.FREE, Authentication.ANONYMOUS,
-            new RepoConfig.Simple(), Optional.empty()
-        );
-    }*/
-
     /**
      * Ctor.
      * @param storage Storage
