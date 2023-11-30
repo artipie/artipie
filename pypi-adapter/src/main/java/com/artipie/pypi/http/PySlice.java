@@ -40,14 +40,6 @@ import java.util.regex.Pattern;
 public final class PySlice extends Slice.Wrap {
 
     /**
-     * Ctor.
-     * @param storage The storage and default parameters for free access.
-     */
-    public PySlice(final Storage storage) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, "*", Optional.empty());
-    }
-
-    /**
      * Primary ctor.
      * @param storage The storage.
      * @param policy Access policy.

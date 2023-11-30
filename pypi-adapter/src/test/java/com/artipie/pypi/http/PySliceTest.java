@@ -9,6 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.IsHeader;
 import com.artipie.http.hm.IsString;
@@ -18,8 +19,10 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.security.policy.Policy;
 import io.reactivex.Flowable;
 import java.util.Collections;
+import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
@@ -49,7 +52,13 @@ class PySliceTest {
     @BeforeEach
     void init() {
         this.storage = new InMemoryStorage();
-        this.slice = new PySlice(this.storage);
+        this.slice = new PySlice(
+            this.storage,
+            Policy.FREE,
+            (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+            "*",
+            Optional.empty()
+        );
     }
 
     @Test

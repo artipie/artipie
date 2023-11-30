@@ -224,7 +224,10 @@ public final class PySliceITCase {
     }
 
     private void startServer() {
-        this.startServer(Policy.FREE, Authentication.ANONYMOUS);
+        this.startServer(
+            Policy.FREE,
+            (usr, pwd) -> Optional.of(Authentication.ANONYMOUS)
+        );
     }
 
 }
