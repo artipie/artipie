@@ -93,6 +93,17 @@ public final class CondaSliceITCase {
         this.port = new RandomFreePort().get();
         this.events = new ConcurrentLinkedDeque<>();
         final String url = String.format("http://host.testcontainers.internal:%d", this.port);
+        final Tokens token = new Tokens() {
+            @Override
+            public TokenAuthentication auth() {
+                return TokenAuth.ANONYMOUS;
+            }
+
+            @Override
+            public String generate(final AuthUser user) {
+                return "abc123";
+            }
+        };
         this.server = new VertxSliceServer(
             CondaSliceITCase.VERTX,
             new LoggingSlice(
@@ -101,7 +112,7 @@ public final class CondaSliceITCase {
                         this.storage,
                         Policy.FREE,
                         (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
-                        CondaSliceITCase.ANONYMOUS,
+                        token,
                         url,
                         "*",
                         Optional.of(this.events)
@@ -263,19 +274,4 @@ public final class CondaSliceITCase {
             new IsEqual<>(true)
         );
     }
-
-    /**
-     * Anonymous tokens.
-     */
-    private static final Tokens ANONYMOUS = new Tokens() {
-        @Override
-        public TokenAuthentication auth() {
-            return TokenAuth.ANONYMOUS;
-        }
-
-        @Override
-        public String generate(final AuthUser user) {
-            return "abc123";
-        }
-    };
 }
