@@ -77,16 +77,6 @@ public final class NuGet implements Slice {
      * Ctor.
      *
      * @param url Base URL.
-     * @param repository Repository.
-     */
-    public NuGet(final URL url, final Repository repository) {
-        this(url, repository, Policy.FREE, Authentication.ANONYMOUS, "*", Optional.empty());
-    }
-
-    /**
-     * Ctor.
-     *
-     * @param url Base URL.
      * @param repository Storage for packages.
      * @param policy Access policy.
      * @param users User identities.

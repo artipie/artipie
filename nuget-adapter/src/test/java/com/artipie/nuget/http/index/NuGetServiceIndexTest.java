@@ -6,6 +6,7 @@ package com.artipie.nuget.http.index;
 
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Response;
+import com.artipie.http.auth.Authentication;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
@@ -13,12 +14,14 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.AstoRepository;
 import com.artipie.nuget.http.NuGet;
+import com.artipie.security.policy.Policy;
 import io.reactivex.Flowable;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
@@ -57,7 +60,14 @@ class NuGetServiceIndexTest {
     @BeforeEach
     void init() throws Exception {
         this.url = URI.create("http://localhost:4321/repo").toURL();
-        this.nuget = new NuGet(this.url, new AstoRepository(new InMemoryStorage()));
+        this.nuget = new NuGet(
+            this.url,
+            new AstoRepository(new InMemoryStorage()),
+            Policy.FREE,
+            (usr, pwd) -> Optional.of(Authentication.ANONYMOUS),
+            "*",
+            Optional.empty()
+        );
     }
 
     @Test
