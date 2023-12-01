@@ -7,16 +7,13 @@ package com.artipie.http;
 import com.artipie.docker.http.BaseEntity;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLineFrom;
-import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.perms.FreePermissions;
 import com.artipie.settings.Settings;
 import java.nio.ByteBuffer;
-import java.security.PermissionCollection;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,14 +72,7 @@ public final class DockerRoutingSlice implements Slice {
                     new BaseEntity(),
                     this.settings.authz().authentication(),
                     new OperationControl(
-                        user -> {
-                            // @checkstyle NestedIfDepthCheck (10 lines)
-                            PermissionCollection res = new FreePermissions();
-                            if (Authentication.ANY_USER.name().equals(user.name())) {
-                                res = EmptyPermissions.INSTANCE;
-                            }
-                            return res;
-                        },
+                        user -> new FreePermissions(),
                         new DockerRepositoryPermission("*", "*", DockerActions.PULL.mask())
                     )
                 ).response(line, headers, body);

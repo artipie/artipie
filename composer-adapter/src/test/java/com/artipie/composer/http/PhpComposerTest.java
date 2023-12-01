@@ -12,7 +12,9 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.composer.AllPackages;
 import com.artipie.composer.AstoRepository;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.headers.Authorization;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
@@ -20,7 +22,6 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import java.util.Arrays;
-import java.util.Collections;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +60,7 @@ class PhpComposerTest {
     }
 
     @Test
-    void shouldGetPackageContent() throws Exception {
+    void shouldGetPackageContent() {
         final byte[] data = "data".getBytes();
         new BlockingStorage(this.storage).save(
             new Key.From("vendor", "package.json"),
@@ -67,7 +68,7 @@ class PhpComposerTest {
         );
         final Response response = this.php.response(
             new RequestLine(RqMethod.GET, "/p/vendor/package.json").toString(),
-            Collections.emptyList(),
+            this.basicAuthHeaders(),
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -86,7 +87,7 @@ class PhpComposerTest {
     void shouldFailGetPackageMetadataWhenNotExists() {
         final Response response = this.php.response(
             new RequestLine(RqMethod.GET, "/p/vendor/unknown-package.json").toString(),
-            Collections.emptyList(),
+            this.basicAuthHeaders(),
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -97,12 +98,12 @@ class PhpComposerTest {
     }
 
     @Test
-    void shouldGetAllPackages() throws Exception {
+    void shouldGetAllPackages() {
         final byte[] data = "all packages".getBytes();
         new BlockingStorage(this.storage).save(new AllPackages(), data);
         final Response response = this.php.response(
             PhpComposerTest.GET_PACKAGES,
-            Collections.emptyList(),
+            this.basicAuthHeaders(),
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -120,7 +121,7 @@ class PhpComposerTest {
     void shouldFailGetAllPackagesWhenNotExists() {
         final Response response = this.php.response(
             PhpComposerTest.GET_PACKAGES,
-            Collections.emptyList(),
+            this.basicAuthHeaders(),
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -133,7 +134,7 @@ class PhpComposerTest {
     void shouldPutRoot() {
         final Response response = this.php.response(
             new RequestLine(RqMethod.PUT, "/").toString(),
-            Collections.emptyList(),
+            this.basicAuthHeaders(),
             new Content.From(
                 new TestResource("minimal-package.json").asBytes()
             )
@@ -143,5 +144,14 @@ class PhpComposerTest {
             response,
             new RsHasStatus(RsStatus.CREATED)
         );
+    }
+
+    /**
+     * Gets Basic Authorization header.
+     *
+     * @return Headers.
+     */
+    private Headers basicAuthHeaders() {
+        return new Headers.From(new Authorization.Basic("some_user", "some_pwd"));
     }
 }

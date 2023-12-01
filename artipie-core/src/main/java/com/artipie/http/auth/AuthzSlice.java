@@ -62,39 +62,29 @@ public final class AuthzSlice implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final Response response;
-        if (this.control.allowed(Authentication.ANY_USER)) {
-            response = this.origin.response(
-                line,
-                new Headers.From(headers, AuthzSlice.LOGIN_HDR, Authentication.ANY_USER.name()),
-                body
-            );
-        } else {
-            response = new AsyncResponse(
-                this.auth.authenticate(headers, line).thenApply(
-                    result -> result.user().map(
-                        usr -> {
-                            final Response rsp;
-                            if (this.control.allowed(usr)) {
-                                rsp = this.origin.response(
-                                    line,
-                                    new Headers.From(headers, AuthzSlice.LOGIN_HDR, usr.name()),
-                                    body
-                                );
-                            } else {
-                                rsp = new RsWithStatus(RsStatus.FORBIDDEN);
-                            }
-                            return rsp;
+        return new AsyncResponse(
+            this.auth.authenticate(headers, line).thenApply(
+                result -> result.user().map(
+                    usr -> {
+                        final Response rsp;
+                        if (this.control.allowed(usr)) {
+                            rsp = this.origin.response(
+                                line,
+                                new Headers.From(headers, AuthzSlice.LOGIN_HDR, usr.name()),
+                                body
+                            );
+                        } else {
+                            rsp = new RsWithStatus(RsStatus.FORBIDDEN);
                         }
-                    ).orElseGet(
-                        () -> new RsWithHeaders(
-                            new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            new Headers.From(new WwwAuthenticate(result.challenge()))
-                        )
+                        return rsp;
+                    }
+                ).orElseGet(
+                    () -> new RsWithHeaders(
+                        new RsWithStatus(RsStatus.UNAUTHORIZED),
+                        new Headers.From(new WwwAuthenticate(result.challenge()))
                     )
                 )
-            );
-        }
-        return response;
+            )
+        );
     }
 }
