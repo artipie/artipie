@@ -102,7 +102,7 @@ final class InstallCurlPutIT {
         this.storage.save(
             new Key.From(".npmrc"),
             new Content.From(
-                String.format("//host.testcontainers.internal:%d/:_authToken=abc1234", port)
+                String.format("//host.testcontainers.internal:%d/:_authToken=abc1234", this.port)
                     .getBytes(StandardCharsets.UTF_8)
             )
         ).join();

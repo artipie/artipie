@@ -4,6 +4,7 @@
  */
 package com.artipie.npm.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
@@ -18,6 +19,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -69,6 +71,13 @@ final class CurlPutIT {
             port
         );
         this.server.start();
+        this.storage.save(
+            new Key.From(".npmrc"),
+            new Content.From(
+                String.format("//host.testcontainers.internal:%d/:_authToken=abc1234", port)
+                    .getBytes(StandardCharsets.UTF_8)
+            )
+        ).join();
     }
 
     @AfterEach
@@ -110,6 +119,7 @@ final class CurlPutIT {
             ).toURL().openConnection();
             conn.setRequestMethod("PUT");
             conn.setDoOutput(true);
+            conn.setRequestProperty("Authorization","Bearer abc1234");
             try (DataOutputStream dos = new DataOutputStream(conn.getOutputStream())) {
                 dos.write(new TestResource(String.format("binaries/%s", name)).asBytes());
                 dos.flush();
