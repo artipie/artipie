@@ -9,6 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
+import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.IsHeader;
 import com.artipie.http.hm.IsString;
@@ -19,7 +20,6 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
-import java.util.Collections;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
@@ -60,7 +60,7 @@ class PySliceTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine("GET", "/simple").toString(),
-                Collections.emptyList(),
+                this.authorization(),
                 Flowable.empty()
             ),
             Matchers.allOf(
@@ -84,7 +84,7 @@ class PySliceTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine("GET", "/").toString(),
-                Collections.emptyList(),
+                this.authorization(),
                 Flowable.empty()
             ),
             Matchers.allOf(
@@ -105,7 +105,7 @@ class PySliceTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine("GET", "/one/Two_three").toString(),
-                Collections.emptyList(),
+                this.authorization(),
                 Flowable.empty()
             ),
             new ResponseMatcher(
@@ -120,7 +120,10 @@ class PySliceTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine("POST", "/sample.tar").toString(),
-                new Headers.From("content-type", "multipart/form-data; boundary=\"abc123\""),
+                new Headers.From(
+                    this.authorization(),
+                    "content-type", "multipart/form-data; boundary=\"abc123\""
+                ),
                 Flowable.empty()
             ),
             new RsHasStatus(RsStatus.BAD_REQUEST)
@@ -142,7 +145,7 @@ class PySliceTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine("GET", key).toString(),
-                Collections.emptyList(),
+                this.authorization(),
                 Flowable.empty()
             ),
             new ResponseMatcher(
@@ -150,6 +153,15 @@ class PySliceTest {
                 content.getBytes()
             )
         );
+    }
+
+    /**
+     * Gets Authorization header.
+     *
+     * @return Headers.
+     */
+    private Headers authorization() {
+        return new Headers.From(new Authorization.Basic("usr", "pwd"));
     }
 
 }
