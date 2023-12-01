@@ -8,7 +8,12 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.asto.cache.Cache;
+import com.artipie.asto.cache.FromRemoteCache;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.client.UriClientSlice;
+import com.artipie.http.client.auth.AuthClientSlice;
+import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.SliceHasResponse;
@@ -17,8 +22,10 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +42,7 @@ import org.junit.jupiter.api.Test;
  * @since 0.5
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle MagicNumberCheck (500 lines)
+ * @checkstyle AbbreviationAsWordInNameCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class FileProxySliceITCase {
@@ -92,12 +100,8 @@ final class FileProxySliceITCase {
             .save(new Key.From("foo/bar"), data.getBytes(StandardCharsets.UTF_8));
         MatcherAssert.assertThat(
             new FileProxySlice(
-                this.clients,
-                new URIBuilder().setScheme("http")
-                    .setHost(FileProxySliceITCase.HOST)
-                    .setPort(this.port)
-                    .setPath("/foo")
-                    .build()
+                this.authClientSlice(this.remoteURI()),
+                Cache.NOP, Optional.empty(), FilesSlice.ANY_REPO
             ),
             new SliceHasResponse(
                 new RsHasBody(data.getBytes(StandardCharsets.UTF_8)),
@@ -115,13 +119,10 @@ final class FileProxySliceITCase {
         MatcherAssert.assertThat(
             "Does not return content from proxy",
             new FileProxySlice(
-                this.clients,
-                new URIBuilder().setScheme("http")
-                    .setHost(FileProxySliceITCase.HOST)
-                    .setPort(this.port)
-                    .setPath("/foo")
-                    .build(),
-                cache, events, "my-files-proxy"
+                this.authClientSlice(this.remoteURI()),
+                new FromRemoteCache(cache),
+                Optional.of(events),
+                "my-files-proxy"
             ),
             new SliceHasResponse(
                 new RsHasBody(data),
@@ -168,5 +169,32 @@ final class FileProxySliceITCase {
             )
         );
         MatcherAssert.assertThat("Events queue is empty", events.isEmpty());
+    }
+
+    /**
+     * Get remote server URI.
+     *
+     * @return URI.
+     * @throws URISyntaxException If failed.
+     */
+    private URI remoteURI() throws URISyntaxException {
+        return new URIBuilder().setScheme("http")
+            .setHost(FileProxySliceITCase.HOST)
+            .setPort(this.port)
+            .setPath("/foo")
+            .build();
+    }
+
+    /**
+     * Creates AuthClientSlice.
+     *
+     * @param uri Remote server URI.
+     * @return Slice.
+     */
+    private AuthClientSlice authClientSlice(final URI uri) {
+        return new AuthClientSlice(
+            new UriClientSlice(this.clients, uri),
+            new GenericAuthenticator(this.clients, "username", "password")
+        );
     }
 }

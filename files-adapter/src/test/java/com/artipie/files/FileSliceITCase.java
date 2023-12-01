@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Tests for files adapter.
  * @since 0.5
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class FileSliceITCase {
 
     /**
@@ -72,10 +73,11 @@ final class FileSliceITCase {
     }
 
     @Test
-    void testUploadFile() throws Exception {
+    void testUploadFile() {
         final String hello = "Hello world!!!";
         final WebClient web = WebClient.create(this.vertx);
         web.put(this.port, FileSliceITCase.HOST, "/hello.txt")
+            .basicAuthentication("username", "pwd")
             .rxSendBuffer(Buffer.buffer(hello.getBytes()))
             .blockingGet();
         MatcherAssert.assertThat(
@@ -88,10 +90,11 @@ final class FileSliceITCase {
     }
 
     @Test
-    void testUploadFileWithComplexName() throws Exception {
+    void testUploadFileWithComplexName() {
         final String hello = "Hello world!!!!";
         final WebClient web = WebClient.create(this.vertx);
         web.put(this.port, FileSliceITCase.HOST, "/hello/world.txt")
+            .basicAuthentication("usr", "pwd")
             .rxSendBuffer(Buffer.buffer(hello.getBytes()))
             .blockingGet();
         MatcherAssert.assertThat(
@@ -104,7 +107,7 @@ final class FileSliceITCase {
     }
 
     @Test
-    void testDownloadsFilesWithComplexName() throws Exception {
+    void testDownloadsFilesWithComplexName() {
         final String hello = "Hellooo world!!";
         final WebClient web = WebClient.create(this.vertx);
         final String hellot = "hello/world1.txt";
@@ -112,6 +115,7 @@ final class FileSliceITCase {
         MatcherAssert.assertThat(
             new String(
                 web.get(this.port, FileSliceITCase.HOST, String.format("/%s", hellot))
+                    .basicAuthentication("usr", "pwd")
                     .rxSend()
                     .blockingGet()
                     .bodyAsBuffer()
@@ -123,7 +127,7 @@ final class FileSliceITCase {
     }
 
     @Test
-    void testDownloadsFile() throws Exception {
+    void testDownloadsFile() {
         final String hello = "Hello world!!";
         final WebClient web = WebClient.create(this.vertx);
         final String hellot = "hello1.txt";
@@ -131,6 +135,7 @@ final class FileSliceITCase {
         MatcherAssert.assertThat(
             new String(
                 web.get(this.port, FileSliceITCase.HOST, "/hello1.txt")
+                    .basicAuthentication("usr", "pwd")
                     .rxSend()
                     .blockingGet()
                     .bodyAsBuffer()
@@ -153,6 +158,7 @@ final class FileSliceITCase {
         final String fthree = "foo/bar/file3.txt";
         sto.save(new Key.From(fthree), "file 3 content".getBytes());
         final HttpResponse<Buffer> response = web.get(this.port, FileSliceITCase.HOST, uri)
+            .basicAuthentication("usr", "pwd")
             .putHeader(Accept.NAME, FilesSlice.PLAIN_TEXT)
             .rxSend()
             .blockingGet();
@@ -184,6 +190,7 @@ final class FileSliceITCase {
         sto.save(new Key.From("foo/barz/file2.txt"), "Content 2".getBytes());
         sto.save(new Key.From("foo/barz/file3.txt"), "Content 3".getBytes());
         final HttpResponse<Buffer> response = web.get(this.port, FileSliceITCase.HOST, uri)
+            .basicAuthentication("usr", "pwd")
             .putHeader(Accept.NAME, FilesSlice.HTML_TEXT)
             .rxSend()
             .blockingGet();
@@ -224,6 +231,7 @@ final class FileSliceITCase {
         final String hellot = "hell.txt";
         new BlockingStorage(this.storage).save(new Key.From(hellot), hello.getBytes());
         web.delete(this.port, FileSliceITCase.HOST, "/hell.txt")
+            .basicAuthentication("usr", "pwd")
             .rxSend()
             .blockingGet();
         MatcherAssert.assertThat(
