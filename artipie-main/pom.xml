@@ -34,6 +34,7 @@ SOFTWARE.
     <properties>
         <jettyVersion>12.0.3</jettyVersion>
         <docker.image.name>artipie/artipie</docker.image.name>
+        <docker.ubuntu.image.name>artipie/artipie-ubuntu</docker.ubuntu.image.name>
     </properties>
     <dependencies>
         <dependency>
@@ -197,7 +198,7 @@ SOFTWARE.
         <dependency>
             <groupId>com.artipie</groupId>
             <artifactId>gem-adapter</artifactId>
-            <version>v1.3.7</version>
+            <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -340,6 +341,78 @@ SOFTWARE.
                             <repository>${docker.image.name}</repository>
                             <tag>${project.version}</tag>
                             <dockerfile>Dockerfile</dockerfile>
+                            <buildArgs>
+                                <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <source>21</source>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>ubuntu-docker</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.artipie.VertxMain</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-dependencies</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <includeScope>runtime</includeScope>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.spotify</groupId>
+                        <artifactId>dockerfile-maven-plugin</artifactId>
+                        <version>1.4.13</version>
+                        <executions>
+                            <execution>
+                                <id>default</id>
+                                <goals>
+                                    <goal>build</goal>
+                                    <goal>push</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <repository>${docker.ubuntu.image.name}</repository>
+                            <tag>${project.version}</tag>
+                            <dockerfile>Dockerfile-ubuntu</dockerfile>
                             <buildArgs>
                                 <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
                             </buildArgs>
