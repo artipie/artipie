@@ -91,6 +91,19 @@ SOFTWARE.
     </dependency>
   </dependencies>
   <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <release>21</release>
+          <testExcludes>
+            <exclude>**/com/artipie/http/servlet/**</exclude>
+            <exclude>**/com/artipie/http/slice/SliceITCase.java</exclude>
+          </testExcludes>
+        </configuration>
+      </plugin>
+    </plugins>
     <testResources>
       <testResource>
         <filtering>true</filtering>

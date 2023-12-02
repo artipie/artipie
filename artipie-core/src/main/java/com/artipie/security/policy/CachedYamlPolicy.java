@@ -17,7 +17,6 @@ import com.artipie.asto.misc.Cleanable;
 import com.artipie.asto.misc.UncheckedFunc;
 import com.artipie.asto.misc.UncheckedSupplier;
 import com.artipie.http.auth.AuthUser;
-import com.artipie.http.auth.Authentication;
 import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.perms.PermissionConfig;
 import com.artipie.security.perms.PermissionsLoader;
@@ -103,12 +102,6 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
         new PermissionConfig.FromYamlMapping(Yaml.createYamlMappingBuilder().build());
 
     /**
-     * Empty permissions.
-     */
-    private static final UserPermissions EMPTY_PERMS =
-        new UserPermissions(() -> User.EMPTY, role -> EmptyPermissions.INSTANCE);
-
-    /**
      * Cache for usernames and {@link UserPermissions}.
      */
     private final Cache<String, UserPermissions> cache;
@@ -164,18 +157,12 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
 
     @Override
     public UserPermissions getPermissions(final AuthUser user) {
-        final UserPermissions res;
-        if (Authentication.ANY_USER.name().equals(user.name())) {
-            res = CachedYamlPolicy.EMPTY_PERMS;
-        } else {
-            try {
-                res = this.cache.get(user.name(), this.createUserPermissions(user));
-            } catch (final ExecutionException err) {
-                Logger.error(this, err.getMessage());
-                throw new ArtipieException(err);
-            }
+        try {
+            return this.cache.get(user.name(), this.createUserPermissions(user));
+        } catch (final ExecutionException err) {
+            Logger.error(this, err.getMessage());
+            throw new ArtipieException(err);
         }
-        return res;
     }
 
     @Override

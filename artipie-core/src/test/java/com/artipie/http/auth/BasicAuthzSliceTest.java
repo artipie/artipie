@@ -12,7 +12,6 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
@@ -39,20 +38,26 @@ class BasicAuthzSliceTest {
 
     @Test
     void proxyToOriginSliceIfAllowed() {
+        final String user = "test_user";
         MatcherAssert.assertThat(
             new BasicAuthzSlice(
                 (rqline, headers, body) -> new RsWithHeaders(StandardRs.OK, headers),
-                (user, pswd) -> Optional.empty(),
-                new OperationControl(Policy.FREE, new AdapterBasicPermission("any", Action.ALL))
+                (usr, pwd) -> Optional.of(new AuthUser(user, "test")),
+                new OperationControl(
+                    Policy.FREE,
+                    new AdapterBasicPermission("any_repo_name", Action.ALL)
+                )
             ),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
                     new RsHasHeaders(
-                        new Header(AuthzSlice.LOGIN_HDR, Authentication.ANY_USER.name())
+                        new Header(AuthzSlice.LOGIN_HDR, user)
                     )
                 ),
-                new RequestLine("GET", "/foo")
+                new RequestLine("GET", "/foo"),
+                new Headers.From(new Authorization.Basic(user, "pwd")),
+                Content.EMPTY
             )
         );
     }
@@ -150,27 +155,4 @@ class BasicAuthzSliceTest {
             )
         );
     }
-
-    @Test
-    void doesNotAuthenticateIfNotNeeded() {
-        MatcherAssert.assertThat(
-            new BasicAuthzSlice(
-                new SliceSimple(StandardRs.OK),
-                (user, pswd) -> {
-                    throw new IllegalStateException("Should not be invoked");
-                },
-                new OperationControl(
-                    new PolicyByUsername(Authentication.ANY_USER.name()),
-                    new AdapterBasicPermission("any", Action.ALL)
-                )
-            ),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.OK),
-                new RequestLine(RqMethod.GET, "/resource"),
-                new Headers.From(new Authorization.Basic("alice", "12345")),
-                Content.EMPTY
-            )
-        );
-    }
-
 }

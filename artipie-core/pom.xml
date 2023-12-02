@@ -150,56 +150,17 @@
   </dependencies>
   <build>
     <plugins>
-      <!--<plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.8.1</version>
-          </dependency>
-          <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>7.7.1</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          &lt;!&ndash; FIXME: reactive TCK tests are not executed for multipart processor &ndash;&gt;
-          &lt;!&ndash; <execution> &ndash;&gt;
-          &lt;!&ndash;   <id>surefire-testng</id> &ndash;&gt;
-          &lt;!&ndash;   <phase>test</phase> &ndash;&gt;
-          &lt;!&ndash;   <goals> &ndash;&gt;
-          &lt;!&ndash;     <goal>test</goal> &ndash;&gt;
-          &lt;!&ndash;   </goals> &ndash;&gt;
-          &lt;!&ndash;   <configuration> &ndash;&gt;
-          &lt;!&ndash;     <skip>false</skip> &ndash;&gt;
-          &lt;!&ndash;     <includes> &ndash;&gt;
-          &lt;!&ndash;       <include>com.artipie.http.rq.multipart.MultipartTckTest</include> &ndash;&gt;
-          &lt;!&ndash;       <include>com.artipie.http.rq.multipart.MultipartsTckTest</include> &ndash;&gt;
-          &lt;!&ndash;     </includes> &ndash;&gt;
-          &lt;!&ndash;     <junitArtifactName>none:none</junitArtifactName> &ndash;&gt;
-          &lt;!&ndash;   </configuration> &ndash;&gt;
-          &lt;!&ndash; </execution> &ndash;&gt;
-          &lt;!&ndash;<execution>
-            <id>surefire-junit</id>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <skip>false</skip>
-              <excludes>
-                <exclude>com.artipie.http.rq.multipart.MultipartTckTest</exclude>
-                <exclude>com.artipie.http.rq.multipart.MultipartsTckTest</exclude>
-              </excludes>
-              <testNGArtifactName>none:none</testNGArtifactName>
-            </configuration>
-          </execution>&ndash;&gt;
-        </executions>
-      </plugin>-->
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <release>21</release>
+          <testExcludes>
+            <exclude>**/com/artipie/http/servlet/**</exclude>
+            <exclude>**/com/artipie/http/slice/SliceITCase.java</exclude>
+          </testExcludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

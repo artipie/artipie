@@ -68,33 +68,11 @@ public final class AuthzSlice implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final Response response;
-        if (this.control.allowed(Authentication.ANY_USER)) {
-            response = this.origin.response(
-                line,
-                new Headers.From(headers, AuthzSlice.LOGIN_HDR, Authentication.ANY_USER.name()),
-                body
-            );
-        } else {
-            response = new AsyncResponse(
-                this.auth.authenticate(headers, line).thenApply(
-                    result -> {
-                        if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
-                            if (this.control.allowed(result.user())) {
-                                return this.origin.response(
-                                    line,
-                                    new Headers.From(
-                                        headers, AuthzSlice.LOGIN_HDR,
-                                        result.user().name()
-                                    ),
-                                    body
-                                );
-                            }
-                            return new RsWithStatus(RsStatus.FORBIDDEN);
-                        }
-                        // The case of anonymous user
-                        if (result.status() == AuthScheme.AuthStatus.NO_CREDENTIALS
-                            && this.control.allowed(result.user())) {
+        return new AsyncResponse(
+            this.auth.authenticate(headers, line).thenApply(
+                result -> {
+                    if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
+                        if (this.control.allowed(result.user())) {
                             return this.origin.response(
                                 line,
                                 new Headers.From(
@@ -104,14 +82,26 @@ public final class AuthzSlice implements Slice {
                                 body
                             );
                         }
-                        return new RsWithHeaders(
-                            new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            new Headers.From(new WwwAuthenticate(result.challenge()))
+                        return new RsWithStatus(RsStatus.FORBIDDEN);
+                    }
+                    // The case of anonymous user
+                    if (result.status() == AuthScheme.AuthStatus.NO_CREDENTIALS
+                        && this.control.allowed(result.user())) {
+                        return this.origin.response(
+                            line,
+                            new Headers.From(
+                                headers, AuthzSlice.LOGIN_HDR,
+                                result.user().name()
+                            ),
+                            body
                         );
                     }
-                )
-            );
-        }
-        return response;
+                    return new RsWithHeaders(
+                        new RsWithStatus(RsStatus.UNAUTHORIZED),
+                        new Headers.From(new WwwAuthenticate(result.challenge()))
+                    );
+                }
+            )
+        );
     }
 }
