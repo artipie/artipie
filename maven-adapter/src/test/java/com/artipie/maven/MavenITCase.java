@@ -52,6 +52,7 @@ import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
  * Maven integration test.
  * @since 0.5
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle MethodBodyCommentsCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 @EnabledOnOs({OS.LINUX, OS.MAC})
