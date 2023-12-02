@@ -18,8 +18,6 @@ import org.junit.jupiter.api.Test;
  */
 class AuthLoaderTest {
 
-
-
     @Test
     void loadsFactories() {
         final AuthLoader loader = new AuthLoader(
