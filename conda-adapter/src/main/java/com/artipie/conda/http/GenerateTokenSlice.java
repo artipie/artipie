@@ -56,16 +56,16 @@ final class GenerateTokenSlice implements Slice {
             new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
                 result -> {
                     final Response res;
-                    if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
+                    if (result.status() == AuthScheme.AuthStatus.FAILED) {
+                        res = new RsWithHeaders(
+                            new RsWithStatus(RsStatus.UNAUTHORIZED),
+                            new Headers.From(new WwwAuthenticate(result.challenge()))
+                        );
+                    } else {
                         res = new RsJson(
                             () -> Json.createObjectBuilder()
                                 .add("token", this.tokens.generate(result.user())).build(),
                             StandardCharsets.UTF_8
-                        );
-                    } else {
-                        res = new RsWithHeaders(
-                            new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            new Headers.From(new WwwAuthenticate(result.challenge()))
                         );
                     }
                     return res;
