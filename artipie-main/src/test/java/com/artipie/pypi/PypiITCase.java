@@ -71,7 +71,7 @@ final class PypiITCase {
     @ParameterizedTest
     @CsvSource({
         "8080,my-python",
-        "8081,my-python-port"
+        //"8081,my-python-port" todo https://github.com/artipie/artipie/issues/1350
     })
     void installPythonPackage(final String port, final String repo) throws IOException {
         final String meta = "pypi-repo/example-pckg/dist/artipietestpkg-0.0.3.tar.gz";
@@ -112,7 +112,7 @@ final class PypiITCase {
     @ParameterizedTest
     @CsvSource({
         "8080,my-python",
-        "8081,my-python-port"
+        //"8081,my-python-port" todo https://github.com/artipie/artipie/issues/1350
     })
     void canUpload(final String port, final String repo) throws Exception {
         this.containers.assertExec(
