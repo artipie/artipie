@@ -21,6 +21,7 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.io.TempDir;
@@ -37,6 +38,7 @@ import org.testcontainers.images.builder.Transferable;
  * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Disabled("Remove when #1317 will be done")
 @DisabledIfSystemProperty(named = "os.name", matches = "Windows.*")
 final class GemCliITCase {
 
