@@ -4,6 +4,7 @@
  */
 package com.artipie.npm;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
@@ -14,6 +15,7 @@ import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 import javax.json.JsonObject;
@@ -91,6 +93,13 @@ public final class NpmIT {
             .withWorkingDirectory("/home/")
             .withFileSystemBind(dtmp.toString(), "/home");
         this.cntn.start();
+        this.data.save(
+            new Key.From(".npmrc"),
+            new Content.From(
+                String.format("//host.testcontainers.internal:%d/:_authToken=abc123", port)
+                    .getBytes(StandardCharsets.UTF_8)
+            )
+        ).join();
     }
 
     @AfterEach

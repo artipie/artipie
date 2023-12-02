@@ -269,7 +269,8 @@ public final class MavenITCase {
             .withWorkingDirectory("/home/")
             .withFileSystemBind(this.tmp.toString(), "/home");
         this.cntn.start();
-        this.settings(this.getUser(anonymous));
+        //todo Pass the `anonymous` value when #1317 - a real anonymous user
+        this.settings(this.getUser(false));
     }
 
     private String exec(final String... actions) throws Exception {

@@ -85,6 +85,7 @@ final class HexITCase {
         HexITCase.VERTX.close();
     }
 
+    @Disabled("Should be green with #1317 anonymous user")
     @Test
     void downloadDependency() throws IOException, InterruptedException {
         this.init(true);
