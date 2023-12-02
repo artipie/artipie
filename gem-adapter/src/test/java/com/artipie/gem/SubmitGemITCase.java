@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.Queue;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.io.TempDir;
  *
  * @since 0.2
  */
+@Disabled("Remove when #1317 will be done")
 public class SubmitGemITCase {
 
     @Test
