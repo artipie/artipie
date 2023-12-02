@@ -44,7 +44,7 @@ import org.testcontainers.containers.GenericContainer;
  * @checkstyle MethodBodyCommentsCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-@Disabled("when #1317 will be done here should be url without credentials")
+@Disabled("Remove when #1317 will be done")
 @DisabledOnOs(OS.WINDOWS)
 final class RpmSliceDownloadITCase {
 
