@@ -119,7 +119,7 @@ final class CurlPutIT {
             ).toURL().openConnection();
             conn.setRequestMethod("PUT");
             conn.setDoOutput(true);
-            conn.setRequestProperty("Authorization","Bearer abc1234");
+            conn.setRequestProperty("Authorization", "Bearer abc1234");
             try (DataOutputStream dos = new DataOutputStream(conn.getOutputStream())) {
                 dos.write(new TestResource(String.format("binaries/%s", name)).asBytes());
                 dos.flush();
