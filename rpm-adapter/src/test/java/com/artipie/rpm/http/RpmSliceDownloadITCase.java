@@ -40,6 +40,7 @@ import org.testcontainers.containers.GenericContainer;
  * @since 0.10
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ClassFanOutComplexityCheck (500 lines)
+ * @checkstyle MethodBodyCommentsCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
@@ -134,12 +135,18 @@ final class RpmSliceDownloadITCase {
         this.start(Policy.FREE, Authentication.ANONYMOUS);
         final Path setting = this.tmp.resolve("example.repo");
         this.tmp.resolve("example.repo").toFile().createNewFile();
+        // todo when #1317 will be done here should be url without credentials
+        // final String url = String.format(
+        // "baseurl=http://host.testcontainers.internal:%d/", this.port);
+        final String url = String.format(
+            "baseurl=http://usr:pwd@host.testcontainers.internal:%d/", this.port
+        );
         Files.write(
             setting,
             new ListOf<>(
                 "[example]",
                 "name=Example Repository",
-                String.format("baseurl=http://host.testcontainers.internal:%d/", this.port),
+                url,
                 "enabled=1",
                 "gpgcheck=0"
             )
