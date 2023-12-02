@@ -60,6 +60,10 @@ public final class GemApiKeyAuth implements AuthScheme {
                     return res;
                 }
             )
-            .get();
+            .orElse(
+                CompletableFuture.completedFuture(
+                    AuthScheme.result(AuthUser.ANONYMOUS, "")
+                )
+            );
     }
 }
