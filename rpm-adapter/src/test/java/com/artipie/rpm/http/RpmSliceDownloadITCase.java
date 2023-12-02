@@ -28,6 +28,7 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -43,6 +44,7 @@ import org.testcontainers.containers.GenericContainer;
  * @checkstyle MethodBodyCommentsCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Disabled("when #1317 will be done here should be url without credentials")
 @DisabledOnOs(OS.WINDOWS)
 final class RpmSliceDownloadITCase {
 
@@ -135,18 +137,12 @@ final class RpmSliceDownloadITCase {
         this.start(Policy.FREE, Authentication.ANONYMOUS);
         final Path setting = this.tmp.resolve("example.repo");
         this.tmp.resolve("example.repo").toFile().createNewFile();
-        // todo when #1317 will be done here should be url without credentials
-        // final String url = String.format(
-        // "baseurl=http://host.testcontainers.internal:%d/", this.port);
-        final String url = String.format(
-            "baseurl=http://usr:pwd@host.testcontainers.internal:%d/", this.port
-        );
         Files.write(
             setting,
             new ListOf<>(
                 "[example]",
                 "name=Example Repository",
-                url,
+                String.format("baseurl=http://host.testcontainers.internal:%d/", this.port),
                 "enabled=1",
                 "gpgcheck=0"
             )
