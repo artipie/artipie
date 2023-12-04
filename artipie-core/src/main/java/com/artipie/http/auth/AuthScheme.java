@@ -17,6 +17,8 @@ import java.util.concurrent.CompletionStage;
  * @checkstyle JavadocMethodCheck (500 lines)
  * @checkstyle JavadocVariableCheck (500 lines)
  * @checkstyle AvoidInlineConditionalsCheck (500 lines)
+ * @checkstyle OperatorWrapCheck (500 lines)
+ * @checkstyle StringLiteralsConcatenationCheck (500 lines)
  */
 @SuppressWarnings({"PMD.ProhibitPublicStaticMethods",
     "PMD.ConstructorOnlyInitializesOrCallOtherConstructors"})
@@ -149,6 +151,13 @@ public interface AuthScheme {
          */
         public String challenge() {
             return this.challenge;
+        }
+
+        @Override
+        public String toString() {
+            final String usr = this.status == AuthStatus.FAILED ? "" :
+                ", user=" + this.user.name();
+            return String.format("Result: [status=%s%s]", this.status, usr);
         }
     }
 

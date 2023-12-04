@@ -12,6 +12,7 @@ import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
+import com.jcabi.log.Logger;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import org.reactivestreams.Publisher;
@@ -71,6 +72,7 @@ public final class AuthzSlice implements Slice {
         return new AsyncResponse(
             this.auth.authenticate(headers, line).thenApply(
                 result -> {
+                    Logger.debug("security", "Authentication %s", result);
                     if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
                         if (this.control.allowed(result.user())) {
                             return this.origin.response(

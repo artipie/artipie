@@ -5,6 +5,7 @@
 package com.artipie.http.auth;
 
 import com.artipie.security.policy.Policy;
+import com.jcabi.log.Logger;
 import java.security.Permission;
 
 /**
@@ -12,8 +13,10 @@ import java.security.Permission;
  * if required permission is granted for user.
  * <p/>
  * Instances of this class are created in the adapter with users' policies and required
- * permission for the adapter' operation.
+ * permission for the adapter's operation.
  * @since 1.2
+ * @checkstyle StringLiteralsConcatenationCheck (500 lines)
+ * @checkstyle AvoidInlineConditionalsCheck (500 lines)
  */
 public final class OperationControl {
 
@@ -43,6 +46,12 @@ public final class OperationControl {
      * @return True if authorized
      */
     public boolean allowed(final AuthUser user) {
-        return this.policy.getPermissions(user).implies(this.perm);
+        final boolean res = this.policy.getPermissions(user).implies(this.perm);
+        Logger.debug(
+            "security",
+            "Authorization operation: [permission=%s, user=%s, result=%s]",
+            this.perm, user.name(), res ? "allowed" : "NOT allowed"
+        );
+        return res;
     }
 }

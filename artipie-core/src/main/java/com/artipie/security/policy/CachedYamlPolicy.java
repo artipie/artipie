@@ -88,6 +88,7 @@ import java.util.stream.Collectors;
  * @since 1.2
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanable<String> {
 
     /**
@@ -160,7 +161,7 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
         try {
             return this.cache.get(user.name(), this.createUserPermissions(user));
         } catch (final ExecutionException err) {
-            Logger.error(this, err.getMessage());
+            Logger.error("security", err.getMessage());
             throw new ArtipieException(err);
         }
     }
@@ -200,7 +201,7 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
                 res = CachedYamlPolicy.readPermissionsFromYaml(mapping);
             }
         } catch (final IOException | ValueNotFoundException err) {
-            Logger.error(err, String.format("Failed to read/parse file '%s'", filename));
+            Logger.error("security", String.format("Failed to read/parse file '%s'", filename));
             res = EmptyPermissions.INSTANCE;
         }
         return res;
@@ -396,7 +397,7 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
             try {
                 res = CachedYamlPolicy.readFile(asto, filename);
             } catch (final IOException | ValueNotFoundException err) {
-                Logger.error(err, String.format("Failed to read or parse file '%s'", filename));
+                Logger.error("security", "Failed to read or parse file '%s'", filename);
                 res = Yaml.createYamlMappingBuilder().build();
             }
             return res;
