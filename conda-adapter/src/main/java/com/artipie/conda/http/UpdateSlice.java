@@ -103,60 +103,52 @@ public final class UpdateSlice implements Slice {
         final Response res;
         if (matcher.matches()) {
             final Key temp = new Key.From(UpdateSlice.TMP, matcher.group(1));
+            final Key main = new Key.From(matcher.group(1));
             res = new AsyncResponse(
-                this.asto.exists(new Key.From(matcher.group(1))).thenCompose(
-                    main -> this.asto.exists(temp).thenApply(upl -> main || upl)
-                ).thenCompose(
-                    exists -> {
-                        final CompletionStage<Response> resp;
-                        if (exists) {
-                            resp = CompletableFuture.completedFuture(
-                                new RsWithStatus(RsStatus.BAD_REQUEST)
-                            );
-                        } else {
-                            resp = this.asto.save(
-                                temp,
-                                new Content.From(
-                                    UpdateSlice.filePart(new Headers.From(headers), body)
-                                )
-                            )
-                                .thenCompose(empty -> this.infoJson(matcher.group(1), temp))
-                                .thenCompose(json -> this.addChecksum(temp, Digests.MD5, json))
-                                .thenCompose(json -> this.addChecksum(temp, Digests.SHA256, json))
-                                .thenApply(JsonObjectBuilder::build)
-                                .thenCompose(
-                                    json -> {
-                                        //@checkstyle MagicNumberCheck (20 lines)
-                                        //@checkstyle LineLengthCheck (20 lines)
-                                        //@checkstyle NestedIfDepthCheck (20 lines)
-                                        CompletionStage<Void> action = new AstoMergedJson(
-                                            this.asto, new Key.From(matcher.group(2), "repodata.json")
-                                        ).merge(
-                                            Collections.singletonMap(matcher.group(3), json)
-                                        ).thenCompose(
-                                            ignored -> this.asto.move(temp, new Key.From(matcher.group(1)))
-                                        );
-                                        if (this.events.isPresent()) {
-                                            action = action.thenAccept(
-                                                nothing -> this.events.get().add(
-                                                    new ArtifactEvent(
-                                                        UpdateSlice.CONDA, this.rname,
-                                                        new Login(new Headers.From(headers)).getValue(),
-                                                        String.join("_", json.getString("name"), json.getString("arch")),
-                                                        json.getString("version"),
-                                                        json.getJsonNumber(UpdateSlice.SIZE).longValue()
-                                                    )
-                                                )
-                                            );
-                                        }
-                                        return action;
-                                    }
-                                ).thenApply(
-                                    ignored -> new RsWithStatus(RsStatus.CREATED)
+                this.asto.exclusively(
+                    main,
+                    target -> target.exists(main).thenCompose(
+                        repo -> this.asto.exists(temp).thenApply(upl -> repo || upl)
+                    ).thenCompose(
+                        exists -> this.asto.save(
+                            temp,
+                            new Content.From(UpdateSlice.filePart(new Headers.From(headers), body))
+                        )
+                        .thenCompose(empty -> this.infoJson(matcher.group(1), temp))
+                        .thenCompose(json -> this.addChecksum(temp, Digests.MD5, json))
+                        .thenCompose(json -> this.addChecksum(temp, Digests.SHA256, json))
+                        .thenApply(JsonObjectBuilder::build)
+                        .thenCompose(
+                            json -> {
+                                //@checkstyle MagicNumberCheck (20 lines)
+                                //@checkstyle LineLengthCheck (20 lines)
+                                //@checkstyle NestedIfDepthCheck (20 lines)
+                                CompletionStage<Void> action = new AstoMergedJson(
+                                    this.asto, new Key.From(matcher.group(2), "repodata.json")
+                                ).merge(
+                                    Collections.singletonMap(matcher.group(3), json)
+                                ).thenCompose(
+                                    ignored -> this.asto.move(temp, new Key.From(matcher.group(1)))
                                 );
-                        }
-                        return resp;
-                    }
+                                if (this.events.isPresent()) {
+                                    action = action.thenAccept(
+                                        nothing -> this.events.get().add(
+                                            new ArtifactEvent(
+                                                UpdateSlice.CONDA, this.rname,
+                                                new Login(new Headers.From(headers)).getValue(),
+                                                String.join("_", json.getString("name"), json.getString("arch")),
+                                                json.getString("version"),
+                                                json.getJsonNumber(UpdateSlice.SIZE).longValue()
+                                            )
+                                        )
+                                    );
+                                }
+                                return action;
+                            }
+                        ).thenApply(
+                            ignored -> new RsWithStatus(RsStatus.CREATED)
+                        )
+                    )
                 )
             );
         } else {
