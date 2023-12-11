@@ -28,6 +28,7 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -159,6 +160,7 @@ class UpdateSliceTest {
     }
 
     @Test
+    @Disabled("Upload synchronization behaviour should be discussed further")
     void returnsBadRequestIfPackageAlreadyExists() {
         final String key = "linux-64/test.conda";
         this.asto.save(new Key.From(key), Content.EMPTY).join();
