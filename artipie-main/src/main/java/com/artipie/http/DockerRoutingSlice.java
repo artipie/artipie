@@ -25,6 +25,7 @@ import org.reactivestreams.Publisher;
  * Slice decorator which redirects all Docker V2 API requests to Artipie format paths.
  * @since 0.9
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle AvoidInlineConditionalsCheck (500 lines)
  */
 public final class DockerRoutingSlice implements Slice {
 
@@ -73,7 +74,8 @@ public final class DockerRoutingSlice implements Slice {
                     new BaseEntity(),
                     this.settings.authz().authentication(),
                     new OperationControl(
-                        user -> user.isAnonymous() ? EmptyPermissions.INSTANCE : FreePermissions.INSTANCE,
+                        user -> user.isAnonymous() ? EmptyPermissions.INSTANCE
+                            : FreePermissions.INSTANCE,
                         new DockerRepositoryPermission("*", "*", DockerActions.PULL.mask())
                     )
                 ).response(line, headers, body);
