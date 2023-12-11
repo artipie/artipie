@@ -38,6 +38,8 @@ final class PypiITCase {
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("pypi-repo/pypi.yml", "my-python")
             .withRepoConfig("pypi-repo/pypi-port.yml", "my-python-port")
+            .withUser("security/users/alice.yaml", "alice")
+            .withRole("security/roles/readers.yaml", "readers")
             .withExposedPorts(8081),
 
         () -> new TestDeployment.ClientContainer("python:3.7")
