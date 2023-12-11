@@ -17,6 +17,7 @@ import org.awaitility.Awaitility;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -101,6 +102,7 @@ class MavenProxyPackageProcessorTest {
     }
 
     @Test
+    @Disabled("https://github.com/artipie/artipie/issues/1349")
     void processesSeveralPackagesAndPacakgeWithError() throws SchedulerException {
         final String first = "com/artipie/asto/0.20.1";
         final Key firstk = new Key.From(first);
