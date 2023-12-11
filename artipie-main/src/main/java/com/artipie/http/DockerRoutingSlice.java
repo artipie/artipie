@@ -11,6 +11,7 @@ import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.perms.FreePermissions;
 import com.artipie.settings.Settings;
 import java.nio.ByteBuffer;
@@ -72,7 +73,7 @@ public final class DockerRoutingSlice implements Slice {
                     new BaseEntity(),
                     this.settings.authz().authentication(),
                     new OperationControl(
-                        user -> new FreePermissions(),
+                        user -> user.isAnonymous() ? EmptyPermissions.INSTANCE : FreePermissions.INSTANCE,
                         new DockerRepositoryPermission("*", "*", DockerActions.PULL.mask())
                     )
                 ).response(line, headers, body);

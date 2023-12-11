@@ -12,7 +12,6 @@ import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import com.jcabi.log.Logger;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import org.reactivestreams.Publisher;
@@ -26,6 +25,7 @@ import org.reactivestreams.Publisher;
  * @checkstyle ParameterNumberCheck (500 lines)
  * @checkstyle NestedIfDepthCheck (500 lines)
  * @checkstyle MethodBodyCommentsCheck (500 lines)
+ * @checkstyle AvoidInlineConditionalsCheck (500 lines)
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class AuthzSlice implements Slice {
@@ -72,7 +72,6 @@ public final class AuthzSlice implements Slice {
         return new AsyncResponse(
             this.auth.authenticate(headers, line).thenApply(
                 result -> {
-                    Logger.debug("security", "Authentication %s", result);
                     if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
                         if (this.control.allowed(result.user())) {
                             return this.origin.response(
