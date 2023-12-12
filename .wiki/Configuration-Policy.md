@@ -90,6 +90,11 @@ Role can also be deactivated (it means that role does not grant any permissions 
 
 Individual user permissions and role permissions are simply joined for the user.
 
+### Anonymous user
+In the case, when a request doesn't contain a user's credentials, all operations are performed on behalf 
+of the user with the name `anonymous`. You can define permissions and roles that available 
+to `anonymous` the same way as it's done for regular users.
+
 ### Permissions
 
 Permissions in Artipie are based on `java.security.Permission` and `java.security.PermissionCollection`

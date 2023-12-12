@@ -14,6 +14,11 @@ import java.util.Objects;
 public final class AuthUser {
 
     /**
+     * Anonymous user is a user who doesn't have any credentials.
+     */
+    public static final AuthUser ANONYMOUS = new AuthUser("anonymous", "unknown");
+
+    /**
      * User name.
      */
     private final String uname;
@@ -30,7 +35,7 @@ public final class AuthUser {
      * @param context Authentication context
      */
     public AuthUser(final String name, final String context) {
-        this.uname = name;
+        this.uname = Objects.requireNonNull(name, "User's name cannot be null!");
         this.context = context;
     }
 
@@ -44,7 +49,7 @@ public final class AuthUser {
     }
 
     /**
-     * Ger user name.
+     * Get user's name.
      *
      * @return Name
      */
@@ -58,6 +63,15 @@ public final class AuthUser {
      */
     public String authContext() {
         return this.context;
+    }
+
+    /**
+     * This user is anonymous.
+     *
+     * @return True if user is anonymous.
+     */
+    public boolean isAnonymous() {
+        return this.uname.equals(AuthUser.ANONYMOUS.uname);
     }
 
     @Override

@@ -17,7 +17,6 @@ import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Enumeration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.NotImplementedException;
@@ -59,17 +58,7 @@ class AuthScopeSliceTest {
                 }
             },
             (headers, rline) -> CompletableFuture.completedFuture(
-                new AuthScheme.Result() {
-                    @Override
-                    public Optional<AuthUser> user() {
-                        return Optional.of(new AuthUser("alice", "test"));
-                    }
-
-                    @Override
-                    public String challenge() {
-                        return "";
-                    }
-                }
+                AuthScheme.result(new AuthUser("alice", "test"), "")
             ),
             authUser -> new TestCollection(perm),
             "my-repo"

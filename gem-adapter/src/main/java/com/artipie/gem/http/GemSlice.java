@@ -28,8 +28,7 @@ import java.util.Queue;
 
 /**
  * A slice, which servers gem packages.
- *
- *  Ruby HTTP layer.
+ * Ruby HTTP layer.
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @checkstyle ParameterNumberCheck (500 lines)
  * @since 0.1

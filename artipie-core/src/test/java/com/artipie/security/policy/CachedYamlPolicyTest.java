@@ -190,6 +190,57 @@ class CachedYamlPolicyTest {
     }
 
     @Test
+    void anonymousCanReadWithDevRoleAndThenWithIndividualPerms() {
+        this.asto.save(new Key.From("users/anonymous.yml"), this.anonymousConfig());
+        this.asto.save(new Key.From("roles/java-dev.yaml"), this.javaDev());
+        final CachedYamlPolicy policy = new CachedYamlPolicy(
+            this.cache, this.user, this.roles, this.asto
+        );
+        MatcherAssert.assertThat(
+            "Anonymous can read from maven repo",
+            policy.getPermissions(AuthUser.ANONYMOUS)
+                .implies(new AdapterBasicPermission("maven-repo", Action.Standard.READ)),
+            new IsEqual<>(true)
+        );
+        MatcherAssert.assertThat(
+            "Cache with UserPermissions has 1 item",
+            this.cache.size(),
+            new IsEqual<>(1L)
+        );
+        MatcherAssert.assertThat(
+            "Cache with user individual permissions and roles has 1 item",
+            this.user.size(),
+            new IsEqual<>(1L)
+        );
+        MatcherAssert.assertThat(
+            "Cache with role permissions has 2 items (default role and `java-def` role)",
+            this.roles.size(),
+            new IsEqual<>(2L)
+        );
+        MatcherAssert.assertThat(
+            "Anonymous can read from rpm repo",
+            policy.getPermissions(AuthUser.ANONYMOUS)
+                .implies(new AdapterBasicPermission("rpm-repo", Action.Standard.READ)),
+            new IsEqual<>(true)
+        );
+        MatcherAssert.assertThat(
+            "Cache with UserPermissions has 1 item",
+            this.cache.size(),
+            new IsEqual<>(1L)
+        );
+        MatcherAssert.assertThat(
+            "Cache with user individual permissions and roles has 1 item",
+            this.user.size(),
+            new IsEqual<>(1L)
+        );
+        MatcherAssert.assertThat(
+            "Cache with role permissions has 2 items (default and `java-dev`)",
+            this.roles.size(),
+            new IsEqual<>(2L)
+        );
+    }
+
+    @Test
     void johnCannotWriteIntoTestRepo() {
         this.asto.save(new Key.From("users/john.yml"), this.johnConfig());
         this.asto.save(new Key.From("roles/java-dev.yaml"), this.javaDev());
@@ -429,6 +480,20 @@ class CachedYamlPolicyTest {
             ),
             new IsEqual<>(false)
         );
+    }
+
+    private byte[] anonymousConfig() {
+        return String.join(
+            "\n",
+            "roles:",
+            "  - java-dev",
+            "permissions:",
+            "  adapter_basic_permissions:",
+            "    rpm-repo:",
+            "      - read",
+            "    binary-test-repo:",
+            "      - read"
+        ).getBytes(StandardCharsets.UTF_8);
     }
 
     private byte[] aliceConfig() {

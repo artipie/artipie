@@ -25,9 +25,7 @@ import org.reactivestreams.Publisher;
 /**
  * Slice to handle `GET /user` request.
  * @since 0.4
- * @todo #32:30min Implement this slice properly, check swagger docs for more details
- *  https://api.anaconda.org/docs#!/user/get_user
- *  Now it returns string stab.
+ * @checkstyle ReturnCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class GetUserSlice implements Slice {
@@ -51,19 +49,16 @@ final class GetUserSlice implements Slice {
         return new AsyncResponse(
             this.scheme.authenticate(headers, line).thenApply(
                 result -> {
-                    final Response res;
-                    if (result.user().isPresent()) {
-                        res = new RsJson(
-                            () -> GetUserSlice.json(result.user().get().name()),
+                    if (result.status() != AuthScheme.AuthStatus.FAILED) {
+                        return new RsJson(
+                            () -> GetUserSlice.json(result.user().name()),
                             StandardCharsets.UTF_8
                         );
-                    } else {
-                        res = new RsWithHeaders(
-                            new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            new Headers.From(new WwwAuthenticate(result.challenge()))
-                        );
                     }
-                    return res;
+                    return new RsWithHeaders(
+                        new RsWithStatus(RsStatus.UNAUTHORIZED),
+                        new Headers.From(new WwwAuthenticate(result.challenge()))
+                    );
                 }
             )
         );

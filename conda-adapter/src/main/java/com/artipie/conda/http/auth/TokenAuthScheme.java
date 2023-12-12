@@ -20,7 +20,10 @@ import java.util.regex.Pattern;
 /**
  * Conda token auth scheme.
  * @since 0.5
+ * @checkstyle ReturnCountCheck (500 lines)
+ * @checkstyle AvoidInlineConditionalsCheck (500 lines)
  */
+@SuppressWarnings("PMD.OnlyOneReturn")
 public final class TokenAuthScheme implements AuthScheme {
 
     /**
@@ -49,89 +52,35 @@ public final class TokenAuthScheme implements AuthScheme {
     @Override
     public CompletionStage<Result> authenticate(final Iterable<Map.Entry<String, String>> headers,
         final String line) {
-        return this.user(headers, line).thenApply(
-            user -> user.<Result>map(Success::new).orElse(new Failure())
-        );
-    }
-
-    /**
-     * Obtains user from authentication header or from request line.
-     *
-     * @param headers Headers
-     * @param line Request line
-     * @return User, empty if not authenticated
-     */
-    private CompletionStage<Optional<AuthUser>> user(
-        final Iterable<Map.Entry<String, String>> headers, final String line
-    ) {
-        return new RqHeaders(headers, Authorization.NAME).stream()
+        final CompletionStage<Optional<AuthUser>> fut = new RqHeaders(headers, Authorization.NAME)
+            .stream()
             .findFirst()
-            .map(Authorization::new)
-            .filter(hdr -> hdr.scheme().equals(TokenAuthScheme.NAME))
-            .map(hdr -> new Authorization.Token(hdr.credentials()).token())
-            .map(this.auth::user)
+            .map(this::user)
             .orElseGet(
                 () -> {
                     final Matcher mtchr = TokenAuthScheme.PTRN.matcher(
                         new RequestLineFrom(line).uri().toString()
                     );
-                    CompletionStage<Optional<AuthUser>> res =
-                        CompletableFuture.completedFuture(Optional.empty());
-                    if (mtchr.matches()) {
-                        res = this.auth.user(mtchr.group(1));
-                    }
-                    return res;
-                }
+                    return mtchr.matches()
+                        ? this.auth.user(mtchr.group(1))
+                        : CompletableFuture.completedFuture(Optional.of(AuthUser.ANONYMOUS));
+                });
+        return fut.thenApply(user -> AuthScheme.result(user, TokenAuthScheme.NAME));
+    }
+
+    /**
+     * Obtains user from authorization header or from request line.
+     *
+     * @param header Authorization header's value
+     * @return User, empty if not authenticated
+     */
+    private CompletionStage<Optional<AuthUser>> user(final String header) {
+        final Authorization atz = new Authorization(header);
+        if (atz.scheme().equals(TokenAuthScheme.NAME)) {
+            return this.auth.user(
+                new Authorization.Token(atz.credentials()).token()
             );
-    }
-
-    /**
-     * Successful result with authenticated user.
-     *
-     * @since 0.5
-     */
-    private static class Success implements Result {
-
-        /**
-         * Authenticated user.
-         */
-        private final AuthUser usr;
-
-        /**
-         * Ctor.
-         *
-         * @param user Authenticated user.
-         */
-        Success(final AuthUser user) {
-            this.usr = user;
         }
-
-        @Override
-        public Optional<AuthUser> user() {
-            return Optional.of(this.usr);
-        }
-
-        @Override
-        public String challenge() {
-            return TokenAuthScheme.NAME;
-        }
-    }
-
-    /**
-     * Failed result without authenticated user.
-     *
-     * @since 0.5
-     */
-    private static class Failure implements Result {
-
-        @Override
-        public Optional<AuthUser> user() {
-            return Optional.empty();
-        }
-
-        @Override
-        public String challenge() {
-            return TokenAuthScheme.NAME;
-        }
+        return CompletableFuture.completedFuture(Optional.empty());
     }
 }

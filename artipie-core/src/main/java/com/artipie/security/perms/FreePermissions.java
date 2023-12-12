@@ -17,6 +17,11 @@ import org.apache.commons.lang3.NotImplementedException;
 public final class FreePermissions extends PermissionCollection {
 
     /**
+     * Class instance.
+     */
+    public static final PermissionCollection INSTANCE = new FreePermissions();
+
+    /**
      * Required serial.
      */
     private static final long serialVersionUID = 1346496579871236952L;

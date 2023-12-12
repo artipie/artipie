@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
@@ -147,7 +146,7 @@ class NuGetPackageMetadataTest {
     }
 
     @Test
-    void shouldFailGetRegistrationWithoutAuth() {
+    void shouldUnauthorizedGetRegistrationForAnonymousUser() {
         MatcherAssert.assertThat(
             this.nuget.response(
                 new RequestLine(
@@ -158,7 +157,7 @@ class NuGetPackageMetadataTest {
                 Flowable.empty()
             ),
             new ResponseMatcher(
-                RsStatus.UNAUTHORIZED, new Header("WWW-Authenticate", "Basic realm=\"artipie\"")
+                RsStatus.UNAUTHORIZED, Headers.EMPTY
             )
         );
     }

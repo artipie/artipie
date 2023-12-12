@@ -10,7 +10,6 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
@@ -65,7 +64,7 @@ class NuGetPackageContentTest {
     }
 
     @Test
-    void shouldGetPackageContent() throws Exception {
+    void shouldGetPackageContent() {
         final byte[] data = "data".getBytes();
         new BlockingStorage(this.storage).save(
             new Key.From("package", "1.0.0", "content.nupkg"),
@@ -124,7 +123,7 @@ class NuGetPackageContentTest {
     }
 
     @Test
-    void shouldGetPackageVersions() throws Exception {
+    void shouldGetPackageVersions() {
         final byte[] data = "example".getBytes();
         new BlockingStorage(this.storage).save(
             new Key.From("package2", "index.json"),
@@ -162,7 +161,7 @@ class NuGetPackageContentTest {
     }
 
     @Test
-    void shouldFailGetPackageContentWithoutAuth() {
+    void shouldUnauthorizedGetPackageContentByAnonymousUser() {
         MatcherAssert.assertThat(
             this.nuget.response(
                 new RequestLine(
@@ -172,9 +171,7 @@ class NuGetPackageContentTest {
                 Headers.EMPTY,
                 Flowable.empty()
             ),
-            new ResponseMatcher(
-                RsStatus.UNAUTHORIZED, new Header("WWW-Authenticate", "Basic realm=\"artipie\"")
-            )
+            new ResponseMatcher(RsStatus.UNAUTHORIZED, Headers.EMPTY)
         );
     }
 }

@@ -12,11 +12,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
@@ -24,7 +25,10 @@ import org.junit.jupiter.params.provider.ValueSource;
  *
  * @since 0.17
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle IndentationCheck (500 lines)
+ * @checkstyle BracketsStructureCheck (500 lines)
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class BearerAuthSchemeTest {
 
     @Test
@@ -50,33 +54,49 @@ final class BearerAuthSchemeTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"bob"})
-    @NullSource
+    @ValueSource(strings = {"bob", "jora"})
     void shouldReturnUserInResult(final String name) {
-        final Optional<AuthUser> user = Optional.ofNullable(name)
-            .map(AuthUser::new);
-        final Optional<AuthUser> result = new BearerAuthScheme(
-            tkn -> CompletableFuture.completedFuture(user),
+        final AuthUser user = new AuthUser(name);
+        final AuthScheme.Result result = new BearerAuthScheme(
+            tkn -> CompletableFuture.completedFuture(Optional.of(user)),
             "whatever"
         ).authenticate(
             new Headers.From(new Authorization.Bearer("abc")), "GET http://any HTTP/1.1"
-        ).toCompletableFuture().join().user();
-        MatcherAssert.assertThat(result, new IsEqual<>(user));
+        ).toCompletableFuture().join();
+        Assertions.assertSame(AuthScheme.AuthStatus.AUTHENTICATED, result.status());
+        MatcherAssert.assertThat(result.user(), Matchers.is(user));
+    }
+
+    @Test
+    void shouldReturnAnonymousUserWhenNoAuthorizationHeader() {
+        final String params = "realm=\"artipie.com/auth\",param1=\"123\"";
+        final AuthScheme.Result result = new BearerAuthScheme(
+            tkn -> CompletableFuture.completedFuture(Optional.empty()), params
+        ).authenticate(
+            new Headers.From(new Header("X-Something", "some value")),
+            "GET http://ignored HTTP/1.1"
+        ).toCompletableFuture().join();
+        Assertions.assertSame(
+            AuthScheme.AuthStatus.NO_CREDENTIALS,
+            result.status()
+        );
+        Assertions.assertTrue(
+            result.user().isAnonymous(),
+            "Should return anonymous user"
+        );
     }
 
     @ParameterizedTest
     @MethodSource("badHeaders")
-    void shouldNotAuthWhenNoAuthHeader(final Headers headers) {
+    void shouldNotBeAuthorizedWhenNoBearerHeader(final Headers headers) {
         final String params = "realm=\"artipie.com/auth\",param1=\"123\"";
         final AuthScheme.Result result = new BearerAuthScheme(
             tkn -> CompletableFuture.completedFuture(Optional.empty()),
             params
-        ).authenticate(headers, "GET http://ignored HTTP/1.1").toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            "Not authenticated",
-            result.user().isPresent(),
-            new IsEqual<>(false)
-        );
+        ).authenticate(headers, "GET http://ignored HTTP/1.1")
+            .toCompletableFuture()
+            .join();
+        Assertions.assertNotSame(AuthScheme.AuthStatus.AUTHENTICATED, result.status());
         MatcherAssert.assertThat(
             "Has expected challenge",
             result.challenge(),

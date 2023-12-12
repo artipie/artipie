@@ -110,24 +110,6 @@ final class DockerRoutingSliceTest {
         );
     }
 
-    @Test
-    void notAllowsAnyUser() {
-        MatcherAssert.assertThat(
-            new DockerRoutingSlice(
-                new SettingsWithAuth((usr, pswd) -> Optional.of(Authentication.ANY_USER)),
-                (line, headers, body) -> {
-                    throw new UnsupportedOperationException();
-                }
-            ),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.FORBIDDEN),
-                new RequestLine(RqMethod.GET, "/v2/"),
-                new Headers.From(new Authorization.Basic("any", "ignored")),
-                Content.EMPTY
-            )
-        );
-    }
-
     private static void verify(final Slice slice, final String path) throws Exception {
         slice.response(
             new RequestLine(RqMethod.GET, path).toString(),
