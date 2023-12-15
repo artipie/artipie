@@ -17,8 +17,8 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 
 /**
  * Conda IT case with S3 storage.
@@ -38,7 +38,12 @@ public final class CondaS3ITCase {
     /**
      * Repository TCP port number.
      */
-    private static final String PORT = "8080";
+    private static final int PORT = 8080;
+
+    /**
+     * MinIO S3 storage server port.
+     */
+    private static final int S3_PORT = 9000;
 
     /**
      * Test repository name.
@@ -55,10 +60,48 @@ public final class CondaS3ITCase {
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withUser("security/users/alice.yaml", "alice")
             .withRepoConfig("conda/conda-s3.yml", "my-conda"),
-        () -> new TestDeployment.ClientContainer("continuumio/miniconda3:4.10.3")
+        () -> new TestDeployment.ClientContainer(
+            new ImageFromDockerfile(
+                "local/artipie-main/conda_s3_itcase", false
+            ).withDockerfileFromBuilder(
+                builder -> builder
+                    .from("continuumio/miniconda3:4.10.3")
+                    .env("DEBIAN_FRONTEND", "noninteractive")
+                    .run("apt update -y -o APT::Update::Error-Mode=any")
+                    .run("apt dist-upgrade -y && apt install -y curl netcat")
+                    .run("apt autoremove -y && apt clean -y && rm -rfv /var/lib/apt/lists")
+                    .run("apt install -y curl && apt clean && rm -rfv /var/lib/apt/lists")
+                    .run("conda install -vv -y conda-build==3.27.0 conda-verify==3.4.2 anaconda-client==1.10.0 2>&1|tee /tmp/conda.log")
+                    .run("conda clean -a")
+                    .copy("condarc", "/root/.condarc")
+                    .run("anaconda config --set url http://artipie:%d/%s/ -s".formatted(CondaS3ITCase.PORT, CondaS3ITCase.REPO))
+                    .run("conda config --set anaconda_upload yes")
+                    .copy("minio-bin-20231120.txz", "/w/minio-bin-20231120.txz")
+                    .run("tar xf /w/minio-bin-20231120.txz -C /root")
+                    .run(
+                        String.join(
+                            ";",
+                            "sh -c '/root/bin/minio server /var/minio > /tmp/minio.log 2>&1 &'",
+                            "timeout 30 sh -c 'until nc -z localhost 9000; do sleep 0.1; done'",
+                            "/root/bin/mc alias set srv1 http://localhost:9000 minioadmin minioadmin 2>&1 |tee /tmp/mc.log",
+                            "/root/bin/mc mb srv1/buck1 --region s3test 2>&1|tee -a /tmp/mc.log",
+                            "/root/bin/mc anonymous set public srv1/buck1 2>&1|tee -a /tmp/mc.log"
+                        )
+                    )
+                    .run("rm -fv /w/minio-bin-20231120.txz /tmp/*.log")
+                    .copy("snappy-1.1.3-0.tar.bz2", "/w/snappy-1.1.3-0.tar.bz2")
+                    .copy("noarch_glom-22.1.0.tar.bz2", "/w/noarch_glom-22.1.0.tar.bz2")
+                    .copy("linux-64_nng-1.4.0.tar.bz2", "/w/linux-64_nng-1.4.0.tar.bz2")
+                )
+                .withFileFromClasspath("condarc", "conda/condarc")
+                .withFileFromClasspath("snappy-1.1.3-0.tar.bz2", "conda/snappy-1.1.3-0.tar.bz2")
+                .withFileFromClasspath("noarch_glom-22.1.0.tar.bz2", "conda/noarch_glom-22.1.0.tar.bz2")
+                .withFileFromClasspath("linux-64_nng-1.4.0.tar.bz2", "conda/linux-64_nng-1.4.0.tar.bz2")
+                .withFileFromClasspath("minio-bin-20231120.txz", "minio-bin-20231120.txz")
+            )
             .withWorkingDirectory("/w")
             .withNetworkAliases("minic")
-            .withExposedPorts(9000)
+            .withExposedPorts(CondaS3ITCase.S3_PORT)
             .waitingFor(
                 new AbstractWaitStrategy() {
                     @Override
@@ -67,75 +110,17 @@ public final class CondaS3ITCase {
                     }
                 }
             )
-            .withClasspathResourceMapping(
-                "conda/condarc", "/w/.condarc", BindMode.READ_ONLY
-            )
-            .withClasspathResourceMapping(
-                "conda/snappy-1.1.3-0.tar.bz2", "/w/snappy-1.1.3-0.tar.bz2", BindMode.READ_ONLY
-            )
-            .withClasspathResourceMapping(
-                "conda/noarch_glom-22.1.0.tar.bz2", "/w/noarch_glom-22.1.0.tar.bz2", BindMode.READ_ONLY
-            )
-            .withClasspathResourceMapping(
-                "conda/linux-64_nng-1.4.0.tar.bz2", "/w/linux-64_nng-1.4.0.tar.bz2", BindMode.READ_ONLY
-            )
-            .withClasspathResourceMapping(
-                "minio-bin-20231120.txz", "/w/minio-bin-20231120.txz", BindMode.READ_ONLY
-            )
     );
 
     @BeforeEach
     void init() throws IOException {
         this.containers.assertExec(
-            "Apt dependencies installation failed", new ContainerResultMatcher(),
-            "bash", "-c", "apt update -y; apt install -y curl"
-        );
-        this.containers.assertExec(
-            "Conda dependencies installation failed", new ContainerResultMatcher(),
-            "conda install -vv -y conda-build==3.27.0 conda-verify==3.4.2 anaconda-client==1.10.0".split(" ")
-        );
-        this.containers.assertExec(
-            "Failed to move condarc to /root", new ContainerResultMatcher(),
-            "mv", "/w/.condarc", "/root/"
-        );
-        this.containers.assertExec(
-            "Failed to set anaconda upload url",
-            new ContainerResultMatcher(),
-            "anaconda", "config", "--set", "url",
-            String.format(
-                "http://artipie:%s/%s/",
-                CondaS3ITCase.PORT,
-                CondaS3ITCase.REPO
-            ), "-s"
-        );
-        this.containers.assertExec(
-            "Failed to set anaconda upload flag",
-            new ContainerResultMatcher(),
-            "conda config --set anaconda_upload yes".split(" ")
-        );
-        this.containers.assertExec(
-            "Minio unpack failed", new ContainerResultMatcher(),
-            "tar xvf /w/minio-bin-20231120.txz -C /root".split(" ")
-        );
-        this.containers.assertExec(
             "Failed to start Minio", new ContainerResultMatcher(),
-            "bash", "-c", "nohup /root/bin/minio server /var/minio &"
+            "bash", "-c", "nohup /root/bin/minio server /var/minio 2>&1|tee /tmp/minio.log &"
         );
         this.containers.assertExec(
             "Failed to wait for Minio", new ContainerResultMatcher(),
-            "sleep", "2"
-        );
-        this.containers.assertExec(
-            "Failed to configure Minio alias", new ContainerResultMatcher(),
-            "/root/bin/mc alias set srv1 http://localhost:9000 minioadmin minioadmin".split(" ")
-        );
-        this.containers.assertExec(
-            "Failed to configure Minio bucket", new ContainerResultMatcher(),
-            "/root/bin/mc mb srv1/buck1 --region s3test".split(" ")
-        );
-        this.containers.assertExec(
-            "Failed to configure Minio access", new ContainerResultMatcher(),
-            "/root/bin/mc anonymous set public srv1/buck1".split(" ")
+            "timeout", "30",  "sh", "-c", "until nc -z localhost 9000; do sleep 0.1; done"
         );
         this.containers.assertExec(
             "Login was not successful",
@@ -168,7 +153,7 @@ public final class CondaS3ITCase {
                 Matchers.allOf(
                     new StringContains(
                         String.format(
-                            "Using Anaconda API: http://artipie:%s/%s/",
+                            "Using Anaconda API: http://artipie:%d/%s/",
                             CondaS3ITCase.PORT,
                             CondaS3ITCase.REPO
                         )
@@ -225,12 +210,11 @@ public final class CondaS3ITCase {
                 Matchers.allOf(
                     new StringContains(
                         String.format(
-                            "Using Anaconda API: http://artipie:%s/%s/",
+                            "Using Anaconda API: http://artipie:%d/%s/",
                             CondaS3ITCase.PORT,
                             CondaS3ITCase.REPO
                         )
                     ),
-                    // @checkstyle LineLengthCheck (1 line)
                     new StringContains("Uploading file \"alice/snappy/1.1.3/linux-64/snappy-1.1.3-0.tar.bz2\""),
                     new StringContains("Upload complete")
                 )
@@ -244,12 +228,11 @@ public final class CondaS3ITCase {
                 Matchers.allOf(
                     new StringContains(
                         String.format(
-                            "Using Anaconda API: http://artipie:%s/%s/",
+                            "Using Anaconda API: http://artipie:%d/%s/",
                             CondaS3ITCase.PORT,
                             CondaS3ITCase.REPO
                         )
                     ),
-                    // @checkstyle LineLengthCheck (1 line)
                     new StringContains("Uploading file \"alice/glom/22.1.0/noarch/noarch_glom-22.1.0.tar.bz2\""),
                     new StringContains("Upload complete")
                 )
@@ -302,7 +285,7 @@ public final class CondaS3ITCase {
                 Matchers.allOf(
                     new StringContains(
                         String.format(
-                            "Using Anaconda API: http://artipie:%s/%s/",
+                            "Using Anaconda API: http://artipie:%d/%s/",
                             CondaS3ITCase.PORT,
                             CondaS3ITCase.REPO
                         )
@@ -320,7 +303,7 @@ public final class CondaS3ITCase {
                 Matchers.allOf(
                     new StringContains(
                         String.format(
-                            "Using Anaconda API: http://artipie:%s/%s/",
+                            "Using Anaconda API: http://artipie:%d/%s/",
                             CondaS3ITCase.PORT,
                             CondaS3ITCase.REPO
                         )
