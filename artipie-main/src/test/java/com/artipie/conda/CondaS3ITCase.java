@@ -152,12 +152,12 @@ public final class CondaS3ITCase {
     void canSingleUploadToArtipie(final String pkgname, final String pkgpath, final String pkgarch)
         throws IOException {
         this.containers.assertExec(
-            "",
+            "repodata.json must be absent in S3 before test",
             new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
             "curl -f -kv http://minic:9000/buck1/my-conda/%s/repodata.json".formatted(pkgarch).split(" ")
         );
         this.containers.assertExec(
-            "",
+            "%s must be absent in S3 before test".formatted(pkgname),
             new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
             "curl -f -kv http://minic:9000/buck1/my-conda/%s/%s".formatted(pkgarch, pkgname).split(" ")
         );
@@ -180,35 +180,42 @@ public final class CondaS3ITCase {
             "timeout 30s anaconda --show-traceback --verbose upload /w/%s".formatted(pkgname).split(" ")
         );
         this.containers.assertExec(
-            "", new ContainerResultMatcher(new IsEqual<>(2)),
+            "repodata.json must be absent in file storage since file storage must be unused",
+            new ContainerResultMatcher(new IsEqual<>(2)),
             "ls", "/var/artipie/data/my-conda/%s/repodata.json".formatted(pkgarch)
         );
         this.containers.assertExec(
-            "", new ContainerResultMatcher(new IsEqual<>(0)),
+            "repodata.json must exist in S3 storage after test",
+            new ContainerResultMatcher(new IsEqual<>(0)),
             "curl -f -kv http://minic:9000/buck1/my-conda/%s/repodata.json".formatted(pkgarch).split(" ")
         );
         this.containers.assertExec(
-            "", new ContainerResultMatcher(new IsEqual<>(0)),
+            "%s/%s must exist in S3 storage after test".formatted(pkgarch, pkgname),
+            new ContainerResultMatcher(new IsEqual<>(0)),
             "curl -f -kv http://minic:9000/buck1/my-conda/%s/%s".formatted(pkgarch, pkgname).split(" ")
         );
     }
 
     @Test
-    void canMultiUploadDifferentArchTest() throws IOException {
+    void canMultiUploadDifferentArchTest() throws IOException, InterruptedException {
         this.containers.assertExec(
-            "", new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
+            "linux-64/snappy-1.1.3-0.tar.bz2 must be absent in S3 before test",
+            new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
             "curl -f -kv http://minic:9000/buck1/my-conda/linux-64/snappy-1.1.3-0.tar.bz2".split(" ")
         );
         this.containers.assertExec(
-            "", new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
+            "noarch_glom-22.1.0.tar.bz2 must be absent in S3 before test",
+            new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
             "curl -f -kv http://minic:9000/buck1/my-conda/noarch/noarch_glom-22.1.0.tar.bz2".split(" ")
         );
         this.containers.assertExec(
-            "", new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
+            "noarch/repodata.json must be absent in S3 before test",
+            new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
             "curl -f -kv http://minic:9000/buck1/my-conda/noarch/repodata.json".split(" ")
         );
         this.containers.assertExec(
-            "", new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
+            "linux-64/repodata.json must be absent in S3 before test",
+            new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
             "curl -f -kv http://minic:9000/buck1/my-conda/linux-64/repodata.json".split(" ")
         );
         this.containers.assertExec(
@@ -250,22 +257,22 @@ public final class CondaS3ITCase {
             "timeout 30s anaconda --show-traceback --verbose upload /w/noarch_glom-22.1.0.tar.bz2".split(" ")
         );
         this.containers.assertExec(
-            "",
+            "linux-64/snappy-1.1.3-0.tar.bz2 must exist in S3 storage after test",
             new ContainerResultMatcher(new IsEqual<>(0)),
             "curl -f -kv http://minic:9000/buck1/my-conda/linux-64/snappy-1.1.3-0.tar.bz2".split(" ")
         );
         this.containers.assertExec(
-            "",
+            "oarch_glom-22.1.0.tar.bz2 must exist in S3 storage after test",
             new ContainerResultMatcher(new IsEqual<>(0)),
             "curl -f -kv http://minic:9000/buck1/my-conda/noarch/noarch_glom-22.1.0.tar.bz2".split(" ")
         );
         this.containers.assertExec(
-            "",
+            "noarch/repodata.json must exist in S3 storage after test",
             new ContainerResultMatcher(new IsEqual<>(0)),
             "curl -f -kv http://minic:9000/buck1/my-conda/noarch/repodata.json".split(" ")
         );
         this.containers.assertExec(
-            "",
+            "linux-64/repodata.json must exist in S3 storage after test",
             new ContainerResultMatcher(new IsEqual<>(0)),
             "curl -f -kv http://minic:9000/buck1/my-conda/linux-64/repodata.json".split(" ")
         );
@@ -274,17 +281,17 @@ public final class CondaS3ITCase {
     @Test
     void canMultiUploadSameArchTest() throws IOException, InterruptedException {
         this.containers.assertExec(
-            "",
+            "linux-64/snappy-1.1.3-0.tar.bz2 must be absent in S3 before test",
             new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
             "curl -f -kv http://minic:9000/buck1/my-conda/linux-64/snappy-1.1.3-0.tar.bz2".split(" ")
         );
         this.containers.assertExec(
-            "",
+            "linux-64/linux-64_nng-1.4.0.tar.bz2 must be absent in S3 before test",
             new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
             "curl -f -kv http://minic:9000/buck1/my-conda/linux-64/linux-64_nng-1.4.0.tar.bz2".split(" ")
         );
         this.containers.assertExec(
-            "",
+            "repodata.json must be absent in S3 before test",
             new ContainerResultMatcher(new IsEqual<>(CondaS3ITCase.CURL_NOT_FOUND)),
             "curl -f -kv http://minic:9000/buck1/my-conda/linux-64/repodata.json".split(" ")
         );
@@ -325,15 +332,18 @@ public final class CondaS3ITCase {
             "timeout 30s anaconda --show-traceback --verbose upload /w/snappy-1.1.3-0.tar.bz2".split(" ")
         );
         this.containers.assertExec(
-            "", new ContainerResultMatcher(new IsEqual<>(0)),
+            "linux-64/snappy-1.1.3-0.tar.bz2 must exist in S3 storage after test",
+            new ContainerResultMatcher(new IsEqual<>(0)),
             "curl -f -kv http://minic:9000/buck1/my-conda/linux-64/snappy-1.1.3-0.tar.bz2".split(" ")
         );
         this.containers.assertExec(
-            "", new ContainerResultMatcher(new IsEqual<>(0)),
+            "linux-64/linux-64_nng-1.4.0.tar.bz2 must exist in S3 storage after test",
+            new ContainerResultMatcher(new IsEqual<>(0)),
             "curl -f -kv http://minic:9000/buck1/my-conda/linux-64/linux-64_nng-1.4.0.tar.bz2".split(" ")
         );
         this.containers.assertExec(
-            "", new ContainerResultMatcher(new IsEqual<>(0)),
+            "linux-64/repodata.json must exist in S3 storage after test",
+            new ContainerResultMatcher(new IsEqual<>(0)),
             "curl -f -kv http://minic:9000/buck1/my-conda/linux-64/repodata.json".split(" ")
         );
     }
