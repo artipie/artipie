@@ -17,7 +17,6 @@ import com.artipie.asto.misc.Cleanable;
 import com.artipie.asto.misc.UncheckedFunc;
 import com.artipie.asto.misc.UncheckedSupplier;
 import com.artipie.http.auth.AuthUser;
-import com.artipie.http.auth.Authentication;
 import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.perms.PermissionConfig;
 import com.artipie.security.perms.PermissionsLoader;
@@ -89,6 +88,7 @@ import java.util.stream.Collectors;
  * @since 1.2
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanable<String> {
 
     /**
@@ -101,12 +101,6 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
      */
     private static final PermissionConfig EMPTY_CONFIG =
         new PermissionConfig.FromYamlMapping(Yaml.createYamlMappingBuilder().build());
-
-    /**
-     * Empty permissions.
-     */
-    private static final UserPermissions EMPTY_PERMS =
-        new UserPermissions(() -> User.EMPTY, role -> EmptyPermissions.INSTANCE);
 
     /**
      * Cache for usernames and {@link UserPermissions}.
@@ -164,18 +158,12 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
 
     @Override
     public UserPermissions getPermissions(final AuthUser user) {
-        final UserPermissions res;
-        if (Authentication.ANY_USER.name().equals(user.name())) {
-            res = CachedYamlPolicy.EMPTY_PERMS;
-        } else {
-            try {
-                res = this.cache.get(user.name(), this.createUserPermissions(user));
-            } catch (final ExecutionException err) {
-                Logger.error(this, err.getMessage());
-                throw new ArtipieException(err);
-            }
+        try {
+            return this.cache.get(user.name(), this.createUserPermissions(user));
+        } catch (final ExecutionException err) {
+            Logger.error("security", err.getMessage());
+            throw new ArtipieException(err);
         }
-        return res;
     }
 
     @Override
@@ -213,7 +201,7 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
                 res = CachedYamlPolicy.readPermissionsFromYaml(mapping);
             }
         } catch (final IOException | ValueNotFoundException err) {
-            Logger.error(err, String.format("Failed to read/parse file '%s'", filename));
+            Logger.error("security", String.format("Failed to read/parse file '%s'", filename));
             res = EmptyPermissions.INSTANCE;
         }
         return res;
@@ -409,7 +397,7 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
             try {
                 res = CachedYamlPolicy.readFile(asto, filename);
             } catch (final IOException | ValueNotFoundException err) {
-                Logger.error(err, String.format("Failed to read or parse file '%s'", filename));
+                Logger.error("security", "Failed to read or parse file '%s'", filename);
                 res = Yaml.createYamlMappingBuilder().build();
             }
             return res;

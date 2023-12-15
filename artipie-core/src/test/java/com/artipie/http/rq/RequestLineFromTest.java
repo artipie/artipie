@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
  * </p>
  * @since 0.1
  */
-public final class RequestLineFromTest {
+final class RequestLineFromTest {
 
     /**
      * Exception message.

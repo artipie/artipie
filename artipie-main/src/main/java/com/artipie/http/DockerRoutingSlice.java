@@ -7,7 +7,6 @@ package com.artipie.http;
 import com.artipie.docker.http.BaseEntity;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RequestLine;
@@ -16,7 +15,6 @@ import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.perms.FreePermissions;
 import com.artipie.settings.Settings;
 import java.nio.ByteBuffer;
-import java.security.PermissionCollection;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +25,7 @@ import org.reactivestreams.Publisher;
  * Slice decorator which redirects all Docker V2 API requests to Artipie format paths.
  * @since 0.9
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
+ * @checkstyle AvoidInlineConditionalsCheck (500 lines)
  */
 public final class DockerRoutingSlice implements Slice {
 
@@ -75,14 +74,8 @@ public final class DockerRoutingSlice implements Slice {
                     new BaseEntity(),
                     this.settings.authz().authentication(),
                     new OperationControl(
-                        user -> {
-                            // @checkstyle NestedIfDepthCheck (10 lines)
-                            PermissionCollection res = new FreePermissions();
-                            if (Authentication.ANY_USER.name().equals(user.name())) {
-                                res = EmptyPermissions.INSTANCE;
-                            }
-                            return res;
-                        },
+                        user -> user.isAnonymous() ? EmptyPermissions.INSTANCE
+                            : FreePermissions.INSTANCE,
                         new DockerRepositoryPermission("*", "*", DockerActions.PULL.mask())
                     )
                 ).response(line, headers, body);

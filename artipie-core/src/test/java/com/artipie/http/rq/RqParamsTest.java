@@ -21,7 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  *
  * @since 0.18
  */
-public final class RqParamsTest {
+class RqParamsTest {
 
     @ParameterizedTest
     @CsvSource({

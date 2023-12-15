@@ -1,0 +1,10 @@
+permissions:
+  adapter_basic_permissions:
+    my-maven:
+      - "read"
+    my-npm:
+      - "*"
+  docker_repository_permissions:
+    "*":
+      "*":
+        - pull

@@ -18,13 +18,16 @@ import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import org.reactivestreams.Publisher;
 
 /**
  * Responses on api key requests.
  *
  * @since 0.3
+ * @checkstyle ReturnCountCheck (500 lines)
  */
+@SuppressWarnings("PMD.OnlyOneReturn")
 final class ApiKeySlice implements Slice {
 
     /**
@@ -48,17 +51,20 @@ final class ApiKeySlice implements Slice {
         return new AsyncResponse(
             new BasicAuthScheme(this.auth)
                 .authenticate(headers)
-                .thenApply(AuthScheme.Result::user)
                 .thenApply(
-                    opt -> opt.flatMap(
-                        user -> new RqHeaders(headers, Authorization.NAME).stream()
-                            .filter(val -> val.startsWith(BasicAuthScheme.NAME))
-                            .map(val -> val.substring(BasicAuthScheme.NAME.length() + 1))
-                            .findFirst()
-                    )
-                ).thenApply(
-                    key -> key.<Response>map(val -> new RsWithBody(val, StandardCharsets.US_ASCII))
-                        .orElseGet(() -> new RsWithStatus(RsStatus.UNAUTHORIZED))
+                    result -> {
+                        if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
+                            final Optional<String> key = new RqHeaders(headers, Authorization.NAME)
+                                .stream()
+                                .filter(val -> val.startsWith(BasicAuthScheme.NAME))
+                                .map(val -> val.substring(BasicAuthScheme.NAME.length() + 1))
+                                .findFirst();
+                            if (key.isPresent()) {
+                                return new RsWithBody(key.get(), StandardCharsets.US_ASCII);
+                            }
+                        }
+                        return new RsWithStatus(RsStatus.UNAUTHORIZED);
+                    }
                 )
         );
     }

@@ -15,7 +15,9 @@ import java.util.concurrent.CompletionStage;
  * Basic authentication method.
  *
  * @since 0.17
+ * @checkstyle ReturnCountCheck (500 lines)
  */
+@SuppressWarnings("PMD.OnlyOneReturn")
 public final class BasicAuthScheme implements AuthScheme {
 
     /**
@@ -46,72 +48,26 @@ public final class BasicAuthScheme implements AuthScheme {
     public CompletionStage<Result> authenticate(
         final Iterable<Map.Entry<String, String>> headers, final String line
     ) {
-        return CompletableFuture.completedFuture(
-            this.user(headers).<Result>map(Success::new).orElseGet(Failure::new)
-        );
+        final AuthScheme.Result result = new RqHeaders(headers, Authorization.NAME)
+            .stream()
+            .findFirst()
+            .map(s -> AuthScheme.result(this.user(s), BasicAuthScheme.CHALLENGE))
+            .orElseGet(() -> AuthScheme.result(AuthUser.ANONYMOUS, BasicAuthScheme.CHALLENGE));
+        return CompletableFuture.completedFuture(result);
     }
 
     /**
-     * Obtains user from authentication header.
-     * @param headers Headers
+     * Obtains user from authorization header.
+     *
+     * @param header Authorization header's value
      * @return User if authorised
      */
-    private Optional<AuthUser> user(final Iterable<Map.Entry<String, String>> headers) {
-        return new RqHeaders(headers, Authorization.NAME).stream()
-            .findFirst()
-            .map(Authorization::new)
-            .filter(hdr -> hdr.scheme().equals(BasicAuthScheme.NAME))
-            .map(hdr -> new Authorization.Basic(hdr.credentials()))
-            .flatMap(hdr -> this.auth.user(hdr.username(), hdr.password()));
-    }
-
-    /**
-     * Successful result with authenticated user.
-     *
-     * @since 0.17
-     */
-    private static class Success implements Result {
-
-        /**
-         * Authenticated user.
-         */
-        private final AuthUser usr;
-
-        /**
-         * Ctor.
-         *
-         * @param user Authenticated user.
-         */
-        Success(final AuthUser user) {
-            this.usr = user;
+    private Optional<AuthUser> user(final String header) {
+        final Authorization atz = new Authorization(header);
+        if (atz.scheme().equals(BasicAuthScheme.NAME)) {
+            final Authorization.Basic basic = new Authorization.Basic(atz.credentials());
+            return this.auth.user(basic.username(), basic.password());
         }
-
-        @Override
-        public Optional<AuthUser> user() {
-            return Optional.of(this.usr);
-        }
-
-        @Override
-        public String challenge() {
-            return BasicAuthScheme.CHALLENGE;
-        }
-    }
-
-    /**
-     * Failed result without authenticated user.
-     *
-     * @since 0.17
-     */
-    private static class Failure implements Result {
-
-        @Override
-        public Optional<AuthUser> user() {
-            return Optional.empty();
-        }
-
-        @Override
-        public String challenge() {
-            return BasicAuthScheme.CHALLENGE;
-        }
+        return Optional.empty();
     }
 }

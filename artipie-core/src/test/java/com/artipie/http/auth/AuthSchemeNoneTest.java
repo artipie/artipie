@@ -5,9 +5,7 @@
 package com.artipie.http.auth;
 
 import com.artipie.http.Headers;
-import java.util.Optional;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -19,12 +17,10 @@ final class AuthSchemeNoneTest {
 
     @Test
     void shouldAuthEmptyHeadersAsAnonymous() {
-        MatcherAssert.assertThat(
+        Assertions.assertTrue(
             AuthScheme.NONE.authenticate(Headers.EMPTY, "any")
-                .toCompletableFuture().join()
-                .user()
-                .map(AuthUser::name),
-            new IsEqual<>(Optional.of("anonymous"))
+            .toCompletableFuture().join()
+            .user().isAnonymous()
         );
     }
 }

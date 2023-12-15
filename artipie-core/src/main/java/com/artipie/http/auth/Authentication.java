@@ -19,12 +19,7 @@ public interface Authentication {
     /**
      * Resolve anyone as an anonymous user.
      */
-    Authentication ANONYMOUS = (name, pswd) -> Optional.of(new AuthUser("anonymous", "unknown"));
-
-    /**
-     * Any user instance.
-     */
-    AuthUser ANY_USER = new AuthUser("*", "any");
+    Authentication ANONYMOUS = (name, pswd) -> Optional.of(AuthUser.ANONYMOUS);
 
     /**
      * Find user by credentials.
