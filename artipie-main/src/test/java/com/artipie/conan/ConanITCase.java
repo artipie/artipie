@@ -168,7 +168,7 @@ public final class ConanITCase {
      */
     @SuppressWarnings("PMD.LineLengthCheck")
     private static TestDeployment.ClientContainer prepareClientContainer() {
-        final ImageFromDockerfile image = new ImageFromDockerfile().withDockerfileFromBuilder(
+        final ImageFromDockerfile image = new ImageFromDockerfile("local/artipie-main/conan_itcase", false).withDockerfileFromBuilder(
             builder -> builder
                 .from("ubuntu:22.04")
                 .env("CONAN_TRACE_FILE", "/tmp/conan_trace.log")
@@ -186,7 +186,6 @@ public final class ConanITCase {
                 .run("conan remote add conancenter https://center.conan.io False --force")
                 .run("conan remote add conan-center https://conan.bintray.com False --force")
                 .run("conan remote add conan-test http://artipie:9301 False --force")
-                .build()
         );
         return new TestDeployment.ClientContainer(image)
             .withCommand("tail", "-f", "/dev/null")

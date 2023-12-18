@@ -1,0 +1,14 @@
+---
+repo:
+  type: conda
+  url: http://artipie:8080/my-conda
+  storage:
+    type: s3
+    bucket: buck1
+    region: s3test
+    endpoint: http://minic:9000
+    #endpoint: http://172.28.178.210:9001
+    credentials:
+      type: basic
+      accessKeyId: minioadmin
+      secretAccessKey: minioadmin
