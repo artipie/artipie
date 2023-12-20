@@ -136,7 +136,7 @@ public final class UpdateSlice implements Slice {
                                             new ArtifactEvent(
                                                 UpdateSlice.CONDA, this.rname,
                                                 new Login(new Headers.From(headers)).getValue(),
-                                                String.join("_", json.getString("name"), json.getString("arch")),
+                                                String.join("_", json.getString("name", "<no name>"), json.getString("arch", "<no arch>")),
                                                 json.getString("version"),
                                                 json.getJsonNumber(UpdateSlice.SIZE).longValue()
                                             )
