@@ -64,11 +64,7 @@ SOFTWARE.
     <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>javax.json</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.11.0</version>
+      <version>${javax.json.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -147,24 +143,24 @@ SOFTWARE.
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <groupId>org.codehaus.mojo</groupId>
-        <executions>
-          <execution>
-            <id>Download-ruby</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>bash</executable>
-              <commandlineArgs>./scripts/fetch-ruby-deps.sh</commandlineArgs>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+<!--      <plugin>-->
+<!--        <artifactId>exec-maven-plugin</artifactId>-->
+<!--        <version>3.0.0</version>-->
+<!--        <groupId>org.codehaus.mojo</groupId>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <id>Download-ruby</id>-->
+<!--            <phase>initialize</phase>-->
+<!--            <goals>-->
+<!--              <goal>exec</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <executable>bash</executable>-->
+<!--              <commandlineArgs>./scripts/fetch-ruby-deps.sh</commandlineArgs>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
     </plugins>
   </build>
 </project>

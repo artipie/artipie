@@ -76,7 +76,7 @@ SOFTWARE.
         <dependency>
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-core</artifactId>
-            <version>0.5.4</version>
+            <version>0.7.6</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
@@ -106,17 +106,18 @@ SOFTWARE.
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
-            <version>1.9.5</version>
+            <version>1.12.1</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.42.0.0</version>
+            <version>3.44.1.0</version>
         </dependency>
         <!-- Hamcrest is required in the main code for github auth -->
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
+            <version>2.2</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -126,7 +127,7 @@ SOFTWARE.
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-authz-client</artifactId>
-            <version>20.0.1</version>
+            <version>23.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.quartz-scheduler</groupId>

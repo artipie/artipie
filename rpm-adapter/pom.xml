@@ -97,10 +97,6 @@ SOFTWARE.
       <version>3.8.5</version>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-aspects</artifactId>
       <version>0.24.1</version>
