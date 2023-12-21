@@ -501,7 +501,7 @@ class ConanSliceITCase {
      */
     @SuppressWarnings("PMD.LineLengthCheck")
     private static ImageFromDockerfile getBaseImage() {
-        return new ImageFromDockerfile().withDockerfileFromBuilder(
+        return new ImageFromDockerfile("local/conan-adapter/conan_slice_itcase", false).withDockerfileFromBuilder(
             builder -> builder
                 .from("ubuntu:22.04")
                 .env("CONAN_TRACE_FILE", "/tmp/conan_trace.log")
@@ -523,7 +523,6 @@ class ConanSliceITCase {
                 .run("conan remote add conan-test http://host.testcontainers.internal:9300 False --force")
                 .run("conan remote disable conancenter")
                 .run("conan remote disable conan-center")
-                .build()
         );
     }
 }
