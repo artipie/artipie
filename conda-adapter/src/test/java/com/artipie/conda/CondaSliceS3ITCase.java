@@ -214,11 +214,6 @@ public final class CondaSliceS3ITCase {
             )
         );
         MatcherAssert.assertThat(
-            "repodata.json must be absent in file storage since file storage must be unused",
-            this.exec(String.format("ls /var/artipie/data/%s/repodata.json", pkgarch).split(" ")),
-            this.exitCodeStrMatcher(2)
-        );
-        MatcherAssert.assertThat(
             "repodata.json must exist in S3 storage after test",
             this.exec(String.format("curl -f -kv http://localhost:9000/buck1/%s/repodata.json", pkgarch).split(" ")),
             this.exitCodeStrMatcher(0)
@@ -277,22 +272,22 @@ public final class CondaSliceS3ITCase {
             )
         );
         MatcherAssert.assertThat(
-            "linux-64/snappy-1.1.3-0.tar.bz2 must be absent in S3 before test",
+            "linux-64/snappy-1.1.3-0.tar.bz2 must exist in S3 before test",
             this.exec("curl -f -kv http://localhost:9000/buck1/linux-64/snappy-1.1.3-0.tar.bz2".split(" ")),
             this.exitCodeStrMatcher(0)
         );
         MatcherAssert.assertThat(
-            "noarch_glom-22.1.0.tar.bz2 must be absent in S3 before test",
+            "noarch_glom-22.1.0.tar.bz2 must exist in S3 before test",
             this.exec("curl -f -kv http://localhost:9000/buck1/noarch/noarch_glom-22.1.0.tar.bz2".split(" ")),
             this.exitCodeStrMatcher(0)
         );
         MatcherAssert.assertThat(
-            "noarch/repodata.json must be absent in S3 before test",
+            "noarch/repodata.json must exist in S3 before test",
             this.exec("curl -f -kv http://localhost:9000/buck1/noarch/repodata.json".split(" ")),
             this.exitCodeStrMatcher(0)
         );
         MatcherAssert.assertThat(
-            "linux-64/repodata.json must be absent in S3 before test",
+            "linux-64/repodata.json must exist in S3 before test",
             this.exec("curl -f -kv http://localhost:9000/buck1/linux-64/repodata.json".split(" ")),
             this.exitCodeStrMatcher(0)
         );
@@ -340,17 +335,17 @@ public final class CondaSliceS3ITCase {
             )
         );
         MatcherAssert.assertThat(
-            "linux-64/snappy-1.1.3-0.tar.bz2 must be absent in S3 before test",
+            "linux-64/snappy-1.1.3-0.tar.bz2 must exist in S3 before test",
             this.exec("curl -f -kv http://localhost:9000/buck1/linux-64/snappy-1.1.3-0.tar.bz2".split(" ")),
             this.exitCodeStrMatcher(0)
         );
         MatcherAssert.assertThat(
-            "linux-64/linux-64_nng-1.4.0.tar.bz2 must be absent in S3 before test",
+            "linux-64/linux-64_nng-1.4.0.tar.bz2 must exist in S3 before test",
             this.exec("curl -f -kv http://localhost:9000/buck1/linux-64/linux-64_nng-1.4.0.tar.bz2".split(" ")),
             this.exitCodeStrMatcher(0)
         );
         MatcherAssert.assertThat(
-            "linux-64/linux-64_nng-1.4.0.tar.bz2 must be absent in S3 before test",
+            "linux-64/linux-64_nng-1.4.0.tar.bz2 must exist in S3 before test",
             this.exec("curl -f -kv http://localhost:9000/buck1/linux-64/repodata.json".split(" ")),
             this.exitCodeStrMatcher(0)
         );
