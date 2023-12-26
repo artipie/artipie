@@ -48,11 +48,6 @@ class BucketTest {
         .build();
 
     /**
-     * Amazon client.
-     */
-    private final AmazonS3 client = MOCK.createS3Client();
-
-    /**
      * Bucket name to use in tests.
      */
     private String name;
@@ -63,9 +58,9 @@ class BucketTest {
     private Bucket bucket;
 
     @BeforeEach
-    void setUp() {
+    void setUp(final AmazonS3 client) {
         this.name = UUID.randomUUID().toString();
-        this.client.createBucket(this.name);
+        client.createBucket(this.name);
         this.bucket = new Bucket(
             S3AsyncClient.builder()
                 .region(Region.of("us-east-1"))
@@ -81,9 +76,9 @@ class BucketTest {
     }
 
     @Test
-    void shouldUploadPartAndCompleteMultipartUpload() throws Exception {
+    void shouldUploadPartAndCompleteMultipartUpload(final AmazonS3 client) throws Exception {
         final String key = "multipart";
-        final String id = this.client.initiateMultipartUpload(
+        final String id = client.initiateMultipartUpload(
             new InitiateMultipartUploadRequest(this.name, key)
         ).getUploadId();
         final byte[] data = "data".getBytes();
@@ -113,16 +108,16 @@ class BucketTest {
             )
         ).join();
         final byte[] downloaded;
-        try (S3Object s3Object = this.client.getObject(this.name, key)) {
+        try (S3Object s3Object = client.getObject(this.name, key)) {
             downloaded = ByteStreams.toByteArray(s3Object.getObjectContent());
         }
         MatcherAssert.assertThat(downloaded, new IsEqual<>(data));
     }
 
     @Test
-    void shouldAbortMultipartUploadWhenFailedToReadContent() {
+    void shouldAbortMultipartUploadWhenFailedToReadContent(final AmazonS3 client) {
         final String key = "abort";
-        final String id = this.client.initiateMultipartUpload(
+        final String id = client.initiateMultipartUpload(
             new InitiateMultipartUploadRequest(this.name, key)
         ).getUploadId();
         final byte[] data = "abort_test".getBytes();
@@ -143,7 +138,7 @@ class BucketTest {
             )
         ).join();
         MatcherAssert.assertThat(
-            this.client.listMultipartUploads(
+            client.listMultipartUploads(
                 new ListMultipartUploadsRequest(this.name)
             ).getMultipartUploads(),
             new IsEmptyIterable<>()

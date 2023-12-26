@@ -58,44 +58,39 @@ class S3StorageTest {
         .build();
 
     /**
-     * Amazon client.
-     */
-    private final AmazonS3 client = MOCK.createS3Client();
-
-    /**
      * Bucket to use in tests.
      */
     private String bucket;
 
     @BeforeEach
-    void setUp() {
+    void setUp(final AmazonS3 client) {
         this.bucket = UUID.randomUUID().toString();
-        this.client.createBucket(this.bucket);
+        client.createBucket(this.bucket);
     }
 
     @Test
-    void shouldUploadObjectWhenSave() throws Exception {
+    void shouldUploadObjectWhenSave(final AmazonS3 client) throws Exception {
         final byte[] data = "data2".getBytes();
         final String key = "a/b/c";
         this.storage().save(new Key.From(key), new Content.OneTime(new Content.From(data))).join();
-        MatcherAssert.assertThat(this.download(key), Matchers.equalTo(data));
+        MatcherAssert.assertThat(this.download(client, key), Matchers.equalTo(data));
     }
 
     @Test
     @Timeout(5)
-    void shouldUploadObjectWhenSaveContentOfUnknownSize() throws Exception {
+    void shouldUploadObjectWhenSaveContentOfUnknownSize(final AmazonS3 client) throws Exception {
         final byte[] data = "data?".getBytes();
         final String key = "unknown/size";
         this.storage().save(
             new Key.From(key),
             new Content.OneTime(new Content.From(data))
         ).join();
-        MatcherAssert.assertThat(this.download(key), Matchers.equalTo(data));
+        MatcherAssert.assertThat(this.download(client, key), Matchers.equalTo(data));
     }
 
     @Test
     @Timeout(15)
-    void shouldUploadObjectWhenSaveLargeContent() throws Exception {
+    void shouldUploadObjectWhenSaveLargeContent(final AmazonS3 client) throws Exception {
         final int size = 20 * 1024 * 1024;
         final byte[] data = new byte[size];
         new Random().nextBytes(data);
@@ -104,28 +99,26 @@ class S3StorageTest {
             new Key.From(key),
             new Content.OneTime(new Content.From(data))
         ).join();
-        MatcherAssert.assertThat(this.download(key), Matchers.equalTo(data));
+        MatcherAssert.assertThat(this.download(client, key), Matchers.equalTo(data));
     }
 
     @Test
-    void shouldAbortMultipartUploadWhenFailedToReadContent() {
+    void shouldAbortMultipartUploadWhenFailedToReadContent(final AmazonS3 client) {
         this.storage().save(
             new Key.From("abort"),
             new Content.OneTime(new Content.From(Flowable.error(new IllegalStateException())))
         ).exceptionally(ignore -> null).join();
-        final List<MultipartUpload> uploads = this.client.listMultipartUploads(
+        final List<MultipartUpload> uploads = client.listMultipartUploads(
             new ListMultipartUploadsRequest(this.bucket)
         ).getMultipartUploads();
         MatcherAssert.assertThat(uploads, new IsEmptyIterable<>());
     }
 
     @Test
-    void shouldExistForSavedObject() throws Exception {
+    void shouldExistForSavedObject(final AmazonS3 client) throws Exception {
         final byte[] data = "content".getBytes();
         final String key = "some/existing/key";
-        this.client.putObject(
-            this.bucket, key, new ByteArrayInputStream(data), new ObjectMetadata()
-        );
+        client.putObject(this.bucket, key, new ByteArrayInputStream(data), new ObjectMetadata());
         final boolean exists = new BlockingStorage(this.storage())
             .exists(new Key.From(key));
         MatcherAssert.assertThat(
@@ -135,7 +128,7 @@ class S3StorageTest {
     }
 
     @Test
-    void shouldListKeysInOrder() throws Exception {
+    void shouldListKeysInOrder(final AmazonS3 client) throws Exception {
         final byte[] data = "some data!".getBytes();
         Arrays.asList(
             new Key.From("1"),
@@ -144,7 +137,7 @@ class S3StorageTest {
             new Key.From("a", "z"),
             new Key.From("z")
         ).forEach(
-            key -> this.client.putObject(
+            key -> client.putObject(
                 this.bucket,
                 key.string(),
                 new ByteArrayInputStream(data),
@@ -163,12 +156,10 @@ class S3StorageTest {
     }
 
     @Test
-    void shouldGetObjectWhenLoad() throws Exception {
+    void shouldGetObjectWhenLoad(final AmazonS3 client) throws Exception {
         final byte[] data = "data".getBytes();
         final String key = "some/key";
-        this.client.putObject(
-            this.bucket, key, new ByteArrayInputStream(data), new ObjectMetadata()
-        );
+        client.putObject(this.bucket, key, new ByteArrayInputStream(data), new ObjectMetadata());
         final byte[] value = new BlockingStorage(this.storage())
             .value(new Key.From(key));
         MatcherAssert.assertThat(
@@ -178,10 +169,10 @@ class S3StorageTest {
     }
 
     @Test
-    void shouldCopyObjectWhenMoved() throws Exception {
+    void shouldCopyObjectWhenMoved(final AmazonS3 client) throws Exception {
         final byte[] original = "something".getBytes();
         final String source = "source";
-        this.client.putObject(
+        client.putObject(
             this.bucket,
             source, new ByteArrayInputStream(original),
             new ObjectMetadata()
@@ -191,7 +182,7 @@ class S3StorageTest {
             new Key.From(source),
             new Key.From(destination)
         );
-        try (S3Object s3Object = this.client.getObject(this.bucket, destination)) {
+        try (S3Object s3Object = client.getObject(this.bucket, destination)) {
             MatcherAssert.assertThat(
                 ByteStreams.toByteArray(s3Object.getObjectContent()),
                 new IsEqual<>(original)
@@ -200,9 +191,9 @@ class S3StorageTest {
     }
 
     @Test
-    void shouldDeleteOriginalObjectWhenMoved() throws Exception {
+    void shouldDeleteOriginalObjectWhenMoved(final AmazonS3 client) throws Exception {
         final String source = "src";
-        this.client.putObject(
+        client.putObject(
             this.bucket,
             source,
             new ByteArrayInputStream("some data".getBytes()),
@@ -213,29 +204,27 @@ class S3StorageTest {
             new Key.From("dest")
         );
         MatcherAssert.assertThat(
-            this.client.doesObjectExist(this.bucket, source),
+            client.doesObjectExist(this.bucket, source),
             new IsEqual<>(false)
         );
     }
 
     @Test
-    void shouldDeleteObject() throws Exception {
+    void shouldDeleteObject(final AmazonS3 client) throws Exception {
         final byte[] data = "to be deleted".getBytes();
         final String key = "to/be/deleted";
-        this.client.putObject(
-            this.bucket, key, new ByteArrayInputStream(data), new ObjectMetadata()
-        );
+        client.putObject(this.bucket, key, new ByteArrayInputStream(data), new ObjectMetadata());
         new BlockingStorage(this.storage()).delete(new Key.From(key));
         MatcherAssert.assertThat(
-            this.client.doesObjectExist(this.bucket, key),
+            client.doesObjectExist(this.bucket, key),
             new IsEqual<>(false)
         );
     }
 
     @Test
-    void readMetadata() throws Exception {
+    void readMetadata(final AmazonS3 client) throws Exception {
         final String key = "random/data";
-        this.client.putObject(
+        client.putObject(
             this.bucket, key,
             new ByteArrayInputStream("random data".getBytes()), new ObjectMetadata()
         );
@@ -262,8 +251,8 @@ class S3StorageTest {
         );
     }
 
-    private byte[] download(final String key) throws IOException {
-        try (S3Object s3Object = this.client.getObject(this.bucket, key)) {
+    private byte[] download(final AmazonS3 client, final String key) throws IOException {
+        try (S3Object s3Object = client.getObject(this.bucket, key)) {
             return ByteStreams.toByteArray(s3Object.getObjectContent());
         }
     }
