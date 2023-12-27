@@ -37,6 +37,19 @@ SOFTWARE.
   </properties>
   <dependencies>
     <dependency>
+      <groupId>com.artipie</groupId>
+      <artifactId>asto-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
+      <!-- Do not remove this exclusion! No tests will run if dependency is not excluded! -->
+      <exclusions>
+        <exclusion>
+          <groupId>org.testng</groupId>
+          <artifactId>testng</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>com.jcabi.incubator</groupId>
       <artifactId>xembly</artifactId>
       <version>0.24.0</version>

@@ -53,6 +53,7 @@ SOFTWARE.
     <module>rpm-adapter/benchmarks</module>
     <module>vertx-server</module>
     <module>http-client</module>
+    <module>asto</module>
   </modules>
   <description>Binary Artifact Management Tool</description>
   <url>https://github.com/artipie/artipie</url>
@@ -73,7 +74,6 @@ SOFTWARE.
   <properties>
     <docker.image.name>artipie/artipie</docker.image.name>
     <qulice.license>${project.basedir}/../LICENSE.header</qulice.license>
-    <asto.version>v1.16.0</asto.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <junit-platform.version>5.10.0</junit-platform.version>
@@ -146,38 +146,6 @@ SOFTWARE.
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-log</artifactId>
       <version>0.23.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>asto-core</artifactId>
-      <version>${asto.version}</version>
-      <!-- Do not remove this exclusion! No tests will run if dependency is not excluded! -->
-      <exclusions>
-        <exclusion>
-          <groupId>org.testng</groupId>
-          <artifactId>testng</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>asto-etcd</artifactId>
-      <version>${asto.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>asto-redis</artifactId>
-      <version>${asto.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>asto-s3</artifactId>
-      <version>${asto.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.artipie</groupId>
-      <artifactId>asto-vertx-file</artifactId>
-      <version>${asto.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>

@@ -38,6 +38,38 @@ SOFTWARE.
     </properties>
     <dependencies>
         <dependency>
+            <groupId>com.artipie</groupId>
+            <artifactId>asto-core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <!-- Do not remove this exclusion! No tests will run if dependency is not excluded! -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.testng</groupId>
+                    <artifactId>testng</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.artipie</groupId>
+            <artifactId>asto-etcd</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.artipie</groupId>
+            <artifactId>asto-redis</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.artipie</groupId>
+            <artifactId>asto-s3</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.artipie</groupId>
+            <artifactId>asto-vertx-file</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.jcabi</groupId>
             <artifactId>jcabi-github</artifactId>
             <version>1.3.2</version>
@@ -76,7 +108,7 @@ SOFTWARE.
         <dependency>
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-core</artifactId>
-            <version>0.7.6</version>
+            <version>0.7.1</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>

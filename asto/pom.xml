@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.artipie</groupId>
+        <artifactId>artipie</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>asto</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>asto</name>
+    <description>A simple Java storage</description>
+    <url>https://github.com/artipie/asto</url>
+    <inceptionYear>2019</inceptionYear>
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <modules>
+        <module>asto-core</module>
+        <module>asto-redis</module>
+        <module>asto-s3</module>
+        <module>asto-vertx-file</module>
+        <module>asto-etcd</module>
+        <module>asto-artipie</module>
+    </modules>
+    <dependencies>
+        <!-- tests -->
+        <dependency>
+            <groupId>io.etcd</groupId>
+            <artifactId>jetcd-test</artifactId>
+            <version>0.5.11</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- TestNG compatibility layer with Junit5 -->
+        <dependency>
+            <groupId>com.github.testng-team</groupId>
+            <artifactId>testng-junit5</artifactId>
+            <version>0.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.8.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <configuration>
+                    <forkCount>1</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <useSystemClassLoader>true</useSystemClassLoader>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.12.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
