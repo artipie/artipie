@@ -33,13 +33,3 @@ jobs:
       - run: mvn install -DskipTests
       - run: mvn -B deploy -Pubuntu-docker -DskipTests
         working-directory: artipie-main
-      - name: Create Github Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ env.RELEASE_VERSION }}
-          draft: false
-          prerelease: false
