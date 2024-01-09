@@ -11,14 +11,12 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.json.JsonWriter;
 import org.cactoos.set.SetOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -185,14 +183,9 @@ class AstoRepositoryAddJsonTest {
             .join();
     }
 
-    private Content packageJson() throws Exception {
-        final byte[] bytes;
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final JsonWriter writer = Json.createWriter(out);
-        writer.writeObject(this.pack.json().toCompletableFuture().join());
-        out.flush();
-        bytes = out.toByteArray();
-        writer.close();
-        return new Content.From(bytes);
+    private Content packageJson() {
+        return new Content.From(
+            this.pack.json().toCompletableFuture().join().toString().getBytes()
+        );
     }
 }
