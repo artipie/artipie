@@ -17,6 +17,6 @@ prints to console a list of running repositories, test credentials and a link to
 
 If started on localhost with command above: 
 * The dashboard URI is `http://localhost:8080/dashboard` and default username and password are `artipie/artipie`.
-* Swagger UI to manage Artipie is available on 'http://localhost:8086/api/index-org.html'. More information about [Rest API](./Rest-api) 
-* Artipie server side (repositories) is served on `8081` port and is available on URI `http://localhost:8081/{username}/{reponame}`, 
-where `{username}` is the name of the user and `{reponame}` is the name of the repository.
+* Swagger UI to manage Artipie is available on 'http://localhost:8086/api/index.html'. More information about [Rest API](./Rest-api) 
+* Artipie server side (repositories) is served on `8081` port and is available on URI `http://localhost:8081/{reponame}`, 
+where `{reponame}` is the name of the repository.

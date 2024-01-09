@@ -7,7 +7,9 @@ To set up this repository, create config with `file` repository type and storage
 ```yaml
 repo:
   type: file
-  storage: default
+  storage:
+    type: fs
+    path: /var/artipie/data
 ```
 
 In order to upload a binary file to the storage, send a `PUT` HTTP request with file contents:

@@ -70,7 +70,7 @@ documentation is provided.
 A new image generate default configuration, prints a list of running repositories, test 
 credentials and a link to the [Swagger](https://swagger.io/) documentation to console. To check 
 existing repositories using Artipie Rest API:
-- go to Swagger documentation page `http://localhost:8086/api/index-org.html`, 
+- go to Swagger documentation page `http://localhost:8086/api/index.html`, 
 choose "Auth token" in "Select a definition" list,
 - generate and copy authentication token for user `artipie/artipie`,  
 - switch to "Repositories" definition, press "Authorize" button and paste the token 
@@ -78,21 +78,21 @@ choose "Auth token" in "Select a definition" list,
 Response should be a json list with three default repositories:
 ```json
 [
-  "artipie/my-bin",
-  "artipie/my-docker",
-  "artipie/my-maven"
+  "my-bin",
+  "my-docker",
+  "my-maven"
 ]
 ```
 Artipie server side (repositories) is served on `8080` port and is available on URI 
-`http://localhost:8080/{username}/{reponame}`, where `{username}` is the name 
-of the user and `{reponame}` is the name of the repository. Let's put some text data into binary repository:
+`http://localhost:8080/{reponame}`, where `{reponame}` is the name of the repository. 
+Let's put some text data into binary repository:
 ```commandline
-curl -X PUT -d 'Hello world!' http://localhost:8080/artipie/my-bin/test.txt
+curl -X PUT -d 'Hello world!' http://localhost:8080/my-bin/test.txt
 ```
 With this request we added file `test.txt` containing text "Hello world!" into repository. Let's check
 it's really there:
 ```commandline
-curl -X GET http://localhost:8080/artipie/my-bin/test.txt
+curl -X GET http://localhost:8080/my-bin/test.txt
 ```
 "Hello world!" should be printed in console.
 
