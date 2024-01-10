@@ -9,7 +9,6 @@ import com.artipie.asto.ByteArray;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.misc.UncheckedIOConsumer;
 import com.artipie.asto.misc.UncheckedIOSupplier;
 import com.artipie.asto.misc.UncheckedRunnable;
 import io.reactivex.Flowable;
@@ -29,10 +28,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
@@ -113,6 +114,7 @@ public final class StorageValuePipeline<R> {
      *  output stream.
      * @return Completion action with the result
      * @throws ArtipieIOException On Error
+     * @checkstyle ExecutableStatementCountCheck (100 lines)
      */
     public CompletionStage<R> processWithResult(
         final BiFunction<Optional<InputStream>, OutputStream, R> action
@@ -135,18 +137,50 @@ public final class StorageValuePipeline<R> {
                     }
                     return stage;
                 }
-            ).thenCompose(
+            )
+            .thenCompose(
                 optional -> {
-                    try (PublishingOutputStream output = new PublishingOutputStream()) {
-                        res.set(action.apply(optional, output));
-                        return this.asto.save(this.write, new Content.From(output.publisher()));
-                    } catch (final IOException err) {
-                        throw new ArtipieIOException(err);
-                    } finally {
-                        optional.ifPresent(new UncheckedIOConsumer<>(InputStream::close));
-                    }
+                    final PublishingOutputStream output = new PublishingOutputStream();
+                    return CompletableFuture.runAsync(
+                        () -> {
+                            res.set(action.apply(optional, output));
+                        }, Executors.newSingleThreadExecutor()
+                    )
+                    .thenApply(unused -> new ImmutablePair<>(optional, output));
                 }
-            ).thenApply(nothing -> res.get());
+            )
+            .thenApply(
+                streams -> {
+                    this.asto.save(this.write, new Content.From(streams.getRight().publisher()));
+                    return streams;
+                }
+            )
+            .handle(
+                (streams, throwable) -> {
+                    Throwable last = throwable;
+                    try {
+                        if (streams.getLeft().isPresent()) {
+                            streams.getLeft().get().close();
+                        }
+                    } catch (final IOException ex) {
+                        if (last != null) {
+                            ex.addSuppressed(last);
+                        }
+                        last = ex;
+                    }
+                    try {
+                        streams.getRight().close();
+                    } catch (final IOException ex) {
+                        if (last != null) {
+                            ex.addSuppressed(last);
+                        }
+                        last = ex;
+                    }
+                    if (last != null) {
+                        throw new ArtipieIOException(last);
+                    }
+                    return res.get();
+                });
     }
 
     /**
