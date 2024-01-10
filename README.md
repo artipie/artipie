@@ -128,21 +128,15 @@ Thanks to [FreePik](https://www.freepik.com/free-photos-vectors/party) for the l
 
 ## How to release
 
-Artipie service is released in two formats: 
+Artipie service is released in several formats: 
 - [docker image in DockerHub](https://hub.docker.com/r/artipie/artipie)
+- [docker image based on Ubuntu](https://hub.docker.com/r/artipie/artipie-ubuntu)
 - jar archive with dependencies in GitHub release page ([example](https://github.com/artipie/artipie/releases/tag/v0.30.1))
+- asto modules, artipie-core, http-client, vertx-server and each adapter are released as jars into Maven central
 
-These two distributions are created by one GitHub action `[docker-release.yml](.github/workflows/docker-release.yml)`. To
-publish release, push tag (starting with `v` into this repository masted branch):
+All these distributions are created by GitHub [workflows](.github/workflows). To
+publish release, push tag starting with `v` into this repository masted branch:
 ```bash
 git tag v1.2.0
 git push --tags origin
 ```
-Also, each adapter can be released into Maven Central individually. To do that, push git tag of the following format:
-```text
-[adapter-name]_[version]
-rpm-adapter_v1.2.3
-```
-On this tag, GitHub action [maven-adapter-release.yml](.github%2Fworkflows%2Fmaven-adapter-release.yml) will run to
-release specified adapter. Note, that some of the adapters should be compatible with java 8. To achieve that, we use 
-[--release=8](https://www.baeldung.com/java-compiler-release-option) option for the main code.
