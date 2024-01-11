@@ -96,15 +96,14 @@ curl -X GET http://localhost:8080/my-bin/test.txt
 ```
 "Hello world!" should be printed in console.
 
-Do dive in dipper into Artipie configuration, features, explore repositories and storages settings, 
+To dive in deeper into Artipie configuration, features, explore repositories and storages settings,
 please, address our [Wiki](https://github.com/artipie/artipie/wiki).
 
-Default server configuration in Docker Container refers to `/var/artipie/repos` to look up for 
+Default server configuration in Docker Container refers to `/var/artipie/repo` to look up for
 repository configurations. You may want to mount local configurations `<your-local-config-dir>` 
-to `/var/artipie/repos` to check and edit it manually.
+to `/var/artipie/repo` to check and edit it manually.
 
-> **Important:** check that `<your-local-config-dir>` has correct permissions, it should be `2020:2021`,  
-to change it correctly use `chown -R 2020:2021 <your-local-config-dir>`.
+> **Important:** for provided Artipie docker containers `<your-local-config-dir>` should have directory ownership set to `2021:2020`. To change it correctly use `sudo chown -R 2021:2020 <your-local-config-dir>`.
 
 If you have any question or suggestions, do not hesitate to [create an issue](https://github.com/artipie/artipie/issues/new) or contact us in
 [Telegram](https://t.me/artipie).  
