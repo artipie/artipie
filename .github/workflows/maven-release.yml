@@ -1,4 +1,4 @@
-name: Create Maven adapter release
+name: Create Maven release
 on:
   push:
     tags:
@@ -50,16 +50,6 @@ jobs:
               }
             ]
       - run: mvn -B install -DskipTests
-      - run: mvn deploy -pl '!:artipie-main' -Psonatype,gpg-sign -DskipTests --errors
+      - run: mvn deploy -pl '!:artipie-main,!:helm-bench,!:debian-bench,!:conda-bench,!:rpm-bench' -Psonatype,gpg-sign -DskipTests --errors
         env:
           MAVEN_OPTS: --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED
-      - name: Create Github Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ env.TAG }}
-          draft: false
-          prerelease: false
