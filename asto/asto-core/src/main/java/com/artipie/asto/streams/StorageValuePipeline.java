@@ -28,12 +28,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
@@ -109,6 +109,8 @@ public final class StorageValuePipeline<R> {
 
     /**
      * Process storage item, save it back and return some result.
+     * Note that `action` must be called in async to avoid deadlock on input stream.
+     * Also note that `PublishingOutputStream` currently needs `onComplete()` or `close()` call for reliable notifications.
      *
      * @param action Action to perform with storage content if exists and write back as
      *  output stream.
@@ -140,47 +142,44 @@ public final class StorageValuePipeline<R> {
             )
             .thenCompose(
                 optional -> {
-                    final PublishingOutputStream output = new PublishingOutputStream();
+                    final ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+                    final PublishingOutputStream output = new PublishingOutputStream(Schedulers.from(executor));
                     return CompletableFuture.runAsync(
-                        () -> {
-                            res.set(action.apply(optional, output));
-                        }, Executors.newSingleThreadExecutor()
-                    )
-                    .thenApply(unused -> new ImmutablePair<>(optional, output));
+                        () -> res.set(action.apply(optional, output)), executor
+                    ).thenCompose(
+                        unused -> {
+                            final CompletableFuture<Void> saved = this.asto.save(this.write, new Content.From(output.publisher()));
+                            output.setComplete();
+                            return saved;
+                        }
+                    ).handle(
+                        (unused, throwable) -> {
+                            Throwable last = throwable;
+                            try {
+                                if (optional.isPresent()) {
+                                    optional.get().close();
+                                }
+                            } catch (final IOException ex) {
+                                if (last != null) {
+                                    ex.addSuppressed(last);
+                                }
+                                last = ex;
+                            }
+                            try {
+                                output.close();
+                            } catch (final IOException ex) {
+                                if (last != null) {
+                                    ex.addSuppressed(last);
+                                }
+                                last = ex;
+                            }
+                            if (last != null) {
+                                throw new ArtipieIOException(last);
+                            }
+                            return res.get();
+                        });
                 }
-            )
-            .thenApply(
-                streams -> {
-                    this.asto.save(this.write, new Content.From(streams.getRight().publisher()));
-                    return streams;
-                }
-            )
-            .handle(
-                (streams, throwable) -> {
-                    Throwable last = throwable;
-                    try {
-                        if (streams.getLeft().isPresent()) {
-                            streams.getLeft().get().close();
-                        }
-                    } catch (final IOException ex) {
-                        if (last != null) {
-                            ex.addSuppressed(last);
-                        }
-                        last = ex;
-                    }
-                    try {
-                        streams.getRight().close();
-                    } catch (final IOException ex) {
-                        if (last != null) {
-                            ex.addSuppressed(last);
-                        }
-                        last = ex;
-                    }
-                    if (last != null) {
-                        throw new ArtipieIOException(last);
-                    }
-                    return res.get();
-                });
+            );
     }
 
     /**
@@ -315,12 +314,27 @@ public final class StorageValuePipeline<R> {
 
         /**
          * Ctor.
+         *
+         *  @param scheduler Target rx scheduler for execution.
+         */
+        PublishingOutputStream(Scheduler scheduler) {
+            this(
+                PublishingOutputStream.DEFAULT_TIMESPAN,
+                TimeUnit.MILLISECONDS,
+                PublishingOutputStream.DEFAULT_BUF_SIZE,
+                scheduler
+            );
+        }
+
+        /**
+         * Ctor.
          */
         PublishingOutputStream() {
             this(
                 PublishingOutputStream.DEFAULT_TIMESPAN,
                 TimeUnit.MILLISECONDS,
-                PublishingOutputStream.DEFAULT_BUF_SIZE
+                PublishingOutputStream.DEFAULT_BUF_SIZE,
+                Schedulers.io()
             );
         }
 
@@ -331,12 +345,14 @@ public final class StorageValuePipeline<R> {
          *  before it is emitted to publisher.
          * @param unit The unit of time which applies to the timespan argument.
          * @param count The maximum size of each buffer before it is emitted.
+         * @param scheduler Target rx scheduler for execution.
          */
         @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
         PublishingOutputStream(
             final long timespan,
             final TimeUnit unit,
-            final int count
+            final int count,
+            Scheduler scheduler
         ) {
             this.pub = UnicastProcessor.create();
             this.bufproc = UnicastProcessor.create();
@@ -346,7 +362,7 @@ public final class StorageValuePipeline<R> {
                         ByteBuffer.wrap(new ByteArray(list).primitiveBytes())
                     )
                 )
-                .subscribeOn(Schedulers.io())
+                .subscribeOn(scheduler)
                 .doOnComplete(this.pub::onComplete)
                 .subscribe();
         }
@@ -360,6 +376,10 @@ public final class StorageValuePipeline<R> {
         @Override
         public void close() throws IOException {
             super.close();
+            this.bufproc.onComplete();
+        }
+
+        public void setComplete() {
             this.bufproc.onComplete();
         }
 
