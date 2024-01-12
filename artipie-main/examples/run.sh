@@ -182,6 +182,11 @@ r=0
 grep "FAILED" "$workdir/results.txt" > /dev/null || r="$?"
 if [ "$r" -eq 0 ] ; then
   rm -fv "$pidfile"
+  echo "Artipie container logs:"
+  container=$(docker ps --filter name=artipie -q 2> /dev/null)
+  if [[ -n "$container" ]] ; then
+    docker logs "$container" || echo "failed to log artipie"
+  fi
   die "One or more tests failed"
 else
   rm -fv "$pidfile"
