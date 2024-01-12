@@ -78,6 +78,7 @@ SOFTWARE.
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <junit-platform.version>5.10.0</junit-platform.version>
     <vertx.version>4.5.1</vertx.version>
+    <guava.version>33.0.0-jre</guava.version>
     <javax.json.version>1.1.4</javax.json.version>
     <maven.compiler.release>17</maven.compiler.release>
   </properties>
