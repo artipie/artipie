@@ -99,9 +99,8 @@ public interface RemoveWriter {
                 ).thenCompose(
                     noth ->  {
                         try {
-                            final BufferedWriter bufw = new BufferedWriter(
-                                new OutputStreamWriter(Files.newOutputStream(out))
-                            );
+                            final OutputStreamWriter osw = new OutputStreamWriter(Files.newOutputStream(out));
+                            final BufferedWriter bufw = new BufferedWriter(osw);
                             final TokenizerFlatProc target = new TokenizerFlatProc("\n");
                             return this.contentOfIndex(source)
                                 .thenAccept(cont -> cont.subscribe(target))
@@ -152,6 +151,7 @@ public interface RemoveWriter {
                                             ctx -> {
                                                 try {
                                                     bufw.close();
+                                                    osw.close();
                                                 } catch (final IOException exc) {
                                                     throw new ArtipieIOException(exc);
                                                 }
