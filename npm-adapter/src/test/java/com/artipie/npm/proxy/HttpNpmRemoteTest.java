@@ -10,6 +10,7 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
@@ -21,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
-import org.apache.commons.collections4.keyvalue.UnmodifiableMapEntry;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -166,8 +166,8 @@ public final class HttpNpmRemoteTest {
                     RsStatus.OK,
                     new Headers.From(
                         // @checkstyle LineLengthCheck (2 lines)
-                        new UnmodifiableMapEntry<>("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
-                        new UnmodifiableMapEntry<>("Content-Type", HttpNpmRemoteTest.DEF_CONTENT_TYPE)
+                        new Header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
+                        new Header("Content-Type", HttpNpmRemoteTest.DEF_CONTENT_TYPE)
                     ),
                     new Content.From(HttpNpmRemoteTest.DEF_CONTENT.getBytes(StandardCharsets.UTF_8))
                 );
