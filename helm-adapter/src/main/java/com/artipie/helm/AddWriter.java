@@ -122,9 +122,8 @@ interface AddWriter {
             return CompletableFuture.allOf().thenCompose(
                 none -> {
                     try {
-                        final BufferedWriter bufw = new BufferedWriter(
-                            new OutputStreamWriter(Files.newOutputStream(out))
-                        );
+                        final OutputStreamWriter osw = new OutputStreamWriter(Files.newOutputStream(out));
+                        final BufferedWriter bufw = new BufferedWriter(osw);
                         final TokenizerFlatProc target = new TokenizerFlatProc("\n");
                         return this.contentOfIndex(source)
                             .thenAccept(cont -> cont.subscribe(target))
@@ -183,6 +182,7 @@ interface AddWriter {
                                             }
                                             try {
                                                 bufw.close();
+                                                osw.close();
                                             } catch (final IOException exc) {
                                                 throw new ArtipieIOException(exc);
                                             }
@@ -202,9 +202,8 @@ interface AddWriter {
             return CompletableFuture.supplyAsync(
                 () -> {
                     try {
-                        final BufferedWriter bufw = new BufferedWriter(
-                            new OutputStreamWriter(Files.newOutputStream(out))
-                        );
+                        final OutputStreamWriter osw = new OutputStreamWriter(Files.newOutputStream(out));
+                        final BufferedWriter bufw = new BufferedWriter(osw);
                         final YamlWriter writer = new YamlWriter(bufw, 2);
                         final String[] lines = new EmptyIndex().asString().split("\n");
                         for (final String line : lines) {
@@ -215,15 +214,20 @@ interface AddWriter {
                         final CompletableFuture<Void> result = new CompletableFuture<>();
                         this.writeChartsToIndex(charts, writer).handle(
                             (noth, thr) -> {
+                                try {
+                                    bufw.close();
+                                    osw.close();
+                                } catch (final IOException exc) {
+                                    if (thr == null) {
+                                        result.completeExceptionally(exc);
+                                    } else {
+                                        thr.addSuppressed(exc);
+                                    }
+                                }
                                 if (thr == null) {
                                     result.complete(null);
                                 } else {
                                     result.completeExceptionally(thr);
-                                }
-                                try {
-                                    bufw.close();
-                                } catch (final IOException exc) {
-                                    throw new ArtipieIOException(exc);
                                 }
                                 return null;
                             }
