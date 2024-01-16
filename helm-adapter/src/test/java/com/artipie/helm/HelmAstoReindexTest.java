@@ -30,11 +30,6 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Test for {@link Helm.Asto#reindex(Key)}.
  * @since 0.3
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @todo #113:30min Fix reindex operation.
- *  For some cases (about 1-2 of 1000) these tests fail with NPE when
- *  it tries to get entries of a new index. It looks like index does not have
- *  time to copy from temporary written index file to the source one.
- *  It is necessary to address this problem and enable tests.
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class HelmAstoReindexTest {
@@ -48,7 +43,6 @@ final class HelmAstoReindexTest {
         this.storage = new InMemoryStorage();
     }
 
-    @Disabled
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void reindexFromRootDirectory(final boolean withindex) throws IOException {
@@ -73,7 +67,6 @@ final class HelmAstoReindexTest {
         HelmAstoReindexTest.assertTmpDirWasRemoved();
     }
 
-    @Disabled
     @Test
     void reindexWithSomePrefix() throws IOException {
         final Key prfx = new Key.From("prefix");
