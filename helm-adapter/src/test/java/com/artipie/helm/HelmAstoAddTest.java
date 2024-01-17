@@ -137,7 +137,6 @@ final class HelmAstoAddTest {
         HelmAstoAddTest.assertTmpDirWasRemoved();
     }
 
-    @Disabled
     @Test
     void failsToAddInfoAboutExistedVersion() throws IOException {
         final String ark = "ark-1.0.1.tgz";
