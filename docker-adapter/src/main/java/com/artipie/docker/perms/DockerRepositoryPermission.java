@@ -145,6 +145,14 @@ public final class DockerRepositoryPermission extends Permission  {
     }
 
     /**
+     * Get permission resource.
+     * @return Resource (image) name
+     */
+    public String permResource() {
+        return this.resource;
+    }
+
+    /**
      * Check if this action implies another action ignoring mask. That is true if
      * - permissions names are equal, or this permission has wildcard name
      * - resources names are equal or this permission has wildcard resource
