@@ -57,7 +57,8 @@ public enum DockerActions implements Action {
      * @return The mask
      * @throws IllegalArgumentException is the action not valid
      */
-    static int maskByAction(final String name) {
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static int maskByAction(final String name) {
         for (final Action item : values()) {
             if (item.names().contains(name)) {
                 return item.mask();

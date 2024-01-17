@@ -68,7 +68,8 @@ public enum RegistryCategory implements Action {
      * @return The mask
      * @throws IllegalArgumentException is the category not valid
      */
-    static int maskByCategory(final String name) {
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static int maskByCategory(final String name) {
         for (final Action item : values()) {
             if (item.names().contains(name)) {
                 return item.mask();

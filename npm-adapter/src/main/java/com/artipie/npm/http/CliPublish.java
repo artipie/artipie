@@ -27,7 +27,7 @@ import javax.json.JsonObject;
  * @since 0.9
  * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
-final class CliPublish implements Publish {
+public final class CliPublish implements Publish {
     /**
      * Pattern for `referer` header value.
      */
@@ -47,7 +47,7 @@ final class CliPublish implements Publish {
      * Constructor.
      * @param storage The storage.
      */
-    CliPublish(final Storage storage) {
+    public CliPublish(final Storage storage) {
         this.storage = storage;
     }
 

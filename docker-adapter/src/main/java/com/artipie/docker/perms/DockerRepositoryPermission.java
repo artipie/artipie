@@ -215,7 +215,7 @@ public final class DockerRepositoryPermission extends Permission  {
          * Create an empty DockerPermissionCollection object.
          * @checkstyle MagicNumberCheck (5 lines)
          */
-        DockerRepositoryPermissionCollection() {
+        public DockerRepositoryPermissionCollection() {
             this.collection = new ConcurrentHashMap<>(5);
             this.any = false;
         }
