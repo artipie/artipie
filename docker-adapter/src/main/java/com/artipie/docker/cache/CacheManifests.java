@@ -92,8 +92,7 @@ public final class CacheManifests implements Manifests {
                 final CompletionStage<Optional<Manifest>> result;
                 if (throwable == null) {
                     if (original.isPresent()) {
-                        this.copy(ref);
-                        result = CompletableFuture.completedFuture(original);
+                        result = this.copy(ref).thenApply(unused -> original);
                     } else {
                         result = this.cache.manifests().get(ref).exceptionally(ignored -> original);
                     }
