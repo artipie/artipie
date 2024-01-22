@@ -29,7 +29,7 @@ import java.util.UUID;
 /**
  * Test for {@link StorageValuePipeline} backed by {@link S3Storage}
  */
-public class StorageValuePipelineTest {
+public class StorageValuePipelineS3Test {
 
     /**
      * Mock S3 server.
