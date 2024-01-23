@@ -7,19 +7,18 @@ package com.artipie.asto.streams;
 import com.artipie.asto.ArtipieIOException;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.asto.Splitting;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
-import io.reactivex.Flowable;
+import com.artipie.asto.test.ReadWithDelaysStorage;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
@@ -224,40 +223,4 @@ class StorageValuePipelineTest {
         );
     }
 
-    /**
-     * Storage for tests.
-     * <p/>
-     * Reading a value by a key return content that emit chunks of bytes
-     * with random size and random delays.
-     *
-     * @since 1.12
-     */
-    private static class ReadWithDelaysStorage extends Storage.Wrap {
-        /**
-         * Ctor.
-         *
-         * @param delegate Original storage.
-         */
-        ReadWithDelaysStorage(final Storage delegate) {
-            super(delegate);
-        }
-
-        @Override
-        public final CompletableFuture<Content> value(final Key key) {
-            final Random random = new Random();
-            return super.value(key)
-                .thenApply(
-                    content -> new Content.From(
-                        Flowable.fromPublisher(content)
-                            .flatMap(
-                                buffer -> new Splitting(
-                                    buffer,
-                                    (random.nextInt(9) + 1) * 1024
-                                ).publisher()
-                            )
-                            .delay(random.nextInt(5_000), TimeUnit.MILLISECONDS)
-                    )
-                );
-        }
-    }
 }
