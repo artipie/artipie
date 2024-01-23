@@ -27,17 +27,13 @@ import org.quartz.SchedulerException;
  * Test for {@link QuartzService} and
  * {@link com.artipie.db.DbConsumer}.
  * @since 0.31
- * @checkstyle MagicNumberCheck (1000 lines)
- * @checkstyle IllegalTokenCheck (1000 lines)
- * @checkstyle LocalVariableNameCheck (1000 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public final class SchedulerDbTest {
 
     /**
      * Test directory.
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     */
+         */
     @TempDir
     Path path;
 

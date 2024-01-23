@@ -111,8 +111,7 @@ public interface XmlEvent {
      * @see <a href="https://man7.org/linux/man-pages/man7/inode.7.html">Man page for file inode information</a>
      * @see <a href="https://github.com/rpm-software-management/createrepo_c/blob/b49b8b2586c07d3e84009beba677162b86539f9d/src/parsehdr.c#L256">Create repo implementation</a>
      * @since 1.5
-     * @checkstyle ExecutableStatementCountCheck (300 lines)
-     */
+         */
     @SuppressWarnings("PMD.AvoidUsingOctalValues")
     final class Files implements XmlEvent {
 

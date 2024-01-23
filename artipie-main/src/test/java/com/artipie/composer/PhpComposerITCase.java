@@ -15,7 +15,6 @@ import org.testcontainers.containers.BindMode;
 /**
  * Integration test for Composer repo.
  * @since 0.18
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class PhpComposerITCase {
@@ -26,8 +25,7 @@ final class PhpComposerITCase {
 
     /**
      * Deployment for tests.
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     */
+         */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

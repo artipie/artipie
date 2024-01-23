@@ -26,7 +26,6 @@ import org.apache.commons.io.IOUtils;
 /**
  * Python package metadata.
  * @since 0.6
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public interface Metadata {
 

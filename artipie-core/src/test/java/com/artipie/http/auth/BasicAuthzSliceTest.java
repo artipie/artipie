@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link BasicAuthzSlice}.
  * @since 1.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class BasicAuthzSliceTest {

@@ -23,7 +23,6 @@ import org.testcontainers.containers.BindMode;
 /**
  * Conda IT case.
  * @since 0.23
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -31,9 +30,7 @@ public final class CondaAuthITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
-     */
+             */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
@@ -87,7 +84,6 @@ public final class CondaAuthITCase {
                 new IsEqual<>(0),
                 Matchers.allOf(
                     new StringContains("Using Anaconda API: http://artipie:8080/my-conda/"),
-                    // @checkstyle LineLengthCheck (1 line)
                     new StringContains("Uploading file \"alice/example-package/0.0.1/linux-64/example-package-0.0.1-0.tar.bz2\""),
                     new StringContains("Upload complete")
                 )

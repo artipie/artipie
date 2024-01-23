@@ -77,9 +77,7 @@ public final class ApiUserPermission extends RestApiPermission {
     /**
      * User actions.
      * @since 0.29
-     * @checkstyle JavadocVariableCheck (20 lines)
-     * @checkstyle MagicNumberCheck (20 lines)
-     */
+             */
     public enum UserAction implements Action {
         READ(0x4),
         CREATE(0x2),

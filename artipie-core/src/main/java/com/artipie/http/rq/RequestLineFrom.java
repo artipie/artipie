@@ -79,7 +79,6 @@ public final class RequestLineFrom {
      */
     private String part(final int idx) {
         final String[] parts = this.line.trim().split("\\s");
-        // @checkstyle MagicNumberCheck (1 line)
         if (parts.length == 3) {
             return parts[idx];
         } else {

@@ -40,8 +40,7 @@ public final class DependencySection {
      * @param names Tag for names
      * @param versions Tag for versions
      * @param flags Tag for flags
-     * @checkstyle ParameterNumberCheck (10 lines)
-     */
+         */
     public DependencySection(
         final String name, final AbstractHeader.Tag names, final AbstractHeader.Tag versions,
         final AbstractHeader.Tag flags

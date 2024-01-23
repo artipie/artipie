@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
  * Catalog GET endpoint.
  *
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class CatalogEntityGetTest {
 

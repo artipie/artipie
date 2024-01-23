@@ -152,8 +152,7 @@ public final class MicrometerStorage implements Storage {
      * @param err Error
      * @param <T> Result type
      * @return Completion stage with the result
-     * @checkstyle ParameterNumberCheck (10 lines)
-     */
+         */
     private <T> CompletionStage<T> handleCompletion(
         final String method, final Timer.Sample timer, final T res, final Throwable err
     ) {

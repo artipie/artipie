@@ -47,8 +47,6 @@ import org.testcontainers.utility.DockerImageName;
  * Test for {@link AuthFromKeycloak}.
  *
  * @since 0.28
- * @checkstyle IllegalCatchCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidCatchingThrowable")
 @Testcontainers
@@ -108,8 +106,7 @@ public class AuthFromKeycloakTest {
 
     /**
      * Test directory.
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     */
+         */
     @TempDir
     Path path;
 
@@ -175,8 +172,7 @@ public class AuthFromKeycloakTest {
      * @param realm Keycloak realm
      * @param client Keycloak client application ID
      * @param password Keycloak client application password
-     * @checkstyle ParameterNumberCheck (3 lines)
-     */
+         */
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
     private YamlSettings settings(final String url, final String realm,
         final String client, final String password) {

@@ -39,7 +39,6 @@ import org.reactivestreams.Publisher;
  * Slice that proxies request with given request line and empty headers and body,
  * caches and returns response from remote.
  * @since 0.7
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class ProxySlice implements Slice {
 
@@ -74,8 +73,7 @@ final class ProxySlice implements Slice {
      * @param cache Cache
      * @param events Artifact events queue
      * @param rname Repository name
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     ProxySlice(final Slice origin, final Cache cache,
         final Optional<Queue<ProxyArtifactEvent>> events,
         final String rname) {

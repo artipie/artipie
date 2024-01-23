@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link DeleteChartSlice}.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class DeleteChartSliceTest {

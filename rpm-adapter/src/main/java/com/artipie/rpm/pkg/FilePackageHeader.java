@@ -59,7 +59,7 @@ public final class FilePackageHeader {
      * @throws IOException In case of I/O error.
      */
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
-    public Header header() throws InvalidPackageException, IOException {
+    public Header header() throws IOException {
         try (ReadableByteChannel chan = Channels.newChannel(this.pckg)) {
             final Format format;
             try {

@@ -55,8 +55,7 @@ public final class FilePackage implements Package {
          * @param file File path
          * @param digest Digest
          * @param location File relative location
-         * @checkstyle ParameterNumberCheck (10 lines)
-         */
+                 */
         public Headers(final Header hdr, final Path file, final Digest digest,
             final String location) {
             this.hdr = hdr;

@@ -56,6 +56,7 @@ public final class JsonPackages implements Packages {
     }
 
     @Override
+    @SuppressWarnings("PMD.CognitiveComplexity")
     public CompletionStage<Packages> add(final Package pack, final Optional<String> vers) {
         return new ContentAsJson(this.source)
             .value()

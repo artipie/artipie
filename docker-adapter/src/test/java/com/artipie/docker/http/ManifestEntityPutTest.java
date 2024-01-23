@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link DockerSlice}.
  * Manifest PUT endpoint.
  *
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.2
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

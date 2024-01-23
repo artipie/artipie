@@ -46,10 +46,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link JettyClientSlices} and http3.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ReturnCountCheck (500 lines)
- * @checkstyle NestedIfDepthCheck (500 lines)
  */
 @SuppressWarnings(
     {"PMD.AvoidDuplicateLiterals", "PMD.StaticAccessToStaticFields", "PMD.LongVariable"}

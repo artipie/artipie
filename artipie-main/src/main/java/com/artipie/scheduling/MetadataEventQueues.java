@@ -90,8 +90,7 @@ public final class MetadataEventQueues {
      * Obtain queue for proxy adapter repository.
      * @param config Repository config
      * @return Queue for proxy events
-     * @checkstyle ExecutableStatementCountCheck (30 lines)
-     */
+         */
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public Optional<Queue<ProxyArtifactEvent>> proxyEventQueues(final RepoConfig config) {
         Optional<Queue<ProxyArtifactEvent>> result =
@@ -119,7 +118,6 @@ public final class MetadataEventQueues {
                                 config.name(),
                                 this.quartz.schedulePeriodicJob(interval, threads, type.job(), data)
                             );
-                            // @checkstyle LineLengthCheck (1 line)
                             Logger.info(this, "Initialized proxy metadata job and queue for %s repository", config.name());
                         } catch (final SchedulerException err) {
                             throw new ArtipieException(err);
@@ -128,7 +126,6 @@ public final class MetadataEventQueues {
                     }
                 );
                 result = Optional.of(events);
-            // @checkstyle IllegalCatchCheck (5 lines)
             } catch (final Exception err) {
                 Logger.error(
                     this, "Failed to initialize events queue processing for repo %s:\n%s",
@@ -176,8 +173,7 @@ public final class MetadataEventQueues {
     /**
      * Repository types.
      * @since 0.31
-     * @checkstyle JavadocVariableCheck (30 lines)
-     */
+         */
     enum ProxyRepoType {
 
         MAVEN_PROXY {

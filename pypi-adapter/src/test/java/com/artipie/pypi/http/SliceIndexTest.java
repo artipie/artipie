@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link SliceIndex}.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods", "unchecked"})
 class SliceIndexTest {

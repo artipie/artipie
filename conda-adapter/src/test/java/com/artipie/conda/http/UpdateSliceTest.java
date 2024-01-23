@@ -37,7 +37,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 /**
  * Test for {@link UpdateSlice}.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UpdateSliceTest {

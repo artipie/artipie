@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
  * Blob Get endpoint.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class BlobEntityGetTest {

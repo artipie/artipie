@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
  * Upload PUT endpoint.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UploadEntityPutTest {

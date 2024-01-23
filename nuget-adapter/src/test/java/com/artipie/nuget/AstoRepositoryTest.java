@@ -46,11 +46,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link AstoRepository}.
  *
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle IllegalCatchCheck (500 lines)
- * @checkstyle ExecutableStatementCountCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidCatchingGenericException"})
 class AstoRepositoryTest {
@@ -93,7 +88,6 @@ class AstoRepositoryTest {
                 this.storage.value(identity.hashKey())
             ),
             Matchers.equalTo(
-                // @checkstyle LineLength (1 lines)
                 "aTRmXwR5xYu+mWxE8r8W1DWnL02SeV8LwdQMsLwTWP8OZgrCCyTqvOAe5hRb1VNQYXjln7qr0PKpSyO/pcc19Q=="
             )
         );
@@ -118,7 +112,6 @@ class AstoRepositoryTest {
             CompletionException.class,
             () -> this.repository.add(new Content.From("not a zip".getBytes()))
                 .toCompletableFuture().join(),
-            // @checkstyle LineLengthCheck (1 line)
             "Repository expected to throw InvalidPackageException if package is invalid and cannot be added"
         ).getCause();
         MatcherAssert.assertThat(

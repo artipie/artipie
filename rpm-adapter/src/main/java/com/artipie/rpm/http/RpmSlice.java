@@ -28,7 +28,6 @@ import java.util.Queue;
 /**
  * Artipie {@link Slice} for RPM repository HTTP API.
  * @since 0.7
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class RpmSlice extends Slice.Wrap {
 
@@ -49,8 +48,7 @@ public final class RpmSlice extends Slice.Wrap {
      * @param policy Access policy.
      * @param auth Auth details.
      * @param config Repository configuration.
-     * @checkstyle ParameterNumberCheck (10 lines)
-     */
+         */
     public RpmSlice(
         final Storage storage,
         final Policy<?> policy,
@@ -67,8 +65,7 @@ public final class RpmSlice extends Slice.Wrap {
      * @param auth Auth details.
      * @param config Repository configuration.
      * @param events Artifact events queue
-     * @checkstyle ParameterNumberCheck (10 lines)
-     */
+         */
     public RpmSlice(
         final Storage storage,
         final Policy<?> policy,

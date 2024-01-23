@@ -31,8 +31,6 @@ import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
  * Test for {@link StorageValuePipeline}.
  *
  * @since 1.5
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class StorageValuePipelineTest {

@@ -79,34 +79,17 @@ public class NextSafeAvailablePort {
      *
      * @param port The port to check for availability
      * @return If the ports is available
-     * @checkstyle ReturnCountCheck (50 lines)
-     * @checkstyle FinalParametersCheck (50 lines)
-     * @checkstyle EmptyCatchBlock (50 lines)
-     * @checkstyle MethodBodyCommentsCheck (50 lines)
-     */
+                     */
     @SuppressWarnings({"PMD.EmptyCatchBlock", "PMD.OnlyOneReturn"})
     private static boolean available(final int port) {
-        ServerSocket sersock = null;
-        DatagramSocket dgrmsock = null;
-        try {
-            sersock = new ServerSocket(port);
+        try (ServerSocket sersock = new ServerSocket(port);
+            DatagramSocket dgrmsock = new DatagramSocket(port)
+        ) {
             sersock.setReuseAddress(true);
-            dgrmsock = new DatagramSocket(port);
             dgrmsock.setReuseAddress(true);
             return true;
         } catch (IOException exp) {
             // should not be thrown
-        } finally {
-            if (dgrmsock != null) {
-                dgrmsock.close();
-            }
-            if (sersock != null) {
-                try {
-                    sersock.close();
-                } catch (IOException exp) {
-                    // should not be thrown
-                }
-            }
         }
         return false;
     }

@@ -131,8 +131,7 @@ public final class Pipeline<D> implements Subscriber<D>, Subscription {
 
     /**
      * Check if all required parts are connected, and request from upstream if so.
-     * @checkstyle MethodBodyCommentsCheck (10 lines)
-     */
+         */
     private void checkRequest() {
         synchronized (this.lock) {
             if (this.downstream != null && this.upstream != null) {

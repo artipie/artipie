@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 /**
  * NPM Proxy storage test.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RxNpmProxyStorageTest {

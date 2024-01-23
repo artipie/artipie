@@ -30,7 +30,6 @@ import org.reactivestreams.Publisher;
 /**
  * Composer proxy slice with cache support.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 final class CachedProxySlice implements Slice {

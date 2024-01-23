@@ -46,7 +46,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link UploadSlice}.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UploadSliceTest {

@@ -21,7 +21,6 @@ import org.junit.jupiter.params.provider.CsvSource;
  * Test case for {@link ArtifactHeaders}.
  *
  * @since 1.0
- * @checkstyle JavadocMethodCheck (500 lines)
  */
 public final class ArtifactHeadersTest {
 

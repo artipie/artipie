@@ -39,7 +39,6 @@ import org.testcontainers.images.builder.Transferable;
  * Authorisation is not used here as NuGet client hangs up on pushing a package
  * when authentication is required.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 @DisabledOnOs(OS.WINDOWS)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

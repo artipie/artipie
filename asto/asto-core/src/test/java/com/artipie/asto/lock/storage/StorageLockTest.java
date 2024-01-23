@@ -36,7 +36,6 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Test cases for {@link StorageLock}.
  *
  * @since 0.24
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @Timeout(1)
 final class StorageLockTest {

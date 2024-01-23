@@ -47,7 +47,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Test for {@link com.artipie.debian.http.DebianSlice}.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @todo #2:30min Find (or create) package without any dependencies or necessary settings
  *  for install test: current package `aglfn_1.7-3_all.deb` is now successfully downloaded and
  *  unpacked, but then debian needs to configure it and fails.
@@ -63,8 +62,7 @@ public final class DebianSliceITCase {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
+         */
     @TempDir
     Path tmp;
 

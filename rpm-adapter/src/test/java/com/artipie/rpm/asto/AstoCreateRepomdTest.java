@@ -26,7 +26,6 @@ import org.xmlunit.matchers.CompareMatcher;
 /**
  * Test for {@link AstoCreateRepomd}.
  * @since 1.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class AstoCreateRepomdTest {

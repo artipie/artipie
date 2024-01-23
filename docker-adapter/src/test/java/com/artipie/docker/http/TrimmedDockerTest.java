@@ -30,7 +30,6 @@ import wtf.g4s8.hamcrest.json.StringIsJson;
 /**
  * Test for {@link TrimmedDocker}.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class TrimmedDockerTest {

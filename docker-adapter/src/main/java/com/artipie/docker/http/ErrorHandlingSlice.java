@@ -54,7 +54,6 @@ final class ErrorHandlingSlice implements Slice {
                 CompletionStage<Void> sent;
                 try {
                     sent = original.send(connection);
-                    // @checkstyle IllegalCatchCheck (1 line)
                 } catch (final RuntimeException ex) {
                     sent = handle(ex).map(rsp -> rsp.send(connection)).orElseThrow(() -> ex);
                 }
@@ -72,7 +71,6 @@ final class ErrorHandlingSlice implements Slice {
                     }
                 ).thenCompose(Function.identity());
             };
-            // @checkstyle IllegalCatchCheck (1 line)
         } catch (final RuntimeException ex) {
             response = handle(ex).orElseThrow(() -> ex);
         }
@@ -84,8 +82,7 @@ final class ErrorHandlingSlice implements Slice {
      *
      * @param throwable Throwable to translate.
      * @return Result response, empty that throwable cannot be handled.
-     * @checkstyle ReturnCountCheck (3 lines)
-     */
+         */
     @SuppressWarnings("PMD.OnlyOneReturn")
     private static Optional<Response> handle(final Throwable throwable) {
         if (throwable instanceof DockerError) {

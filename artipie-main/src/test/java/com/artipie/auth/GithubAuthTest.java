@@ -24,7 +24,6 @@ final class GithubAuthTest {
         final String secret = "secret";
         MatcherAssert.assertThat(
             new GithubAuth(
-                // @checkstyle ReturnCountCheck (5 lines)
                 token -> {
                     if (token.equals(secret)) {
                         return "User";

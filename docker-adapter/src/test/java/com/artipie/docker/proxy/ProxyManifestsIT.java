@@ -24,7 +24,6 @@ import wtf.g4s8.hamcrest.json.StringIsJson;
  * Integration tests for {@link ProxyManifests}.
  *
  * @since 0.10
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class ProxyManifestsIT {
 

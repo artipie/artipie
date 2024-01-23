@@ -95,8 +95,7 @@ public interface Meta {
      * Read and write simple operator implementation.
      * @param <T> Value type
      * @since 1.9
-     * @checkstyle AbbreviationAsWordInNameCheck (5 lines)
-     */
+         */
     final class OpRWSimple<T> implements ReadOperator<Optional<? extends T>>, WriteOperator<T> {
 
         /**

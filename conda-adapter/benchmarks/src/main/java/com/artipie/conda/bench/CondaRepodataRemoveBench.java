@@ -2,9 +2,10 @@
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
  * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
-package com.artipie.conda;
+package com.artipie.conda.bench;
 
 import com.artipie.asto.misc.UncheckedIOFunc;
+import com.artipie.conda.CondaRepodata;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,9 +32,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 /**
  * Benchmark for {@link CondaRepodata.Remove}.
  * @since 0.1
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle JavadocMethodCheck (500 lines)
- * @checkstyle DesignForExtensionCheck (500 lines)
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)

@@ -34,8 +34,6 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * Implementation of {@link Package} that checks uniqueness of the packages index records.
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 public final class UniquePackage implements Package {
 

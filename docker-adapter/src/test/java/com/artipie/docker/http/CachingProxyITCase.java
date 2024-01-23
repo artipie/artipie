@@ -38,7 +38,6 @@ import org.junit.jupiter.api.condition.OS;
  * Integration test for {@link ProxyDocker}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DockerClientSupport

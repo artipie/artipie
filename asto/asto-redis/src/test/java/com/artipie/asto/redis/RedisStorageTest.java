@@ -37,8 +37,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Tests for {@link RedisStorage}.
  *
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  * @since 0.1
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})

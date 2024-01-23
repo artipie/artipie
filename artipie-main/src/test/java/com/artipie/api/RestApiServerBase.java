@@ -47,7 +47,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /**
  * Base class for Rest API tests. When creating test for rest API verticle, extend this class.
  * @since 0.27
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings("PMD.TooManyMethods")
@@ -60,8 +59,7 @@ public class RestApiServerBase {
 
     /**
      * Wait test completion.
-     * @checkstyle MagicNumberCheck (3 lines)
-     */
+         */
     static final long TEST_TIMEOUT = Duration.ofSeconds(3).toSeconds();
 
     /**
@@ -71,8 +69,7 @@ public class RestApiServerBase {
 
     /**
      * Maximum awaiting time duration of port availability.
-     * @checkstyle MagicNumberCheck (10 lines)
-     */
+         */
     private static final long MAX_WAIT = Duration.ofMinutes(1).toMillis();
 
     /**
@@ -82,8 +79,7 @@ public class RestApiServerBase {
 
     /**
      * Test security storage.
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     */
+         */
     protected Storage ssto;
 
     /**
@@ -129,8 +125,7 @@ public class RestApiServerBase {
      * Creates instance of KeyStore based on Artipie yaml-configuration.
      * @return KeyStore.
      * @throws IOException During yaml creation
-     * @checkstyle NonStaticMethodCheck (5 lines)
-     */
+         */
     Optional<KeyStore> keyStore() throws IOException {
         return Optional.empty();
     }
@@ -224,8 +219,7 @@ public class RestApiServerBase {
      * @param rqs Request parameters: method and path
      * @param assertion Test assertion
      * @throws Exception On error
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     final void requestAndAssert(final Vertx vertx, final VertxTestContext ctx,
         final TestRequest rqs, final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
         this.requestAndAssert(
@@ -244,8 +238,7 @@ public class RestApiServerBase {
      * @param token Jwt auth token
      * @param assertion Test assertion
      * @throws Exception On error
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     final void requestAndAssert(final Vertx vertx, final VertxTestContext ctx,
         final TestRequest rqs, final Optional<String> token,
         final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
@@ -287,8 +280,7 @@ public class RestApiServerBase {
      * @param pass Password
      * @return Jwt token
      * @throws Exception On error
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     final AtomicReference<String> getToken(
         final Vertx vertx, final VertxTestContext ctx, final String name, final String pass
     ) throws Exception {

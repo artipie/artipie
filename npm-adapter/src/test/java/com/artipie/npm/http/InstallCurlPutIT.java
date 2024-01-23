@@ -37,15 +37,13 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * IT for installation after publishing through `curl PUT` tgz archive.
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @DisabledOnOs(OS.WINDOWS)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class InstallCurlPutIT {
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
+         */
     @TempDir
     Path tmp;
 

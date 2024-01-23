@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 /**
  * Repository config.
  * @since 0.2
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 public final class RepoConfig {
@@ -124,8 +123,7 @@ public final class RepoConfig {
     /**
      * Start repo on http3 version?
      * @return True if so
-     * @checkstyle MethodNameCheck (5 lines)
-     */
+         */
     public boolean startOnHttp3() {
         return Boolean.parseBoolean(this.repoYaml().string("http3"));
     }

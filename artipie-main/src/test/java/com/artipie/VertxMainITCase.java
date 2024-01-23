@@ -23,8 +23,7 @@ final class VertxMainITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (15 lines)
-     */
+         */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         Map.ofEntries(

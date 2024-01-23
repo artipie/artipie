@@ -39,7 +39,6 @@ import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
  * Integration test for PHP Composer repository.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 @DisabledOnOs(OS.WINDOWS)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

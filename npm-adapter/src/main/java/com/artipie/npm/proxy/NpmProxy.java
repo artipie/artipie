@@ -18,7 +18,6 @@ import java.net.URI;
 /**
  * NPM Proxy.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (200 lines)
  */
 public class NpmProxy {
 
@@ -71,8 +70,7 @@ public class NpmProxy {
      * Retrieve package metadata.
      * @param name Package name
      * @return Package metadata (cached or downloaded from remote repository)
-     * @checkstyle ReturnCountCheck (15 lines)
-     */
+         */
     public Maybe<NpmPackage> getPackage(final String name) {
         return this.storage.getPackage(name).flatMap(
             pkg -> this.remotePackage(name).switchIfEmpty(Maybe.just(pkg))

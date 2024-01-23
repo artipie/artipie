@@ -12,7 +12,6 @@ import org.redline_rpm.header.AbstractHeader;
  * <a href="https://rpm-software-management.github.io/rpm/manual/tags.html">Tags</a>.
  * <a href="https://rpm-software-management.github.io/rpm/manual/dependencies.html">Deps</a>.
  * @since 1.11
- * @checkstyle JavadocVariableCheck (500 lines)
  */
 public enum WeakDepsTags implements AbstractHeader.Tag {
 

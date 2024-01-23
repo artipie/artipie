@@ -27,16 +27,13 @@ import org.sqlite.SQLiteDataSource;
  * Integration test for artifact metadata
  * database.
  * @since 0.31
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class MetadataMavenITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
-     */
+             */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> new TestDeployment.ArtipieContainer().withConfig("artipie-db.yaml")

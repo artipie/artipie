@@ -54,18 +54,13 @@ import org.xmlunit.matchers.CompareMatcher;
  *  "Reading of RPM package 'package' failed, data corrupt or malformed.",
  *  like described in showMeaningfulErrorWhenInvalidPackageSent. Implement it
  *  and then enable the test.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle IllegalCatchCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidCatchingGenericException")
 final class RpmTest {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
+         */
     @TempDir
     static Path tmp;
 

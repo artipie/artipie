@@ -19,7 +19,6 @@ import java.nio.file.Paths;
 /**
  * Main class.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (200 lines)
  */
 public final class Cli {
 
@@ -60,21 +59,14 @@ public final class Cli {
         repo.batchUpdateIncrementally(Key.ROOT);
         final Vertx vertx = Vertx.vertx();
         final ItemTokenizer tokenizer = new ItemTokenizer(vertx.getDelegate());
-        final VertxSliceServer server = new VertxSliceServer(
-            vertx,
-            new LoggingSlice(
-                new ConanSlice(
-                    storage,
-                    new PolicyByUsername(Cli.USERNAME),
-                    new Authentication.Single(
-                        Cli.USERNAME, Cli.PASSWORD
-                    ),
-                    new ConanSlice.FakeAuthTokens(Cli.DEMO_TOKEN, Cli.USERNAME),
-                    tokenizer,
-                    "*"
-            )),
-            Cli.CONAN_PORT
-        );
-        server.start();
+        try (VertxSliceServer server =
+            new VertxSliceServer(
+                vertx, new LoggingSlice(
+                    new ConanSlice(storage, new PolicyByUsername(Cli.USERNAME),
+                    new Authentication.Single(Cli.USERNAME, Cli.PASSWORD),
+                    new ConanSlice.FakeAuthTokens(Cli.DEMO_TOKEN, Cli.USERNAME), tokenizer, "*")
+            ), Cli.CONAN_PORT)) {
+            server.start();
+        }
     }
 }

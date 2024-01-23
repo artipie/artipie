@@ -34,8 +34,6 @@ import org.junit.jupiter.api.Timeout;
  * Tests for {@link AstoManifests}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class AstoManifestsTest {
@@ -64,7 +62,6 @@ final class AstoManifestsTest {
     void shouldReadManifest() {
         final ManifestRef ref = new ManifestRef.FromTag(new Tag.Valid("1"));
         final byte[] manifest = this.manifest(ref);
-        // @checkstyle MagicNumberCheck (1 line)
         MatcherAssert.assertThat(manifest.length, Matchers.equalTo(528));
     }
 

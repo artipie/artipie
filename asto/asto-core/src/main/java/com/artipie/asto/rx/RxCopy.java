@@ -15,9 +15,6 @@ import java.util.Optional;
  * A reactive version of {@link com.artipie.asto.Copy}.
  *
  * @since 0.19
- * @checkstyle NonStaticMethodCheck (500 lines)
- * @checkstyle MemberNameCheck (500 lines)
- * @checkstyle ParameterNameCheck (500 lines)
  */
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 public class RxCopy {

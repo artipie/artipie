@@ -43,9 +43,6 @@ import org.reactivestreams.Publisher;
  *  https://github.com/npm/cli
  *  https://github.com/npm/registry
  *  https://docs.npmjs.com/cli/v8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
- * @checkstyle MethodLengthCheck (500 lines)
  */
 @SuppressWarnings("PMD.ExcessiveMethodLength")
 public final class NpmSlice implements Slice {
@@ -99,8 +96,7 @@ public final class NpmSlice implements Slice {
      * @param auth Authentication.
      * @param name Repository name
      * @param events Events queue
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     public NpmSlice(
         final URL base,
         final Storage storage,

@@ -27,8 +27,7 @@ final class GroupResult {
 
     /**
      * Subscriber which cancel publisher subscription.
-     * @checkstyle AnonInnerLengthCheck (25 lines)
-     */
+         */
     private static final Subscriber<? super Object> CANCEL_SUB = new Subscriber<Object>() {
         @Override
         public void onSubscribe(final Subscription sub) {
@@ -106,7 +105,6 @@ final class GroupResult {
      */
     public boolean success() {
         final int code = Integer.parseInt(this.status.code());
-        // @checkstyle MagicNumberCheck (1 line)
         return code >= 200 && code < 300;
     }
 

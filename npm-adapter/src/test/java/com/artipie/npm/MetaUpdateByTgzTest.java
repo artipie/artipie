@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link MetaUpdate.ByTgz}.
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class MetaUpdateByTgzTest {

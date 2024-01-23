@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
  * Test for {@link FileProxySlice} to verify it works with target requiring authentication.
  *
  * @since 0.6
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class FileProxySliceAuthIT {
 

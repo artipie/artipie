@@ -30,8 +30,8 @@ import java.util.function.IntUnaryOperator;
  * This class defines all state and its transition and provide method to patch and check the state.
  * </p>
  * @since 1.0
- * @checkstyle MagicNumberCheck (50 lines)
  */
+@SuppressWarnings("PMD.AvoidAccessToStaticMembersViaThis")
 final class State {
 
     /**

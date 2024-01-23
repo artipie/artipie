@@ -36,7 +36,6 @@ import org.junit.jupiter.params.provider.MethodSource;
  * Tests for {@link DockerProxy}.
  *
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DockerProxyTest {

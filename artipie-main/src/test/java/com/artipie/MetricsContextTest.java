@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
  * Test for Metrics context.
  *
  * @since 0.28.0
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class MetricsContextTest {

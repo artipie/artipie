@@ -53,9 +53,7 @@ public final class RpmDependency {
      * @param aname Another dependency name
      * @param avers Another dependency version
      * @return True if this dependency can be satisfied by another
-     * @checkstyle BooleanExpressionComplexityCheck (20 lines)
-     * @checkstyle CyclomaticComplexityCheck (20 lines)
-     */
+             */
     @SuppressWarnings("PMD.CyclomaticComplexity")
     public boolean isSatisfiedBy(final String aname, final HeaderTags.Version avers) {
         boolean res = false;

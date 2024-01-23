@@ -12,7 +12,6 @@ import java.util.Set;
  * Registry permission categories.
  *
  * @since 0.18
- * @checkstyle MagicNumberCheck (100 lines)
  */
 public enum RegistryCategory implements Action {
 

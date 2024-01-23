@@ -21,8 +21,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * Integration test for auth in local Docker repositories.
  *
  * @since 0.10
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle LineLengthCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
@@ -30,8 +28,7 @@ final class DockerLocalAuthIT {
 
     /**
      * Deployment for tests.
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     */
+         */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> new TestDeployment.ArtipieContainer().withConfig("artipie_with_policy.yaml")

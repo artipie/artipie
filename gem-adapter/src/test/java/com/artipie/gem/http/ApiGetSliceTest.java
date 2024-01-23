@@ -28,7 +28,6 @@ import wtf.g4s8.hamcrest.json.JsonHas;
  * A test for gem submit operation.
  *
  * @since 0.7
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class ApiGetSliceTest {

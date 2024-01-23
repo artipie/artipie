@@ -22,7 +22,6 @@ import javax.json.JsonObject;
  * Asto merged json adds packages metadata to repodata index, reading and writing to/from
  * abstract storage.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class AstoMergedJson {
 

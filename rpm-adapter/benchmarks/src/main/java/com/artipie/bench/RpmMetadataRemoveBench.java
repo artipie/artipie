@@ -39,10 +39,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 /**
  * Benchmark for {@link com.artipie.rpm.RpmMetadata.Remove}.
  * @since 1.4
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle DesignForExtensionCheck (500 lines)
- * @checkstyle JavadocMethodCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)

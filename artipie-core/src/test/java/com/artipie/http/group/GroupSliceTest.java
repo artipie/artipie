@@ -30,14 +30,12 @@ import org.junit.jupiter.api.Timeout;
  * Test case for {@link GroupSlice}.
  *
  * @since 0.16
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class GroupSliceTest {
 
     @Test
     @Timeout(1)
     void returnsFirstOrderedSuccessResponse() {
-        // @checkstyle MagicNumberCheck (10 lines)
         final String expects = "ok-150";
         MatcherAssert.assertThat(
             new GroupSlice(
@@ -60,7 +58,6 @@ final class GroupSliceTest {
 
     @Test
     void returnsNotFoundIfAllFails() {
-        // @checkstyle MagicNumberCheck (10 lines)
         MatcherAssert.assertThat(
             new GroupSlice(
                 slice(RsStatus.NOT_FOUND, "not-found-140", Duration.ofMillis(250)),

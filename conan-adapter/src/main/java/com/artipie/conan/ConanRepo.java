@@ -32,8 +32,7 @@ public final class ConanRepo {
      * Updates repository incrementally.
      * @param prefix Repo prefix
      * @return Completable action
-     * @checkstyle NonStaticMethodCheck (5 lines)
-     */
+         */
     public Completable batchUpdateIncrementally(final Key prefix) {
         return null;
     }

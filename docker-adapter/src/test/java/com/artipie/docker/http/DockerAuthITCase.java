@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Integration test for authentication in {@link DockerSlice}.
  *
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.4
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

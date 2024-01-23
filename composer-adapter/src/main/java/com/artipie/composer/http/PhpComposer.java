@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
  * PHP Composer repository HTTP front end.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class PhpComposer extends Slice.Wrap {
     /**
@@ -35,8 +34,7 @@ public final class PhpComposer extends Slice.Wrap {
      * @param auth Authentication
      * @param name Repository name
      * @param events Artifact repository events
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     public PhpComposer(
         final Repository repository,
         final Policy<?> policy,

@@ -77,8 +77,7 @@ public final class TestSettings implements Settings {
      *
      * @param storage Storage
      * @param meta Yaml `meta` mapping
-     * @checkstyle ParameterNumberCheck (2 lines)
-     */
+         */
     public TestSettings(
         final Storage storage,
         final YamlMapping meta

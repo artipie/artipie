@@ -21,9 +21,7 @@ public final class RolesITCase {
 
     /**
      * Deployment for tests.
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
-     */
+             */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> new TestDeployment.ArtipieContainer().withConfig("artipie_with_policy.yaml")

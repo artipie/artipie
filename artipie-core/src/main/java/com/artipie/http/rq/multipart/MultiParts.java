@@ -20,7 +20,6 @@ import org.reactivestreams.Subscription;
  * Multipart parts publisher.
  *
  * @since 1.0
- * @checkstyle MethodBodyCommentsCheck (500 lines)
  */
 final class MultiParts implements Processor<ByteBuffer, RqMultipart.Part>,
     ByteBufferTokenizer.Receiver {

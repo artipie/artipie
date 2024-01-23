@@ -19,7 +19,6 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Integration test for local Docker repository running on port.
  *
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.10
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -27,8 +26,7 @@ final class DockerOnPortIT {
 
     /**
      * Temp directory.
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     */
+         */
     @TempDir
     static Path temp;
 
@@ -50,8 +48,7 @@ final class DockerOnPortIT {
     /**
      * Deployment for tests.
      *
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     */
+         */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

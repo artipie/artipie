@@ -32,7 +32,6 @@ import org.reactivestreams.Publisher;
 /**
  * Search slice.
  * @since 0.7
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UnusedPrivateMethod"})
 public final class SearchSlice implements Slice {
@@ -180,12 +179,11 @@ public final class SearchSlice implements Slice {
             final String query = "//member/value/array/data/value/string/text()";
             return new PublisherAs(this.body).string(StandardCharsets.UTF_8).thenApply(
                 xml -> new XMLDocument(xml)
-                    // @checkstyle LineLengthCheck (1 line)
                     .nodes("/*[local-name()='methodCall']/*[local-name()='params']/*[local-name()='param']/*[local-name()='value']/*[local-name()='struct']/*[local-name()='member']")
             ).thenApply(
                 nodes -> nodes.stream()
                     .filter(
-                        node -> node.xpath("//member/name/text()").get(0).equals("name")
+                        node -> "name".equals(node.xpath("//member/name/text()").get(0))
                         && !node.xpath(query).isEmpty()
                     )
                     .findFirst()

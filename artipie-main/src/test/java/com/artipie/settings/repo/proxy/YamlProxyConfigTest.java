@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link YamlProxyConfig}.
  *
  * @since 0.12
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class YamlProxyConfigTest {

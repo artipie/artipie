@@ -38,7 +38,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Conda adapter integration test.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)

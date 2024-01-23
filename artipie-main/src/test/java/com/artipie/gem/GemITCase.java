@@ -22,8 +22,6 @@ import org.testcontainers.containers.BindMode;
 
 /**
  * Integration tests for Gem repository.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  * @since 0.13
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -37,8 +35,7 @@ final class GemITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     */
+         */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

@@ -24,10 +24,6 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Record consumer.
  * @since 0.31
- * @checkstyle MagicNumberCheck (1000 lines)
- * @checkstyle ExecutableStatementCountCheck (1000 lines)
- * @checkstyle LocalVariableNameCheck (1000 lines)
- * @checkstyle IllegalTokenCheck (1000 lines)
  */
 @SuppressWarnings(
     {
@@ -39,8 +35,7 @@ class DbConsumerTest {
 
     /**
      * Test directory.
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     */
+         */
     @TempDir
     Path path;
 

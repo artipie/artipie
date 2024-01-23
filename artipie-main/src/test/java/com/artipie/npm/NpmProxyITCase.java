@@ -21,7 +21,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * Integration test for {@link com.artipie.npm.proxy.http.NpmProxySlice}.
  * @since 0.13
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
@@ -39,9 +38,7 @@ final class NpmProxyITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (15 lines)
-     */
+             */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         Map.ofEntries(

@@ -38,7 +38,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test cases for {@link DownloadAssetSlice}.
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidUsingHardCodedIP", "PMD.AvoidDuplicateLiterals"})
 final class DownloadAssetSliceTest {

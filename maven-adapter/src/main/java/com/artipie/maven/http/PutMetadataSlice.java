@@ -30,7 +30,6 @@ import org.reactivestreams.Publisher;
  * before the filename:
  * `.upload/${package_name}/${version}/meta/maven-metadata.xml`.
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class PutMetadataSlice implements Slice {
 

@@ -38,7 +38,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * HexPM integration test.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -55,8 +54,7 @@ final class HexITCase {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
+         */
     @TempDir
     Path tmp;
 

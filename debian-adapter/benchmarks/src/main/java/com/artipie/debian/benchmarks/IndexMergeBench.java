@@ -34,9 +34,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 /**
  * Benchmark for {@link com.artipie.debian.MultiPackages.Unique}.
  * @since 0.8
- * @checkstyle DesignForExtensionCheck (500 lines)
- * @checkstyle JavadocMethodCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)

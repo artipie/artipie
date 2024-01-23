@@ -38,8 +38,6 @@ import org.reactivestreams.Publisher;
  *  There are too many fields and constructor parameters as result in this class.
  *  Probably it is needed to extract some additional abstractions to reduce it,
  *  joint Permissions and Identities might be one of them.
- * @checkstyle ParameterNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 public final class NuGet implements Slice {
 

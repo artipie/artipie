@@ -46,7 +46,6 @@ import org.reactivestreams.Publisher;
  * See <a href="https://docs.docker.com/registry/spec/api/#manifest">Manifest</a>.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class ManifestEntity {
 
@@ -292,8 +291,7 @@ final class ManifestEntity {
          * @param auth Authentication
          * @param policy Security policy
          * @param name Artipie repository name
-         * @checkstyle ParameterNumberCheck (4 lines)
-         */
+                 */
         PutAuth(final Docker docker, final ScopeSlice origin,
             final AuthScheme auth, final Policy<?> policy, final String name) {
             this.docker = docker;

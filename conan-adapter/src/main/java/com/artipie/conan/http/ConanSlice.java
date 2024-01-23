@@ -33,8 +33,6 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Artipie {@link Slice} for Conan repository HTTP API.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 public final class ConanSlice extends Slice.Wrap {
 
@@ -125,9 +123,7 @@ public final class ConanSlice extends Slice.Wrap {
      * @param tokens User auth token generator.
      * @param tokenizer Tokens provider for repository items.
      * @param name Repository name.
-     * @checkstyle MethodLengthCheck (200 lines)
-     * @checkstyle ParameterNumberCheck (20 lines)
-     */
+             */
     @SuppressWarnings("PMD.ExcessiveMethodLength")
     public ConanSlice(
         final Storage storage,

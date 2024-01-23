@@ -34,9 +34,6 @@ import org.reactivestreams.Publisher;
  * Tests to check JfrSlice.
  *
  * @since 0.28
- * @checkstyle LocalFinalVariableNameCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public class JfrSliceTest {
 

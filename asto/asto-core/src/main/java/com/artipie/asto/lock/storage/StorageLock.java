@@ -66,8 +66,7 @@ public final class StorageLock implements Lock {
      * @param target Target key.
      * @param uuid Identifier.
      * @param expiration Expiration time.
-     * @checkstyle ParameterNumberCheck (2 lines)
-     */
+         */
     public StorageLock(
         final Storage storage,
         final Key target,

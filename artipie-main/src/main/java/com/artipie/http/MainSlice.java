@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
  * extracting repository name from URI path.
  *
  * @since 0.11
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class MainSlice extends Slice.Wrap {
@@ -52,8 +51,7 @@ public final class MainSlice extends Slice.Wrap {
      * @param http HTTP client.
      * @param settings Artipie settings.
      * @param tokens Tokens: authentication and generation
-     * @checkstyle ParameterNumberCheck (10 lines)
-     */
+         */
     public MainSlice(
         final ClientSlices http,
         final Settings settings,

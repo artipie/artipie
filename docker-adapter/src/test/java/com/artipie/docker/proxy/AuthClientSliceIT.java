@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
  * Integration test for {@link AuthClientSlice}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class AuthClientSliceIT {

@@ -35,7 +35,6 @@ import org.reactivestreams.Publisher;
  *  We should replace {@link HeadSlice} of artipie/files-adapter by
  *  this one. Before doing this task, be sure that at least version
  *  1.8.1 of artipie/http has been released.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class HeadSlice implements Slice {
 

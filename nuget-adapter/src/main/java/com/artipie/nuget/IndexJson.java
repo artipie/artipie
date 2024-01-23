@@ -27,8 +27,8 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
  * called registration page in the repository docs.
  * <a href="https://learn.microsoft.com/en-us/nuget/api/registration-base-url-resource#registration-page-object">Registration page</a>.
  * @since 1.5
- * @checkstyle InterfaceIsTypeCheck (500 lines)
  */
+@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract class IndexJson {
 
     /**
@@ -257,8 +257,7 @@ public abstract class IndexJson {
          * @param version Version of new package
          * @param old Existing packages metadata array
          * @return Sorted by packages version list of the packages metadata including new package
-         * @checkstyle InnerAssignmentCheck (10 lines)
-         */
+                 */
         @SuppressWarnings("PMD.AssignmentInOperand")
         private static List<JsonObject> sortedPackages(final JsonObject newest,
             final String version, final JsonObject old) {

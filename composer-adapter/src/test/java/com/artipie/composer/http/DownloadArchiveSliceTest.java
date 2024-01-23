@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link DownloadArchiveSlice}.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class DownloadArchiveSliceTest {
     @Test

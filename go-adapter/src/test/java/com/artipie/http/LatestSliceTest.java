@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link LatestSlice}.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public class LatestSliceTest {
 

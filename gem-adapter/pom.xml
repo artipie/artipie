@@ -34,6 +34,9 @@ SOFTWARE.
   <name>gem-adapter</name>
   <description>An Artipie adapter for Ruby Gem packages</description>
   <inceptionYear>2020</inceptionYear>
+  <properties>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.artipie</groupId>

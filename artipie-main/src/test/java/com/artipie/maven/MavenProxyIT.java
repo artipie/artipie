@@ -18,7 +18,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * Integration test for {@link com.artipie.maven.http.MavenProxySlice}.
  *
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.11
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -27,9 +26,7 @@ final class MavenProxyIT {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
-     */
+             */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

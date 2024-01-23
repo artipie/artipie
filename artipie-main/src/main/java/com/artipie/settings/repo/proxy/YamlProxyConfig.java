@@ -19,8 +19,6 @@ import java.util.stream.StreamSupport;
  * Proxy repository config from YAML.
  *
  * @since 0.12
- * @checkstyle MemberNameCheck (500 lines)
- * @checkstyle ParameterNameCheck (500 lines)
  */
 public final class YamlProxyConfig implements ProxyConfig {
 
@@ -39,8 +37,7 @@ public final class YamlProxyConfig implements ProxyConfig {
      *
      * @param repoConfig Repository config.
      * @param yaml Source YAML.
-     * @checkstyle ParameterNumberCheck (10 lines)
-     */
+         */
     public YamlProxyConfig(
         final RepoConfig repoConfig,
         final YamlMapping yaml

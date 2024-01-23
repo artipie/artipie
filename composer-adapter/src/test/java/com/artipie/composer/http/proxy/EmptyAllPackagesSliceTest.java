@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link EmptyAllPackagesSlice}.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class EmptyAllPackagesSliceTest {
     @Test

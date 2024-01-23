@@ -177,8 +177,7 @@ public final class IniFile {
      * @param factory Factory that would provide new instances of T, initialized with String value.
      * @param <T> Get this type.
      * @return Corresponding value from Ini file as type T, of default value, if not found.
-     * @checkstyle ParameterNumberCheck (30 lines)
-     */
+         */
     public <T> T getValue(final String section, final String key, final T defaultvalue,
         final Function<String, T> factory) {
         final Map<String, String> values = this.entries.get(section);

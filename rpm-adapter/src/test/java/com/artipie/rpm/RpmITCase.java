@@ -31,8 +31,6 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Integration test for {@link Rpm}.
  * @since 0.6
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledIfSystemProperty(named = "it.longtests.enabled", matches = "true")
@@ -41,8 +39,7 @@ final class RpmITCase {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
+         */
     @TempDir
     static Path tmp;
 

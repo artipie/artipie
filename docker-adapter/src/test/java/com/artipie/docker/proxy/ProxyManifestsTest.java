@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link ProxyManifests}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class ProxyManifestsTest {
 

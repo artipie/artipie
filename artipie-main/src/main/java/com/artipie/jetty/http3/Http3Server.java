@@ -27,8 +27,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 /**
  * Http3 server.
  * @since 0.31
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 public final class Http3Server {
 
@@ -107,10 +105,7 @@ public final class Http3Server {
      * Implementation of {@link Session.Server.Listener} which passes data to slice and sends
      * response to {@link Stream.Server} via {@link  Http3Connection}.
      * @since 0.31
-     * @checkstyle ReturnCountCheck (500 lines)
-     * @checkstyle AnonInnerLengthCheck (500 lines)
-     * @checkstyle NestedIfDepthCheck (500 lines)
-     */
+                 */
     @SuppressWarnings("PMD.OnlyOneReturn")
     private final class SliceListener implements Session.Server.Listener {
 

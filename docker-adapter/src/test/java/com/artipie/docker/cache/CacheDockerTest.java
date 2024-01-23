@@ -25,7 +25,6 @@ import wtf.g4s8.hamcrest.json.StringIsJson;
  * Tests for {@link CacheDocker}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class CacheDockerTest {
 

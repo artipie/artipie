@@ -35,7 +35,6 @@ import org.reactivestreams.Publisher;
  * @todo #117:30min Add test to verify this class.
  *  Create integration test against local maven repository to download artifacts from
  *  Artipie Maven repository and verify that all HEAD and GET requests has correct headers.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class LocalMavenSlice implements Slice {
 

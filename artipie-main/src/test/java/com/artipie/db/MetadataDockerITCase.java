@@ -17,15 +17,13 @@ import org.junit.jupiter.api.io.TempDir;
  * Integration test for artifact metadata
  * database.
  * @since 0.31
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class MetadataDockerITCase {
 
     /**
      * Deployment for tests.
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     */
+         */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> new TestDeployment.ArtipieContainer().withConfig("artipie-db.yaml")

@@ -14,7 +14,6 @@ import java.util.function.Consumer;
 /**
  * Yaml based KeyStore.
  * @since 0.26
- * @checkstyle DesignForExtensionCheck (500 lines)
  */
 public abstract class YamlBasedKeyStore implements KeyStore {
     /**

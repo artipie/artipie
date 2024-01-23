@@ -39,8 +39,7 @@ public final class GithubAuth implements Authentication {
 
     /**
      * New GitHub authentication.
-     * @checkstyle ReturnCountCheck (10 lines)
-     */
+         */
     public GithubAuth() {
         this(
             token -> {

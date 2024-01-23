@@ -47,9 +47,7 @@ public final class YamlPolicyFactory implements PolicyFactory {
         long eviction;
         try {
             eviction = Long.parseLong(config.string("eviction_millis"));
-        // @checkstyle IllegalCatchCheck (5 lines)
         } catch (final Exception err) {
-            // @checkstyle MagicNumberCheck (2 lines)
             eviction = 180_000L;
         }
         try {

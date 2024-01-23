@@ -35,8 +35,7 @@ public final class NpmPackage {
      * @param content JSON data
      * @param modified Last modified date
      * @param refreshed Last update date
-     * @checkstyle ParameterNumberCheck (10 lines)
-     */
+         */
     public NpmPackage(final String name,
         final String content,
         final String modified,

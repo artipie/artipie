@@ -148,7 +148,7 @@ public interface RepoConfig {
                         && node.asMapping().value(FromYaml.CRON) != null) {
                         res = UpdateMode.CRON;
                     } else if (node.type() == Node.SCALAR
-                        && node.asScalar().value().equals("upload")) {
+                        && "upload".equals(node.asScalar().value())) {
                         res = UpdateMode.UPLOAD;
                     } else {
                         throw new ArtipieException(
@@ -209,8 +209,7 @@ public interface RepoConfig {
          * @param npolicy Naming policy
          * @param filelist Filelist
          * @param umode Update mode
-         * @checkstyle ParameterNumberCheck (5 lines)
-         */
+                 */
         public Simple(final Digest dgst, final NamingPolicy npolicy, final boolean filelist,
             final RepoConfig.UpdateMode umode) {
             this.dgst = dgst;

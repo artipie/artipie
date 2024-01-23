@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link AstoRepository#addJson(Content, Optional)}.
  *
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class AstoRepositoryAddJsonTest {

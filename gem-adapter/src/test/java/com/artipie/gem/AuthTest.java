@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Test;
  * A test for api key endpoint.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class AuthTest {

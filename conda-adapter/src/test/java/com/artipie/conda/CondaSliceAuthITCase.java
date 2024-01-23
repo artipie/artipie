@@ -42,7 +42,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Conda adapter integration test.
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
@@ -80,8 +79,7 @@ public final class CondaSliceAuthITCase {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
+         */
     @TempDir
     Path tmp;
 

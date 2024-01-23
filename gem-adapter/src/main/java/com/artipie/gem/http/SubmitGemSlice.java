@@ -31,7 +31,6 @@ import org.reactivestreams.Publisher;
 /**
  * A slice, which servers gem packages.
  * @since 1.0
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class SubmitGemSlice implements Slice {
 

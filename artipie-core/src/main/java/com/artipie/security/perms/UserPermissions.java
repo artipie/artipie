@@ -92,7 +92,7 @@ public final class UserPermissions extends PermissionCollection {
     }
 
     @Override
-    @SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts")
+    @SuppressWarnings({"PMD.AvoidDeeplyNestedIfStmts", "PMD.CognitiveComplexity"})
     public boolean implies(final Permission permission) {
         final String first = this.last.get();
         boolean res = this.checkReference(first, permission);
@@ -102,7 +102,6 @@ public final class UserPermissions extends PermissionCollection {
                 if (!Objects.equals(first, second)) {
                     res = this.checkReference(second, permission);
                 }
-                // @checkstyle NestedIfDepthCheck (20 lines)
                 if (!res) {
                     if (second != null) {
                         res = this.user.get().perms().implies(permission);

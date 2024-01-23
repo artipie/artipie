@@ -27,7 +27,6 @@ import javax.json.JsonObject;
  * validates it and returns if valid. If item is not present in storage or is not valid,
  * it is loaded from remote.
  * @since 0.4
- * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class ComposerStorageCache implements Cache {
     /**

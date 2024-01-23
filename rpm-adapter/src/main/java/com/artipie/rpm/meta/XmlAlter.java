@@ -139,7 +139,7 @@ public interface XmlAlter {
             final XMLEvent res;
             while (origattrs.hasNext()) {
                 final Attribute attr = (Attribute) origattrs.next();
-                if (attr.getName().getLocalPart().equals("packages")) {
+                if ("packages".equals(attr.getName().getLocalPart())) {
                     newattrs.add(RpmMetadata.EVENTS_FACTORY.createAttribute(attr.getName(), value));
                     replaced = true;
                 } else {

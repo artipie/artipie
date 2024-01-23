@@ -44,7 +44,7 @@ public final class MavenProxyPackageProcessor extends QuartzJob {
     private Storage asto;
 
     @Override
-    @SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.EmptyWhileStmt"})
+    @SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.EmptyControlStatement", "PMD.CognitiveComplexity"})
     public void execute(final JobExecutionContext context) {
         if (this.asto == null || this.packages == null || this.events == null) {
             super.stopJob(context);

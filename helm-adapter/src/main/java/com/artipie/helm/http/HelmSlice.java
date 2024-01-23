@@ -28,8 +28,6 @@ import java.util.Queue;
 /**
  * HelmSlice.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 public final class HelmSlice extends Slice.Wrap {
 

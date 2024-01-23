@@ -69,8 +69,7 @@ public final class CacheManifests implements Manifests {
      * @param cache Cache repository.
      * @param events Artifact metadata events
      * @param rname Artipie repository name
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     public CacheManifests(final RepoName name, final Repo origin, final Repo cache,
         final Optional<Queue<ArtifactEvent>> events, final String rname) {
         this.name = name;

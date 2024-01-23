@@ -33,7 +33,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * A test which ensures {@code pip} console tool compatibility with the adapter.
  *
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
@@ -107,7 +106,6 @@ public final class PySliceITCase {
             "AlarmTime successfully installed",
             this.container.bash(
                 String.format(
-                    // @checkstyle LineLengthCheck (1 line)
                     "pip install --index-url %s --no-deps --trusted-host host.testcontainers.internal alarmtime",
                     this.container.localAddress(user, pswd)
                 )
@@ -144,7 +142,6 @@ public final class PySliceITCase {
             "ABtests successfully installed",
             this.container.bash(
                 String.format(
-                    // @checkstyle LineLengthCheck (1 line)
                     "pip install --index-url %s --no-deps --trusted-host host.testcontainers.internal ABtests",
                     this.container.localAddress()
                 )
@@ -165,13 +162,11 @@ public final class PySliceITCase {
         MatcherAssert.assertThat(
             this.container.bash(
                 String.format(
-                    // @checkstyle LineLengthCheck (1 line)
                     "python3 -m twine upload --repository-url %s -u any -p any --verbose pypi_repo/*",
                     this.container.localAddress()
                 )
             ),
             Matchers.allOf(
-                // @checkstyle LineLengthCheck (3 lines)
                 new StringContainsInOrder(new ListOf<String>("Uploading artipie-sample-0.2.zip", "100%")),
                 new StringContainsInOrder(new ListOf<String>("Uploading artipie-sample-0.2.tar.gz", "100%")),
                 new StringContainsInOrder(new ListOf<String>("Uploading artipie_sample-0.2-py3-none-any.whl", "100%"))
@@ -186,7 +181,6 @@ public final class PySliceITCase {
         MatcherAssert.assertThat(
             this.container.bash(
                 String.format(
-                    // @checkstyle LineLengthCheck (1 line)
                     "pip install --index-url %s --no-deps --trusted-host host.testcontainers.internal \"alarmtime==0.1.5\"",
                     this.container.localAddress()
                 )

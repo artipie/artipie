@@ -83,14 +83,14 @@ public final class ConansEntity {
     /**
      * Main files of package binary.
      */
-    private static final String[] PKG_BIN_LIST = new String[]{
+    private static final String[] PKG_BIN_LIST = {
         ConansEntity.CONAN_MANIFEST, ConansEntity.CONAN_INFO, "conan_package.tgz",
     };
 
     /**
      * Main files of package recipe.
      */
-    private static final String[] PKG_SRC_LIST = new String[]{
+    private static final String[] PKG_SRC_LIST = {
         ConansEntity.CONAN_MANIFEST, "conan_export.tgz", "conanfile.py", "conan_sources.tgz",
     };
 
@@ -187,8 +187,7 @@ public final class ConansEntity {
     /**
      * Conan /search REST APIs for package binaries.
      * @since 0.1
-     * @checkstyle ClassDataAbstractionCouplingCheck (99 lines)
-     */
+         */
     public static final class GetSearchBinPkg extends BaseConanSlice {
 
         /**
@@ -222,7 +221,7 @@ public final class ConansEntity {
             final JsonObjectBuilder jsonbuilder,
             final String pkghash
         ) throws IOException {
-            final CompletableFuture<String> result = new PublisherAs(content)
+            return new PublisherAs(content)
                 .string(StandardCharsets.UTF_8).thenApply(
                     data -> {
                         final Wini conaninfo;
@@ -250,7 +249,6 @@ public final class ConansEntity {
                         jsonbuilder.add(pkghash, pkgbuilder);
                         return jsonbuilder.build().toString();
                     }).toCompletableFuture();
-            return result;
         }
 
         /**
@@ -301,8 +299,7 @@ public final class ConansEntity {
     /**
      * Conan /packages/~hash~ REST APIs.
      * @since 0.1
-     * @checkstyle ClassDataAbstractionCouplingCheck (99 lines)
-     */
+         */
     public static final class GetPkgInfo extends BaseConanSlice {
 
         /**

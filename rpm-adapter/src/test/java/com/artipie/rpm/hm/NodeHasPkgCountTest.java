@@ -18,7 +18,6 @@ import org.llorllale.cactoos.matchers.Mismatches;
 /**
  * Test for {@link NodeHasPkgCount}.
  * @since 0.10
- * @checkstyle MagicNumberCheck (500 lines)
  */
 final class NodeHasPkgCountTest {
 

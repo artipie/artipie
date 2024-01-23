@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link TgzArchive}.
  * @since 0.9
- * @checkstyle LineLengthCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class TgzArchiveTest {

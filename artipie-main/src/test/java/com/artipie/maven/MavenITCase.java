@@ -25,8 +25,6 @@ import org.testcontainers.containers.BindMode;
 /**
  * Integration tests for Maven repository.
  * @since 0.11
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseObjectForClearerAPI"})
 @DisabledOnOs(OS.WINDOWS)
@@ -34,9 +32,7 @@ public final class MavenITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
-     */
+             */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

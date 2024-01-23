@@ -39,7 +39,6 @@ import org.reactivestreams.Publisher;
  * and <a href="https://docs.docker.com/registry/spec/api/#blob-upload">Blob Upload</a>.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class UploadEntity {

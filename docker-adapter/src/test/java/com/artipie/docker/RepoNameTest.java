@@ -46,7 +46,6 @@ final class RepoNameTest {
     void cannotBeGreaterThanMaxLength() {
         Assertions.assertThrows(
             InvalidRepoNameException.class,
-            // @checkstyle MagicNumberCheck (1 line)
             () -> new RepoName.Valid(RepoNameTest.repeatChar('a', 256)).value()
         );
     }

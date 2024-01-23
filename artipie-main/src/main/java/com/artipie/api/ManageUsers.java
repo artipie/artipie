@@ -29,7 +29,6 @@ import org.apache.commons.lang3.tuple.Pair;
  * Users from yaml files.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class ManageUsers implements CrudUsers {

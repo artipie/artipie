@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
  * Test for {@link MavenProxySlice} to verify it works with target requiring authentication.
  *
  * @since 0.7
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class MavenProxySliceAuthIT {

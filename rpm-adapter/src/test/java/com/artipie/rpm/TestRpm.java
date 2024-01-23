@@ -84,8 +84,7 @@ public interface TestRpm {
          * Rpm metadata path.
          * @param type Xml package type
          * @return Path
-         * @checkstyle NonStaticMethodCheck (5 line)
-         */
+                 */
         public Path metadata(final XmlPackage type) {
             return new TestResource(
                 String.format("repodata/abc-%s.xml.example", type.lowercase())
@@ -110,8 +109,7 @@ public interface TestRpm {
          * Rpm metadata path.
          * @param type Xml package type
          * @return Path
-         * @checkstyle NonStaticMethodCheck (5 line)
-         */
+                 */
         public Path metadata(final XmlPackage type) {
             return new TestResource(
                 String.format("repodata/libdeflt-%s.xml.example", type.lowercase())

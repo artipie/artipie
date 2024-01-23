@@ -46,8 +46,6 @@ import java.util.zip.ZipOutputStream;
  * That's it.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ReturnCountCheck (500 lines)
  */
 public final class Goproxy {
 

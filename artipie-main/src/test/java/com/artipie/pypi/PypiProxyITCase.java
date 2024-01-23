@@ -20,7 +20,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 /**
  * Test to pypi proxy.
  * @since 0.12
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
@@ -29,8 +28,7 @@ public final class PypiProxyITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     */
+         */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         Map.ofEntries(

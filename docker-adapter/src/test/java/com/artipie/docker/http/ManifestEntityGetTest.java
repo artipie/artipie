@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
  * Manifest GET endpoint.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ManifestEntityGetTest {
@@ -130,7 +129,6 @@ class ManifestEntityGetTest {
         Headers() {
             super(
                 new Headers.From(
-                    // @checkstyle LineLengthCheck (1 line)
                     new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/webp")
                 )
             );

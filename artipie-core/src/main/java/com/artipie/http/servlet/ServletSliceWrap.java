@@ -31,7 +31,6 @@ import org.cqfn.rio.stream.ReactiveInputStream;
  * Slice wrapper for using in servlet API. Class is not used in Artipie, but required for
  * CloudArtifact project.
  * @since 0.18
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class ServletSliceWrap {
 
@@ -79,9 +78,7 @@ public final class ServletSliceWrap {
      * @param req Servlet request
      * @param rsp Servlet response
      * @return Future
-     * @checkstyle ReturnCountCheck (10 lines)
-     * @checkstyle IllegalCatchCheck (30 lines)
-     */
+             */
     @SuppressWarnings({"PMD.OnlyOneReturn", "PMD.AvoidCatchingGenericException"})
     public CompletionStage<Void> handle(final HttpServletRequest req,
         final HttpServletResponse rsp) {

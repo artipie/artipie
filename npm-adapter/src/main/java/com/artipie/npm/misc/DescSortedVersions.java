@@ -14,11 +14,6 @@ import javax.json.JsonObject;
  * DescSortedVersions.
  *
  * @since 0.1
- * @checkstyle IllegalTokenCheck (500 lines)
- * @checkstyle ParameterNameCheck (500 lines)
- * @checkstyle LocalFinalVariableNameCheck (500 lines)
- * @checkstyle FinalLocalVariableCheck (500 lines)
- * @checkstyle AvoidDuplicateLiterals (500 lines)
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class DescSortedVersions {
@@ -57,8 +52,7 @@ public final class DescSortedVersions {
      * @return Value {@code 0} if {@code v1 == v2};
      *  a value less than {@code 0} if {@code v1 < v2}; and
      *  a value greater than {@code 0} if {@code v1 > v2}
-     * @checkstyle ReturnCountCheck (20 lines)
-     */
+         */
     private static int compareVersions(final String v1, final String v2) {
         final String delimiter = "\\.";
         final String[] component1 = v1.split(delimiter);

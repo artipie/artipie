@@ -160,9 +160,8 @@ public final class DockerRepositoryPermission extends Permission  {
      * @return True when implies
      */
     private boolean impliesIgnoreMask(final DockerRepositoryPermission perm) {
-        // @checkstyle LineLengthCheck (5 lines)
-        return (this.getName().equals(DockerRepositoryPermission.WILDCARD) || this.getName().equals(perm.getName()))
-            && (this.resource.equals(DockerRepositoryPermission.WILDCARD) || this.resource.equals(perm.resource));
+        return (DockerRepositoryPermission.WILDCARD.equals(this.getName()) || this.getName().equals(perm.getName()))
+            && (DockerRepositoryPermission.WILDCARD.equals(this.resource) || this.resource.equals(perm.resource));
     }
 
     /**
@@ -221,8 +220,7 @@ public final class DockerRepositoryPermission extends Permission  {
 
         /**
          * Create an empty DockerPermissionCollection object.
-         * @checkstyle MagicNumberCheck (5 lines)
-         */
+                 */
         public DockerRepositoryPermissionCollection() {
             this.collection = new ConcurrentHashMap<>(5);
             this.any = false;
@@ -250,7 +248,7 @@ public final class DockerRepositoryPermission extends Permission  {
         }
 
         @Override
-        @SuppressWarnings("PMD.CyclomaticComplexity")
+        @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
         public boolean implies(final Permission obj) {
             boolean res = false;
             //@checkstyle NestedIfDepthCheck (50 lines)
@@ -307,8 +305,8 @@ public final class DockerRepositoryPermission extends Permission  {
          * @return True if name and resource equal wildcard and action is {@link DockerActions#ALL}
          */
         private static boolean anyActionAllowed(final DockerRepositoryPermission perm) {
-            return perm.getName().equals(DockerRepositoryPermission.WILDCARD)
-                && perm.resource.equals(DockerRepositoryPermission.WILDCARD)
+            return DockerRepositoryPermission.WILDCARD.equals(perm.getName())
+                && DockerRepositoryPermission.WILDCARD.equals(perm.resource)
                 && perm.mask == DockerActions.ALL.mask();
         }
 

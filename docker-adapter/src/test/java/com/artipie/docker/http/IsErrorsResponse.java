@@ -32,7 +32,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
  * Matcher for errors response.
  *
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class IsErrorsResponse extends BaseMatcher<Response> {
 

@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 /**
  * Add packages to metadata and repository.
  * @since 1.10
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class AstoRepoAdd {
 

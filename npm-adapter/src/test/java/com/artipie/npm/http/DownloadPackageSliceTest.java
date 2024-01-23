@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests Download Package Slice works.
  * @since 0.6
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
 public class DownloadPackageSliceTest {

@@ -45,7 +45,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-jdk-21-maven-
       - name: Build it with Maven
-        run: mvn -B install -Pqulice
+        run: mvn -B install
   xcop-lint:
     runs-on: ubuntu-latest
     steps:

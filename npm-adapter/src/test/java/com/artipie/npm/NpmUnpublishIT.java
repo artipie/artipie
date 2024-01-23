@@ -31,7 +31,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * IT for `npm unpublish` command.
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @DisabledOnOs(OS.WINDOWS)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

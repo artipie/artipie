@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
  * Test resource.
  * @since 0.24
  */
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public final class TestResource {
 
     /**
@@ -111,8 +112,7 @@ public final class TestResource {
     /**
      * Recourse as bytes.
      * @return Bytes
-     * @checkstyle MagicNumberCheck (10 lines)
-     */
+         */
     @SuppressWarnings("PMD.AssignmentInOperand")
     public byte[] asBytes() {
         try (InputStream stream = this.asInputStream()) {

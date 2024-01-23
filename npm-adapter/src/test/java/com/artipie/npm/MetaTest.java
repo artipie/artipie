@@ -27,7 +27,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
  * Tests for {@link Meta}.
  *
  * @since 0.4.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class MetaTest {

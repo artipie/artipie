@@ -35,8 +35,6 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 /**
  * Conda adapter integration test.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle LineLengthCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class CondaSliceS3ITCase {

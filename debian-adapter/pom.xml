@@ -38,6 +38,7 @@ SOFTWARE.
   <properties>
     <org.bouncycastle.version>1.70</org.bouncycastle.version>
     <jmh.version>1.29</jmh.version>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
   </properties>
   <dependencies>
     <dependency>

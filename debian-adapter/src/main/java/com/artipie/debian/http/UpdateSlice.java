@@ -42,7 +42,6 @@ import org.reactivestreams.Publisher;
 /**
  * Debian update slice adds uploaded slice to the storage and updates Packages index.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class UpdateSlice implements Slice {
 
@@ -169,8 +168,7 @@ public final class UpdateSlice implements Slice {
      * @param archs Supported architectures
      * @param hdrs Request headers
      * @return Completion action
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     private CompletionStage<Void> logEvents(
         final Key artifact, final String control, final List<String> archs, final Headers hdrs
     ) {

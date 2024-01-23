@@ -43,7 +43,6 @@ import org.junit.jupiter.params.provider.MethodSource;
  * Tests for {@link ErrorHandlingSlice}.
  *
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ErrorHandlingSliceTest {

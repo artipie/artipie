@@ -29,9 +29,7 @@ final class NugetITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
-     */
+             */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
@@ -88,7 +86,6 @@ final class NugetITCase {
                 new IsEqual<>(0),
                 new StringContainsInOrder(
                     Arrays.asList(
-                        // @checkstyle LineLengthCheck (1 line)
                         "PackageReference for package 'newtonsoft.json' version '12.0.3' added to file '/w/TestProj/TestProj.csproj'",
                         "Restored /w/TestProj/TestProj.csproj"
                     )

@@ -19,7 +19,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 /**
  * Test for {@link CondaRepodata.Remove}.
  * @since 0.1
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class CondaRepodataAppendTest {

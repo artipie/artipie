@@ -14,7 +14,6 @@ import org.junit.Test;
 /**
  * Tests Script.StandardScript and Script.PrecompiledScript.
  * @since 0.1
- * @checkstyle MagicNumberCheck (200 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class ScriptingTest {

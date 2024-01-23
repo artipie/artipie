@@ -15,7 +15,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test cases for {@link NextSafeAvailablePort}.
  * @since 0.9
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.ProhibitPlainJunitAssertionsRule")
 final class NextSafeAvailablePortTest {

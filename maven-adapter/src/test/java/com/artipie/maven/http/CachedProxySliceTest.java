@@ -32,7 +32,6 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Test case for {@link CachedProxySlice}.
  *
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CachedProxySliceTest {

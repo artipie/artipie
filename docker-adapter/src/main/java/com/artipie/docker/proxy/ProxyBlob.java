@@ -54,8 +54,7 @@ public final class ProxyBlob implements Blob {
      * @param name Repository name.
      * @param dig Blob digest.
      * @param size Blob size.
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     public ProxyBlob(
         final Slice remote,
         final RepoName name,

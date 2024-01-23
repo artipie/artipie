@@ -28,7 +28,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Integration case for {@link Goproxy}.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @Testcontainers

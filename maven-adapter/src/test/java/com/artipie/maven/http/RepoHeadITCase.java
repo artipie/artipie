@@ -36,7 +36,6 @@ import org.reactivestreams.Publisher;
 /**
  * Test for {@link RepoHead}.
  * @since 0.6
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RepoHeadITCase {

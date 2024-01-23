@@ -25,7 +25,6 @@ import org.reactivestreams.Publisher;
 /**
  * Slice to handle `GET /user` request.
  * @since 0.4
- * @checkstyle ReturnCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class GetUserSlice implements Slice {

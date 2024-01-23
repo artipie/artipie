@@ -28,8 +28,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link RepoData}.
  * @since 0.1
- * @checkstyle TrailingCommentCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class RepoDataTest {
@@ -41,8 +39,7 @@ class RepoDataTest {
 
     /**
      * Maximum awaiting time duration.
-     * @checkstyle MagicNumberCheck (10 lines)
-     */
+         */
     private static final long MAX_WAIT = Duration.ofMinutes(1).toMillis();
 
     /**
@@ -52,8 +49,7 @@ class RepoDataTest {
 
     /**
      * Temp dir.
-     * @checkstyle VisibilityModifierCheck (500 lines)
-     */
+         */
     @TempDir
     Path temp;
 
@@ -213,8 +209,7 @@ class RepoDataTest {
      * Allows to wait result of action during period of time.
      * @param action Action
      * @return Result of action
-     * @checkstyle MagicNumberCheck (15 lines)
-     */
+         */
     private Boolean waitCondition(final Supplier<Boolean> action) {
         final long max = System.currentTimeMillis() + RepoDataTest.MAX_WAIT;
         boolean res;

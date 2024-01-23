@@ -28,7 +28,7 @@ public interface StorageFactory {
      * @param cfg Storage configuration.
      * @return Storage
      */
-    default Storage newStorage(YamlMapping cfg) {
+    default Storage newStorage(final YamlMapping cfg) {
         return this.newStorage(
             new Config.YamlStorageConfig(cfg)
         );

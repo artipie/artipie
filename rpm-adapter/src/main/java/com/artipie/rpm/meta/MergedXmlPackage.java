@@ -24,8 +24,6 @@ import javax.xml.stream.events.XMLEvent;
  * Merged xml: reads provided index (filelist of others xml), excludes items by
  * provided checksums, adds items by provided file paths and updates `packages` attribute value.
  * @since 1.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle NestedTryDepthCheck (500 lines)
  */
 public final class MergedXmlPackage implements MergedXml {
 
@@ -55,8 +53,7 @@ public final class MergedXmlPackage implements MergedXml {
      * @param out Output stream
      * @param type Xml package type
      * @param res Result of the primary.xml merging
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     public MergedXmlPackage(final Optional<InputStream> input, final OutputStream out,
         final XmlPackage type, final MergedXml.Result res) {
         this.input = input;
@@ -71,8 +68,7 @@ public final class MergedXmlPackage implements MergedXml {
      * @param out Output stream
      * @param type Xml package type
      * @param res Result of the primary.xml merging
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     public MergedXmlPackage(final InputStream input, final OutputStream out,
         final XmlPackage type, final MergedXml.Result res) {
         this(Optional.of(input), out, type, res);
@@ -144,9 +140,7 @@ public final class MergedXmlPackage implements MergedXml {
      * @param reader Reader
      * @param writer Writes
      * @throws XMLStreamException When error occurs
-     * @checkstyle ParameterNumberCheck (5 lines)
-     * @checkstyle CyclomaticComplexityCheck (20 lines)
-     */
+             */
     private void process(final Collection<String> ids, final XMLEventReader reader,
         final XMLEventWriter writer) throws XMLStreamException {
         boolean valid = true;

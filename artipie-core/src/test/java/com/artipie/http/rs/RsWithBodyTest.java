@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link RsWithBody}.
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 final class RsWithBodyTest {
 

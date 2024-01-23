@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
  *    |  maven-metadata.xml.md5
  * </pre>
  * @since 0.5
- * @checkstyle MagicNumberCheck (500 lines)
  */
 public final class AstoValidUpload implements ValidUpload {
 

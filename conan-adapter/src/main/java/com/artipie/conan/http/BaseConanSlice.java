@@ -36,7 +36,6 @@ import org.reactivestreams.Publisher;
 /**
  * Base slice class for Conan REST APIs.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 abstract class BaseConanSlice implements Slice {
 
@@ -156,8 +155,7 @@ abstract class BaseConanSlice implements Slice {
      * @param ctor Constructs resulting json string.
      * @param <T> Generators result type.
      * @return Json RequestResult in CompletableFuture.
-     * @checkstyle ParameterNumberCheck (40 lines)
-     */
+         */
     protected static <T> CompletableFuture<RequestResult> generateJson(
         final String[] keys,
         final Function<String, Tuple2<Key, CompletableFuture<T>>> mapper,
@@ -228,7 +226,7 @@ abstract class BaseConanSlice implements Slice {
          * @return Respose data as array of bytes.
          */
         public byte[] getData() {
-            return this.data;
+            return this.data.clone();
         }
 
         /**

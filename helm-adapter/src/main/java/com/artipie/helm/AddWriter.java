@@ -38,12 +38,8 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * Add writer of info about charts to index file.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle CyclomaticComplexityCheck (500 lines)
- * @checkstyle ExecutableStatementCountCheck (500 lines)
- * @checkstyle NPathComplexityCheck (500 lines)
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.NPathComplexity"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.NPathComplexity", "PMD.CognitiveComplexity"})
 interface AddWriter {
     /**
      * Add info about charts to index. If index contains a chart with the same
@@ -99,9 +95,6 @@ interface AddWriter {
             this.storage = storage;
         }
 
-        // @checkstyle NoJavadocForOverriddenMethodsCheck (15 lines)
-        // @checkstyle JavadocParameterOrderCheck (15 lines)
-        // @checkstyle MethodBodyCommentsCheck (120 lines)
         /**
          * It has the next implementation.
          * Read index file line by line. If we are in the `entries:` section, we will check
@@ -351,7 +344,6 @@ interface AddWriter {
                     writer.writeLine("-", 2);
                     final String str = new IndexYamlMapping(pair.getRight().fields()).toString();
                     for (final String entry : str.split("[\\n\\r]+")) {
-                        // @checkstyle MagicNumberCheck (1 line)
                         writer.writeLine(entry, 3);
                     }
                 }
@@ -379,7 +371,6 @@ interface AddWriter {
                             yaml = new IndexYamlMapping(pair.getRight().fields()).toString();
                             final String[] lines = yaml.split("[\\n\\r]+");
                             for (final String line : lines) {
-                                // @checkstyle MagicNumberCheck (1 line)
                                 writer.writeLine(line, 3);
                             }
                         }

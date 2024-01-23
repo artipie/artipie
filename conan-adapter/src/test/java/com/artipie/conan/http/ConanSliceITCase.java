@@ -31,8 +31,6 @@ import org.testcontainers.images.builder.Transferable;
 /**
  * Tests for {@link ConanSlice}.
  * Test container and data for package base of Ubuntu 20.04 LTS x86_64.
- * @checkstyle LineLengthCheck (999 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (999 lines)
  * @since 0.1
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
@@ -462,8 +460,7 @@ class ConanSliceITCase {
     /**
      * Starts VertxSliceServer and docker container.
      * @throws Exception On error
-     * @checkstyle ParameterNumberCheck (10 lines)
-     */
+         */
     private void start() throws Exception {
         this.storage = new InMemoryStorage();
         this.server = new VertxSliceServer(

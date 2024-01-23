@@ -47,8 +47,7 @@ public final class TagsPage implements Tags {
      * @param tags Tags.
      * @param from From which tag to start, exclusive.
      * @param limit Maximum number of tags returned.
-     * @checkstyle ParameterNumberCheck (2 lines)
-     */
+         */
     public TagsPage(
         final RepoName repo,
         final Collection<Tag> tags,

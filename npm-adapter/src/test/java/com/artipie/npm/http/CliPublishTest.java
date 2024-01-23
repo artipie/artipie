@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link CliPublish}.
  * @since 0.9
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CliPublishTest {

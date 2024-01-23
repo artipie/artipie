@@ -30,9 +30,7 @@ final class FileProxyAuthIT {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (20 lines)
-     */
+             */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         Map.ofEntries(

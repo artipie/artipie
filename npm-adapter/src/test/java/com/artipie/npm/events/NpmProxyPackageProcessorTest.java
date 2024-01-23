@@ -26,7 +26,6 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 /**
  * Test for {@link NpmProxyPackageProcessor}.
  * @since 1.5
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class NpmProxyPackageProcessorTest {

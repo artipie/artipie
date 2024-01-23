@@ -40,8 +40,6 @@ import org.quartz.SchedulerException;
  * Settings built from YAML.
  *
  * @since 0.1
- * @checkstyle ReturnCountCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class YamlSettings implements Settings {

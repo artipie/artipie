@@ -20,8 +20,7 @@ interface BlobListFormat {
     /**
      * Stamdard format implementations.
      * @since 1.0
-     * @checkstyle IndentationCheck (30 lines)
-     */
+         */
     enum Standard implements BlobListFormat {
 
         /**

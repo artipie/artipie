@@ -13,7 +13,6 @@ import java.util.function.Function;
  * @param <T> Function type
  * @param <R> Function return type
  * @since 1.1
- * @checkstyle AbbreviationAsWordInNameCheck (200 lines)
  */
 public final class UncheckedIOFunc<T, R> implements Function<T, R> {
 

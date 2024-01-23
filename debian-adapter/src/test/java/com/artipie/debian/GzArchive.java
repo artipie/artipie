@@ -16,7 +16,6 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 /**
  * Class to work with gz: pack and unpack bytes.
  * @since 0.4
- * @checkstyle NonStaticMethodCheck (500 lines)
  */
 public final class GzArchive {
 
@@ -40,8 +39,7 @@ public final class GzArchive {
      * Decompresses provided gz packed data.
      * @param data Bytes to unpack
      * @return Unpacked data in string format
-     * @checkstyle MagicNumberCheck (15 lines)
-     */
+         */
     @SuppressWarnings("PMD.AssignmentInOperand")
     public String decompress(final byte[] data) {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();

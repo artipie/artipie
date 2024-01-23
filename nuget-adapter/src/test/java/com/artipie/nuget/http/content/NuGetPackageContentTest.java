@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
  * Package Content resource.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 class NuGetPackageContentTest {

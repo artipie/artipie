@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link PutMetadataSlice}.
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class PutMetadataSliceTest {

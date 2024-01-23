@@ -25,7 +25,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 /**
  * Debian repository.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public interface Debian {
 

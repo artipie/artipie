@@ -48,7 +48,6 @@ import org.reactivestreams.Publisher;
  *  with injected `Cache` and client `Slice` instances and verifies that target slice
  *  doesn't invalidate the cache if checksums headers matches and invalidates cache if
  *  checksums doesn't match.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class CachedProxySlice implements Slice {
 
@@ -94,8 +93,7 @@ final class CachedProxySlice implements Slice {
      * @param cache Cache
      * @param events Artifact events
      * @param rname Repository name
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     CachedProxySlice(final Slice client, final Cache cache,
         final Optional<Queue<ProxyArtifactEvent>> events, final String rname) {
         this.client = client;

@@ -47,9 +47,6 @@ import org.reactivestreams.Publisher;
 /**
  * Integration tests for multipart feature.
  * @since 1.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 line)
- * @checkstyle MagicNumberCheck (500 line)
  */
 final class MultipartITCase {
 
@@ -259,8 +256,7 @@ final class MultipartITCase {
     /**
      * Container for slice with dynamic deployment.
      * @since 1.2
-     * @checkstyle ReturnCountCheck (100 lines)
-     */
+         */
     private static final class SliceContainer implements Slice {
 
         /**

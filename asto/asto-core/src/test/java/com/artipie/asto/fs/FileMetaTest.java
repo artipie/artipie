@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test case for {@link FileMeta}.
  * @since 1.9
- * @checkstyle AnonInnerLengthCheck (500 lines)
  */
 final class FileMetaTest {
 

@@ -22,8 +22,6 @@ import org.quartz.SchedulerException;
 /**
  * Test for {@link QuartzService}.
  * @since 1.3
- * @checkstyle IllegalTokenCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 public final class QuartzServiceTest {
 

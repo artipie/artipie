@@ -11,7 +11,6 @@ import java.util.TreeMap;
 /**
  * Classloader of dynamically compiled classes.
  * @since 0.28
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public final class CodeClassLoader extends ClassLoader {
@@ -38,8 +37,7 @@ public final class CodeClassLoader extends ClassLoader {
     /**
      * Adds code blobs.
      * @param blobs Code blobs.
-     * @checkstyle HiddenFieldCheck (5 lines)
-     */
+         */
     public void addBlobs(final CodeBlob... blobs) {
         this.addBlobs(List.of(blobs));
     }
@@ -47,8 +45,7 @@ public final class CodeClassLoader extends ClassLoader {
     /**
      * Adds code blobs.
      * @param blobs Code blobs.
-     * @checkstyle HiddenFieldCheck (5 lines)
-     */
+         */
     public void addBlobs(final List<CodeBlob> blobs) {
         blobs.forEach(blob -> this.blobs.put(blob.classname(), blob));
     }

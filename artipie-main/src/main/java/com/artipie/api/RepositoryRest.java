@@ -25,7 +25,6 @@ import org.eclipse.jetty.http.HttpStatus;
 /**
  * Rest-api operations for repositories settings CRUD
  * (create/read/update/delete) operations.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.26
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
@@ -75,8 +74,7 @@ public final class RepositoryRest extends BaseRest {
      * @param data Repository data management
      * @param policy Artipie policy
      * @param events Artifact events queue
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     public RepositoryRest(
         final FiltersCache cache, final CrudRepoSettings crs, final RepoData data,
         final Policy<?> policy, final Optional<MetadataEventQueues> events
@@ -209,7 +207,6 @@ public final class RepositoryRest extends BaseRest {
                 context.user().principal().getString(AuthTokenRest.CONTEXT)
             )
         );
-        // @checkstyle BooleanExpressionComplexityCheck (5 lines)
         if ((exists && perms.implies(RepositoryRest.UPDATE)
             || !exists && perms.implies(RepositoryRest.CREATE)) && validator.validate(context)) {
             final JsonObject json = BaseRest.readJsonObject(context);

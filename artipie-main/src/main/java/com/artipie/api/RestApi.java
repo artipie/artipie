@@ -28,9 +28,6 @@ import java.util.Optional;
 /**
  * Vert.x {@link io.vertx.core.Verticle} for exposing Rest API operations.
  * @since 0.26
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MemberNameCheck (500 lines)
- * @checkstyle ParameterNameCheck (500 lines)
  */
 public final class RestApi extends AbstractVerticle {
 
@@ -83,8 +80,7 @@ public final class RestApi extends AbstractVerticle {
      * @param keystore KeyStore
      * @param jwt Jwt authentication provider
      * @param events Artifact metadata events queue
-     * @checkstyle ParameterNumberCheck (10 lines)
-     */
+         */
     public RestApi(
         final ArtipieCaches caches,
         final Storage configsStorage,
@@ -108,8 +104,7 @@ public final class RestApi extends AbstractVerticle {
      * @param settings Artipie settings
      * @param port Port to start verticle on
      * @param jwt Jwt authentication provider
-     * @checkstyle ParameterNumberCheck (5 lines)
-     */
+         */
     public RestApi(final Settings settings, final int port, final JWTAuth jwt) {
         this(
             settings.caches(), settings.configStorage(),
@@ -140,10 +135,7 @@ public final class RestApi extends AbstractVerticle {
      * @param tokenRb Token RouterBuilder
      * @param settingsRb Settings RouterBuilder
      * @param rolesRb Roles RouterBuilder
-     * @checkstyle ParameterNameCheck (4 lines)
-     * @checkstyle ParameterNumberCheck (3 lines)
-     * @checkstyle ExecutableStatementCountCheck (30 lines)
-     */
+                 */
     private void startServices(final RouterBuilder repoRb, final RouterBuilder userRb,
         final RouterBuilder tokenRb, final RouterBuilder settingsRb, final RouterBuilder rolesRb) {
         this.addJwtAuth(tokenRb, repoRb, userRb, settingsRb, rolesRb);

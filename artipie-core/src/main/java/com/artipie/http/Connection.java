@@ -35,9 +35,9 @@ public interface Connection {
      */
     @Deprecated
     default CompletionStage<Void> accept(
-        RsStatus status,
-        Iterable<Map.Entry<String, String>> headers,
-        Publisher<ByteBuffer> body
+        final RsStatus status,
+        final Iterable<Map.Entry<String, String>> headers,
+        final Publisher<ByteBuffer> body
     ) {
         return this.accept(status, new Headers.From(headers), body);
     }

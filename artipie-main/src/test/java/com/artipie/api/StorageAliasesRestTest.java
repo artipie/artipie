@@ -240,7 +240,6 @@ public final class StorageAliasesRestTest extends RestApiServerBase {
     }
 
     private String jsonAliases() {
-        // @checkstyle LineLengthCheck (1 line)
         return "[{\"alias\":\"default\",\"storage\":{\"type\":\"fs\",\"path\":\"/var/artipie/repo/data\"}},{\"alias\":\"redis-sto\",\"storage\":{\"type\":\"redis\",\"config\":\"some\"}}]";
     }
 }

@@ -27,8 +27,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link GzipSlice}.
  * @since 1.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class GzipSliceTest {

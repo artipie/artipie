@@ -34,9 +34,6 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
  * Gpg signature, ain functionality of this class was copy-pasted from
  * https://github.com/bcgit/bc-java/blob/master/pg/src/main/java/org/bouncycastle/openpgp/examples/ClearSignedFileProcessor.java.
  * @since 0.4
- * @checkstyle ExecutableStatementCountCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle InnerAssignmentCheck (500 lines)
  */
 @SuppressWarnings(
     {"PMD.AvoidDuplicateLiterals", "PMD.AssignmentInOperand", "PMD.ArrayIsStoredDirectly"}
@@ -88,8 +85,9 @@ public final class GpgClearsign {
                     while (ahead != -1);
                 }
                 armored.endClearText();
-                final BCPGOutputStream bout = new BCPGOutputStream(armored);
-                sgen.generate().encode(bout);
+                try (BCPGOutputStream bout = new BCPGOutputStream(armored)) {
+                    sgen.generate().encode(bout);
+                }
                 armored.close();
                 return out.toByteArray();
             }
@@ -125,8 +123,9 @@ public final class GpgClearsign {
                 while ((sym = input.read()) >= 0) {
                     sgen.update((byte) sym);
                 }
-                final BCPGOutputStream res = new BCPGOutputStream(armored);
-                sgen.generate().encode(res);
+                try (BCPGOutputStream res = new BCPGOutputStream(armored)) {
+                    sgen.generate().encode(res);
+                }
                 armored.close();
                 return out.toByteArray();
             }

@@ -30,7 +30,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 /**
  * Test for {@link RolesRest}.
  * @since 0.27
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class RolesRestTest extends RestApiServerBase {
@@ -38,8 +37,7 @@ final class RolesRestTest extends RestApiServerBase {
     /**
      * Artipie authentication.
      * @return Authentication instance.
-     * @checkstyle AnonInnerLengthCheck (30 lines)
-     */
+         */
     ArtipieSecurity auth() {
         return new ArtipieSecurity() {
             @Override
@@ -58,7 +56,6 @@ final class RolesRestTest extends RestApiServerBase {
                         "  all_permission: {}"
                     ).getBytes(StandardCharsets.UTF_8)
                 );
-                // @checkstyle MagicNumberCheck (1 line)
                 return new CachedYamlPolicy(asto, 60_000L);
             }
 
@@ -97,7 +94,6 @@ final class RolesRestTest extends RestApiServerBase {
             new UncheckedConsumer<>(
                 response -> JSONAssert.assertEquals(
                     response.body().toString(),
-                    // @checkstyle LineLengthCheck (1 line)
                     "[{\"name\":\"java-dev\",\"permissions\":{\"adapter_basic_permissions\":{\"maven\":[\"write\",\"read\"]}}},{\"name\":\"readers\",\"permissions\":{\"adapter_basic_permissions\":{\"*\":[\"read\"]}}}]",
                     false
                 )
@@ -123,7 +119,6 @@ final class RolesRestTest extends RestApiServerBase {
             new UncheckedConsumer<>(
                 response -> JSONAssert.assertEquals(
                     response.body().toString(),
-                    // @checkstyle LineLengthCheck (1 line)
                     "{\"name\":\"java-dev\",\"permissions\":{\"adapter_basic_permissions\":{\"maven\":[\"write\",\"read\"]}}}",
                     false
                 )

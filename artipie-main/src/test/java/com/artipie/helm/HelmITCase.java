@@ -18,8 +18,6 @@ import org.testcontainers.containers.BindMode;
 
 /**
  * Integration tests for Helm repository.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  * @todo #607:60min Verify install using kubectl in docker.
  *  Now test just check that `index.yaml` was created. It would
  *  be better to verify install within `helm install`. For this,
@@ -37,8 +35,7 @@ final class HelmITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     */
+         */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

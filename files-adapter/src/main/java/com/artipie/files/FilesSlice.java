@@ -45,7 +45,6 @@ import java.util.regex.Pattern;
  *  We previously introduced {@link BlobListJsonFormat}
  *  to list blobs in JSON from a prefix. We should now test that the type
  *  and value of response's content are correct when we make a request.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.ExcessiveMethodLength")
 public final class FilesSlice extends Slice.Wrap {
@@ -96,8 +95,7 @@ public final class FilesSlice extends Slice.Wrap {
      * @param auth Auth details.
      * @param name Repository name
      * @param events Repository artifact events
-     * @checkstyle ParameterNumberCheck (10 lines)
-     */
+         */
     public FilesSlice(
         final Storage storage, final Policy<?> perms, final Authentication auth, final String name,
         final Optional<Queue<ArtifactEvent>> events
@@ -219,13 +217,14 @@ public final class FilesSlice extends Slice.Wrap {
      */
     public static void main(final String... args) {
         final int port = 8080;
-        final VertxSliceServer server = new VertxSliceServer(
-            new FilesSlice(
-                new InMemoryStorage(), Policy.FREE, Authentication.ANONYMOUS,
-                FilesSlice.ANY_REPO, Optional.empty()
-            ),
-            port
-        );
-        server.start();
+        try (
+            VertxSliceServer server = new VertxSliceServer(
+                new FilesSlice(
+                    new InMemoryStorage(), Policy.FREE, Authentication.ANONYMOUS,
+                    FilesSlice.ANY_REPO, Optional.empty()), port
+            )
+        ) {
+            server.start();
+        }
     }
 }

@@ -25,8 +25,6 @@ import org.reactivestreams.Publisher;
 /**
  * HTTP slice for download package requests.
  * @since 0.1
- * @checkstyle ReturnCountCheck (200 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (200 lines)
  */
 public final class DownloadPackageSlice implements Slice {
     /**
@@ -82,7 +80,7 @@ public final class DownloadPackageSlice implements Slice {
     private String clientFormat(final String data,
         final Iterable<Map.Entry<String, String>> headers) {
         final String host = StreamSupport.stream(headers.spliterator(), false)
-            .filter(e -> e.getKey().equalsIgnoreCase("Host"))
+            .filter(e -> "Host".equalsIgnoreCase(e.getKey()))
             .findAny().orElseThrow(
                 () -> new RuntimeException("Could not find Host header in request")
             ).getValue();

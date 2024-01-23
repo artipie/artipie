@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
  * Upload DElETE endpoint.
  *
  * @since 0.16
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class UploadEntityDeleteTest {

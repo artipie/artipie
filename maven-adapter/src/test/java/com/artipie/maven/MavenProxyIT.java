@@ -38,7 +38,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Integration test for {@link com.artipie.maven.http.MavenProxySlice}.
  *
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.11
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -52,8 +51,7 @@ final class MavenProxyIT {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
-     */
+         */
     @TempDir
     Path tmp;
 

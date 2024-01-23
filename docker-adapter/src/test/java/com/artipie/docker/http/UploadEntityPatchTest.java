@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
  * Upload PATCH endpoint.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UploadEntityPatchTest {

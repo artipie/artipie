@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * Test for {@link ValidFilename}.
  * @since 0.6
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 class ValidFilenameTest {
 

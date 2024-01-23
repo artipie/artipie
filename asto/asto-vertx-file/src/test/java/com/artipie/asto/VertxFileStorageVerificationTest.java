@@ -15,7 +15,6 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Vertx file storage verification test.
  *
- * @checkstyle ProtectedMethodInFinalClassCheck (500 lines)
  * @since 0.1
  */
 @SuppressWarnings("PMD.TestClassWithoutTestCases")

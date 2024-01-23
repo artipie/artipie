@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link ScriptContext}.
  * @since 0.30
- * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 class ScriptContextTest {
 

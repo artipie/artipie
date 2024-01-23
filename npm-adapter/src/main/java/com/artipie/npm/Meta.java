@@ -19,7 +19,6 @@ import javax.json.JsonValue;
  * The meta.json file.
  *
  * @since 0.1
- * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class Meta {
@@ -63,7 +62,7 @@ final class Meta {
             : uploaded.getJsonObject("dist-tags").entrySet()
         ) {
             patch.add(String.format("/dist-tags/%s", tag.getKey()), tag.getValue());
-            if (tag.getKey().equals(Meta.LATEST)) {
+            if (Meta.LATEST.equals(tag.getKey())) {
                 haslatest = true;
             }
         }

@@ -32,7 +32,6 @@ import org.redisson.api.RMapAsync;
  * Redis implementation of Storage.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class RedisStorage implements Storage {
     /**

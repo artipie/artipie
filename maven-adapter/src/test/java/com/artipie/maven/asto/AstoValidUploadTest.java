@@ -22,7 +22,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * Test for {@link AstoValidUpload}.
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class AstoValidUploadTest {

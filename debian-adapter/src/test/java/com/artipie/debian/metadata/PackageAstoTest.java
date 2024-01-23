@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link Package.Asto}.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.AssignmentInOperand"})
 class PackageAstoTest {

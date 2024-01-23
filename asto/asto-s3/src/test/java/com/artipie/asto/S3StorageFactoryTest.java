@@ -23,8 +23,7 @@ public final class S3StorageFactoryTest {
     /**
      * Test for S3 storage factory.
      *
-     * @checkstyle MethodNameCheck (3 lines)
-     */
+         */
     @Test
     void shouldCreateS3StorageConfigHasCredentials() {
         MatcherAssert.assertThat(
@@ -54,8 +53,7 @@ public final class S3StorageFactoryTest {
     /**
      * Test for S3 storage factory.
      *
-     * @checkstyle MethodNameCheck (3 lines)
-     */
+         */
     @Test
     void shouldCreateS3StorageConfigDoesNotHaveCredentials() {
         MatcherAssert.assertThat(

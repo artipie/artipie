@@ -124,8 +124,7 @@ public final class TrimPathSlice implements Slice {
      * Normalize path: remove whitespaces and slash chars.
      * @param path Path
      * @return Normalized path
-     * @checkstyle ReturnCountCheck (10 lines)
-     */
+         */
     @SuppressWarnings("PMD.OnlyOneReturn")
     private static String normalized(final String path) {
         final String clear = Objects.requireNonNull(path).trim();
@@ -145,8 +144,7 @@ public final class TrimPathSlice implements Slice {
      * Convert matched string to valid path.
      * @param result Result of matching
      * @return Path string
-     * @checkstyle ReturnCountCheck (15 lines)
-     */
+         */
     @SuppressWarnings("PMD.OnlyOneReturn")
     private static String asPath(final String result) {
         if (result == null || result.isEmpty()) {

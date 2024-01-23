@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link DeleteTokenSlice}.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DeleteTokenSliceTest {

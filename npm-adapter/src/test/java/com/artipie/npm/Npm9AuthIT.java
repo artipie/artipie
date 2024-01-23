@@ -43,7 +43,6 @@ import org.testcontainers.containers.GenericContainer;
  * Make sure the library is compatible with npm 9 cli tools and auth.
  *
  * @since 0.11
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)

@@ -32,7 +32,6 @@ import org.reactivestreams.Publisher;
  *  We should test that this slice return expected metadata (`X-Artipie-MD5`,
  *  `X-Artipie-Size` and `X-Artipie-CreatedAt`) when an user specify URL parameter
  *  `meta` to true. We should also check that nothing is return in the opposite case.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class FileMetaSlice implements Slice {
 

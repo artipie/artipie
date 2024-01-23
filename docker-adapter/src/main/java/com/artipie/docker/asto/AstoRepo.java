@@ -16,7 +16,6 @@ import com.artipie.docker.Uploads;
  * Asto implementation of {@link Repo}.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class AstoRepo implements Repo {
 

@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 /**
  * Simple storage, in files.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class VertxFileStorage implements Storage {

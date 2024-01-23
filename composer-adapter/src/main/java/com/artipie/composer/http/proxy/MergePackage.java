@@ -138,8 +138,7 @@ public interface MergePackage {
          * @param lcl Local index file
          * @param rmt Remote index file
          * @return Merged JSON.
-         * @checkstyle NestedIfDepthCheck (40 lines)
-         */
+                 */
         private JsonObject jsonWithMergedContent(
             final JsonObject lcl, final Optional<JsonObject> rmt
         ) {

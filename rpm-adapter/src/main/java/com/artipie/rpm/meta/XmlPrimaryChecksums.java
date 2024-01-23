@@ -67,7 +67,7 @@ public final class XmlPrimaryChecksums {
                     checksum = event.asCharacters().getData();
                 }
                 if (event.isEndElement()
-                    && event.asEndElement().getName().getLocalPart().equals("package")) {
+                    && "package".equals(event.asEndElement().getName().getLocalPart())) {
                     res.put(name, checksum);
                 }
             }
