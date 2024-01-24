@@ -26,8 +26,6 @@ final class FileITCase {
 
     /**
      * Deployment for tests.
-     * @checkstyle VisibilityModifierCheck (5 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(

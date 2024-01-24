@@ -16,7 +16,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 /**
  * Test for {@link SearchResults}.
  * @since 1.2
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class SearchResultsTest {

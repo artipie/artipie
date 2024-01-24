@@ -24,7 +24,6 @@ import org.reactivestreams.Publisher;
 /**
  * Main HTTP slice NPM Proxy adapter.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (100 lines)
  */
 public final class NpmProxySlice implements Slice {
     /**

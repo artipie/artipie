@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link HeadSlice}.
  *
  * @since 0.26.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class HeadSliceTest {
 
@@ -47,7 +46,6 @@ final class HeadSliceTest {
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
                     new RsHasHeaders(
-                        // @checkstyle MagicNumberCheck (1 line)
                         new ContentLength(8),
                         new ContentDisposition("attachment; filename=\"foo\"")
                     ),

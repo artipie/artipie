@@ -35,7 +35,7 @@ SOFTWARE.
   <packaging>jar</packaging>
   <properties>
     <jmh.version>1.29</jmh.version>
-    <qulice.license>${project.basedir}/../../LICENSE.header</qulice.license>
+    <header.license>${project.basedir}/../../LICENSE.header</header.license>
   </properties>
   <dependencies>
     <dependency>

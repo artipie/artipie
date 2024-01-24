@@ -32,7 +32,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test cases for {@link DownloadPackageSlice}.
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @todo #239:30min Fix download meta for empty prefix.
  *  Test for downloading meta hangs for some reason when empty prefix
  *  is passed. It is necessary to find out why it happens and add

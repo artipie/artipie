@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link Property}.
  * @since 0.23
- * @checkstyle MagicNumberCheck (500 lines)
  */
 final class PropertyTest {
     @Test

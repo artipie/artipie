@@ -44,7 +44,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Test for {@link DebianSlice} with GPG-signature.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
@@ -57,7 +56,6 @@ public final class DebianGpgSliceITCase {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
      */
     @TempDir
     Path tmp;

@@ -21,7 +21,6 @@ import org.testcontainers.containers.Container;
 
 /**
  * Integration tests for Npm repository with npm client version 9 and token auth.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.12
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -34,8 +33,6 @@ final class Npm9AuthITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(

@@ -15,7 +15,6 @@ import java.util.concurrent.CompletionStage;
  * Basic authentication method.
  *
  * @since 0.17
- * @checkstyle ReturnCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class BasicAuthScheme implements AuthScheme {
@@ -64,7 +63,7 @@ public final class BasicAuthScheme implements AuthScheme {
      */
     private Optional<AuthUser> user(final String header) {
         final Authorization atz = new Authorization(header);
-        if (atz.scheme().equals(BasicAuthScheme.NAME)) {
+        if (BasicAuthScheme.NAME.equals(atz.scheme())) {
             final Authorization.Basic basic = new Authorization.Basic(atz.credentials());
             return this.auth.user(basic.username(), basic.password());
         }

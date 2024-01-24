@@ -57,7 +57,6 @@ final class SliceByPath implements Slice {
         this.tokens = tokens;
     }
 
-    // @checkstyle ReturnCountCheck (20 lines)
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,

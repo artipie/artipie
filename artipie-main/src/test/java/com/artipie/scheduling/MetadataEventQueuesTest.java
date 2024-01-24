@@ -27,8 +27,6 @@ import org.quartz.impl.matchers.GroupMatcher;
 /**
  * Test for {@link MetadataEventQueues}.
  * @since 0.31
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class MetadataEventQueuesTest {

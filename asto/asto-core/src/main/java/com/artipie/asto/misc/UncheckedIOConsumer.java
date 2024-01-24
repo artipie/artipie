@@ -12,7 +12,6 @@ import java.util.function.Consumer;
  * Unchecked IO {@link Consumer}.
  * @param <T> Consumer type
  * @since 1.1
- * @checkstyle AbbreviationAsWordInNameCheck (200 lines)
  */
 public final class UncheckedIOConsumer<T> implements Consumer<T> {
 

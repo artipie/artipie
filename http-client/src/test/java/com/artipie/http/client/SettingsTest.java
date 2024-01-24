@@ -16,8 +16,6 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Tests for {@link SettingsTest}.
  *
  * @since 0.1
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 final class SettingsTest {

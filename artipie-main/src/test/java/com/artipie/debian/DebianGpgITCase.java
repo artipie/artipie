@@ -24,7 +24,6 @@ import org.testcontainers.containers.BindMode;
 /**
  * Debian integration test.
  * @since 0.17
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -32,7 +31,6 @@ public final class DebianGpgITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(

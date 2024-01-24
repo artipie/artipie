@@ -32,7 +32,6 @@ import org.reactivestreams.Publisher;
  * UploadSlice.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class UploadSlice implements Slice {
 
@@ -68,7 +67,6 @@ public final class UploadSlice implements Slice {
      * @param storage Abstract storage
      * @param events Artifact events queue
      * @param rname Repository name
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public UploadSlice(final Publish npm, final Storage storage,
         final Optional<Queue<ArtifactEvent>> events, final String rname) {

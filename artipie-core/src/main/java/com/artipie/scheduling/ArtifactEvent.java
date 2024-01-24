@@ -63,7 +63,6 @@ public final class ArtifactEvent {
      * @param rtype Repository type
      * @param rname Repository name
      * @param aname Artifact name
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public ArtifactEvent(final String rtype, final String rname, final String aname) {
         this(rtype, rname, ArtifactEvent.DEF_OWNER, aname, "", 0L, 0L, Type.DELETE_ALL);
@@ -75,7 +74,6 @@ public final class ArtifactEvent {
      * @param rname Repository name
      * @param aname Artifact name
      * @param version Artifact version
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public ArtifactEvent(final String rtype, final String rname,
         final String aname, final String version) {
@@ -92,7 +90,6 @@ public final class ArtifactEvent {
      * @param size Artifact size
      * @param created Artifact created date
      * @param etype Event type
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public ArtifactEvent(final String rtype, final String rname, final String owner,
         final String aname, final String version, final long size,
@@ -116,7 +113,6 @@ public final class ArtifactEvent {
      * @param version Artifact version
      * @param size Artifact size
      * @param created Artifact created date
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public ArtifactEvent(final String rtype, final String rname, final String owner,
         final String aname, final String version, final long size,
@@ -132,7 +128,6 @@ public final class ArtifactEvent {
      * @param aname Artifact name
      * @param version Artifact version
      * @param size Artifact size
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public ArtifactEvent(final String rtype, final String rname, final String owner,
         final String aname, final String version, final long size) {

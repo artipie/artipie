@@ -31,6 +31,9 @@ SOFTWARE.
   </parent>
   <artifactId>conan-adapter</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <properties>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.artipie</groupId>

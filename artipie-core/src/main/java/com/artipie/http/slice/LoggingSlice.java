@@ -22,7 +22,6 @@ import org.reactivestreams.Publisher;
  * Slice that logs incoming requests and outgoing responses.
  *
  * @since 0.8
- * @checkstyle IllegalCatchCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidCatchingGenericException")
 public final class LoggingSlice implements Slice {

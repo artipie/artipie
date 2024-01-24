@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
  * Test case for {@link ArtifactGetResponse}.
  *
  * @since 0.5
- * @checkstyle JavadocMethodCheck (500 lines)
  */
 final class ArtifactHeadResponseTest {
 

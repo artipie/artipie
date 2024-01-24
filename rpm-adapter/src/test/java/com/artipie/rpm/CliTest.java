@@ -13,7 +13,6 @@ import org.junit.jupiter.api.io.TempDir;
  * Test case for {@link Cli}.
  *
  * @since 0.6
- * @checkstyle LineLengthCheck (70 lines)
  */
 final class CliTest {
     @Test

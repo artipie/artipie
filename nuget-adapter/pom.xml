@@ -35,6 +35,9 @@ SOFTWARE.
   <name>nuget-adapter</name>
   <description>Turns your files/objects into NuGet artifacts</description>
   <inceptionYear>2020</inceptionYear>
+  <properties>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.artipie</groupId>

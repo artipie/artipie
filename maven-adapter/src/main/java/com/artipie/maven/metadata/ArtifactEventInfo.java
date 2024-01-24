@@ -13,7 +13,6 @@ import java.util.Optional;
 /**
  * Helps to obtain and format info for artifact events logging.
  * @since 0.10
- * @checkstyle NonStaticMethodCheck (500 lines)
  */
 public final class ArtifactEventInfo {
 

@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Test;
  * Package publish resource.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class NuGetPackagePublishTest {

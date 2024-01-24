@@ -28,7 +28,6 @@ import org.reactivestreams.Publisher;
 /**
  * Slice that gzips requested content.
  * @since 1.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class GzipSlice implements Slice {
 
@@ -60,8 +59,8 @@ final class GzipSlice implements Slice {
      * @param body Origin response body
      * @param headers Origin response headers
      * @return Completable action
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
+    @SuppressWarnings("PMD.CloseResource")
     private static CompletionStage<Void> gzip(final Connection connection, final RsStatus stat,
         final Publisher<ByteBuffer> body, final Headers headers) {
         final CompletionStage<Void> future;
@@ -81,7 +80,6 @@ final class GzipSlice implements Slice {
                 )
             );
             try (GZIPOutputStream gzos = new GZIPOutputStream(resout)) {
-                // @checkstyle MagicNumberCheck (1 line)
                 final byte[] buffer = new byte[1024 * 8];
                 while (true) {
                     final int length = oinput.read(buffer);

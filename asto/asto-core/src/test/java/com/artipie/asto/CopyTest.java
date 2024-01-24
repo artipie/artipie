@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 /**
  * A test for {@link Copy}.
  * @since 0.19
- * @checkstyle LocalFinalVariableNameCheck (500 lines)
  */
 public class CopyTest {
 

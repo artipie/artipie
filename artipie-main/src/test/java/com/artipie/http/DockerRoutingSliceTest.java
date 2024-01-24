@@ -41,7 +41,6 @@ import org.junit.jupiter.api.Test;
  * Test case for {@link DockerRoutingSlice}.
  *
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class DockerRoutingSliceTest {

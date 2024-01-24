@@ -18,7 +18,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Redis storage verification test.
  *
- * @checkstyle ProtectedMethodInFinalClassCheck (500 lines)
  * @since 0.1
  */
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.AvoidDuplicateLiterals"})

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
  * Unit test for Goproxy class.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public class GoproxyTest {
     @Test

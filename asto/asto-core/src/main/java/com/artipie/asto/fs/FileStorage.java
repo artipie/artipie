@@ -41,7 +41,6 @@ import org.cqfn.rio.file.File;
  * Simple storage, in files.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class FileStorage implements Storage {
@@ -245,7 +244,6 @@ public final class FileStorage implements Storage {
     /**
      * Removes empty key parts (directories).
      * @param target Directory path
-     * @checkstyle NestedIfDepthCheck (20 lines)
      */
     private void deleteEmptyParts(final Path target) {
         final Path dirabs = this.dir.normalize().toAbsolutePath();

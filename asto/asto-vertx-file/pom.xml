@@ -31,7 +31,7 @@ SOFTWARE.
   <modelVersion>4.0.0</modelVersion>
   <artifactId>asto-vertx-file</artifactId>
   <properties>
-    <qulice.license>${project.basedir}/../../LICENSE.header</qulice.license>
+    <header.license>${project.basedir}/../../LICENSE.header</header.license>
   </properties>
   <dependencies>
     <dependency>

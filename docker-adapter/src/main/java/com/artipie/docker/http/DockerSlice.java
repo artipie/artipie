@@ -24,8 +24,6 @@ import java.util.Queue;
  * See <a href="https://docs.docker.com/registry/spec/api/">Docker Registry HTTP API V2</a>.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 public final class DockerSlice extends Slice.Wrap {
 
@@ -69,7 +67,6 @@ public final class DockerSlice extends Slice.Wrap {
      * @param auth Authentication scheme.
      * @param events Artifact events queue
      * @param name Repository name
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     @SuppressWarnings("PMD.ExcessiveMethodLength")
     public DockerSlice(final Docker docker, final Policy<?> policy, final AuthScheme auth,
@@ -183,7 +180,6 @@ public final class DockerSlice extends Slice.Wrap {
      * @param auth Authentication scheme.
      * @param name Repository name
      * @return Authorized slice.
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     private static Slice auth(
         final ScopeSlice origin,

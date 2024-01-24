@@ -31,11 +31,6 @@ import org.redline_rpm.header.Header;
 /**
  * Implementation of {@link XmlEvent} to build event for {@link XmlPackage#PRIMARY} package.
  *
- * @checkstyle ExecutableStatementCountCheck (500 lines)
- * @checkstyle MagicNumberCheck (20 lines)
- * @checkstyle CyclomaticComplexityCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle NPathComplexityCheck (500 lines)
  * @since 1.5
  */
 @SuppressWarnings({"PMD.LongVariable", "PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
@@ -53,7 +48,6 @@ public final class XmlEventPrimary implements XmlEvent {
 
     /**
      * Post dependency.
-     * @checkstyle MagicNumberCheck (5 lines)
      */
     private static final int RPMSENSE_SCRIPT_POST = 1 << 10;
 
@@ -208,7 +202,7 @@ public final class XmlEventPrimary implements XmlEvent {
      * @param tags Tag info
      * @throws XMLStreamException On error
      */
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.CognitiveComplexity"})
     private static void addRequires(final XMLEventWriter writer, final HeaderTags tags)
         throws XMLStreamException {
         final XMLEventFactory events = XMLEventFactory.newFactory();
@@ -255,7 +249,7 @@ public final class XmlEventPrimary implements XmlEvent {
             }
             if (!name.startsWith("rpmlib(")
                 && !name.startsWith("config(") && !duplicates.contains(full)
-                && !name.equals("/usr/sbin/glibc_post_upgrade.x86_64")) {
+                && !"/usr/sbin/glibc_post_upgrade.x86_64".equals(name)) {
                 writer.add(
                     events.createStartElement(XmlEventPrimary.PRFX, XmlEventPrimary.NS_URL, "entry")
                 );
@@ -376,7 +370,6 @@ public final class XmlEventPrimary implements XmlEvent {
      * @param prefix Prefix
      * @param attrs Attributes list
      * @throws XMLStreamException On Error
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     private static void addAttributes(final XMLEventWriter writer, final String tag,
         final String namespace, final String prefix, final Map<String, String> attrs)
@@ -412,7 +405,6 @@ public final class XmlEventPrimary implements XmlEvent {
      * @param flags Entries flags
      * @param def Default flag
      * @throws XMLStreamException On error
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     private static void addEntryAttr(final XMLEventWriter writer, final XMLEventFactory events,
         final List<HeaderTags.Version> versions, final int ind, final List<Optional<String>> flags,
@@ -452,7 +444,6 @@ public final class XmlEventPrimary implements XmlEvent {
      * @param rversion Requires version
      * @param flag Requires flag
      * @return True is requires item should NOT be added
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     private static boolean checkRequiresInProvides(
         final List<String> nprovides, final List<HeaderTags.Version> vprovides,
@@ -470,13 +461,13 @@ public final class XmlEventPrimary implements XmlEvent {
     }
 
     /**
-     * Files filter. It's a method as qulice fails to analyze a constant with exception.
+     * Files filter.
      * @return Predicate to filter files
      */
     private static Predicate<String> filesFilter() {
         // @checkstyle BooleanExpressionComplexityCheck (10 lines)
         return name -> name.startsWith("/var/")
-            || name.equals("/boot") || name.startsWith("/boot/")
+            || "/boot".equals(name) || name.startsWith("/boot/")
             || name.startsWith("/lib/") || name.startsWith("/lib64/")
             || "/lib64".equals(name) || "/lib".equals(name)
             || name.startsWith("/run/") || name.startsWith("/usr/")

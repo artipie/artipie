@@ -30,7 +30,6 @@ import org.reactivestreams.Publisher;
 /**
  * Slice implementation that provides HTTP API (Go module proxy protocol) for Golang repository.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class GoSlice implements Slice {
 
@@ -58,7 +57,6 @@ public final class GoSlice implements Slice {
      * @param policy Security policy
      * @param users Users
      * @param name Repository name
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     public GoSlice(final Storage storage, final Policy<?> policy, final Authentication users,
         final String name) {
@@ -112,7 +110,6 @@ public final class GoSlice implements Slice {
      * @param users Users
      * @param name Repository name
      * @return Slice
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     private static Slice createSlice(final Storage storage, final String type,
         final Policy<?> policy, final Authentication users, final String name) {

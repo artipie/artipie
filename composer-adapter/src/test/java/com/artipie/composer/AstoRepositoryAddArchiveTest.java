@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link AstoRepository#addArchive(Archive, Content)}.
  *
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class AstoRepositoryAddArchiveTest {

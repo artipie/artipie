@@ -76,7 +76,7 @@ public final class GenericAuthenticator implements Authenticator {
     @Override
     public CompletionStage<Headers> authenticate(final Headers headers) {
         return StreamSupport.stream(headers.spliterator(), false)
-            .filter(header -> header.getKey().equals(WwwAuthenticate.NAME))
+            .filter(header -> WwwAuthenticate.NAME.equals(header.getKey()))
             .findAny()
             .map(header -> this.authenticate(new WwwAuthenticate(header.getValue())))
             .orElse(Authenticator.ANONYMOUS)

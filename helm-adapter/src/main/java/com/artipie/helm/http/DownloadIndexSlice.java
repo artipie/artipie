@@ -41,7 +41,6 @@ import org.reactivestreams.Publisher;
  * Download index file endpoint. Return index file with urls that are
  * based on requested URL.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class DownloadIndexSlice implements Slice {
     /**

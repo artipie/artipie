@@ -50,7 +50,6 @@ public final class RpmByDigestCopy {
      * @param key Key to copy from
      * @param digests Content digests to exclude
      * @param algorithm Digest algorithm
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public RpmByDigestCopy(
         final Storage from, final Key key, final List<String> digests,

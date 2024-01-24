@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
  * Test case for {@link DockerAuthSlice}.
  *
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class DockerAuthSliceTest {
 

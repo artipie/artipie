@@ -34,14 +34,9 @@ SOFTWARE.
   <name>hexpm-adapter</name>
   <description>An Artipie adapter for Erlang/Elixir packages</description>
   <url>https://github.com/artipie/hexpm-adapter</url>
-  <licenses>
-    <license>
-      <name>MIT</name>
-      <url>https://github.com/artipie/hexpm-adapter/blob/master/LICENSE.txt</url>
-    </license>
-  </licenses>
   <properties>
     <protobuf.version>3.21.10</protobuf.version>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
   </properties>
   <dependencies>
     <dependency>
@@ -67,7 +62,7 @@ SOFTWARE.
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <release>21</release>
+          <release>17</release>
         </configuration>
       </plugin>
     </plugins>

@@ -35,8 +35,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link UpdateSlice}.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AssignmentInOperand", "PMD.AvoidDuplicateLiterals"})
 class UpdateSliceTest {

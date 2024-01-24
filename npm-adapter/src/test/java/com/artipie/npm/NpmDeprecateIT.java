@@ -36,7 +36,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
 /**
  * IT case for `npm deprecate` command.
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @DisabledOnOs(OS.WINDOWS)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -44,7 +43,6 @@ public final class NpmDeprecateIT {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
      */
     @TempDir
     Path tmp;

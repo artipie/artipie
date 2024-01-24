@@ -48,7 +48,6 @@ public final class CacheDocker implements Docker {
      * @param cache Cache repository.
      * @param events Artifact metadata events queue
      * @param rname Artipie repository name
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public CacheDocker(final Docker origin, final Docker cache,
         final Optional<Queue<ArtifactEvent>> events, final String rname) {

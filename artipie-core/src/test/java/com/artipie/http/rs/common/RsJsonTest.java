@@ -21,7 +21,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
  * Test case for {@link RsJson}.
  *
  * @since 0.16
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class RsJsonTest {
 

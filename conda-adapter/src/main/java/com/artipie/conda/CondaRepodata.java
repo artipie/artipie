@@ -158,7 +158,6 @@ public interface CondaRepodata {
     /**
      * Package item: .conda or tar.bz2 package as input stream, file name and checksums.
      * @since 0.2
-     * @checkstyle ParameterNameCheck (100 lines)
      */
     final class PackageItem {
 
@@ -174,14 +173,12 @@ public interface CondaRepodata {
 
         /**
          * Sha256 sum of the package.
-         * @checkstyle MemberNameCheck (5 lines)
-         */
+                 */
         private final String sha256;
 
         /**
          * Md5 sum of the package.
-         * @checkstyle MemberNameCheck (5 lines)
-         */
+                 */
         private final String md5;
 
         /**
@@ -196,9 +193,7 @@ public interface CondaRepodata {
          * @param sha256 Sha256 sum of the package
          * @param md5 Md5 sum of the package
          * @param size Package size
-         * @checkstyle ParameterNumberCheck (5 lines)
-         * @checkstyle ParameterNameCheck (5 lines)
-         */
+                         */
         public PackageItem(final InputStream input, final String filename, final String sha256,
             final String md5, final long size) {
             this.input = input;

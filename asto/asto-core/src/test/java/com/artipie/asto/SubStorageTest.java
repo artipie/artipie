@@ -21,7 +21,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link SubStorage}.
  * @since 1.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @todo #352:30min Continue to add more tests for {@link SubStorage}.
  *  All the methods of the class should be verified, do not forget to
  *  add tests with different prefixes, including {@link Key#ROOT} as prefix.

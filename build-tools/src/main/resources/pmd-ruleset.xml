@@ -1,0 +1,181 @@
+<ruleset xmlns="http://pmd.sourceforge.net/ruleset/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Artipie Ruleset" xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+    <description>
+        This ruleset checks code for potential mess
+    </description>
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="JUnitTestsShouldIncludeAssert"/>
+        <exclude name="PositionLiteralsFirstInComparisons"/>
+        <exclude name="PositionLiteralsFirstInCaseInsensitiveComparisons"/>
+        <exclude name="GuardLogStatement"/>
+    </rule>
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="AvoidFinalLocalVariable"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="AbstractNaming"/>
+        <exclude name="ClassNamingConventions"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="DefaultPackage"/>
+        <exclude name="LinguisticNaming"/>
+        <exclude name="CallSuperInConstructor"/>
+    </rule>
+
+    <rule ref="category/java/design.xml">
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="LawOfDemeter"/>
+        <exclude name="SignatureDeclareThrowsException"/>
+        <exclude name="ExcessiveImports"/>
+    </rule>
+    <rule ref="category/java/design.xml/CognitiveComplexity">
+        <properties>
+            <property name="reportLevel" value="17" />
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="classReportLevel" value="80" />
+            <property name="methodReportLevel" value="15" />
+            <property name="cycloOptions" value="" />
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/TooManyMethods">
+        <properties>
+            <property name="maxmethods" value="12" />
+        </properties>
+    </rule>
+    <rule ref="category/java/documentation.xml">
+        <exclude name="CommentRequired"/>
+        <exclude name="CommentSize"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="MissingSerialVersionUID"/>
+        <exclude name="AvoidFieldNameMatchingMethodName"/>
+        <exclude name="AvoidFieldNameMatchingTypeName"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
+        <properties>
+            <property name="maxDuplicateLiterals">
+                <value>5</value>
+            </property>
+            <property name="skipAnnotations">
+                <value>true</value>
+            </property>
+        </properties>
+    </rule>
+    <rule ref="category/java/performance.xml">
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+    </rule>
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="AvoidUsingVolatile"/>
+        <exclude name="UseConcurrentHashMap"/>
+        <exclude name="DoNotUseThreads"/>
+    </rule>
+    <rule name="OnlyOneConstructorShouldDoInitialization" message="Avoid field initialization in several constructors." language="java" class="net.sourceforge.pmd.lang.rule.XPathRule">
+        <description>
+            Avoid doing field initialization in several constructors.
+            Only one main constructor should do real work.
+            Other constructors should delegate initialization to it.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+          //ClassOrInterfaceBody[count(ClassOrInterfaceBodyDeclaration/ConstructorDeclaration)>1]
+          [count(ClassOrInterfaceBodyDeclaration/ConstructorDeclaration[BlockStatement])>1]
+        ]]></value>
+            </property>
+        </properties>
+    </rule>
+    <rule name="ConstructorOnlyInitializesOrCallOtherConstructors" message="Only field initialization or call to other constructors in a constructor." language="java" class="net.sourceforge.pmd.lang.rule.XPathRule">
+        <description>
+            Avoid putting anything other than field assignments into constructors.
+            The only exception should be calling other constructors
+            or calling super class constructor.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+          //ConstructorDeclaration/BlockStatement[count(Statement/StatementExpression/PrimaryExpression[count(following-sibling::AssignmentOperator[1])>0]/PrimaryPrefix[@ThisModifier="true"])!=count(*)]
+        ]]></value>
+            </property>
+        </properties>
+    </rule>
+    <rule name="AvoidDirectAccessToStaticFields" message="Static fields should be accessed in a static way [CLASS_NAME.FIELD_NAME]." language="java" class="net.sourceforge.pmd.lang.rule.XPathRule">
+        <description>
+            Avoid accessing static fields directly.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+          //Name[@Image = //FieldDeclaration[@Static='true']/@Name]
+        ]]></value>
+            </property>
+        </properties>
+    </rule>
+<!--    The following rule does not seem to properly work-->
+<!--    <rule name="AvoidAccessToStaticMembersViaThis" message="Static members should be accessed in a static way [CLASS_NAME.FIELD_NAME], not via instance reference." language="java" class="net.sourceforge.pmd.lang.rule.XPathRule">-->
+<!--        <description>-->
+<!--            Avoid accessing static fields or methods via instance with 'this' keyword.-->
+<!--        </description>-->
+<!--        <priority>3</priority>-->
+<!--        <properties>-->
+<!--            <property name="xpath">-->
+<!--                <value><![CDATA[-->
+<!--          //PrimaryExpression[-->
+<!--            (./PrimaryPrefix[@ThisModifier='true']) and-->
+<!--            (./PrimarySuffix[-->
+<!--              @Image=//FieldDeclaration[@Static='true']/@VariableName-->
+<!--              or @Image=//MethodDeclaration[@Static='true']/@MethodName-->
+<!--            ])-->
+<!--          ]-->
+<!--        ]]></value>-->
+<!--            </property>-->
+<!--        </properties>-->
+<!--    </rule>-->
+    <rule name="ProhibitPublicStaticMethods" message="Public static methods are prohibited." language="java" class="net.sourceforge.pmd.lang.rule.XPathRule">
+        <description>
+            Public static methods are prohibited.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+          //ClassOrInterfaceBodyDeclaration[
+            MethodDeclaration[@Static='true' and @Public='true'
+              and not (
+               MethodDeclarator[
+                count(FormalParameters/FormalParameter)=1
+                and @Image='main'
+                and FormalParameters/FormalParameter[1]/Type/ReferenceType/ClassOrInterfaceType[@Image='String']
+                and FormalParameters/FormalParameter[@Varargs='true']
+               ] and not(ResultType/Type)
+              )
+            ] and (
+                Annotation/MarkerAnnotation/Name[@Image!='BeforeClass' and @Image!='AfterClass'
+                  and @Image!='Parameterized.Parameters']
+                or not (Annotation)
+            )
+          ]
+      ]]></value>
+            </property>
+        </properties>
+    </rule>
+    <rule name="ProhibitFilesCreateFileInTests" message="Files.createFile should not be used in tests, replace them with @Rule TemporaryFolder" language="java" class="net.sourceforge.pmd.lang.rule.XPathRule">
+        <description>
+            Files.createFile shouldn't be used in tests.
+        </description>
+        <priority>3</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+          //ClassOrInterfaceDeclaration[ends-with(@SimpleName, 'Test')]//PrimaryPrefix/Name[@Name='Files.createFile']
+        ]]></value>
+            </property>
+        </properties>
+    </rule>
+</ruleset>

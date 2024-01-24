@@ -35,7 +35,6 @@ import org.reactivestreams.Publisher;
  * Slice for rpm packages upload.
  *
  * @since 0.8.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RpmUpload implements Slice {

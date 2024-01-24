@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link YamlProxyStorage}.
  * @since 0.23
- * @checkstyle MagicNumberCheck (500 lines)
  */
 final class YamlCacheStorageTest {
     @Test

@@ -52,7 +52,6 @@ public interface Action {
     /**
      * Standard actions.
      * @since 1.2
-     * @checkstyle JavadocVariableCheck (100 lines)
      */
     enum Standard implements Action {
 

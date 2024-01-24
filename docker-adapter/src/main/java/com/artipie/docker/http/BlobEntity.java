@@ -31,7 +31,6 @@ import org.reactivestreams.Publisher;
  * See <a href="https://docs.docker.com/registry/spec/api/#blob">Blob</a>.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class BlobEntity {
 

@@ -25,7 +25,6 @@ import org.reactivestreams.Publisher;
 /**
  * Test case for multipart request parser.
  * @since 1.0
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class RqMultipartTest {
@@ -80,7 +79,6 @@ final class RqMultipartTest {
     @Test
     // @Timeout(1)
     void multipartWithEmptyBodies() throws Exception {
-        // @checkstyle LineLengthCheck (100 lines)
         final String payload = String.join(
             "\r\n",
             "--92fd51d48f874720a066238b824c0146",
@@ -137,7 +135,6 @@ final class RqMultipartTest {
     @Test
     @SuppressWarnings("deprecation")
     void readOnePartOfRequest() {
-        // @checkstyle LineLengthCheck (100 lines)
         final String payload = String.join(
             "\r\n",
             "--4f0974f4a401fd757d35fe31a4737ac2",
@@ -270,7 +267,6 @@ final class RqMultipartTest {
             ).parts()
         ).flatMap(Flowable::fromPublisher)
             .reduce(0, (acc, chunk) -> acc + chunk.remaining()).blockingGet();
-        // @checkstyle MagicNumberCheck (1 line)
         MatcherAssert.assertThat(size, Matchers.equalTo(4163));
     }
 }

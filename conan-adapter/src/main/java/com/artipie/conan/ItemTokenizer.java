@@ -53,11 +53,10 @@ public class ItemTokenizer {
      * @return Java String token in JWT format.
      */
     public String generateToken(final String path, final String hostname) {
-        final String token = this.provider.generateToken(
+        return this.provider.generateToken(
             new JsonObject().put(ItemTokenizer.PATH, path)
                 .put(ItemTokenizer.HOSTNAME, hostname)
         );
-        return token;
     }
 
     /**
@@ -66,7 +65,7 @@ public class ItemTokenizer {
      * @return Decoded item data.
      */
     public CompletionStage<Optional<ItemInfo>> authenticateToken(final String token) {
-        final CompletionStage<Optional<ItemInfo>> item = this.provider.authenticate(
+        return this.provider.authenticate(
             new TokenCredentials(token)
         ).map(
             user -> {
@@ -77,14 +76,13 @@ public class ItemTokenizer {
                     res = Optional.of(
                         new ItemInfo(
                             principal.getString(ItemTokenizer.PATH),
-                            principal.getString(ItemTokenizer.HOSTNAME).toString()
+                            principal.getString(ItemTokenizer.HOSTNAME)
                         )
                     );
                 }
                 return res;
             }
         ).toCompletionStage();
-        return item;
     }
 
     /**

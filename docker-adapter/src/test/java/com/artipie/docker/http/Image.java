@@ -126,8 +126,7 @@ public interface Image {
          * @param name Image name.
          * @param digest Manifest digest.
          * @param layer Image layer.
-         * @checkstyle ParameterNumberCheck (6 lines)
-         */
+                 */
         public From(
             final String registry,
             final String name,

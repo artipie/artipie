@@ -39,7 +39,6 @@ import org.apache.commons.lang3.tuple.Pair;
  * Performes gem index update using specified indexer implementation.
  * </p>
  * @since 1.0
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class Gem {
 
@@ -208,10 +207,10 @@ public final class Gem {
 
         @Override
         public void print(final String nme, final String value) {
-            if (nme.equals("name")) {
+            if ("name".equals(nme)) {
                 this.name = value;
             }
-            if (nme.equals("version")) {
+            if ("version".equals(nme)) {
                 this.version = value;
             }
         }

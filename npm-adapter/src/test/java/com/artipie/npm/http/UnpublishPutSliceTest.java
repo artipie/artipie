@@ -37,7 +37,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test cases for {@link UnpublishPutSlice}.
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class UnpublishPutSliceTest {

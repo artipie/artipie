@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
  * Test case for {@link RqHeaders}.
  *
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class RqHeadersTest {
 

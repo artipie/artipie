@@ -28,7 +28,6 @@ import javax.json.JsonObject;
  *
  * @since 0.1
  * @deprecated Use {@link Publish} implementations from `http` package.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines).
  */
 @Deprecated
 public class Npm {

@@ -152,7 +152,6 @@ public final class BufAccumulator implements ReadableByteChannel, WritableByteCh
     @SuppressWarnings("PMD.NullAssignment")
     public void close() {
         this.check();
-        // @checkstyle MethodBodyCommentsCheck (1 lines)
         // assign to null means broken state, it's verified by `check` method.
         this.buffer = null;
     }

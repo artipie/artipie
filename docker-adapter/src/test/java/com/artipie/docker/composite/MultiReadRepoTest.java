@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link MultiReadRepo}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class MultiReadRepoTest {
 

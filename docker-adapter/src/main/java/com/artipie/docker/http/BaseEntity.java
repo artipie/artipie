@@ -20,7 +20,6 @@ import org.reactivestreams.Publisher;
  * See <a href="https://docs.docker.com/registry/spec/api/#base">Base</a>.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class BaseEntity implements ScopeSlice {
 

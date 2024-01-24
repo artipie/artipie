@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link StorageValuePipeline.PublishingOutputStream}.
  *
  * @since 1.12
- * @checkstyle MagicNumberCheck (500 lines)
  */
 public final class ContentAsInputStreamTest {
 

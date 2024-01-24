@@ -60,11 +60,6 @@ import java.util.regex.Pattern;
 /**
  * Slice from repo config.
  * @since 0.1.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ParameterNameCheck (500 lines)
- * @checkstyle ParameterNumberCheck (500 lines)
- * @checkstyle CyclomaticComplexityCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 public final class SliceFromConfig extends Slice.Wrap {
 
@@ -105,10 +100,6 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param cfg Repository config
      * @param standalone Standalone flag
      * @return Slice completionStage
-     * @checkstyle LineLengthCheck (150 lines)
-     * @checkstyle ExecutableStatementCountCheck (100 lines)
-     * @checkstyle JavaNCSSCheck (500 lines)
-     * @checkstyle MethodLengthCheck (500 lines)
      */
     @SuppressWarnings(
         {

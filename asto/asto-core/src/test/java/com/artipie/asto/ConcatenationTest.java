@@ -19,7 +19,6 @@ import org.reactivestreams.Publisher;
  * Tests for {@link Concatenation}.
  *
  * @since 0.17
- * @checkstyle ArrayTrailingCommaCheck (500 lines)
  */
 final class ConcatenationTest {
 

@@ -17,6 +17,7 @@
     <inceptionYear>2019</inceptionYear>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <header.license>${project.basedir}/../LICENSE.header</header.license>
     </properties>
     <modules>
         <module>asto-core</module>

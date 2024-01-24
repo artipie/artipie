@@ -44,8 +44,6 @@ import org.quartz.impl.StdSchedulerFactory;
 /**
  * Test for ArtipieScheduler.
  * @since 0.30
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle VisibilityModifierCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class ScriptSchedulerTest {

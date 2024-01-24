@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link DockerRepositoryPermission}.
  * @since 0.18
- * @checkstyle MagicNumberCheck (300 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DockerRepositoryPermissionFactoryTest {

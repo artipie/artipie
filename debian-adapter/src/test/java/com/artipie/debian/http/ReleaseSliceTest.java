@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link ReleaseSlice}.
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class ReleaseSliceTest {
 

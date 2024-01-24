@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link Action.Standard}.
  * @since 1.2
- * @checkstyle MagicNumberCheck (500 lines)
  */
 public final class StandardActionTest {
 

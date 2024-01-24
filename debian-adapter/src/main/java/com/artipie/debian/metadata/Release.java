@@ -30,7 +30,6 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * Release metadata file.
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public interface Release {

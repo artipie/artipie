@@ -49,7 +49,6 @@ import org.junit.jupiter.params.provider.CsvSource;
  *  There is a test in `JettyClientSlicesTest` checking that
  *  non-secure proxy works in `JettyClientSlices`. It's needed to test
  *  support for proxy working over HTTPS protocol.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class JettyClientSlicesTest {

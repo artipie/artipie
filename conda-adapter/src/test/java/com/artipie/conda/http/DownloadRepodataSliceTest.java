@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link DownloadRepodataSlice}.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class DownloadRepodataSliceTest {
 

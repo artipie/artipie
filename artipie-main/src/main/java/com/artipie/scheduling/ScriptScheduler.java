@@ -26,7 +26,6 @@ import org.quartz.SchedulerException;
 /**
  * Scheduler for Artipie scripts.
  * @since 0.30
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class ScriptScheduler {
 

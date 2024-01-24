@@ -38,7 +38,6 @@ import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 /**
  * Test for {@link RpmRemove}.
  * @since 1.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RpmRemoveTest {

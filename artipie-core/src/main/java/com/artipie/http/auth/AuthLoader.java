@@ -66,7 +66,6 @@ public final class AuthLoader extends
             .map(inst -> ((ArtipieAuthFactory) inst).value())
             .findFirst()
             .orElseThrow(
-                // @checkstyle LineLengthCheck (1 lines)
                 () -> new ArtipieException("Annotation 'ArtipieAuthFactory' should have a not empty value")
             );
     }

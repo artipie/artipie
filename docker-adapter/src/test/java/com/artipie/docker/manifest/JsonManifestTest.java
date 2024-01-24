@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link JsonManifest}.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class JsonManifestTest {
@@ -82,7 +81,6 @@ class JsonManifestTest {
     void shouldConvertForMultiType() {
         final JsonManifest manifest = new JsonManifest(
             new Digest.Sha256("qwe"),
-            // @checkstyle LineLengthCheck (1 line)
             "{\"mediaType\":\"application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json,application/vnd.docker.distribution.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json\"}".getBytes()
         );
         MatcherAssert.assertThat(

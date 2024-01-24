@@ -35,6 +35,7 @@ SOFTWARE.
   <url>https://github.com/artipie/pypi-adapter</url>
   <properties>
     <apache.httpcomponents.version>4.5.14</apache.httpcomponents.version>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
   </properties>
   <dependencies>
     <dependency>

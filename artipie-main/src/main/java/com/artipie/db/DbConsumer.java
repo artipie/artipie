@@ -46,7 +46,6 @@ public final class DbConsumer implements Consumer<ArtifactEvent> {
     public DbConsumer(final DataSource source) {
         this.source = source;
         this.subject = PublishSubject.create();
-        // @checkstyle MagicNumberCheck (5 lines)
         this.subject.subscribeOn(Schedulers.io())
             .buffer(2, TimeUnit.SECONDS, 50)
             .subscribe(new DbObserver());
@@ -68,7 +67,6 @@ public final class DbConsumer implements Consumer<ArtifactEvent> {
             Logger.debug(this, "Subscribed to insert/delete db records");
         }
 
-        // @checkstyle ExecutableStatementCountCheck (40 lines)
         @Override
         public void onNext(final @NonNull List<ArtifactEvent> events) {
             if (events.isEmpty()) {
@@ -79,7 +77,6 @@ public final class DbConsumer implements Consumer<ArtifactEvent> {
             try (
                 Connection conn = DbConsumer.this.source.getConnection();
                 PreparedStatement insert = conn.prepareStatement(
-                    // @checkstyle LineLengthCheck (1 line)
                     "insert or replace into artifacts (repo_type, repo_name, name, version, size, created_date, owner) VALUES (?,?,?,?,?,?,?);"
                 );
                 PreparedStatement deletev = conn.prepareStatement(

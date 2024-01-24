@@ -28,7 +28,6 @@ class XmlEventFilelistsTest {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
      */
     @TempDir
     Path tmp;

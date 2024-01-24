@@ -25,7 +25,6 @@ import org.reactivestreams.Publisher;
  * Responses on api key requests.
  *
  * @since 0.3
- * @checkstyle ReturnCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
 final class ApiKeySlice implements Slice {

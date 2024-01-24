@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link Versions}.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 class VersionsTest {
 

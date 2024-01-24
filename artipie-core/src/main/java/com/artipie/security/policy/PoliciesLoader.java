@@ -66,7 +66,6 @@ public final class PoliciesLoader extends
             .map(inst -> ((ArtipiePolicyFactory) inst).value())
             .findFirst()
             .orElseThrow(
-                // @checkstyle LineLengthCheck (1 lines)
                 () -> new ArtipieException("Annotation 'ArtipiePolicyFactory' should have a not empty value")
             );
     }

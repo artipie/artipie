@@ -18,7 +18,6 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Test for artifacts db.
  * @since 0.31
- * @checkstyle MagicNumberCheck (1000 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class ArtifactDbTest {

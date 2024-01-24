@@ -31,7 +31,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 /**
  * Test for {@link PyProxySlice} with authorisation.
  * @since 0.7
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 class PyProxySliceAuthITCase {
@@ -102,7 +101,6 @@ class PyProxySliceAuthITCase {
         MatcherAssert.assertThat(
             this.container.bash(
                 String.format(
-                    // @checkstyle LineLengthCheck (1 line)
                     "pip install --index-url %s --no-deps --trusted-host host.testcontainers.internal \"alarmtime\"",
                     this.container.localAddress()
                 )

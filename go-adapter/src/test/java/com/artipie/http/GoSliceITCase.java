@@ -36,7 +36,6 @@ import org.testcontainers.containers.GenericContainer;
  * @todo #62:30min Make this test work with authorization, for now go refuses to send username and
  *  password parameters to insecure url with corresponding error: "refusing to pass credentials
  *  to insecure URL".
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.StaticAccessToStaticFields")
 @DisabledOnOs(OS.WINDOWS)

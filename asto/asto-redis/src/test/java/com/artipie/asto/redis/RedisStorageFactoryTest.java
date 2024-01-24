@@ -25,8 +25,6 @@ import org.testcontainers.containers.GenericContainer;
  * Tests for redis storage factory.
  *
  * @since 0.1
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)

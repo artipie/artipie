@@ -47,7 +47,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Ensure that helm command line tool is compatible with this adapter.
  *
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.2
  */
 @DisabledIfSystemProperty(named = "os.name", matches = "Windows.*")

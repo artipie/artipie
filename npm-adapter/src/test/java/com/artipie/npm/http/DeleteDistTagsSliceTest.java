@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link DeleteDistTagsSlice}.
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class DeleteDistTagsSliceTest {
 

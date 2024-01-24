@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link ComposerStorageCache}.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class ComposerStorageCacheTest {

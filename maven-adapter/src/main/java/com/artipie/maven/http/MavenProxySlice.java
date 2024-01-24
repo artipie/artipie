@@ -27,8 +27,6 @@ import java.util.Queue;
 /**
  * Maven proxy repository slice.
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 public final class MavenProxySlice extends Slice.Wrap {
 

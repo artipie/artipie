@@ -15,7 +15,6 @@ import java.util.concurrent.CompletionStage;
  * Bearer authentication method.
  *
  * @since 0.17
- * @checkstyle ReturnCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class BearerAuthScheme implements AuthScheme {
@@ -70,7 +69,7 @@ public final class BearerAuthScheme implements AuthScheme {
      */
     private CompletionStage<Optional<AuthUser>> user(final String header) {
         final Authorization atz = new Authorization(header);
-        if (atz.scheme().equals(BearerAuthScheme.NAME)) {
+        if (BearerAuthScheme.NAME.equals(atz.scheme())) {
             return this.auth.user(
                 new Authorization.Bearer(atz.credentials()).token()
             );

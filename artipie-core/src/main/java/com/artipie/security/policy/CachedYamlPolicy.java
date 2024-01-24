@@ -86,7 +86,6 @@ import java.util.stream.Collectors;
  *       - read
  * }</pre>
  * @since 1.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanable<String> {
@@ -128,7 +127,6 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
      * @param users Cache for username and user individual permissions
      * @param roles Cache for role name and role permissions
      * @param asto Storage to read users and roles yaml files from
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     CachedYamlPolicy(
         final Cache<String, UserPermissions> cache,
@@ -214,7 +212,6 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
      * 2) function to get permissions of the role.
      * @param user Username
      * @return Callable to create {@link UserPermissions}
-     * @checkstyle LocalFinalVariableNameCheck (10 lines)
      */
     private Callable<UserPermissions> createUserPermissions(final AuthUser user) {
         return () -> new UserPermissions(
@@ -362,7 +359,6 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
                     roles = sequence.values().stream().map(item -> item.asScalar().value())
                         .collect(Collectors.toSet());
                 }
-                // @checkstyle NestedIfDepthCheck (10 lines)
                 if (user.authContext() != null && !user.authContext().isEmpty()) {
                     final String role = String.format("default/%s", user.authContext());
                     if (roles.isEmpty()) {

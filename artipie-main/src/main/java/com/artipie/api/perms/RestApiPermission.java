@@ -205,7 +205,6 @@ public abstract class RestApiPermission extends Permission {
                 if (this.any) {
                     res = true;
                 } else {
-                    // @checkstyle NestedIfDepthCheck (10 lines)
                     for (final Permission item : this.perms) {
                         if (item.implies(permission)) {
                             res = true;

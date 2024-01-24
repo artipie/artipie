@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
  * A test for {@link TgzArchive}.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class TgzArchiveTest {

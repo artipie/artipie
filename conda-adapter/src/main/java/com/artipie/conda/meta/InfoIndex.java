@@ -86,8 +86,8 @@ public interface InfoIndex {
     /**
      * Implementation of {@link InfoIndex} to read metadata from `.conda` package.
      * @since 0.2
-     * @checkstyle CyclomaticComplexityCheck (50 lines)
      */
+    @SuppressWarnings("PMD.CognitiveComplexity")
     final class Conda implements InfoIndex {
 
         /**
@@ -104,7 +104,7 @@ public interface InfoIndex {
         }
 
         @Override
-        @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.AssignmentInOperand"})
+        @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.AssignmentInOperand", "PMD.CloseResource"})
         public JsonObject json() throws IOException {
             Optional<JsonObject> res = Optional.empty();
             try (

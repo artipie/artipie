@@ -105,9 +105,9 @@ public final class ConansEntityV2 {
         if (type == null) {
             final int index = filename.lastIndexOf('.');
             final String ext = filename.substring(index);
-            if (ext.equals(".py")) {
+            if (".py".equals(ext)) {
                 type = "text/x-python";
-            } else if (ext.equals(".tgz")) {
+            } else if (".tgz".equals(ext)) {
                 type = "x-gzip";
             } else {
                 type = "application/octet-stream";

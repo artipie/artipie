@@ -69,7 +69,6 @@ public final class PermissionsLoader extends
             .map(inst -> ((ArtipiePermissionFactory) inst).value())
             .findFirst()
             .orElseThrow(
-                // @checkstyle LineLengthCheck (1 lines)
                 () -> new ArtipieException("Annotation 'ArtipiePermissionFactory' should have a not empty value")
             );
     }

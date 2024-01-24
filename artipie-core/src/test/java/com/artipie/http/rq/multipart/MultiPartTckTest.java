@@ -17,9 +17,6 @@ import org.reactivestreams.tck.TestEnvironment;
  * Test case for {@link MultiPart}.
  *
  * @since 1.0
- * @checkstyle JavadocMethodCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ReturnCountCheck (500 lines)
  */
 @SuppressWarnings(
     {

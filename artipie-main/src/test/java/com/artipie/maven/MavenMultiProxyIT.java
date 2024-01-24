@@ -27,8 +27,6 @@ final class MavenMultiProxyIT {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(

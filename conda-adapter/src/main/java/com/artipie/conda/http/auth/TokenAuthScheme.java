@@ -20,8 +20,6 @@ import java.util.regex.Pattern;
 /**
  * Conda token auth scheme.
  * @since 0.5
- * @checkstyle ReturnCountCheck (500 lines)
- * @checkstyle AvoidInlineConditionalsCheck (500 lines)
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class TokenAuthScheme implements AuthScheme {
@@ -76,7 +74,7 @@ public final class TokenAuthScheme implements AuthScheme {
      */
     private CompletionStage<Optional<AuthUser>> user(final String header) {
         final Authorization atz = new Authorization(header);
-        if (atz.scheme().equals(TokenAuthScheme.NAME)) {
+        if (TokenAuthScheme.NAME.equals(atz.scheme())) {
             return this.auth.user(
                 new Authorization.Token(atz.credentials()).token()
             );

@@ -27,9 +27,6 @@ import org.junit.jupiter.api.Test;
  * Tests JFR storage events.
  *
  * @since 0.28.0
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle LocalFinalVariableNameCheck (500 lines)
  */
 @SuppressWarnings(
     {

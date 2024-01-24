@@ -25,7 +25,6 @@ import javax.json.JsonObject;
  *  2. meta.json file
  *
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class CliPublish implements Publish {
     /**

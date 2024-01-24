@@ -39,7 +39,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
  * Service index resource.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class NuGetServiceIndexTest {

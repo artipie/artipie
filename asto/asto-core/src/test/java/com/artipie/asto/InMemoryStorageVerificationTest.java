@@ -10,7 +10,6 @@ import com.artipie.asto.test.StorageWhiteboxVerification;
 /**
  * In memory storage verification test.
  *
- * @checkstyle ProtectedMethodInFinalClassCheck (500 lines)
  * @since 1.14.0
  */
 @SuppressWarnings("PMD.TestClassWithoutTestCases")

@@ -36,7 +36,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test case for {@link DownloadIndexSlice}.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class DownloadIndexSliceTest {

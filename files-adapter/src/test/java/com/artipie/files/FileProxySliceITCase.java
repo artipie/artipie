@@ -33,8 +33,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for files adapter.
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class FileProxySliceITCase {

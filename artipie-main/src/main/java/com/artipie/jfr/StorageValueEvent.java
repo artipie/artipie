@@ -14,9 +14,6 @@ import jdk.jfr.Name;
  * Storage event for the {@code value} operation.
  *
  * @since 0.28.0
- * @checkstyle JavadocVariableCheck (500 lines)
- * @checkstyle VisibilityModifierCheck (500 lines)
- * @checkstyle MemberNameCheck (500 lines)
  */
 @Name("artipie.StorageValue")
 @Label("Storage Get")

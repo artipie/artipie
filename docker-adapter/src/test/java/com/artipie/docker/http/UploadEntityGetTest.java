@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
  * Upload GET endpoint.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "PMD.AvoidDuplicateLiterals"})
 public final class UploadEntityGetTest {
@@ -103,7 +102,6 @@ public final class UploadEntityGetTest {
             .uploads()
             .start()
             .toCompletableFuture().join();
-        // @checkstyle MagicNumberCheck (1 line)
         upload.append(new Content.From(new byte[128])).toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
         final Response get = this.slice.response(

@@ -51,9 +51,6 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
  * and Node container to run npm install command.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "deprecation"})
 @DisabledOnOs(OS.WINDOWS)

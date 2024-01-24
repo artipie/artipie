@@ -27,7 +27,6 @@ import java.util.Queue;
 /**
  * Python proxy slice.
  * @since 0.7
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class PyProxySlice extends Slice.Wrap {
 
@@ -49,7 +48,6 @@ public final class PyProxySlice extends Slice.Wrap {
      * @param cache Repository cache storage
      * @param events Artifact events queue
      * @param rname Repository name
-     * @checkstyle ParameterNumberCheck (500 lines)
      */
     @SuppressWarnings("PMD.UnusedFormalParameter")
     public PyProxySlice(

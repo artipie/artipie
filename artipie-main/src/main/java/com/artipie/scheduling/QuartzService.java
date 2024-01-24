@@ -112,7 +112,6 @@ public final class QuartzService {
      * @param <T> Class type parameter
      * @return Set of the started quartz job keys
      * @throws SchedulerException On error
-     * @checkstyle ParameterNumberCheck (7 lines)
      */
     public <T extends Job> Set<JobKey> schedulePeriodicJob(
         final int seconds, final int threads, final Class<T> clazz, final JobDataMap data
@@ -216,7 +215,6 @@ public final class QuartzService {
             this.scheduler.getMetaData().getThreadPoolSize(), requested
         );
         if (requested > count) {
-            // @checkstyle LineLengthCheck (1 line)
             Logger.warn(this, String.format("Parallel quartz jobs amount is limited to thread pool size %s instead of requested %s", count, requested));
         }
         return count;

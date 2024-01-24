@@ -36,7 +36,6 @@ class AcceptTest {
         MatcherAssert.assertThat(
             new Accept(
                 new Headers.From(
-                    // @checkstyle LineLengthCheck (2 lines)
                     new Header("Accept", "text/html;q=0.6, application/xml;q=0.9, image/bmp;q=0.3"),
                     new Header("Accept", "image/bmp;q=0.5, text/html, multipart/mixed, text/json;q=0.4")
                 )
@@ -65,7 +64,6 @@ class AcceptTest {
         MatcherAssert.assertThat(
             new Accept(
                 new Headers.From(
-                    // @checkstyle LineLengthCheck (1 line)
                     new Header("Accept", "application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json,application/vnd.docker.distribution.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json")
                 )
             ).values(),

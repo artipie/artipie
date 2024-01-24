@@ -46,7 +46,6 @@ public final class ScriptContext {
      * @param repositories Repositories info API, available in scripts.
      * @param storage Blocking storage instance to access scripts.
      * @param settings Settings API, available in scripts.
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     public ScriptContext(
         final RepositoriesFromStorage repositories, final BlockingStorage storage,

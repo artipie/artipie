@@ -21,7 +21,6 @@ import javax.json.Json;
  * NuGet repository that stores packages in {@link Storage}.
  *
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class AstoRepository implements Repository {
 

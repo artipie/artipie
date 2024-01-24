@@ -32,8 +32,6 @@ import javax.json.JsonString;
  * Proxy storage for a file-adapter via HTTP.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle LineLengthCheck (500 lines)
  */
 public final class ArtipieStorage implements Storage {
 

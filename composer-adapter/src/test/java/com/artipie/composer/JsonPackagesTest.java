@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link JsonPackages}.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (6 lines)
  */
 class JsonPackagesTest {
 

@@ -32,7 +32,6 @@ import java.util.function.Function;
  * Simple implementation of Storage that holds all data in memory.
  *
  * @since 0.14
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class InMemoryStorage implements Storage {
@@ -40,7 +39,6 @@ public final class InMemoryStorage implements Storage {
     /**
      * Values stored by key strings.
      * It is package private for avoid using sync methods for operations of storage for benchmarks.
-     * @checkstyle VisibilityModifierCheck (2 lines)
      */
     final NavigableMap<String, byte[]> data;
 

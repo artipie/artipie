@@ -12,7 +12,6 @@ import java.util.Optional;
 /**
  * Benchmark storage verification test.
  *
- * @checkstyle ProtectedMethodInFinalClassCheck (500 lines)
  * @since 1.14.0
  */
 @SuppressWarnings("PMD.TestClassWithoutTestCases")

@@ -39,7 +39,6 @@ import org.testcontainers.containers.GenericContainer;
  * Test for {@link RpmSlice}, uses dnf and yum rpm-package managers,
  * checks that list and install works with and without authentication.
  * @since 0.10
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
@@ -66,7 +65,6 @@ public final class RpmSliceITCase {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
      */
     @TempDir
     Path tmp;
@@ -162,8 +160,6 @@ public final class RpmSliceITCase {
      * @param cred String with user name and password to add in url, uname:pswd@
      * @param linux Linux distribution name and version
      * @throws Exception On error
-     * @checkstyle ParameterNumberCheck (10 lines)
-     * @checkstyle ExecutableStatementCountCheck (100 lines)
      */
     private void start(final Policy<?> policy, final Authentication auth, final String cred,
         final String linux) throws Exception {

@@ -36,7 +36,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
  * Tests for {@link RegistrationPage}.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 class RegistrationPageTest {
 

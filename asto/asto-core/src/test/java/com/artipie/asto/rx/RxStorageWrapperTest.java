@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link RxStorageWrapper}.
  *
  * @since 1.11
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class RxStorageWrapperTest {

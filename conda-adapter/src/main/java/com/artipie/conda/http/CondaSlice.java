@@ -47,8 +47,6 @@ import java.util.regex.Pattern;
  * In the last two cases authentication is performed by the token in path, and thus
  * we cannot trim first part of the path.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveMethodLength"})
 public final class CondaSlice extends Slice.Wrap {
@@ -109,7 +107,6 @@ public final class CondaSlice extends Slice.Wrap {
      * @param url Application url
      * @param repo Repository name
      * @param events Events queue
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public CondaSlice(final Storage storage, final Policy<?> policy, final Authentication users,
         final Tokens tokens, final String url, final String repo,

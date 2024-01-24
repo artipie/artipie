@@ -13,7 +13,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * Test for {@link com.artipie.pypi.meta.PackageInfo.FromMetadata}.
  * @since 0.6
- * @checkstyle LeftCurlyCheck (500 lines)
  */
 class PackageInfoFromMetadataTest {
 

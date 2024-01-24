@@ -63,8 +63,6 @@ public final class XmlPrimaryMaid implements XmlMaid {
      * Input/output streams are not closed in this implementation, resources
      * should be closed from the outside.
      * @since 1.4
-     * @checkstyle CyclomaticComplexityCheck (300 lines)
-     * @checkstyle ExecutableStatementCountCheck (300 lines)
      */
     public static final class Stream implements XmlMaid {
 
@@ -184,9 +182,8 @@ public final class XmlPrimaryMaid implements XmlMaid {
          * @param infos Collection to add removed packages info to
          * @return Valid packages count
          * @throws XMLStreamException If fails
-         * @checkstyle ParameterNumberCheck (5 lines)
-         */
-        @SuppressWarnings("PMD.CyclomaticComplexity")
+                 */
+        @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
         private static long processPackagesWithResult(final Collection<String> checksums,
             final XMLEventReader reader, final XMLEventWriter writer,
             final Collection<PackageInfo> infos) throws XMLStreamException {
@@ -241,7 +238,7 @@ public final class XmlPrimaryMaid implements XmlMaid {
          */
         private static boolean isEndPackage(final XMLEvent event) {
             return event.isEndElement()
-                && event.asEndElement().getName().getLocalPart().equals("package");
+                && "package".equals(event.asEndElement().getName().getLocalPart());
         }
 
         /**

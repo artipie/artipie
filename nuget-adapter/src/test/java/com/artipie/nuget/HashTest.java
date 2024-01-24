@@ -37,7 +37,6 @@ class HashTest {
                 .thenApply(PublisherAs::new)
                 .thenCompose(PublisherAs::asciiString)
                 .toCompletableFuture().join(),
-            // @checkstyle LineLength (1 lines)
             Matchers.equalTo("xwtd2ev7b1HQnUEytxcMnSB1CnhS8AaA9lZY8DEOgQBW5nY8NMmgCw6UAHb1RJXBafwjAszrMSA5JxxDRpUH3A==")
         );
     }

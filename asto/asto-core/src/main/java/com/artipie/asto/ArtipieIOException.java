@@ -11,7 +11,6 @@ import java.io.UncheckedIOException;
 /**
  * Artipie input-output exception.
  * @since 1.0
- * @checkstyle AbbreviationAsWordInNameCheck (10 lines)
  */
 public class ArtipieIOException extends ArtipieException {
 

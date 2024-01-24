@@ -60,7 +60,6 @@ public final class AstoUpload implements Upload {
      * @param layout Uploads layout.
      * @param name Repository name.
      * @param uuid Upload UUID.
-     * @checkstyle ParameterNumberCheck (2 lines)
      */
     public AstoUpload(
         final Storage storage,

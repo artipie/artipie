@@ -127,7 +127,7 @@ public final class TgzArchive {
                         continue;
                     }
                     final String[] parts = entry.getName().split("/");
-                    if (parts[parts.length - 1].equals("package.json")) {
+                    if ("package.json".equals(parts[parts.length - 1])) {
                         json = Optional.of(Json.createReader(tar).readObject());
                     }
                 }

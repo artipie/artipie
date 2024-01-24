@@ -18,8 +18,6 @@ import java.util.function.Function;
  * Wrapper for a Storage that generates JFR events for operations.
  *
  * @since 0.28.0
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle TooManyMethods (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class JfrStorage implements Storage {
@@ -214,7 +212,6 @@ public final class JfrStorage implements Storage {
      * @param evt JFR event
      * @param updater Lambda to fulfill an event`s fields
      * @return Wrapped content
-     * @checkstyle ParameterNumberCheck (25 lines)
      */
     private ChunksAndSizeMetricsContent metricsContent(
         final Key key,
@@ -254,7 +251,6 @@ public final class JfrStorage implements Storage {
      * @param updater Lambda to fulfill an event`s fields
      * @param <T> Result type
      * @return Result
-     * @checkstyle ParameterNumberCheck (25 lines)
      */
     private <T> T eventProcess(
         final T res,

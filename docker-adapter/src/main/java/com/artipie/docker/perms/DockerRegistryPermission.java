@@ -183,8 +183,7 @@ public final class DockerRegistryPermission extends Permission {
 
         /**
          * Create an empty object.
-         * @checkstyle MagicNumberCheck (5 lines)
-         */
+                 */
         public DockerRegistryPermissionCollection() {
             this.collection = new ConcurrentHashMap<>(5);
             this.any = false;

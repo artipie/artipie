@@ -39,7 +39,6 @@ import org.reactivestreams.Publisher;
 /**
  * Binary files proxy {@link Slice} implementation.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class FileProxySlice implements Slice {
 
@@ -83,7 +82,6 @@ public final class FileProxySlice implements Slice {
      * @param remote Remote URI
      * @param auth Authenticator
      * @param asto Cache storage
-     * @checkstyle ParameterNumberCheck (500 lines)
      */
     public FileProxySlice(final ClientSlices clients, final URI remote,
         final Authenticator auth, final Storage asto) {
@@ -100,7 +98,6 @@ public final class FileProxySlice implements Slice {
      * @param asto Cache storage
      * @param events Artifact events
      * @param rname Repository name
-     * @checkstyle ParameterNumberCheck (500 lines)
      */
     public FileProxySlice(final ClientSlices clients, final URI remote, final Storage asto,
         final Queue<ArtifactEvent> events, final String rname) {

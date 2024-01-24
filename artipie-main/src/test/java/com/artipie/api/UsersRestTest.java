@@ -59,7 +59,6 @@ final class UsersRestTest extends RestApiServerBase {
             new UncheckedConsumer<>(
                 response -> JSONAssert.assertEquals(
                     response.body().toString(),
-                    // @checkstyle LineLengthCheck (1 line)
                     "[{\"name\":\"Alice\",\"roles\":[\"readers\"], \"permissions\":{\"adapter_basic_permissions\":{\"repo1\":[\"write\"]}}},{\"name\":\"Bob\",\"email\":\"bob@example.com\",\"roles\":[\"admin\"]}]",
                     false
                 )
@@ -86,7 +85,6 @@ final class UsersRestTest extends RestApiServerBase {
             new UncheckedConsumer<>(
                 response -> JSONAssert.assertEquals(
                     response.body().toString(),
-                    // @checkstyle LineLengthCheck (1 line)
                     "{\"name\":\"John\",\"email\":\"john@example.com\",\"roles\":[\"readers\",\"tags\"]}",
                     false
                 )

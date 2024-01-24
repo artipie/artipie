@@ -182,8 +182,7 @@ public final class TokenizerFlatProc implements Processor<ByteBuffer, ByteBuffer
 
         /**
          * Notify item received.
-         * @checkstyle NonStaticMethodCheck (10 lines)
-         */
+                 */
         public void receive() {
             // not implemented
         }

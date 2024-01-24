@@ -34,14 +34,12 @@ import org.junit.jupiter.api.io.TempDir;
  * Test case for {@link FileStorage}.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class FileStorageTest {
 
     /**
      * Test temp directory.
-     * @checkstyle VisibilityModifierCheck (10 lines)
      */
     @TempDir
     Path tmp;

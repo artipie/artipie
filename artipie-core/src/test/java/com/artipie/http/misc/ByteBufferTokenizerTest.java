@@ -22,7 +22,6 @@ import org.junit.jupiter.params.provider.CsvSource;
  * Test case for ByteBufferTokenizer.
  *
  * @since 1.0
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.UseObjectForClearerAPI")
 final class ByteBufferTokenizerTest {

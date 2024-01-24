@@ -79,7 +79,6 @@ public final class SliceListing implements Slice {
      * @param transform Transformation
      * @param mtype Mime type
      * @param format Format of a key collection
-     * @checkstyle ParameterNumberCheck (20 lines)
      */
     public SliceListing(
         final Storage storage,

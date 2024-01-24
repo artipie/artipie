@@ -42,7 +42,6 @@ import org.reactivestreams.Publisher;
  * If request is not valid (see {@link RpmRemove#validate(Key, Pair)}),
  * `BAD_REQUEST` status is returned.
  * @since 1.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class RpmRemove implements Slice {
 

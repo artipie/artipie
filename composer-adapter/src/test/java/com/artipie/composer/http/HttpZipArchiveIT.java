@@ -42,7 +42,6 @@ import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
  * with archive in ZIP format.
  *
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @DisabledOnOs(OS.WINDOWS)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

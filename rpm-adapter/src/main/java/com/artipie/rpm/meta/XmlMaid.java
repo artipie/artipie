@@ -136,7 +136,7 @@ public interface XmlMaid {
                 while (reader.hasNext()) {
                     event = reader.nextEvent();
                     if (event.isStartElement()
-                        && event.asStartElement().getName().getLocalPart().equals(ByPkgidAttr.TAG)
+                        && ByPkgidAttr.TAG.equals(event.asStartElement().getName().getLocalPart())
                     ) {
                         if (ids.contains(
                             event.asStartElement().getAttributeByName(new QName("pkgid")).getValue()
@@ -151,7 +151,7 @@ public interface XmlMaid {
                         writer.add(event);
                     }
                     if (event.isEndElement()
-                        && event.asEndElement().getName().getLocalPart().equals(ByPkgidAttr.TAG)) {
+                        && ByPkgidAttr.TAG.equals(event.asEndElement().getName().getLocalPart())) {
                         valid = true;
                     }
                 }

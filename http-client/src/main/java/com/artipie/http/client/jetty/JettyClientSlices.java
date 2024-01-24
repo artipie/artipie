@@ -21,7 +21,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
  * and stop requests in progress.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class JettyClientSlices implements ClientSlices {
 

@@ -75,23 +75,24 @@ public interface MergedJson {
         }
 
         @Override
-        @SuppressWarnings("PMD.AssignmentInOperand")
+        @SuppressWarnings({"PMD.AssignmentInOperand", "PMD.CognitiveComplexity"})
         public void merge(final Map<String, JsonObject> items) throws IOException {
             if (this.parser.isPresent()) {
-                final JsonParser prsr = this.parser.get();
-                JsonToken token;
-                final AtomicReference<Boolean> tars = new AtomicReference<>(false);
-                final AtomicReference<Boolean> condas = new AtomicReference<>(false);
-                while ((token = prsr.nextToken()) != null) {
-                    // @checkstyle NestedIfDepthCheck (10 lines)
-                    if (token == JsonToken.END_OBJECT) {
-                        // @checkstyle InnerAssignmentCheck (1 line)
-                        if ((token = prsr.nextToken()) != null && token != JsonToken.END_OBJECT) {
-                            this.gnrt.writeEndObject();
+                final AtomicReference<Boolean> tars;
+                final AtomicReference<Boolean> condas;
+                try (JsonParser prsr = this.parser.get()) {
+                    JsonToken token;
+                    tars = new AtomicReference<>(false);
+                    condas = new AtomicReference<>(false);
+                    while ((token = prsr.nextToken()) != null) {
+                        if (token == JsonToken.END_OBJECT) {
+                            if ((token = prsr.nextToken()) != null && token != JsonToken.END_OBJECT) {
+                                this.gnrt.writeEndObject();
+                                this.processJsonToken(items, prsr, token, tars, condas);
+                            }
+                        } else {
                             this.processJsonToken(items, prsr, token, tars, condas);
                         }
-                    } else {
-                        this.processJsonToken(items, prsr, token, tars, condas);
                     }
                 }
                 if (tars.get() ^ condas.get()) {
@@ -119,8 +120,7 @@ public interface MergedJson {
          * @param tars Is it json object with .tar.bz2 items?
          * @param condas Is it json object with .conda items?
          * @throws IOException On IO error
-         * @checkstyle ParameterNumberCheck (5 lines)
-         */
+                 */
         private void processJsonToken(final Map<String, JsonObject> items, final JsonParser prsr,
             final JsonToken token, final AtomicReference<Boolean> tars,
             final AtomicReference<Boolean> condas) throws IOException {

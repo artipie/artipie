@@ -34,7 +34,6 @@ public class FilterSlice implements Slice {
      * Ctor.
      * @param origin Origin slice
      * @param yaml Yaml mapping to read filters from
-     * @checkstyle HiddenFieldCheck (10 lines)
      */
     public FilterSlice(final Slice origin, final YamlMapping yaml) {
         this(

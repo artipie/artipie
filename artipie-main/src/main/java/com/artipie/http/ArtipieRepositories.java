@@ -85,7 +85,6 @@ public final class ArtipieRepositories {
      * @param name Repository name
      * @param port Repository port
      * @return Async slice for repo
-     * @checkstyle ParameterNumberCheck (2 lines)
      */
     private CompletionStage<Slice> resolve(final Key name, final int port) {
         return new RepositoriesFromStorage(this.settings)

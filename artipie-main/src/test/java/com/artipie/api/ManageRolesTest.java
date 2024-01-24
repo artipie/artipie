@@ -23,7 +23,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 /**
  * Test for {@link ManageRoles}.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ManageRolesTest {
@@ -69,7 +68,6 @@ class ManageRolesTest {
         );
         JSONAssert.assertEquals(
             this.roles.list().toString(),
-            // @checkstyle LineLengthCheck (1 line)
             "[{\"name\":\"java-dev\",\"permissions\":{\"adapter_basic_permissions\":{\"maven\":[\"write\",\"read\"]}}},{\"name\":\"readers\",\"permissions\":{\"adapter_basic_permissions\":{\"*\":[\"read\"]}}}]",
             true
         );

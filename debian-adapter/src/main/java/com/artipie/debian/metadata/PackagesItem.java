@@ -103,8 +103,7 @@ public interface PackagesItem {
          * @param filename Filename
          * @param control Control file
          * @return Control with size and file name
-         * @checkstyle ParameterNumberCheck (5 lines)
-         */
+                 */
         private static String addSizeAndFilename(
             final long size, final String filename, final String control
         ) {

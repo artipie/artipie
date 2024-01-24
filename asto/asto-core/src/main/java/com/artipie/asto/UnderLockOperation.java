@@ -46,7 +46,6 @@ public final class UnderLockOperation<T> {
      *
      * @param storage Storage.
      * @return Operation result.
-     * @checkstyle IllegalCatchCheck (10 lines)
      */
     @SuppressWarnings("PMD.AvoidCatchingThrowable")
     public CompletionStage<T> perform(final Storage storage) {

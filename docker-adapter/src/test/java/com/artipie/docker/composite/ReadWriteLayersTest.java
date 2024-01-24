@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link ReadWriteLayers}.
  *
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class ReadWriteLayersTest {

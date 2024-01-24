@@ -54,12 +54,6 @@ import org.reactivestreams.Publisher;
 /**
  * This slice creates package meta-info from request body(tar-archive) and saves this tar-archive.
  * @since 0.1
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
- * @checkstyle NestedIfDepthCheck (500 lines)
- * @checkstyle ParameterNumberCheck (500 lines)
- * @checkstyle AvoidInlineConditionalsCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.ExcessiveMethodLength")
 public final class UploadSlice implements Slice {
@@ -216,7 +210,7 @@ public final class UploadSlice implements Slice {
         final AtomicReference<List<PackageOuterClass.Release>> releases,
         final boolean replace,
         final AtomicReference<String> version
-    ) throws ArtipieException {
+    ) {
         final List<PackageOuterClass.Release> releaseslist = releases.get();
         if (releaseslist.isEmpty()) {
             return;

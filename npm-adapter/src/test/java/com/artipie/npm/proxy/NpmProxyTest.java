@@ -31,7 +31,6 @@ import org.mockito.stubbing.Answer;
  * Test NPM Proxy works.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

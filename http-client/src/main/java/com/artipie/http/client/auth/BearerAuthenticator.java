@@ -77,7 +77,7 @@ public final class BearerAuthenticator implements Authenticator {
             throw new IllegalArgumentException(ex);
         }
         final String query = header.params().stream()
-            .filter(param -> !param.name().equals("realm"))
+            .filter(param -> !"realm".equals(param.name()))
             .map(param -> String.format("%s=%s", param.name(), param.value()))
             .collect(Collectors.joining("&"));
         final CompletableFuture<String> promise = new CompletableFuture<>();

@@ -29,8 +29,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link AstoMetadataRemove}.
  * @since 1.9
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class AstoMetadataRemoveTest {

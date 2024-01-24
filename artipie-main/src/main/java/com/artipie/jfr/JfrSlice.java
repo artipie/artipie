@@ -22,7 +22,6 @@ import org.reactivestreams.Publisher;
  * Slice wrapper to generate JFR events for every the {@code response} method call.
  *
  * @since 0.28.0
- * @checkstyle LocalFinalVariableNameCheck (500 lines)
  */
 public final class JfrSlice implements Slice {
 
@@ -64,7 +63,6 @@ public final class JfrSlice implements Slice {
      * @param body The request body
      * @param event JFR event
      * @return The response.
-     * @checkstyle ParameterNumberCheck (25 lines)
      */
     private Response wrapResponse(
         final String line,

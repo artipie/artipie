@@ -50,7 +50,6 @@ public final class AuthFromEnv implements Authentication {
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Optional<AuthUser> user(final String username, final String password) {
         final Optional<AuthUser> result;
-        // @checkstyle LineLengthCheck (5 lines)
         if (Objects.equals(Objects.requireNonNull(username), this.env.get(AuthFromEnv.ENV_NAME))
             && Objects.equals(Objects.requireNonNull(password), this.env.get(AuthFromEnv.ENV_PASS))) {
             result = Optional.of(new AuthUser(username, "env"));

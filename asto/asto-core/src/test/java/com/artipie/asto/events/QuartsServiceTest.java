@@ -15,8 +15,6 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 /**
  * Test for {@link QuartsService}.
  * @since 1.17
- * @checkstyle IllegalTokenCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 class QuartsServiceTest {
 

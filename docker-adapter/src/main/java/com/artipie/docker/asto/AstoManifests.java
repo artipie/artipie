@@ -59,7 +59,6 @@ public final class AstoManifests implements Manifests {
      * @param blobs Blobs storage.
      * @param layout Manifests layout.
      * @param name Repository name
-     * @checkstyle ParameterNumberCheck (2 lines)
      */
     public AstoManifests(
         final Storage asto,

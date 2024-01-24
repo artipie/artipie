@@ -25,8 +25,6 @@ import java.net.URI;
 /**
  * Composer proxy repository slice.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 public class ComposerProxySlice extends Slice.Wrap {
     /**

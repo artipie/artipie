@@ -26,7 +26,6 @@ import org.reactivestreams.Publisher;
  * Tests for {@link SliceFromResource}.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public class SliceFromResourceTest {
 

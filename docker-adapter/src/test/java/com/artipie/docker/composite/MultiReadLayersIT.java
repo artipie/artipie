@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
  * Integration test for {@link MultiReadLayers}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class MultiReadLayersIT {
 

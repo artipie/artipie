@@ -47,7 +47,7 @@ public final class PyProxyPackageProcessor extends QuartzJob {
     private BlockingStorage asto;
 
     @Override
-    @SuppressWarnings("PMD.AvoidCatchingGenericException")
+    @SuppressWarnings({"PMD.AvoidCatchingGenericException", "PMD.CognitiveComplexity"})
     public void execute(final JobExecutionContext context) {
         if (this.asto == null || this.packages == null || this.events == null) {
             super.stopJob(context);
@@ -77,7 +77,6 @@ public final class PyProxyPackageProcessor extends QuartzJob {
                                 String.format("Python proxy package %s is not valid", key.string())
                             );
                         }
-                    // @checkstyle IllegalCatchCheck (1 line)
                     } catch (final Exception err) {
                         Logger.error(
                             this,

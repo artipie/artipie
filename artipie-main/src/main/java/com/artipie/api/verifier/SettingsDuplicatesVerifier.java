@@ -46,7 +46,6 @@ public final class SettingsDuplicatesVerifier implements Verifier {
      * @return Error message
      */
     public String message() {
-        // @checkstyle LineLengthCheck (1 line)
         return String.format("Repository %s has settings duplicates. Please remove repository and create it again.", this.rname);
     }
 }

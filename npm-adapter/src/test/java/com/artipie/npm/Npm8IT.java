@@ -44,7 +44,6 @@ import org.testcontainers.containers.GenericContainer;
  * Make sure the library is compatible with npm 8 cli tools.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)

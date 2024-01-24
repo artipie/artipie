@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link RpmByDigestCopy}.
  * @since 0.11
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("unchecked")
 class RpmByDigestCopyTest {

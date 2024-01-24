@@ -23,7 +23,6 @@ import wtf.g4s8.hamcrest.json.StringIsJson;
  * Tests for {@link JoinedCatalogSource}.
  *
  * @since 0.10
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class JoinedCatalogSourceTest {
 

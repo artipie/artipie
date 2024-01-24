@@ -16,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /**
  * Test for {@link SettingsRest}.
  * @since 0.27
- * @checkstyle DesignForExtensionCheck (500 lines)
  */
 @ExtendWith(VertxExtension.class)
 public final class SettingsRestTest extends RestApiServerBase {

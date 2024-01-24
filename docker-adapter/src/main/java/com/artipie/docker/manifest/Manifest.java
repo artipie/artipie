@@ -89,7 +89,7 @@ public interface Manifest {
      *  will be removed in next major release.
      */
     @Deprecated
-    default Manifest convert(List<String> options) {
+    default Manifest convert(final List<String> options) {
         return this.convert(new HashSet<>(options));
     }
 }

@@ -14,11 +14,6 @@ import java.util.concurrent.CompletionStage;
  * Authentication scheme such as Basic, Bearer etc.
  *
  * @since 0.17
- * @checkstyle JavadocMethodCheck (500 lines)
- * @checkstyle JavadocVariableCheck (500 lines)
- * @checkstyle AvoidInlineConditionalsCheck (500 lines)
- * @checkstyle OperatorWrapCheck (500 lines)
- * @checkstyle StringLiteralsConcatenationCheck (500 lines)
  */
 @SuppressWarnings({"PMD.ProhibitPublicStaticMethods",
     "PMD.ConstructorOnlyInitializesOrCallOtherConstructors"})
@@ -51,7 +46,7 @@ public interface AuthScheme {
      * @param headers Request headers.
      * @return Authentication result.
      */
-    default CompletionStage<Result> authenticate(Iterable<Map.Entry<String, String>> headers) {
+    default CompletionStage<Result> authenticate(final Iterable<Map.Entry<String, String>> headers) {
         return this.authenticate(headers, "");
     }
 

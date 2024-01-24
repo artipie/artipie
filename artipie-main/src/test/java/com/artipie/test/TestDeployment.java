@@ -166,7 +166,6 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
      * @param msg Assertion message
      * @param path Path in container
      * @param matcher Matcher InputStream of content
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public void assertArtipieContent(final String name, final String msg, final String path,
         final Matcher<byte[]> matcher) {
@@ -325,7 +324,6 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
      * @throws IOException On error
      */
     public void setUpForDockerTests() throws IOException {
-        // @checkstyle MagicNumberCheck (2 lines)
         this.setUpForDockerTests(8080);
     }
 
@@ -336,8 +334,6 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
      * @throws IOException On error
      */
     public void setUpForDockerTests(final int... ports) throws IOException {
-        // @checkstyle MethodBodyCommentsCheck (18 lines)
-        // @checkstyle LineLengthCheck (10 lines)
         this.clientExec("apk", "add", "--update", "--no-cache", "openrc", "docker");
         // needs this command to initialize openrc directories on first call
         this.clientExec("rc-status");
@@ -794,8 +790,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
          * @param msg Assertion message on failure
          * @param cmd Command list to execute
          * @param matcher Exec result matcher
-         * @checkstyle ParameterNumberCheck (2 lines)
-         */
+                 */
         DockerCommand(
             final TestDeployment deployment,
             final String msg,

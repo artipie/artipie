@@ -15,7 +15,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 /**
  * Test for {@link com.artipie.api.perms.RestApiPermission.RestApiPermissionCollection}.
  * @since 0.30
- * @checkstyle DesignForExtensionCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class RestApiPermissionCollectionTest {

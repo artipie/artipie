@@ -31,7 +31,6 @@ import java.util.zip.GZIPInputStream;
 /**
  * Removes packages from metadata files.
  * @since 1.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class AstoMetadataRemove {
 
@@ -127,7 +126,6 @@ public final class AstoMetadataRemove {
      * @param temp Temp key where to write the result
      * @param checksums Checksums to remove
      * @return Completable action with count of the items left in storage
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     private CompletionStage<Long> removePackages(
         final XmlPackage pckg, final Key key, final Key temp, final Collection<String> checksums

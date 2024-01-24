@@ -40,7 +40,6 @@ import org.reactivestreams.Publisher;
  * Tests for {@link JettyClientSlices} and vertx.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class JettyClientSlicesAndVertxITCase {
 

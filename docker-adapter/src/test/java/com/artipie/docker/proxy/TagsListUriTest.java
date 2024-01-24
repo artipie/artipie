@@ -16,7 +16,6 @@ import org.junit.jupiter.params.provider.CsvSource;
  * Tests for {@link TagsListUri}.
  *
  * @since 0.10
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 class TagsListUriTest {
 

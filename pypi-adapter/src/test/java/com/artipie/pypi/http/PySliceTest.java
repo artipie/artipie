@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * Test for {@link PySlice}.
  * @since 0.6
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class PySliceTest {

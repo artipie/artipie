@@ -47,9 +47,6 @@ import org.reactivestreams.Publisher;
 /**
  * Test for {@link Http3Server}.
  * @since 0.31
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle AnonInnerLengthCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class Http3ServerTest {

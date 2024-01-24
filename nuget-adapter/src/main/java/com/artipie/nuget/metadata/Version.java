@@ -24,7 +24,6 @@ public final class Version implements Comparable<Version>, NuspecField {
     /**
      * RegEx pattern for matching version string.
      *
-     * @checkstyle StringLiteralsConcatenationCheck (7 lines)
      */
     private static final Pattern PATTERN = Pattern.compile(
         String.join(
@@ -68,7 +67,7 @@ public final class Version implements Comparable<Version>, NuspecField {
         this.revision().ifPresent(
             revision -> {
                 final String rev = removeLeadingZeroes(revision);
-                if (!rev.equals("0")) {
+                if (!"0".equals(rev)) {
                     builder.append('.').append(rev);
                 }
             }

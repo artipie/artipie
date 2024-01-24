@@ -73,7 +73,7 @@ public final class YamlWriter {
             final StringBuilder bldr = new StringBuilder();
             this.writeLine(
                 bldr.append(YamlWriter.TAG_GENERATED)
-                    .append(" ")
+                    .append(' ')
                     .append(new DateTimeNow().asString())
                     .toString(),
                 0

@@ -42,7 +42,6 @@ public final class Accept {
      * Parses `Accept` header values, sorts them according to weight and returns in
      * corresponding order.
      * @return Set or the values
-     * @checkstyle ReturnCountCheck (11 lines)
      */
     @SuppressWarnings("PMD.OnlyOneReturn")
     public List<String> values() {

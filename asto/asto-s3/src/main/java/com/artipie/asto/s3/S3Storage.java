@@ -46,7 +46,6 @@ import software.amazon.awssdk.services.s3.model.S3Object;
  *  Also whole operation does not complete until abort() is complete.
  *  It would be better to finish save() operation right away and do abort() in background,
  *  but it makes testing the method difficult.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public final class S3Storage implements Storage {
@@ -96,7 +95,6 @@ public final class S3Storage implements Storage {
      *  <code>true</code> - if multipart feature is allowed for larger blobs,
      *  <code>false</code> otherwise.
      * @param endpoint S3 client endpoint
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public S3Storage(final S3AsyncClient client, final String bucket, final boolean multipart,
         final String endpoint) {

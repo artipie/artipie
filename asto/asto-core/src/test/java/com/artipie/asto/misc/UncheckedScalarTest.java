@@ -15,8 +15,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link UncheckedScalar} and {@link UncheckedIOScalar}.
  * @since 1.3
- * @checkstyle LeftCurlyCheck (200 lines)
- * @checkstyle AbbreviationAsWordInNameCheck (200 lines)
  */
 class UncheckedScalarTest {
 

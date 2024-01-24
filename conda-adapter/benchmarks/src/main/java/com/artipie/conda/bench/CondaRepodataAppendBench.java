@@ -2,8 +2,9 @@
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
  * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
-package com.artipie.conda;
+package com.artipie.conda.bench;
 
+import com.artipie.conda.CondaRepodata;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -110,7 +111,6 @@ public class CondaRepodataAppendBench {
     /**
      * Package item: .conda or tar.bz2 package as bytes, file name and checksums.
      * @since 0.2
-     * @checkstyle ParameterNameCheck (100 lines)
      */
     private static final class TestPackage {
 
@@ -126,14 +126,12 @@ public class CondaRepodataAppendBench {
 
         /**
          * Sha256 sum of the package.
-         * @checkstyle MemberNameCheck (5 lines)
-         */
+                 */
         private final String sha256;
 
         /**
          * Md5 sum of the package.
-         * @checkstyle MemberNameCheck (5 lines)
-         */
+                 */
         private final String md5;
 
         /**
@@ -142,8 +140,7 @@ public class CondaRepodataAppendBench {
          * @param filename Name of the file
          * @param sha256 Sha256 sum of the package
          * @param md5 Md5 sum of the package
-         * @checkstyle ParameterNumberCheck (5 lines)
-         */
+                 */
         public TestPackage(final byte[] input, final String filename, final String sha256,
             final String md5) {
             this.input = input;

@@ -8,4 +8,4 @@
  *
  * @since 0.3
  */
-package com.artipie.conda;
+package com.artipie.conda.bench;

@@ -32,8 +32,6 @@ public final class Cli {
      * Main method of Cli tool.
      *
      * @param args Arguments of command line
-     * @checkstyle IllegalCatchCheck (70 lines)
-     * @checkstyle LineLengthCheck (50 lines)
      */
     @SuppressWarnings(
         {

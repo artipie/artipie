@@ -41,6 +41,7 @@ public final class EventsProcessor<T> extends QuartzJob {
     private Consumer<T> action;
 
     @Override
+    @SuppressWarnings("PMD.CognitiveComplexity")
     public void execute(final JobExecutionContext context) {
         if (this.action == null || this.elements == null) {
             super.stopJob(context);
@@ -54,7 +55,6 @@ public final class EventsProcessor<T> extends QuartzJob {
                         cnt = cnt + 1;
                         this.action.accept(item);
                     } catch (final EventProcessingError ex) {
-                        // @checkstyle NestedIfDepthCheck (10 lines)
                         Logger.error(this, ex.getMessage());
                         if (error > EventsProcessor.MAX_RETRY) {
                             this.stopJob(context);

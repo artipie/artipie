@@ -77,8 +77,6 @@ public final class ApiRolePermission extends RestApiPermission {
     /**
      * Alias actions.
      * @since 0.29
-     * @checkstyle JavadocVariableCheck (20 lines)
-     * @checkstyle MagicNumberCheck (20 lines)
      */
     public enum RoleAction implements Action {
         READ(0x4),

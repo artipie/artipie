@@ -29,7 +29,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link Helm.Asto#reindex(Key)}.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class HelmAstoReindexTest {

@@ -35,8 +35,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link AstoMaven}.
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class AstoMavenTest {

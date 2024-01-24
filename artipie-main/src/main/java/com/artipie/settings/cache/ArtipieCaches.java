@@ -65,8 +65,7 @@ public interface ArtipieCaches {
 
         /**
          * Cache for configurations of filters.
-         * @checkstyle MemberNameCheck (5 line)
-         */
+                 */
         private final FiltersCache filtersCache;
 
         /**
@@ -75,9 +74,7 @@ public interface ArtipieCaches {
          * @param strgcache Storages cache
          * @param policy Artipie policy
          * @param filtersCache Filters cache
-         * @checkstyle ParameterNumberCheck (7 lines)
-         * @checkstyle ParameterNameCheck (7 lines)
-         */
+                         */
         public All(
             final Cleanable<String> users,
             final StoragesCache strgcache,

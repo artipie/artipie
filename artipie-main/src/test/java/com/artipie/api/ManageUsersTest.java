@@ -24,7 +24,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 /**
  * Test for {@link ManageUsers}.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ManageUsersTest {
@@ -74,7 +73,6 @@ class ManageUsersTest {
         );
         JSONAssert.assertEquals(
             this.users.list().toString(),
-            // @checkstyle LineLengthCheck (1 line)
             "[{\"name\":\"Alice\",\"roles\":[\"readers\"], \"permissions\":{\"adapter_basic_permissions\":{\"repo1\":[\"write\"]}}},{\"name\":\"Bob\",\"email\":\"bob@example.com\",\"roles\":[\"admin\"]}]",
             true
         );

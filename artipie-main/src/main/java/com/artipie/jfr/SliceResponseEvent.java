@@ -16,9 +16,6 @@ import jdk.jfr.StackTrace;
  * Slice response event triggered when the slice's {@code response} method is called.
  *
  * @since 0.28
- * @checkstyle JavadocVariableCheck (500 lines)
- * @checkstyle MemberNameCheck (500 lines)
- * @checkstyle VisibilityModifierCheck (500 lines)
  */
 @Name("artipie.SliceResponse")
 @Label("Slice Response")

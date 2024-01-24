@@ -30,7 +30,6 @@ import org.reactivestreams.Publisher;
  * Tests for {@link AuthScopeSlice}.
  *
  * @since 0.11
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class AuthScopeSliceTest {
 

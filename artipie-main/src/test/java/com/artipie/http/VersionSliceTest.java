@@ -22,7 +22,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
 /**
  * Tests for {@link VersionSlice}.
  * @since 0.21
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class VersionSliceTest {
     @Test

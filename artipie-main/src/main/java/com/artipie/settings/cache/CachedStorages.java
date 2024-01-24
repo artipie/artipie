@@ -27,7 +27,6 @@ import org.apache.commons.lang3.NotImplementedException;
  * in Artipie settings using {@link LoadingCache}.
  *
  * @since 0.23
- * @checkstyle DesignForExtensionCheck (500 lines)
  */
 public class CachedStorages implements StoragesCache {
 

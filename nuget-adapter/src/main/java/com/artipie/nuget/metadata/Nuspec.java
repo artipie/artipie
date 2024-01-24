@@ -32,7 +32,6 @@ public interface Nuspec {
      * Package identifier: original case sensitive and lowercase.
      * @return Package id
      * @throws ArtipieException If id field is not found
-     * @checkstyle MethodNameCheck (3 lines)
      */
     @SuppressWarnings("PMD.ShortMethodName")
     NuspecField id();
@@ -125,7 +124,7 @@ public interface Nuspec {
          * @param bytes Binary content of in .nuspec format.
          */
         public Xml(final byte[] bytes) {
-            this.bytes = bytes;
+            this.bytes = bytes.clone();
             this.content = new XMLDocument(bytes);
         }
 
@@ -255,7 +254,7 @@ public interface Nuspec {
 
         @Override
         public byte[] bytes() {
-            return this.bytes;
+            return this.bytes.clone();
         }
 
         @Override

@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 /**
  * IT for remove operation.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class HelmDeleteIT {

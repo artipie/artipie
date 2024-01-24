@@ -34,6 +34,9 @@ SOFTWARE.
   <name>conda-adapter</name>
   <description>Turns your files/objects into conda repository</description>
   <inceptionYear>2021</inceptionYear>
+  <properties>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.artipie</groupId>

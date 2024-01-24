@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
  * Test case for {@link DigestVerification}.
  *
  * @since 0.25
- * @checkstyle MagicNumberCheck (500 lines)
  */
 final class DigestVerificationTest {
 
