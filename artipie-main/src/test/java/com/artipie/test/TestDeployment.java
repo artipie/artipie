@@ -166,7 +166,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
      * @param msg Assertion message
      * @param path Path in container
      * @param matcher Matcher InputStream of content
-         */
+     */
     public void assertArtipieContent(final String name, final String msg, final String path,
         final Matcher<byte[]> matcher) {
         this.artipie.get(name).copyFileFromContainer(

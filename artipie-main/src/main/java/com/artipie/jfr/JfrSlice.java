@@ -63,7 +63,7 @@ public final class JfrSlice implements Slice {
      * @param body The request body
      * @param event JFR event
      * @return The response.
-         */
+     */
     private Response wrapResponse(
         final String line,
         final Iterable<Map.Entry<String, String>> headers,

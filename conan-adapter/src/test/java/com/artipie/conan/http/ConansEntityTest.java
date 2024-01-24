@@ -127,7 +127,7 @@ class ConansEntityTest {
      * @param files List of files required for test.
      * @param factory Request instance factory.
      * @throws JSONException For Json parsing errors.
-         */
+     */
     private void runTest(final String request, final String json, final String[] files,
         final Function<Storage, Slice> factory) throws JSONException {
         final Storage storage = new InMemoryStorage();

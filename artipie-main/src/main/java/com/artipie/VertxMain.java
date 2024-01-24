@@ -93,7 +93,7 @@ public final class VertxMain {
 
     /**
      * Port and http3 server.
-         */
+     */
     private final Map<Integer, Http3Server> http3;
 
     /**
@@ -188,7 +188,7 @@ public final class VertxMain {
      * @param settings Settings.
      * @param mport Artipie service main port
      * @param jwt Jwt authentication
-         */
+     */
     private void startRepos(
         final Vertx vertx,
         final Settings settings,
@@ -246,7 +246,7 @@ public final class VertxMain {
      * @param vertx Vertx instance
      * @param mctx Metrics context
      * @return Port server started to listen on.
-         */
+     */
     private int listenOn(
         final Slice slice, final int sport, final Vertx vertx, final MetricsContext mctx
     ) {

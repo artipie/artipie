@@ -74,7 +74,7 @@ public final class RepositoryRest extends BaseRest {
      * @param data Repository data management
      * @param policy Artipie policy
      * @param events Artifact events queue
-         */
+     */
     public RepositoryRest(
         final FiltersCache cache, final CrudRepoSettings crs, final RepoData data,
         final Policy<?> policy, final Optional<MetadataEventQueues> events

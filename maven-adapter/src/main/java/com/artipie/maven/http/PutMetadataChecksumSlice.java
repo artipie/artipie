@@ -98,7 +98,7 @@ public final class PutMetadataChecksumSlice implements Slice {
      * @param mvn Maven repository
      * @param rname Repository name
      * @param events Events queue
-         */
+     */
     public PutMetadataChecksumSlice(final Storage asto, final ValidUpload valid, final Maven mvn,
         final String rname, final Optional<Queue<ArtifactEvent>> events) {
         this.asto = asto;

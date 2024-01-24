@@ -89,7 +89,7 @@ final class CurlPublish implements Publish {
      * @param vers Package version
      * @param bytes Package bytes
      * @return Completable action
-         */
+     */
     private CompletableFuture<Void> saveAndUpdate(
         final TgzArchive uploaded, final String name, final String vers, final byte[] bytes
     ) {

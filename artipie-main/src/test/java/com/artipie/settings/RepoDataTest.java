@@ -39,7 +39,7 @@ class RepoDataTest {
 
     /**
      * Maximum awaiting time duration.
-         */
+     */
     private static final long MAX_WAIT = Duration.ofMinutes(1).toMillis();
 
     /**
@@ -209,7 +209,7 @@ class RepoDataTest {
      * Allows to wait result of action during period of time.
      * @param action Action
      * @return Result of action
-         */
+     */
     private Boolean waitCondition(final Supplier<Boolean> action) {
         final long max = System.currentTimeMillis() + RepoDataTest.MAX_WAIT;
         boolean res;

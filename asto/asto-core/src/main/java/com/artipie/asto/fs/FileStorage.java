@@ -244,7 +244,7 @@ public final class FileStorage implements Storage {
     /**
      * Removes empty key parts (directories).
      * @param target Directory path
-         */
+     */
     private void deleteEmptyParts(final Path target) {
         final Path dirabs = this.dir.normalize().toAbsolutePath();
         final Path path = target.normalize().toAbsolutePath();

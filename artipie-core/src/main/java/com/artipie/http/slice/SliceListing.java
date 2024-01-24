@@ -79,7 +79,7 @@ public final class SliceListing implements Slice {
      * @param transform Transformation
      * @param mtype Mime type
      * @param format Format of a key collection
-         */
+     */
     public SliceListing(
         final Storage storage,
         final Function<String, Key> transform,

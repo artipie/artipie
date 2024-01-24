@@ -27,7 +27,7 @@ final class GroupResult {
 
     /**
      * Subscriber which cancel publisher subscription.
-         */
+     */
     private static final Subscriber<? super Object> CANCEL_SUB = new Subscriber<Object>() {
         @Override
         public void onSubscribe(final Subscription sub) {

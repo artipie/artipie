@@ -53,7 +53,7 @@ public final class HexSlice extends Slice.Wrap {
      * @param users Concrete identities.
      * @param events Artifact events queue
      * @param name Repository name
-         */
+     */
     public HexSlice(final Storage storage, final Policy<?> policy, final Authentication users,
         final Optional<Queue<ArtifactEvent>> events, final String name) {
         super(new SliceRoute(

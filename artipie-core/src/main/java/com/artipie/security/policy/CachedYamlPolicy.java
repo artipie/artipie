@@ -212,7 +212,7 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
      * 2) function to get permissions of the role.
      * @param user Username
      * @return Callable to create {@link UserPermissions}
-         */
+     */
     private Callable<UserPermissions> createUserPermissions(final AuthUser user) {
         return () -> new UserPermissions(
             new UncheckedSupplier<>(

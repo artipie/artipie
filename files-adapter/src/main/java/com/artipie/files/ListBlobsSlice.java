@@ -78,7 +78,7 @@ public final class ListBlobsSlice implements Slice {
      * @param format Blob list format
      * @param mtype Mime type
      * @param transform Transformation
-         */
+     */
     public ListBlobsSlice(
         final Storage storage,
         final BlobListFormat format,

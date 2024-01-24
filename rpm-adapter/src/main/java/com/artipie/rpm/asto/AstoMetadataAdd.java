@@ -129,7 +129,7 @@ public final class AstoMetadataAdd {
      * @param type Metadata type
      * @param event Xml event instance
      * @return COmpletable action
-         */
+     */
     private CompletableFuture<Void> add(final Key temp, final Collection<Package.Meta> metas,
         final MergedXml.Result primary, final XmlPackage type, final XmlEvent event) {
         return this.getExistingOrDefaultKey(type).thenCompose(

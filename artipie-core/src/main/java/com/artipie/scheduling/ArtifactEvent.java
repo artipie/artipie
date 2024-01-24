@@ -63,7 +63,7 @@ public final class ArtifactEvent {
      * @param rtype Repository type
      * @param rname Repository name
      * @param aname Artifact name
-         */
+     */
     public ArtifactEvent(final String rtype, final String rname, final String aname) {
         this(rtype, rname, ArtifactEvent.DEF_OWNER, aname, "", 0L, 0L, Type.DELETE_ALL);
     }
@@ -74,7 +74,7 @@ public final class ArtifactEvent {
      * @param rname Repository name
      * @param aname Artifact name
      * @param version Artifact version
-         */
+     */
     public ArtifactEvent(final String rtype, final String rname,
         final String aname, final String version) {
         this(rtype, rname, ArtifactEvent.DEF_OWNER, aname, version, 0L, 0L, Type.DELETE_VERSION);
@@ -90,7 +90,7 @@ public final class ArtifactEvent {
      * @param size Artifact size
      * @param created Artifact created date
      * @param etype Event type
-         */
+     */
     public ArtifactEvent(final String rtype, final String rname, final String owner,
         final String aname, final String version, final long size,
         final long created, final Type etype) {
@@ -113,7 +113,7 @@ public final class ArtifactEvent {
      * @param version Artifact version
      * @param size Artifact size
      * @param created Artifact created date
-         */
+     */
     public ArtifactEvent(final String rtype, final String rname, final String owner,
         final String aname, final String version, final long size,
         final long created) {
@@ -128,7 +128,7 @@ public final class ArtifactEvent {
      * @param aname Artifact name
      * @param version Artifact version
      * @param size Artifact size
-         */
+     */
     public ArtifactEvent(final String rtype, final String rname, final String owner,
         final String aname, final String version, final long size) {
         this(rtype, rname, owner, aname, version, size, System.currentTimeMillis(), Type.INSERT);

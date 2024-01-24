@@ -69,7 +69,7 @@ public class RestApiServerBase {
 
     /**
      * Maximum awaiting time duration of port availability.
-         */
+     */
     private static final long MAX_WAIT = Duration.ofMinutes(1).toMillis();
 
     /**
@@ -79,7 +79,7 @@ public class RestApiServerBase {
 
     /**
      * Test security storage.
-         */
+     */
     protected Storage ssto;
 
     /**

@@ -53,7 +53,7 @@ public final class MergedXmlPackage implements MergedXml {
      * @param out Output stream
      * @param type Xml package type
      * @param res Result of the primary.xml merging
-         */
+     */
     public MergedXmlPackage(final Optional<InputStream> input, final OutputStream out,
         final XmlPackage type, final MergedXml.Result res) {
         this.input = input;
@@ -68,7 +68,7 @@ public final class MergedXmlPackage implements MergedXml {
      * @param out Output stream
      * @param type Xml package type
      * @param res Result of the primary.xml merging
-         */
+     */
     public MergedXmlPackage(final InputStream input, final OutputStream out,
         final XmlPackage type, final MergedXml.Result res) {
         this(Optional.of(input), out, type, res);

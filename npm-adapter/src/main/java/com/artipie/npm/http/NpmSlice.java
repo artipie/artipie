@@ -96,7 +96,7 @@ public final class NpmSlice implements Slice {
      * @param auth Authentication.
      * @param name Repository name
      * @param events Events queue
-         */
+     */
     public NpmSlice(
         final URL base,
         final Storage storage,

@@ -37,7 +37,7 @@ public final class YamlProxyConfig implements ProxyConfig {
      *
      * @param repoConfig Repository config.
      * @param yaml Source YAML.
-         */
+     */
     public YamlProxyConfig(
         final RepoConfig repoConfig,
         final YamlMapping yaml

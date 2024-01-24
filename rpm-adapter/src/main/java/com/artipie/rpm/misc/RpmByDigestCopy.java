@@ -50,7 +50,7 @@ public final class RpmByDigestCopy {
      * @param key Key to copy from
      * @param digests Content digests to exclude
      * @param algorithm Digest algorithm
-         */
+     */
     public RpmByDigestCopy(
         final Storage from, final Key key, final List<String> digests,
         final Digests algorithm

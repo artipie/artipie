@@ -73,7 +73,7 @@ public final class MavenSlice extends Slice.Wrap {
      * @param users Concrete identities.
      * @param name Repository name
      * @param events Artifact events
-         */
+     */
     public MavenSlice(final Storage storage, final Policy<?> policy, final Authentication users,
         final String name, final Optional<Queue<ArtifactEvent>> events) {
         super(

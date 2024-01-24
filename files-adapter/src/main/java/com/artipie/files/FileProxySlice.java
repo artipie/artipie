@@ -82,7 +82,7 @@ public final class FileProxySlice implements Slice {
      * @param remote Remote URI
      * @param auth Authenticator
      * @param asto Cache storage
-         */
+     */
     public FileProxySlice(final ClientSlices clients, final URI remote,
         final Authenticator auth, final Storage asto) {
         this(
@@ -98,7 +98,7 @@ public final class FileProxySlice implements Slice {
      * @param asto Cache storage
      * @param events Artifact events
      * @param rname Repository name
-         */
+     */
     public FileProxySlice(final ClientSlices clients, final URI remote, final Storage asto,
         final Queue<ArtifactEvent> events, final String rname) {
         this(

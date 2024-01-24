@@ -59,7 +59,7 @@ public final class DebianSlice extends Slice.Wrap {
      * @param users Users
      * @param config Repository configuration
      * @param events Artifact events queue
-         */
+     */
     public DebianSlice(
         final Storage storage, final Policy<?> policy,
         final Authentication users, final Config config,

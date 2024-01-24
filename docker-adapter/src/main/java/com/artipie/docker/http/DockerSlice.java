@@ -180,7 +180,7 @@ public final class DockerSlice extends Slice.Wrap {
      * @param auth Authentication scheme.
      * @param name Repository name
      * @return Authorized slice.
-         */
+     */
     private static Slice auth(
         final ScopeSlice origin,
         final Policy<?> perms,

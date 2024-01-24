@@ -95,7 +95,7 @@ public final class FilesSlice extends Slice.Wrap {
      * @param auth Auth details.
      * @param name Repository name
      * @param events Repository artifact events
-         */
+     */
     public FilesSlice(
         final Storage storage, final Policy<?> perms, final Authentication auth, final String name,
         final Optional<Queue<ArtifactEvent>> events

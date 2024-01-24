@@ -32,7 +32,7 @@ public final class ConanRepo {
      * Updates repository incrementally.
      * @param prefix Repo prefix
      * @return Completable action
-         */
+     */
     public Completable batchUpdateIncrementally(final Key prefix) {
         return null;
     }

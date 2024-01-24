@@ -112,7 +112,7 @@ public final class QuartzService {
      * @param <T> Class type parameter
      * @return Set of the started quartz job keys
      * @throws SchedulerException On error
-         */
+     */
     public <T extends Job> Set<JobKey> schedulePeriodicJob(
         final int seconds, final int threads, final Class<T> clazz, final JobDataMap data
     ) throws SchedulerException {

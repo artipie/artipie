@@ -187,7 +187,7 @@ public final class ConansEntity {
     /**
      * Conan /search REST APIs for package binaries.
      * @since 0.1
-         */
+     */
     public static final class GetSearchBinPkg extends BaseConanSlice {
 
         /**
@@ -299,7 +299,7 @@ public final class ConansEntity {
     /**
      * Conan /packages/~hash~ REST APIs.
      * @since 0.1
-         */
+     */
     public static final class GetPkgInfo extends BaseConanSlice {
 
         /**

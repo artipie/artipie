@@ -107,7 +107,7 @@ public final class CondaSlice extends Slice.Wrap {
      * @param url Application url
      * @param repo Repository name
      * @param events Events queue
-         */
+     */
     public CondaSlice(final Storage storage, final Policy<?> policy, final Authentication users,
         final Tokens tokens, final String url, final String repo,
         final Optional<Queue<ArtifactEvent>> events) {

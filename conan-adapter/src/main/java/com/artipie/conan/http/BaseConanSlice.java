@@ -155,7 +155,7 @@ abstract class BaseConanSlice implements Slice {
      * @param ctor Constructs resulting json string.
      * @param <T> Generators result type.
      * @return Json RequestResult in CompletableFuture.
-         */
+     */
     protected static <T> CompletableFuture<RequestResult> generateJson(
         final String[] keys,
         final Function<String, Tuple2<Key, CompletableFuture<T>>> mapper,

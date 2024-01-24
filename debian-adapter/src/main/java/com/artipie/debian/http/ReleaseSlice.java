@@ -50,7 +50,7 @@ public final class ReleaseSlice implements Slice {
      * @param asto Storage
      * @param release Release index
      * @param inrelease InRelease index
-         */
+     */
     public ReleaseSlice(final Slice origin, final Storage asto, final Release release,
         final InRelease inrelease) {
         this.origin = origin;

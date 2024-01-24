@@ -126,7 +126,7 @@ public final class AstoMetadataRemove {
      * @param temp Temp key where to write the result
      * @param checksums Checksums to remove
      * @return Completable action with count of the items left in storage
-         */
+     */
     private CompletionStage<Long> removePackages(
         final XmlPackage pckg, final Key key, final Key temp, final Collection<String> checksums
     ) {

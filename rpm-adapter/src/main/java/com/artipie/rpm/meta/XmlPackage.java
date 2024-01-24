@@ -46,7 +46,7 @@ public enum XmlPackage {
 
     /**
      * File suffix.
-         */
+     */
     private static final String SUFFIX = ".xml";
 
     /**

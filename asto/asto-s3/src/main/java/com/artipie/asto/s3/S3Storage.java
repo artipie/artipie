@@ -95,7 +95,7 @@ public final class S3Storage implements Storage {
      *  <code>true</code> - if multipart feature is allowed for larger blobs,
      *  <code>false</code> otherwise.
      * @param endpoint S3 client endpoint
-         */
+     */
     public S3Storage(final S3AsyncClient client, final String bucket, final boolean multipart,
         final String endpoint) {
         this.client = client;

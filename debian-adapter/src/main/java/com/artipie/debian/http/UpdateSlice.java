@@ -168,7 +168,7 @@ public final class UpdateSlice implements Slice {
      * @param archs Supported architectures
      * @param hdrs Request headers
      * @return Completion action
-         */
+     */
     private CompletionStage<Void> logEvents(
         final Key artifact, final String control, final List<String> archs, final Headers hdrs
     ) {

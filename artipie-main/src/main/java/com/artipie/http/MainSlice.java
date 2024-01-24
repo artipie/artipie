@@ -51,7 +51,7 @@ public final class MainSlice extends Slice.Wrap {
      * @param http HTTP client.
      * @param settings Artipie settings.
      * @param tokens Tokens: authentication and generation
-         */
+     */
     public MainSlice(
         final ClientSlices http,
         final Settings settings,

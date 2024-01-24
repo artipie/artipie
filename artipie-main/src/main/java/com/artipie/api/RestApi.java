@@ -80,7 +80,7 @@ public final class RestApi extends AbstractVerticle {
      * @param keystore KeyStore
      * @param jwt Jwt authentication provider
      * @param events Artifact metadata events queue
-         */
+     */
     public RestApi(
         final ArtipieCaches caches,
         final Storage configsStorage,
@@ -104,7 +104,7 @@ public final class RestApi extends AbstractVerticle {
      * @param settings Artipie settings
      * @param port Port to start verticle on
      * @param jwt Jwt authentication provider
-         */
+     */
     public RestApi(final Settings settings, final int port, final JWTAuth jwt) {
         this(
             settings.caches(), settings.configStorage(),

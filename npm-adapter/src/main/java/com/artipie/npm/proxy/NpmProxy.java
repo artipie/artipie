@@ -70,7 +70,7 @@ public class NpmProxy {
      * Retrieve package metadata.
      * @param name Package name
      * @return Package metadata (cached or downloaded from remote repository)
-         */
+     */
     public Maybe<NpmPackage> getPackage(final String name) {
         return this.storage.getPackage(name).flatMap(
             pkg -> this.remotePackage(name).switchIfEmpty(Maybe.just(pkg))

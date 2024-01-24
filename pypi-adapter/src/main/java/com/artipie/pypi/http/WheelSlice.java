@@ -183,7 +183,7 @@ final class WheelSlice implements Slice {
      * @param filename Artifact filename
      * @param headers Request headers
      * @return Completion action
-         */
+     */
     private CompletionStage<Void> putArtifactToQueue(
         final Key key, final PackageInfo info, final String filename,
         final Iterable<Map.Entry<String, String>> headers

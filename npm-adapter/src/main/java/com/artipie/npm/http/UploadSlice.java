@@ -67,7 +67,7 @@ public final class UploadSlice implements Slice {
      * @param storage Abstract storage
      * @param events Artifact events queue
      * @param rname Repository name
-         */
+     */
     public UploadSlice(final Publish npm, final Storage storage,
         final Optional<Queue<ArtifactEvent>> events, final String rname) {
         this.npm = npm;

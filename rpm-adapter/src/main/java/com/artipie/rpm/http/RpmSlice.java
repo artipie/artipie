@@ -48,7 +48,7 @@ public final class RpmSlice extends Slice.Wrap {
      * @param policy Access policy.
      * @param auth Auth details.
      * @param config Repository configuration.
-         */
+     */
     public RpmSlice(
         final Storage storage,
         final Policy<?> policy,
@@ -65,7 +65,7 @@ public final class RpmSlice extends Slice.Wrap {
      * @param auth Auth details.
      * @param config Repository configuration.
      * @param events Artifact events queue
-         */
+     */
     public RpmSlice(
         final Storage storage,
         final Policy<?> policy,

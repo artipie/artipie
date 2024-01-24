@@ -79,7 +79,7 @@ public final class DockerProxy implements Slice {
      * @param policy Access policy.
      * @param auth Authentication mechanism.
      * @param events Artifact events queue
-         */
+     */
     public DockerProxy(
         final ClientSlices client,
         final boolean standalone,

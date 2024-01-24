@@ -75,7 +75,7 @@ public final class StorageHasMetadata extends AllOf<Storage> {
      * @param expected Amount of expected items in metadata
      * @return True if metadata is correct
      * @throws Exception On error
-         */
+     */
     private static boolean hasMetadata(
         final Storage storage, final Path temp, final XmlPackage pckg, final int expected
     ) throws Exception {

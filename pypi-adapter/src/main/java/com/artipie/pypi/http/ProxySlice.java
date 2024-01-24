@@ -73,8 +73,8 @@ final class ProxySlice implements Slice {
      * @param cache Cache
      * @param events Artifact events queue
      * @param rname Repository name
-         */
-    ProxySlice(final Slice origin, final Cache cache,
+     */
+    proxySlice(final Slice origin, final Cache cache,
         final Optional<Queue<ProxyArtifactEvent>> events,
         final String rname) {
         this.origin = origin;

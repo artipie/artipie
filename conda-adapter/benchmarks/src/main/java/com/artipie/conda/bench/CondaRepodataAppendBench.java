@@ -111,7 +111,7 @@ public class CondaRepodataAppendBench {
     /**
      * Package item: .conda or tar.bz2 package as bytes, file name and checksums.
      * @since 0.2
-         */
+     */
     private static final class TestPackage {
 
         /**

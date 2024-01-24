@@ -50,7 +50,7 @@ public final class JoinedTagsSource {
      * @param from From which tag to start, exclusive.
      * @param limit Maximum number of tags returned.
      * @param manifests Sources to load tags from.
-         */
+     */
     public JoinedTagsSource(
         final RepoName repo,
         final Optional<Tag> from,
@@ -67,7 +67,7 @@ public final class JoinedTagsSource {
      * @param manifests Sources to load tags from.
      * @param from From which tag to start, exclusive.
      * @param limit Maximum number of tags returned.
-         */
+     */
     public JoinedTagsSource(
         final RepoName repo,
         final List<Manifests> manifests,

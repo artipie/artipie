@@ -53,7 +53,7 @@ public final class CacheRepo implements Repo {
      * @param cache Cache repository.
      * @param events Artifact events
      * @param rname Repository name
-         */
+     */
     public CacheRepo(final RepoName name, final Repo origin, final Repo cache,
         final Optional<Queue<ArtifactEvent>> events, final String rname) {
         this.name = name;

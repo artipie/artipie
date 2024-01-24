@@ -39,7 +39,7 @@ public final class GithubAuth implements Authentication {
 
     /**
      * New GitHub authentication.
-         */
+     */
     public GithubAuth() {
         this(
             token -> {

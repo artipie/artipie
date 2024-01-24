@@ -24,7 +24,7 @@ public final class Version implements Comparable<Version>, NuspecField {
     /**
      * RegEx pattern for matching version string.
      *
-         */
+     */
     private static final Pattern PATTERN = Pattern.compile(
         String.join(
             "",

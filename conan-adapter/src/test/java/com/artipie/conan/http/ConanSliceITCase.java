@@ -460,7 +460,7 @@ class ConanSliceITCase {
     /**
      * Starts VertxSliceServer and docker container.
      * @throws Exception On error
-         */
+     */
     private void start() throws Exception {
         this.storage = new InMemoryStorage();
         this.server = new VertxSliceServer(

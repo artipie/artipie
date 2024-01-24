@@ -88,7 +88,7 @@ public final class Rpm {
      * @param naming RPM files naming policy
      * @param dgst Hashing sum computation algorithm
      * @param filelists Include file lists in update
-         */
+     */
     public Rpm(final Storage stg, final NamingPolicy naming, final Digest dgst,
         final boolean filelists) {
         this(stg, new RepoConfig.Simple(dgst, naming, filelists));

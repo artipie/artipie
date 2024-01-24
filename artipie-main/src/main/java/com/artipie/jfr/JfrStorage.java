@@ -212,7 +212,7 @@ public final class JfrStorage implements Storage {
      * @param evt JFR event
      * @param updater Lambda to fulfill an event`s fields
      * @return Wrapped content
-         */
+     */
     private ChunksAndSizeMetricsContent metricsContent(
         final Key key,
         final Content content,
@@ -251,7 +251,7 @@ public final class JfrStorage implements Storage {
      * @param updater Lambda to fulfill an event`s fields
      * @param <T> Result type
      * @return Result
-         */
+     */
     private <T> T eventProcess(
         final T res,
         final Key key,

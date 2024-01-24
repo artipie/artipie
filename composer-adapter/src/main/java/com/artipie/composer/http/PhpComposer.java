@@ -34,7 +34,7 @@ public final class PhpComposer extends Slice.Wrap {
      * @param auth Authentication
      * @param name Repository name
      * @param events Artifact repository events
-         */
+     */
     public PhpComposer(
         final Repository repository,
         final Policy<?> policy,

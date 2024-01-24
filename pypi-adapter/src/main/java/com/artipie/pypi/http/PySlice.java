@@ -53,7 +53,7 @@ public final class PySlice extends Slice.Wrap {
      * @param auth Concrete identities.
      * @param name Repository name
      * @param queue Events queue
-         */
+     */
     public PySlice(final Storage storage, final Policy<?> policy, final Authentication auth,
         final String name, final Optional<Queue<ArtifactEvent>> queue) {
         super(

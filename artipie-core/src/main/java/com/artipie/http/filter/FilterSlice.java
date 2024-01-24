@@ -34,7 +34,7 @@ public class FilterSlice implements Slice {
      * Ctor.
      * @param origin Origin slice
      * @param yaml Yaml mapping to read filters from
-         */
+     */
     public FilterSlice(final Slice origin, final YamlMapping yaml) {
         this(
             origin,

@@ -48,7 +48,7 @@ public final class XmlEventPrimary implements XmlEvent {
 
     /**
      * Post dependency.
-         */
+     */
     private static final int RPMSENSE_SCRIPT_POST = 1 << 10;
 
     /**
@@ -370,7 +370,7 @@ public final class XmlEventPrimary implements XmlEvent {
      * @param prefix Prefix
      * @param attrs Attributes list
      * @throws XMLStreamException On Error
-         */
+     */
     private static void addAttributes(final XMLEventWriter writer, final String tag,
         final String namespace, final String prefix, final Map<String, String> attrs)
         throws XMLStreamException {
@@ -405,7 +405,7 @@ public final class XmlEventPrimary implements XmlEvent {
      * @param flags Entries flags
      * @param def Default flag
      * @throws XMLStreamException On error
-         */
+     */
     private static void addEntryAttr(final XMLEventWriter writer, final XMLEventFactory events,
         final List<HeaderTags.Version> versions, final int ind, final List<Optional<String>> flags,
         final String def) throws XMLStreamException {
@@ -444,7 +444,7 @@ public final class XmlEventPrimary implements XmlEvent {
      * @param rversion Requires version
      * @param flag Requires flag
      * @return True is requires item should NOT be added
-         */
+     */
     private static boolean checkRequiresInProvides(
         final List<String> nprovides, final List<HeaderTags.Version> vprovides,
         final String rname, final HeaderTags.Version rversion, final Optional<String> flag

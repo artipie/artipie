@@ -57,7 +57,7 @@ public final class DownloadAssetSlice implements Slice {
      * @param path Asset path helper
      * @param packages Queue with proxy packages and owner
      * @param rname Repository name
-         */
+     */
     public DownloadAssetSlice(final NpmProxy npm, final AssetPath path,
         final Optional<Queue<ProxyArtifactEvent>> packages, final String rname) {
         this.npm = npm;

@@ -36,7 +36,7 @@ public final class NpmAsset {
      * @param content Reactive publisher for asset content
      * @param modified Last modified date
      * @param ctype Original content type
-         */
+     */
     public NpmAsset(final String path,
         final Publisher<ByteBuffer> content,
         final String modified,

@@ -57,7 +57,7 @@ public final class GoSlice implements Slice {
      * @param policy Security policy
      * @param users Users
      * @param name Repository name
-         */
+     */
     public GoSlice(final Storage storage, final Policy<?> policy, final Authentication users,
         final String name) {
         this.origin = new SliceRoute(
@@ -110,7 +110,7 @@ public final class GoSlice implements Slice {
      * @param users Users
      * @param name Repository name
      * @return Slice
-         */
+     */
     private static Slice createSlice(final Storage storage, final String type,
         final Policy<?> policy, final Authentication users, final String name) {
         return new BasicAuthzSlice(

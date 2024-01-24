@@ -49,7 +49,7 @@ public final class StorageAliasesRest extends BaseRest {
      * @param caches Artipie settings caches
      * @param asto Artipie settings storage
      * @param policy Artipie policy
-         */
+     */
     public StorageAliasesRest(final StoragesCache caches, final BlockingStorage asto,
         final Policy<?> policy) {
         this.caches = caches;

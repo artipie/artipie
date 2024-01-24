@@ -30,7 +30,7 @@ public abstract class FactoryLoader<F, A, C, O> {
 
     /**
      * The name of the factory <-> factory.
-         */
+     */
     protected final Map<String, F> factories;
 
     /**

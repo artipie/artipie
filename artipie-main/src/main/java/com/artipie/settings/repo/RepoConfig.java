@@ -123,7 +123,7 @@ public final class RepoConfig {
     /**
      * Start repo on http3 version?
      * @return True if so
-         */
+     */
     public boolean startOnHttp3() {
         return Boolean.parseBoolean(this.repoYaml().string("http3"));
     }
