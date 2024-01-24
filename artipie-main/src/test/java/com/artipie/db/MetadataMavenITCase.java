@@ -33,7 +33,7 @@ public final class MetadataMavenITCase {
 
     /**
      * Test deployments.
-             */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> new TestDeployment.ArtipieContainer().withConfig("artipie-db.yaml")

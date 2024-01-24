@@ -31,7 +31,7 @@ public final class DebianGpgITCase {
 
     /**
      * Test deployments.
-         */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

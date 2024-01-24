@@ -50,7 +50,7 @@ public final class CondaS3ITCase {
 
     /**
      * Test deployments.
-             */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

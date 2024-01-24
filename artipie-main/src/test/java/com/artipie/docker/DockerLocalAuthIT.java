@@ -28,7 +28,7 @@ final class DockerLocalAuthIT {
 
     /**
      * Deployment for tests.
-         */
+     */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> new TestDeployment.ArtipieContainer().withConfig("artipie_with_policy.yaml")

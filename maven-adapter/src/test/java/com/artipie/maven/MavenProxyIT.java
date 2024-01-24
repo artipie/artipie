@@ -51,7 +51,7 @@ final class MavenProxyIT {
 
     /**
      * Temporary directory for all tests.
-         */
+     */
     @TempDir
     Path tmp;
 

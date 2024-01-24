@@ -23,7 +23,7 @@ public final class MetadataDockerITCase {
 
     /**
      * Deployment for tests.
-         */
+     */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> new TestDeployment.ArtipieContainer().withConfig("artipie-db.yaml")

@@ -67,7 +67,7 @@ public final class DockerSlice extends Slice.Wrap {
      * @param auth Authentication scheme.
      * @param events Artifact events queue
      * @param name Repository name
-         */
+     */
     @SuppressWarnings("PMD.ExcessiveMethodLength")
     public DockerSlice(final Docker docker, final Policy<?> policy, final AuthScheme auth,
         final Optional<Queue<ArtifactEvent>> events, final String name) {

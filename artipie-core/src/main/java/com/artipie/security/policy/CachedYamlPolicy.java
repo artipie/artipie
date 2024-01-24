@@ -127,7 +127,7 @@ public final class CachedYamlPolicy implements Policy<UserPermissions>, Cleanabl
      * @param users Cache for username and user individual permissions
      * @param roles Cache for role name and role permissions
      * @param asto Storage to read users and roles yaml files from
-         */
+     */
     CachedYamlPolicy(
         final Cache<String, UserPermissions> cache,
         final Cache<String, User> users,

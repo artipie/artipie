@@ -112,7 +112,7 @@ public final class TestResource {
     /**
      * Recourse as bytes.
      * @return Bytes
-         */
+     */
     @SuppressWarnings("PMD.AssignmentInOperand")
     public byte[] asBytes() {
         try (InputStream stream = this.asInputStream()) {

@@ -32,7 +32,7 @@ public final class MavenITCase {
 
     /**
      * Test deployments.
-             */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

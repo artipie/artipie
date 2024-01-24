@@ -65,7 +65,7 @@ public final class RpmSliceITCase {
 
     /**
      * Temporary directory for all tests.
-         */
+     */
     @TempDir
     Path tmp;
 

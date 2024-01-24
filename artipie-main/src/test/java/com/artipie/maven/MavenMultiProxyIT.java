@@ -27,7 +27,7 @@ final class MavenMultiProxyIT {
 
     /**
      * Test deployments.
-             */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         new MapOf<>(

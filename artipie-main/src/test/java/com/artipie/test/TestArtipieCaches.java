@@ -34,7 +34,7 @@ public final class TestArtipieCaches implements ArtipieCaches {
 
     /**
      * Cache for configurations of filters.
-         */
+     */
     @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
     private final FiltersCache filtersCache;
 

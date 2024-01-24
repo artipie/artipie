@@ -36,7 +36,7 @@ import org.junit.jupiter.api.io.TempDir;
 public final class RepositoryRestTest extends RestApiServerBase {
     /**
      * Temp dir.
-         */
+     */
     @TempDir
     Path temp;
 

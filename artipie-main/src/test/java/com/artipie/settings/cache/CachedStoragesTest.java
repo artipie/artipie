@@ -26,7 +26,7 @@ final class CachedStoragesTest {
 
     /**
      * Test directory.
-         */
+     */
     @TempDir
     Path temp;
 

@@ -36,7 +36,7 @@ public class HexpmITCase {
 
     /**
      * Test deployments.
-             */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

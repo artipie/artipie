@@ -59,7 +59,7 @@ public class RestApiServerBase {
 
     /**
      * Wait test completion.
-         */
+     */
     static final long TEST_TIMEOUT = Duration.ofSeconds(3).toSeconds();
 
     /**
@@ -125,7 +125,7 @@ public class RestApiServerBase {
      * Creates instance of KeyStore based on Artipie yaml-configuration.
      * @return KeyStore.
      * @throws IOException During yaml creation
-         */
+     */
     Optional<KeyStore> keyStore() throws IOException {
         return Optional.empty();
     }
@@ -219,7 +219,7 @@ public class RestApiServerBase {
      * @param rqs Request parameters: method and path
      * @param assertion Test assertion
      * @throws Exception On error
-         */
+     */
     final void requestAndAssert(final Vertx vertx, final VertxTestContext ctx,
         final TestRequest rqs, final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
         this.requestAndAssert(
@@ -238,7 +238,7 @@ public class RestApiServerBase {
      * @param token Jwt auth token
      * @param assertion Test assertion
      * @throws Exception On error
-         */
+     */
     final void requestAndAssert(final Vertx vertx, final VertxTestContext ctx,
         final TestRequest rqs, final Optional<String> token,
         final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
@@ -280,7 +280,7 @@ public class RestApiServerBase {
      * @param pass Password
      * @return Jwt token
      * @throws Exception On error
-         */
+     */
     final AtomicReference<String> getToken(
         final Vertx vertx, final VertxTestContext ctx, final String name, final String pass
     ) throws Exception {

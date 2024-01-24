@@ -158,7 +158,7 @@ public interface CondaRepodata {
     /**
      * Package item: .conda or tar.bz2 package as input stream, file name and checksums.
      * @since 0.2
-         */
+     */
     final class PackageItem {
 
         /**

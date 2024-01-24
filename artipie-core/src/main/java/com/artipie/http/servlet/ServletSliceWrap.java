@@ -78,7 +78,7 @@ public final class ServletSliceWrap {
      * @param req Servlet request
      * @param rsp Servlet response
      * @return Future
-             */
+     */
     @SuppressWarnings({"PMD.OnlyOneReturn", "PMD.AvoidCatchingGenericException"})
     public CompletionStage<Void> handle(final HttpServletRequest req,
         final HttpServletResponse rsp) {

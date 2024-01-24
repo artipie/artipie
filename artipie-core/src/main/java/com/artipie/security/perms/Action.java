@@ -52,7 +52,7 @@ public interface Action {
     /**
      * Standard actions.
      * @since 1.2
-         */
+     */
     enum Standard implements Action {
 
         READ(0x4, "read", "r", "download", "install", "pull"),

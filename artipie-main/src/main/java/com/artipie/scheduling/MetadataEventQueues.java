@@ -90,7 +90,7 @@ public final class MetadataEventQueues {
      * Obtain queue for proxy adapter repository.
      * @param config Repository config
      * @return Queue for proxy events
-         */
+     */
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public Optional<Queue<ProxyArtifactEvent>> proxyEventQueues(final RepoConfig config) {
         Optional<Queue<ProxyArtifactEvent>> result =
@@ -173,7 +173,7 @@ public final class MetadataEventQueues {
     /**
      * Repository types.
      * @since 0.31
-         */
+     */
     enum ProxyRepoType {
 
         MAVEN_PROXY {

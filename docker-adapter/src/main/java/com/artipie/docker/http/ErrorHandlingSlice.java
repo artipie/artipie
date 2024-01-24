@@ -82,7 +82,7 @@ final class ErrorHandlingSlice implements Slice {
      *
      * @param throwable Throwable to translate.
      * @return Result response, empty that throwable cannot be handled.
-         */
+     */
     @SuppressWarnings("PMD.OnlyOneReturn")
     private static Optional<Response> handle(final Throwable throwable) {
         if (throwable instanceof DockerError) {

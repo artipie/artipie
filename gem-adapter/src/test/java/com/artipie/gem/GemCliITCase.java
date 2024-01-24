@@ -188,7 +188,7 @@ final class GemCliITCase {
      * @param ruby The ruby container.
      * @param command Bash command to execute.
      * @return Exit code.
-         */
+     */
     @SuppressWarnings("PMD.OnlyOneReturn")
     private static int bash(final RubyContainer ruby, final String command) {
         final Container.ExecResult exec;

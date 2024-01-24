@@ -60,7 +60,7 @@ final class RpmTest {
 
     /**
      * Temporary directory for all tests.
-         */
+     */
     @TempDir
     static Path tmp;
 

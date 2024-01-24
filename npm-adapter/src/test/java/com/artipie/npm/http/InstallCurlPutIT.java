@@ -43,7 +43,7 @@ import org.testcontainers.containers.GenericContainer;
 final class InstallCurlPutIT {
     /**
      * Temporary directory for all tests.
-         */
+     */
     @TempDir
     Path tmp;
 

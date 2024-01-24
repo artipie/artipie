@@ -29,7 +29,7 @@ public interface ListingFormat {
     /**
      * Standard format implementations.
      * @since 1.1.0
-         */
+     */
     enum Standard implements ListingFormat {
         /**
          * Text format renders keys as a list of strings

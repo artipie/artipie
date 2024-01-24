@@ -35,7 +35,7 @@ class DbConsumerTest {
 
     /**
      * Test directory.
-         */
+     */
     @TempDir
     Path path;
 

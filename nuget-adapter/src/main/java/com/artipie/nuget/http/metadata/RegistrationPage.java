@@ -51,7 +51,7 @@ final class RegistrationPage {
      * @todo #87:60min Refactor RegistrationPage class, reduce number of fields.
      *  Probably it is needed to extract some abstraction for creating leaf objects,
      *  that will join `repository` and `content` fields and produce leaf JSON for package identity.
-         */
+     */
     RegistrationPage(
         final Repository repository,
         final ContentLocation content,

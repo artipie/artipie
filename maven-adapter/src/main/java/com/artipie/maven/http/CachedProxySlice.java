@@ -93,7 +93,7 @@ final class CachedProxySlice implements Slice {
      * @param cache Cache
      * @param events Artifact events
      * @param rname Repository name
-         */
+     */
     CachedProxySlice(final Slice client, final Cache cache,
         final Optional<Queue<ProxyArtifactEvent>> events, final String rname) {
         this.client = client;

@@ -225,7 +225,7 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
     /**
      * Artipie authentication.
      * @return Authentication instance.
-         */
+     */
     ArtipieSecurity auth() {
         return new ArtipieSecurity() {
             @Override

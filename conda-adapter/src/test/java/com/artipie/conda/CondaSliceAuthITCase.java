@@ -79,7 +79,7 @@ public final class CondaSliceAuthITCase {
 
     /**
      * Temporary directory for all tests.
-         */
+     */
     @TempDir
     Path tmp;
 

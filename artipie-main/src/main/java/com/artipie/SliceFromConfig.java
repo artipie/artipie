@@ -100,7 +100,7 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param cfg Repository config
      * @param standalone Standalone flag
      * @return Slice completionStage
-                     */
+     */
     @SuppressWarnings(
         {
             "PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength",

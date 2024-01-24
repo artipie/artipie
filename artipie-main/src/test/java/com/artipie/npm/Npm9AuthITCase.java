@@ -33,7 +33,7 @@ final class Npm9AuthITCase {
 
     /**
      * Test deployments.
-             */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> new TestDeployment.ArtipieContainer().withConfig("artipie_with_policy.yaml")

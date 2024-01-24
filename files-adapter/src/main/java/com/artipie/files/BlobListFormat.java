@@ -20,7 +20,7 @@ interface BlobListFormat {
     /**
      * Stamdard format implementations.
      * @since 1.0
-         */
+     */
     enum Standard implements BlobListFormat {
 
         /**

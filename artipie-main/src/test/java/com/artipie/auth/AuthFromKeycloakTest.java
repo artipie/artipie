@@ -106,7 +106,7 @@ public class AuthFromKeycloakTest {
 
     /**
      * Test directory.
-         */
+     */
     @TempDir
     Path path;
 
@@ -172,7 +172,7 @@ public class AuthFromKeycloakTest {
      * @param realm Keycloak realm
      * @param client Keycloak client application ID
      * @param password Keycloak client application password
-         */
+     */
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
     private YamlSettings settings(final String url, final String realm,
         final String client, final String password) {

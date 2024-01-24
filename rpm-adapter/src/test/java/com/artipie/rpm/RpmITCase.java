@@ -39,7 +39,7 @@ final class RpmITCase {
 
     /**
      * Temporary directory for all tests.
-         */
+     */
     @TempDir
     static Path tmp;
 

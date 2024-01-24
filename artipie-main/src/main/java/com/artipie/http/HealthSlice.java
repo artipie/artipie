@@ -64,7 +64,7 @@ public final class HealthSlice implements Slice {
     /**
      * Checks storage status by writing {@code OK} to storage.
      * @return True if OK
-         */
+     */
     @SuppressWarnings("PMD.OnlyOneReturn")
     private CompletionStage<Boolean> storageStatus() {
         try {

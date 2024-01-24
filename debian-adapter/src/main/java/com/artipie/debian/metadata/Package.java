@@ -36,7 +36,7 @@ public interface Package {
     /**
      * Simple {@link Package} implementation: it appends item to the index without any validation.
      * @since 0.1
-         */
+     */
     final class Asto implements Package {
 
         /**

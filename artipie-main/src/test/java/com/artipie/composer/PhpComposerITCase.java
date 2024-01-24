@@ -25,7 +25,7 @@ final class PhpComposerITCase {
 
     /**
      * Deployment for tests.
-         */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

@@ -34,7 +34,7 @@ class YamlSettingsTest {
 
     /**
      * Test directory.
-         */
+     */
     @TempDir
     Path temp;
 

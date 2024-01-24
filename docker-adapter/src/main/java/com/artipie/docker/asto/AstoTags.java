@@ -55,7 +55,7 @@ final class AstoTags implements Tags {
      * @param keys List of keys inside tags root.
      * @param from From which tag to start, exclusive.
      * @param limit Maximum number of tags returned.
-         */
+     */
     AstoTags(
         final RepoName name,
         final Key root,

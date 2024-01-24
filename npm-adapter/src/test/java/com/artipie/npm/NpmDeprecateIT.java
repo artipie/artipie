@@ -43,7 +43,7 @@ public final class NpmDeprecateIT {
 
     /**
      * Temporary directory for all tests.
-         */
+     */
     @TempDir
     Path tmp;
 

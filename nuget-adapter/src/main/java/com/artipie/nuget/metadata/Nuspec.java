@@ -32,7 +32,7 @@ public interface Nuspec {
      * Package identifier: original case sensitive and lowercase.
      * @return Package id
      * @throws ArtipieException If id field is not found
-         */
+     */
     @SuppressWarnings("PMD.ShortMethodName")
     NuspecField id();
 

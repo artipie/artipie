@@ -41,7 +41,7 @@ public final class NpmDistTagsIT {
 
     /**
      * Temporary directory for all tests.
-         */
+     */
     @TempDir
     Path tmp;
 

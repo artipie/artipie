@@ -42,7 +42,7 @@ public final class Accept {
      * Parses `Accept` header values, sorts them according to weight and returns in
      * corresponding order.
      * @return Set or the values
-         */
+     */
     @SuppressWarnings("PMD.OnlyOneReturn")
     public List<String> values() {
         final RqHeaders rqh = new RqHeaders(this.headers, Accept.NAME);

@@ -32,7 +32,7 @@ public final class Cli {
      * Main method of Cli tool.
      *
      * @param args Arguments of command line
-             */
+     */
     @SuppressWarnings(
         {
             "PMD.SystemPrintln",

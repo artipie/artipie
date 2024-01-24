@@ -123,7 +123,7 @@ public final class ConanSlice extends Slice.Wrap {
      * @param tokens User auth token generator.
      * @param tokenizer Tokens provider for repository items.
      * @param name Repository name.
-             */
+     */
     @SuppressWarnings("PMD.ExcessiveMethodLength")
     public ConanSlice(
         final Storage storage,

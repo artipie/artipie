@@ -68,7 +68,7 @@ public final class MavenITCase {
 
     /**
      * Temporary directory for all tests.
-         */
+     */
     @TempDir
     Path tmp;
 

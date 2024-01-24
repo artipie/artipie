@@ -17,7 +17,7 @@ final class Completion<T> {
     /**
      * Fake implementation for tests.
      * @since 1.0
-         */
+     */
     static final Completion<?> FAKE = new Completion<>(
         new Subscriber<Object>() {
             @Override

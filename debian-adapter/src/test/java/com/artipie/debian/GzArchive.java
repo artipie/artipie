@@ -39,7 +39,7 @@ public final class GzArchive {
      * Decompresses provided gz packed data.
      * @param data Bytes to unpack
      * @return Unpacked data in string format
-         */
+     */
     @SuppressWarnings("PMD.AssignmentInOperand")
     public String decompress(final byte[] data) {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();

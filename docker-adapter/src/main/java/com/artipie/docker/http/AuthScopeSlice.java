@@ -48,7 +48,7 @@ final class AuthScopeSlice implements Slice {
      * @param auth Authentication scheme.
      * @param perms Access permissions.
      * @param name Repository name
-         */
+     */
     AuthScopeSlice(
         final ScopeSlice origin,
         final AuthScheme auth,

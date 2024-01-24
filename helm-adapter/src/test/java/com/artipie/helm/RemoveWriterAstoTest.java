@@ -42,7 +42,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 final class RemoveWriterAstoTest {
     /**
      * Temporary directory for all tests.
-         */
+     */
     @TempDir
     Path dir;
 

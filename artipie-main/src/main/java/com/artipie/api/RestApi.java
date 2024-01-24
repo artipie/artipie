@@ -135,7 +135,7 @@ public final class RestApi extends AbstractVerticle {
      * @param tokenRb Token RouterBuilder
      * @param settingsRb Settings RouterBuilder
      * @param rolesRb Roles RouterBuilder
-                 */
+     */
     private void startServices(final RouterBuilder repoRb, final RouterBuilder userRb,
         final RouterBuilder tokenRb, final RouterBuilder settingsRb, final RouterBuilder rolesRb) {
         this.addJwtAuth(tokenRb, repoRb, userRb, settingsRb, rolesRb);

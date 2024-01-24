@@ -28,7 +28,7 @@ public final class DebianITCase {
 
     /**
      * Test deployments.
-         */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

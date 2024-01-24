@@ -47,7 +47,7 @@ final class AstoCatalog implements Catalog {
      * @param keys List of keys inside repositories root.
      * @param from From which tag to start, exclusive.
      * @param limit Maximum number of tags returned.
-         */
+     */
     AstoCatalog(
         final Key root,
         final Collection<Key> keys,

@@ -26,7 +26,7 @@ final class DockerOnPortIT {
 
     /**
      * Temp directory.
-         */
+     */
     @TempDir
     static Path temp;
 
@@ -48,7 +48,7 @@ final class DockerOnPortIT {
     /**
      * Deployment for tests.
      *
-         */
+     */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

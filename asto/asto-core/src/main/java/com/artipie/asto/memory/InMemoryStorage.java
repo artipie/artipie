@@ -39,7 +39,7 @@ public final class InMemoryStorage implements Storage {
     /**
      * Values stored by key strings.
      * It is package private for avoid using sync methods for operations of storage for benchmarks.
-         */
+     */
     final NavigableMap<String, byte[]> data;
 
     /**

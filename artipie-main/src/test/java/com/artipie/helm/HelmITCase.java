@@ -35,7 +35,7 @@ final class HelmITCase {
 
     /**
      * Test deployments.
-         */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

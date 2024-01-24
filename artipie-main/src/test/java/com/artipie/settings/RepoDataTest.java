@@ -49,7 +49,7 @@ class RepoDataTest {
 
     /**
      * Temp dir.
-         */
+     */
     @TempDir
     Path temp;
 

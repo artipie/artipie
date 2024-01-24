@@ -38,7 +38,7 @@ final class NpmProxyITCase {
 
     /**
      * Test deployments.
-             */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         Map.ofEntries(

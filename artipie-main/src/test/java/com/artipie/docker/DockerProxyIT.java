@@ -36,7 +36,7 @@ final class DockerProxyIT {
 
     /**
      * Deployment for tests.
-         */
+     */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()

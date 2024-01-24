@@ -33,7 +33,7 @@ public final class SchedulerDbTest {
 
     /**
      * Test directory.
-         */
+     */
     @TempDir
     Path path;
 

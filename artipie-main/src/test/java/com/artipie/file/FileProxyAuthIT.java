@@ -30,7 +30,7 @@ final class FileProxyAuthIT {
 
     /**
      * Test deployments.
-             */
+     */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
         Map.ofEntries(

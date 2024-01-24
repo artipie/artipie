@@ -21,7 +21,7 @@ public final class RolesITCase {
 
     /**
      * Deployment for tests.
-             */
+     */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         () -> new TestDeployment.ArtipieContainer().withConfig("artipie_with_policy.yaml")

@@ -23,7 +23,7 @@ final class VertxMainITCase {
 
     /**
      * Test deployments.
-         */
+     */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(
         Map.ofEntries(

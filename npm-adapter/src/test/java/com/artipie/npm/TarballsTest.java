@@ -29,7 +29,7 @@ public class TarballsTest {
      * @param prefix Tarball prefix
      * @param expected Expected absolute tarball link
      * @throws IOException
-         */
+     */
     @ParameterizedTest
     @CsvSource({
         "http://example.com/, http://example.com/@hello/simple-npm-project/-/@hello/simple-npm-project-1.0.1.tgz",
