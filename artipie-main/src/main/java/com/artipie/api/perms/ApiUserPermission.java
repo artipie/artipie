@@ -77,7 +77,7 @@ public final class ApiUserPermission extends RestApiPermission {
     /**
      * User actions.
      * @since 0.29
-             */
+     */
     public enum UserAction implements Action {
         READ(0x4),
         CREATE(0x2),

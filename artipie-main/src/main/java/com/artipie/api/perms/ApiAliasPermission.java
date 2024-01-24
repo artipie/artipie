@@ -77,7 +77,7 @@ public final class ApiAliasPermission extends RestApiPermission {
     /**
      * Alias actions.
      * @since 0.29
-             */
+     */
     public enum AliasAction implements Action {
         READ(0x4),
         CREATE(0x2),

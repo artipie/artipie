@@ -140,7 +140,7 @@ public final class MergedXmlPackage implements MergedXml {
      * @param reader Reader
      * @param writer Writes
      * @throws XMLStreamException When error occurs
-             */
+     */
     private void process(final Collection<String> ids, final XMLEventReader reader,
         final XMLEventWriter writer) throws XMLStreamException {
         boolean valid = true;

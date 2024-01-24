@@ -160,7 +160,7 @@ public final class RpmSliceITCase {
      * @param cred String with user name and password to add in url, uname:pswd@
      * @param linux Linux distribution name and version
      * @throws Exception On error
-             */
+     */
     private void start(final Policy<?> policy, final Authentication auth, final String cred,
         final String linux) throws Exception {
         final Storage storage = new InMemoryStorage();

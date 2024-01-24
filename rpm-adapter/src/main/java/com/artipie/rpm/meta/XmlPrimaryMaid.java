@@ -63,7 +63,7 @@ public final class XmlPrimaryMaid implements XmlMaid {
      * Input/output streams are not closed in this implementation, resources
      * should be closed from the outside.
      * @since 1.4
-             */
+     */
     public static final class Stream implements XmlMaid {
 
         /**

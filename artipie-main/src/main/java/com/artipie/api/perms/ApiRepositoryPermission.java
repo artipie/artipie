@@ -76,7 +76,7 @@ public final class ApiRepositoryPermission extends RestApiPermission {
     /**
      * Repository actions.
      * @since 0.29
-             */
+     */
     public enum RepositoryAction implements Action {
         READ(0x4),
         CREATE(0x2),
