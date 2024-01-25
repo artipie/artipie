@@ -7,7 +7,6 @@ package com.artipie.http.client.jetty;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.HttpClientSettings;
-import com.artipie.http.client.Settings;
 import com.google.common.base.Strings;
 import org.eclipse.jetty.client.BasicAuthentication;
 import org.eclipse.jetty.client.HttpClient;
@@ -109,7 +108,7 @@ public final class JettyClientSlices implements ClientSlices {
     }
 
     /**
-     * Creates {@link HttpClient} from {@link Settings}.
+     * Creates {@link HttpClient} from {@link HttpClientSettings}.
      *
      * @param settings Settings.
      * @return HTTP client built from settings.
