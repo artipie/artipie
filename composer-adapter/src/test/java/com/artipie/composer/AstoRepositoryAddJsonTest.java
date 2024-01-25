@@ -52,11 +52,7 @@ class AstoRepositoryAddJsonTest {
     @BeforeEach
     void init() {
         this.storage = new InMemoryStorage();
-        this.pack = new JsonPackage(
-            new Content.From(
-                new TestResource("minimal-package.json").asBytes()
-            )
-        );
+        this.pack = new JsonPackage(new TestResource("minimal-package.json").asBytes());
         this.version = this.pack.version(Optional.empty())
             .toCompletableFuture().join()
             .get();

@@ -80,7 +80,7 @@ public final class AstoRepository implements Repository {
                 .thenCompose(PublisherAs::bytes)
                 .thenCompose(
                     bytes -> {
-                        final Package pack = new JsonPackage(new Content.From(bytes));
+                        final Package pack = new JsonPackage(bytes);
                         return CompletableFuture.allOf(
                             this.packages().thenCompose(
                                 packages -> packages.orElse(new JsonPackages())
@@ -133,9 +133,7 @@ public final class AstoRepository implements Repository {
                                     this.packages(),
                                     (noth, packages) -> packages.orElse(new JsonPackages())
                                         .add(
-                                            new JsonPackage(
-                                                new Content.From(this.addDist(compos, key))
-                                            ),
+                                            new JsonPackage(this.addDist(compos, key)),
                                             Optional.empty()
                                         )
                                         .thenCompose(
