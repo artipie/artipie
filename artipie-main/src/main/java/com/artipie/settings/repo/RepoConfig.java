@@ -10,6 +10,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.LoggingStorage;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
+import com.artipie.http.client.HttpClientSettings;
 import com.artipie.micrometer.MicrometerStorage;
 import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
@@ -224,6 +225,11 @@ public final class RepoConfig {
      */
     public StoragesCache storagesCache() {
         return this.cache;
+    }
+
+    public Optional<HttpClientSettings> httpClientSettings() {
+        final YamlMapping client = this.repoYaml().yamlMapping("http_client");
+        return client != null ? Optional.of(HttpClientSettings.from(client)) : Optional.empty();
     }
 
     /**

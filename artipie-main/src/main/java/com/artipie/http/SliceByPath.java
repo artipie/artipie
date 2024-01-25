@@ -26,11 +26,6 @@ import org.reactivestreams.Publisher;
 final class SliceByPath implements Slice {
 
     /**
-     * HTTP client.
-     */
-    private final ClientSlices http;
-
-    /**
      * Artipie settings.
      */
     private final Settings settings;
@@ -43,16 +38,13 @@ final class SliceByPath implements Slice {
     /**
      * New slice from settings.
      *
-     * @param http HTTP client
      * @param settings Artipie settings
      * @param tokens Tokens: authentication and generation
      */
     SliceByPath(
-        final ClientSlices http,
         final Settings settings,
         final Tokens tokens
     ) {
-        this.http = http;
         this.settings = settings;
         this.tokens = tokens;
     }
@@ -71,7 +63,7 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
-        return new ArtipieRepositories(this.http, this.settings, this.tokens)
+        return new ArtipieRepositories(this.settings, this.tokens)
             .slice(key.get(), new RequestLineFrom(line).uri().getPort())
             .response(line, headers, body);
     }

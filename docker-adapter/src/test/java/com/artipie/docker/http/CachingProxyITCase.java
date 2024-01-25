@@ -18,7 +18,7 @@ import com.artipie.docker.junit.DockerClientSupport;
 import com.artipie.docker.junit.DockerRepository;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.docker.ref.ManifestRef;
-import com.artipie.http.client.Settings;
+import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
@@ -72,7 +72,9 @@ final class CachingProxyITCase {
     @BeforeEach
     void setUp() throws Exception {
         this.img = new Image.ForOs();
-        this.client = new JettyClientSlices(new Settings.WithFollowRedirects(true));
+        this.client = new JettyClientSlices(
+            new HttpClientSettings().setFollowRedirects(true)
+        );
         this.client.start();
         this.cache = new AstoDocker(new InMemoryStorage());
         final Docker local = new AstoDocker(new InMemoryStorage());

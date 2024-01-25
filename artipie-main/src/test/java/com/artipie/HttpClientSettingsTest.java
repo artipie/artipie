@@ -4,10 +4,21 @@
  */
 package com.artipie;
 
-import com.artipie.http.client.Settings;
-import java.util.Optional;
+import com.amihaiemil.eoyaml.Yaml;
+import com.artipie.asto.Key;
+import com.artipie.asto.test.TestResource;
+import com.artipie.http.client.HttpClientSettings;
+import com.artipie.http.client.ProxySettings;
+import com.artipie.scheduling.QuartzService;
+import com.artipie.settings.StorageByAlias;
+import com.artipie.settings.YamlSettings;
+import com.artipie.settings.repo.RepoConfig;
+import com.artipie.test.TestStoragesCache;
+import java.net.URI;
+import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -18,57 +29,85 @@ import org.junit.jupiter.api.Test;
 class HttpClientSettingsTest {
 
     @Test
-    public void shouldNotHaveProxy() {
-        System.getProperties().remove(HttpClientSettings.PROXY_HOST);
-        System.getProperties().remove(HttpClientSettings.PROXY_PORT);
+    void shouldNotHaveProxyFromSystem() {
+        System.getProperties().remove("http.proxyHost");
+        System.getProperties().remove("http.proxyPort");
         MatcherAssert.assertThat(
-            new HttpClientSettings().proxy().isPresent(),
-            new IsEqual<>(false)
-        );
-    }
-
-    @Test
-    public void shouldHaveProxyWhenSpecified() {
-        final String host = "artipie.com";
-        final int port = 1234;
-        System.setProperty(HttpClientSettings.PROXY_HOST, host);
-        System.setProperty(HttpClientSettings.PROXY_PORT, String.valueOf(port));
-        final Optional<Settings.Proxy> proxy = new HttpClientSettings().proxy();
-        MatcherAssert.assertThat(
-            "Proxy enabled",
-            proxy.isPresent(),
+            new HttpClientSettings().proxies().isEmpty(),
             new IsEqual<>(true)
         );
-        MatcherAssert.assertThat(
-            "Proxy is not secure",
-            proxy.get().secure(),
-            new IsEqual<>(false)
-        );
-        MatcherAssert.assertThat(
-            "Proxy has expected host",
-            proxy.get().host(),
-            new IsEqual<>(host)
-        );
-        MatcherAssert.assertThat(
-            "Proxy has expected port",
-            proxy.get().port(),
-            new IsEqual<>(port)
-        );
     }
 
     @Test
-    public void shouldNotTrustAll() {
-        MatcherAssert.assertThat(
-            new HttpClientSettings().trustAll(),
-            new IsEqual<>(false)
-        );
+    void shouldHaveProxyFromSystemWhenSpecified() {
+        System.setProperty("http.proxyHost", "notsecure.com");
+        System.setProperty("http.proxyPort", "1234");
+        System.setProperty("https.proxyHost", "secure.com");
+        System.setProperty("https.proxyPort", "6778");
+        final HttpClientSettings settings = new HttpClientSettings();
+        Assertions.assertEquals(2, settings.proxies().size());
+        for (ProxySettings proxy : settings.proxies()) {
+            switch (proxy.host()) {
+                case "notsecure.com": {
+                    Assertions.assertFalse(proxy.secure());
+                    Assertions.assertEquals(1234, proxy.port());
+                    break;
+                }
+                case "secure.com": {
+                    Assertions.assertTrue(proxy.secure());
+                    Assertions.assertEquals(6778, proxy.port());
+                    break;
+                }
+                default:
+                    Assertions.fail("Unexpected host name");
+            }
+        }
     }
 
     @Test
-    public void shouldFollowRedirects() {
-        MatcherAssert.assertThat(
-            new HttpClientSettings().followRedirects(),
-            new IsEqual<>(true)
+    void shouldInitFromMetaYaml() throws Exception {
+        final Path path = new TestResource("artipie_http_client.yaml").asPath();
+        final HttpClientSettings stn = new YamlSettings(
+            Yaml.createYamlInput(path.toFile()).readYamlMapping(),
+            path.getParent(), new QuartzService()
+        ).httpClientSettings();
+        Assertions.assertEquals(20_000, stn.connectTimeout());
+        Assertions.assertEquals(25, stn.idleTimeout());
+        Assertions.assertTrue(stn.trustAll());
+        Assertions.assertTrue(stn.http3());
+        Assertions.assertEquals("/var/artipie/keystore.jks", stn.jksPath());
+        Assertions.assertEquals("secret", stn.jksPwd());
+        Assertions.assertEquals(stn.proxies().size(), 2);
+        final ProxySettings proxy = stn.proxies().get(0);
+        Assertions.assertEquals(URI.create("https://proxy1.com"), proxy.uri());
+        Assertions.assertEquals("user_realm", proxy.basicRealm());
+        Assertions.assertEquals("user_name", proxy.basicUser());
+        Assertions.assertEquals("user_password", proxy.basicPwd());
+    }
+
+    @Test
+    void shouldInitRepoConfigFromFile() throws Exception {
+        final RepoConfig cfg = new RepoConfig(
+            new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
+            new Key.From("aaa"),
+            Yaml.createYamlInput(
+                new TestResource("docker/docker-proxy-http-client.yml").asInputStream()
+            ).readYamlMapping(),
+            new TestStoragesCache(), false
         );
+        final HttpClientSettings stn = cfg.httpClientSettings()
+            .orElseGet(() -> Assertions.fail("Should return HttpClientSettings"));
+        Assertions.assertEquals(25000, stn.connectTimeout());
+        Assertions.assertEquals(500, stn.idleTimeout());
+        Assertions.assertTrue(stn.trustAll());
+        Assertions.assertTrue(stn.http3());
+        Assertions.assertEquals("/var/artipie/keystore.jks", stn.jksPath());
+        Assertions.assertEquals("secret", stn.jksPwd());
+        Assertions.assertEquals(stn.proxies().size(), 2);
+        final ProxySettings proxy = stn.proxies().get(1);
+        Assertions.assertEquals(URI.create("https://proxy1.com"), proxy.uri());
+        Assertions.assertEquals("user_realm", proxy.basicRealm());
+        Assertions.assertEquals("user_name", proxy.basicUser());
+        Assertions.assertEquals("user_password", proxy.basicPwd());
     }
 }

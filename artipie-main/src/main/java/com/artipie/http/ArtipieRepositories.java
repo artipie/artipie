@@ -26,11 +26,6 @@ import java.util.concurrent.CompletionStage;
 public final class ArtipieRepositories {
 
     /**
-     * HTTP client.
-     */
-    private final ClientSlices http;
-
-    /**
      * Artipie settings.
      */
     private final Settings settings;
@@ -42,16 +37,13 @@ public final class ArtipieRepositories {
 
     /**
      * New Artipie repositories.
-     * @param http HTTP client
      * @param settings Artipie settings
      * @param tokens Tokens: authentication and generation
      */
     public ArtipieRepositories(
-        final ClientSlices http,
         final Settings settings,
         final Tokens tokens
     ) {
-        this.http = http;
         this.settings = settings;
         this.tokens = tokens;
     }
@@ -94,7 +86,6 @@ public final class ArtipieRepositories {
                     final Slice res;
                     if (config.port().isEmpty() || config.port().getAsInt() == port) {
                         res = new SliceFromConfig(
-                            this.http,
                             this.settings,
                             config,
                             config.port().isPresent(),

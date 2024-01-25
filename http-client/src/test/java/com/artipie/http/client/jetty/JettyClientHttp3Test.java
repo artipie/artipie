@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.Headers;
-import com.artipie.http.client.Settings;
+import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.misc.PublisherAs;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
@@ -102,7 +102,11 @@ public final class JettyClientHttp3Test {
         connector.setPort(0);
         server.addConnector(connector);
         server.start();
-        this.client = new JettyClientSlices(new Settings.Http3WithTrustAll());
+        this.client = new JettyClientSlices(
+            new HttpClientSettings()
+                .setHttp3(true)
+                .setTrustAll(true)
+        );
         this.client.start();
         this.port = connector.getLocalPort();
     }

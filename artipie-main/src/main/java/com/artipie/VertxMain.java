@@ -72,11 +72,6 @@ public final class VertxMain {
     private static final String DEF_API_PORT = "8086";
 
     /**
-     * HTTP client.
-     */
-    private final ClientSlices http;
-
-    /**
      * Config file path.
      */
     private final Path config;
@@ -99,12 +94,10 @@ public final class VertxMain {
     /**
      * Ctor.
      *
-     * @param http HTTP client
      * @param config Config file path.
      * @param port HTTP port
      */
-    public VertxMain(final ClientSlices http, final Path config, final int port) {
-        this.http = http;
+    public VertxMain(final Path config, final int port) {
         this.config = config;
         this.port = port;
         this.servers = new ArrayList<>(0);
@@ -128,7 +121,7 @@ public final class VertxMain {
             )
         );
         final int main = this.listenOn(
-            new MainSlice(this.http, settings, new JwtTokens(jwt)),
+            new MainSlice(settings, new JwtTokens(jwt)),
             this.port,
             vertx,
             settings.metrics()
@@ -175,9 +168,7 @@ public final class VertxMain {
             "Used version of Artipie: %s",
             new ArtipieProperties().version()
         );
-        final JettyClientSlices http = new JettyClientSlices(new HttpClientSettings());
-        http.start();
-        new VertxMain(http, config, port)
+        new VertxMain(config, port)
             .start(Integer.parseInt(cmd.getOptionValue(apiport, VertxMain.DEF_API_PORT)));
     }
 
@@ -210,7 +201,7 @@ public final class VertxMain {
                     prt -> {
                         final String name = new ConfigFile(repo.name()).name();
                         final Slice slice = new ArtipieRepositories(
-                            this.http, settings, new JwtTokens(jwt)
+                            settings, new JwtTokens(jwt)
                         ).slice(new Key.From(name), prt);
                         if (repo.startOnHttp3()) {
                             this.http3.computeIfAbsent(

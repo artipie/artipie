@@ -6,7 +6,7 @@ package com.artipie.npm.proxy;
 
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.client.Settings;
+import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.npm.RandomFreePort;
 import com.artipie.npm.events.NpmProxyPackageProcessor;
@@ -70,7 +70,7 @@ public final class NpmProxyITCase {
      * Jetty client.
      */
     private final JettyClientSlices client = new JettyClientSlices(
-        new Settings.WithFollowRedirects(true)
+        new HttpClientSettings().setFollowRedirects(true)
     );
 
     /**
