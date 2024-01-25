@@ -9,6 +9,24 @@ repo:
   storage:
     type: fs
     path: /tmp/artipie/data/my-docker
+  # optional; if not defined, then will be used settings form `meta` config
+  http_client:
+    # all fields are optional
+    connection_timeout: 25000
+    idle_timeout: 500
+    trust_all: true
+    follow_redirects: true
+    http3: true
+    jks:
+      path: /var/artipie/keystore.jks
+      password: secret
+    proxies:
+      - url: http://proxy1.com
+      - url: https://proxy2.com
+        # the HTTP "Basic" authentication defined in RFC 2617
+        realm: user_realm
+        username: user_name
+        password: user_password
   remotes:
     - url: registry-1.docker.io
     - url: mcr.microsoft.com

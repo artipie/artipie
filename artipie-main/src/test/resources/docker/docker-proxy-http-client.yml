@@ -10,6 +10,7 @@ repo:
     connection_timeout: 25000
     idle_timeout: 500
     trust_all: true
+    follow_redirects: true
     http3: true
     jks:
       path: /var/artipie/keystore.jks

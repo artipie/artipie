@@ -40,6 +40,10 @@ public class HttpClientSettings {
             if (!Strings.isNullOrEmpty(http3)) {
                 res.setHttp3(Boolean.parseBoolean(http3));
             }
+            final String followRedirects = mapping.string("follow_redirects");
+            if (!Strings.isNullOrEmpty(followRedirects)) {
+                res.setFollowRedirects(Boolean.parseBoolean(followRedirects));
+            }
             final YamlMapping jks = mapping.yamlMapping("jks");
             if (jks != null) {
                 res.setJksPath(

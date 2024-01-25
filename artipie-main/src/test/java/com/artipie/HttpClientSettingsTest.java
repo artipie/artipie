@@ -74,6 +74,7 @@ class HttpClientSettingsTest {
         Assertions.assertEquals(20_000, stn.connectTimeout());
         Assertions.assertEquals(25, stn.idleTimeout());
         Assertions.assertTrue(stn.trustAll());
+        Assertions.assertTrue(stn.followRedirects());
         Assertions.assertTrue(stn.http3());
         Assertions.assertEquals("/var/artipie/keystore.jks", stn.jksPath());
         Assertions.assertEquals("secret", stn.jksPwd());
@@ -100,6 +101,7 @@ class HttpClientSettingsTest {
         Assertions.assertEquals(25000, stn.connectTimeout());
         Assertions.assertEquals(500, stn.idleTimeout());
         Assertions.assertTrue(stn.trustAll());
+        Assertions.assertTrue(stn.followRedirects());
         Assertions.assertTrue(stn.http3());
         Assertions.assertEquals("/var/artipie/keystore.jks", stn.jksPath());
         Assertions.assertEquals("secret", stn.jksPwd());

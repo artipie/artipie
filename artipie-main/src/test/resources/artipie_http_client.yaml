@@ -7,6 +7,7 @@ meta:
     connection_timeout: 20000
     idle_timeout: 25
     trust_all: true
+    follow_redirects: true
     http3: true
     jks:
       path: /var/artipie/keystore.jks
