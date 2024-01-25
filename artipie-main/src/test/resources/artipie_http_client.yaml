@@ -1,0 +1,24 @@
+meta:
+  storage:
+    type: fs
+    path: /var/artipie/repo
+  base_url: http://artipie:8080/
+  http_client:
+    connection_timeout: 20000
+    idle_timeout: 25
+    trust_all: true
+    http3: true
+    jks:
+      path: /var/artipie/keystore.jks
+      password: secret
+    proxies:
+      - url: https://proxy1.com
+        realm: user_realm
+        username: user_name
+        password: user_password
+      - url: http://proxy2.com
+  credentials:
+    - type: artipie
+      storage:
+        type: fs
+        path: /var/artipie/security
