@@ -9,7 +9,7 @@ repo:
   storage:
     type: fs
     path: /tmp/artipie/data/my-docker
-  # optional; if not defined, then will be used settings form `meta` config
+  # optional; if not defined, then will be used settings from a `meta` config
   http_client:
     # all fields are optional
     connection_timeout: 25000
