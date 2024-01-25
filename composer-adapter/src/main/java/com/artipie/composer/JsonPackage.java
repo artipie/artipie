@@ -4,12 +4,14 @@
  */
 package com.artipie.composer;
 
-import com.artipie.asto.Content;
-import com.artipie.composer.misc.ContentAsJson;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 /**
  * PHP Composer package built from JSON.
@@ -25,15 +27,24 @@ public final class JsonPackage implements Package {
     /**
      * Package binary content.
      */
-    private final Content content;
+    private final JsonObject json;
 
     /**
      * Ctor.
      *
-     * @param content Package binary content.
+     * @param data Package binary content.
      */
-    public JsonPackage(final Content content) {
-        this.content = content;
+    public JsonPackage(final byte[] data) {
+        this(JsonPackage.loadJson(data));
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param json Package json content.
+     */
+    public JsonPackage(final JsonObject json) {
+        this.json = json;
     }
 
     @Override
@@ -52,7 +63,20 @@ public final class JsonPackage implements Package {
 
     @Override
     public CompletionStage<JsonObject> json() {
-        return new ContentAsJson(this.content).value();
+        return CompletableFuture.completedFuture(this.json);
+    }
+
+    /**
+     * Load JsonObject from binary data.
+     * @param data Json object content.
+     * @return JsonObject instance.
+     */
+    private static JsonObject loadJson(final byte[] data) {
+        try (JsonReader reader = Json.createReader(
+            new StringReader(new String(data, StandardCharsets.UTF_8))
+        )) {
+            return reader.readObject();
+        }
     }
 
     /**

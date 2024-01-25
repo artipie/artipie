@@ -26,11 +26,7 @@ class JsonPackageTest {
 
     @BeforeEach
     void init()  {
-        this.pack = new JsonPackage(
-            new Content.From(
-                new TestResource("minimal-package.json").asBytes()
-            )
-        );
+        this.pack = new JsonPackage(new TestResource("minimal-package.json").asBytes());
     }
 
     @Test
