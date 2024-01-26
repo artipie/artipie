@@ -37,7 +37,6 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.ClientSlices;
-import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.filter.FilterSlice;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.http.MavenSlice;
@@ -77,13 +76,16 @@ public final class SliceFromConfig extends Slice.Wrap {
      * @param tokens Tokens: authentication and generation
      */
     public SliceFromConfig(
-        final Settings settings, final RepoConfig config,
-        final boolean standalone, final Tokens tokens
+        final ClientSlices client,
+        final Settings settings,
+        final RepoConfig config,
+        final boolean standalone,
+        final Tokens tokens
     ) {
         super(
             SliceFromConfig.build(
-                settings, new LoggingAuth(settings.authz().authentication()), tokens,
-                settings.authz().policy(), config, standalone
+                client, settings, new LoggingAuth(settings.authz().authentication()),
+                tokens, settings.authz().policy(), config, standalone
             )
         );
     }
@@ -106,6 +108,7 @@ public final class SliceFromConfig extends Slice.Wrap {
         }
     )
     private static Slice build(
+        final ClientSlices client,
         final Settings settings,
         final Authentication auth,
         final Tokens tokens,
@@ -125,7 +128,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "file-proxy":
                 slice = new TrimPathSlice(
-                    new FileProxy(clientSlices(cfg, settings), cfg, events), SliceFromConfig.PTRN
+                    new FileProxy(client, cfg, events), SliceFromConfig.PTRN
                 );
                 break;
             case "npm":
@@ -170,7 +173,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "php-proxy":
                 slice = new TrimPathSlice(
-                    new ComposerProxy(clientSlices(cfg, settings), cfg), SliceFromConfig.PTRN
+                    new ComposerProxy(client, cfg), SliceFromConfig.PTRN
                 );
                 break;
             case "nuget":
@@ -195,7 +198,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "maven-proxy":
                 slice = new TrimPathSlice(
                     new MavenProxy(
-                        clientSlices(cfg, settings), cfg,
+                        client, cfg,
                         settings.artifactMetadata().flatMap(queues -> queues.proxyEventQueues(cfg))
                     ),
                     SliceFromConfig.PTRN
@@ -214,7 +217,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                             cfg.settings().orElseThrow().yamlMapping("remote").string("url")
                         ),
                         cfg.storage(),
-                        clientSlices(cfg, settings)
+                        client
                     ),
                     settings.artifactMetadata().flatMap(queues -> queues.proxyEventQueues(cfg))
                 );
@@ -228,7 +231,8 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "pypi-proxy":
                 slice = new TrimPathSlice(
                     new PypiProxy(
-                        clientSlices(cfg, settings), cfg, settings.artifactMetadata()
+                        client, cfg,
+                        settings.artifactMetadata()
                             .flatMap(queues -> queues.proxyEventQueues(cfg))
                     ),
                     SliceFromConfig.PTRN
@@ -260,7 +264,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                 break;
             case "docker-proxy":
                 slice = new DockerProxy(
-                    clientSlices(cfg, settings), standalone, cfg, policy, auth, events
+                    client, standalone, cfg, policy, auth, events
                 );
                 break;
             case "deb":
@@ -309,11 +313,5 @@ public final class SliceFromConfig extends Slice.Wrap {
                     )
             )
             .get();
-    }
-
-    private static ClientSlices clientSlices(final RepoConfig cfg, final Settings settings) {
-        return new JettyClientSlices(
-            cfg.httpClientSettings().orElseGet(settings::httpClientSettings)
-        );
     }
 }

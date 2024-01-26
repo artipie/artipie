@@ -4,15 +4,13 @@
  */
 package com.artipie.http;
 
+import com.artipie.RepositorySlices;
 import com.artipie.RqPath;
 import com.artipie.asto.Key;
-import com.artipie.http.auth.Tokens;
-import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import com.artipie.settings.Settings;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -26,27 +24,19 @@ import org.reactivestreams.Publisher;
 final class SliceByPath implements Slice {
 
     /**
-     * Artipie settings.
+     * Slices cache.
      */
-    private final Settings settings;
+    private final RepositorySlices slices;
 
     /**
-     * Tokens: authentication and generation.
-     */
-    private final Tokens tokens;
-
-    /**
-     * New slice from settings.
+     * Create SliceByPath.
      *
-     * @param settings Artipie settings
-     * @param tokens Tokens: authentication and generation
+     * @param slices Slices cache
      */
     SliceByPath(
-        final Settings settings,
-        final Tokens tokens
+        final RepositorySlices slices
     ) {
-        this.settings = settings;
-        this.tokens = tokens;
+        this.slices = slices;
     }
 
     @Override
@@ -63,7 +53,7 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
-        return new ArtipieRepositories(this.settings, this.tokens)
+        return this.slices
             .slice(key.get(), new RequestLineFrom(line).uri().getPort())
             .response(line, headers, body);
     }

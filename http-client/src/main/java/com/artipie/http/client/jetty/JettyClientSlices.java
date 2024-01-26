@@ -4,6 +4,7 @@
  */
 package com.artipie.http.client.jetty;
 
+import com.artipie.ArtipieException;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.HttpClientSettings;
@@ -59,20 +60,24 @@ public final class JettyClientSlices implements ClientSlices {
 
     /**
      * Prepare for usage.
-     *
-     * @throws Exception In case of any errors starting.
      */
-    public void start() throws Exception {
-        this.clnt.start();
+    public void start() {
+        try {
+            this.clnt.start();
+        } catch (Exception e) {
+            throw new ArtipieException(e);
+        }
     }
 
     /**
      * Release used resources and stop requests in progress.
-     *
-     * @throws Exception In case of any errors stopping.
      */
-    public void stop() throws Exception {
-        this.clnt.stop();
+    public void stop() {
+        try {
+            this.clnt.stop();
+        } catch (Exception e) {
+            throw new ArtipieException(e);
+        }
     }
 
     @Override
