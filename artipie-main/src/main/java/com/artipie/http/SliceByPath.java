@@ -33,16 +33,17 @@ final class SliceByPath implements Slice {
      *
      * @param slices Slices cache
      */
-    SliceByPath(
-        final RepositorySlices slices
-    ) {
+    SliceByPath(final RepositorySlices slices) {
         this.slices = slices;
     }
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(
+        final String line,
+        final Iterable<Map.Entry<String, String>> headers,
+        final Publisher<ByteBuffer> body
+    ) {
         final Optional<Key> key = SliceByPath.keyFromPath(
             new RequestLineFrom(line).uri().getPath()
         );
