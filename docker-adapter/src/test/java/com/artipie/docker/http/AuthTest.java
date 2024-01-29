@@ -45,7 +45,6 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsNot;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -57,8 +56,6 @@ import org.testcontainers.shaded.com.google.common.collect.Sets;
  * Authentication & authorization tests.
  *
  * @since 0.8
- * @todo #434:30min test `shouldReturnForbiddenWhenUserHasNoRequiredPermissionOnSecondManifestPut`
- *  fails in github actions, locally it works fine. Figure out what is the problem and fix it.
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.OnlyOneConstructorShouldDoInitialization"})
 public final class AuthTest {
@@ -119,7 +116,6 @@ public final class AuthTest {
     }
 
     @Test
-    @Disabled
     void shouldReturnForbiddenWhenUserHasNoRequiredPermissionOnSecondManifestPut() {
         final Basic basic = new Basic(this.docker);
         final RequestLine line = new RequestLine(RqMethod.PUT, "/v2/my-alpine/manifests/latest");
