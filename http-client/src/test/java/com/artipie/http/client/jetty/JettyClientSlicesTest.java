@@ -7,8 +7,9 @@ package com.artipie.http.client.jetty;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.HttpServer;
-import com.artipie.http.client.Settings;
+import com.artipie.http.client.ProxySettings;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
@@ -40,15 +41,6 @@ import org.junit.jupiter.params.provider.CsvSource;
  * Tests for {@link JettyClientSlices}.
  *
  * @since 0.1
- * @todo #1:30min Improve tests for `JettyClientSlices`.
- *  Unit tests in `JettyClientSlicesTest` check that `JettyClientSlices` produce
- *  `JettyClientSlice` instances, but do not check that they are configured
- *  with expected host, port and secure flag.
- *  These important properties should be covered with tests.
- * @todo #5:30min Test support for secure proxy in `JettyClientSlices`.
- *  There is a test in `JettyClientSlicesTest` checking that
- *  non-secure proxy works in `JettyClientSlices`. It's needed to test
- *  support for proxy working over HTTPS protocol.
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class JettyClientSlicesTest {
@@ -111,8 +103,8 @@ final class JettyClientSlicesTest {
             )
         );
         final JettyClientSlices client = new JettyClientSlices(
-            new Settings.WithProxy(
-                new Settings.Proxy.Simple(false, "localhost", this.server.port())
+            new HttpClientSettings().addProxy(
+                new ProxySettings("http", "localhost", this.server.port())
             )
         );
         try {
@@ -140,7 +132,7 @@ final class JettyClientSlicesTest {
             )
         );
         final JettyClientSlices client = new JettyClientSlices(
-            new Settings.WithFollowRedirects(false)
+            new HttpClientSettings().setFollowRedirects(false)
         );
         try {
             client.start();
@@ -174,7 +166,7 @@ final class JettyClientSlicesTest {
             }
         );
         final JettyClientSlices client = new JettyClientSlices(
-            new Settings.WithFollowRedirects(true)
+            new HttpClientSettings().setFollowRedirects(true)
         );
         try {
             client.start();
@@ -196,7 +188,7 @@ final class JettyClientSlicesTest {
     void shouldTimeoutConnectionIfDisabled() throws Exception {
         final int timeout = 1;
         final JettyClientSlices client = new JettyClientSlices(
-            new Settings.WithConnectTimeout(0)
+            new HttpClientSettings().setConnectTimeout(0)
         );
         try {
             client.start();
@@ -220,9 +212,9 @@ final class JettyClientSlicesTest {
     @Test
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
     void shouldTimeoutConnectionIfEnabled() throws Exception {
-        final int timeout = 5;
+        final int timeout = 5_000;
         final JettyClientSlices client = new JettyClientSlices(
-            new Settings.WithConnectTimeout(timeout, TimeUnit.SECONDS)
+            new HttpClientSettings().setConnectTimeout(timeout)
         );
         try {
             client.start();
@@ -245,10 +237,10 @@ final class JettyClientSlicesTest {
 
     @Test
     void shouldTimeoutIdleConnectionIfEnabled() throws Exception {
-        final int timeout = 1;
+        final int timeout = 1_000;
         this.server.update((line, headers, body) -> connection -> new CompletableFuture<>());
         final JettyClientSlices client = new JettyClientSlices(
-            new Settings.WithIdleTimeout(new Settings.Default(), timeout, TimeUnit.SECONDS)
+            new HttpClientSettings().setIdleTimeout(timeout)
         );
         try {
             client.start();
@@ -275,7 +267,7 @@ final class JettyClientSlicesTest {
     void shouldNotTimeoutIdleConnectionIfDisabled() throws Exception {
         this.server.update((line, headers, body) -> connection -> new CompletableFuture<>());
         final JettyClientSlices client = new JettyClientSlices(
-            new Settings.WithIdleTimeout(0)
+            new HttpClientSettings().setIdleTimeout(0)
         );
         try {
             client.start();
@@ -306,7 +298,7 @@ final class JettyClientSlicesTest {
     })
     void shouldTrustAllCertificates(final String url) throws Exception {
         final JettyClientSlices client = new JettyClientSlices(
-            new Settings.WithTrustAll(true)
+            new HttpClientSettings().setTrustAll(true)
         );
         try {
             client.start();
@@ -332,7 +324,7 @@ final class JettyClientSlicesTest {
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
     void shouldRejectBadCertificates(final String url) throws Exception {
         final JettyClientSlices client = new JettyClientSlices(
-            new Settings.WithTrustAll(false)
+            new HttpClientSettings().setTrustAll(false)
         );
         try {
             client.start();

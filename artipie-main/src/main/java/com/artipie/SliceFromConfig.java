@@ -70,21 +70,22 @@ public final class SliceFromConfig extends Slice.Wrap {
 
     /**
      * Ctor.
-     * @param http HTTP client
      * @param settings Artipie settings
      * @param config Repo config
      * @param standalone Standalone flag
      * @param tokens Tokens: authentication and generation
      */
     public SliceFromConfig(
-        final ClientSlices http,
-        final Settings settings, final RepoConfig config,
-        final boolean standalone, final Tokens tokens
+        final ClientSlices client,
+        final Settings settings,
+        final RepoConfig config,
+        final boolean standalone,
+        final Tokens tokens
     ) {
         super(
             SliceFromConfig.build(
-                http, settings, new LoggingAuth(settings.authz().authentication()), tokens,
-                settings.authz().policy(), config, standalone
+                client, settings, new LoggingAuth(settings.authz().authentication()),
+                tokens, settings.authz().policy(), config, standalone
             )
         );
     }
@@ -92,7 +93,6 @@ public final class SliceFromConfig extends Slice.Wrap {
     /**
      * Find a slice implementation for config.
      *
-     * @param http HTTP client
      * @param settings Artipie settings
      * @param auth Authentication
      * @param tokens Tokens: authentication and generation
@@ -108,7 +108,7 @@ public final class SliceFromConfig extends Slice.Wrap {
         }
     )
     private static Slice build(
-        final ClientSlices http,
+        final ClientSlices client,
         final Settings settings,
         final Authentication auth,
         final Tokens tokens,
@@ -127,7 +127,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "file-proxy":
-                slice = new TrimPathSlice(new FileProxy(http, cfg, events), SliceFromConfig.PTRN);
+                slice = new TrimPathSlice(
+                    new FileProxy(client, cfg, events), SliceFromConfig.PTRN
+                );
                 break;
             case "npm":
                 slice = new TrimPathSlice(
@@ -170,7 +172,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                 );
                 break;
             case "php-proxy":
-                slice = new TrimPathSlice(new ComposerProxy(http, cfg), SliceFromConfig.PTRN);
+                slice = new TrimPathSlice(
+                    new ComposerProxy(client, cfg), SliceFromConfig.PTRN
+                );
                 break;
             case "nuget":
                 slice = new TrimPathSlice(
@@ -194,7 +198,7 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "maven-proxy":
                 slice = new TrimPathSlice(
                     new MavenProxy(
-                        http, cfg,
+                        client, cfg,
                         settings.artifactMetadata().flatMap(queues -> queues.proxyEventQueues(cfg))
                     ),
                     SliceFromConfig.PTRN
@@ -213,7 +217,7 @@ public final class SliceFromConfig extends Slice.Wrap {
                             cfg.settings().orElseThrow().yamlMapping("remote").string("url")
                         ),
                         cfg.storage(),
-                        http
+                        client
                     ),
                     settings.artifactMetadata().flatMap(queues -> queues.proxyEventQueues(cfg))
                 );
@@ -227,7 +231,8 @@ public final class SliceFromConfig extends Slice.Wrap {
             case "pypi-proxy":
                 slice = new TrimPathSlice(
                     new PypiProxy(
-                        http, cfg, settings.artifactMetadata()
+                        client, cfg,
+                        settings.artifactMetadata()
                             .flatMap(queues -> queues.proxyEventQueues(cfg))
                     ),
                     SliceFromConfig.PTRN
@@ -258,7 +263,9 @@ public final class SliceFromConfig extends Slice.Wrap {
                 }
                 break;
             case "docker-proxy":
-                slice = new DockerProxy(http, standalone, cfg, policy, auth, events);
+                slice = new DockerProxy(
+                    client, standalone, cfg, policy, auth, events
+                );
                 break;
             case "deb":
                 slice = new TrimPathSlice(

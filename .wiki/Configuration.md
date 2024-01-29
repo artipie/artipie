@@ -20,6 +20,24 @@ meta:
     type: fs
     path: /tmp/artipie/configs
   configs: repo
+  # optional, settings for the HttpClient that will be used in xxx-proxy repositories
+  http_client:
+    # all fields are optional
+    connection_timeout: 25000
+    idle_timeout: 500
+    trust_all: true
+    follow_redirects: true
+    http3: true
+    jks:
+      path: /var/artipie/keystore.jks
+      password: secret
+    proxies:
+      - url: http://proxy1.com
+      - url: https://proxy2.com
+        # the HTTP "Basic" authentication defined in RFC 2617
+        realm: user_realm
+        username: user_name
+        password: user_password
   credentials:
     - type: artipie
     - type: env
@@ -61,6 +79,16 @@ in `/tmp/artipie/configs` directly.
 Credentials and policy sections are responsible for [user credentials](./Configuration-Credentials) and [security policy](./Configuration-Policy).
 
 Note that Artipie understands both extensions: `yml` and `yaml`.
+
+### Http client settings
+The http client settings can be overridden in `xxx-proxy` repository config.
+Proxy servers can be defined by system properties as it's described in [Java documentation](https://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html).
+Default values:
+ - connection_timeout: 15_000
+ - idle_timeout: 0 
+ - trust_all: false
+ - follow_redirects: true
+ - http3: false
 
 ## Additional configuration 
 
