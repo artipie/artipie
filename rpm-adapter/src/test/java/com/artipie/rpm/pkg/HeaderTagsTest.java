@@ -20,7 +20,6 @@ import org.redline_rpm.header.Header;
 /**
  * Test for {@link HeaderTags}.
  * @since 1.10
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class HeaderTagsTest {

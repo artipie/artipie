@@ -28,7 +28,6 @@ import java.util.Queue;
 /**
  * Debian slice.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class DebianSlice extends Slice.Wrap {
 
@@ -60,7 +59,6 @@ public final class DebianSlice extends Slice.Wrap {
      * @param users Users
      * @param config Repository configuration
      * @param events Artifact events queue
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public DebianSlice(
         final Storage storage, final Policy<?> policy,

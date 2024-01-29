@@ -62,9 +62,6 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * Vertx server entry point.
  * @since 1.0
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ExecutableStatementCountCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 @SuppressWarnings("PMD.PrematureDeclaration")
 public final class VertxMain {
@@ -96,7 +93,6 @@ public final class VertxMain {
 
     /**
      * Port and http3 server.
-     * @checkstyle MemberNameCheck (5 lines)
      */
     private final Map<Integer, Http3Server> http3;
 
@@ -192,7 +188,6 @@ public final class VertxMain {
      * @param settings Settings.
      * @param mport Artipie service main port
      * @param jwt Jwt authentication
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     private void startRepos(
         final Vertx vertx,
@@ -251,7 +246,6 @@ public final class VertxMain {
      * @param vertx Vertx instance
      * @param mctx Metrics context
      * @return Port server started to listen on.
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     private int listenOn(
         final Slice slice, final int sport, final Vertx vertx, final MetricsContext mctx

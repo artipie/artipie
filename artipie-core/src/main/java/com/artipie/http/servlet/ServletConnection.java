@@ -37,7 +37,6 @@ final class ServletConnection implements Connection {
         this.rsp = rsp;
     }
 
-    // @checkstyle ReturnCountCheck (10 lines)
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
     public CompletionStage<Void> accept(final RsStatus status,

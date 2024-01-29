@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link CachedYamlPolicy} and {@link UserPermissions}.
  * @since 1.2
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class CachedYamlPolicyTest {
@@ -265,7 +264,6 @@ class CachedYamlPolicyTest {
             this.user.size(),
             new IsEqual<>(1L)
         );
-        // @checkstyle LineLengthCheck (5 lines)
         MatcherAssert.assertThat(
             "Cache with role permissions has 3 items (default role from context, `java-dev`, `tester`)",
             this.roles.size(),

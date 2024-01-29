@@ -32,7 +32,6 @@ import org.apache.commons.lang3.tuple.Pair;
  * to download NPM packages and assets. It uses underlying Vertx Web Client inside
  * and works in Rx-way.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class HttpNpmRemote implements NpmRemote {

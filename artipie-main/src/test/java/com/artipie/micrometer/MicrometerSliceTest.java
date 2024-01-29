@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link MicrometerSlice}.
  * @since 0.28
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class MicrometerSliceTest {
 
@@ -91,7 +90,6 @@ class MicrometerSliceTest {
         MatcherAssert.assertThat(
             List.of(this.registry.getMetersAsString().split("\n")),
             Matchers.containsInAnyOrder(
-                // @checkstyle LineLengthCheck (20 lines)
                 Matchers.containsString("artipie.connection.accept(TIMER)[status='OK']; count=2.0, total_time"),
                 Matchers.containsString("artipie.connection.accept(TIMER)[status='CONTINUE']; count=1.0, total_time="),
                 Matchers.containsString("artipie.request.body.size(DISTRIBUTION_SUMMARY)[method='POST']; count=0.0, total=0.0 bytes, max=0.0 bytes"),

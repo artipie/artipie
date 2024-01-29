@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link ReadWriteDocker}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class ReadWriteDockerTest {
 

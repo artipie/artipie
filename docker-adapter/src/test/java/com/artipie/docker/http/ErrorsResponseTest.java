@@ -37,7 +37,6 @@ public final class ErrorsResponseTest {
                 Collections.singleton(new BlobUnknownError(new Digest.Sha256("123")))
             ),
             new RsHasBody(
-                // @checkstyle LineLengthCheck (1 line)
                 "{\"errors\":[{\"code\":\"BLOB_UNKNOWN\",\"message\":\"blob unknown to registry\",\"detail\":\"sha256:123\"}]}".getBytes()
             )
         );

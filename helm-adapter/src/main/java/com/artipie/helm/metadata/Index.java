@@ -43,7 +43,7 @@ public interface Index {
      * </pre>
      * @since 0.3
      */
-    @SuppressWarnings("PMD.CyclomaticComplexity")
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
     final class WithBreaks implements Index {
         /**
          * Versions.

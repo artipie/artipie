@@ -75,7 +75,6 @@ public final class FilterFactoryLoader extends
             .map(inst -> ((ArtipieFilterFactory) inst).value())
             .findFirst()
             .orElseThrow(
-                // @checkstyle LineLengthCheck (1 lines)
                 () -> new ArtipieException(
                     String.format(
                         "Annotation '%s' should have a not empty value",

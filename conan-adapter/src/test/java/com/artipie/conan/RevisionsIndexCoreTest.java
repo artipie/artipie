@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for RevisionsIndexCore class.
  * @since 0.1
- * @checkstyle MagicNumberCheck (199 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RevisionsIndexCoreTest {

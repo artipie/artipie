@@ -37,13 +37,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link RemoveWriter.Asto}.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class RemoveWriterAstoTest {
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
      */
     @TempDir
     Path dir;

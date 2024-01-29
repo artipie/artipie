@@ -30,7 +30,6 @@ public abstract class FactoryLoader<F, A, C, O> {
 
     /**
      * The name of the factory <-> factory.
-     * @checkstyle VisibilityModifierCheck (5 lines)
      */
     protected final Map<String, F> factories;
 

@@ -19,6 +19,7 @@ https://github.com/artipie/artipie/blob/master/LICENSE.txt
   <inceptionYear>2020</inceptionYear>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
   </properties>
   <dependencies>
     <dependency>

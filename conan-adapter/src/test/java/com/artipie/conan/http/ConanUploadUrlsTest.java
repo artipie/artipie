@@ -32,8 +32,6 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 /**
  * Test for {@link ConanUpload}.
  * @since 0.1
- * @checkstyle LineLengthCheck (999 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (999 lines)
  */
 public class ConanUploadUrlsTest {
 

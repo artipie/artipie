@@ -39,10 +39,6 @@ import org.redline_rpm.header.Header;
 /**
  * Rpm metadata class works with xml metadata - adds or removes records about xml packages.
  * @since 1.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ModifierOrderCheck (500 lines)
- * @checkstyle InterfaceIsTypeCheck (500 lines)
- * @checkstyle NestedTryDepthCheck (500 lines)
  */
 public interface RpmMetadata {
 
@@ -88,8 +84,7 @@ public interface RpmMetadata {
          * Removes records from metadata by RPMs checksums.
          * @param checksums Rpms checksums  to remove by
          * @throws ArtipieIOException On io-operation result error
-         * @checkstyle NestedTryDepthCheck (30 lines)
-         */
+                 */
         public void perform(final Collection<String> checksums) {
             try {
                 for (final MetadataItem item : this.items) {
@@ -152,8 +147,7 @@ public interface RpmMetadata {
          * Appends records about provided RPMs.
          * @param packages Rpms to append info about, map of the path to file and location
          * @throws ArtipieIOException On io-operation error
-         * @checkstyle NestedTryDepthCheck (20 lines)
-         */
+                 */
         @SuppressWarnings("PMD.AvoidDuplicateLiterals")
         public void perform(final Collection<Package.Meta> packages) {
             try {
@@ -323,8 +317,7 @@ public interface RpmMetadata {
          * @param sum File checksum and algorithm
          * @param location Relative file location in the repository, value of
          *  location tag from primary xml
-         * @checkstyle ParameterNumberCheck (5 lines)
-         */
+                 */
         public RpmItem(final Header header, final long size, final Checksum sum,
             final String location) {
             this.header = header;
@@ -340,8 +333,7 @@ public interface RpmMetadata {
          * @param dgst File checksum
          * @param location Relative file location in the repository, value of
          *  location tag from primary xml
-         * @checkstyle ParameterNumberCheck (5 lines)
-         */
+                 */
         public RpmItem(final Header header, final long size, final String dgst,
             final String location) {
             this(header, size, new Checksum.Simple(Digest.SHA256, dgst), location);

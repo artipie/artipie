@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link WheelSlice}.
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class WheelSliceTest {

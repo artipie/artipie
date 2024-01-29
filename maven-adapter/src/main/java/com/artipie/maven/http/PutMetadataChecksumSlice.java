@@ -46,7 +46,6 @@ import org.reactivestreams.Publisher;
  * is ready to be added in the repository (see {@link ValidUpload#ready(Key)}), this slice initiate
  * repository update.
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class PutMetadataChecksumSlice implements Slice {
 
@@ -99,7 +98,6 @@ public final class PutMetadataChecksumSlice implements Slice {
      * @param mvn Maven repository
      * @param rname Repository name
      * @param events Events queue
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public PutMetadataChecksumSlice(final Storage asto, final ValidUpload valid, final Maven mvn,
         final String rname, final Optional<Queue<ArtifactEvent>> events) {

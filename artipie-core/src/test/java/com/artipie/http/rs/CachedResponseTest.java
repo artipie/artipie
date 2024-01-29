@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
  * Test for {@link CachedResponse}.
  *
  * @since 0.17
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class CachedResponseTest {
 

@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
  * Wrapper for Conan protocol request paths.
  * @since 0.1
  */
+@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract class PathWrap {
     /**
      * Path pattern for specific request type.
@@ -131,8 +132,7 @@ public abstract class PathWrap {
     public static final class PkgBinLatest extends PathWrap {
         /**
          * Ctor.
-         * @checkstyle LineLengthCheck (5 lines)
-         */
+                 */
         protected PkgBinLatest() {
             super("^/v2/conans/(?<path>.*)/revisions/(?<rev>[0-9]*)/packages/(?<hash>[0-9,a-f]*)/latest$");
         }
@@ -171,8 +171,7 @@ public abstract class PathWrap {
     public static final class PkgBinFiles extends PathWrap {
         /**
          * Ctor.
-         * @checkstyle LineLengthCheck (5 lines)
-         */
+                 */
         protected PkgBinFiles() {
             super("^/v2/conans/(?<path>.*)/revisions/(?<rev>[0-9]*)/packages/(?<hash>[0-9,a-f]*)/revisions/(?<rev2>[0-9]*)/files$");
         }
@@ -185,8 +184,7 @@ public abstract class PathWrap {
     public static final class PkgBinFile extends PathWrap {
         /**
          * Ctor.
-         * @checkstyle LineLengthCheck (5 lines)
-         */
+                 */
         @SuppressWarnings("LineLengthCheck")
         protected PkgBinFile() {
             super("^/v2/conans/(?<path>.*)/revisions/(?<rev>[0-9]*)/packages/(?<hash>[0-9,a-f]*)/revisions/(?<rev2>[0-9]*)/files/(?<file>.*)$");

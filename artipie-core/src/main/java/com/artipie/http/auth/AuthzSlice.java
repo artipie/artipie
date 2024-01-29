@@ -20,12 +20,6 @@ import org.reactivestreams.Publisher;
  * Slice with authorization.
  *
  * @since 1.2
- * @checkstyle ReturnCountCheck (500 lines)
- * @checkstyle JavadocMethodCheck (500 lines)
- * @checkstyle ParameterNumberCheck (500 lines)
- * @checkstyle NestedIfDepthCheck (500 lines)
- * @checkstyle MethodBodyCommentsCheck (500 lines)
- * @checkstyle AvoidInlineConditionalsCheck (500 lines)
  */
 @SuppressWarnings("PMD.OnlyOneReturn")
 public final class AuthzSlice implements Slice {

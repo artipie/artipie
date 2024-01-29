@@ -28,7 +28,6 @@ import org.quartz.impl.StdSchedulerFactory;
 /**
  * Test for {@link PyProxyPackageProcessor}.
  * @since 0.9
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class PyProxyPackageProcessorTest {

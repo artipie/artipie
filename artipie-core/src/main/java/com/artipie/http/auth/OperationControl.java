@@ -15,8 +15,6 @@ import java.security.Permission;
  * Instances of this class are created in the adapter with users' policies and required
  * permission for the adapter's operation.
  * @since 1.2
- * @checkstyle StringLiteralsConcatenationCheck (500 lines)
- * @checkstyle AvoidInlineConditionalsCheck (500 lines)
  */
 public final class OperationControl {
 

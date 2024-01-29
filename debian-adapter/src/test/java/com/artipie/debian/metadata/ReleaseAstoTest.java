@@ -32,7 +32,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link Release.Asto}.
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ReleaseAstoTest {

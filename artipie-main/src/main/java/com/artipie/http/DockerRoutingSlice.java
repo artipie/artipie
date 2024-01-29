@@ -24,8 +24,6 @@ import org.reactivestreams.Publisher;
 /**
  * Slice decorator which redirects all Docker V2 API requests to Artipie format paths.
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle AvoidInlineConditionalsCheck (500 lines)
  */
 public final class DockerRoutingSlice implements Slice {
 

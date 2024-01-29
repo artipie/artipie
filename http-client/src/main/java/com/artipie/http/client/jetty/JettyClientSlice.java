@@ -35,9 +35,6 @@ import org.reactivestreams.Publisher;
  * ClientSlices implementation using Jetty HTTP client as back-end.
  * <a href="https://eclipse.dev/jetty/documentation/jetty-12/programming-guide/index.html#pg-client-http-non-blocking">Docs</a>
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MethodBodyCommentsCheck (500 lines)
- * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 final class JettyClientSlice implements Slice {
 
@@ -68,7 +65,6 @@ final class JettyClientSlice implements Slice {
      * @param secure Secure connection flag.
      * @param host Host name.
      * @param port Port.
-     * @checkstyle ParameterNumberCheck (2 lines)
      */
     JettyClientSlice(
         final HttpClient client,
@@ -190,9 +186,8 @@ final class JettyClientSlice implements Slice {
      * See <a href="https://eclipse.dev/jetty/documentation/jetty-12/programming-guide/index.html#pg-client-http-content-response">jetty docs</a>
      * for more details.
      * @since 0.3
-     * @checkstyle ReturnCountCheck (500 lines)
      */
-    @SuppressWarnings("PMD.OnlyOneReturn")
+    @SuppressWarnings({"PMD.OnlyOneReturn", "PMD.CognitiveComplexity"})
     private static final class Demander implements Runnable {
 
         /**

@@ -40,14 +40,11 @@ import org.junit.jupiter.api.Timeout;
  * <p>
  * If a storage implementation passes this tests, it can be used like a storage in Artipie server.
  *
- * @checkstyle MethodNameCheck (1500 lines)
- * @checkstyle JavadocMethodCheck (1500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (1500 lines)
  * @since 1.14.0
  */
 @SuppressWarnings({"deprecation", "PMD.MethodNamingConventions",
     "PMD.AvoidDuplicateLiterals", "PMD.AvoidCatchingGenericException",
-    "PMD.TooManyMethods"})
+    "PMD.TooManyMethods", "PMD.JUnit5TestShouldBePackagePrivate"})
 @Disabled
 public abstract class StorageWhiteboxVerification {
 

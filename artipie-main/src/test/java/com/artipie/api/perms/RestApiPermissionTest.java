@@ -14,7 +14,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 /**
  * Test for {@link RestApiPermission}.
  * @since 0.30
- * @checkstyle DesignForExtensionCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CompareObjectsWithEquals"})
 class RestApiPermissionTest {

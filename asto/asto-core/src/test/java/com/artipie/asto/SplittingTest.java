@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link Splitting}.
  *
  * @since 1.12.0
- * @checkstyle MagicNumberCheck (500 lines)
  */
 public class SplittingTest {
 

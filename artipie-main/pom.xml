@@ -35,6 +35,7 @@ SOFTWARE.
         <jettyVersion>12.0.3</jettyVersion>
         <docker.image.name>artipie/artipie</docker.image.name>
         <docker.ubuntu.image.name>artipie/artipie-ubuntu</docker.ubuntu.image.name>
+        <header.license>${project.basedir}/../LICENSE.header</header.license>
     </properties>
     <dependencies>
         <dependency>

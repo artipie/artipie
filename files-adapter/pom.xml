@@ -35,6 +35,9 @@ SOFTWARE.
   <name>files-adapter</name>
   <description>A simple adapter for storing files</description>
   <inceptionYear>2020</inceptionYear>
+  <properties>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.artipie</groupId>

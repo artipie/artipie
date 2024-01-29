@@ -34,7 +34,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Test for {@link Helm.Asto#delete(Collection, Key)}.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class HelmAstoDeleteTest {

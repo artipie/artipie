@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link InRelease.Asto}.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class InReleaseAstoTest {

@@ -23,7 +23,6 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * MultiDebian merges metadata.
  * @since 0.6
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public interface MultiPackages {
 
@@ -41,6 +40,7 @@ public interface MultiPackages {
      * does not close input or output streams, these operations should be made from the outside.
      * @since 0.6
      */
+    @SuppressWarnings("PMD.CloseResource")
     final class Unique implements MultiPackages {
 
         @Override

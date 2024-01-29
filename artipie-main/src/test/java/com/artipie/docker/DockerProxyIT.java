@@ -16,7 +16,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 /**
  * Integration test for {@link ProxyDocker}.
  *
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.10
  * @todo #499:30min Add integration test for Docker proxy cache feature.
  *  Docker proxy supports caching feature for it's remote repositories.
@@ -37,7 +36,6 @@ final class DockerProxyIT {
 
     /**
      * Deployment for tests.
-     * @checkstyle VisibilityModifierCheck (5 lines)
      */
     @RegisterExtension
     final TestDeployment deployment = new TestDeployment(

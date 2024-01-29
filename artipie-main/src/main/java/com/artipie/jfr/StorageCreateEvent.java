@@ -15,8 +15,6 @@ import jdk.jfr.StackTrace;
  * Event triggered when storage is created.
  *
  * @since 0.28.0
- * @checkstyle JavadocVariableCheck (500 lines)
- * @checkstyle VisibilityModifierCheck (500 lines)
  */
 @Name("artipie.StorageCreate")
 @Label("Storage Create")

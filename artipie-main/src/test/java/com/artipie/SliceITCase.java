@@ -37,8 +37,6 @@ import org.junit.jupiter.api.condition.JRE;
 /**
  * Slices integration tests.
  * @since 0.20
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledForJreRange(min = JRE.JAVA_11, disabledReason = "HTTP client is not supported prior JRE_11")

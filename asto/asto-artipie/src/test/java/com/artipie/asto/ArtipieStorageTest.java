@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test;
  * Test case for {@link ArtipieStorage}.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class ArtipieStorageTest {
 

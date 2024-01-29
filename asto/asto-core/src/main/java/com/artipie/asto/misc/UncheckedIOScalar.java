@@ -12,7 +12,6 @@ import java.io.IOException;
  * Scalar that throws {@link ArtipieException} on error.
  * @param <T> Return value type
  * @since 1.3
- * @checkstyle AbbreviationAsWordInNameCheck (200 lines)
  */
 public final class UncheckedIOScalar<T> implements Scalar<T> {
 

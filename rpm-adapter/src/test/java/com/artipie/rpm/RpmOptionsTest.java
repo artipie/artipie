@@ -17,7 +17,6 @@ import org.llorllale.cactoos.matchers.Satisfies;
  * Tests for {@link RpmOptions}.
  *
  * @since 0.11
- * @checkstyle LeftCurlyCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class RpmOptionsTest {

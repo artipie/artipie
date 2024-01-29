@@ -30,7 +30,6 @@ import java.util.concurrent.CompletionStage;
  * Proxy implementation of {@link Repo}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class ProxyManifests implements Manifests {
 

@@ -43,8 +43,8 @@ import org.reactivestreams.Subscriber;
  *
  * @param <R> Result type
  * @since 1.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
+@SuppressWarnings("PMD.CognitiveComplexity")
 public final class StorageValuePipeline<R> {
 
     /**
@@ -317,7 +317,7 @@ public final class StorageValuePipeline<R> {
          *
          *  @param scheduler Target rx scheduler for execution.
          */
-        PublishingOutputStream(Scheduler scheduler) {
+        PublishingOutputStream(final Scheduler scheduler) {
             this(
                 PublishingOutputStream.DEFAULT_TIMESPAN,
                 TimeUnit.MILLISECONDS,
@@ -352,7 +352,7 @@ public final class StorageValuePipeline<R> {
             final long timespan,
             final TimeUnit unit,
             final int count,
-            Scheduler scheduler
+            final Scheduler scheduler
         ) {
             this.pub = UnicastProcessor.create();
             this.bufproc = UnicastProcessor.create();
@@ -367,7 +367,6 @@ public final class StorageValuePipeline<R> {
                 .subscribe();
         }
 
-        // @checkstyle ParameterNameCheck (5 line)
         @Override
         public void write(final int b) throws IOException {
             this.bufproc.onNext((byte) b);

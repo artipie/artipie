@@ -32,8 +32,6 @@ import org.apache.commons.lang3.NotImplementedException;
 /**
  * Helm repository.
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 public interface Helm {
     /**
@@ -74,7 +72,7 @@ public interface Helm {
      * Implementation of {@link Helm} for abstract storage.
      * @since 0.3
      */
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+    @SuppressWarnings("PMD.CognitiveComplexity")
     final class Asto implements Helm {
         /**
          * Storage.
@@ -172,7 +170,6 @@ public interface Helm {
                                             noth -> {
                                                 try {
                                                     dir.set(Files.createTempDirectory(prfx));
-                                                    // @checkstyle LineLengthCheck (1 line)
                                                     out.set(Files.createTempFile(dir.get(), prfx, "-out.yaml"));
                                                 } catch (final IOException exc) {
                                                     throw new ArtipieIOException(exc);
@@ -200,7 +197,6 @@ public interface Helm {
                                             )
                                         ).handle(
                                             (noth, thr) -> {
-                                                // @checkstyle NestedIfDepthCheck (10 lines)
                                                 if (thr == null) {
                                                     rslt.complete(null);
                                                 } else {
@@ -320,8 +316,7 @@ public interface Helm {
          * @param tmpdir Temporary directory
          * @param idxtarget Target key to index file in source storage
          * @return Result of completion
-         * @checkstyle ParameterNumberCheck (7 lines)
-         */
+                 */
         private CompletionStage<Void> moveFromTempStorageAndDelete(
             final Storage tmpstrg,
             final Key outidx,

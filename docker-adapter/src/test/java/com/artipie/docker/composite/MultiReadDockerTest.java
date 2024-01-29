@@ -28,7 +28,6 @@ import wtf.g4s8.hamcrest.json.StringIsJson;
  * Tests for {@link MultiReadDocker}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class MultiReadDockerTest {
 

@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link AstoUpload}.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class AstoUploadTest {
 
@@ -79,7 +78,6 @@ class AstoUploadTest {
 
     @Test
     void shouldSaveStartedDateWhenLoadingIsStarted() {
-        // @checkstyle MagicNumberCheck (1 line)
         final Instant time = LocalDateTime.of(2020, Month.MAY, 19, 12, 58, 11)
             .atZone(ZoneOffset.UTC).toInstant();
         this.upload.start(time).join();

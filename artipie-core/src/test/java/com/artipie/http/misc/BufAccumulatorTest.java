@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test case for {@link BufAccumulator}.
  * @since 1.0
- * @checkstyle MagicNumberCheck (500 lines)
  */
 final class BufAccumulatorTest {
 

@@ -45,7 +45,6 @@ import org.reactivestreams.Publisher;
  * WheelSlice save and manage whl and tgz entries.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class WheelSlice implements Slice {
 
@@ -90,7 +89,6 @@ final class WheelSlice implements Slice {
         final Publisher<ByteBuffer> publisher
     ) {
         final Key.From key = new Key.From(UUID.randomUUID().toString());
-        // @checkstyle  (50 lines)
         return new AsyncResponse(
             this.filePart(new Headers.From(iterable), publisher, key).thenCompose(
                 filename -> this.storage.value(key).thenCompose(
@@ -147,7 +145,7 @@ final class WheelSlice implements Slice {
         return Flowable.fromPublisher(
             new RqMultipart(headers, body).inspect(
                 (part, inspector) -> {
-                    if (new ContentDisposition(part.headers()).fieldName().equals("content")) {
+                    if ("content".equals(new ContentDisposition(part.headers()).fieldName())) {
                         inspector.accept(part);
                     } else {
                         inspector.ignore(part);
@@ -162,7 +160,6 @@ final class WheelSlice implements Slice {
         ).flatMapSingle(
             part -> SingleInterop.fromFuture(
                 this.storage.save(temp, new Content.From(part))
-                    // @checkstyle LineLengthCheck (1 line)
                     .thenRun(() -> Logger.debug(this, "WS: content saved to temp file `%s`", temp.string()))
                     .thenApply(nothing -> new ContentDisposition(part.headers()).fileName())
             )
@@ -186,7 +183,6 @@ final class WheelSlice implements Slice {
      * @param filename Artifact filename
      * @param headers Request headers
      * @return Completion action
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     private CompletionStage<Void> putArtifactToQueue(
         final Key key, final PackageInfo info, final String filename,

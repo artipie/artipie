@@ -45,7 +45,6 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Tests for {@link JettyClientSlice} with HTTP server.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class JettyClientSliceTest {
 

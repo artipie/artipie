@@ -17,7 +17,6 @@ import java.util.function.Consumer;
  * HTTP request headers.
  *
  * @since 0.8
- * @checkstyle InterfaceIsTypeCheck (2 lines)
  */
 public interface Headers extends Iterable<Map.Entry<String, String>> {
 

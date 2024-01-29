@@ -30,15 +30,12 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * Test for {@link RepositoryRest}.
  * @since 0.26
- * @checkstyle DesignForExtensionCheck (1000 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (1000 lines)
  */
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public final class RepositoryRestTest extends RestApiServerBase {
     /**
      * Temp dir.
-     * @checkstyle VisibilityModifierCheck (500 lines)
      */
     @TempDir
     Path temp;

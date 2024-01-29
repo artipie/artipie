@@ -91,7 +91,6 @@ public final class WwwAuthenticateTest {
     @Test
     void shouldParseHeaderWithParams() {
         final WwwAuthenticate header = new WwwAuthenticate(
-            // @checkstyle LineLengthCheck (1 line)
             "Bearer realm=\"https://auth.docker.io/token\",service=\"registry.docker.io\",scope=\"repository:busybox:pull\""
         );
         MatcherAssert.assertThat(

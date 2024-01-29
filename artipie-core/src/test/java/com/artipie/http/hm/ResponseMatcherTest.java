@@ -29,7 +29,6 @@ import org.llorllale.cactoos.matchers.Matches;
 /**
  * Test for {@link ResponseMatcher}.
  * @since 0.10
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 class ResponseMatcherTest {

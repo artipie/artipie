@@ -24,9 +24,6 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Test for {@link BearerAuthScheme}.
  *
  * @since 0.17
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle IndentationCheck (500 lines)
- * @checkstyle BracketsStructureCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class BearerAuthSchemeTest {

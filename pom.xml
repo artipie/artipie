@@ -30,6 +30,7 @@ SOFTWARE.
   <packaging>pom</packaging>
   <name>artipie</name>
   <modules>
+    <module>build-tools</module>
     <module>artipie-core</module>
     <module>artipie-main</module>
     <module>pypi-adapter</module>
@@ -73,7 +74,6 @@ SOFTWARE.
   </scm>
   <properties>
     <docker.image.name>artipie/artipie</docker.image.name>
-    <qulice.license>${project.basedir}/../LICENSE.header</qulice.license>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <junit-platform.version>5.10.0</junit-platform.version>
@@ -81,6 +81,7 @@ SOFTWARE.
     <guava.version>33.0.0-jre</guava.version>
     <javax.json.version>1.1.4</javax.json.version>
     <maven.compiler.release>17</maven.compiler.release>
+    <header.license>LICENSE.header</header.license>
   </properties>
   <distributionManagement>
     <repository>
@@ -273,7 +274,7 @@ SOFTWARE.
               <goal>testCompile</goal>
             </goals>
             <configuration>
-              <release>21</release>
+              <release>17</release>
             </configuration>
           </execution>
         </executions>
@@ -298,6 +299,76 @@ SOFTWARE.
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>4.3</version>
+        <configuration>
+          <licenseSets>
+            <licenseSet>
+              <header>${header.license}</header>
+              <useDefaultExcludes>true</useDefaultExcludes>
+              <excludes>
+                <exclude>**/**.md</exclude>
+                <exclude>**/**.txt</exclude>
+                <exclude>**/pom.xml</exclude>
+                <exclude>**/**.sh</exclude>
+                <exclude>**/**.yaml</exclude>
+                <exclude>**/**.rb</exclude>
+                <exclude>**/Docker*</exclude>
+                <exclude>pom.xml</exclude>
+                <exclude>LICENSE.header</exclude>
+                <exclude>.Dockerignore</exclude>
+                <exclude>**/com/artipie/hex/proto/generated/*</exclude>
+                <exclude>**/src/test/resources/**</exclude>
+                <exclude>**/src/test/resources-binary/**</exclude>
+                <exclude>**/src/main/resources/**</exclude>
+                <exclude>**/examples/**</exclude>
+              </excludes>
+            </licenseSet>
+          </licenseSets>
+        </configuration>
+        <executions>
+          <execution>
+            <id>licence-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.21.2</version>
+        <configuration>
+          <rulesets>
+            <ruleset>pmd-ruleset.xml</ruleset>
+          </rulesets>
+          <printFailingErrors>true</printFailingErrors>
+          <targetJdk>17</targetJdk>
+          <excludes>
+            <exclude>**/hex/proto/generated/**</exclude>
+            <exclude>**/debian/benchmarks/**</exclude>
+            <exclude>**/bench/**</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.artipie</groupId>
+            <artifactId>build-tools</artifactId>
+            <version>1.0-SNAPSHOT</version>
+          </dependency>
+        </dependencies>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -307,31 +378,6 @@ SOFTWARE.
           <version>0.8.11</version>
           <configuration>
             <skip>false</skip>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>com.qulice</groupId>
-          <artifactId>qulice-maven-plugin</artifactId>
-          <version>0.19.0</version>
-          <configuration>
-            <license>file:${qulice.license}</license>
-            <excludes combine.children="append">
-              <exclude>findbugs:.*</exclude>
-              <exclude>duplicatefinder:.*</exclude>
-              <exclude>dependencies:.*</exclude>
-              <exclude>checkstyle:.*/src/test/resources/.*</exclude>
-              <exclude>checkstyle:.*/src/main/resources/swagger-ui/.*</exclude>
-              <exclude>checkstyle:.*/src/test/java/com/artipie/settings/cache/GuavaFiltersCacheTest.java</exclude>
-              <exclude>checkstyle:.*/com.artipie.http.filter/.*</exclude>
-              <exclude>pmd:.*/src/test/resources/.*</exclude>
-              <exclude>pmd:.*/src/main/resources/swagger-ui/.*</exclude>
-              <exclude>checkstyle:.*/src/test/resources-binary/.*</exclude>
-              <exclude>pmd:.*/src/test/resources-binary/.*</exclude>
-              <exclude>checkstyle:.*/src/main/java/com/artipie/hex/proto/generated/.*</exclude>
-              <exclude>pmd:.*/src/main/java/com/artipie/hex/proto/generated/.*</exclude>
-              <exclude>checkstyle:.*/benchmarks/src/main/java/com/artipie/.*/.*</exclude>
-              <exclude>pmd:.*/benchmarks/src/main/java/com/artipie/.*/.*</exclude>
-            </excludes>
           </configuration>
         </plugin>
         <plugin>
@@ -370,6 +416,27 @@ SOFTWARE.
       </plugins>
     </pluginManagement>
   </build>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.21.2</version>
+        <configuration>
+          <rulesets>
+            <ruleset>pmd-ruleset.xml</ruleset>
+          </rulesets>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>pmd</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
   <profiles>
     <profile>
       <id>itcase</id>

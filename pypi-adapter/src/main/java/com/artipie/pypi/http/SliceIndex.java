@@ -33,7 +33,6 @@ import org.reactivestreams.Publisher;
  * SliceIndex returns formatted html output with index of repository packages.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class SliceIndex implements Slice {
 

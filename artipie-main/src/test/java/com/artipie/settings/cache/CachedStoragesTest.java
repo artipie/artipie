@@ -26,7 +26,6 @@ final class CachedStoragesTest {
 
     /**
      * Test directory.
-     * @checkstyle VisibilityModifierCheck (5 lines)
      */
     @TempDir
     Path temp;

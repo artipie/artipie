@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link BearerAuthenticator}.
  *
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 class BearerAuthenticatorTest {
 

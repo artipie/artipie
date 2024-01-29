@@ -12,7 +12,9 @@
   <artifactId>artipie-core</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-
+  <properties>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.artipie</groupId>

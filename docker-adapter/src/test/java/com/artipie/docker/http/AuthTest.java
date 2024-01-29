@@ -57,9 +57,6 @@ import org.testcontainers.shaded.com.google.common.collect.Sets;
  * Authentication & authorization tests.
  *
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
- * @checkstyle JavadocVariableCheck (500 lines)
  * @todo #434:30min test `shouldReturnForbiddenWhenUserHasNoRequiredPermissionOnSecondManifestPut`
  *  fails in github actions, locally it works fine. Figure out what is the problem and fix it.
  */

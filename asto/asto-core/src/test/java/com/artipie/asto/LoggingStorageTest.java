@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link LoggingStorage}.
  *
  * @since 0.20.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class LoggingStorageTest {
 

@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test case for multipart headers.
  * @since 1.0
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ModifiedControlVariableCheck (500 lines)
  */
 final class MultipartHeadersTest {
 

@@ -369,7 +369,6 @@ public final class HeaderTags {
     /**
      * Rpm package dependency flags.
      * @since 1.10
-     * @checkstyle JavadocVariableCheck (10 lines)
      */
     public enum Flags {
         EQUAL(8, "EQ"),

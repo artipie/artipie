@@ -30,8 +30,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link AstoRepoAdd}.
  * @since 1.10
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class AstoRepoAddTest {

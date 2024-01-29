@@ -39,7 +39,6 @@ public final class S3StorageFactory implements StorageFactory {
      *
      * @param cfg Storage config.
      * @return Built S3 client.
-     * @checkstyle MethodNameCheck (3 lines)
      */
     private static S3AsyncClient s3Client(final Config cfg) {
         final S3AsyncClientBuilder builder = S3AsyncClient.builder();

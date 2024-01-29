@@ -33,7 +33,6 @@ import org.reactivestreams.Publisher;
  * See <a href="https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource#registration-pages-and-leaves">Registration pages and leaves</a>
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class Registration implements Resource {
 

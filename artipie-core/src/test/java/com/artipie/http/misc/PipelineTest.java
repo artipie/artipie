@@ -17,7 +17,6 @@ import org.reactivestreams.Subscription;
 /**
  * Test case for {@link Pipeline}.
  * @since 1.0
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class PipelineTest {
 
@@ -122,7 +121,6 @@ final class PipelineTest {
             this.cancellation = cancellation;
         }
 
-        // @checkstyle ReturnCountCheck (10 lines)
         @Override
         public void request(final long add) {
             this.requested.updateAndGet(

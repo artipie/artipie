@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link SliceOptional}.
  * @since 0.21
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class SliceOptionalTest {
 

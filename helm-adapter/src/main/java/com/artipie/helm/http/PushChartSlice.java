@@ -40,8 +40,6 @@ import org.reactivestreams.Publisher;
  * @since 0.2
  * @todo #13:30min Create an integration test
  *  We need an integration test for this class with described logic of upload from client side
- * @checkstyle MethodBodyCommentsCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class PushChartSlice implements Slice {
 
@@ -96,7 +94,7 @@ final class PushChartSlice implements Slice {
                     Completable.defer(
                         () -> {
                             final Completable res;
-                            if (!upd.isPresent() || upd.get().equals("true")) {
+                            if (upd.isEmpty() || "true".equals(upd.get())) {
                                 final ChartYaml chart = tgz.chartYaml();
                                 res = new IndexYaml(this.storage).update(tgz);
                                 this.events.ifPresent(

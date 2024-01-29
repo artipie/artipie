@@ -34,7 +34,7 @@ public final class ParsedChartName {
     public boolean valid() {
         final String trimmed = this.name.trim();
         return trimmed.endsWith(":")
-            && !trimmed.equals(ParsedChartName.ENTRS)
+            && !ParsedChartName.ENTRS.equals(trimmed)
             && trimmed.charAt(0) != '-';
     }
 }

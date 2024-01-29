@@ -33,8 +33,6 @@ import org.testcontainers.images.builder.Transferable;
  * A test which ensures {@code gem} console tool compatibility with the adapter.
  *
  * @since 0.2
- * @checkstyle StringLiteralsConcatenationCheck (500 lines)
- * @checkstyle ExecutableStatementCountCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledIfSystemProperty(named = "os.name", matches = "Windows.*")
@@ -190,7 +188,6 @@ final class GemCliITCase {
      * @param ruby The ruby container.
      * @param command Bash command to execute.
      * @return Exit code.
-     * @checkstyle ReturnCountCheck (20 lines) - return -1 on interrupt
      */
     @SuppressWarnings("PMD.OnlyOneReturn")
     private static int bash(final RubyContainer ruby, final String command) {

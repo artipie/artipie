@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test case for {@link SliceUpload}.
  * @since 0.6
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class SliceUploadTest {

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link AstoBlobs}.
  *
  * @since 0.6
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class AstoBlobsTest {
 

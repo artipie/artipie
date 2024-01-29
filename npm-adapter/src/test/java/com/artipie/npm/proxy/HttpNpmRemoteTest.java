@@ -33,7 +33,6 @@ import org.skyscreamer.jsonassert.JSONAssert;
 /**
  * Http NPM Remote client test.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public final class HttpNpmRemoteTest {

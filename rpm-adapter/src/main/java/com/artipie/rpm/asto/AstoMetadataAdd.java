@@ -29,7 +29,6 @@ import java.util.zip.GZIPInputStream;
 /**
  * Add rpm packages records to metadata.
  * @since 1.10
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class AstoMetadataAdd {
 
@@ -130,7 +129,6 @@ public final class AstoMetadataAdd {
      * @param type Metadata type
      * @param event Xml event instance
      * @return COmpletable action
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     private CompletableFuture<Void> add(final Key temp, final Collection<Package.Meta> metas,
         final MergedXml.Result primary, final XmlPackage type, final XmlEvent event) {

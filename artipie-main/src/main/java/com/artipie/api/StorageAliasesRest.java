@@ -49,7 +49,6 @@ public final class StorageAliasesRest extends BaseRest {
      * @param caches Artipie settings caches
      * @param asto Artipie settings storage
      * @param policy Artipie policy
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public StorageAliasesRest(final StoragesCache caches, final BlockingStorage asto,
         final Policy<?> policy) {

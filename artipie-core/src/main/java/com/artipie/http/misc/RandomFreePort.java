@@ -11,7 +11,6 @@ import java.net.ServerSocket;
 /**
  * Provides random free port.
  * @since 0.18
- * @checkstyle NonStaticMethodCheck (500 lines)
  */
 public final class RandomFreePort {
     /**

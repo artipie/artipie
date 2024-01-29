@@ -61,7 +61,6 @@ final class GroupResults {
      * @param result Repayable result
      * @param con Connection to use for replay
      * @return Future
-     * @checkstyle ReturnCountCheck (25 lines)
      */
     @SuppressWarnings("PMD.OnlyOneReturn")
     public CompletionStage<Void> complete(final int order, final GroupResult result,

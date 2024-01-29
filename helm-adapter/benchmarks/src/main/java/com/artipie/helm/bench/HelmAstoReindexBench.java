@@ -33,10 +33,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 /**
  * Benchmark for {@link com.artipie.helm.Helm.Asto#reindex(Key)}.
  * @since 0.3
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle DesignForExtensionCheck (500 lines)
- * @checkstyle JavadocMethodCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)

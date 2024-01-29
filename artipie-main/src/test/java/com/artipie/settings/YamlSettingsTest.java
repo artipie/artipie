@@ -28,14 +28,12 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Tests for {@link YamlSettings}.
  *
  * @since 0.1
- * @checkstyle MethodNameCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class YamlSettingsTest {
 
     /**
      * Test directory.
-     * @checkstyle VisibilityModifierCheck (5 lines)
      */
     @TempDir
     Path temp;

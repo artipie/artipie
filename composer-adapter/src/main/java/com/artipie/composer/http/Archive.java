@@ -83,7 +83,7 @@ public interface Archive {
                             ArchiveEntry entry;
                             while ((entry = zip.getNextZipEntry()) != null) {
                                 final String[] parts = entry.getName().split("/");
-                                if (parts[parts.length - 1].equals(Zip.COMPOS)) {
+                                if (Zip.COMPOS.equals(parts[parts.length - 1])) {
                                     return Json.createReader(zip).readObject();
                                 }
                             }
@@ -112,8 +112,7 @@ public interface Archive {
                 .thenApply(
                     bytes -> {
                         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                        final ZipOutputStream zos = new ZipOutputStream(bos);
-                        try {
+                        try (ZipOutputStream zos = new ZipOutputStream(bos)) {
                             try (
                                 ZipArchiveInputStream zip = new ZipArchiveInputStream(
                                     new ByteArrayInputStream(bytes)
@@ -124,7 +123,7 @@ public interface Archive {
                                     final ZipEntry newentr = new ZipEntry(entry.getName());
                                     final boolean isdir = newentr.isDirectory();
                                     final String[] parts = entry.getName().split("/");
-                                    if (parts[parts.length - 1].equals(Zip.COMPOS) && !isdir) {
+                                    if (Zip.COMPOS.equals(parts[parts.length - 1]) && !isdir) {
                                         zos.putNextEntry(newentr);
                                         zos.write(composer);
                                     } else if (!isdir) {
@@ -139,8 +138,6 @@ public interface Archive {
                                     zos.flush();
                                     zos.closeEntry();
                                 }
-                            } finally {
-                                zos.close();
                             }
                         } catch (final IOException exc) {
                             throw new UncheckedIOException(exc);

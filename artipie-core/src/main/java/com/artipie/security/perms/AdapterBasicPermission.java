@@ -147,7 +147,7 @@ public final class AdapterBasicPermission extends Permission {
      */
     private boolean impliesIgnoreMask(final AdapterBasicPermission perm) {
         final boolean res;
-        if (this.getName().equals(AdapterBasicPermission.WILDCARD)) {
+        if (AdapterBasicPermission.WILDCARD.equals(this.getName())) {
             res = true;
         } else {
             res = this.getName().equalsIgnoreCase(perm.getName());
@@ -202,8 +202,7 @@ public final class AdapterBasicPermission extends Permission {
 
         /**
          * Create an empty BasicPermissionCollection object.
-         * @checkstyle MagicNumberCheck (5 lines)
-         */
+                 */
         AdapterBasicPermissionCollection() {
             this.perms = new ConcurrentHashMap<>(5);
             this.any = false;
@@ -218,7 +217,7 @@ public final class AdapterBasicPermission extends Permission {
             }
             if (permission instanceof AdapterBasicPermission) {
                 this.perms.put(permission.getName(), permission);
-                if (permission.getName().equals(AdapterBasicPermission.WILDCARD)
+                if (AdapterBasicPermission.WILDCARD.equals(permission.getName())
                     && ((AdapterBasicPermission) permission).mask == Action.ALL.mask()) {
                     this.any = true;
                 }
@@ -230,13 +229,13 @@ public final class AdapterBasicPermission extends Permission {
         }
 
         @Override
+        @SuppressWarnings("PMD.CognitiveComplexity")
         public boolean implies(final Permission permission) {
             boolean res = false;
             if (permission instanceof AdapterBasicPermission) {
                 if (this.any) {
                     res = true;
                 } else {
-                    //@checkstyle NestedIfDepthCheck (10 lines)
                     Permission existing = this.perms.get(permission.getName());
                     if (existing != null) {
                         res = existing.implies(permission);

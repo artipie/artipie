@@ -38,8 +38,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Integration test for {@link RpmSlice}.
  * @since 0.10
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
@@ -59,7 +57,6 @@ final class RpmSliceDownloadITCase {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
      */
     @TempDir
     Path tmp;

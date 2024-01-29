@@ -159,8 +159,7 @@ public interface CatalogEntry {
          * <code>dependency_id:dependency_version:group_targetFramework</code>
          * The last part `group_targetFramework` can be empty.
          * @return Dependencies grouped by target framework
-         * @checkstyle MagicNumberCheck (20 lines)
-         */
+                 */
         private Map<String, List<Pair<String, String>>> dependenciesByTargetFramework() {
             final Map<String, List<Pair<String, String>>> res = new HashMap<>();
             this.nuspec.dependencies().forEach(

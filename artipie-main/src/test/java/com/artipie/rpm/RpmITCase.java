@@ -28,8 +28,6 @@ public final class RpmITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
@@ -74,7 +72,6 @@ public final class RpmITCase {
             String.format("http://artipie:%s/%s/time-1.7-45.el7.x86_64.rpm", port, repo),
             "--upload-file", "/w/time-1.7-45.el7.x86_64.rpm"
         );
-        // @checkstyle MagicNumberCheck (1 line)
         Thread.sleep(2000);
         this.containers.assertExec(
             "Failed to install time package",

@@ -11,7 +11,6 @@ import javax.xml.stream.XMLStreamWriter;
 /**
  * Envelop for XmlFile Class.
  * @since 0.7
- * @checkstyle DesignForExtensionCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 public class XmlWriterWrap implements XMLStreamWriter {
@@ -191,7 +190,7 @@ public class XmlWriterWrap implements XMLStreamWriter {
     }
 
     @Override
-    public Object getProperty(final String name) throws IllegalArgumentException {
+    public Object getProperty(final String name) {
         return this.xml.getProperty(name);
     }
 

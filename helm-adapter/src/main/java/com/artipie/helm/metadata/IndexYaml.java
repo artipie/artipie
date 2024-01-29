@@ -30,8 +30,6 @@ import org.yaml.snakeyaml.Yaml;
  * Index.yaml file. The main file in a chart repo.
  *
  * @since 0.2
- * @checkstyle MethodBodyCommentsCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class IndexYaml {

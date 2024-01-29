@@ -37,27 +37,27 @@ public final class SearchResults {
      * @throws IOException On IO error
      */
     void generate(final Collection<Package> packages) throws IOException {
-        final JsonGenerator gen = new JsonFactory().createGenerator(this.out);
-        gen.writeStartObject();
-        gen.writeNumberField("totalHits", packages.size());
-        gen.writeFieldName("data");
-        gen.writeStartArray();
-        for (final Package item : packages) {
+        try (JsonGenerator gen = new JsonFactory().createGenerator(this.out)) {
             gen.writeStartObject();
-            gen.writeStringField("id", item.id);
-            gen.writeStringField("version", item.version());
-            gen.writeFieldName("packageTypes");
-            gen.writeArray(item.types.toArray(new String[]{}), 0, item.types.size());
-            gen.writeFieldName("versions");
+            gen.writeNumberField("totalHits", packages.size());
+            gen.writeFieldName("data");
             gen.writeStartArray();
-            for (final Version vers : item.versions) {
-                vers.write(gen);
+            for (final Package item : packages) {
+                gen.writeStartObject();
+                gen.writeStringField("id", item.id);
+                gen.writeStringField("version", item.version());
+                gen.writeFieldName("packageTypes");
+                gen.writeArray(item.types.toArray(new String[]{}), 0, item.types.size());
+                gen.writeFieldName("versions");
+                gen.writeStartArray();
+                for (final Version vers : item.versions) {
+                    vers.write(gen);
+                }
+                gen.writeEndArray();
+                gen.writeEndObject();
             }
             gen.writeEndArray();
-            gen.writeEndObject();
         }
-        gen.writeEndArray();
-        gen.close();
     }
 
     /**

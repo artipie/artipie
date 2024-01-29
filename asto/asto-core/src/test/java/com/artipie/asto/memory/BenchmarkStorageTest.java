@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link BenchmarkStorage}.
  * @since 1.1.0
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class BenchmarkStorageTest {

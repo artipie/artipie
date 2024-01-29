@@ -30,7 +30,6 @@ import wtf.g4s8.hamcrest.json.StringIsJson;
  * Tests for {@link MultiReadManifests}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class MultiReadManifestsTest {

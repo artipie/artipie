@@ -31,7 +31,6 @@ import org.reactivestreams.Publisher;
  * Slice to download repodata.json. If the repodata item does not exists in storage, empty
  * json is returned.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class DownloadRepodataSlice implements Slice {
 

@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link AstoRepository#packages()} and {@link AstoRepository#packages(Name)}.
  *
  * @since 0.3
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 class AstoRepositoryPackagesTest {
 

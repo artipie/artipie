@@ -30,7 +30,6 @@ import javax.annotation.concurrent.NotThreadSafe;
  * @implNote The state could be broken in case of runtime exception occurs during
  *  the tokenization process, it couldn't be recovered and should not be used after failure
  * @since 1.0
- * @checkstyle MethodBodyCommentsCheck (500 lines)
  */
 @NotThreadSafe
 public final class ByteBufferTokenizer implements Closeable {
@@ -161,7 +160,6 @@ public final class ByteBufferTokenizer implements Closeable {
      */
     private static int indexOf(final int offset, final byte[] array, final byte[] token) {
         int res = -1;
-        // @checkstyle LocalVariableNameCheck (10 lines)
         TOP: for (int i = offset; i < array.length - token.length + 1; ++i) {
             boolean found = true;
             for (int j = 0; j < token.length; ++j) {

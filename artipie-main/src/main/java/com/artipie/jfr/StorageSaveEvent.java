@@ -14,8 +14,6 @@ import jdk.jfr.Name;
  * Storage event for the {@code save} operation.
  *
  * @since 0.28.0
- * @checkstyle VisibilityModifierCheck (500 lines)
- * @checkstyle JavadocVariableCheck (500 lines)
  */
 @Name("artipie.StorageSave")
 @Label("Storage Save")

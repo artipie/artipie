@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
  * Test for {@link RpmUpload}.
  *
  * @since 0.8.3
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RpmUploadTest {

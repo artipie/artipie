@@ -14,7 +14,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
 /**
  * Test case for {@link IsJson}.
  * @since 1.0
- * @checkstyle MagicNumberCheck (500 lines)
  */
 final class IsJsonTest {
 

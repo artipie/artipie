@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link ResourceFromSlice}.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class ResourceFromSliceTest {
 

@@ -28,7 +28,6 @@ import org.reactivestreams.Publisher;
  * based on requested URL.
  *
  * @since 0.6
- * @checkstyle ClassDataAbstractionCouplingCheck (250 lines)
  */
 public final class DownloadPackageSlice implements Slice {
 

@@ -239,8 +239,7 @@ public final class RqMultipart {
          * Create filter single source which either returns accepted item, or
          * drain ignored item and return empty after that.
          * @return Single source
-         * @checkstyle ReturnCountCheck (20 lines)
-         */
+                 */
         @SuppressWarnings({"PMD.ConfusingTernary", "PMD.OnlyOneReturn"})
         Single<? extends Part> filter() {
             if (this.accepted != null) {

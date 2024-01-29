@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
  * Base GET endpoint.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 class BaseEntityGetTest {
 

@@ -30,7 +30,6 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * Creates `repomd.xml`.
  * @since 1.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class AstoCreateRepomd {
 

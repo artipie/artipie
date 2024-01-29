@@ -42,8 +42,6 @@ import org.reactivestreams.Publisher;
 /**
  * Slice to update the repository.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 public final class UpdateSlice implements Slice {
 
@@ -214,7 +212,7 @@ public final class UpdateSlice implements Slice {
         return Flowable.fromPublisher(
             new RqMultipart(headers, body).inspect(
                 (part, inspector) -> {
-                    if (new ContentDisposition(part.headers()).fieldName().equals("file")) {
+                    if ("file".equals(new ContentDisposition(part.headers()).fieldName())) {
                         inspector.accept(part);
                     } else {
                         inspector.ignore(part);

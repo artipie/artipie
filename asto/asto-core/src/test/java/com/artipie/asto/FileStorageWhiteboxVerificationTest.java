@@ -13,7 +13,6 @@ import org.junit.jupiter.api.io.TempDir;
 /**
  * File storage verification test.
  *
- * @checkstyle ProtectedMethodInFinalClassCheck (500 lines)
  * @since 1.14.0
  */
 @SuppressWarnings("PMD.TestClassWithoutTestCases")

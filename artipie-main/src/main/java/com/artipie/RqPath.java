@@ -26,7 +26,6 @@ public enum RqPath implements Predicate<String> {
         @Override
         public boolean test(final String path) {
             final int length = path.split("/").length;
-            // @checkstyle MagicNumberCheck (1 line)
             return CONDA.ptrn.matcher(path).matches() && (length == 6 || length == 7);
         }
     };

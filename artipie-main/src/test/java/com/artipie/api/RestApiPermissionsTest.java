@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for permissions for rest api.
  * @since 0.30
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RestApiPermissionsTest extends RestApiServerBase {
@@ -62,7 +61,6 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
      */
     private static final Collection<TestRequest> RQST = Stream.concat(
         Stream.of(
-            // @checkstyle LineLengthCheck (500 lines)
             new TestRequest(HttpMethod.PUT, "/api/v1/users/Mark", new JsonObject().put("type", "plain").put("pass", "abc123")),
             new TestRequest(HttpMethod.GET, "/api/v1/users/Alice"),
             new TestRequest(HttpMethod.DELETE, "/api/v1/users/Justine"),
@@ -227,7 +225,6 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
     /**
      * Artipie authentication.
      * @return Authentication instance.
-     * @checkstyle AnonInnerLengthCheck (30 lines)
      */
     ArtipieSecurity auth() {
         return new ArtipieSecurity() {
@@ -261,7 +258,6 @@ public final class RestApiPermissionsTest extends RestApiServerBase {
                         "    - *"
                     ).getBytes(StandardCharsets.UTF_8)
                 );
-                // @checkstyle MagicNumberCheck (500 lines)
                 return new CachedYamlPolicy(blsto, 60_000L);
             }
 

@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test case for {@link IndexYaml}.
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @since 0.2
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})

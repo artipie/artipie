@@ -17,12 +17,8 @@ import org.apache.maven.artifact.versioning.ComparableVersion;
  *  createrepo compare dependency implementation
  *  </a>
  * @since 1.9.9
- * @checkstyle ExecutableStatementCountCheck (500 lines)
- * @checkstyle JavaNCSSCheck (500 lines)
- * @checkstyle CyclomaticComplexityCheck (500 lines)
- * @checkstyle NestedIfDepthCheck (500 lines)
  */
-@SuppressWarnings("PMD.CyclomaticComplexity")
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
 public final class CrCompareDependency implements Comparator<String> {
 
     @Override

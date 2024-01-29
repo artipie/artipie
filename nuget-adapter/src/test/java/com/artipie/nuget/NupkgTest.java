@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link Nupkg}.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 class NupkgTest {
 

@@ -16,7 +16,6 @@ import org.reactivestreams.tck.TestEnvironment;
  * Whitebox style tests for verifying {@link StorageValuePipeline.ContentAsInputStream}.
  *
  * @since 1.12
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 public final class ContentAsInputStreamWhiteboxVerificationTest

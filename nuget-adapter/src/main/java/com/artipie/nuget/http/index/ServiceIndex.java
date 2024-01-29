@@ -51,7 +51,7 @@ public final class ServiceIndex implements Route {
     @Override
     public Resource resource(final String path) {
         final Resource resource;
-        if (path.equals("/index.json")) {
+        if ("/index.json".equals(path)) {
             resource = new Index();
         } else {
             resource = new Absent();

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link UploadSlice}.
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class UploadSliceTest {
 

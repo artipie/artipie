@@ -14,7 +14,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * Test for {@link RpmDependency}.
  * @since 0.1
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseObjectForClearerAPI"})
 class RpmDependencyTest {

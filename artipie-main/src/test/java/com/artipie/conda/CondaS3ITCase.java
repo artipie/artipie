@@ -23,8 +23,6 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 /**
  * Conda IT case with S3 storage.
  * @since 0.23
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle LineLengthCheck (500 lines)
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -52,8 +50,6 @@ public final class CondaS3ITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(

@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
  * Tags list GET endpoint.
  *
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 class TagsEntityGetTest {
 

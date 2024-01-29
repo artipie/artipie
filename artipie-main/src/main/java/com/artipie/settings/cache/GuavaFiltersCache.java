@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
  * Implementation of cache for filters using {@link LoadingCache}.
  *
  * @since 0.28
- * @checkstyle DesignForExtensionCheck (500 lines)
  */
 public class GuavaFiltersCache implements FiltersCache {
     /**

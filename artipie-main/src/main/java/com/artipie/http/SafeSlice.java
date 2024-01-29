@@ -17,8 +17,6 @@ import org.reactivestreams.Publisher;
 /**
  * Slice which handles all exceptions and respond with 500 error in that case.
  * @since 0.9
- * @checkstyle IllegalCatchCheck (500 lines)
- * @checkstyle ReturnCountCheck (500 lines)
  */
 @SuppressWarnings({"PMD.OnlyOneReturn", "PMD.AvoidCatchingGenericException"})
 final class SafeSlice implements Slice {

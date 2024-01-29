@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test;
  * Manifest HEAD endpoint.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ManifestEntityHeadTest {
@@ -116,7 +114,6 @@ class ManifestEntityHeadTest {
         Headers() {
             super(
                 new Headers.From(
-                    // @checkstyle LineLengthCheck (1 line)
                     new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/*")
                 )
             );

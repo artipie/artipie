@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Timeout;
  * Test cases for {@link RetryLock}.
  *
  * @since 0.24
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.ProhibitPlainJunitAssertionsRule")
 @Timeout(3)

@@ -44,8 +44,6 @@ import org.junit.jupiter.api.condition.JRE;
 /**
  * Integration test for servlet slice wrapper.
  * @since 0.19
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledForJreRange(min = JRE.JAVA_11, disabledReason = "HTTP client is not supported prior JRE_11")
@@ -119,7 +117,6 @@ final class ServletWrapITCase {
         final int status = HttpClient.newHttpClient().send(
             this.req.copy().GET().build(), HttpResponse.BodyHandlers.discarding()
         ).statusCode();
-        // @checkstyle MagicNumberCheck (1 line)
         MatcherAssert.assertThat(status, new IsEqual<>(204));
     }
 

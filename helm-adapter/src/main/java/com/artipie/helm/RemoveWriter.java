@@ -34,12 +34,8 @@ import java.util.concurrent.CompletionStage;
 /**
  * Remove writer of info about charts from index file.
  * @since 0.3
- * @checkstyle CyclomaticComplexityCheck (500 lines)
- * @checkstyle ExecutableStatementCountCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle NestedIfDepthCheck (500 lines)
- * @checkstyle NPathComplexityCheck (500 lines)
  */
+@SuppressWarnings("PMD.CognitiveComplexity")
 public interface RemoveWriter {
     /**
      * Rewrites source index file avoiding writing down info about charts which
@@ -113,7 +109,7 @@ public interface RemoveWriter {
                                                 final String trimmed = curr.trim();
                                                 final int pos = new SpaceInBeginning(curr).last();
                                                 if (!ctx.inentries) {
-                                                    ctx.setEntries(trimmed.equals(Asto.ENTRS));
+                                                    ctx.setEntries(Asto.ENTRS.equals(trimmed));
                                                 }
                                                 if (ctx.inentries
                                                     && new ParsedChartName(curr).valid()) {
@@ -249,7 +245,6 @@ public interface RemoveWriter {
                 }
                 for (final String vrsn : todelete.get(pckg)) {
                     if (!fromidx.get(pckg).contains(vrsn)) {
-                        // @checkstyle LineLengthCheck (5 lines)
                         throw new ArtipieException(
                             new IllegalStateException(
                                 String.format(

@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.CsvSource;
  * Tests for {@link AddArchiveSlice}.
  *
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class AddArchiveSliceTest {
     /**

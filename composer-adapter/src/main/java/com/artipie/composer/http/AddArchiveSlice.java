@@ -29,7 +29,6 @@ import org.reactivestreams.Publisher;
  * Slice for adding a package to the repository in ZIP format.
  * See <a href="https://getcomposer.org/doc/05-repositories.md#artifact">Artifact repository</a>.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings({"PMD.SingularField", "PMD.UnusedPrivateField"})
 final class AddArchiveSlice implements Slice {

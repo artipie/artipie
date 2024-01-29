@@ -12,7 +12,6 @@ import java.util.function.Supplier;
  * Unchecked IO {@link Supplier}.
  * @param <T> Supplier type
  * @since 1.8
- * @checkstyle AbbreviationAsWordInNameCheck (200 lines)
  */
 public final class UncheckedIOSupplier<T> implements Supplier<T> {
 

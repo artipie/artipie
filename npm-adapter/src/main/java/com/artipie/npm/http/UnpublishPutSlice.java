@@ -37,7 +37,6 @@ import org.reactivestreams.Publisher;
  * It unpublishes a single version of package when multiple
  * versions are published.
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class UnpublishPutSlice implements Slice {

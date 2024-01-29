@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
  * Tests to check the JFR storage create event.
  *
  * @since 0.28.0
- * @checkstyle MagicNumberCheck (500 lines)
  */
 public class StorageCreateEventTest {
 

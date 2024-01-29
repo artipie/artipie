@@ -27,9 +27,6 @@ import javax.xml.stream.events.XMLEvent;
  * Merged primary xml: appends provided information to primary.xml,
  * excluding duplicated packages by `location` tag.
  * @since 1.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ConditionalRegexpMultilineCheck (500 lines)
- * @checkstyle NestedTryDepthCheck (500 lines)
  */
 public final class MergedXmlPrimary implements MergedXml {
 
@@ -115,10 +112,8 @@ public final class MergedXmlPrimary implements MergedXml {
      * @param cnt Valid packages count
      * @return Checksums of the skipped packages
      * @throws XMLStreamException If fails
-     * @checkstyle ParameterNumberCheck (5 lines)
-     * @checkstyle CyclomaticComplexityCheck (20 lines)
      */
-    @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CyclomaticComplexity"})
+    @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
     private static Collection<String> processPackages(final Set<String> locations,
         final XMLEventReader reader, final XMLEventWriter writer, final AtomicLong cnt)
         throws XMLStreamException {
@@ -147,7 +142,7 @@ public final class MergedXmlPrimary implements MergedXml {
                 );
             }
             final boolean endpackage = event.isEndElement()
-                && event.asEndElement().getName().getLocalPart().equals("package");
+                && "package".equals(event.asEndElement().getName().getLocalPart());
             if (endpackage && valid) {
                 cnt.incrementAndGet();
                 for (final XMLEvent item : pckg) {

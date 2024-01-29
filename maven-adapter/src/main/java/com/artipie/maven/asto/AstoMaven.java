@@ -23,7 +23,6 @@ import org.xembly.Directives;
  * Maven front for artipie maven adaptor.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class AstoMaven implements Maven {
 

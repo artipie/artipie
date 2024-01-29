@@ -60,14 +60,15 @@ public interface Key {
     abstract class Base implements Key {
         @Override
         public boolean equals(final Object another) {
+            boolean res;
             if (this == another) {
-                return true;
+                res = true;
+            } else if (another instanceof Key from) {
+                res = Objects.equals(this.parts(), from.parts());
+            } else {
+                res = false;
             }
-            if (!(another instanceof Key)) {
-                return false;
-            }
-            final Key from = (Key) another;
-            return Objects.equals(this.parts(), from.parts());
+            return res;
         }
 
         @Override

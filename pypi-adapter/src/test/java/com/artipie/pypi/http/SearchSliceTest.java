@@ -29,7 +29,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * Test for {@link SearchSlice}.
  * @since 0.7
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class SearchSliceTest {

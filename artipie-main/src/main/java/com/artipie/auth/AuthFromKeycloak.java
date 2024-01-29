@@ -39,7 +39,6 @@ public final class AuthFromKeycloak implements Authentication {
             client.authorization(username, password, "openid")
                 .authorize(new AuthorizationRequest());
             res = Optional.of(new AuthUser(username, "keycloak"));
-            // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Throwable err) {
             Logger.error(this, err.getMessage());
             res = Optional.empty();

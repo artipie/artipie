@@ -22,7 +22,6 @@ import org.redline_rpm.header.Header;
 /**
  * Rpm package metadata from the storage.
  * @since 1.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class AstoRpmPackage {
 

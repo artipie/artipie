@@ -11,8 +11,6 @@ import java.util.Set;
 /**
  * Docker actions.
  * @since 0.18
- * @checkstyle JavadocVariableCheck (100 lines)
- * @checkstyle MagicNumberCheck (100 lines)
  */
 public enum DockerActions implements Action {
 

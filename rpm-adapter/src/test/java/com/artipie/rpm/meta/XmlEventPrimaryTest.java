@@ -29,8 +29,6 @@ import org.xmlunit.matchers.CompareMatcher;
 /**
  * Test for {@link XmlEventPrimary}.
  * @since 1.5
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class XmlEventPrimaryTest {

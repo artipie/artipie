@@ -37,7 +37,6 @@ import org.reactivestreams.Publisher;
  * Docker proxy slice created from config.
  *
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class DockerProxy implements Slice {
 
@@ -80,7 +79,6 @@ public final class DockerProxy implements Slice {
      * @param policy Access policy.
      * @param auth Authentication mechanism.
      * @param events Artifact events queue
-     * @checkstyle ParameterNumberCheck (2 lines)
      */
     public DockerProxy(
         final ClientSlices client,

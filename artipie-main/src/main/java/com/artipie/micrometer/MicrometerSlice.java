@@ -27,7 +27,6 @@ import org.reactivestreams.Publisher;
 /**
  * Calculated uploaded and downloaded body size for all requests.
  * @since 0.28
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 public final class MicrometerSlice implements Slice {
 

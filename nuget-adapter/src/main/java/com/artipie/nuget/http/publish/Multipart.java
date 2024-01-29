@@ -80,7 +80,7 @@ final class Multipart {
      */
     private byte[] boundary() {
         final String header = StreamSupport.stream(this.headers.spliterator(), false)
-            .filter(entry -> entry.getKey().equalsIgnoreCase("Content-Type"))
+            .filter(entry -> "Content-Type".equalsIgnoreCase(entry.getKey()))
             .map(Map.Entry::getValue)
             .findFirst()
             .orElseThrow(

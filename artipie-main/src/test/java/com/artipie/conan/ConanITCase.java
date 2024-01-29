@@ -50,8 +50,6 @@ public final class ConanITCase {
 
     /**
      * Test deployments.
-     * @checkstyle VisibilityModifierCheck (10 lines)
-     * @checkstyle MagicNumberCheck (10 lines)
      */
     @RegisterExtension
     final TestDeployment containers = new TestDeployment(
@@ -164,7 +162,6 @@ public final class ConanITCase {
      * Prepares base docker image instance for tests.
      *
      * @return ImageFromDockerfile of testcontainers.
-     * @checkstyle LineLengthCheck (99 lines)
      */
     @SuppressWarnings("PMD.LineLengthCheck")
     private static TestDeployment.ClientContainer prepareClientContainer() {

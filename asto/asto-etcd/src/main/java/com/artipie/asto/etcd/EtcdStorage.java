@@ -39,8 +39,6 @@ import java.util.stream.Collectors;
  * provide sized content.
  * </p>
  * @since 0.1
- * @checkstyle ReturnCountCheck (200 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class EtcdStorage implements Storage {
 

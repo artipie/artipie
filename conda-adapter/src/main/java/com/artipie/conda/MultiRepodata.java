@@ -45,6 +45,7 @@ public interface MultiRepodata {
      * the outside.
      * @since 0.3
      */
+    @SuppressWarnings("PMD.CloseResource")
     final class Unique implements MultiRepodata {
 
         /**

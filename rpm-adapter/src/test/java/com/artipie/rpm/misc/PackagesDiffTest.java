@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link PackagesDiff}.
  * @since 1.10
- * @checkstyle DiamondOperatorCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class PackagesDiffTest {

@@ -29,7 +29,6 @@ public class TarballsTest {
      * @param prefix Tarball prefix
      * @param expected Expected absolute tarball link
      * @throws IOException
-     * @checkstyle LineLengthCheck (5 lines)
      */
     @ParameterizedTest
     @CsvSource({

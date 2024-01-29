@@ -34,6 +34,9 @@ SOFTWARE.
   <packaging>jar</packaging>
   <name>composer-files</name>
   <description>Turns your files/objects into PHP Composer artifacts</description>
+  <properties>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>

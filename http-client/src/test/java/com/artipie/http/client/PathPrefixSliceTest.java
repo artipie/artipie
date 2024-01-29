@@ -21,7 +21,6 @@ import org.junit.jupiter.params.provider.CsvSource;
  * Tests for {@link PathPrefixSlice}.
  *
  * @since 0.3
- * @checkstyle ParameterNumberCheck (500 lines)
  */
 final class PathPrefixSliceTest {
 

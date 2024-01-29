@@ -11,7 +11,7 @@ they don't violate our quality standards. To avoid frustration, before
 sending us your pull request please run full Maven build:
 
 ```
-mvn clean verify -Pqulice
+mvn clean verify
 ```
 
 After submitting pull-request check CI status checks. If any check with "required" label fails,
@@ -42,7 +42,7 @@ This is a build and test pipeline for artipie main assembly verification:
 
 ## Code style
 
-Code style is enforced by "qulice" Maven plugin which aggregates multiple rules for "checkstyle" and "PMD".
+Code style is enforced by "pmd-maven-plugin" Maven plugin which applies project PMD rule set.
 
 There are some additional recommendation for code style which are not covered by automatic checks:
 

@@ -27,7 +27,6 @@ import java.util.Queue;
  * Artipie {@link Slice} for HexPm repository HTTP API.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class HexSlice extends Slice.Wrap {
 
@@ -54,7 +53,6 @@ public final class HexSlice extends Slice.Wrap {
      * @param users Concrete identities.
      * @param events Artifact events queue
      * @param name Repository name
-     * @checkstyle ParameterNumberCheck (10 lines)
      */
     public HexSlice(final Storage storage, final Policy<?> policy, final Authentication users,
         final Optional<Queue<ArtifactEvent>> events, final String name) {

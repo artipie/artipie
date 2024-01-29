@@ -21,8 +21,6 @@ import org.redline_rpm.header.Header;
 /**
  * Test for {@link AstoRpmPackage}.
  * @since 1.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
  */
 class AstoRpmPackageTest {
 

@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link ReadWriteManifests}.
  *
  * @since 0.5
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 final class ReadWriteManifestsTest {
 

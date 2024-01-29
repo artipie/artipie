@@ -24,7 +24,6 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 /**
  * Integration tests for grouped repositories.
  * @since 0.10
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @todo #370:30min Enable `test.networkEnabled` property for some CI builds.
  *  Make sure these tests are not failing due to network issues, maybe we should retry
  *  it to avoid false failures.

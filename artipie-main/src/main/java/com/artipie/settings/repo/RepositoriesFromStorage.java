@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
  * Artipie repositories created from {@link Settings}.
  *
  * @since 0.13
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class RepositoriesFromStorage implements Repositories {
     /**

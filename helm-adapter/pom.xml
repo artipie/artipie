@@ -32,6 +32,9 @@ SOFTWARE.
   <artifactId>helm-adapter</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>helm-adapter</name>
+  <properties>
+    <header.license>${project.basedir}/../LICENSE.header</header.license>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.artipie</groupId>

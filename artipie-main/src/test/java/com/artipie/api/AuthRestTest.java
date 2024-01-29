@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for authentication in Rest API.
  * @since 0.27
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class AuthRestTest extends RestApiServerBase {
@@ -245,7 +244,6 @@ public final class AuthRestTest extends RestApiServerBase {
     /**
      * Artipie authentication.
      * @return Authentication instance.
-     * @checkstyle AnonInnerLengthCheck (30 lines)
      */
     ArtipieSecurity auth() {
         return new ArtipieSecurity() {
@@ -265,7 +263,6 @@ public final class AuthRestTest extends RestApiServerBase {
                         "  all_permission: {}"
                     ).getBytes(StandardCharsets.UTF_8)
                 );
-                // @checkstyle MagicNumberCheck (1 line)
                 return new CachedYamlPolicy(asto, 60_000L);
             }
 

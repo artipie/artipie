@@ -22,11 +22,6 @@ import org.junit.jupiter.api.Test;
  * Tests for ChunksAndSizeMetricsContent.
  *
  * @since 0.28.0
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ParameterNameCheck (500 lines)
- * @checkstyle LocalFinalVariableNameCheck (500 lines)
- * @checkstyle IllegalCatchCheck (500 lines)
  */
 @SuppressWarnings(
     {
@@ -123,7 +118,6 @@ class ChunksAndSizeMetricsContentTest {
             ).blockingSubscribe();
             Assertions.fail();
         } catch (final RuntimeException err) {
-            // @checkstyle MethodBodyCommentsCheck (1 lines)
             // No-op.
         }
         MatcherAssert.assertThat(counter.get(), Is.is(1));

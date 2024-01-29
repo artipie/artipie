@@ -51,8 +51,6 @@ import java.util.zip.GZIPInputStream;
  * <pre> rpm.batchUpdate(new Key.From("rmp-repo"));</pre>
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class Rpm {
@@ -90,7 +88,6 @@ public final class Rpm {
      * @param naming RPM files naming policy
      * @param dgst Hashing sum computation algorithm
      * @param filelists Include file lists in update
-     * @checkstyle ParameterNumberCheck (3 lines)
      */
     public Rpm(final Storage stg, final NamingPolicy naming, final Digest dgst,
         final boolean filelists) {

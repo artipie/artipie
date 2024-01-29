@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link UploadEntity.Request}.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (2 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class UploadEntityRequestTest {

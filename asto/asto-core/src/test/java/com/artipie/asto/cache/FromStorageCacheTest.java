@@ -28,9 +28,6 @@ import org.junit.jupiter.api.Test;
  * Test case for {@link FromStorageCache}.
  *
  * @since 0.24
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class FromStorageCacheTest {

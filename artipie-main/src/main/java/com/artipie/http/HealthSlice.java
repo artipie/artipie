@@ -26,7 +26,6 @@ import org.reactivestreams.Publisher;
  * response status is {@code OK} if all status passed and {@code UNAVAILABLE} if any failed.
  * </p>
  * @since 0.10
- * @checkstyle AvoidInlineConditionalsCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidCatchingGenericException")
 public final class HealthSlice implements Slice {
@@ -65,7 +64,6 @@ public final class HealthSlice implements Slice {
     /**
      * Checks storage status by writing {@code OK} to storage.
      * @return True if OK
-     * @checkstyle ReturnCountCheck (10 lines)
      */
     @SuppressWarnings("PMD.OnlyOneReturn")
     private CompletionStage<Boolean> storageStatus() {
@@ -74,7 +72,6 @@ public final class HealthSlice implements Slice {
                 new Key.From(".system", "test"),
                 new Content.From("OK".getBytes(StandardCharsets.US_ASCII))
             ).thenApply(none -> true).exceptionally(ignore -> false);
-            // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Exception ignore) {
             return CompletableFuture.completedFuture(false);
         }

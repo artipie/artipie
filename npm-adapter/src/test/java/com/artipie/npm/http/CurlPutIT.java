@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * IT for `curl PUT` tgz archive.
  * @since 0.9
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @DisabledOnOs(OS.WINDOWS)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

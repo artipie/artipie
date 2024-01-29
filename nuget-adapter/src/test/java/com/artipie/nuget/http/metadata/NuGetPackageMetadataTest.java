@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Test;
  * Package metadata resource.
  *
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class NuGetPackageMetadataTest {

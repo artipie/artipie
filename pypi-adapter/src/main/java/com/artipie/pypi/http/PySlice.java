@@ -34,7 +34,6 @@ import java.util.regex.Pattern;
  * PyPi HTTP entry point.
  *
  * @since 0.2
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class PySlice extends Slice.Wrap {
@@ -54,7 +53,6 @@ public final class PySlice extends Slice.Wrap {
      * @param auth Concrete identities.
      * @param name Repository name
      * @param queue Events queue
-     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public PySlice(final Storage storage, final Policy<?> policy, final Authentication auth,
         final String name, final Optional<Queue<ArtifactEvent>> queue) {

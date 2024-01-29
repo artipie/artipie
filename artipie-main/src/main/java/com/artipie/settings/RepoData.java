@@ -23,8 +23,6 @@ import java.util.concurrent.CompletionStage;
 /**
  * Repository data management.
  * @since 0.1
- * @checkstyle MemberNameCheck (500 lines)
- * @checkstyle ParameterNameCheck (500 lines)
  */
 public final class RepoData {
     /**

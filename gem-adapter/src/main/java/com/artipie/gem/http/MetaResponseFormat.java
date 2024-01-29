@@ -25,7 +25,6 @@ import javax.json.JsonObjectBuilder;
 /**
  * Gem meta response format.
  * @since 1.3
- * @checkstyle ClassDataAbstractionCouplingCheck (100 lines)
  */
 enum MetaResponseFormat implements Function<MetaInfo, Response> {
     /**

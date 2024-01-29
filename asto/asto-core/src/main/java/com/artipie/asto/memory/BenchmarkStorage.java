@@ -46,8 +46,6 @@ import java.util.function.Function;
  *     this key is considered deleted. It allows to just emulate delete operation.
  * </p>
  * @since 1.1.0
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle NestedIfDepthCheck (500 lines)
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public final class BenchmarkStorage implements Storage {
@@ -84,6 +82,7 @@ public final class BenchmarkStorage implements Storage {
     }
 
     @Override
+    @SuppressWarnings("PMD.CognitiveComplexity")
     public CompletableFuture<Collection<Key>> list(final Key root) {
         return CompletableFuture.supplyAsync(
             () -> {
@@ -158,7 +157,6 @@ public final class BenchmarkStorage implements Storage {
         return res.toCompletableFuture();
     }
 
-    // @checkstyle MissingDeprecatedCheck (5 lines)
     @Override
     @Deprecated
     public CompletableFuture<Long> size(final Key key) {

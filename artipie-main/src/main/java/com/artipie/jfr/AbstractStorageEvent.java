@@ -12,8 +12,6 @@ import jdk.jfr.StackTrace;
  * Abstract storage event.
  *
  * @since 0.28.0
- * @checkstyle JavadocVariableCheck (500 lines)
- * @checkstyle VisibilityModifierCheck (500 lines)
  */
 @SuppressWarnings("PMD.AbstractClassWithoutAnyMethod")
 @StackTrace(false)

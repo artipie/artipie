@@ -43,8 +43,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * Tests for {@link S3Storage}.
  *
  * @since 0.1
- * @checkstyle MagicNumberCheck (500 lines)
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.TooManyMethods")
 @DisabledOnOs(OS.WINDOWS)

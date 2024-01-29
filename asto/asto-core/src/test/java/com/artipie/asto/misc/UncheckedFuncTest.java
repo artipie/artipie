@@ -15,8 +15,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link UncheckedFunc} and {@link UncheckedIOFunc}.
  * @since 1.1
- * @checkstyle LeftCurlyCheck (200 lines)
- * @checkstyle AbbreviationAsWordInNameCheck (200 lines)
  */
 class UncheckedFuncTest {
 

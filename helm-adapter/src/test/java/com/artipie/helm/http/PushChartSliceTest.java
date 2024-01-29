@@ -32,7 +32,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Tests for {@link PushChartSlice}.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class PushChartSliceTest {

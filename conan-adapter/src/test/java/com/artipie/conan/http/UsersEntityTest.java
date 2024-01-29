@@ -24,7 +24,6 @@ import org.junit.Test;
 /**
  * Test for {@link UsersEntity}.
  * @since 0.1
- * @checkstyle ClassDataAbstractionCouplingCheck (999 lines)
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class UsersEntityTest {

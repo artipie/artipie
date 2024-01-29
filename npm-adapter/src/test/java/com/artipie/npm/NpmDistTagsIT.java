@@ -34,7 +34,6 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * IT for npm dist-tags command.
  * @since 0.8
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 @DisabledOnOs(OS.WINDOWS)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -42,7 +41,6 @@ public final class NpmDistTagsIT {
 
     /**
      * Temporary directory for all tests.
-     * @checkstyle VisibilityModifierCheck (3 lines)
      */
     @TempDir
     Path tmp;

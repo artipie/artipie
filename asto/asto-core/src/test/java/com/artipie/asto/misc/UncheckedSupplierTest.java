@@ -15,8 +15,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for {@link UncheckedSupplier} and {@link UncheckedIOSupplier}.
  * @since 1.8
- * @checkstyle LeftCurlyCheck (200 lines)
- * @checkstyle AbbreviationAsWordInNameCheck (200 lines)
  */
 class UncheckedSupplierTest {
 

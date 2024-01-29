@@ -42,8 +42,6 @@ import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
  * Integration test for PHP Composer repository with auth.
  *
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
- * @checkstyle ClassFanOutComplexityCheck (500 lines)
  */
 @DisabledOnOs(OS.WINDOWS)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")

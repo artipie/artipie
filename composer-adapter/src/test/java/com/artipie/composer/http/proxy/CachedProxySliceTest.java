@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link CachedProxySlice}.
  * @since 0.4
- * @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  * @todo #77:30min Enable tests or remove them.
  *  Now caching functionality is not implemented for class because
  *  the index for a specific package is obtained by combining info
