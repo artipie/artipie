@@ -4,8 +4,7 @@
  */
 package com.artipie.http;
 
-import com.artipie.http.auth.Tokens;
-import com.artipie.http.client.ClientSlices;
+import com.artipie.RepositorySlices;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
@@ -48,14 +47,11 @@ public final class MainSlice extends Slice.Wrap {
     /**
      * Artipie entry point.
      *
-     * @param http HTTP client.
      * @param settings Artipie settings.
-     * @param tokens Tokens: authentication and generation
      */
     public MainSlice(
-        final ClientSlices http,
         final Settings settings,
-        final Tokens tokens
+        final RepositorySlices slices
     ) {
         super(
             new SliceRoute(
@@ -74,7 +70,7 @@ public final class MainSlice extends Slice.Wrap {
                 new RtRulePath(
                     RtRule.FALLBACK,
                     new DockerRoutingSlice(
-                        settings, new SliceByPath(http, settings, tokens)
+                        settings, new SliceByPath(slices)
                     )
                 )
             )

@@ -9,7 +9,7 @@ import com.artipie.docker.Digest;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.DigestFromContent;
 import com.artipie.docker.proxy.ProxyLayers;
-import com.artipie.http.client.Settings;
+import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
@@ -37,7 +37,9 @@ class MultiReadLayersIT {
 
     @BeforeEach
     void setUp() throws Exception {
-        this.slices = new JettyClientSlices(new Settings.WithFollowRedirects(true));
+        this.slices = new JettyClientSlices(
+            new HttpClientSettings().setFollowRedirects(true)
+        );
         this.slices.start();
     }
 

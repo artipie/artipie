@@ -7,7 +7,7 @@ package com.artipie.docker.proxy;
 import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tags;
-import com.artipie.http.client.Settings;
+import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import java.util.Optional;
 import org.hamcrest.MatcherAssert;
@@ -34,7 +34,9 @@ final class ProxyManifestsIT {
 
     @BeforeEach
     void setUp() throws Exception {
-        this.client = new JettyClientSlices(new Settings.WithFollowRedirects(true));
+        this.client = new JettyClientSlices(
+            new HttpClientSettings().setFollowRedirects(true)
+        );
         this.client.start();
     }
 

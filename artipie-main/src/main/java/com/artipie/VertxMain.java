@@ -8,12 +8,9 @@ package com.artipie;
 import com.artipie.api.RestApi;
 import com.artipie.asto.Key;
 import com.artipie.auth.JwtTokens;
-import com.artipie.http.ArtipieRepositories;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
 import com.artipie.http.Slice;
-import com.artipie.http.client.ClientSlices;
-import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.jetty.http3.Http3Server;
 import com.artipie.jetty.http3.SslFactoryFromYaml;
@@ -72,11 +69,6 @@ public final class VertxMain {
     private static final String DEF_API_PORT = "8086";
 
     /**
-     * HTTP client.
-     */
-    private final ClientSlices http;
-
-    /**
      * Config file path.
      */
     private final Path config;
@@ -99,12 +91,10 @@ public final class VertxMain {
     /**
      * Ctor.
      *
-     * @param http HTTP client
      * @param config Config file path.
      * @param port HTTP port
      */
-    public VertxMain(final ClientSlices http, final Path config, final int port) {
-        this.http = http;
+    public VertxMain(final Path config, final int port) {
         this.config = config;
         this.port = port;
         this.servers = new ArrayList<>(0);
@@ -114,11 +104,11 @@ public final class VertxMain {
     /**
      * Starts the server.
      *
-     * @param apiport Port to run Rest API service on
+     * @param apiPort Port to run Rest API service on
      * @return Port the servers listening on.
      * @throws IOException In case of error reading settings.
      */
-    public int start(final int apiport) throws IOException {
+    public int start(final int apiPort) throws IOException {
         final QuartzService quartz = new QuartzService();
         final Settings settings = new SettingsFromPath(this.config).find(quartz);
         final Vertx vertx = VertxMain.vertx(settings.metrics());
@@ -127,18 +117,23 @@ public final class VertxMain {
                 new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
             )
         );
+        final RepositorySlices slices = new RepositorySlices(settings, new JwtTokens(jwt));
         final int main = this.listenOn(
-            new MainSlice(this.http, settings, new JwtTokens(jwt)),
+            new MainSlice(settings, slices),
             this.port,
             vertx,
             settings.metrics()
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
-        this.startRepos(vertx, settings, this.port, jwt);
-        vertx.deployVerticle(new RestApi(settings, apiport, jwt));
+        this.startRepos(vertx, settings, this.port, slices);
+        vertx.deployVerticle(new RestApi(settings, apiPort, jwt));
         quartz.start();
         new ScriptScheduler(quartz).loadCrontab(settings);
         return main;
+    }
+
+    public void stop(){
+        this.servers.forEach(VertxSliceServer::stop);
     }
 
     /**
@@ -175,9 +170,7 @@ public final class VertxMain {
             "Used version of Artipie: %s",
             new ArtipieProperties().version()
         );
-        final JettyClientSlices http = new JettyClientSlices(new HttpClientSettings());
-        http.start();
-        new VertxMain(http, config, port)
+        new VertxMain(config, port)
             .start(Integer.parseInt(cmd.getOptionValue(apiport, VertxMain.DEF_API_PORT)));
     }
 
@@ -186,14 +179,14 @@ public final class VertxMain {
      *
      * @param vertx Vertx instance
      * @param settings Settings.
-     * @param mport Artipie service main port
-     * @param jwt Jwt authentication
+     * @param port Artipie service main port
+     * @param slices Slices cache
      */
     private void startRepos(
         final Vertx vertx,
         final Settings settings,
-        final int mport,
-        final JWTAuth jwt
+        final int port,
+        final RepositorySlices slices
     ) {
         final Collection<RepoConfig> configs = settings.repoConfigsStorage().list(Key.ROOT)
             .thenApply(
@@ -209,9 +202,7 @@ public final class VertxMain {
                 repo.port().ifPresentOrElse(
                     prt -> {
                         final String name = new ConfigFile(repo.name()).name();
-                        final Slice slice = new ArtipieRepositories(
-                            this.http, settings, new JwtTokens(jwt)
-                        ).slice(new Key.From(name), prt);
+                        final Slice slice = slices.slice(new Key.From(name), prt);
                         if (repo.startOnHttp3()) {
                             this.http3.computeIfAbsent(
                                 prt, key -> {
@@ -228,7 +219,7 @@ public final class VertxMain {
                         }
                         VertxMain.logRepo(prt, name);
                     },
-                    () -> VertxMain.logRepo(mport, repo.name())
+                    () -> VertxMain.logRepo(port, repo.name())
                 );
             } catch (final IllegalStateException err) {
                 Logger.error(this, "Invalid repo config file %s: %[exception]s", repo.name(), err);

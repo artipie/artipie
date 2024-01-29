@@ -19,6 +19,7 @@ import com.artipie.db.ArtifactDbFactory;
 import com.artipie.db.DbConsumer;
 import com.artipie.http.auth.AuthLoader;
 import com.artipie.http.auth.Authentication;
+import com.artipie.http.client.HttpClientSettings;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.scheduling.QuartzService;
@@ -77,7 +78,12 @@ public final class YamlSettings implements Settings {
     /**
      * YAML file content.
      */
-    private final YamlMapping content;
+    private final YamlMapping meta;
+
+    /**
+     * Settings for
+     */
+    private final HttpClientSettings httpClientSettings;
 
     /**
      * A set of caches for artipie settings.
@@ -107,7 +113,11 @@ public final class YamlSettings implements Settings {
      */
     @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
     public YamlSettings(final YamlMapping content, final Path path, final QuartzService quartz) {
-        this.content = content;
+        this.meta = content.yamlMapping("meta");
+        if (this.meta == null) {
+            throw new IllegalStateException("Invalid settings: not empty `meta` section is expected");
+        }
+        this.httpClientSettings = HttpClientSettings.from(this.meta.yamlMapping("http_client"));
         final CachedUsers auth = YamlSettings.initAuth(this.meta());
         this.security = new ArtipieSecurity.FromYaml(
             this.meta(), auth, new PolicyStorage(this.meta()).parse()
@@ -131,12 +141,7 @@ public final class YamlSettings implements Settings {
 
     @Override
     public YamlMapping meta() {
-        return Optional.ofNullable(this.content.yamlMapping("meta"))
-            .orElseThrow(
-                () -> new IllegalStateException(
-                    "Invalid settings: not empty `meta` section is expected"
-                )
-            );
+        return this.meta;
     }
 
     @Override
@@ -173,8 +178,13 @@ public final class YamlSettings implements Settings {
     }
 
     @Override
+    public HttpClientSettings httpClientSettings() {
+        return this.httpClientSettings;
+    }
+
+    @Override
     public String toString() {
-        return String.format("YamlSettings{\n%s\n}", this.content.toString());
+        return String.format("YamlSettings{\n%s\n}", this.meta.toString());
     }
 
     /**
