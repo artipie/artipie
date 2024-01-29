@@ -263,7 +263,10 @@ public final class FileStorage implements Storage {
                 if (again) {
                     this.deleteEmptyParts(path.getParent());
                 }
-            } catch (final IOException err) {
+            } catch (final NoSuchFileException ex) {
+                this.deleteEmptyParts(path.getParent());
+            }
+            catch (final IOException err) {
                 throw new ArtipieIOException(err);
             }
         }
