@@ -130,7 +130,7 @@ public class HttpClientSettings {
 
     public HttpClientSettings() {
         this.trustAll = false;
-        this.followRedirects = false;
+        this.followRedirects = true;
         this.connectTimeout = 15_000L;
         this.idleTimeout = 0L;
         this.http3 = false;

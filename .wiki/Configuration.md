@@ -87,7 +87,7 @@ Default values:
  - connection_timeout: 15_000
  - idle_timeout: 0 
  - trust_all: false
- - follow_redirects: false
+ - follow_redirects: true
  - http3: false
 
 ## Additional configuration 
