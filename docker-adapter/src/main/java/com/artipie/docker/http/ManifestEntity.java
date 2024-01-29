@@ -322,7 +322,7 @@ final class ManifestEntity {
                                 this.policy,
                                 new DockerRepositoryPermission(
                                     this.rname, new Request(line).name().value(),
-                                    DockerActions.PUSH.mask() & DockerActions.OVERWRITE.mask()
+                                    DockerActions.PUSH.mask() | DockerActions.OVERWRITE.mask()
                                 )
                             );
                         }
