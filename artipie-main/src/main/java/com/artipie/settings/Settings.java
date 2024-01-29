@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Storage;
+import com.artipie.http.client.HttpClientSettings;
 import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.settings.cache.ArtipieCaches;
 import java.util.Optional;
@@ -74,4 +75,8 @@ public interface Settings {
      * @return Yaml sequence of crontab strings.
      */
     Optional<YamlSequence> crontab();
+
+    default HttpClientSettings httpClientSettings() {
+        return new HttpClientSettings();
+    }
 }

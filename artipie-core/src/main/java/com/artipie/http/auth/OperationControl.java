@@ -7,6 +7,9 @@ package com.artipie.http.auth;
 import com.artipie.security.policy.Policy;
 import com.jcabi.log.Logger;
 import java.security.Permission;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Operation controller for slice. The class is meant to check
@@ -24,9 +27,9 @@ public final class OperationControl {
     private final Policy<?> policy;
 
     /**
-     * Required permission.
+     * Required permissions (at least one should be allowed).
      */
-    private final Permission perm;
+    private final Collection<Permission> perms;
 
     /**
      * Ctor.
@@ -34,8 +37,26 @@ public final class OperationControl {
      * @param perm Required permission
      */
     public OperationControl(final Policy<?> policy, final Permission perm) {
+        this(policy, Collections.singleton(perm));
+    }
+
+    /**
+     * Ctor.
+     * @param policy Security policy
+     * @param perms Required permissions (at least one should be allowed)
+     */
+    public OperationControl(final Policy<?> policy, final Permission... perms) {
+        this(policy, List.of(perms));
+    }
+
+    /**
+     * Ctor.
+     * @param policy Security policy
+     * @param perms Required permissions (at least one should be allowed)
+     */
+    public OperationControl(final Policy<?> policy, final Collection<Permission> perms) {
         this.policy = policy;
-        this.perm = perm;
+        this.perms = perms;
     }
 
     /**
@@ -44,11 +65,12 @@ public final class OperationControl {
      * @return True if authorized
      */
     public boolean allowed(final AuthUser user) {
-        final boolean res = this.policy.getPermissions(user).implies(this.perm);
+        final boolean res = this.perms.stream()
+            .anyMatch(perm -> this.policy.getPermissions(user).implies(perm));
         Logger.debug(
             "security",
             "Authorization operation: [permission=%s, user=%s, result=%s]",
-            this.perm, user.name(), res ? "allowed" : "NOT allowed"
+            this.perms, user.name(), res ? "allowed" : "NOT allowed"
         );
         return res;
     }

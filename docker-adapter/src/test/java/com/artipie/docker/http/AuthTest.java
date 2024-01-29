@@ -142,6 +142,23 @@ public final class AuthTest {
     }
 
     @Test
+    void shouldReturnForbiddenWhenUserHasNoRequiredPermissionOnFirstManifestPut() {
+        final Basic basic = new Basic(this.docker);
+        final RequestLine line = new RequestLine(RqMethod.PUT, "/v2/my-alpine/manifests/latest");
+        final DockerRepositoryPermission permission =
+            new DockerRepositoryPermission("*", "my-alpine", DockerActions.PULL.mask());
+        MatcherAssert.assertThat(
+            basic.slice(permission),
+            new SliceHasResponse(
+                new RsHasStatus(RsStatus.FORBIDDEN),
+                line,
+                basic.headers(TestAuthentication.ALICE),
+                new Content.From(this.manifest())
+            )
+        );
+    }
+
+    @Test
     void shouldOverwriteManifestIfAllowed() {
         final Basic basic = new Basic(this.docker);
         final String path = "/v2/my-alpine/manifests/abc";

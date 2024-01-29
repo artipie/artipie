@@ -4,9 +4,12 @@
  */
 package com.artipie.http.client.jetty;
 
+import com.artipie.ArtipieException;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
-import com.artipie.http.client.Settings;
+import com.artipie.http.client.HttpClientSettings;
+import com.google.common.base.Strings;
+import org.eclipse.jetty.client.BasicAuthentication;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
 import org.eclipse.jetty.client.Origin;
@@ -43,7 +46,7 @@ public final class JettyClientSlices implements ClientSlices {
      * Ctor.
      */
     public JettyClientSlices() {
-        this(new Settings.Default());
+        this(new HttpClientSettings());
     }
 
     /**
@@ -51,26 +54,30 @@ public final class JettyClientSlices implements ClientSlices {
      *
      * @param settings Settings.
      */
-    public JettyClientSlices(final Settings settings) {
+    public JettyClientSlices(final HttpClientSettings settings) {
         this.clnt = create(settings);
     }
 
     /**
      * Prepare for usage.
-     *
-     * @throws Exception In case of any errors starting.
      */
-    public void start() throws Exception {
-        this.clnt.start();
+    public void start() {
+        try {
+            this.clnt.start();
+        } catch (Exception e) {
+            throw new ArtipieException(e);
+        }
     }
 
     /**
      * Release used resources and stop requests in progress.
-     *
-     * @throws Exception In case of any errors stopping.
      */
-    public void stop() throws Exception {
-        this.clnt.stop();
+    public void stop() {
+        try {
+            this.clnt.stop();
+        } catch (Exception e) {
+            throw new ArtipieException(e);
+        }
     }
 
     @Override
@@ -106,12 +113,12 @@ public final class JettyClientSlices implements ClientSlices {
     }
 
     /**
-     * Creates {@link HttpClient} from {@link Settings}.
+     * Creates {@link HttpClient} from {@link HttpClientSettings}.
      *
      * @param settings Settings.
      * @return HTTP client built from settings.
      */
-    private static HttpClient create(final Settings settings) {
+    private static HttpClient create(final HttpClientSettings settings) {
         final HttpClient result;
         if (settings.http3()) {
             result = new HttpClient(new HttpClientTransportOverHTTP3(new HTTP3Client()));
@@ -120,24 +127,27 @@ public final class JettyClientSlices implements ClientSlices {
         }
         final SslContextFactory.Client factory = new SslContextFactory.Client();
         factory.setTrustAll(settings.trustAll());
+        if (!Strings.isNullOrEmpty(settings.jksPath())) {
+            factory.setKeyStoreType("jks");
+            factory.setKeyStorePath(settings.jksPath());
+            factory.setKeyStorePassword(settings.jksPwd());
+        }
         result.setSslContextFactory(factory);
-        settings.proxy().ifPresent(
-            proxy -> result.getProxyConfiguration().addProxy(
-                new HttpProxy(new Origin.Address(proxy.host(), proxy.port()), proxy.secure())
-            )
+        settings.proxies().forEach(
+            proxy -> {
+                if (!Strings.isNullOrEmpty(proxy.basicRealm())) {
+                    result.getAuthenticationStore().addAuthentication(
+                        new BasicAuthentication(
+                            proxy.uri(), proxy.basicRealm(), proxy.basicUser(), proxy.basicPwd()
+                        )
+                    );
+                }
+                result.getProxyConfiguration().addProxy(
+                    new HttpProxy(new Origin.Address(proxy.host(), proxy.port()), proxy.secure())
+                );
+            }
         );
         result.setFollowRedirects(settings.followRedirects());
-        if (settings.connectTimeout() <= 0) {
-            /* @checkstyle MethodBodyCommentsCheck (1 line)
-             * Jetty client does not treat zero value as infinite timeout in non-blocking mode.
-             * Instead it timeouts the connection instantly.
-             * That has been tested in version org.eclipse.jetty:jetty-client:9.4.30.v20200611.
-             * See "org.eclipse.jetty.io.ManagedSelector.Connect" class constructor
-             * and "run()" method for details.
-             * Issue was reported, see https://github.com/eclipse/jetty.project/issues/5150
-             */
-            result.setConnectBlocking(true);
-        }
         result.setConnectTimeout(settings.connectTimeout());
         result.setIdleTimeout(settings.idleTimeout());
         return result;

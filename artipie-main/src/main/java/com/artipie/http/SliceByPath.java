@@ -4,15 +4,13 @@
  */
 package com.artipie.http;
 
+import com.artipie.RepositorySlices;
 import com.artipie.RqPath;
 import com.artipie.asto.Key;
-import com.artipie.http.auth.Tokens;
-import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import com.artipie.settings.Settings;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -26,41 +24,26 @@ import org.reactivestreams.Publisher;
 final class SliceByPath implements Slice {
 
     /**
-     * HTTP client.
+     * Slices cache.
      */
-    private final ClientSlices http;
+    private final RepositorySlices slices;
 
     /**
-     * Artipie settings.
-     */
-    private final Settings settings;
-
-    /**
-     * Tokens: authentication and generation.
-     */
-    private final Tokens tokens;
-
-    /**
-     * New slice from settings.
+     * Create SliceByPath.
      *
-     * @param http HTTP client
-     * @param settings Artipie settings
-     * @param tokens Tokens: authentication and generation
+     * @param slices Slices cache
      */
-    SliceByPath(
-        final ClientSlices http,
-        final Settings settings,
-        final Tokens tokens
-    ) {
-        this.http = http;
-        this.settings = settings;
-        this.tokens = tokens;
+    SliceByPath(final RepositorySlices slices) {
+        this.slices = slices;
     }
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(
+        final String line,
+        final Iterable<Map.Entry<String, String>> headers,
+        final Publisher<ByteBuffer> body
+    ) {
         final Optional<Key> key = SliceByPath.keyFromPath(
             new RequestLineFrom(line).uri().getPath()
         );
@@ -71,7 +54,7 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
-        return new ArtipieRepositories(this.http, this.settings, this.tokens)
+        return this.slices
             .slice(key.get(), new RequestLineFrom(line).uri().getPort())
             .response(line, headers, body);
     }

@@ -318,11 +318,16 @@ final class ManifestEntity {
                                 this.policy, this.permission(line, this.rname)
                             );
                         } else {
+                            final String img = new Request(line).name().value();
                             control = new OperationControl(
                                 this.policy,
                                 new DockerRepositoryPermission(
-                                    this.rname, new Request(line).name().value(),
-                                    DockerActions.PUSH.mask() & DockerActions.OVERWRITE.mask()
+                                    this.rname, img,
+                                    DockerActions.PUSH.mask()
+                                ),
+                                new DockerRepositoryPermission(
+                                    this.rname, img,
+                                    DockerActions.OVERWRITE.mask()
                                 )
                             );
                         }
