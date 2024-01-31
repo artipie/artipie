@@ -50,6 +50,6 @@ jobs:
               }
             ]
       - run: mvn -B install -DskipTests
-      - run: mvn deploy -pl '!:artipie-main,!:helm-bench,!:debian-bench,!:conda-bench,!:rpm-bench' -Psonatype,gpg-sign -DskipTests --errors
+      - run: mvn deploy -pl '!:artipie-main,!:helm-bench,!:debian-bench,!:conda-bench,!:rpm-bench,!:build-tools' -Psonatype,gpg-sign -DskipTests --errors
         env:
           MAVEN_OPTS: --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED
