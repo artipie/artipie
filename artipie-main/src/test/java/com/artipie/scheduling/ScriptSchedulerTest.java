@@ -12,10 +12,9 @@ import com.artipie.asto.fs.FileStorage;
 import com.artipie.scripting.ScriptRunner;
 import com.artipie.settings.Settings;
 import com.artipie.settings.YamlSettings;
+import com.artipie.settings.repo.MapRepositories;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.RepoConfigYaml;
-import com.artipie.settings.repo.Repositories;
-import com.artipie.settings.repo.RepositoriesFromStorage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
@@ -149,13 +148,15 @@ public final class ScriptSchedulerTest {
         final YamlSettings settings = this.runCronScript(
             String.join(
                 "\n",
+                "import java.util.Optional",
+                "\n",
                 "File file = new File('%1$s')",
-                "cfg = _repositories.config('my-repo').toCompletableFuture().join()",
+                "cfg = _repositories.config('my-repo').get()",
                 "file.write cfg.toString()"
             )
         );
-        final Repositories repos = new RepositoriesFromStorage(settings);
-        final RepoConfig cfg = repos.config(repo).toCompletableFuture().join();
+        final RepoConfig cfg = new MapRepositories(settings)
+            .config(repo).orElseThrow();
         MatcherAssert.assertThat(
             new String(this.data.value(result)),
             new IsEqual<>(cfg.toString())
@@ -213,7 +214,7 @@ public final class ScriptSchedulerTest {
         final String script = String.format(cronscript, filename.replace("\\", "\\\\"));
         this.data.save(new Key.From(ScriptSchedulerTest.SCRIPT_PATH), script.getBytes());
         final ScriptScheduler scheduler = new ScriptScheduler(this.service);
-        scheduler.loadCrontab(settings);
+        scheduler.loadCrontab(settings, new MapRepositories(settings));
         final Key result = new Key.From(ScriptSchedulerTest.RESULTS_PATH);
         Awaitility.waitAtMost(1, TimeUnit.MINUTES).until(() -> this.data.exists(result));
         return settings;

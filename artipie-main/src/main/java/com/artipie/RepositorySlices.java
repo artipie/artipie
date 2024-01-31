@@ -56,7 +56,7 @@ import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.Settings;
 import com.artipie.settings.repo.RepoConfig;
-import com.artipie.settings.repo.RepositoriesFromStorage;
+import com.artipie.settings.repo.Repositories;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -81,6 +81,8 @@ public class RepositorySlices {
      */
     private final Settings settings;
 
+    private final Repositories repos;
+
     /**
      * Tokens: authentication and generation.
      */
@@ -93,13 +95,16 @@ public class RepositorySlices {
 
     /**
      * @param settings Artipie settings
+     * @param repos Repositories
      * @param tokens Tokens: authentication and generation
      */
     public RepositorySlices(
         final Settings settings,
+        final Repositories repos,
         final Tokens tokens
     ) {
         this.settings = settings;
+        this.repos = repos;
         this.tokens = tokens;
         this.slices = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.MINUTES)
@@ -130,10 +135,12 @@ public class RepositorySlices {
      * @return Slice for repo
      */
     private SliceValue resolve(final Key name, final int port) {
-        final RepoConfig cfg = new RepositoriesFromStorage(this.settings)
-            .config(name.string()).toCompletableFuture().join();
-        if (cfg.port().isEmpty() || cfg.port().getAsInt() == port) {
-            return sliceFromConfig(cfg);
+        final Optional<RepoConfig> opt = repos.config(name.string());
+        if (opt.isPresent()) {
+            final RepoConfig cfg = opt.get();
+            if (cfg.port().isEmpty() || cfg.port().getAsInt() == port) {
+                return sliceFromConfig(cfg);
+            }
         }
         return new SliceValue(new SliceSimple(new RsRepoNotFound(name)), Optional.empty());
     }

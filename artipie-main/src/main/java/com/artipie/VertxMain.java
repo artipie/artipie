@@ -21,8 +21,9 @@ import com.artipie.settings.ConfigFile;
 import com.artipie.settings.MetricsContext;
 import com.artipie.settings.Settings;
 import com.artipie.settings.SettingsFromPath;
+import com.artipie.settings.repo.MapRepositories;
 import com.artipie.settings.repo.RepoConfig;
-import com.artipie.settings.repo.RepositoriesFromStorage;
+import com.artipie.settings.repo.Repositories;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -43,13 +44,10 @@ import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -117,7 +115,8 @@ public final class VertxMain {
                 new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
             )
         );
-        final RepositorySlices slices = new RepositorySlices(settings, new JwtTokens(jwt));
+        final Repositories repos = new MapRepositories(settings);
+        final RepositorySlices slices = new RepositorySlices(settings, repos, new JwtTokens(jwt));
         final int main = this.listenOn(
             new MainSlice(settings, slices),
             this.port,
@@ -125,10 +124,10 @@ public final class VertxMain {
             settings.metrics()
         );
         Logger.info(VertxMain.class, "Artipie was started on port %d", main);
-        this.startRepos(vertx, settings, this.port, slices);
+        this.startRepos(vertx, settings, repos, this.port, slices);
         vertx.deployVerticle(new RestApi(settings, apiPort, jwt));
         quartz.start();
-        new ScriptScheduler(quartz).loadCrontab(settings);
+        new ScriptScheduler(quartz).loadCrontab(settings, repos);
         return main;
     }
 
@@ -185,19 +184,11 @@ public final class VertxMain {
     private void startRepos(
         final Vertx vertx,
         final Settings settings,
+        final Repositories repos,
         final int port,
         final RepositorySlices slices
     ) {
-        final Collection<RepoConfig> configs = settings.repoConfigsStorage().list(Key.ROOT)
-            .thenApply(
-                keys -> keys.stream().map(ConfigFile::new)
-                    .filter(Predicate.not(ConfigFile::isSystem).and(ConfigFile::isYamlOrYml))
-                    .map(ConfigFile::name)
-                    .map(name -> new RepositoriesFromStorage(settings).config(name))
-                    .map(stage -> stage.toCompletableFuture().join())
-                    .collect(Collectors.toList())
-            ).toCompletableFuture().join();
-        for (final RepoConfig repo : configs) {
+        for (final RepoConfig repo : repos.configs()) {
             try {
                 repo.port().ifPresentOrElse(
                     prt -> {

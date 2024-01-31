@@ -7,7 +7,6 @@ package com.artipie.settings;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
 import com.artipie.settings.cache.StoragesCache;
-import java.util.Optional;
 
 /**
  * Obtain storage by alias from aliases settings yaml.
@@ -35,19 +34,18 @@ public final class StorageByAlias {
      * @return Storage instance
      */
     public Storage storage(final StoragesCache cache, final String alias) {
-        return Optional.ofNullable(this.yaml.yamlMapping("storages")).map(
-            node -> Optional.ofNullable(node.yamlMapping(alias)).map(cache::storage)
-                .orElseThrow(StorageByAlias::illegalState)
-        ).orElseThrow(StorageByAlias::illegalState);
-    }
-
-    /**
-     * Throws illegal state exception.
-     * @return Illegal state exception.
-     */
-    private static RuntimeException illegalState() {
+        final YamlMapping mapping = this.yaml.yamlMapping("storages");
+        if (mapping != null) {
+            final YamlMapping aliasMapping = mapping.yamlMapping(alias);
+            if (aliasMapping != null) {
+                return cache.storage(aliasMapping);
+            }
+        }
         throw new IllegalStateException(
-            "yaml file with aliases is malformed or alias is absent"
+            String.format(
+                "yaml file with aliases is malformed or alias `%s` is absent",
+                alias
+            )
         );
     }
 }
