@@ -10,11 +10,13 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.factory.Config;
 import com.artipie.asto.factory.StoragesLoader;
-import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.asto.misc.UncheckedIOFunc;
 import com.artipie.asto.s3.S3Storage;
+import com.artipie.asto.streams.ContentAsStream;
 import com.artipie.asto.streams.StorageValuePipeline;
 import com.artipie.asto.test.ReadWithDelaysStorage;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +50,11 @@ public class StorageValuePipelineS3Test {
      */
     private String bucket;
 
+    /**
+     * Test storage.
+     */
+    private Storage asto;
+
     @BeforeEach
     void setUp(final AmazonS3 client) {
         this.bucket = UUID.randomUUID().toString();
@@ -71,16 +78,6 @@ public class StorageValuePipelineS3Test {
                         .build()
                 )
             );
-    }
-
-    /**
-     * Test storage.
-     */
-    private Storage asto;
-
-    @BeforeEach
-    void init() {
-        this.asto = new InMemoryStorage();
     }
 
     @Test
@@ -179,5 +176,18 @@ public class StorageValuePipelineS3Test {
             new BlockingStorage(this.asto).value(kto).length,
             new IsEqual<>(size + bufsize)
         );
+    }
+
+    @Test
+    void testContentAsStream() {
+        final Charset charset = StandardCharsets.UTF_8;
+        final Key kfrom = new Key.From("kfrom");
+        this.asto.save(kfrom, new Content.From("one\ntwo\nthree".getBytes(charset))).join();
+        final List<String> res = this.asto.value(kfrom).thenCompose(
+            content -> new ContentAsStream<List<String>>(content)
+                .process(new UncheckedIOFunc<>(
+                    input -> org.apache.commons.io.IOUtils.readLines(input, charset)
+                ))).join();
+        MatcherAssert.assertThat(res, Matchers.contains("one", "two", "three"));
     }
 }

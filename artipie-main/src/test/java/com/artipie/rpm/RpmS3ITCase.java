@@ -4,7 +4,6 @@
  */
 package com.artipie.rpm;
 
-import com.artipie.debian.DebianS3ITCase;
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
 import org.cactoos.list.ListOf;
@@ -19,7 +18,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
-
 import java.io.IOException;
 
 /**

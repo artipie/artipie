@@ -5,6 +5,9 @@
 package com.artipie.asto.streams;
 
 import com.artipie.asto.Content;
+import com.artipie.asto.Key;
+import com.artipie.asto.Storage;
+import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.misc.UncheckedIOFunc;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -31,4 +34,17 @@ class ContentAsStreamTest {
         );
     }
 
+    @Test
+    void testContentAsStream() {
+        final Charset charset = StandardCharsets.UTF_8;
+        final Key kfrom = new Key.From("kfrom");
+        final Storage storage = new InMemoryStorage();
+        storage.save(kfrom, new Content.From("one\ntwo\nthree".getBytes(charset))).join();
+        final List<String> res = storage.value(kfrom).thenCompose(
+            content -> new ContentAsStream<List<String>>(content)
+                .process(new UncheckedIOFunc<>(
+                    input -> org.apache.commons.io.IOUtils.readLines(input, charset)
+                ))).join();
+        MatcherAssert.assertThat(res, Matchers.contains("one", "two", "three"));
+    }
 }

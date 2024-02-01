@@ -10,11 +10,16 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.asto.ext.ContentAs;
+import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
@@ -170,4 +175,18 @@ final class RxStorageWrapperTest {
         );
     }
 
+    @Test
+    void testSchedulingRxStorageWrapperS3() {
+        final Key key = new Key.From("test.txt");
+        final String data = "five\tsix eight";
+        final Executor executor = Executors.newSingleThreadExecutor();
+        final RxStorageWrapper rxsto = new RxStorageWrapper(this.original);
+        rxsto.save(key, new Content.From(data.getBytes(StandardCharsets.US_ASCII))).blockingAwait();
+        final String result = this.original.value(key).thenApplyAsync(content -> {
+            final String res = new PublisherAs(content).asciiString().toCompletableFuture().join();
+            MatcherAssert.assertThat("Values must match", res.equals(data));
+            return rxsto.value(key).to(ContentAs.STRING).to(SingleInterop.get()).thenApply(s -> s).toCompletableFuture().join();
+        }, executor).toCompletableFuture().join();
+        MatcherAssert.assertThat("Values must match", result.equals(data));
+    }
 }

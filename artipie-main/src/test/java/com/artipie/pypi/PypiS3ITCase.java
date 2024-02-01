@@ -19,7 +19,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
-
 import java.io.IOException;
 
 /**

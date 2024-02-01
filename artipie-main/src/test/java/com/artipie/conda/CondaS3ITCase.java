@@ -66,7 +66,6 @@ public final class CondaS3ITCase {
                     .run("apt update -y -o APT::Update::Error-Mode=any")
                     .run("apt dist-upgrade -y && apt install -y curl netcat")
                     .run("apt autoremove -y && apt clean -y && rm -rfv /var/lib/apt/lists")
-                    .run("apt install -y curl && apt clean && rm -rfv /var/lib/apt/lists")
                     .run("conda install -vv -y conda-build==3.27.0 conda-verify==3.4.2 anaconda-client==1.10.0 2>&1|tee /tmp/conda.log")
                     .run("conda clean -a")
                     .copy("condarc", "/root/.condarc")
