@@ -90,7 +90,6 @@ public final class DbConsumer implements Consumer<ArtifactEvent> {
                 for (final ArtifactEvent record : events) {
                     try {
                         if (record.eventType() == ArtifactEvent.Type.INSERT) {
-                            //@checkstyle MagicNumberCheck (20 lines)
                             insert.setString(1, record.repoType());
                             insert.setString(2, record.repoName());
                             insert.setString(3, record.artifactName());

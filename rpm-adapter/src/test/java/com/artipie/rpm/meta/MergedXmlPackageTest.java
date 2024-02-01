@@ -53,7 +53,6 @@ class MergedXmlPackageTest {
             MatcherAssert.assertThat(
                 actual,
                 XhtmlMatchers.hasXPaths(
-                    // @checkstyle LineLengthCheck (4 lines)
                     String.format("/*[local-name()='%s' and @packages='3']", type.tag()),
                     String.format("/*[local-name()='%s']/*[local-name()='package' and @name='aom']", type.tag()),
                     String.format("/*[local-name()='%s']/*[local-name()='package' and @name='nginx']", type.tag()),
@@ -94,7 +93,6 @@ class MergedXmlPackageTest {
             MatcherAssert.assertThat(
                 actual,
                 XhtmlMatchers.hasXPaths(
-                    // @checkstyle LineLengthCheck (4 lines)
                     String.format("/*[local-name()='%s' and @packages='2']", type.tag()),
                     String.format("/*[local-name()='%s']/*[local-name()='package' and @name='libdeflt1_0' and @pkgid='47bbb8b2401e8853812e6340f4197252b92463c132f64a257e18c0c8c83ae462']", type.tag()),
                     String.format("/*[local-name()='%s']/*[local-name()='package' and @name='time']", type.tag())
@@ -139,7 +137,6 @@ class MergedXmlPackageTest {
             MatcherAssert.assertThat(
                 actual,
                 XhtmlMatchers.hasXPaths(
-                    // @checkstyle LineLengthCheck (4 lines)
                     String.format("/*[local-name()='%s' and @packages='4']", type.tag()),
                     String.format("/*[local-name()='%s']/*[local-name()='package' and @name='libdeflt1_0' and @pkgid='47bbb8b2401e8853812e6340f4197252b92463c132f64a257e18c0c8c83ae462']", type.tag()),
                     String.format("/*[local-name()='%s']/*[local-name()='package' and @name='nginx']", type.tag()),
@@ -180,7 +177,6 @@ class MergedXmlPackageTest {
             MatcherAssert.assertThat(
                 actual,
                 XhtmlMatchers.hasXPaths(
-                    // @checkstyle LineLengthCheck (4 lines)
                     String.format("/*[local-name()='%s' and @packages='1']", type.tag()),
                     String.format("/*[local-name()='%s']/*[local-name()='package' and @name='abc']", type.tag())
                 )
@@ -214,7 +210,6 @@ class MergedXmlPackageTest {
         MatcherAssert.assertThat(
             out.toString(StandardCharsets.UTF_8.name()),
             XhtmlMatchers.hasXPaths(
-                // @checkstyle LineLengthCheck (3 lines)
                 String.format("/*[local-name()='%s' and @packages='2']", type.tag()),
                 String.format("/*[local-name()='%s']/*[local-name()='package' and @name='abc']", type.tag()),
                 String.format("/*[local-name()='%s']/*[local-name()='package' and @name='time']", type.tag())

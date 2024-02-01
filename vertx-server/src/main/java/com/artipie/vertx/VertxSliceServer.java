@@ -149,7 +149,6 @@ public final class VertxSliceServer implements Closeable {
                         return null;
                     }
                 );
-                //@checkstyle IllegalCatchCheck (1 line)
             } catch (final Exception ex) {
                 VertxSliceServer.sendError(req.response(), ex);
             }

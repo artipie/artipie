@@ -22,7 +22,6 @@ class SizeAndDigestTest {
             new SizeAndDigest().apply(new TestResource("Packages.gz").asInputStream()),
             new IsEqual<>(
                 new ImmutablePair<>(
-                    // @checkstyle MagicNumberCheck (1 line)
                     2564L, "c1cfc96b4ca50645c57e10b65fcc89fd1b2b79eb495c9fa035613af7ff97dbff"
                 )
             )

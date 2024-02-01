@@ -109,7 +109,6 @@ final class ComposerStorageCacheTest {
         final byte[] body = "some info".getBytes();
         final byte[] updated = "updated some info".getBytes();
         final String key = "vendor/package";
-        // @checkstyle MagicNumberCheck (2 line)
         final String expired = ZonedDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
             .minus(Duration.ofDays(100))
             .toString();

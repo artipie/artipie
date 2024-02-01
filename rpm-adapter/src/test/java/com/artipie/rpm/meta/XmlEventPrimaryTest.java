@@ -82,7 +82,6 @@ class XmlEventPrimaryTest {
         final XMLEventWriter writer = new OutputFactoryImpl().createXMLEventWriter(bout);
         this.prepareXmlWriter(writer);
         final Header hdr = new Header();
-        // @checkstyle LineLengthCheck (2 lines)
         hdr.createEntry(Header.HeaderTag.CONFLICTNAME, new String[]{"one", "two", "one", "three", "two"});
         hdr.createEntry(Header.HeaderTag.CONFLICTVERSION, new String[]{"0.1", "0.2", "0.1", "0.3", "0.2.2"});
         hdr.createEntry(Header.HeaderTag.CONFLICTFLAGS, new int[]{2, 8, 2, 2, 8});
@@ -94,7 +93,6 @@ class XmlEventPrimaryTest {
             new IsEqual<>(
                 String.join(
                     "",
-                    // @checkstyle LineLengthCheck (1 line)
                     "<?xml version='1.0' encoding='UTF-8'?><metadata xmlns=\"http://linux.duke.edu/metadata/common\" xmlns:rpm=\"http://linux.duke.edu/metadata/rpm\"><package type=\"rpm\"><name></name><arch></arch><version epoch=\"0\" rel=\"\" ver=\"\"/><checksum type=\"sha256\" pkgid=\"YES\">d6a7cd2a7371b1a15d543196979ff74fdb027023ebf187d5d329be11055c77fd</checksum><summary></summary><description></description><packager></packager><url></url><time file=\"0\" build=\"0\"/><size installed=\"0\" package=\"3\" archive=\"0\"/><location href=\"test.rpm\"/><format><rpm:license></rpm:license><rpm:vendor></rpm:vendor><rpm:group></rpm:group><rpm:buildhost></rpm:buildhost><rpm:sourcerpm></rpm:sourcerpm><rpm:header-range start=\"0\" end=\"0\"/><rpm:requires/>",
                     "<rpm:conflicts>",
                     "<rpm:entry name=\"one\" ver=\"0.1\" epoch=\"0\" flags=\"LT\"/>",
@@ -130,7 +128,6 @@ class XmlEventPrimaryTest {
         hdr.createEntry(Header.HeaderTag.DIRINDEXES, new int[]{0, 1});
         hdr.createEntry(Header.HeaderTag.FILEMODES, new short[]{0, 1});
         hdr.createEntry(Header.HeaderTag.FILEFLAGS, new int[]{0, 0});
-        // @checkstyle LineLengthCheck (2 lines)
         hdr.createEntry(Header.HeaderTag.REQUIRENAME, new String[]{"one", "two", requires, "three"});
         hdr.createEntry(Header.HeaderTag.REQUIREVERSION, new String[]{"0.1", "0.2", "", "0.3.0"});
         hdr.createEntry(Header.HeaderTag.REQUIREFLAGS, new int[]{8, 8, 8, 8});
@@ -142,7 +139,6 @@ class XmlEventPrimaryTest {
             new IsEqual<>(
                 String.join(
                     "",
-                    // @checkstyle LineLengthCheck (5 lines)
                     "<?xml version='1.0' encoding='UTF-8'?><metadata xmlns=\"http://linux.duke.edu/metadata/common\" xmlns:rpm=\"http://linux.duke.edu/metadata/rpm\"><package type=\"rpm\">",
                     String.format("<name>%s</name>", name),
                     "<arch></arch><version epoch=\"0\" rel=\"\" ver=\"\"/><checksum type=\"sha256\" pkgid=\"YES\">d6a7cd2a7371b1a15d543196979ff74fdb027023ebf187d5d329be11055c77fd</checksum><summary></summary><description></description><packager></packager><url></url><time file=\"0\" build=\"0\"/><size installed=\"0\" package=\"3\" archive=\"0\"/><location href=\"test.rpm\"/><format><rpm:license></rpm:license><rpm:vendor></rpm:vendor><rpm:group></rpm:group><rpm:buildhost></rpm:buildhost><rpm:sourcerpm></rpm:sourcerpm><rpm:header-range start=\"0\" end=\"0\"/>",

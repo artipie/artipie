@@ -57,8 +57,6 @@ public final class NpmProxyPackageProcessor extends QuartzJob {
     @Override
     @SuppressWarnings("PMD.CyclomaticComplexity")
     public void execute(final JobExecutionContext context) {
-        // @checkstyle BooleanExpressionComplexityCheck (6 lines)
-        // @checkstyle NestedIfDepthCheck (20 lines)
         if (this.asto == null || this.packages == null || this.host == null
             || this.events == null) {
             super.stopJob(context);

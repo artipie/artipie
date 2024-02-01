@@ -79,7 +79,6 @@ public final class QuartsService {
         final JobBuilder job = JobBuilder.newJob(EventsProcessor.class).setJobData(data);
         final int count = Math.min(this.scheduler.getMetaData().getThreadPoolSize(), parallel);
         if (parallel > count) {
-            // @checkstyle LineLengthCheck (1 line)
             Logger.warn(this, String.format("Parallel quartz jobs amount is limited to thread pool size %s instead of requested %s", count, parallel));
         }
         for (int item = 0; item < count; item = item + 1) {

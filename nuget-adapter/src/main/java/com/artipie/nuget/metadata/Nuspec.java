@@ -199,7 +199,6 @@ public interface Nuspec {
             );
             final Collection<String> res = new ArrayList<>(10);
             if (!deps.isEmpty()) {
-                //@checkstyle LineLengthCheck (1 line)
                 final List<XML> groups = this.content.nodes("/*[name()='package']/*[name()='metadata']/*[name()='dependencies']/*[name()='group']");
                 for (final XML group : groups) {
                     final String tfv = Optional.ofNullable(
@@ -235,7 +234,6 @@ public interface Nuspec {
             );
             final Set<String> res = new HashSet<>(1);
             if (!root.isEmpty()) {
-                //@checkstyle LineLengthCheck (1 line)
                 final List<XML> types = this.content.nodes("/*[name()='package']/*[name()='metadata']/*[name()='packageTypes']/*[name()='packageType']");
                 for (final XML type : types) {
                     res.add(

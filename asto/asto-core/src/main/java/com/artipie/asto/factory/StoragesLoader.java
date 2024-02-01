@@ -76,7 +76,6 @@ public final class StoragesLoader
             .map(a -> ((ArtipieStorageFactory) a).value())
             .findFirst()
             .orElseThrow(
-                // @checkstyle LineLengthCheck (3 lines)
                 () -> new ArtipieException("Annotation 'ArtipieStorageFactory' should have a not empty value")
             );
     }

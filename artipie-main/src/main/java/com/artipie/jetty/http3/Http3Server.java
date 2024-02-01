@@ -87,7 +87,6 @@ public final class Http3Server {
                 .setPemWorkDirectory(Files.createTempDirectory("http3-pem"));
             this.server.addConnector(connector);
             this.server.start();
-        // @checkstyle IllegalCatchCheck (5 lines)
         } catch (final Exception err) {
             throw new ArtipieException(err);
         }

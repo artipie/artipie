@@ -47,7 +47,6 @@ public final class CachedUsers implements Authentication, Cleanable<String> {
             origin,
             CacheBuilder.newBuilder()
                 .expireAfterAccess(
-                    //@checkstyle MagicNumberCheck (1 line)
                     new Property(ArtipieProperties.AUTH_TIMEOUT).asLongOrDefault(300_000L),
                     TimeUnit.MILLISECONDS
                 ).softValues()

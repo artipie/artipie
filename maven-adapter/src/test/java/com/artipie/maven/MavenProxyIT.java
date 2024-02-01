@@ -124,7 +124,6 @@ final class MavenProxyIT {
                     new StringContains("BUILD SUCCESS"),
                     new StringContains(
                         String.format(
-                            // @checkstyle LineLengthCheck (1 line)
                             "Downloaded from my-repo: http://host.testcontainers.internal:%s/args4j/args4j/2.32/args4j-2.32.jar (154 kB",
                             this.port
                         )

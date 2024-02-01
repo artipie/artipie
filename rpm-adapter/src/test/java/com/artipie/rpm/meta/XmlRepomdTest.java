@@ -42,7 +42,6 @@ class XmlRepomdTest {
         }
         MatcherAssert.assertThat(
             new String(Files.readAllBytes(res), StandardCharsets.UTF_8),
-            // @checkstyle LineLengthCheck (15 lines)
             XhtmlMatchers.hasXPaths(
                 String.format("/*[local-name()='repomd']/*[local-name()='revision' and text()='%s']", time),
                 String.format("/*[local-name()='repomd']/*[local-name()='data' and @type='%s']", type),

@@ -46,7 +46,6 @@ public class CachedStorages implements StoragesCache {
     public CachedStorages() {
         this.cache = CacheBuilder.newBuilder()
             .expireAfterWrite(
-                //@checkstyle MagicNumberCheck (1 line)
                 new Property(ArtipieProperties.STORAGE_TIMEOUT).asLongOrDefault(180_000L),
                 TimeUnit.MILLISECONDS
             ).softValues()

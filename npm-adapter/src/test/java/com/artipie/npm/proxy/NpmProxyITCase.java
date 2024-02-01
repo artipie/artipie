@@ -191,7 +191,6 @@ public final class NpmProxyITCase {
             result.getStderr(),
             new StringContains(
                 String.format(
-                    //@checkstyle LineLengthCheck (1 line)
                     "Not Found - GET http://host.testcontainers.internal:%d/npm-proxy/packageNotFound",
                     NpmProxyITCase.listenPort
                 )
@@ -217,7 +216,6 @@ public final class NpmProxyITCase {
             result.getStderr(),
             new StringContains(
                 String.format(
-                    //@checkstyle LineLengthCheck (1 line)
                     "Not Found - GET http://host.testcontainers.internal:%d/npm-proxy/assetNotFound",
                     NpmProxyITCase.listenPort
                 )

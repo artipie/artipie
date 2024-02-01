@@ -24,9 +24,6 @@ import org.llorllale.cactoos.matchers.MatcherOf;
  * amount of rpm packages (see {@link NodeHasPkgCount}). Storage should contain gzipped metadata
  * files by {@code repodata} key, each metadata file should be met only once.
  * @since 0.11
- * @todo #311:30min Create proper unit test for this class (use metadata examples from test
- *  resources), do not forget to test mismatches descriptions.
- *  @checkstyle ClassDataAbstractionCouplingCheck (500 lines)
  */
 public final class StorageHasMetadata extends AllOf<Storage> {
 

@@ -106,7 +106,6 @@ class AstoRepoRemoveTest {
             ),
             XhtmlMatchers.hasXPaths(
                 "/*[local-name()='metadata' and @packages='1']",
-                //@checkstyle LineLengthCheck (1 line)
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='abc']"
             )
         );
@@ -145,7 +144,6 @@ class AstoRepoRemoveTest {
         new TestResource("AstoRepoRemoveTest/repomd.xml")
             .saveTo(this.storage, new Key.From("repodata", "repomd.xml"));
         new AstoRepoRemove(this.storage, this.conf).perform(
-            //@checkstyle LineLengthCheck (1 line)
             new ListOf<String>(
                 "b9d10ae3485a5c5f71f0afb1eaf682bfbea4ea667cc3c3975057d6e3d8f2e905",
                 "b9d10ae3485a5c5f71f0afb1eaf682bfbea4ea667cc3c3975057d6e3d8f2e905",
@@ -163,7 +161,6 @@ class AstoRepoRemoveTest {
             new String(mbytes.value(XmlPackage.PRIMARY), StandardCharsets.UTF_8),
             XhtmlMatchers.hasXPaths(
                 "/*[local-name()='metadata' and @packages='1']",
-                //@checkstyle LineLengthCheck (1 line)
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='libdeflt1_0']"
             )
         );

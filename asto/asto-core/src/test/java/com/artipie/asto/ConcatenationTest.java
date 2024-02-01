@@ -54,7 +54,6 @@ final class ConcatenationTest {
     }
 
     @Test
-    // @checkstyle MagicNumberCheck (25 lines)
     void shouldReadLargeContentCorrectly() {
         final int sizekb = 8;
         final int chunks = 128 * 1024 / sizekb + 1;

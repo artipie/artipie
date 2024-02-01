@@ -224,7 +224,6 @@ public class RestApiServerBase {
         final TestRequest rqs, final Consumer<HttpResponse<Buffer>> assertion) throws Exception {
         this.requestAndAssert(
             vertx, ctx, rqs,
-            //@checkstyle LineLengthCheck (1 line)
             Optional.of("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhcnRpcGllIiwiY29udGV4dCI6InRlc3QiLCJpYXQiOjE2ODIwODgxNTh9.QjQPLQ0tQFbiRIWpE-GUtUFXvUXvXP4p7va_DOBHjTM"),
             assertion
         );

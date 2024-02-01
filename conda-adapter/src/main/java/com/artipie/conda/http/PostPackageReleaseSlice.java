@@ -47,7 +47,6 @@ public final class PostPackageReleaseSlice implements Slice {
                         "  \"doc_url\": null, ",
                         "  \"full_name\": \"any/example-project\", ",
                         "  \"home\": \"None\", ",
-                        // @checkstyle LineLengthCheck (30 lines)
                         "  \"html_url\": \"http://host.testcontainers.internal/any/example-project\", ",
                         "  \"id\": \"610d24984e06fc71454caec7\", ",
                         "  \"latest_version\": \"\", ",

@@ -97,7 +97,6 @@ public final class StorageHasRepoMd extends AllOf<Storage> {
                     .asciiString().toCompletableFuture().join()
             ).nodes(
                 String.format(
-                    //@checkstyle LineLengthCheck (1 line)
                     "/*[name()='repomd']/*[name()='data' and @type='%s']/*[name()='checksum' and @type='%s' and text()='%s']",
                     pckg.name().toLowerCase(Locale.US),
                     digest.type(),

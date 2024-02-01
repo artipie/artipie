@@ -33,7 +33,6 @@ public final class UncheckedFunc<T, R, E extends Throwable> implements Function<
     public R apply(final T val) {
         try {
             return this.checked.apply(val);
-            // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Throwable err) {
             throw new IllegalStateException(err);
         }

@@ -64,7 +64,6 @@ class RpmMetadataAppendTest {
             primary.toString(),
             XhtmlMatchers.hasXPaths(
                 "/*[local-name()='metadata' and @packages='4']",
-                //@checkstyle LineLengthCheck (4 lines)
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='nginx']",
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='aom']",
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='abc']",
@@ -116,7 +115,6 @@ class RpmMetadataAppendTest {
             primary.toString(),
             XhtmlMatchers.hasXPaths(
                 "/*[local-name()='metadata' and @packages='2']",
-                //@checkstyle LineLengthCheck (2 lines)
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='time']",
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='abc']"
             )

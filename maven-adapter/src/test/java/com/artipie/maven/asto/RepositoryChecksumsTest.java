@@ -26,7 +26,6 @@ final class RepositoryChecksumsTest {
 
     @Test
     void findsArtifactChecksums() throws Exception {
-        // @checkstyle LocalFinalVariableNameCheck (20 lines)
         final Storage storage = new InMemoryStorage();
         final BlockingStorage bsto = new BlockingStorage(storage);
         final Key.From artifact = new Key.From("com/test/1.0/my-package.jar");
@@ -41,7 +40,6 @@ final class RepositoryChecksumsTest {
             new Key.From("com/test/1.0/my-package.jar.sha256"),
             sha256.getBytes(StandardCharsets.UTF_8)
         );
-        // @checkstyle LineLengthCheck (1 line)
         final String sha512 = "cf713dd3f077719375e646a23dee1375725652f5f275b0bf25d326062b3a64535575acde6d27b547fcd735c870cf94badc4b2215aba9c3af5085567b4561ac28";
         bsto.save(
             new Key.From("com/test/1.0/my-package.jar.sha512"),

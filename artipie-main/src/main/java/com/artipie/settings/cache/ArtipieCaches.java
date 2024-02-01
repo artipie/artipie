@@ -104,7 +104,6 @@ public interface ArtipieCaches {
                 res = (CachedYamlPolicy) this.policy;
             } else {
                 res = new Cleanable<>() {
-                    //@checkstyle MethodBodyCommentsCheck (10 lines)
                     @Override
                     public void invalidate(final String any) {
                         //do nothing

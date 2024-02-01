@@ -29,7 +29,6 @@ public abstract class QuartzJob implements Job {
             Logger.error(
                 this,
                 String.format(
-                    //@checkstyle LineLengthCheck (1 line)
                     "Events queue/action is null or EventProcessingError occurred, processing failed. Stopping job %s...", key
                 )
             );

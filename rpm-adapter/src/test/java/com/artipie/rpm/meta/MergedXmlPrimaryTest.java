@@ -60,7 +60,6 @@ class MergedXmlPrimaryTest {
                 "Primary does not have expected packages",
                 out.toString(StandardCharsets.UTF_8.name()),
                 XhtmlMatchers.hasXPaths(
-                    // @checkstyle LineLengthCheck (3 lines)
                     "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='aom']",
                     "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='nginx']",
                     "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='libdeflt1_0']"
@@ -106,7 +105,6 @@ class MergedXmlPrimaryTest {
                 "Primary does not have expected packages",
                 actual,
                 XhtmlMatchers.hasXPaths(
-                    // @checkstyle LineLengthCheck (3 lines)
                     "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='time']",
                     "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='libdeflt1_0']",
                     "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='checksum' and text()='47bbb8b2401e8853812e6340f4197252b92463c132f64a257e18c0c8c83ae462']"
@@ -158,7 +156,6 @@ class MergedXmlPrimaryTest {
                 "Primary does not have expected packages",
                 actual,
                 XhtmlMatchers.hasXPaths(
-                    // @checkstyle LineLengthCheck (5 lines)
                     "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='time']",
                     "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='abc']",
                     "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='nginx']",
@@ -201,7 +198,6 @@ class MergedXmlPrimaryTest {
             MatcherAssert.assertThat(
                 actual,
                 XhtmlMatchers.hasXPaths(
-                    // @checkstyle LineLengthCheck (1 line)
                     "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='abc']"
                 )
             );
@@ -240,7 +236,6 @@ class MergedXmlPrimaryTest {
             "Primary does not have expected packages",
             out.toString(StandardCharsets.UTF_8.name()),
             XhtmlMatchers.hasXPaths(
-                // @checkstyle LineLengthCheck (5 lines)
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='time']",
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='abc']"
             )

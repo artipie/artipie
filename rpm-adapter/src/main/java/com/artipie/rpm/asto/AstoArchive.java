@@ -40,7 +40,6 @@ final class AstoArchive {
         return new StorageValuePipeline<>(this.asto, key).process(
             (inpt, out) -> {
                 try (GZIPOutputStream gzos = new GZIPOutputStream(out)) {
-                    // @checkstyle MagicNumberCheck (1 line)
                     final byte[] buffer = new byte[1024 * 8];
                     while (true) {
                         final int length = inpt.get().read(buffer);

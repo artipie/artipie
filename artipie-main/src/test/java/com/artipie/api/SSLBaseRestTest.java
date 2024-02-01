@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
  * @since 0.26
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-//@checkstyle AbbreviationAsWordInNameCheck (1 line)
 abstract class SSLBaseRestTest extends RestApiServerBase {
     @Test
     void generatesToken(final Vertx vertx, final VertxTestContext ctx) throws Exception {

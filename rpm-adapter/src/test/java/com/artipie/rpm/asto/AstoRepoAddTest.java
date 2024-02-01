@@ -132,7 +132,6 @@ class AstoRepoAddTest {
             new String(this.mbytes.value(XmlPackage.PRIMARY), StandardCharsets.UTF_8),
             XhtmlMatchers.hasXPaths(
                 "/*[local-name()='metadata' and @packages='3']",
-                //@checkstyle LineLengthCheck (3 lines)
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='abc']",
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='time']",
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='libnss-mymachines2']"
@@ -148,7 +147,6 @@ class AstoRepoAddTest {
                 "/*[local-name()='otherdata' and @packages='3']",
                 "/*[local-name()='otherdata']/*[local-name()='package' and @name='abc']",
                 "/*[local-name()='otherdata']/*[local-name()='package' and @name='time']",
-                //@checkstyle LineLengthCheck (1 line)
                 "/*[local-name()='otherdata']/*[local-name()='package' and @name='libnss-mymachines2']"
             )
         );
@@ -162,7 +160,6 @@ class AstoRepoAddTest {
                 "/*[local-name()='filelists' and @packages='3']",
                 "/*[local-name()='filelists']/*[local-name()='package' and @name='abc']",
                 "/*[local-name()='filelists']/*[local-name()='package' and @name='time']",
-                //@checkstyle LineLengthCheck (1 line)
                 "/*[local-name()='filelists']/*[local-name()='package' and @name='libnss-mymachines2']"
             )
         );

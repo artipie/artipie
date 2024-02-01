@@ -33,7 +33,6 @@ public final class UncheckedIOScalar<T> implements Scalar<T> {
     public T value() {
         try {
             return this.origin.value();
-        // @checkstyle IllegalCatchCheck (1 line)
         } catch (final IOException ex) {
             throw new ArtipieIOException(ex);
         }

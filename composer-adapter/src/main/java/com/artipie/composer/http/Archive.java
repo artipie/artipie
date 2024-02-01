@@ -102,7 +102,6 @@ public interface Archive {
             return this.cname;
         }
 
-        // @checkstyle ExecutableStatementCountCheck (5 lines)
         @Override
         public CompletionStage<Content> replaceComposerWith(
             final Content archive, final byte[] composer
@@ -128,7 +127,6 @@ public interface Archive {
                                         zos.write(composer);
                                     } else if (!isdir) {
                                         zos.putNextEntry(newentr);
-                                        // @checkstyle MagicNumberCheck (1 line)
                                         final byte[] buf = new byte[1024];
                                         int len;
                                         while ((len = zip.read(buf)) > 0) {

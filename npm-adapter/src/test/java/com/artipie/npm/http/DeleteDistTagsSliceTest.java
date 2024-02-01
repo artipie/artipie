@@ -75,7 +75,6 @@ class DeleteDistTagsSliceTest {
             new PublisherAs(this.storage.value(this.meta).join()).asciiString()
                 .toCompletableFuture().join(),
             new IsEqual<>(
-                // @checkstyle LineLengthCheck (1 line)
                 "{\"name\":\"@hello/simple-npm-project\",\"dist-tags\":{\"latest\":\"1.0.3\",\"first\":\"1.0.1\"}}"
             )
         );

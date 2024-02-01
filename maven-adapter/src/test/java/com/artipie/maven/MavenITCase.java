@@ -109,7 +109,6 @@ public final class MavenITCase {
             ),
             new StringContainsInOrder(
                 new ListOf<String>(
-                    // @checkstyle LineLengthCheck (1 line)
                     String.format("Downloaded from my-repo: http://host.testcontainers.internal:%d/com/artipie/helloworld/0.1/helloworld-0.1.jar (11 B", this.port),
                     "BUILD SUCCESS"
                 )

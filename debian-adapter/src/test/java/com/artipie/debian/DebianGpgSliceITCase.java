@@ -145,7 +145,6 @@ public final class DebianGpgSliceITCase {
             this.exec("apt-get", "update"),
             new AllOf<>(
                 new ListOf<Matcher<? super String>>(
-                    // @checkstyle LineLengthCheck (2 lines)
                     new MatchesPattern(Pattern.compile("[\\S\\s]*Get:1 http://host.testcontainers.internal:\\d+ artipie InRelease[\\S\\s]*")),
                     new MatchesPattern(Pattern.compile("[\\S\\s]*Get:2 http://host.testcontainers.internal:\\d+ artipie/main amd64 Packages \\[685 B][\\S\\s]*")),
                     new IsNot<>(new StringContains("Get:3"))
@@ -157,7 +156,6 @@ public final class DebianGpgSliceITCase {
             this.exec("apt-get", "install", "-y", "aglfn"),
             new AllOf<>(
                 new ListOf<Matcher<? super String>>(
-                    // @checkstyle LineLengthCheck (1 line)
                     new MatchesPattern(Pattern.compile("[\\S\\s]*Get:1 http://host.testcontainers.internal:\\d+ artipie/main amd64 aglfn amd64 1.7-3 \\[29.9 kB][\\S\\s]*")),
                     new IsNot<>(new StringContains("Get:2")),
                     new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))
@@ -189,7 +187,6 @@ public final class DebianGpgSliceITCase {
             this.exec("apt-get", "update"),
             new AllOf<>(
                 new ListOf<Matcher<? super String>>(
-                    // @checkstyle LineLengthCheck (3 lines)
                     new MatchesPattern(Pattern.compile("[\\S\\s]*Get:2 http://host.testcontainers.internal:\\d+ artipie Release[\\S\\s]*")),
                     new MatchesPattern(Pattern.compile("[\\S\\s]*Get:3 http://host.testcontainers.internal:\\d+ artipie Release.gpg[\\S\\s]*")),
                     new MatchesPattern(Pattern.compile("[\\S\\s]*Get:4 http://host.testcontainers.internal:\\d+ artipie/main amd64 Packages \\[1351 B][\\S\\s]*")),
@@ -202,7 +199,6 @@ public final class DebianGpgSliceITCase {
             this.exec("apt-get", "install", "-y", "aglfn"),
             new AllOf<>(
                 new ListOf<Matcher<? super String>>(
-                    // @checkstyle LineLengthCheck (1 line)
                     new MatchesPattern(Pattern.compile("[\\S\\s]*Get:1 http://host.testcontainers.internal:\\d+ artipie/main amd64 aglfn amd64 1.7-3 \\[29.9 kB][\\S\\s]*")),
                     new IsNot<>(new StringContains("Get:2")),
                     new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))

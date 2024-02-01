@@ -251,7 +251,6 @@ public final class DockerRepositoryPermission extends Permission  {
         @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
         public boolean implies(final Permission obj) {
             boolean res = false;
-            //@checkstyle NestedIfDepthCheck (50 lines)
             if (obj instanceof DockerRepositoryPermission) {
                 final DockerRepositoryPermission perm = (DockerRepositoryPermission) obj;
                 if (this.any) {

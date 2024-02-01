@@ -103,7 +103,6 @@ public final class LoggingStorage implements Storage {
         );
     }
 
-    // @checkstyle MissingDeprecatedCheck (5 lines)
     @Override
     @Deprecated
     public CompletableFuture<Long> size(final Key key) {

@@ -52,7 +52,6 @@ public final class PyProxyPackageProcessor extends QuartzJob {
         if (this.asto == null || this.packages == null || this.events == null) {
             super.stopJob(context);
         } else {
-            //@checkstyle NestedIfDepthCheck (80 lines)
             while (!this.packages.isEmpty()) {
                 final ProxyArtifactEvent event = this.packages.poll();
                 if (event != null) {

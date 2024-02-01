@@ -41,7 +41,6 @@ public final class RepositoriesFromStorage implements Repositories {
 
     static {
         final long duration;
-        //@checkstyle MagicNumberCheck (1 line)
         duration = new Property(ArtipieProperties.CONFIG_TIMEOUT).asLongOrDefault(120_000L);
         RepositoriesFromStorage.configs = CacheBuilder.newBuilder()
             .expireAfterWrite(duration, TimeUnit.MILLISECONDS)

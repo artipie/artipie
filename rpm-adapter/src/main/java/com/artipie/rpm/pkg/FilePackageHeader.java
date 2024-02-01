@@ -66,7 +66,6 @@ public final class FilePackageHeader {
                 format = new Scanner(
                     new PrintStream(Logger.stream(Level.FINE, this))
                 ).run(new ReadableChannelWrapper(chan));
-                // @checkstyle IllegalCatchCheck (1 line)
             } catch (final RuntimeException ex) {
                 throw new InvalidPackageException(ex);
             }

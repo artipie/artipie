@@ -93,7 +93,6 @@ final class AstoMavenTest {
             ),
             new AllOf<>(
                 new ListOf<Matcher<? super XML>>(
-                    // @checkstyle LineLengthCheck (20 lines)
                     XhtmlMatchers.hasXPath("/metadata/groupId[text() = 'com.artipie']"),
                     XhtmlMatchers.hasXPath("/metadata/artifactId[text() = 'asto']"),
                     XhtmlMatchers.hasXPath("/metadata/versioning/latest[text() = '0.20.2']"),
@@ -250,7 +249,6 @@ final class AstoMavenTest {
             ),
             new AllOf<>(
                 new ListOf<Matcher<? super XML>>(
-                    // @checkstyle LineLengthCheck (20 lines)
                     XhtmlMatchers.hasXPath("/metadata/groupId[text() = 'com.artipie']"),
                     XhtmlMatchers.hasXPath("/metadata/artifactId[text() = 'asto']"),
                     XhtmlMatchers.hasXPath("/metadata/versioning/latest[text() = '1.0-SNAPSHOT']"),

@@ -17,7 +17,6 @@ import java.util.Optional;
  * @since 0.26
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TestClassWithoutTestCases"})
-//@checkstyle AbbreviationAsWordInNameCheck (1 line)
 final class SSLPemRestTest extends SSLBaseRestTest {
     /**
      * PEM-file with private key.

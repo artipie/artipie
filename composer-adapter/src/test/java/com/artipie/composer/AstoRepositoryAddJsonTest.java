@@ -108,7 +108,6 @@ class AstoRepositoryAddJsonTest {
         );
         this.addJsonToAsto(this.packageJson(), Optional.empty());
         MatcherAssert.assertThat(
-            // @checkstyle LineLengthCheck (1 line)
             "Package with both new and old versions should present in packages after adding new version",
             this.packages(name.key()).getJsonObject(name.string()).keySet(),
             new IsEqual<>(new SetOf<>("1.1.0", this.version))

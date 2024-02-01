@@ -109,7 +109,6 @@ class MergedJsonTest {
         "mp6_input.json,notebook-6.1.1-py38_0.conda,notebook-conda.json,mp3_output.json",
         "mp7_input.json,decorator-4.2.1-py27_0.tar.bz2,decorator-tar.json,mp7_output.json"
     })
-    // @checkstyle ParameterNumberCheck (5 lines)
     void mergesPackage(final String input, final String pkg, final String file, final String out)
         throws IOException, JSONException {
         final ByteArrayOutputStream res = new ByteArrayOutputStream();

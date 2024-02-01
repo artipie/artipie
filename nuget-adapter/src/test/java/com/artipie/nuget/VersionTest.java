@@ -61,7 +61,6 @@ class VersionTest {
         "1.2.3----R-S.12.9.1--.12+meta,1.2.3----R-S.12.9.1--.12",
         "1.2.3----RC-SNAPSHOT.12.9.1--.12,1.2.3----RC-SNAPSHOT.12.9.1--.12",
         "1.0.0+0.build.1-rc.10000aaa-kk-0.1,1.0.0",
-        //@checkstyle LineLengthCheck (1 line)
         "99999999999999999999999.999999999999999999.99999999999999999,99999999999999999999999.999999999999999999.99999999999999999",
         "1.0.0-0A.is.legal,1.0.0-0A.is.legal"
     })
@@ -104,7 +103,6 @@ class VersionTest {
         "+justmeta",
         "9.8.7+meta+meta",
         "9.8.7-whatever+meta+meta",
-        //@checkstyle LineLengthCheck (1 line)
         "99999999999999999999999.999999999999999999.99999999999999999----RC-SNAPSHOT.12.09.1--------------------------------..12"
     })
     void shouldNotNormalize(final String original) {

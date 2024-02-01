@@ -80,7 +80,6 @@ final class SubmitGemSlice implements Slice {
         final Key key = new Key.From(
             "gems", UUID.randomUUID().toString().replace("-", "").concat(".gem")
         );
-        // @checkstyle ReturnCountCheck (50 lines)
         return new AsyncResponse(
             this.storage.save(
                 key, new ContentWithSize(body, headers)

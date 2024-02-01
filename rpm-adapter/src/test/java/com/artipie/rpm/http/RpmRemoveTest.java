@@ -143,7 +143,6 @@ class RpmRemoveTest {
             ),
             XhtmlMatchers.hasXPaths(
                 "/*[local-name()='metadata' and @packages='1']",
-                //@checkstyle LineLengthCheck (1 line)
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='name' and text()='nginx']"
             )
         );
