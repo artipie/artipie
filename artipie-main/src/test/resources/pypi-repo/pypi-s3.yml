@@ -1,0 +1,12 @@
+---
+repo:
+  type: pypi
+  storage:
+    type: s3
+    bucket: buck1
+    region: s3test
+    endpoint: http://minioc:9000
+    credentials:
+      type: basic
+      accessKeyId: minioadmin
+      secretAccessKey: minioadmin

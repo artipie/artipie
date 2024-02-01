@@ -1,0 +1,16 @@
+meta:
+  storage:
+    type: s3
+    bucket: buck1
+    region: s3test
+    endpoint: http://172.28.178.210:9001/ #http://artipie:9000/
+    credentials:
+      type: basic
+      accessKeyId: minioadmin
+      secretAccessKey: minioadmin
+  base_url: http://artipie:8080/
+  credentials:
+    - type: artipie
+      storage:
+        type: fs
+        path: /var/artipie/security
