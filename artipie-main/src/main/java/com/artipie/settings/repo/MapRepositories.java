@@ -62,7 +62,7 @@ public class MapRepositories implements Repositories {
                     .toCompletableFuture().join();
                 try {
                     final RepoConfig cfg = new RepoConfig(
-                        alias.join(), key,
+                        alias.join(), new Key.From(file.name()),
                         Yaml.createYamlInput(content).readYamlMapping(),
                         this.settings.caches().storagesCache(),
                         this.settings.metrics().storage()
