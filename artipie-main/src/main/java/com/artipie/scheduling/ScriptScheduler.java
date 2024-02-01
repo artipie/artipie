@@ -12,7 +12,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.scripting.ScriptContext;
 import com.artipie.scripting.ScriptRunner;
 import com.artipie.settings.Settings;
-import com.artipie.settings.repo.RepositoriesFromStorage;
+import com.artipie.settings.repo.Repositories;
 import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
@@ -77,15 +77,15 @@ public final class ScriptScheduler {
      *           cronexp: * * 11 * * ?
      * </pre>
      * @param settings Artipie settings
+     * @param repos Repositories registry
      */
     @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-    public void loadCrontab(final Settings settings) {
+    public void loadCrontab(final Settings settings, final Repositories repos) {
         final CronDefinition crondef =
             CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
         final CronParser parser = new CronParser(crondef);
         final ScriptContext context = new ScriptContext(
-            new RepositoriesFromStorage(settings),
-            new BlockingStorage(settings.configStorage()), settings
+            repos, new BlockingStorage(settings.configStorage()), settings
         );
         settings.crontab()
             .ifPresent(

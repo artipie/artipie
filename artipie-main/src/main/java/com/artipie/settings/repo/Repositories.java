@@ -4,20 +4,32 @@
  */
 package com.artipie.settings.repo;
 
-import java.util.concurrent.CompletionStage;
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Artipie repositories registry.
- *
- * @since 0.13
  */
 public interface Repositories {
 
     /**
-     * Find repository config by name.
+     * Gets repository config by name.
      *
      * @param name Repository name
-     * @return Repository config
+     * @return {@code Optional}, that contains repository configuration
+     * or {@code Optional.empty()} if one is not found.
      */
-    CompletionStage<RepoConfig> config(String name);
+    Optional<RepoConfig> config(String name);
+
+    /**
+     * Gets collection repositories configurations.
+     *
+     * @return Collection repository's configurations.
+     */
+    Collection<RepoConfig> configs();
+
+    /**
+     * Refreshes repositories configurations.
+     */
+    void refresh();
 }

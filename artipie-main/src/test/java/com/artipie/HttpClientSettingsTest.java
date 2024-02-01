@@ -16,8 +16,7 @@ import com.artipie.settings.repo.RepoConfig;
 import com.artipie.test.TestStoragesCache;
 import java.net.URI;
 import java.nio.file.Path;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -28,14 +27,22 @@ import org.junit.jupiter.api.Test;
  */
 class HttpClientSettingsTest {
 
-    @Test
-    void shouldNotHaveProxyFromSystem() {
+    private static void removeProxyProperties(){
         System.getProperties().remove("http.proxyHost");
         System.getProperties().remove("http.proxyPort");
-        MatcherAssert.assertThat(
-            new HttpClientSettings().proxies().isEmpty(),
-            new IsEqual<>(true)
-        );
+        System.getProperties().remove("https.proxyHost");
+        System.getProperties().remove("https.proxyPort");
+    }
+
+    @AfterEach
+    void tearDown() {
+        removeProxyProperties();
+    }
+
+    @Test
+    void shouldNotHaveProxyByDefault() {
+        removeProxyProperties();
+        Assertions.assertTrue(new HttpClientSettings().proxies().isEmpty());
     }
 
     @Test
@@ -59,7 +66,7 @@ class HttpClientSettingsTest {
                     break;
                 }
                 default:
-                    Assertions.fail("Unexpected host name");
+                    Assertions.fail("Unexpected host name: " + proxy.host());
             }
         }
     }

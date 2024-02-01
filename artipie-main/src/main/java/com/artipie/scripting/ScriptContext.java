@@ -9,7 +9,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
 import com.artipie.settings.Settings;
-import com.artipie.settings.repo.RepositoriesFromStorage;
+import com.artipie.settings.repo.Repositories;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -29,7 +29,7 @@ public final class ScriptContext {
     /**
      * Repositories info API, available in scripts.
      */
-    private final RepositoriesFromStorage repositories;
+    private final Repositories repositories;
 
     /**
      * Blocking storage instance to access scripts.
@@ -48,7 +48,8 @@ public final class ScriptContext {
      * @param settings Settings API, available in scripts.
      */
     public ScriptContext(
-        final RepositoriesFromStorage repositories, final BlockingStorage storage,
+        final Repositories repositories,
+        final BlockingStorage storage,
         final Settings settings
     ) {
         this.repositories = repositories;
@@ -67,9 +68,9 @@ public final class ScriptContext {
 
     /**
      * Getter for repositories info API, available in scripts.
-     * @return RepositoriesFromStorage object.
+     * @return Repositories object.
      */
-    RepositoriesFromStorage getRepositories() {
+    Repositories getRepositories() {
         return this.repositories;
     }
 
