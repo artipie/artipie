@@ -92,11 +92,6 @@ SOFTWARE.
       <version>${guava.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.8.0-alpha2</version>
-    </dependency>
-    <dependency>
       <groupId>com.fasterxml</groupId>
       <artifactId>aalto-xml</artifactId>
       <version>1.2.2</version>
