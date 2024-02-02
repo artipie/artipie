@@ -66,9 +66,7 @@ public final class MavenProxyPackageProcessor extends QuartzJob {
                                     .thenApply(meta -> meta.read(Meta.OP_SIZE)).join().get()
                             )
                         );
-                        // @checkstyle EmptyBlockCheck (1 line)
                         while (this.packages.remove(event)) { }
-                    // @checkstyle IllegalCatchCheck (1 line)
                     } catch (final Exception err) {
                         Logger.error(
                             this,

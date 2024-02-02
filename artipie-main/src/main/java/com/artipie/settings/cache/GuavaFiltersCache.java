@@ -33,7 +33,6 @@ public class GuavaFiltersCache implements FiltersCache {
     public GuavaFiltersCache() {
         this.cache = CacheBuilder.newBuilder()
             .expireAfterAccess(
-                //@checkstyle MagicNumberCheck (1 line)
                 new Property(ArtipieProperties.FILTERS_TIMEOUT).asLongOrDefault(180_000L),
                 TimeUnit.MILLISECONDS
             ).softValues()

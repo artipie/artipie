@@ -27,7 +27,6 @@ public class RpmOptionsTest {
             RpmOptions.DIGEST.option(),
             new AllOf<>(
                 new ListOf<Matcher<? super Option>>(
-                    //@checkstyle LineLengthCheck (5 lines)
                     new Satisfies<>(opt -> "dgst".equals(opt.getArgName())),
                     new Satisfies<>(opt -> "d".equals(opt.getOpt())),
                     new Satisfies<>(opt -> "(optional, default sha256) configures Digest instance for Rpm: sha256 or sha1".equals(opt.getDescription())),
@@ -43,7 +42,6 @@ public class RpmOptionsTest {
             RpmOptions.NAMING_POLICY.option(),
             new AllOf<>(
                 new ListOf<Matcher<? super Option>>(
-                    //@checkstyle LineLengthCheck (5 lines)
                     new Satisfies<>(opt -> "np".equals(opt.getArgName())),
                     new Satisfies<>(opt -> "n".equals(opt.getOpt())),
                     new Satisfies<>(opt -> "(optional, default plain) configures NamingPolicy for Rpm: plain, sha256 or sha1".equals(opt.getDescription())),
@@ -59,7 +57,6 @@ public class RpmOptionsTest {
             RpmOptions.FILELISTS.option(),
             new AllOf<>(
                 new ListOf<Matcher<? super Option>>(
-                    //@checkstyle LineLengthCheck (5 lines)
                     new Satisfies<>(opt -> "fl".equals(opt.getArgName())),
                     new Satisfies<>(opt -> "f".equals(opt.getOpt())),
                     new Satisfies<>(opt -> "(optional, default true) includes File Lists for Rpm: true or false".equals(opt.getDescription())),

@@ -114,7 +114,6 @@ public final class RestApi extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
-        //@checkstyle LineLengthCheck (10 line)
         RouterBuilder.create(this.vertx, "swagger-ui/yaml/repo.yaml").compose(
             repoRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/users.yaml").compose(
                 userRb -> RouterBuilder.create(this.vertx, "swagger-ui/yaml/token-gen.yaml").compose(
@@ -183,7 +182,6 @@ public final class RestApi extends AbstractVerticle {
         }
         server.requestHandler(router)
             .listen(this.port)
-            //@checkstyle LineLengthCheck (1 line)
             .onComplete(res -> Logger.info(this, "Rest API started on port %d, swagger is available on %s://localhost:%d/api/index.html", this.port, schema, this.port))
             .onFailure(err -> Logger.error(this, err.getMessage()));
     }

@@ -216,7 +216,6 @@ public final class VertxFileStorage implements Storage {
         return new UnderLockOperation<>(new StorageLock(this, key), operation).perform(this);
     }
 
-    // @checkstyle MissingDeprecatedCheck (5 lines)
     @Deprecated
     @Override
     public CompletableFuture<Long> size(final Key key) {

@@ -229,7 +229,6 @@ public final class CondaSliceITCase {
                 new ListOf<String>(
                     "Creating package \"example-package\"",
                     String.format("Creating release \"%s\"", version),
-                    // @checkstyle LineLengthCheck (1 line)
                     String.format("Uploading file \"anonymous/example-package/%s/linux-64/example-package-%s-0.tar.bz2\"", version, version),
                     "Upload complete"
                 )

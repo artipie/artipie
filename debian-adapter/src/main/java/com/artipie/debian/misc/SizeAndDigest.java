@@ -29,7 +29,6 @@ public final class SizeAndDigest implements Function<InputStream, Pair<Long, Str
             final MessageDigest digest = MessageDigest.getInstance("SHA-256");
             long size = 0;
             try (GzipCompressorInputStream gcis = new GzipCompressorInputStream(input)) {
-                // @checkstyle MagicNumberCheck (1 line)
                 final byte[] buf = new byte[1024];
                 int cnt;
                 while (-1 != (cnt = gcis.read(buf))) {

@@ -465,7 +465,6 @@ public final class XmlEventPrimary implements XmlEvent {
      * @return Predicate to filter files
      */
     private static Predicate<String> filesFilter() {
-        // @checkstyle BooleanExpressionComplexityCheck (10 lines)
         return name -> name.startsWith("/var/")
             || "/boot".equals(name) || name.startsWith("/boot/")
             || name.startsWith("/lib/") || name.startsWith("/lib64/")

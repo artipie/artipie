@@ -214,7 +214,6 @@ public final class HeaderTags {
      * @return List of the recommends dependencies flags
      */
     public List<Optional<String>> dependencyFlags(final AbstractHeader.Tag tag) {
-        // @checkstyle MagicNumberCheck (2 lines)
         return Arrays.stream(this.meta.header(tag).asInts())
             .map(flag -> flag & 0xf)
             .mapToObj(Flags::find).collect(Collectors.toList());

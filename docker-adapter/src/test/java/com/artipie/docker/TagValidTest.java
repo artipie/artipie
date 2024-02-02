@@ -29,7 +29,6 @@ class TagValidTest {
         "MY_TAG",
         "My.Tag.1",
         "_some_tag",
-        //@checkstyle LineLengthCheck (1 line)
         "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567"
     })
     void shouldGetValueWhenValid(final String original) {
@@ -45,7 +44,6 @@ class TagValidTest {
         "*",
         "\u00ea",
         "-my-tag",
-        //@checkstyle LineLengthCheck (1 line)
         "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678"
     })
     void shouldFailToGetValueWhenInvalid(final String original) {

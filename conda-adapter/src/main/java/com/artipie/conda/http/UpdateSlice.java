@@ -118,9 +118,6 @@ public final class UpdateSlice implements Slice {
                         .thenApply(JsonObjectBuilder::build)
                         .thenCompose(
                             json -> {
-                                //@checkstyle MagicNumberCheck (20 lines)
-                                //@checkstyle LineLengthCheck (20 lines)
-                                //@checkstyle NestedIfDepthCheck (20 lines)
                                 CompletionStage<Void> action = new AstoMergedJson(
                                     this.asto, new Key.From(matcher.group(2), "repodata.json")
                                 ).merge(

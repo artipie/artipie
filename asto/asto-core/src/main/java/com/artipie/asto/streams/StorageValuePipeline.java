@@ -116,7 +116,6 @@ public final class StorageValuePipeline<R> {
      *  output stream.
      * @return Completion action with the result
      * @throws ArtipieIOException On Error
-     * @checkstyle ExecutableStatementCountCheck (100 lines)
      */
     public CompletionStage<R> processWithResult(
         final BiFunction<Optional<InputStream>, OutputStream, R> action

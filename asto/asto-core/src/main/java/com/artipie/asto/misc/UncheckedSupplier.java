@@ -33,7 +33,6 @@ public final class UncheckedSupplier<T> implements Supplier<T> {
     public T get() {
         try {
             return this.checked.get();
-            // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Exception err) {
             throw new ArtipieException(err);
         }

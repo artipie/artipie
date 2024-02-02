@@ -42,7 +42,6 @@ public class XmlWriterWrap implements XMLStreamWriter {
         this.xml.writeAttribute(localname, value);
     }
 
-    // @checkstyle ParameterNumberCheck (4 lines)
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
     @Override
     public void writeAttribute(

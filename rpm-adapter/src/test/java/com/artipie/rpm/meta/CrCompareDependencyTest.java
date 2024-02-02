@@ -45,7 +45,6 @@ final class CrCompareDependencyTest {
             .sorted(new CrCompareDependency())
             .collect(Collectors.joining(" < ")),
             Matchers.is(
-                // @checkstyle LineLengthCheck (1 line)
                 "libc.so.6 < libc.so.6(GLIBC_2.0) < libc.so.6(GLIBC_2.1) < libc.so.6(GLIBC_2.1.1) < libc.so.6(GLIBC_2.1.3) < libc.so.6(GLIBC_2.2) < libc.so.6(GLIBC_2.3) < libc.so.6(GLIBC_2.3.4) < libc.so.6(GLIBC_2.4)"
             )
         );
@@ -66,7 +65,6 @@ final class CrCompareDependencyTest {
             .sorted(new CrCompareDependency())
             .collect(Collectors.joining(" < ")),
             Matchers.is(
-                // @checkstyle LineLengthCheck (1 line)
                 "libc.so.6()(64bit) < libc.so.6(GLIBC_2.2.5)(64bit) < libc.so.6(GLIBC_2.3)(64bit) < libc.so.6(GLIBC_2.3.4)(64bit) < libc.so.6(GLIBC_2.4)(64bit) < libc.so.6(GLIBC_2.14)(64bit)"
             )
         );
@@ -85,7 +83,6 @@ final class CrCompareDependencyTest {
             .sorted(new CrCompareDependency())
             .collect(Collectors.joining(" < ")),
             Matchers.is(
-                // @checkstyle LineLengthCheck (1 line)
                 "libc.so.6() < libc.so.6(GLIBC_2.3.4)(64 bit) < libc.so.6(GLIBC_2.4) < libc.so.6(GLIBC_2.5)(32 bit)"
             )
         );

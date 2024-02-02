@@ -258,7 +258,6 @@ final class RpmTest {
         MatcherAssert.assertThat(
             new XMLDocument(xml),
             XhtmlMatchers.hasXPath(
-                //@checkstyle LineLengthCheck (3 lines)
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='location' and @href='libdeflt1_0-2020.03.27-25.1.armv7hl.rpm']",
                 "/*[local-name()='metadata']/*[local-name()='package']/*[local-name()='location' and @href='subdir/abc-1.01-26.git20200127.fc32.ppc64le.rpm']"
             )

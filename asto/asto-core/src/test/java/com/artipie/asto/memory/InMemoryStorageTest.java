@@ -41,7 +41,6 @@ class InMemoryStorageTest {
                 }
             )
         );
-        // @checkstyle MagicNumberCheck (1 line)
         Thread.sleep(100);
         MatcherAssert.assertThat(
             this.storage.exists(key).get(1, TimeUnit.SECONDS),

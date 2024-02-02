@@ -121,7 +121,6 @@ public abstract class StorageWhiteboxVerification {
                             )
                         )
                     ).join();
-                    // @checkstyle IllegalCatchCheck (1 line)
                 } catch (final Exception exc) {
                 }
                 MatcherAssert.assertThat(
@@ -777,7 +776,6 @@ public abstract class StorageWhiteboxVerification {
             ns -> {
                 try {
                     consumer.accept(ns);
-                    // @checkstyle IllegalCatchCheck (1 line)
                 } catch (final Exception err) {
                     throw new AssertionError(err);
                 }

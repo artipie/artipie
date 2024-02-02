@@ -217,7 +217,6 @@ public final class DockerRegistryPermission extends Permission {
                 if (this.any) {
                     res = true;
                 } else {
-                    //@checkstyle NestedIfDepthCheck (10 lines)
                     Permission existing = this.collection.get(permission.getName());
                     if (existing != null) {
                         res = existing.implies(permission);

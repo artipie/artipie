@@ -58,7 +58,6 @@ final class RxFileTest {
         );
     }
 
-    // @checkstyle MagicNumberCheck (1 line)
     @Test
     @Timeout(1)
     public void rxFileSaveWorks(@TempDir final Path tmp) throws IOException {

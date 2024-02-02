@@ -72,7 +72,6 @@ public final class RedisStorageTest {
                 }
             )
         );
-        // @checkstyle MagicNumberCheck (1 line)
         TimeUnit.MILLISECONDS.sleep(100);
         MatcherAssert.assertThat(
             this.storage.exists(key).get(1, TimeUnit.SECONDS),

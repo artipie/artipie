@@ -49,7 +49,6 @@ class XmlEventFilelistsTest {
             new IsXmlEqual(
                 String.join(
                     "\n",
-                    //@checkstyle LineLengthCheck (1 line)
                     "<package pkgid=\"47bbb8b2401e8853812e6340f4197252b92463c132f64a257e18c0c8c83ae462\" name=\"libdeflt1_0\" arch=\"armv7hl\">",
                     "<version epoch=\"0\" ver=\"2020.03.27\" rel=\"25.1\"/>",
                     "<file>/usr/lib/libdeflt.so.1.0</file>",

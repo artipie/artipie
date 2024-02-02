@@ -32,7 +32,6 @@ public final class UncheckedConsumer<T, E extends Throwable> implements Consumer
     public void accept(final T val) {
         try {
             this.checked.accept(val);
-            // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Throwable err) {
             throw new IllegalStateException(err);
         }

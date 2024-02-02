@@ -36,7 +36,6 @@ class InfoIndexCondaTest {
                 "    \"vc >=14.1,<15.0a0\",",
                 "    \"vs2015_runtime >=14.16.27012,<15.0a0\"",
                 "  ],",
-                // @checkstyle LineLengthCheck (1 line)
                 "  \"license\": \"LGPL-2.1-or-later AND LGPL-2.1-or-later WITH unRAR-restriction\",",
                 "  \"name\": \"7zip\",",
                 "  \"platform\": \"win\",",

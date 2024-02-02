@@ -160,7 +160,6 @@ public final class GoSliceITCase {
         final Storage res = new InMemoryStorage();
         final String path = "/golang.org/x/time/@v/%s%s";
         final String zip = ".zip";
-        //@checkstyle LineLengthCheck (4 lines)
         res.save(new KeyFromPath(String.format(path, "", "list")), new Content.From(VERSION.getBytes())).get();
         res.save(new KeyFromPath(String.format(path, VERSION, ".info")), new Content.From(String.format("{\"Version\":\"%s\",\"Time\":\"2019-10-24T00:54:14Z\"}", VERSION).getBytes())).get();
         res.save(new KeyFromPath(String.format(path, VERSION, ".mod")), new Content.From("module golang.org/x/time".getBytes())).get();

@@ -34,7 +34,6 @@ public final class UncheckedFunc<T, R, E extends Exception> implements Function<
     public R apply(final T val) {
         try {
             return this.checked.apply(val);
-            // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Exception err) {
             throw new ArtipieException(err);
         }

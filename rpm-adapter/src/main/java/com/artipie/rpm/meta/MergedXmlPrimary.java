@@ -59,7 +59,6 @@ public final class MergedXmlPrimary implements MergedXml {
         this(Optional.of(input), out);
     }
 
-    // @checkstyle ExecutableStatementCountCheck (100 lines)
     @Override
     public Result merge(final Collection<Package.Meta> packages, final XmlEvent event)
         throws IOException {

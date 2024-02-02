@@ -200,7 +200,6 @@ final class FileStorageTest {
         bsto.save(key, new byte[]{0x00, 0x00, 0x00});
         MatcherAssert.assertThat(
             bsto.size(key),
-            // @checkstyle MagicNumberCheck (1 line)
             Matchers.equalTo(3L)
         );
     }
@@ -243,14 +242,12 @@ final class FileStorageTest {
             new Key.From(name),
             new Content.OneTime(
                 new Content.From(
-                    // @checkstyle MagicNumberCheck (1 line)
                     Flowable.generate(new WriteTestSource(1024 * 8, 1024 * 1024 / 8))
                 )
             )
         ).get();
         MatcherAssert.assertThat(
             Files.size(this.tmp.resolve(name)),
-            // @checkstyle MagicNumberCheck (1 line)
             Matchers.equalTo(1024L * 1024 * 1024)
         );
     }

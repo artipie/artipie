@@ -46,7 +46,6 @@ public final class UncheckedRunnable implements Runnable {
     public void run() {
         try {
             this.original.run();
-        // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Exception err) {
             throw new ArtipieIOException(err);
         }

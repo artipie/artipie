@@ -33,7 +33,6 @@ public final class UncheckedConsumer<T, E extends Exception> implements Consumer
     public void accept(final T val) {
         try {
             this.checked.accept(val);
-            // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Exception err) {
             throw new ArtipieException(err);
         }

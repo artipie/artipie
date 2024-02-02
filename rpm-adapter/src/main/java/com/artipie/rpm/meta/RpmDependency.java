@@ -64,7 +64,6 @@ public final class RpmDependency {
             res = true;
         } else if (this.name.equals(aname) && this.flag.isPresent()
             && !this.flag.get().equals(HeaderTags.Flags.EQUAL.notation())) {
-            // @checkstyle LineLengthCheck (5 lines)
             res = this.flag.get().equals(HeaderTags.Flags.LESS_OR_EQUAL.notation()) && avers.compareTo(this.vers) <= 0
                 || this.flag.get().equals(HeaderTags.Flags.LESS.notation()) && avers.compareTo(this.vers) < 0
                 || this.flag.get().equals(HeaderTags.Flags.GREATER_OR_EQUAL.notation()) && avers.compareTo(this.vers) >= 0

@@ -159,9 +159,6 @@ public interface XmlEvent {
                 final int[] flags = tags.fileFlags();
                 for (int idx = 0; idx < files.length; idx += 1) {
                     final String fle = files[idx];
-                    // @checkstyle MethodBodyCommentsCheck (2 lines)
-                    // @todo #388:30min This condition is not covered with unit test, extend
-                    //  the test to check this case and make sure it works properly.
                     if (fle.isEmpty() || fle.charAt(0) == '.') {
                         continue;
                     }

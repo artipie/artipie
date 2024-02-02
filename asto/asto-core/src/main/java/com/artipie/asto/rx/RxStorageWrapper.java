@@ -59,7 +59,6 @@ public final class RxStorageWrapper implements RxStorage {
         );
     }
 
-    // @checkstyle MissingDeprecatedCheck (5 lines)
     @Override
     @Deprecated
     public Single<Long> size(final Key key) {

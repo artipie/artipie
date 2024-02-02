@@ -124,7 +124,6 @@ public final class PutMetadataChecksumSlice implements Slice {
                         if (key.isPresent() && key.get().parent().isPresent()
                             && key.get().parent().get().parent().isPresent()) {
                             final Key location = key.get().parent().get().parent().get();
-                            // @checkstyle NestedIfDepthCheck (10 lines)
                             resp = this.valid.ready(location).thenCompose(
                                 ready -> {
                                     final CompletionStage<Response> action;

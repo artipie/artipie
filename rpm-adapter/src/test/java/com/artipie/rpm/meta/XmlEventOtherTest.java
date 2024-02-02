@@ -49,7 +49,6 @@ class XmlEventOtherTest {
             new IsXmlEqual(
                 String.join(
                     "\n",
-                    //@checkstyle LineLengthCheck (1 line)
                     "<package pkgid=\"b9d10ae3485a5c5f71f0afb1eaf682bfbea4ea667cc3c3975057d6e3d8f2e905\" name=\"abc\" arch=\"ppc64le\">",
                     "<version epoch=\"0\" ver=\"1.01\" rel=\"26.git20200127.fc32\"/>",
                     "</package>"

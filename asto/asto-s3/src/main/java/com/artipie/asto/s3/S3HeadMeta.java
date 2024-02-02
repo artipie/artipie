@@ -32,7 +32,6 @@ final class S3HeadMeta implements Meta {
     public <T> T read(final ReadOperator<T> opr) {
         final Map<String, String> raw = new HashMap<>();
         Meta.OP_SIZE.put(raw, this.rsp.contentLength());
-        // @checkstyle MethodBodyCommentsCheck (1 line)
         // ETag is a quoted MD5 of blob content according to S3 docs
         Meta.OP_MD5.put(raw, this.rsp.eTag().replaceAll("\"", ""));
         return opr.take(raw);

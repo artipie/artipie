@@ -80,7 +80,6 @@ public final class JsonPackages implements Packages {
                                     pack.json(),
                                     (vrsn, pkg) -> {
                                         if (!vrsn.isPresent()) {
-                                            // @checkstyle LineLengthCheck (1 line)
                                             throw new IllegalStateException(String.format("Failed to add package `%s` to packages.json because version is absent", pname));
                                         }
                                         final JsonObject foradd;

@@ -61,7 +61,6 @@ public final class HttpNpmRemoteTest {
     void loadsPackage() throws IOException, JSONException, InterruptedException {
         final String name = "asdas";
         final OffsetDateTime started = OffsetDateTime.now();
-        // @checkstyle MagicNumberCheck (1 line)
         Thread.sleep(100);
         final NpmPackage pkg = this.remote.loadPackage(name).blockingGet();
         MatcherAssert.assertThat("Package is null", pkg != null);
@@ -164,7 +163,6 @@ public final class HttpNpmRemoteTest {
                 res = new RsFull(
                     RsStatus.OK,
                     new Headers.From(
-                        // @checkstyle LineLengthCheck (2 lines)
                         new Header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
                         new Header("Content-Type", HttpNpmRemoteTest.DEF_CONTENT_TYPE)
                     ),

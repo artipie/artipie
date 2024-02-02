@@ -50,7 +50,6 @@ public final class HttpNpmRemote implements NpmRemote {
     }
 
     @Override
-    //@checkstyle ReturnCountCheck (40 lines)
     public Maybe<NpmPackage> loadPackage(final String name) {
         return Maybe.fromFuture(
             this.performRemoteRequest(name).thenCompose(
@@ -76,7 +75,6 @@ public final class HttpNpmRemote implements NpmRemote {
     }
 
     @Override
-    //@checkstyle ReturnCountCheck (50 lines)
     public Maybe<NpmAsset> loadAsset(final String path, final Path tmp) {
         return Maybe.fromFuture(
             this.performRemoteRequest(path).thenApply(

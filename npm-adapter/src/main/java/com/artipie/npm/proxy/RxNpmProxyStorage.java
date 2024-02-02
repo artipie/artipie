@@ -75,7 +75,6 @@ public final class RxNpmProxyStorage implements NpmProxyStorage {
     }
 
     @Override
-    // @checkstyle ReturnCountCheck (15 lines)
     public Maybe<NpmPackage> getPackage(final String name) {
         return this.storage.exists(new Key.From(name, "meta.json"))
             .flatMapMaybe(
@@ -90,7 +89,6 @@ public final class RxNpmProxyStorage implements NpmProxyStorage {
     }
 
     @Override
-    // @checkstyle ReturnCountCheck (15 lines)
     public Maybe<NpmAsset> getAsset(final String path) {
         return this.storage.exists(new Key.From(path))
             .flatMapMaybe(

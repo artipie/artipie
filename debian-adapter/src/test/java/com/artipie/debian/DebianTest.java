@@ -221,7 +221,6 @@ class DebianTest {
             "Architecture: amd64",
             "Maintainer: Debian Science Team <debian-science-maintainers@lists.alioth.debian.org>",
             "Installed-Size: 15735",
-            // @checkstyle LineLengthCheck (1 line)
             "Depends: libatk1.0-0 (>= 1.12.4), libc6 (>= 2.17), libcairo-gobject2 (>= 1.10.0), libcairo2 (>= 1.12), libgdk-pixbuf2.0-0 (>= 2.22.0), libglib2.0-0 (>= 2.43.4), libgsl23 (>= 2.5), libgslcblas0 (>= 2.4), libgtk-3-0 (>= 3.21.5), libgtksourceview-3.0-1 (>= 3.18), libpango-1.0-0 (>= 1.22), libpangocairo-1.0-0 (>= 1.22), libpq5, libreadline7 (>= 6.0), libspread-sheet-widget, libxml2 (>= 2.7.4), zlib1g (>= 1:1.1.4), emacsen-common",
             "Section: math",
             "Priority: optional",
@@ -285,7 +284,6 @@ class DebianTest {
             "Architecture: amd64",
             "Maintainer: Debian OCaml Maintainers <debian-ocaml-maint@lists.debian.org>",
             "Installed-Size: 5870",
-            // @checkstyle LineLengthCheck (1 line)
             "Depends: liblwt-log-ocaml-1f1y2, liblwt-ocaml-dt6l9, libmigrate-parsetree-ocaml-n2039, libreact-ocaml-pdm50, libresult-ocaml-ki2r2, libsexplib0-ocaml-drlz0, ocaml-base-nox-4.11.1",
             "Provides: libobus-ocaml-d0567",
             "Section: ocaml",

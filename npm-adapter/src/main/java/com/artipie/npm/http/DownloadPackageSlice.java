@@ -52,7 +52,6 @@ public final class DownloadPackageSlice implements Slice {
         this.storage = storage;
     }
 
-    // @checkstyle ReturnCountCheck (50 lines)
     @Override
     public Response response(final String line,
         final Iterable<Map.Entry<String, String>> headers,

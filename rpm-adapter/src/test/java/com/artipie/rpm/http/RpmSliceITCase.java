@@ -211,7 +211,6 @@ public final class RpmSliceITCase {
             .withFileSystemBind(this.tmp.toString(), "/home");
         this.cntn.start();
         this.cntn.execInContainer("mv", "/home/example.repo", "/etc/yum.repos.d/");
-        // @checkstyle LineLengthCheck (3 lines)
         this.cntn.execInContainer("mv", "/home/product-id.conf", "/etc/yum/pluginconf.d/product-id.conf");
         this.cntn.execInContainer("mv", "/home/subscription-manager.conf", "/etc/yum/pluginconf.d/subscription-manager.conf");
     }

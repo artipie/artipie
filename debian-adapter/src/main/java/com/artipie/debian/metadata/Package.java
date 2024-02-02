@@ -93,7 +93,6 @@ public interface Package {
                 GzipCompressorOutputStream gcos =
                     new GzipCompressorOutputStream(new BufferedOutputStream(baos))
             ) {
-                // @checkstyle MagicNumberCheck (1 line)
                 final byte[] buf = new byte[1024];
                 int cnt;
                 while (-1 != (cnt = gcis.read(buf))) {

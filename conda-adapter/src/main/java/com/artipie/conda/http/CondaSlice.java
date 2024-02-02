@@ -200,7 +200,6 @@ public final class CondaSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        // @checkstyle LineLengthCheck (1 line)
                         new RtRule.ByPath("/?[a-z0-9-._]*/[a-z0-9-._]*/[a-z0-9-._]*(\\.tar\\.bz2|\\.conda)$"),
                         new ByMethodsRule(RqMethod.POST)
                     ),

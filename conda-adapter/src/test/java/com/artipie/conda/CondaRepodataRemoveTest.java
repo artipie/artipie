@@ -45,7 +45,6 @@ class CondaRepodataRemoveTest {
                     "\"license\":\"BSD 3-Clause\",",
                     "\"md5\":\"0ebe0cb0d62eae6cd237444ba8fded66\",",
                     "\"name\":\"decorator\",",
-                    // @checkstyle LineLengthCheck (1 line)
                     "\"sha256\":\"b5f77880181b37fb2e180766869da6242648aaec5bdd6de89296d9dacd764c14\",",
                     "\"size\":15638,",
                     "\"subdir\":\"linux-64\",",

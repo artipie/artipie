@@ -46,7 +46,6 @@ public interface ControlField {
         public List<String> value(final String control) {
             return Stream.of(control.split("\n")).filter(item -> item.startsWith(this.field))
                 .findFirst()
-                //@checkstyle StringLiteralsConcatenationCheck (1 line)
                 .map(item -> item.substring(item.indexOf(":") + 2))
                 .map(res -> res.split(" "))
                 .map(Arrays::asList)

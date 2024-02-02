@@ -204,7 +204,6 @@ final class ComposerProxySliceIT {
         new TestResource("packages.json").saveTo(this.storage, new AllPackages());
         MatcherAssert.assertThat(
             this.exec("composer", "install", "--verbose", "--no-cache"),
-            // @checkstyle LineLengthCheck (1 line)
             new StringContains(false, String.format("Root composer.json requires %s, it could not be found in any version", name))
         );
     }

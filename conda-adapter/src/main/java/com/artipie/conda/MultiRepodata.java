@@ -63,14 +63,12 @@ public interface MultiRepodata {
          */
         private final Set<String> pckgs = new HashSet<>();
 
-        // @checkstyle ExecutableStatementCountCheck (30 lines)
         @Override
         public void merge(final Collection<InputStream> inputs, final OutputStream result) {
             final JsonFactory factory = new JsonFactory();
             try {
                 final Path ftars = Files.createTempFile("tars", Unique.EXT);
                 final Path fcondas = Files.createTempFile("condas", Unique.EXT);
-                // @checkstyle NestedTryDepthCheck (20 lines)
                 try {
                     try (
                         OutputStream otars = new BufferedOutputStream(Files.newOutputStream(ftars));
