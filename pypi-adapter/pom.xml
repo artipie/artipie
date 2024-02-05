@@ -97,42 +97,24 @@ SOFTWARE.
     <dependency>
       <groupId>com.adobe.testing</groupId>
       <artifactId>s3mock</artifactId>
-      <version>2.4.9</version>
+      <version>3.3.0</version>
       <scope>test</scope>
-      <!--<exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.dataformat</groupId>
-          <artifactId>jackson-dataformat-xml</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-http</artifactId>
-        </exclusion>
-      </exclusions>-->
     </dependency>
     <dependency>
       <groupId>com.adobe.testing</groupId>
       <artifactId>s3mock-junit5</artifactId>
-      <version>2.4.9</version>
-      <scope>test</scope>
-      <!--<exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.dataformat</groupId>
-          <artifactId>jackson-dataformat-xml</artifactId>
-        </exclusion>
-      </exclusions>-->
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-xml</artifactId>
-      <version>2.11.4</version>
+      <version>3.3.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-http</artifactId>
-      <version>9.4.45.v20220203</version>
-      <scope>test</scope>
+      <version>12.0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>12.0.6</version>
     </dependency>
   </dependencies>
   <build>
