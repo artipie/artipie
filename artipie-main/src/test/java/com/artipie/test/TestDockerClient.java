@@ -33,9 +33,9 @@ public class TestDockerClient {
     public static final int[] INSECURE_PORTS = {52001, 52002, 52003};
 
     /**
-     * Built from src/test/resources/docker/Dockerfile.
+     * Built from src/test/resources/Dockerfile.
      */
-    private static final DockerImageName DOCKER_CLIENT = DockerImageName.parse("dgarus/test-docker-client:1.0");
+    private static final DockerImageName DOCKER_CLIENT = DockerImageName.parse("dgarus/test-docker-client:1.3");
 
     private final int port;
     private final GenericContainer<?> client;
@@ -51,7 +51,7 @@ public class TestDockerClient {
 
     public void start() throws IOException {
         this.client.start();
-        execute("rc-service", "docker", "start");
+        executeAndLog("rc-service", "docker", "start");
         Awaitility.await()
                 .atMost(10, TimeUnit.SECONDS)
                 .pollInterval(500, TimeUnit.MICROSECONDS)
