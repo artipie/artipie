@@ -2,38 +2,53 @@
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
  * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
-package com.artipie.asto.rx;
+package com.artipie.asto;
 
-import com.artipie.asto.Concatenation;
-import com.artipie.asto.Content;
-import com.artipie.asto.Key;
-import com.artipie.asto.Remaining;
-import com.artipie.asto.Storage;
+import com.adobe.testing.s3mock.junit5.S3MockExtension;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.ext.ContentAs;
 import com.artipie.asto.ext.PublisherAs;
-import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.asto.factory.Config;
+import com.artipie.asto.factory.StoragesLoader;
+import com.artipie.asto.rx.RxStorage;
+import com.artipie.asto.rx.RxStorageWrapper;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Tests for {@link RxStorageWrapper}.
  *
  * @since 1.11
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
-final class RxStorageWrapperTest {
+final class RxStorageWrapperS3Test {
+
+    /**
+     * Mock S3 server.
+     */
+    @RegisterExtension
+    static final S3MockExtension MOCK = S3MockExtension.builder()
+        .withSecureConnection(false)
+        .build();
+
+    /**
+     * Bucket to use in tests.
+     */
+    private String bucket;
 
     /**
      * Original storage.
@@ -46,8 +61,28 @@ final class RxStorageWrapperTest {
     private RxStorageWrapper wrapper;
 
     @BeforeEach
-    void setUp() {
-        this.original = new InMemoryStorage();
+    void setUp(final AmazonS3 client) {
+        this.bucket = UUID.randomUUID().toString();
+        client.createBucket(this.bucket);
+        this.original = new StoragesLoader()
+            .newObject(
+                "s3",
+                new Config.YamlStorageConfig(
+                    Yaml.createYamlMappingBuilder()
+                        .add("region", "us-east-1")
+                        .add("bucket", this.bucket)
+                        .add("endpoint", String.format("http://localhost:%d", MOCK.getHttpPort()))
+                        .add(
+                            "credentials",
+                            Yaml.createYamlMappingBuilder()
+                                .add("type", "basic")
+                                .add("accessKeyId", "foo")
+                                .add("secretAccessKey", "bar")
+                                .build()
+                        )
+                        .build()
+                )
+            );
         this.wrapper = new RxStorageWrapper(this.original);
     }
 
@@ -146,7 +181,7 @@ final class RxStorageWrapperTest {
                 new Concatenation(
                     this.wrapper.value(key).blockingGet()
                 ).single()
-                .blockingGet(),
+                    .blockingGet(),
                 true
             ).bytes(),
             new IsEqual<>(bvalue)
