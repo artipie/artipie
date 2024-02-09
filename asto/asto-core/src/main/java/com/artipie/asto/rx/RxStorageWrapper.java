@@ -87,9 +87,7 @@ public final class RxStorageWrapper implements RxStorage {
     @Override
     public Single<Content> value(final Key key) {
         return Single.defer(() -> SingleInterop.fromFuture(
-            this.storage.value(key).thenCompose(content -> {
-                return CompletableFuture.completedFuture(content);
-            })
+            this.storage.value(key).thenCompose(CompletableFuture::completedFuture)
         )).observeOn(this.scheduler);
     }
 

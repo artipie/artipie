@@ -106,28 +106,12 @@ SOFTWARE.
       <artifactId>s3mock</artifactId>
       <version>2.4.9</version>
       <scope>test</scope>
-      <!--<exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.dataformat</groupId>
-          <artifactId>jackson-dataformat-xml</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-http</artifactId>
-        </exclusion>
-      </exclusions>-->
     </dependency>
     <dependency>
       <groupId>com.adobe.testing</groupId>
       <artifactId>s3mock-junit5</artifactId>
       <version>2.4.9</version>
       <scope>test</scope>
-      <!--<exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.dataformat</groupId>
-          <artifactId>jackson-dataformat-xml</artifactId>
-        </exclusion>
-      </exclusions>-->
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
