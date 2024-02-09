@@ -34,7 +34,7 @@ SOFTWARE.
   <name>Artipie HTTP client</name>
   <url>https://github.com/artipie/http-client</url>
   <properties>
-    <jettyVersion>12.0.3</jettyVersion>
+    <jettyVersion>12.0.6</jettyVersion>
     <header.license>${project.basedir}/../LICENSE.header</header.license>
   </properties>
   <dependencies>
