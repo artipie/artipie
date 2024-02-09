@@ -10,3 +10,6 @@ permissions:
     "*":
       "*":
         - *
+  docker_registry_permissions:
+    "*":
+      - base

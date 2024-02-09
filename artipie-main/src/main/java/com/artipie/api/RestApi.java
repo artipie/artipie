@@ -149,16 +149,17 @@ public final class RestApi extends AbstractVerticle {
             this.caches.storagesCache(), asto, this.security.policy()
         ).init(repoRb);
         if (this.security.policyStorage().isPresent()) {
+            Storage policyStorage = this.security.policyStorage().get();
             new UsersRest(
-                new ManageUsers(new BlockingStorage(this.security.policyStorage().get())),
-                this.caches, this.security
+                    new ManageUsers(new BlockingStorage(policyStorage)),
+                    this.caches, this.security
             ).init(userRb);
-        }
-        if (this.security.policy() instanceof CachedYamlPolicy) {
-            new RolesRest(
-                new ManageRoles(new BlockingStorage(this.security.policyStorage().get())),
-                this.caches.policyCache(), this.security.policy()
-            ).init(rolesRb);
+            if (this.security.policy() instanceof CachedYamlPolicy) {
+                new RolesRest(
+                        new ManageRoles(new BlockingStorage(policyStorage)),
+                        this.caches.policyCache(), this.security.policy()
+                ).init(rolesRb);
+            }
         }
         new SettingsRest(this.port).init(settingsRb);
         final Router router = repoRb.createRouter();

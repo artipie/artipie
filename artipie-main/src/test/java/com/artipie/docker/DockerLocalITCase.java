@@ -4,47 +4,52 @@
  */
 package com.artipie.docker;
 
-import com.artipie.test.TestDeployment;
+import com.artipie.test.TestDockerClient;
+import com.artipie.test.vertxmain.TestVertxMain;
+import com.artipie.test.vertxmain.TestVertxMainBuilder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Path;
 
 /**
  * Integration test for local Docker repositories.
- *
- * @since 0.10
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class DockerLocalITCase {
 
-    /**
-     * Deployment for tests.
-     */
-    @RegisterExtension
-    final TestDeployment deployment = new TestDeployment(
-        () -> TestDeployment.ArtipieContainer.defaultDefinition()
-            .withRepoConfig("docker/registry.yml", "registry")
-            .withUser("security/users/alice.yaml", "alice"),
-        () -> new TestDeployment.ClientContainer("alpine:3.11")
-            .withPrivilegedMode(true)
-            .withWorkingDirectory("/w")
-    );
+    @TempDir
+    Path temp;
+
+    private TestVertxMain server;
+
+    private TestDockerClient client;
 
     @BeforeEach
     void setUp() throws Exception {
-        this.deployment.setUpForDockerTests();
+        server = new TestVertxMainBuilder(temp)
+                .withUser("alice", "security/users/alice.yaml")
+                .withDockerRepo("registry", temp.resolve("data"))
+                .build(TestDockerClient.INSECURE_PORTS[0]);
+        client = new TestDockerClient(server.port());
+        client.start();
+    }
+
+    @AfterEach
+    void tearDown() {
+        client.stop();
+        server.stop();
     }
 
     @Test
     void pushAndPull() throws Exception {
-        final String image = "artipie:8080/registry/alpine:3.11";
-        new TestDeployment.DockerTest(this.deployment, "artipie:8080")
-            .loginAsAlice()
+        final String image = client.host() + "/registry/alpine:3.11";
+        client.login("alice", "123")
             .pull("alpine:3.11")
             .tag("alpine:3.11", image)
             .push(image)
             .remove(image)
-            .pull(image)
-            .assertExec();
+            .pull(image);
     }
 }

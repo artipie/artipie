@@ -46,18 +46,18 @@ final class AuthScopeSlice implements Slice {
      *
      * @param origin Origin slice.
      * @param auth Authentication scheme.
-     * @param perms Access permissions.
+     * @param policy Access permissions.
      * @param name Repository name
      */
     AuthScopeSlice(
         final ScopeSlice origin,
         final AuthScheme auth,
-        final Policy<?> perms,
+        final Policy<?> policy,
         final String name
     ) {
         this.origin = origin;
         this.auth = auth;
-        this.policy = perms;
+        this.policy = policy;
         this.name = name;
     }
 

@@ -6,6 +6,8 @@ package com.artipie.docker.perms;
 
 import com.artipie.docker.http.Scope;
 import com.artipie.security.perms.Action;
+
+import java.io.Serial;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Collection;
@@ -30,9 +32,7 @@ public final class DockerRepositoryPermission extends Permission  {
      */
     static final String WILDCARD = "*";
 
-    /**
-     * Required serial.
-     */
+    @Serial
     private static final long serialVersionUID = -2916435271451239611L;
 
     /**
@@ -90,30 +90,23 @@ public final class DockerRepositoryPermission extends Permission  {
 
     @Override
     public boolean implies(final Permission permission) {
-        final boolean res;
-        if (permission instanceof DockerRepositoryPermission) {
-            final DockerRepositoryPermission that = (DockerRepositoryPermission) permission;
-            res = (this.mask & that.mask) == that.mask && this.impliesIgnoreMask(that);
-        } else {
-            res = false;
+        if (permission instanceof DockerRepositoryPermission that) {
+            return (this.mask & that.mask) == that.mask && this.impliesIgnoreMask(that);
         }
-        return res;
+        return false;
     }
 
     @Override
     public boolean equals(final Object obj) {
-        final boolean res;
         if (obj == this) {
-            res = true;
-        } else if (obj instanceof DockerRepositoryPermission) {
-            final DockerRepositoryPermission that = (DockerRepositoryPermission) obj;
-            res = that.getName().equals(this.getName())
+            return true;
+        }
+        if (obj instanceof DockerRepositoryPermission that) {
+            return that.getName().equals(this.getName())
                 && that.resource.equals(this.resource)
                 && that.mask == this.mask;
-        } else {
-            res = false;
         }
-        return res;
+        return false;
     }
 
     @Override
@@ -168,6 +161,7 @@ public final class DockerRepositoryPermission extends Permission  {
      * Get key for collection.
      * @return Repo name and resource joined with :
      */
+    @SuppressWarnings("PMD.UnusedPrivateMethod") // just a pmd bug
     private String key() {
         return String.join(":", this.getName(), this.resource);
     }
@@ -198,9 +192,7 @@ public final class DockerRepositoryPermission extends Permission  {
     public static final class DockerRepositoryPermissionCollection extends PermissionCollection
         implements java.io.Serializable {
 
-        /**
-         * Required serial.
-         */
+        @Serial
         private static final long serialVersionUID = 5843247295984092155L;
 
         /**
@@ -220,7 +212,7 @@ public final class DockerRepositoryPermission extends Permission  {
 
         /**
          * Create an empty DockerPermissionCollection object.
-                 */
+         */
         public DockerRepositoryPermissionCollection() {
             this.collection = new ConcurrentHashMap<>(5);
             this.any = false;
@@ -233,8 +225,7 @@ public final class DockerRepositoryPermission extends Permission  {
                     "attempt to add a Permission to a readonly PermissionCollection"
                 );
             }
-            if (obj instanceof DockerRepositoryPermission) {
-                final DockerRepositoryPermission perm = (DockerRepositoryPermission) obj;
+            if (obj instanceof DockerRepositoryPermission perm) {
                 final String key = perm.key();
                 this.collection.put(key, perm);
                 if (DockerRepositoryPermissionCollection.anyActionAllowed(perm)) {
@@ -251,8 +242,7 @@ public final class DockerRepositoryPermission extends Permission  {
         @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.CognitiveComplexity"})
         public boolean implies(final Permission obj) {
             boolean res = false;
-            if (obj instanceof DockerRepositoryPermission) {
-                final DockerRepositoryPermission perm = (DockerRepositoryPermission) obj;
+            if (obj instanceof DockerRepositoryPermission perm) {
                 if (this.any) {
                     res = true;
                 } else {
