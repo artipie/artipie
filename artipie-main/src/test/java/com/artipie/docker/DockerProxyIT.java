@@ -9,6 +9,7 @@ import com.artipie.test.TestDockerClient;
 import com.artipie.test.vertxmain.TestVertxMain;
 import com.artipie.test.vertxmain.TestVertxMainBuilder;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -71,6 +72,7 @@ final class DockerProxyIT {
 
     @Test
     void shouldPushAndPull() throws Exception {
+        Assertions.fail("Hello!! I'm here!");
         final String image = client.host() + "/my-docker/alpine:3.11";
         client.login("alice", "123")
                 .pull("alpine:3.11")
