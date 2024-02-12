@@ -25,13 +25,6 @@ import java.nio.file.Path;
  *  Cache is populated when image is downloaded asynchronously
  *  and later used if remote repository is unavailable.
  *  This feature should be tested.
- * @todo #449:30min Support running DockerProxyIT test on Windows.
- *  Running test on Windows uses `mcr.microsoft.com/dotnet/core/runtime` image.
- *  Loading this image manifest fails with
- *  "java.lang.IllegalStateException: multiple subscribers not supported" error.
- *  It seems that body is being read by some other entity in Artipie,
- *  so it requires investigation.
- *  Similar `CachingProxyITCase` tests works well in docker-adapter module.
  */
 final class DockerProxyIT {
 

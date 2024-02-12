@@ -35,7 +35,7 @@ public class TestDockerClient {
     /**
      * Built from src/test/resources/Dockerfile.
      */
-    private static final DockerImageName DOCKER_CLIENT = DockerImageName.parse("dgarus/test-docker-client:1.3");
+    private static final DockerImageName DOCKER_CLIENT = DockerImageName.parse("artipie/test-docker-client:1.0");
 
     private final int port;
     private final GenericContainer<?> client;
