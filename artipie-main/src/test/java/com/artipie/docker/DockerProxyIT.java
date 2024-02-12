@@ -72,7 +72,6 @@ final class DockerProxyIT {
 
     @Test
     void shouldPushAndPull() throws Exception {
-        Assertions.fail("Hello!! I'm here!");
         final String image = client.host() + "/my-docker/alpine:3.11";
         client.login("alice", "123")
                 .pull("alpine:3.11")
