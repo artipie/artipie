@@ -176,17 +176,17 @@ public final class DockerSlice extends Slice.Wrap {
      * Requires authentication and authorization for slice.
      *
      * @param origin Origin slice.
-     * @param perms Access permissions.
+     * @param policy Access permissions.
      * @param auth Authentication scheme.
      * @param name Repository name
      * @return Authorized slice.
      */
     private static Slice auth(
         final ScopeSlice origin,
-        final Policy<?> perms,
+        final Policy<?> policy,
         final AuthScheme auth,
         final String name
     ) {
-        return new DockerAuthSlice(new AuthScopeSlice(origin, auth, perms, name));
+        return new DockerAuthSlice(new AuthScopeSlice(origin, auth, policy, name));
     }
 }

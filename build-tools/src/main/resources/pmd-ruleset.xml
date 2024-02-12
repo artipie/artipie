@@ -19,6 +19,7 @@
         <exclude name="DefaultPackage"/>
         <exclude name="LinguisticNaming"/>
         <exclude name="CallSuperInConstructor"/>
+        <exclude name="OnlyOneReturn"/>
     </rule>
 
     <rule ref="category/java/design.xml">

@@ -4,6 +4,7 @@
  */
 package com.artipie.security.perms;
 
+import java.io.Serial;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Enumeration;
@@ -24,19 +25,19 @@ import java.util.function.Supplier;
  * <p/>
  * Method {@link UserPermissions#implies(Permission)} implementation note:
  * <p/>
- * first, we check if the permission is implied according to the {@link UserPermissions#last}
+ * first, we check if the permission is implied according to the {@link UserPermissions#lastRole}
  * reference calling {@link UserPermissions#checkReference(String, Permission)} method.
  * Synchronization is not required here as
  * <p>
- * 1) we do not change the value of {@link UserPermissions#last} field
+ * 1) we do not change the value of {@link UserPermissions#lastRole} field
  * </p>
  * <p>
- * 2) it does not matter if the {@link UserPermissions#last} value was changed in the synchronized
+ * 2) it does not matter if the {@link UserPermissions#lastRole} value was changed in the synchronized
  *   section by other thread if we get positive result.
  * </p>
  * <p/>
  * second, if we do not get the positive result, we enter synchronized section, get the value
- * from {@link UserPermissions#last} and check it again if the value was changed. Then, if the
+ * from {@link UserPermissions#lastRole} and check it again if the value was changed. Then, if the
  * result is still negative, we perform the whole check by the user's personal permissions and all
  * the groups.
  *
@@ -44,9 +45,7 @@ import java.util.function.Supplier;
  */
 public final class UserPermissions extends PermissionCollection {
 
-    /**
-     * Required serial.
-     */
+    @Serial
     private static final long serialVersionUID = -7546496571951236695L;
 
     /**
@@ -69,7 +68,7 @@ public final class UserPermissions extends PermissionCollection {
      * {@link UserPermissions#implies(Permission)} method call. Empty if
      * user permissions implied the permission.
      */
-    private final AtomicReference<String> last;
+    private final AtomicReference<String> lastRole;
 
     /**
      * Ctor.
@@ -82,7 +81,7 @@ public final class UserPermissions extends PermissionCollection {
     ) {
         this.rperms = rperms;
         this.user = user;
-        this.last = new AtomicReference<>();
+        this.lastRole = new AtomicReference<>();
         this.lock = new Object();
     }
 
@@ -94,11 +93,11 @@ public final class UserPermissions extends PermissionCollection {
     @Override
     @SuppressWarnings({"PMD.AvoidDeeplyNestedIfStmts", "PMD.CognitiveComplexity"})
     public boolean implies(final Permission permission) {
-        final String first = this.last.get();
+        final String first = this.lastRole.get();
         boolean res = this.checkReference(first, permission);
         if (!res) {
             synchronized (this.lock) {
-                final String second = this.last.get();
+                final String second = this.lastRole.get();
                 if (!Objects.equals(first, second)) {
                     res = this.checkReference(second, permission);
                 }
@@ -107,13 +106,13 @@ public final class UserPermissions extends PermissionCollection {
                         res = this.user.get().perms().implies(permission);
                     }
                     if (res) {
-                        this.last.set(null);
+                        this.lastRole.set(null);
                     } else {
                         for (final String role : this.user.get().roles()) {
                             if (!role.equals(second)
                                 && this.rperms.apply(role).implies(permission)) {
                                 res = true;
-                                this.last.set(role);
+                                this.lastRole.set(role);
                                 break;
                             }
                         }
@@ -136,12 +135,10 @@ public final class UserPermissions extends PermissionCollection {
      * @return The result, true if according to the last ref permission is implied
      */
     private boolean checkReference(final String ref, final Permission permission) {
-        final boolean res;
         if (ref == null) {
-            res = this.user.get().perms().implies(permission);
+            return this.user.get().perms().implies(permission);
         } else {
-            res = this.rperms.apply(ref).implies(permission);
+            return this.rperms.apply(ref).implies(permission);
         }
-        return res;
     }
 }

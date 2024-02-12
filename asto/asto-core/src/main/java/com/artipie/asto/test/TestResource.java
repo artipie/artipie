@@ -127,4 +127,14 @@ public final class TestResource {
             throw new IllegalStateException("Failed to load test recourse", ex);
         }
     }
+
+    /**
+     * Gets a resource content as {@code String}.
+     *
+     * @return Resource string
+     */
+    @SuppressWarnings("PMD.StringInstantiation")
+    public String asString() {
+        return new String(this.asBytes());
+    }
 }

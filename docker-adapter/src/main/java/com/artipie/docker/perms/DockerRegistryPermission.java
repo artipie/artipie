@@ -6,6 +6,8 @@ package com.artipie.docker.perms;
 
 import com.artipie.docker.http.Scope;
 import com.artipie.security.perms.Action;
+
+import java.io.Serial;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Collection;
@@ -21,9 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class DockerRegistryPermission extends Permission {
 
-    /**
-     * Required serial.
-     */
+    @Serial
     private static final long serialVersionUID = 3016435961451239611L;
 
     /**
@@ -70,28 +70,21 @@ public final class DockerRegistryPermission extends Permission {
 
     @Override
     public boolean implies(final Permission permission) {
-        final boolean res;
-        if (permission instanceof DockerRegistryPermission) {
-            final DockerRegistryPermission that = (DockerRegistryPermission) permission;
-            res = (this.mask & that.mask) == that.mask && this.impliesIgnoreMask(that);
-        } else {
-            res = false;
+        if (permission instanceof DockerRegistryPermission that) {
+            return (this.mask & that.mask) == that.mask && this.impliesIgnoreMask(that);
         }
-        return res;
+        return false;
     }
 
     @Override
     public boolean equals(final Object obj) {
-        final boolean res;
         if (obj == this) {
-            res = true;
-        } else if (obj instanceof DockerRegistryPermission) {
-            final DockerRegistryPermission that = (DockerRegistryPermission) obj;
-            res = that.getName().equals(this.getName()) && that.mask == this.mask;
-        } else {
-            res = false;
+            return true;
         }
-        return res;
+        if (obj instanceof DockerRegistryPermission that) {
+            return that.getName().equals(this.getName()) && that.mask == this.mask;
+        }
+        return false;
     }
 
     @Override
@@ -126,13 +119,8 @@ public final class DockerRegistryPermission extends Permission {
      * @return True when implies
      */
     private boolean impliesIgnoreMask(final DockerRegistryPermission perm) {
-        final boolean res;
-        if (this.getName().equals(DockerRepositoryPermission.WILDCARD)) {
-            res = true;
-        } else {
-            res = this.getName().equalsIgnoreCase(perm.getName());
-        }
-        return res;
+        return this.getName().equals(DockerRepositoryPermission.WILDCARD) ||
+                this.getName().equalsIgnoreCase(perm.getName());
     }
 
     /**
@@ -161,9 +149,7 @@ public final class DockerRegistryPermission extends Permission {
     public static final class DockerRegistryPermissionCollection extends PermissionCollection
         implements java.io.Serializable {
 
-        /**
-         * Required serial.
-         */
+        @Serial
         private static final long serialVersionUID = -2153247295984095455L;
 
         /**
@@ -183,7 +169,7 @@ public final class DockerRegistryPermission extends Permission {
 
         /**
          * Create an empty object.
-                 */
+         */
         public DockerRegistryPermissionCollection() {
             this.collection = new ConcurrentHashMap<>(5);
             this.any = false;
@@ -196,8 +182,7 @@ public final class DockerRegistryPermission extends Permission {
                     "attempt to add a Permission to a readonly PermissionCollection"
                 );
             }
-            if (obj instanceof DockerRegistryPermission) {
-                final DockerRegistryPermission perm = (DockerRegistryPermission) obj;
+            if (obj instanceof DockerRegistryPermission perm) {
                 this.collection.put(perm.getName(), perm);
                 if (DockerRepositoryPermission.WILDCARD.equals(perm.getName())
                     && RegistryCategory.ANY.mask() == perm.mask) {

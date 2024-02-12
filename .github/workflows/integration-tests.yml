@@ -28,6 +28,5 @@ jobs:
           key: ubuntu-latest-jdk-21-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ubuntu-latest-jdk-21-maven-
-      - run: mvn -B install -Pitcase -pl "!:artipie-main"
       - run: mvn -B verify -Pdocker-build -Pitcase
         working-directory: artipie-main
