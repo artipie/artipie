@@ -76,12 +76,14 @@ SOFTWARE.
     <docker.image.name>artipie/artipie</docker.image.name>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.release>17</maven.compiler.release>
+    <header.license>LICENSE.header</header.license>
     <junit-platform.version>5.10.0</junit-platform.version>
     <vertx.version>4.5.1</vertx.version>
     <guava.version>33.0.0-jre</guava.version>
     <javax.json.version>1.1.4</javax.json.version>
-    <maven.compiler.release>17</maven.compiler.release>
-    <header.license>LICENSE.header</header.license>
+    <jetty.version>12.0.6</jetty.version>
+    <s3mock.version>3.4.0</s3mock.version>
   </properties>
   <distributionManagement>
     <repository>

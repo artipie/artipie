@@ -32,7 +32,6 @@ SOFTWARE.
     <artifactId>artipie-main</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <jettyVersion>12.0.6</jettyVersion>
         <docker.image.name>artipie/artipie</docker.image.name>
         <docker.ubuntu.image.name>artipie/artipie-ubuntu</docker.ubuntu.image.name>
         <header.license>${project.basedir}/../LICENSE.header</header.license>
@@ -190,7 +189,7 @@ SOFTWARE.
         <dependency>
             <groupId>org.eclipse.jetty.http3</groupId>
             <artifactId>jetty-http3-server</artifactId>
-            <version>${jettyVersion}</version>
+            <version>${jetty.version}</version>
         </dependency>
         <!--        adapters      -->
         <dependency>
