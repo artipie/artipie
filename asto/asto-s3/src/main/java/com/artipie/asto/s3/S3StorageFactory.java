@@ -42,6 +42,7 @@ public final class S3StorageFactory implements StorageFactory {
      */
     private static S3AsyncClient s3Client(final Config cfg) {
         final S3AsyncClientBuilder builder = S3AsyncClient.builder();
+        builder.forcePathStyle(true);
         Optional.ofNullable(cfg.string("region")).ifPresent(val -> builder.region(Region.of(val)));
         endpoint(cfg).ifPresent(val -> builder.endpointOverride(URI.create(val)));
         setCredentialsProvider(builder, cfg);
