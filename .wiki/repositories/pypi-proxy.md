@@ -8,22 +8,20 @@ repo:
   storage:
     type: fs
     path: /var/artipie/data
-  # optional; if not defined, then will be used settings from a `meta` config
-  http_client:
-    # all fields are optional
-    connection_timeout: 25000
-    idle_timeout: 500
-    trust_all: true
-    follow_redirects: true
-    http3: true
-    jks:
+  http_client: # optional, settings for the HttpClient that will be used in xxx-proxy repositories
+    connection_timeout: 25000 # optional, default 15000 ms 
+    idle_timeout: 500 # optional, default 0
+    trust_all: true # optional, default false
+    follow_redirects: true # optional, default true
+    http3: true # optional, default false
+    jks: # optional
       path: /var/artipie/keystore.jks
       password: secret
     proxies:
       - url: http://proxy1.com
       - url: https://proxy2.com
         # the HTTP "Basic" authentication defined in RFC 2617
-        realm: user_realm
+        realm: user_realm # if this field is defined, then `username` and `password` are mandatory
         username: user_name
         password: user_password
   remotes:

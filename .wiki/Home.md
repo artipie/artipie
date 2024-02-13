@@ -5,9 +5,6 @@ Artipie is not just a binary artifact web server -- it's artifact management
 constructor which consists of many components built into server assembly.
 
 You have three options for working with Artipie:
- - As a hosted-solution user: Artipie has hosted version at
- https://central.artipie.com - you can sign-up, create repositories
- and deploy artifacts there
  - Create self-hosted installation - you can run Artipie Docker image
  in private network, install k8s [Helm chart](https://github.com/artipie/helm-charts)
  with Artipie or simply run Artipie `jar` file with JVM

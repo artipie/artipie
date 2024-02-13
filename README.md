@@ -2,16 +2,12 @@
 
 [![Join our Telegramm group](https://img.shields.io/badge/Join%20us-Telegram-blue?&logo=telegram&?link=http://right&link=http://t.me/artipie)](http://t.me/artipie)
 
-[![EO principles respected here](https://www.elegantobjects.org/badge.svg)](https://www.elegantobjects.org)
-[![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
-
 [![Javadoc](http://www.javadoc.io/badge/com.artipie/artipie.svg)](http://www.javadoc.io/doc/com.artipie/artipie)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/artipie/artipie/blob/master/LICENSE.txt)
 [![codecov](https://codecov.io/gh/artipie/artipie/branch/master/graph/badge.svg)](https://app.codecov.io/gh/artipie/artipie)
 [![Hits-of-Code](https://hitsofcode.com/github/artipie/artipie)](https://hitsofcode.com/view/github/artipie/artipie)
 ![Docker Pulls](https://img.shields.io/docker/pulls/artipie/artipie)
 ![Docker Image Version (latest by date)](https://img.shields.io/docker/v/artipie/artipie?label=DockerHub&sort=date)
-[![PDD status](http://www.0pdd.com/svg?name=artipie/artipie)](http://www.0pdd.com/p?name=artipie/artipie)
 
 Artipie is a binary artifact management tool, similar to
 [Artifactory](https://jfrog.com/artifactory/),
@@ -38,9 +34,7 @@ The following set of features makes Artipie unique among all others:
     [Debian](https://github.com/artipie/artipie/wiki/debian),
     [Anaconda](https://github.com/artipie/artipie/wiki/anaconda)
     and [others](https://github.com/artipie/artipie/wiki/Configuration-Repository#supported-repository-types)
-  * It is database-free
   * It can host the data in the file system, [Amazon S3](https://aws.amazon.com/s3/) or in a storage defined by user
-  * Its quality of Java code is extraordinary high :)
 
 Learn more about Artipie in our [Wiki](https://github.com/artipie/artipie/wiki).
 
