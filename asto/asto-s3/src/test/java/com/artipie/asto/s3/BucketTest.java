@@ -63,6 +63,7 @@ class BucketTest {
         client.createBucket(this.name);
         this.bucket = new Bucket(
             S3AsyncClient.builder()
+                .forcePathStyle(true)
                 .region(Region.of("us-east-1"))
                 .credentialsProvider(
                     StaticCredentialsProvider.create(AwsBasicCredentials.create("foo", "bar"))

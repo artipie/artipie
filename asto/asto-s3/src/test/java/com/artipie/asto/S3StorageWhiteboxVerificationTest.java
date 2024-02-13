@@ -38,6 +38,7 @@ public final class S3StorageWhiteboxVerificationTest extends StorageWhiteboxVeri
     protected Storage newStorage() {
         final String endpoint = String.format("http://localhost:%d", MOCK.getHttpPort());
         final S3AsyncClient client = S3AsyncClient.builder()
+            .forcePathStyle(true)
             .region(Region.of("us-east-1"))
             .credentialsProvider(
                 StaticCredentialsProvider.create(
