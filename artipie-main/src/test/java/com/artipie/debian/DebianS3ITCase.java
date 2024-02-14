@@ -11,11 +11,10 @@ import org.cactoos.list.ListOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
@@ -36,6 +35,21 @@ public final class DebianS3ITCase {
     private static final int CURL_NOT_FOUND = 22;
 
     /**
+     * Artipie server port;
+     */
+    private static final int SRV_PORT = 8080;
+
+    /**
+     * Test repository name.
+     */
+    private static final String REPO = "my-debian";
+
+    /**
+     * S3 storage port.
+     */
+    private static final int S3_PORT = 9000;
+
+    /**
      * Test deployments.
      * @checkstyle VisibilityModifierCheck (10 lines)
      */
@@ -43,7 +57,7 @@ public final class DebianS3ITCase {
     final TestDeployment containers = new TestDeployment(
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("debian/debian-s3.yml", "my-debian")
-            .withExposedPorts(8080),
+            .withExposedPorts(DebianS3ITCase.SRV_PORT),
         () -> new TestDeployment.ClientContainer(
             new ImageFromDockerfile(
                 "local/artipie-main/debian_s3_itcase", false
@@ -71,7 +85,7 @@ public final class DebianS3ITCase {
         )
         .withWorkingDirectory("/w")
         .withNetworkAliases("minioc")
-        .withExposedPorts(9000)
+        .withExposedPorts(DebianS3ITCase.S3_PORT)
         .withClasspathResourceMapping(
             "debian/aglfn_1.7-3_amd64.deb", "/w/aglfn_1.7-3_amd64.deb", BindMode.READ_ONLY
         )
@@ -97,73 +111,80 @@ public final class DebianS3ITCase {
         );
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "8080,my-debian,9000"
-    })
-    void curlPutWorks(final String port, final String repo, final String s3port) throws Exception {
+    @Test
+    void curlPutWorks() throws Exception {
         this.containers.assertExec(
             "Packages.gz must be absent in S3 before test",
             new ContainerResultMatcher(new IsEqual<>(DebianS3ITCase.CURL_NOT_FOUND)),
-            "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz".formatted(s3port, repo).split(" ")
+            "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz"
+                .formatted(DebianS3ITCase.S3_PORT, DebianS3ITCase.REPO).split(" ")
         );
         this.containers.assertExec(
             "aglfn_1.7-3_amd64.deb must be absent in S3 before test",
             new ContainerResultMatcher(new IsEqual<>(DebianS3ITCase.CURL_NOT_FOUND)),
-            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb".formatted(s3port, repo).split(" ")
+            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb"
+                .formatted(DebianS3ITCase.S3_PORT, DebianS3ITCase.REPO).split(" ")
         );
         this.containers.assertExec(
             "Failed to upload deb package",
             new ContainerResultMatcher(),
-            "timeout", "30s", "curl", "-i", "-X", "PUT", "--data-binary", "@/w/aglfn_1.7-3_amd64.deb", String.format("http://artipie:%s/%s/main/aglfn_1.7-3_amd64.deb", port, repo)
+            "timeout", "30s", "curl", "-i", "-X", "PUT", "--data-binary", "@/w/aglfn_1.7-3_amd64.deb",
+            String.format("http://artipie:%s/%s/main/aglfn_1.7-3_amd64.deb",
+                DebianS3ITCase.SRV_PORT, DebianS3ITCase.REPO
+            )
         );
         this.containers.assertExec(
             "aglfn_1.7-3_amd64.deb must exist in S3 storage after test",
             new ContainerResultMatcher(new IsEqual<>(0)),
-            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb".formatted(s3port, repo).split(" ")
+            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb"
+                .formatted(DebianS3ITCase.S3_PORT, DebianS3ITCase.REPO).split(" ")
         );
         this.containers.assertExec(
             "Packages.gz must exist in S3 storage after test",
             new ContainerResultMatcher(new IsEqual<>(0)),
-            "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz".formatted(s3port, repo).split(" ")
+            "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz"
+                .formatted(DebianS3ITCase.S3_PORT, DebianS3ITCase.REPO).split(" ")
         );
         this.containers.assertExec(
             "deb from repo must be downloadable",
             new ContainerResultMatcher(new IsEqual<>(0)),
-            "timeout 30s curl -f -k http://artipie:%s/%s/main/aglfn_1.7-3_amd64.deb -o /home/aglfn_repo.deb".formatted(port, repo).split(" ")
+            "timeout 30s curl -f -k http://artipie:%s/%s/main/aglfn_1.7-3_amd64.deb -o /home/aglfn_repo.deb"
+                .formatted(DebianS3ITCase.SRV_PORT, DebianS3ITCase.REPO).split(" ")
         );
         this.containers.assertExec(
             "deb from repo must match with original",
             new ContainerResultMatcher(new IsEqual<>(0)),
-            "cmp /w/aglfn_1.7-3_amd64.deb /home/aglfn_repo.deb".formatted(s3port, repo).split(" ")
+            "cmp /w/aglfn_1.7-3_amd64.deb /home/aglfn_repo.deb"
+                .formatted(DebianS3ITCase.S3_PORT, DebianS3ITCase.REPO).split(" ")
         );
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "8080,my-debian,9000"
-    })
-    void pushAndInstallWorks(final String port, final String repo, final String s3port) throws Exception {
+    @Test
+    void pushAndInstallWorks() throws Exception {
         this.containers.assertExec(
             "Packages.gz must be absent in S3 before test",
             new ContainerResultMatcher(new IsEqual<>(DebianS3ITCase.CURL_NOT_FOUND)),
-            "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz".formatted(s3port, repo).split(" ")
+            "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz"
+                .formatted(DebianS3ITCase.S3_PORT, DebianS3ITCase.REPO).split(" ")
         );
         this.containers.assertExec(
             "aglfn_1.7-3_amd64.deb must be absent in S3 before test",
             new ContainerResultMatcher(new IsEqual<>(DebianS3ITCase.CURL_NOT_FOUND)),
-            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb".formatted(s3port, repo).split(" ")
+            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb"
+                .formatted(DebianS3ITCase.S3_PORT, DebianS3ITCase.REPO).split(" ")
         );
         this.containers.putBinaryToClient(
             String.format(
-                "deb [trusted=yes] http://artipie:%s/%s %s main", port, repo, repo
+                "deb [trusted=yes] http://artipie:%s/%s %s main",
+                DebianS3ITCase.SRV_PORT, DebianS3ITCase.REPO, DebianS3ITCase.REPO
             ).getBytes(),
             "/etc/apt/sources.list"
         );
         this.containers.assertExec(
             "Failed to upload deb package",
             new ContainerResultMatcher(),
-            "timeout", "30s", "curl", String.format("http://artipie:%s/%s/main/aglfn_1.7-3_amd64.deb", port, repo),
+            "timeout", "30s", "curl", String.format("http://artipie:%s/%s/main/aglfn_1.7-3_amd64.deb",
+                DebianS3ITCase.SRV_PORT, DebianS3ITCase.REPO),
             "--upload-file", "/w/aglfn_1.7-3_amd64.deb"
         );
         this.containers.assertExec(
@@ -182,12 +203,14 @@ public final class DebianS3ITCase {
         this.containers.assertExec(
             "aglfn_1.7-3_amd64.deb must exist in S3 storage after test",
             new ContainerResultMatcher(new IsEqual<>(0)),
-            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb".formatted(s3port, repo).split(" ")
+            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb"
+                .formatted(DebianS3ITCase.S3_PORT, DebianS3ITCase.REPO).split(" ")
         );
         this.containers.assertExec(
             "Packages.gz must exist in S3 storage after test",
             new ContainerResultMatcher(new IsEqual<>(0)),
-            "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz".formatted(s3port, repo).split(" ")
+            "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz"
+                .formatted(DebianS3ITCase.S3_PORT, DebianS3ITCase.REPO).split(" ")
         );
     }
 }
