@@ -101,11 +101,58 @@ public final class DebianS3ITCase {
     @CsvSource({
         "8080,my-debian,9000"
     })
+    void curlPutWorks(final String port, final String repo, final String s3port) throws Exception {
+        this.containers.assertExec(
+            "Packages.gz must be absent in S3 before test",
+            new ContainerResultMatcher(new IsEqual<>(DebianS3ITCase.CURL_NOT_FOUND)),
+            "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz".formatted(s3port, repo).split(" ")
+        );
+        this.containers.assertExec(
+            "aglfn_1.7-3_amd64.deb must be absent in S3 before test",
+            new ContainerResultMatcher(new IsEqual<>(DebianS3ITCase.CURL_NOT_FOUND)),
+            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb".formatted(s3port, repo).split(" ")
+        );
+        this.containers.assertExec(
+            "Failed to upload deb package",
+            new ContainerResultMatcher(),
+            "timeout", "30s", "curl", "-i", "-X", "PUT", "--data-binary", "@/w/aglfn_1.7-3_amd64.deb", String.format("http://artipie:%s/%s/main/aglfn_1.7-3_amd64.deb", port, repo)
+        );
+        this.containers.assertExec(
+            "aglfn_1.7-3_amd64.deb must exist in S3 storage after test",
+            new ContainerResultMatcher(new IsEqual<>(0)),
+            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb".formatted(s3port, repo).split(" ")
+        );
+        this.containers.assertExec(
+            "Packages.gz must exist in S3 storage after test",
+            new ContainerResultMatcher(new IsEqual<>(0)),
+            "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz".formatted(s3port, repo).split(" ")
+        );
+        this.containers.assertExec(
+            "deb from repo must be downloadable",
+            new ContainerResultMatcher(new IsEqual<>(0)),
+            "timeout 30s curl -f -k http://artipie:%s/%s/main/aglfn_1.7-3_amd64.deb -o /home/aglfn_repo.deb".formatted(port, repo).split(" ")
+        );
+        this.containers.assertExec(
+            "deb from repo must match with original",
+            new ContainerResultMatcher(new IsEqual<>(0)),
+            "cmp /w/aglfn_1.7-3_amd64.deb /home/aglfn_repo.deb".formatted(s3port, repo).split(" ")
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "8080,my-debian,9000"
+    })
     void pushAndInstallWorks(final String port, final String repo, final String s3port) throws Exception {
         this.containers.assertExec(
             "Packages.gz must be absent in S3 before test",
             new ContainerResultMatcher(new IsEqual<>(DebianS3ITCase.CURL_NOT_FOUND)),
             "curl -f -kv http://minioc:%s/buck1/%s/dists/my-debian/main/binary-amd64/Packages.gz".formatted(s3port, repo).split(" ")
+        );
+        this.containers.assertExec(
+            "aglfn_1.7-3_amd64.deb must be absent in S3 before test",
+            new ContainerResultMatcher(new IsEqual<>(DebianS3ITCase.CURL_NOT_FOUND)),
+            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb".formatted(s3port, repo).split(" ")
         );
         this.containers.putBinaryToClient(
             String.format(
@@ -131,6 +178,11 @@ public final class DebianS3ITCase {
                 new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))
             ),
             "apt-get", "install", "-y", "aglfn"
+        );
+        this.containers.assertExec(
+            "aglfn_1.7-3_amd64.deb must exist in S3 storage after test",
+            new ContainerResultMatcher(new IsEqual<>(0)),
+            "curl -f -kv http://minioc:%s/buck1/%s/main/aglfn_1.7-3_amd64.deb".formatted(s3port, repo).split(" ")
         );
         this.containers.assertExec(
             "Packages.gz must exist in S3 storage after test",
