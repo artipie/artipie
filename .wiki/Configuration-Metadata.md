@@ -37,7 +37,7 @@ All the fields are not null, unique constraint is created on repo_name, name and
 
 [Maven-proxy](maven-proxy), [npm-proxy](npm-proxy) and [python-proxy](pypi-proxy) have some extra mechanism to process
 uploaded artifacts from origin repositories. Generally, the mechanism is a quartz job which verifies uploaded and 
-saved to cash storage artifacts and adds metadata common mechanism and database. Proxy adapters metadata gathering is
+saved to cache storage artifacts and adds metadata common mechanism and database. Proxy adapters metadata gathering is
 enabled when artifacts database is enabled and proxy repository storage is configured. 
 It's possible to configure `threads_count` and `interval_seconds` for [Maven-proxy](maven-proxy), [npm-proxy](npm-proxy) 
 and [python-proxy](pypi-proxy) repositories individually.
