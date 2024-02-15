@@ -32,7 +32,6 @@ public final class UncheckedScalar<T, E extends Exception> implements Scalar<T> 
     public T value() {
         try {
             return this.origin.value();
-        // @checkstyle IllegalCatchCheck (1 line)
         } catch (final Exception ex) {
             throw new ArtipieException(ex);
         }
