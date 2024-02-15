@@ -192,7 +192,6 @@ public final class DebianSliceS3ITCase {
             "Release file is used on update the world",
             this.exec("apt-get", "update"),
             Matchers.allOf(
-                // @checkstyle LineLengthCheck (2 lines)
                 new MatchesPattern(Pattern.compile("[\\S\\s]*Get:2 http://host.testcontainers.internal:\\d+ artipie Release[\\S\\s]*")),
                 new MatchesPattern(Pattern.compile("[\\S\\s]*Get:4 http://host.testcontainers.internal:\\d+ artipie/main amd64 Packages \\[1351 B][\\S\\s]*")),
                 new IsNot<>(new StringContains("Get:5"))
@@ -202,7 +201,6 @@ public final class DebianSliceS3ITCase {
             "Package was downloaded and unpacked",
             this.exec("apt-get", "install", "-y", "aglfn"),
             Matchers.allOf(
-                // @checkstyle LineLengthCheck (1 line)
                 new MatchesPattern(Pattern.compile("[\\S\\s]*Get:1 http://host.testcontainers.internal:\\d+ artipie/main amd64 aglfn amd64 1.7-3 \\[29.9 kB][\\S\\s]*")),
                 new IsNot<>(new StringContains("Get:2")),
                 new StringContainsInOrder(new ListOf<>("Unpacking aglfn", "Setting up aglfn"))
