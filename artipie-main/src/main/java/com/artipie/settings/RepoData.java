@@ -59,7 +59,7 @@ public final class RepoData {
     public CompletionStage<Void> remove(final RepositoryName rname) {
         final String repo = rname.toString();
         return this.repoStorage(rname)
-            .thenAccept(
+            .thenCompose(
                 asto ->
                     asto
                         .deleteAll(new Key.From(repo))
