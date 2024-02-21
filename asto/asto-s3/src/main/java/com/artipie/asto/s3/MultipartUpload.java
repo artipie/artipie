@@ -6,6 +6,7 @@ package com.artipie.asto.s3;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
+import com.artipie.asto.Merging;
 import com.artipie.asto.Splitting;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
@@ -13,11 +14,9 @@ import io.reactivex.Observable;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.reactivestreams.Publisher;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
@@ -78,34 +77,30 @@ final class MultipartUpload {
 
     /**
      * Uploads all content by parts.
+     * Note that content part must be at least MultipartUpload.MIN_PART_SIZE except last part.
      *
      * @param content Object content to be uploaded in parts.
      * @return Completion stage which is completed when responses received from S3 for all parts.
      */
     public CompletionStage<Void> upload(final Content content) {
         final AtomicInteger counter = new AtomicInteger();
-        return Flowable.fromPublisher(content)
-            .concatMap(
+        return new Merging(MultipartUpload.MIN_PART_SIZE).mergeFlow(
+            Flowable.fromPublisher(content).concatMap(
                 buffer -> Flowable.fromPublisher(
                     new Splitting(buffer, MultipartUpload.MIN_PART_SIZE).publisher()
                 )
-            ).map(
-                chunk -> {
-                    final int pnum = counter.incrementAndGet();
-                    return this.uploadPart(
-                        pnum,
-                        Flowable.just(chunk)
-                    ).thenAccept(
-                        response -> this.parts.add(
-                            new UploadedPart(pnum, response.eTag())
-                        )
-                    );
-                }
-            ).reduce(
-                CompletableFuture.allOf(),
-                (acc, stage) -> acc.thenCompose(o -> stage)
-            ).to(SingleInterop.get())
-            .thenCompose(Function.identity());
+            )
+        ).doOnNext(payload -> {
+            final int pnum = counter.incrementAndGet();
+            this.uploadPart(
+                pnum,
+                Flowable.just(payload)
+            ).thenAccept(
+                response -> this.parts.add(
+                    new UploadedPart(pnum, response.eTag())
+                )
+            ).toCompletableFuture().join();
+        }).serialize().count().to(SingleInterop.get()).thenApply(count -> (Void)null);
     }
 
     /**

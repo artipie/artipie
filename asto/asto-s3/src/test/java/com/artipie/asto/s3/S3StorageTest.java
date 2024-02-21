@@ -16,18 +16,27 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.factory.Config;
 import com.artipie.asto.factory.StoragesLoader;
 import com.google.common.io.ByteStreams;
 import io.reactivex.Flowable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyIterable;
@@ -98,6 +107,45 @@ class S3StorageTest {
             new Content.OneTime(new Content.From(data))
         ).join();
         MatcherAssert.assertThat(this.download(client, key), Matchers.equalTo(data));
+    }
+
+    @Test
+    @Timeout(150)
+    void shouldUploadLargeChunkedContent(final AmazonS3 client) throws Exception {
+        final String key = "big/data";
+        final int S3_MIN_PART_SIZE = 5 * 1024 * 1024;
+        final int S3_MIN_MULTIPART = 10 * 1024 * 1024;
+        final int TOTAL_SIZE = S3_MIN_MULTIPART * 2;
+        final int ITEM_SIZE = S3_MIN_PART_SIZE / 1000;
+        final int COUNT = TOTAL_SIZE / ITEM_SIZE;
+        final int TOTAL_SEND = ITEM_SIZE * COUNT;
+        final Random rnd = new Random();
+        final byte[] sentData = new byte[TOTAL_SEND];
+        final Callable<Flowable<ByteBuffer>> getGenerator = () -> Flowable.generate(
+            AtomicInteger::new,
+            (counter, output) -> {
+                final int idx = counter.getAndAdd(1);
+                if (idx < COUNT) {
+                    final byte[] data = new byte[ITEM_SIZE];
+                    rnd.nextBytes(data);
+                    for (int i = 0, j = idx * ITEM_SIZE; i < data.length; ++i, ++j) {
+                        sentData[j] = data[i];
+                    }
+                    output.onNext(ByteBuffer.wrap(data));
+                } else {
+                    output.onComplete();
+                }
+                return counter;
+            });
+        MatcherAssert.assertThat("Generator results mismatch",
+            new PublisherAs(new Content.From(getGenerator.call())).bytes()
+                .toCompletableFuture().join(),
+            Matchers.equalTo(sentData)
+        );
+        this.storage().save(new Key.From(key), new Content.From(getGenerator.call())).join();
+        MatcherAssert.assertThat("Saving results mismatch",
+            this.download(client, key), Matchers.equalTo(sentData)
+        );
     }
 
     @Test

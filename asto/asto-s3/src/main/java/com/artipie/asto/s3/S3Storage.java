@@ -157,11 +157,11 @@ public final class S3Storage implements Storage {
             estimated -> {
                 final CompletionStage<Void> res;
                 if (
-                    this.multipart
-                        && estimated
+                    this.multipart && (estimated.size().isEmpty() ||
+                        estimated
                         .size()
-                        .filter(x -> x > S3Storage.MIN_MULTIPART)
-                        .isPresent()
+                        .filter(x -> x >= S3Storage.MIN_MULTIPART)
+                        .isPresent())
                 ) {
                     res = this.putMultipart(key, estimated);
                 } else {
