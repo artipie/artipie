@@ -39,7 +39,7 @@ public final class FullGetManifests implements Manifests {
      * @param hex Digest hex of manifest.
      */
     public FullGetManifests(final String hex) {
-        this(hex, "");
+        this(hex, "{ \"mediaType\": \"application/vnd.oci.image.manifest.v1+json\", \"schemaVersion\": 2 }");
     }
 
     /**

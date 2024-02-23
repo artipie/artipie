@@ -11,6 +11,7 @@ import com.google.common.base.Strings;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonException;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
@@ -36,6 +37,8 @@ public final class JsonManifest implements Manifest {
     private static JsonObject readJson(byte[] data) {
         try (JsonReader reader = Json.createReader(new ByteArrayInputStream(data))) {
             return reader.readObject();
+        } catch (JsonException e){
+            throw new InvalidManifestException("JSON reading error", e);
         }
     }
     /**

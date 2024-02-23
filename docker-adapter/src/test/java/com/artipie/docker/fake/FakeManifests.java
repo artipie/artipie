@@ -57,22 +57,11 @@ public final class FakeManifests implements Manifests {
      * @return Manifests.
      */
     private static Manifests manifests(final String type, final String code) {
-        final Manifests manifests;
-        switch (type) {
-            case "empty":
-                manifests = new EmptyGetManifests();
-                break;
-            case "full":
-                manifests = new FullGetManifests(code);
-                break;
-            case "faulty":
-                manifests = new FaultyGetManifests();
-                break;
-            default:
-                throw new IllegalArgumentException(
-                    String.format("Unsupported type: %s", type)
-                );
-        }
-        return manifests;
+        return switch (type) {
+            case "empty" -> new EmptyGetManifests();
+            case "full" -> new FullGetManifests(code);
+            case "faulty" -> new FaultyGetManifests();
+            default -> throw new IllegalArgumentException("Unsupported type:" + type);
+        };
     }
 }
