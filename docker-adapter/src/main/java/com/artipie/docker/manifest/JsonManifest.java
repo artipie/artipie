@@ -33,14 +33,6 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class JsonManifest implements Manifest {
-
-    private static JsonObject readJson(byte[] data) {
-        try (JsonReader reader = Json.createReader(new ByteArrayInputStream(data))) {
-            return reader.readObject();
-        } catch (JsonException e){
-            throw new InvalidManifestException("JSON reading error", e);
-        }
-    }
     /**
      * Manifest digest.
      */
@@ -63,6 +55,14 @@ public final class JsonManifest implements Manifest {
         this.manifestDigest = manifestDigest;
         this.source = Arrays.copyOf(source, source.length);
         this.json = readJson(this.source);
+    }
+
+    private static JsonObject readJson(final byte[] data) {
+        try (JsonReader reader = Json.createReader(new ByteArrayInputStream(data))) {
+            return reader.readObject();
+        } catch (JsonException e){
+            throw new InvalidManifestException("JSON reading error", e);
+        }
     }
 
     @Override

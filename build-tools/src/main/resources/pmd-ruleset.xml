@@ -20,6 +20,8 @@
         <exclude name="LinguisticNaming"/>
         <exclude name="CallSuperInConstructor"/>
         <exclude name="OnlyOneReturn"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="LongVariable"/>
     </rule>
 
     <rule ref="category/java/design.xml">
@@ -55,16 +57,7 @@
         <exclude name="MissingSerialVersionUID"/>
         <exclude name="AvoidFieldNameMatchingMethodName"/>
         <exclude name="AvoidFieldNameMatchingTypeName"/>
-    </rule>
-    <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
-        <properties>
-            <property name="maxDuplicateLiterals">
-                <value>5</value>
-            </property>
-            <property name="skipAnnotations">
-                <value>true</value>
-            </property>
-        </properties>
+        <exclude name="AvoidDuplicateLiterals"/>
     </rule>
     <rule ref="category/java/performance.xml">
         <exclude name="AvoidInstantiatingObjectsInLoops"/>

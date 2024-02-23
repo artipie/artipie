@@ -21,12 +21,12 @@ public interface Manifest {
     /**
      * New image manifest format (schemaVersion = 2).
      */
-    String MIME_V2_MANIFEST_SCHEMA2 = "application/vnd.docker.distribution.manifest.v2+json";
+    String MANIFEST_SCHEMA2 = "application/vnd.docker.distribution.manifest.v2+json";
 
     /**
      * Image Manifest OCI Specification.
      */
-    String MIME_OCI_V1_MANIFEST = "application/vnd.oci.image.manifest.v1+json";
+    String MANIFEST_OCI_V1 = "application/vnd.oci.image.manifest.v1+json";
 
     /**
      * Read manifest types.
@@ -54,7 +54,7 @@ public interface Manifest {
      * Converting of manifests is the docker client's responsibility.
      */
     @Deprecated
-    default Manifest convert(Set<? extends String> options) {
+    default Manifest convert(final Set<? extends String> options) {
         return this;
     }
 

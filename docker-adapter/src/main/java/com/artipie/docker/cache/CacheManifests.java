@@ -96,8 +96,8 @@ public final class CacheManifests implements Manifests {
                 if (throwable == null) {
                     if (original.isPresent()) {
                         Manifest manifest = original.get();
-                        if (manifest.mediaType().equals(Manifest.MIME_V2_MANIFEST_SCHEMA2) ||
-                                manifest.mediaType().equals(Manifest.MIME_OCI_V1_MANIFEST)) {
+                        if (Manifest.MANIFEST_SCHEMA2.equals(manifest.mediaType()) ||
+                                Manifest.MANIFEST_OCI_V1.equals(manifest.mediaType())) {
                             result = this.copy(ref).thenApply(unused -> original);
                         } else {
                             LOGGER.warn("Cannot add manifest to cache: [manifest={}, mediaType={}]",
