@@ -39,7 +39,7 @@ final class DockerLocalITCase {
     @AfterEach
     void tearDown() {
         client.stop();
-        server.stop();
+        server.close();
     }
 
     @Test

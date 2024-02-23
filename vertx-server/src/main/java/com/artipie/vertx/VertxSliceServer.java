@@ -12,6 +12,7 @@ import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.core.http.HttpServerRequest;
 import io.vertx.reactivex.core.http.HttpServerResponse;
+
 import java.io.Closeable;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -102,6 +103,10 @@ public final class VertxSliceServer implements Closeable {
         this.served = served;
         this.options = options;
         this.sync = new Object();
+    }
+
+    public int port() {
+        return options.getPort();
     }
 
     /**

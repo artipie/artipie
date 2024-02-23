@@ -95,7 +95,6 @@ class DockerProxyTest {
     ) throws IOException {
         return new DockerProxy(
             new JettyClientSlices(),
-            false,
             new RepoConfig(
                 new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
                 Key.ROOT,

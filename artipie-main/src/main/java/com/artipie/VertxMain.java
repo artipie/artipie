@@ -25,7 +25,6 @@ import com.artipie.settings.repo.MapRepositories;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.Repositories;
 import com.artipie.vertx.VertxSliceServer;
-import com.jcabi.log.Logger;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
@@ -41,6 +40,14 @@ import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import io.vertx.reactivex.core.Vertx;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -48,11 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Vertx server entry point.
@@ -60,6 +62,8 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 @SuppressWarnings("PMD.PrematureDeclaration")
 public final class VertxMain {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VertxMain.class);
 
     /**
      * Default port to start Artipie Rest API service.
@@ -123,7 +127,7 @@ public final class VertxMain {
             vertx,
             settings.metrics()
         );
-        Logger.info(VertxMain.class, "Artipie was started on port %d", main);
+        LOGGER.info("Artipie was started on port {}", main);
         this.startRepos(vertx, settings, repos, this.port, slices);
         vertx.deployVerticle(new RestApi(settings, apiPort, jwt));
         quartz.start();
@@ -132,7 +136,10 @@ public final class VertxMain {
     }
 
     public void stop(){
-        this.servers.forEach(VertxSliceServer::stop);
+        this.servers.forEach(s -> {
+            s.stop();
+            LOGGER.info("Artipie's server on port {} was stopped", s.port());
+        });
     }
 
     /**
@@ -156,7 +163,7 @@ public final class VertxMain {
         if (cmd.hasOption(popt)) {
             port = Integer.parseInt(cmd.getOptionValue(popt));
         } else {
-            Logger.info(VertxMain.class, "Using default port: %d", defp);
+            LOGGER.info("Using default port: {}", defp);
             port = defp;
         }
         if (cmd.hasOption(fopt)) {
@@ -164,11 +171,7 @@ public final class VertxMain {
         } else {
             throw new IllegalStateException("Storage is not configured");
         }
-        Logger.info(
-            VertxMain.class,
-            "Used version of Artipie: %s",
-            new ArtipieProperties().version()
-        );
+        LOGGER.info("Used version of Artipie: {}", new ArtipieProperties().version());
         new VertxMain(config, port)
             .start(Integer.parseInt(cmd.getOptionValue(apiport, VertxMain.DEF_API_PORT)));
     }
@@ -208,14 +211,14 @@ public final class VertxMain {
                         } else {
                             this.listenOn(slice, prt, vertx, settings.metrics());
                         }
-                        VertxMain.logRepo(prt, name);
+                        LOGGER.info("Artipie repo '{}' was started on port {}", name, prt);
                     },
-                    () -> VertxMain.logRepo(port, repo.name())
+                    () -> LOGGER.info("Artipie repo '{}' was started on port {}", repo.name(), port)
                 );
             } catch (final IllegalStateException err) {
-                Logger.error(this, "Invalid repo config file %s: %[exception]s", repo.name(), err);
+                LOGGER.error("Invalid repo config file: " + repo.name(), err);
             } catch (final ArtipieException err) {
-                Logger.error(this, "Failed to start repo %s: %[exception]s", repo.name(), err);
+                LOGGER.error("Failed to start repo:" + repo.name(), err);
             }
         }
     }
@@ -224,30 +227,19 @@ public final class VertxMain {
      * Starts HTTP server listening on specified port.
      *
      * @param slice Slice.
-     * @param sport Slice server port.
+     * @param serverPort Slice server port.
      * @param vertx Vertx instance
      * @param mctx Metrics context
      * @return Port server started to listen on.
      */
     private int listenOn(
-        final Slice slice, final int sport, final Vertx vertx, final MetricsContext mctx
+            final Slice slice, final int serverPort, final Vertx vertx, final MetricsContext mctx
     ) {
         final VertxSliceServer server = new VertxSliceServer(
-            vertx, new BaseSlice(mctx, slice), sport
+                vertx, new BaseSlice(mctx, slice), serverPort
         );
         this.servers.add(server);
         return server.start();
-    }
-
-    /**
-     * Log repository on start.
-     * @param mport Repository port
-     * @param name Repository name
-     */
-    private static void logRepo(final int mport, final String name) {
-        Logger.info(
-            VertxMain.class, "Artipie repo '%s' was started on port %d", name, mport
-        );
     }
 
     /**
@@ -281,12 +273,9 @@ public final class VertxMain {
                 new ProcessorMetrics().bindTo(registry);
                 new JvmThreadMetrics().bindTo(registry);
             }
-            Logger.info(
-                VertxMain.class,
-                String.format(
-                    "Monitoring is enabled, prometheus metrics are available on localhost:%d%s",
+            LOGGER.info(
+                    "Monitoring is enabled, prometheus metrics are available on localhost:{}{}",
                     endpoint.get().getValue(), endpoint.get().getKey()
-                )
             );
         } else {
             res = Vertx.vertx();

@@ -7,10 +7,11 @@ package com.artipie.docker.proxy;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.rs.RsStatus;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Sink that accepts response data (status, headers and body) and transforms it into result object.
@@ -48,10 +49,16 @@ final class ResponseSink<T> {
      */
     public CompletionStage<T> result() {
         final CompletableFuture<T> promise = new CompletableFuture<>();
-        return this.response.send(
+        this.response.send(
             (status, headers, body) -> this.transform.transform(status, headers, body)
                 .thenAccept(promise::complete)
-        ).thenCompose(nothing -> promise);
+        ).handle((res, error) -> {
+            if (error != null) {
+                promise.completeExceptionally(error);
+            }
+            return null;
+        });
+        return promise;
     }
 
     /**

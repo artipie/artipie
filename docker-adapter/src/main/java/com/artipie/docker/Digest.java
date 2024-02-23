@@ -9,7 +9,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * Content Digest.
- * See <a href="https://docs.docker.com/registry/spec/api/#content-digests">Content Digests</a>
+ * <p></>See <a href="https://docs.docker.com/registry/spec/api/#content-digests">Content Digests</a>
  *
  * @since 0.1
  */
