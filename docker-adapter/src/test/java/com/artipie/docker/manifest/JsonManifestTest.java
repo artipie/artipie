@@ -36,10 +36,7 @@ class JsonManifestTest {
             new Digest.Sha256("123"),
             "{\"mediaType\":\"something\"}".getBytes()
         );
-        MatcherAssert.assertThat(
-            manifest.mediaTypes(),
-            Matchers.contains("something")
-        );
+        Assertions.assertEquals(manifest.mediaType(), "something");
     }
 
     @Test
@@ -88,18 +85,6 @@ class JsonManifestTest {
                 hashSet("application/vnd.docker.distribution.manifest.v2+json")
             ),
             new IsEqual<>(manifest)
-        );
-    }
-
-    @Test
-    void shouldFailConvertToUnknownType() {
-        final JsonManifest manifest = new JsonManifest(
-            new Digest.Sha256("123"),
-            "{\"mediaType\":\"typeA\"}".getBytes()
-        );
-        Assertions.assertThrows(
-            IllegalArgumentException.class,
-            () -> manifest.convert(Collections.singleton("typeB"))
         );
     }
 
@@ -184,17 +169,14 @@ class JsonManifestTest {
         final String digest = "sha256:123";
         final JsonManifest manifest = new JsonManifest(
             new Digest.FromString(digest),
-            "something".getBytes()
+            "{ \"schemaVersion\": 2 }".getBytes()
         );
-        MatcherAssert.assertThat(
-            manifest.digest().string(),
-            new IsEqual<>(digest)
-        );
+        Assertions.assertEquals(manifest.digest().string(), digest);
     }
 
     @Test
     void shouldReadContent() {
-        final byte[] data = "data".getBytes();
+        final byte[] data = "{ \"schemaVersion\": 2 }".getBytes();
         final JsonManifest manifest = new JsonManifest(
             new Digest.Sha256("123"),
             data
