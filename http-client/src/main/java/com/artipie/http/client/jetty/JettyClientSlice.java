@@ -84,9 +84,9 @@ final class JettyClientSlice implements Slice {
 
     @Override
     public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+        final String line,
+        final Iterable<Map.Entry<String, String>> headers,
+        final Publisher<ByteBuffer> body
     ) {
         final RequestLineFrom req = new RequestLineFrom(line);
         final Request request = this.buildRequest(headers, req);
@@ -95,7 +95,7 @@ final class JettyClientSlice implements Slice {
         if (req.method() != RqMethod.HEAD) {
             final AsyncRequestContent async = new AsyncRequestContent();
             Flowable.fromPublisher(body).doOnComplete(async::close).forEach(
-                    buf -> async.write(buf, Callback.NOOP)
+                buf -> async.write(buf, Callback.NOOP)
             );
             request.body(async);
         }
