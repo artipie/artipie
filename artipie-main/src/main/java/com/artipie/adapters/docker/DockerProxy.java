@@ -84,8 +84,8 @@ public final class DockerProxy implements Slice {
             final Optional<Queue<ArtifactEvent>> events
     ) {
         final Docker proxies = new MultiReadDocker(
-                new YamlProxyConfig(cfg)
-                        .remotes().stream().map(r -> proxy(client, cfg, events, r))
+            new YamlProxyConfig(cfg)
+                .remotes().stream().map(r -> proxy(client, cfg, events, r))
                 .collect(Collectors.toList())
         );
         Docker docker = cfg.storageOpt()
@@ -101,9 +101,9 @@ public final class DockerProxy implements Slice {
         docker = new TrimmedDocker(docker, cfg.name());
         Slice slice = new DockerSlice(
             docker,
-                policy,
-                new BasicAuthScheme(auth),
-                events, cfg.name()
+            policy,
+            new BasicAuthScheme(auth),
+            events, cfg.name()
         );
         if (cfg.port().isEmpty()) {
             slice = new DockerRoutingSlice.Reverted(slice);
@@ -124,15 +124,15 @@ public final class DockerProxy implements Slice {
             final ProxyConfig.Remote remote
     ) {
         final Docker proxy = new ProxyDocker(
-                new AuthClientSlice(client.from(remote.url()), remote.auth(client))
+            new AuthClientSlice(client.from(remote.url()), remote.auth(client))
         );
         return cfg.storageOpt().<Docker>map(
-                cache -> new CacheDocker(
-                        proxy,
-                        new AstoDocker(new SubStorage(RegistryRoot.V2, cache)),
-                        events,
-                        cfg.name()
-                )
+            cache -> new CacheDocker(
+                proxy,
+                new AstoDocker(new SubStorage(RegistryRoot.V2, cache)),
+                events,
+                cfg.name()
+            )
         ).orElse(proxy);
     }
 }

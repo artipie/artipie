@@ -277,7 +277,7 @@ public class RepositorySlices {
             case "docker-proxy":
                 clientSlices = jettyClientSlices(cfg);
                 slice = new DockerProxy(clientSlices, cfg, securityPolicy(),
-                        authentication(), artifactEvents());
+                    authentication(), artifactEvents());
                 break;
             case "deb":
                 slice = trimPathSlice(

@@ -233,10 +233,10 @@ public final class VertxMain {
      * @return Port server started to listen on.
      */
     private int listenOn(
-            final Slice slice, final int serverPort, final Vertx vertx, final MetricsContext mctx
+        final Slice slice, final int serverPort, final Vertx vertx, final MetricsContext mctx
     ) {
         final VertxSliceServer server = new VertxSliceServer(
-                vertx, new BaseSlice(mctx, slice), serverPort
+            vertx, new BaseSlice(mctx, slice), serverPort
         );
         this.servers.add(server);
         return server.start();
