@@ -46,7 +46,7 @@ final class DockerLocalAuthIT {
     @AfterEach
     void tearDown() {
         client.stop();
-        server.stop();
+        server.close();
     }
 
     @Test

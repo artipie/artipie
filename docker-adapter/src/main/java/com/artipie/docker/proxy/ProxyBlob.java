@@ -17,6 +17,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -79,9 +80,10 @@ public final class ProxyBlob implements Blob {
 
     @Override
     public CompletionStage<Content> content() {
+        String blobPath = String.format("/v2/%s/blobs/%s", this.name.value(), this.dig.string());
         final CompletableFuture<Content> result = new CompletableFuture<>();
         this.remote.response(
-            new RequestLine(RqMethod.GET, new BlobPath(this.name, this.dig).string()).toString(),
+            new RequestLine(RqMethod.GET, blobPath).toString(),
             Headers.EMPTY,
             Flowable.empty()
         ).send(

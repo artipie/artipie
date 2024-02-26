@@ -14,12 +14,12 @@ import com.artipie.http.client.HttpClientSettings;
 import com.artipie.micrometer.MicrometerStorage;
 import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.cache.StoragesCache;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.logging.Level;
 import java.util.stream.Stream;
 
 /**
@@ -185,7 +185,6 @@ public final class RepoConfig {
             node -> new SubStorage(
                 this.prefix,
                 new LoggingStorage(
-                    Level.INFO,
                     this.cache.storage(this.aliases, node)
                 )
             )

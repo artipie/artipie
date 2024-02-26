@@ -39,7 +39,7 @@ class ProxyManifestsTest {
 
     @Test
     void shouldGetManifest() {
-        final byte[] data = "data".getBytes();
+        final byte[] data = "{ \"schemaVersion\": 2 }".getBytes();
         final String digest = "sha256:123";
         final Optional<Manifest> found = new ProxyManifests(
             (line, headers, body) -> {

@@ -6,6 +6,7 @@ package com.artipie.test.vertxmain;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlSequence;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.VertxMain;
 import com.artipie.asto.test.TestResource;
@@ -162,27 +163,49 @@ public class TestVertxMainBuilder {
      * Creates a docker-proxy repository config file in the server's work directory.
      *
      * @param name    Repository name
+     * @param remotes Remotes registry urls
+     * @return TestVertxMainBuilder
+     * @throws IOException If the create operation failed
+     */
+    public TestVertxMainBuilder withDockerProxyRepo(String name, URI... remotes) throws IOException {
+        saveRepoConfig(name,
+                Yaml.createYamlMappingBuilder()
+                        .add("type", "docker-proxy")
+                        .add("remotes", remotesYaml(remotes))
+                        .build()
+        );
+        return this;
+    }
+
+    /**
+     * Creates a docker-proxy repository config file in the server's work directory.
+     *
+     * @param name    Repository name
      * @param data    Repository data path
      * @param remotes Remotes registry urls
      * @return TestVertxMainBuilder
      * @throws IOException If the create operation failed
      */
     public TestVertxMainBuilder withDockerProxyRepo(String name, Path data, URI... remotes) throws IOException {
-        Assertions.assertNotEquals(0, remotes.length, "Empty remotes");
-        YamlSequenceBuilder seq = Yaml.createYamlSequenceBuilder();
-        for (URI url : remotes) {
-            seq = seq.add(
-                    Yaml.createYamlMappingBuilder().add("url", url.toString()).build()
-            );
-        }
         saveRepoConfig(name,
                 Yaml.createYamlMappingBuilder()
                         .add("type", "docker-proxy")
-                        .add("remotes", seq.build())
+                        .add("remotes", remotesYaml(remotes))
                         .add("storage", fileStorageCfg(data))
                         .build()
         );
         return this;
+    }
+
+    private YamlSequence remotesYaml(URI... remotes) {
+        Assertions.assertNotEquals(0, remotes.length, "Empty remotes");
+        YamlSequenceBuilder res = Yaml.createYamlSequenceBuilder();
+        for (URI url : remotes) {
+            res = res.add(
+                    Yaml.createYamlMappingBuilder().add("url", url.toString()).build()
+            );
+        }
+        return res.build();
     }
 
     /**

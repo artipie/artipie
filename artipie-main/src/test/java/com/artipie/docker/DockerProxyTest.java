@@ -76,10 +76,10 @@ class DockerProxyTest {
     @ParameterizedTest
     @MethodSource("badConfigs")
     void shouldFailBuildFromBadConfig(final String yaml) throws Exception {
-        final Slice slice = dockerProxy(this.cache, yaml);
+//        final Slice slice = dockerProxy(this.cache, yaml);
         Assertions.assertThrows(
             RuntimeException.class,
-            () -> slice.response(
+            () -> dockerProxy(this.cache, yaml).response(
                 new RequestLine(RqMethod.GET, "/").toString(),
                 Headers.EMPTY,
                 Flowable.empty()
@@ -95,7 +95,6 @@ class DockerProxyTest {
     ) throws IOException {
         return new DockerProxy(
             new JettyClientSlices(),
-            false,
             new RepoConfig(
                 new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
                 Key.ROOT,

@@ -13,15 +13,7 @@ import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import com.jcabi.log.Logger;
 import io.reactivex.Flowable;
-import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.jetty.client.AsyncRequestContent;
 import org.eclipse.jetty.client.HttpClient;
@@ -30,6 +22,16 @@ import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.util.Callback;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.URI;
+import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * ClientSlices implementation using Jetty HTTP client as back-end.
@@ -37,6 +39,8 @@ import org.reactivestreams.Publisher;
  * @since 0.1
  */
 final class JettyClientSlice implements Slice {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JettyClientSlice.class);
 
     /**
      * HTTP client.
@@ -96,32 +100,40 @@ final class JettyClientSlice implements Slice {
             request.body(async);
         }
         request.onResponseContentSource(
-            (response, source) -> {
-                // The function (as a Runnable) that reads the response content.
-                final Runnable demander = new Demander(source, response, buffers);
-                // Initiate the reads.
-                demander.run();
-            }
-        ).send(
-            result -> {
-                if (result.getFailure() == null) {
-                    res.complete(
-                        new RsFull(
-                            new RsStatus.ByCode(result.getResponse().getStatus()).find(),
-                            new ResponseHeaders(result.getResponse().getHeaders()),
-                            Flowable.fromIterable(buffers).map(
-                                chunk -> {
-                                    final ByteBuffer item = chunk.getByteBuffer();
-                                    chunk.release();
-                                    return item;
-                                }
-                            )
-                        )
-                    );
-                } else {
-                    res.completeExceptionally(result.getFailure());
+                (response, source) -> {
+                    // The function (as a Runnable) that reads the response content.
+                    final Runnable demander = new Demander(source, response, buffers);
+                    // Initiate the reads.
+                    demander.run();
                 }
-            }
+        );
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Send {}\n{}", request, request.getHeaders().asString());
+        }
+        request.send(
+                result -> {
+                    if (result.getFailure() == null) {
+                        Response response = new RsFull(
+                                new RsStatus.ByCode(result.getResponse().getStatus()).find(),
+                                new ResponseHeaders(result.getResponse().getHeaders()),
+                                Flowable.fromIterable(buffers).map(
+                                        chunk -> {
+                                            final ByteBuffer item = chunk.getByteBuffer();
+                                            chunk.release();
+                                            return item;
+                                        }
+                                )
+                        );
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Got {}\n{}",
+                                    result.getResponse(), result.getResponse().getHeaders().asString());
+                        }
+                        res.complete(response);
+                    } else {
+                        LOGGER.error("Got failure", result.getFailure());
+                        res.completeExceptionally(result.getFailure());
+                    }
+                }
         );
         return new AsyncResponse(res);
     }
@@ -233,7 +245,7 @@ final class JettyClientSlice implements Slice {
                     final Throwable failure = chunk.getFailure();
                     if (chunk.isLast()) {
                         this.response.abort(failure);
-                        Logger.error(this, failure.getMessage());
+                        LOGGER.error(failure.getMessage());
                         return;
                     } else {
                         // A transient failure such as a read timeout.
@@ -243,7 +255,7 @@ final class JettyClientSlice implements Slice {
                         } else {
                             // The transient failure is treated as a terminal failure.
                             this.response.abort(failure);
-                            Logger.error(this, failure.getMessage());
+                            LOGGER.error(failure.getMessage());
                             return;
                         }
                     }

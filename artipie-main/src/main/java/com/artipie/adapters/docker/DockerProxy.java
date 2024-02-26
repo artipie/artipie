@@ -26,12 +26,13 @@ import com.artipie.security.policy.Policy;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.settings.repo.proxy.ProxyConfig;
 import com.artipie.settings.repo.proxy.YamlProxyConfig;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
-import org.reactivestreams.Publisher;
 
 /**
  * Docker proxy slice created from config.
@@ -40,41 +41,12 @@ import org.reactivestreams.Publisher;
  */
 public final class DockerProxy implements Slice {
 
-    /**
-     * HTTP client.
-     */
-    private final ClientSlices client;
-
-    /**
-     * Repository configuration.
-     */
-    private final RepoConfig cfg;
-
-    /**
-     * Standalone flag.
-     */
-    private final boolean standalone;
-
-    /**
-     * Access policy.
-     */
-    private final Policy<?> policy;
-
-    /**
-     * Authentication mechanism.
-     */
-    private final Authentication auth;
-
-    /**
-     * Artifact events queue.
-     */
-    private final Optional<Queue<ArtifactEvent>> events;
+    private final Slice delegate;
 
     /**
      * Ctor.
      *
      * @param client HTTP client.
-     * @param standalone Standalone flag.
      * @param cfg Repository configuration.
      * @param policy Access policy.
      * @param auth Authentication mechanism.
@@ -82,18 +54,12 @@ public final class DockerProxy implements Slice {
      */
     public DockerProxy(
         final ClientSlices client,
-        final boolean standalone,
         final RepoConfig cfg,
         final Policy<?> policy,
         final Authentication auth,
         final Optional<Queue<ArtifactEvent>> events
     ) {
-        this.client = client;
-        this.cfg = cfg;
-        this.standalone = standalone;
-        this.policy = policy;
-        this.auth = auth;
-        this.events = events;
+        this.delegate = createProxy(client, cfg, policy, auth, events);
     }
 
     @Override
@@ -102,7 +68,7 @@ public final class DockerProxy implements Slice {
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        return this.delegate().response(line, headers, body);
+        return this.delegate.response(line, headers, body);
     }
 
     /**
@@ -110,13 +76,19 @@ public final class DockerProxy implements Slice {
      *
      * @return Docker proxy slice.
      */
-    private Slice delegate() {
+    private static Slice createProxy(
+            final ClientSlices client,
+            final RepoConfig cfg,
+            final Policy<?> policy,
+            final Authentication auth,
+            final Optional<Queue<ArtifactEvent>> events
+    ) {
         final Docker proxies = new MultiReadDocker(
-            new YamlProxyConfig(this.cfg)
-                .remotes().stream().map(this::proxy)
+            new YamlProxyConfig(cfg)
+                .remotes().stream().map(r -> proxy(client, cfg, events, r))
                 .collect(Collectors.toList())
         );
-        Docker docker = this.cfg.storageOpt()
+        Docker docker = cfg.storageOpt()
             .<Docker>map(
                 storage -> {
                     final AstoDocker local = new AstoDocker(
@@ -126,14 +98,14 @@ public final class DockerProxy implements Slice {
                 }
             )
             .orElse(proxies);
-        docker = new TrimmedDocker(docker, this.cfg.name());
+        docker = new TrimmedDocker(docker, cfg.name());
         Slice slice = new DockerSlice(
             docker,
-            this.policy,
-            new BasicAuthScheme(this.auth),
-            this.events, this.cfg.name()
+            policy,
+            new BasicAuthScheme(auth),
+            events, cfg.name()
         );
-        if (!this.standalone) {
+        if (cfg.port().isEmpty()) {
             slice = new DockerRoutingSlice.Reverted(slice);
         }
         return slice;
@@ -145,15 +117,21 @@ public final class DockerProxy implements Slice {
      * @param remote YAML remote config.
      * @return Docker proxy.
      */
-    private Docker proxy(final ProxyConfig.Remote remote) {
+    private static Docker proxy(
+            final ClientSlices client,
+            final RepoConfig cfg,
+            final Optional<Queue<ArtifactEvent>> events,
+            final ProxyConfig.Remote remote
+    ) {
         final Docker proxy = new ProxyDocker(
-            new AuthClientSlice(this.client.https(remote.url()), remote.auth(this.client))
+            new AuthClientSlice(client.from(remote.url()), remote.auth(client))
         );
-        return this.cfg.storageOpt().<Docker>map(
+        return cfg.storageOpt().<Docker>map(
             cache -> new CacheDocker(
                 proxy,
                 new AstoDocker(new SubStorage(RegistryRoot.V2, cache)),
-                this.events, this.cfg.name()
+                events,
+                cfg.name()
             )
         ).orElse(proxy);
     }

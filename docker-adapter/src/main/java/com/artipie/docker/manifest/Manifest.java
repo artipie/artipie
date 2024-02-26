@@ -6,33 +6,57 @@ package com.artipie.docker.manifest;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
+
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Collections;
 import java.util.Set;
 
 /**
- * Image manifest.
- * See <a href="https://docs.docker.com/engine/reference/commandline/manifest/">docker manifest</a>
- *
- * @since 0.2
+ * An image manifest representation.
+ * <p>See <a href="https://distribution.github.io/distribution/#image-manifest">Image manifest</a>
+ * <p>See <a href="https://github.com/opencontainers/image-spec/tree/main">Open Container Initiative (OCI) Spec</a>
  */
 public interface Manifest {
+
+    /**
+     * New image manifest format (schemaVersion = 2).
+     */
+    String MANIFEST_SCHEMA2 = "application/vnd.docker.distribution.manifest.v2+json";
+
+    /**
+     * Image Manifest OCI Specification.
+     */
+    String MANIFEST_OCI_V1 = "application/vnd.oci.image.manifest.v1+json";
 
     /**
      * Read manifest types.
      *
      * @return Type string.
      */
-    Set<String> mediaTypes();
+    @Deprecated
+    default Set<String> mediaTypes() {
+        return Collections.singleton(this.mediaType());
+    }
+
+    /**
+     * The MIME type of the manifest.
+     *
+     * @return The MIME type.
+     */
+    String mediaType();
 
     /**
      * Converts manifest to one of types.
      *
      * @param options Types the manifest may be converted to.
      * @return Converted manifest.
+     * @Depricated There is no needing to convert manifests.
+     * Converting of manifests is the docker client's responsibility.
      */
-    Manifest convert(Set<? extends String> options);
+    @Deprecated
+    default Manifest convert(final Set<? extends String> options) {
+        return this;
+    }
 
     /**
      * Read config digest.
@@ -68,28 +92,4 @@ public interface Manifest {
      * @return Size of the manifest.
      */
     long size();
-
-    /**
-     * Read manifest first media type.
-     * @return First media type in a collection
-     * @deprecated Use {@link #mediaTypes()} instead, this method
-     *  will be removed in next major release.
-     */
-    @Deprecated
-    default String mediaType() {
-        return this.mediaTypes().iterator().next();
-    }
-
-    /**
-     * Converts manifest to one of types.
-     *
-     * @param options Types the manifest may be converted to.
-     * @return Converted manifest.
-     * @deprecated Use {@link #convert(Set)} instead, this method
-     *  will be removed in next major release.
-     */
-    @Deprecated
-    default Manifest convert(final List<String> options) {
-        return this.convert(new HashSet<>(options));
-    }
 }

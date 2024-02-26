@@ -19,9 +19,11 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.ref.ManifestRef;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
+import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -32,6 +34,15 @@ import java.util.concurrent.CompletionStage;
  * @since 0.3
  */
 public final class ProxyManifests implements Manifests {
+
+    private static final Headers MANIFEST_ACCEPT_HEADERS = new Headers.From(
+            new Header("Accept", "application/json"),
+            new Header("Accept", "application/vnd.oci.image.index.v1+json"),
+            new Header("Accept", "application/vnd.oci.image.manifest.v1+json"),
+            new Header("Accept", "application/vnd.docker.distribution.manifest.v1+prettyjws"),
+            new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json"),
+            new Header("Accept", "application/vnd.docker.distribution.manifest.list.v2+json")
+    );
 
     /**
      * Remote repository.
@@ -64,7 +75,7 @@ public final class ProxyManifests implements Manifests {
         return new ResponseSink<>(
             this.remote.response(
                 new RequestLine(RqMethod.GET, new ManifestPath(this.name, ref).string()).toString(),
-                Headers.EMPTY,
+                MANIFEST_ACCEPT_HEADERS,
                 Content.EMPTY
             ),
             (status, headers, body) -> {

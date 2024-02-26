@@ -9,7 +9,6 @@ import com.artipie.test.TestDockerClient;
 import com.artipie.test.vertxmain.TestVertxMain;
 import com.artipie.test.vertxmain.TestVertxMainBuilder;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,13 +18,6 @@ import java.nio.file.Path;
 
 /**
  * Integration test for {@link ProxyDocker}.
- *
- * @since 0.10
- * @todo #499:30min Add integration test for Docker proxy cache feature.
- *  Docker proxy supports caching feature for it's remote repositories.
- *  Cache is populated when image is downloaded asynchronously
- *  and later used if remote repository is unavailable.
- *  This feature should be tested.
  */
 final class DockerProxyIT {
 
@@ -54,11 +46,11 @@ final class DockerProxyIT {
     @AfterEach
     void tearDown() {
         client.stop();
-        server.stop();
+        server.close();
     }
 
     @Test
-    void shouldPullRemote() throws Exception {
+    void shouldPullBlobRemote() throws Exception {
         final Image image = new Image.ForOs();
         final String img = new Image.From(
                 client.host(),
@@ -68,6 +60,20 @@ final class DockerProxyIT {
         ).remoteByDigest();
         client.login("alice", "123")
                 .pull(img);
+    }
+
+    @Test
+    void shouldPullImageRemote() throws Exception {
+        String image = client.host() + "/my-docker/library/alpine:3.19";
+        client.login("alice", "123")
+                .pull(image);
+    }
+
+    @Test
+    void shouldPullImageWithListManifestRemote() throws Exception {
+        String image = client.host() + "/my-docker/library/postgres:16.2";
+        client.login("alice", "123")
+                .pull(image);
     }
 
     @Test

@@ -6,7 +6,7 @@ package com.artipie.test.vertxmain;
 
 import com.artipie.VertxMain;
 
-public class TestVertxMain {
+public class TestVertxMain implements AutoCloseable {
 
     private final int port;
     private final VertxMain server;
@@ -20,7 +20,8 @@ public class TestVertxMain {
         return port;
     }
 
-    public void stop() {
+    @Override
+    public void close() {
         server.stop();
     }
 }

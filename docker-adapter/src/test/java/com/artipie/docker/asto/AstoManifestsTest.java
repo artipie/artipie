@@ -116,7 +116,7 @@ final class AstoManifestsTest {
         MatcherAssert.assertThat(
             "Exception does not contain expected message",
             exception.getMessage(),
-            new StringContains("Required field `mediaType` is empty")
+            new StringContains("Required field `mediaType` is absent")
         );
     }
 

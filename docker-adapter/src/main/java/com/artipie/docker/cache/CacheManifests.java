@@ -17,7 +17,9 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.JoinedTagsSource;
 import com.artipie.docker.ref.ManifestRef;
 import com.artipie.scheduling.ArtifactEvent;
-import com.jcabi.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -30,6 +32,8 @@ import java.util.function.Function;
  * @since 0.3
  */
 public final class CacheManifests implements Manifests {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(CacheManifests.class);
 
     /**
      * Repository type.
@@ -91,11 +95,21 @@ public final class CacheManifests implements Manifests {
                 final CompletionStage<Optional<Manifest>> result;
                 if (throwable == null) {
                     if (original.isPresent()) {
-                        result = this.copy(ref).thenApply(unused -> original);
+                        Manifest manifest = original.get();
+                        if (Manifest.MANIFEST_SCHEMA2.equals(manifest.mediaType()) ||
+                                Manifest.MANIFEST_OCI_V1.equals(manifest.mediaType())) {
+                            result = this.copy(ref).thenApply(unused -> original);
+                        } else {
+                            LOGGER.warn("Cannot add manifest to cache: [manifest={}, mediaType={}]",
+                                    ref.string(), manifest.mediaType());
+                            result = CompletableFuture.completedFuture(original);
+                        }
                     } else {
                         result = this.cache.manifests().get(ref).exceptionally(ignored -> original);
                     }
                 } else {
+                    LOGGER.warn("Failed getting manifest: [ref={}, error={}]",
+                            ref.string(), throwable.getMessage());
                     result = this.cache.manifests().get(ref);
                 }
                 return result;
@@ -145,9 +159,7 @@ public final class CacheManifests implements Manifests {
         ).handle(
             (ignored, ex) -> {
                 if (ex != null) {
-                    Logger.error(
-                        this, "Failed to cache manifest %s: %[exception]s", ref.string(), ex
-                    );
+                    LOGGER.error("Failed to cache manifest " + ref.string(), ex);
                 }
                 return null;
             }

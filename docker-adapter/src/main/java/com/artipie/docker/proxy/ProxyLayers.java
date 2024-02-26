@@ -61,9 +61,10 @@ public final class ProxyLayers implements Layers {
 
     @Override
     public CompletionStage<Optional<Blob>> get(final Digest digest) {
+        String blobPath = String.format("/v2/%s/blobs/%s", this.name.value(), digest.string());
         return new ResponseSink<>(
             this.remote.response(
-                new RequestLine(RqMethod.HEAD, new BlobPath(this.name, digest).string()).toString(),
+                new RequestLine(RqMethod.HEAD, blobPath).toString(),
                 Headers.EMPTY,
                 Content.EMPTY
             ),
