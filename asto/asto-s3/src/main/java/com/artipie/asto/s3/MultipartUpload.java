@@ -78,6 +78,8 @@ final class MultipartUpload {
     /**
      * Uploads all content by parts.
      * Note that content part must be at least MultipartUpload.MIN_PART_SIZE except last part.
+     * Note that we send one request with chunk data at time. We shouldn't send all chunks/requests in parallel,
+     * since may overload request pool of the S3 client or limits of the server.
      *
      * @param content Object content to be uploaded in parts.
      * @return Completion stage which is completed when responses received from S3 for all parts.

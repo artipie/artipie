@@ -24,7 +24,6 @@ import io.reactivex.Flowable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -33,10 +32,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyIterable;
@@ -113,22 +108,22 @@ class S3StorageTest {
     @Timeout(150)
     void shouldUploadLargeChunkedContent(final AmazonS3 client) throws Exception {
         final String key = "big/data";
-        final int S3_MIN_PART_SIZE = 5 * 1024 * 1024;
-        final int S3_MIN_MULTIPART = 10 * 1024 * 1024;
-        final int TOTAL_SIZE = S3_MIN_MULTIPART * 2;
-        final int ITEM_SIZE = S3_MIN_PART_SIZE / 1000;
-        final int COUNT = TOTAL_SIZE / ITEM_SIZE;
-        final int TOTAL_SEND = ITEM_SIZE * COUNT;
+        final int s3MinPartSize = 5 * 1024 * 1024;
+        final int s3MinMultipart = 10 * 1024 * 1024;
+        final int totalSize = s3MinMultipart * 2;
+        final int itemSize = s3MinPartSize / 1000;
+        final int count = totalSize / itemSize;
+        final int totalSend = itemSize * count;
         final Random rnd = new Random();
-        final byte[] sentData = new byte[TOTAL_SEND];
+        final byte[] sentData = new byte[totalSend];
         final Callable<Flowable<ByteBuffer>> getGenerator = () -> Flowable.generate(
             AtomicInteger::new,
             (counter, output) -> {
                 final int idx = counter.getAndAdd(1);
-                if (idx < COUNT) {
-                    final byte[] data = new byte[ITEM_SIZE];
+                if (idx < count) {
+                    final byte[] data = new byte[itemSize];
                     rnd.nextBytes(data);
-                    for (int i = 0, j = idx * ITEM_SIZE; i < data.length; ++i, ++j) {
+                    for (int i = 0, j = idx * itemSize; i < data.length; ++i, ++j) {
                         sentData[j] = data[i];
                     }
                     output.onNext(ByteBuffer.wrap(data));
@@ -139,12 +134,16 @@ class S3StorageTest {
             });
         MatcherAssert.assertThat("Generator results mismatch",
             new PublisherAs(new Content.From(getGenerator.call())).bytes()
-                .toCompletableFuture().join(),
-            Matchers.equalTo(sentData)
+                .toCompletableFuture().join().length,
+            Matchers.equalTo(sentData.length)
         );
         this.storage().save(new Key.From(key), new Content.From(getGenerator.call())).join();
-        MatcherAssert.assertThat("Saving results mismatch",
+        MatcherAssert.assertThat("Saved results mismatch (S3 client)",
             this.download(client, key), Matchers.equalTo(sentData)
+        );
+        MatcherAssert.assertThat("Saved results mismatch (S3Storage)",
+            new PublisherAs(this.storage().value(new Key.From(key)).toCompletableFuture().get())
+                .bytes().toCompletableFuture().join(), Matchers.equalTo(sentData)
         );
     }
 
