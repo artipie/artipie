@@ -66,7 +66,12 @@ public class AuthTest {
     @Test
     public void unauthorizedWhenNoIdentity() {
         MatcherAssert.assertThat(
-            new GemSlice(new InMemoryStorage()).response(
+            new GemSlice(
+                new InMemoryStorage(),
+                Policy.FREE,
+                (username, password) -> Optional.of(AuthUser.ANONYMOUS),
+                ""
+            ).response(
                 new RequestLine("GET", "/api/v1/api_key").toString(),
                 new Headers.From(),
                 Flowable.empty()

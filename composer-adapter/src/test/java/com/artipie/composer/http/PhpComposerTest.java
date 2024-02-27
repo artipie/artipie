@@ -18,20 +18,20 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.security.policy.Policy;
 import io.reactivex.Flowable;
-import java.util.Arrays;
-import java.util.Collections;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+
 /**
  * Tests for {@link PhpComposer}.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class PhpComposerTest {
 
     /**
@@ -54,7 +54,11 @@ class PhpComposerTest {
     @BeforeEach
     void init() {
         this.storage = new InMemoryStorage();
-        this.php = new PhpComposer(new AstoRepository(this.storage));
+        this.php = new PhpComposer(
+            new AstoRepository(this.storage),
+            Policy.FREE, (username, password) -> Optional.empty(),
+            "*", Optional.empty()
+        );
     }
 
     @Test

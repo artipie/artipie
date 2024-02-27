@@ -8,6 +8,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
@@ -39,14 +40,7 @@ import java.util.regex.Pattern;
 
 /**
  * A {@link Slice} which servers binary files.
- *
- * @since 0.1
- * @todo #91:30min Test FileSlice when listing blobs by prefix in JSON.
- *  We previously introduced {@link BlobListJsonFormat}
- *  to list blobs in JSON from a prefix. We should now test that the type
- *  and value of response's content are correct when we make a request.
  */
-@SuppressWarnings("PMD.ExcessiveMethodLength")
 public final class FilesSlice extends Slice.Wrap {
 
     /**
@@ -79,14 +73,6 @@ public final class FilesSlice extends Slice.Wrap {
      * Repository type.
      */
     private static final String REPO_TYPE = "file";
-
-    /**
-     * Ctor.
-     * @param storage The storage. And default parameters for free access.
-     */
-    public FilesSlice(final Storage storage) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, FilesSlice.ANY_REPO, Optional.empty());
-    }
 
     /**
      * Ctor used by Artipie server which knows `Authentication` implementation.
@@ -220,7 +206,8 @@ public final class FilesSlice extends Slice.Wrap {
         try (
             VertxSliceServer server = new VertxSliceServer(
                 new FilesSlice(
-                    new InMemoryStorage(), Policy.FREE, Authentication.ANONYMOUS,
+                    new InMemoryStorage(), Policy.FREE,
+                    (username, password) -> Optional.of(AuthUser.ANONYMOUS),
                     FilesSlice.ANY_REPO, Optional.empty()), port
             )
         ) {

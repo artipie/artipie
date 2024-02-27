@@ -29,7 +29,6 @@ import org.reactivestreams.Publisher;
 
 /**
  * Slice implementation that provides HTTP API (Go module proxy protocol) for Golang repository.
- * @since 0.3
  */
 public final class GoSlice implements Slice {
 
@@ -42,14 +41,6 @@ public final class GoSlice implements Slice {
      * Origin.
      */
     private final Slice origin;
-
-    /**
-     * Ctor.
-     * @param storage Storage
-     */
-    public GoSlice(final Storage storage) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, "*");
-    }
 
     /**
      * Ctor.

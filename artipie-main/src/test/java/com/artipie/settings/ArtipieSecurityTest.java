@@ -8,39 +8,35 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.http.auth.Authentication;
 import com.artipie.security.policy.CachedYamlPolicy;
 import com.artipie.security.policy.Policy;
-import java.io.IOException;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Test for {@link ArtipieSecurity.FromYaml}.
- * @since 0.29
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class ArtipieSecurityTest {
+
+    private static final Authentication AUTH = (username, password) -> Optional.empty();
 
     @Test
     void initiatesPolicy() throws IOException {
         final ArtipieSecurity security = new ArtipieSecurity.FromYaml(
             Yaml.createYamlInput(this.policy()).readYamlMapping(),
-            Authentication.ANONYMOUS, Optional.empty()
+            ArtipieSecurityTest.AUTH, Optional.empty()
         );
-        MatcherAssert.assertThat(
-            "Returns provided authentication",
-            security.authentication(),
-            new IsInstanceOf(Authentication.ANONYMOUS.getClass())
+        Assertions.assertInstanceOf(
+            ArtipieSecurityTest.AUTH.getClass(), security.authentication()
         );
         MatcherAssert.assertThat(
             "Returns provided empty optional",
             security.policyStorage().isEmpty()
         );
-        MatcherAssert.assertThat(
-            "Initiates policy",
-            security.policy(),
-            new IsInstanceOf(CachedYamlPolicy.class)
-        );
+        Assertions.assertInstanceOf(CachedYamlPolicy.class, security.policy());
     }
 
     @Test
@@ -49,7 +45,7 @@ class ArtipieSecurityTest {
             "Initiates policy",
             new ArtipieSecurity.FromYaml(
                 Yaml.createYamlMappingBuilder().build(),
-                Authentication.ANONYMOUS, Optional.empty()
+                ArtipieSecurityTest.AUTH, Optional.empty()
             ).policy(),
             new IsInstanceOf(Policy.FREE.getClass())
         );

@@ -11,6 +11,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.asto.test.TestResource;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.pypi.PypiDeployment;
@@ -36,10 +37,7 @@ import java.util.UUID;
 
 /**
  * A test which ensures {@code pip} console tool compatibility with the adapter.
- *
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
 public final class PySliceS3ITCase {
 
@@ -253,6 +251,6 @@ public final class PySliceS3ITCase {
     }
 
     private void startServer() {
-        this.startServer(Policy.FREE, Authentication.ANONYMOUS);
+        this.startServer(Policy.FREE, (name, pswd) -> Optional.of(AuthUser.ANONYMOUS));
     }
 }

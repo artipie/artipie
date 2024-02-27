@@ -14,22 +14,11 @@ import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.security.policy.PolicyByUsername;
 import com.artipie.vertx.VertxSliceServer;
 import com.google.common.io.ByteStreams;
 import io.vertx.reactivex.core.Vertx;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.Authenticator;
-import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterAll;
@@ -44,13 +33,23 @@ import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 /**
  * Ensure that helm command line tool is compatible with this adapter.
- *
- * @since 0.2
  */
 @DisabledIfSystemProperty(named = "os.name", matches = "Windows.*")
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class HelmSliceIT {
     /**
      * Vert instance.
@@ -187,7 +186,13 @@ final class HelmSliceIT {
         if (anonymous) {
             this.server = new VertxSliceServer(
                 HelmSliceIT.VERTX,
-                new LoggingSlice(new HelmSlice(this.storage, this.url, Optional.of(this.events))),
+                new LoggingSlice(
+                    new HelmSlice(
+                        this.storage, this.url, Policy.FREE,
+                        (username, password) -> Optional.empty(),
+                        "*", Optional.of(this.events)
+                    )
+                ),
                 this.port
             );
         } else {

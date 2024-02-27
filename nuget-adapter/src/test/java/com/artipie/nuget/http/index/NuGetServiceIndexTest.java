@@ -13,15 +13,8 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.AstoRepository;
 import com.artipie.nuget.http.NuGet;
+import com.artipie.security.policy.Policy;
 import io.reactivex.Flowable;
-import java.io.ByteArrayInputStream;
-import java.net.URI;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -34,13 +27,20 @@ import wtf.g4s8.hamcrest.json.JsonContains;
 import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+
 /**
  * Tests for {@link NuGet}.
  * Service index resource.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class NuGetServiceIndexTest {
 
     /**
@@ -56,7 +56,11 @@ class NuGetServiceIndexTest {
     @BeforeEach
     void init() throws Exception {
         this.url = URI.create("http://localhost:4321/repo").toURL();
-        this.nuget = new NuGet(this.url, new AstoRepository(new InMemoryStorage()));
+        this.nuget = new NuGet(
+            this.url,
+            new AstoRepository(new InMemoryStorage()),
+            Policy.FREE, (username, password) -> Optional.empty(), "*", Optional.empty()
+        );
     }
 
     @Test

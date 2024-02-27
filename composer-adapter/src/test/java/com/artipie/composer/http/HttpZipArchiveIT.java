@@ -12,15 +12,10 @@ import com.artipie.composer.test.HttpUrlUpload;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
 import org.cactoos.list.ListOf;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -37,14 +32,18 @@ import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+
 /**
  * Integration test for PHP Composer repository for working
  * with archive in ZIP format.
- *
- * @since 0.4
  */
 @DisabledOnOs(OS.WINDOWS)
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class HttpZipArchiveIT {
     /**
      * Vertx instance for using in test.
@@ -92,7 +91,12 @@ final class HttpZipArchiveIT {
         );
         this.server = new VertxSliceServer(
             HttpZipArchiveIT.VERTX,
-            new LoggingSlice(new PhpComposer(asto, this.events)),
+            new LoggingSlice(
+                new PhpComposer(
+                    asto,  Policy.FREE, (username, password) -> Optional.empty(),
+                    "*", Optional.of(this.events)
+                )
+            ),
             this.port
         );
         this.server.start();
@@ -150,7 +154,7 @@ final class HttpZipArchiveIT {
         MatcherAssert.assertThat(
             this.exec("composer", "install", "--verbose", "--no-cache"),
             new AllOf<>(
-                new ListOf<Matcher<? super String>>(
+                new ListOf<>(
                     new StringContains(false, "Installs: psr/log:1.1.3"),
                     new StringContains(false, "- Downloading psr/log (1.1.3)"),
                     new StringContains(

@@ -102,21 +102,4 @@ public final class PhpComposer extends Slice.Wrap {
             )
         );
     }
-
-    /**
-     * Ctor with existing front and default parameters for free access.
-     * @param repository Repository
-     */
-    public PhpComposer(final Repository repository) {
-        this(repository, Policy.FREE, Authentication.ANONYMOUS, "*", Optional.empty());
-    }
-
-    /**
-     * Ctor with existing front and default parameters for free access.
-     * @param repository Repository
-     * @param events Repository events
-     */
-    public PhpComposer(final Repository repository, final Queue<ArtifactEvent> events) {
-        this(repository, Policy.FREE, Authentication.ANONYMOUS, "*", Optional.of(events));
-    }
 }

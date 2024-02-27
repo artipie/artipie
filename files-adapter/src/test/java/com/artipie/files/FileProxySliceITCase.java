@@ -15,13 +15,9 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.TimeUnit;
 import org.apache.http.client.utils.URIBuilder;
 import org.awaitility.Awaitility;
 import org.hamcrest.MatcherAssert;
@@ -30,11 +26,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Tests for files adapter.
- * @since 0.5
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class FileProxySliceITCase {
 
     /**
@@ -68,10 +69,19 @@ final class FileProxySliceITCase {
     private VertxSliceServer server;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         this.vertx = Vertx.vertx();
         this.storage = new InMemoryStorage();
-        this.server = new VertxSliceServer(this.vertx, new FilesSlice(this.storage));
+        this.server = new VertxSliceServer(
+            this.vertx,
+            new FilesSlice(
+                this.storage,
+                Policy.FREE,
+                (username, password) -> Optional.empty(),
+                FilesSlice.ANY_REPO,
+                Optional.empty()
+            )
+        );
         this.port = this.server.start();
         this.clients.start();
     }
