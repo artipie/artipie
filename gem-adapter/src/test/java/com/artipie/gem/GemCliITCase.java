@@ -7,6 +7,7 @@ package com.artipie.gem;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.gem.http.GemSlice;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
@@ -67,7 +68,7 @@ final class GemCliITCase {
                 new GemSlice(
                     new FileStorage(temp),
                     Policy.FREE,
-                    (username, password) -> Optional.empty(),
+                    (username, password) -> Optional.of(AuthUser.ANONYMOUS),
                     ""
                 )
             )
