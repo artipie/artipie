@@ -13,8 +13,7 @@ import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.web.client.WebClient;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -37,29 +36,33 @@ public class SubmitGemITCase {
     public void submitResultsInOkResponse(@TempDir final Path temp) throws IOException {
         final Queue<ArtifactEvent> events = new LinkedList<>();
         final Vertx vertx = Vertx.vertx();
-        final VertxSliceServer server = new VertxSliceServer(
-            vertx,
-            new GemSlice(
-                new FileStorage(temp), Policy.FREE,
-                (username, password) -> Optional.empty(), ""
-            )
-        );
-        final WebClient web = WebClient.create(vertx);
-        final int port = server.start();
-        final byte[] gem = Files.readAllBytes(
-            Paths.get("./src/test/resources/builder-3.2.4.gem")
-        );
-        final int code = web.post(port, "localhost", "/api/v1/gems")
-            .rxSendBuffer(Buffer.buffer(gem))
-            .blockingGet()
-            .statusCode();
-        MatcherAssert.assertThat(
-            code,
-            new IsEqual<>(Integer.parseInt(RsStatus.CREATED.code()))
-        );
-        MatcherAssert.assertThat("Upload event was added to queue", events.size() == 1);
-        web.close();
-        server.close();
-        vertx.close();
+        try {
+            try (VertxSliceServer server = new VertxSliceServer(
+                vertx,
+                new GemSlice(
+                    new FileStorage(temp), Policy.FREE,
+                    (username, password) -> Optional.empty(), "",
+                    Optional.of(events)
+                )
+            )) {
+                final WebClient web = WebClient.create(vertx);
+                try {
+                    final int port = server.start();
+                    final byte[] gem = Files.readAllBytes(
+                        Paths.get("./src/test/resources/builder-3.2.4.gem")
+                    );
+                    final int code = web.post(port, "localhost", "/api/v1/gems")
+                        .rxSendBuffer(Buffer.buffer(gem))
+                        .blockingGet()
+                        .statusCode();
+                    Assertions.assertEquals(Integer.parseInt(RsStatus.CREATED.code()), code);
+                    Assertions.assertEquals(1, events.size());
+                } finally {
+                    web.close();
+                }
+            }
+        } finally {
+            vertx.close();
+        }
     }
 }
