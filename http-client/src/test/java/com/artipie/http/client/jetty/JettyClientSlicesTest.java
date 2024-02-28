@@ -33,6 +33,7 @@ import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -290,6 +291,7 @@ final class JettyClientSlicesTest {
         }
     }
 
+    @Disabled("https://github.com/artipie/artipie/issues/1413")
     @ParameterizedTest
     @CsvSource({
         "expired.badssl.com",
@@ -315,6 +317,7 @@ final class JettyClientSlicesTest {
         }
     }
 
+    @Disabled("https://github.com/artipie/artipie/issues/1413")
     @ParameterizedTest
     @CsvSource({
         "expired.badssl.com",
