@@ -9,6 +9,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.helm.http.HelmSlice;
 import com.artipie.helm.test.ContentOfIndex;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.rs.RsStatus;
@@ -189,7 +190,7 @@ final class HelmSliceIT {
                 new LoggingSlice(
                     new HelmSlice(
                         this.storage, this.url, Policy.FREE,
-                        (username, password) -> Optional.empty(),
+                        (username, password) -> Optional.of(AuthUser.ANONYMOUS),
                         "*", Optional.of(this.events)
                     )
                 ),
