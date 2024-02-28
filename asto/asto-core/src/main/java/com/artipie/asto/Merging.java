@@ -9,32 +9,31 @@ import io.reactivex.Maybe;
 import java.nio.ByteBuffer;
 
 /**
- * Merges ByteBuffer objects to bigger ones, according to specified `size`.
- * Produces new ByteBuffer blocks according to specified target size.
- *
- * @since v0.30.12
+ * Merges ByteBuffer objects to bigger in the range of [size, size * 2).
+ * Last block could be less than `size`.
+ * Input buffers must be at most `size` in `remaining` size.
  */
 public class Merging {
 
     /**
      * Data accumulator array.
      */
-    byte[] accumulator;
+    private final byte[] accumulator;
+
+    /**
+     * Minimal block size.
+     */
+    private final int size;
 
     /**
      * Count of bytes accumulated.
      */
-    int accumulated;
-
-    /**
-     * Target block size.
-     */
-    final int size;
+    private int accumulated;
 
     /**
      * Ctor.
      *
-     * @param size Size of target merged (accumulated) ByteBuffer.
+     * @param size Minimal size of merged (accumulated) ByteBuffer.
      */
     public Merging(final int size) {
         this.size = size;
@@ -50,13 +49,10 @@ public class Merging {
         this.accumulated = 0;
         return source.concatMap(chunk -> {
             final int remaining = chunk.remaining();
-            if (remaining > accumulator.length - accumulated) {
-                throw new ArtipieIOException("Splitting error. Chunk is too big.");
+            if (remaining > this.size) {
+                throw new ArtipieIOException("Input chunk is bigger than specified size");
             }
-            int j = accumulated;
-            for (int i = chunk.position(); i < chunk.limit(); ++i) {
-                accumulator[j++] = chunk.get(i);
-            }
+            chunk.get(accumulator, accumulated, remaining);
             accumulated += remaining;
             if (accumulated < this.size) {
                 return Flowable.empty();
