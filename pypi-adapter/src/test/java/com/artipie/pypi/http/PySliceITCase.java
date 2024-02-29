@@ -8,6 +8,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.pypi.PypiDeployment;
@@ -218,7 +219,7 @@ public final class PySliceITCase {
     }
 
     private void startServer() {
-        this.startServer(Policy.FREE, Authentication.ANONYMOUS);
+        this.startServer(Policy.FREE, (name, pswd) -> Optional.of(AuthUser.ANONYMOUS));
     }
 
 }

@@ -9,16 +9,14 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.conda.http.CondaSlice;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import org.apache.commons.io.FileUtils;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
@@ -35,11 +33,15 @@ import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
 /**
  * Conda adapter integration test.
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
 public final class CondaSliceITCase {
 
@@ -87,7 +89,18 @@ public final class CondaSliceITCase {
         final String url = String.format("http://host.testcontainers.internal:%d", this.port);
         this.server = new VertxSliceServer(
             CondaSliceITCase.VERTX,
-            new LoggingSlice(new BodyLoggingSlice(new CondaSlice(this.storage, url, this.events))),
+            new LoggingSlice(
+                new BodyLoggingSlice(
+                    new CondaSlice(
+                        storage,
+                        Policy.FREE,
+                        (username, password) -> Optional.of(AuthUser.ANONYMOUS),
+                        new TestCondaTokens(),
+                        url, "*",
+                        Optional.of(events)
+                    )
+                )
+            ),
             this.port
         );
         this.server.start();

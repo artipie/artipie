@@ -5,7 +5,6 @@
 package com.artipie;
 
 import com.artipie.http.Slice;
-import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.misc.RandomFreePort;
@@ -19,11 +18,6 @@ import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import javax.json.Json;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
@@ -34,11 +28,16 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
 
+import javax.json.Json;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Optional;
+
 /**
  * Slices integration tests.
- * @since 0.20
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledForJreRange(min = JRE.JAVA_11, disabledReason = "HTTP client is not supported prior JRE_11")
 public final class SliceITCase {
 
@@ -54,7 +53,7 @@ public final class SliceITCase {
                         () -> Json.createObjectBuilder().add("any", "any").build()
                     )
                 ),
-                Authentication.ANONYMOUS,
+                (username, password) -> Optional.empty(),
                 new OperationControl(Policy.FREE, new AdapterBasicPermission("test", Action.ALL))
             )
         )

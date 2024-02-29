@@ -7,6 +7,7 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.Header;
@@ -19,15 +20,17 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.security.policy.Policy;
 import com.artipie.security.policy.PolicyByUsername;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Test for {@link GoSlice}.
@@ -132,31 +135,20 @@ class GoSliceTest {
      * @return Instance of {@link GoSlice}
      */
     private GoSlice slice(final Storage storage, final boolean anonymous) {
-        final Policy<?> policy;
         if (anonymous) {
-            policy = Policy.FREE;
-        } else {
-            policy = new PolicyByUsername(USER.getKey());
+            return new GoSlice(storage, Policy.FREE, (name, pswd) -> Optional.of(AuthUser.ANONYMOUS), "test");
         }
-        final Authentication users;
-        if (anonymous) {
-            users = Authentication.ANONYMOUS;
-        } else {
-            users = new Authentication.Single(USER.getKey(), USER.getValue());
-        }
-        return new GoSlice(storage, policy, users, "test");
+        return new GoSlice(storage,
+            new PolicyByUsername(USER.getKey()),
+            new Authentication.Single(USER.getKey(), USER.getValue()),
+            "test"
+        );
     }
 
     private Headers headers(final boolean anonymous) {
-        final Headers res;
-        if (anonymous) {
-            res = Headers.EMPTY;
-        } else {
-            res = new Headers.From(
-                new Authorization.Basic(GoSliceTest.USER.getKey(), GoSliceTest.USER.getValue())
-            );
-        }
-        return res;
+        return anonymous ? Headers.EMPTY : new Headers.From(
+            new Authorization.Basic(GoSliceTest.USER.getKey(), GoSliceTest.USER.getValue())
+        );
     }
 
     /**

@@ -12,15 +12,11 @@ import com.artipie.composer.test.PackageSimple;
 import com.artipie.composer.test.SourceServer;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.slice.LoggingSlice;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Optional;
 import org.cactoos.list.ListOf;
-import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.StringContains;
@@ -35,13 +31,15 @@ import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+
 /**
  * Integration test for PHP Composer repository.
- *
- * @since 0.1
  */
 @DisabledOnOs(OS.WINDOWS)
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RepositoryHttpIT {
     /**
      * Vertx instance for using in test.
@@ -91,7 +89,12 @@ class RepositoryHttpIT {
         this.server = new VertxSliceServer(
             RepositoryHttpIT.VERTX,
             new LoggingSlice(
-                new PhpComposer(new AstoRepository(new InMemoryStorage()))
+                new PhpComposer(
+                    new AstoRepository(new InMemoryStorage()),
+                    Policy.FREE,
+                    (username, password) -> Optional.empty(),
+                    "*", Optional.empty()
+                )
             )
         );
         this.port = this.server.start();
@@ -133,7 +136,7 @@ class RepositoryHttpIT {
         MatcherAssert.assertThat(
             this.exec("composer", "install", "--verbose", "--no-cache"),
             new AllOf<>(
-                new ListOf<Matcher<? super String>>(
+                new ListOf<>(
                     new StringContains(false, "Installs: vendor/package:1.1.2"),
                     new StringContains(false, "- Downloading vendor/package (1.1.2)"),
                     new StringContains(
@@ -156,7 +159,7 @@ class RepositoryHttpIT {
         MatcherAssert.assertThat(
             this.exec("composer", "install", "--verbose", "--no-cache"),
             new AllOf<>(
-                new ListOf<Matcher<? super String>>(
+                new ListOf<>(
                     new StringContains(false, "Installs: vendor/package:2.3.4"),
                     new StringContains(false, "- Downloading vendor/package (2.3.4)"),
                     new StringContains(

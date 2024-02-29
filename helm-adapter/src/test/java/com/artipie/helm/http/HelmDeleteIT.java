@@ -14,20 +14,22 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Stream;
 
 /**
  * IT for remove operation.
@@ -75,7 +77,8 @@ final class HelmDeleteIT {
             new LoggingSlice(
                 new HelmSlice(
                     this.storage, String.format("http://localhost:%d", this.port),
-                    Optional.of(this.events)
+                    Policy.FREE, (username, password) -> Optional.empty(),
+                    "*", Optional.of(this.events)
                 )
             ),
             this.port

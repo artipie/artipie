@@ -27,6 +27,7 @@ import com.artipie.http.slice.SliceSimple;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -40,25 +41,6 @@ public final class ConanSlice extends Slice.Wrap {
      * Test context name for AuthUser.
      */
     private static final String TEST_CONTEXT = "test";
-
-    /**
-     * Anonymous tokens.
-     */
-    private static final Tokens ANONYMOUS = new Tokens() {
-
-        @Override
-        public TokenAuthentication auth() {
-            return token ->
-                CompletableFuture.completedFuture(
-                    Optional.of(new AuthUser("anonymous", ConanSlice.TEST_CONTEXT))
-                );
-        }
-
-        @Override
-        public String generate(final AuthUser user) {
-            return "123qwe";
-        }
-    };
 
     /**
      * Fake implementation of {@link Tokens} for the single user.
@@ -104,15 +86,6 @@ public final class ConanSlice extends Slice.Wrap {
             }
             throw new IllegalStateException(String.join("Unexpected user: ", user.name()));
         }
-    }
-
-    /**
-     * Ctor.
-     * @param storage Storage object.
-     * @param tokenizer Tokenizer for repository items.
-     */
-    public ConanSlice(final Storage storage, final ItemTokenizer tokenizer) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, ConanSlice.ANONYMOUS, tokenizer, "*");
     }
 
     /**

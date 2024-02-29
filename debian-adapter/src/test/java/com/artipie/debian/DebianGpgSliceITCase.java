@@ -13,15 +13,10 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.debian.http.DebianSlice;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.io.DataOutputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.regex.Pattern;
 import org.cactoos.list.ListOf;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -41,11 +36,17 @@ import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
+import java.io.DataOutputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.regex.Pattern;
+
 /**
  * Test for {@link DebianSlice} with GPG-signature.
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 public final class DebianGpgSliceITCase {
 
@@ -92,6 +93,8 @@ public final class DebianGpgSliceITCase {
             new LoggingSlice(
                 new DebianSlice(
                     this.storage,
+                    Policy.FREE,
+                    (username, password) -> Optional.empty(),
                     new Config.FromYaml(
                         "artipie",
                         Yaml.createYamlMappingBuilder()
@@ -101,7 +104,7 @@ public final class DebianGpgSliceITCase {
                             .add("gpg_secret_key", key)
                             .build(),
                         settings
-                    )
+                    ), Optional.empty()
                 )
             )
         );

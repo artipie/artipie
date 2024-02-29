@@ -8,6 +8,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.rpm.Digest;
@@ -22,6 +23,8 @@ import io.vertx.reactivex.core.Vertx;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
+
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.text.StringContainsInOrder;
@@ -90,7 +93,7 @@ final class RpmSliceDownloadITCase {
     void installsByUrl() throws Exception {
         final TestRpm rpm = new TestRpm.Time();
         rpm.put(this.asto);
-        this.start(Policy.FREE, Authentication.ANONYMOUS);
+        this.start(Policy.FREE, (name, pswd) -> Optional.of(AuthUser.ANONYMOUS));
         MatcherAssert.assertThat(
             this.yumInstall(
                 String.format(
@@ -128,7 +131,7 @@ final class RpmSliceDownloadITCase {
         new TestRpm.Aspell().put(new SubStorage(new Key.From("spelling"), this.asto));
         new TestRpm.Time().put(this.asto);
         new Rpm(this.asto, RpmSliceDownloadITCase.CONFIG).batchUpdate(Key.ROOT).blockingAwait();
-        this.start(Policy.FREE, Authentication.ANONYMOUS);
+        this.start(Policy.FREE, (name, pswd) -> Optional.of(AuthUser.ANONYMOUS));
         final Path setting = this.tmp.resolve("example.repo");
         this.tmp.resolve("example.repo").toFile().createNewFile();
         Files.write(

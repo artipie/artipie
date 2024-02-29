@@ -59,14 +59,6 @@ public final class MavenSlice extends Slice.Wrap {
     );
 
     /**
-     * Ctor.
-     * @param storage The storage and default parameters for free access.
-     */
-    public MavenSlice(final Storage storage) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, "*", Optional.empty());
-    }
-
-    /**
      * Private ctor since Artipie doesn't know about `Identities` implementation.
      * @param storage The storage.
      * @param policy Access policy.
@@ -74,8 +66,13 @@ public final class MavenSlice extends Slice.Wrap {
      * @param name Repository name
      * @param events Artifact events
      */
-    public MavenSlice(final Storage storage, final Policy<?> policy, final Authentication users,
-        final String name, final Optional<Queue<ArtifactEvent>> events) {
+    public MavenSlice(
+        final Storage storage,
+        final Policy<?> policy,
+        final Authentication users,
+        final String name,
+        final Optional<Queue<ArtifactEvent>> events
+    ) {
         super(
             new SliceRoute(
                 new RtRulePath(

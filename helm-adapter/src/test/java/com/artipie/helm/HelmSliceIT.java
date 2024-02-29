@@ -9,15 +9,29 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.helm.http.HelmSlice;
 import com.artipie.helm.test.ContentOfIndex;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.misc.RandomFreePort;
-import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.security.policy.PolicyByUsername;
 import com.artipie.vertx.VertxSliceServer;
 import com.google.common.io.ByteStreams;
 import io.vertx.reactivex.core.Vertx;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.Testcontainers;
+import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.Authenticator;
@@ -30,27 +44,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.Testcontainers;
-import org.testcontainers.containers.Container;
-import org.testcontainers.containers.GenericContainer;
 
 /**
  * Ensure that helm command line tool is compatible with this adapter.
- *
- * @since 0.2
  */
 @DisabledIfSystemProperty(named = "os.name", matches = "Windows.*")
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class HelmSliceIT {
     /**
      * Vert instance.
@@ -129,65 +127,52 @@ final class HelmSliceIT {
     void indexYamlIsCreated() throws Exception {
         this.init(true);
         this.con = this.putToLocalhost(true);
-        MatcherAssert.assertThat(
-            "Response status is not 200",
-            this.con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
-        );
-        MatcherAssert.assertThat(
-            "Generated index does not contain required chart",
+        Assertions.assertEquals(200, this.con.getResponseCode());
+        Assertions.assertTrue(
             new ContentOfIndex(this.storage).index()
                 .byChartAndVersion("tomcat", "0.4.1")
                 .isPresent(),
-            new IsEqual<>(true)
+            "Generated index does not contain required chart"
         );
-        MatcherAssert.assertThat("One item was added into events queue", this.events.size() == 1);
+        Assertions.assertEquals(1, this.events.size(), "One item was added into events queue");
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void helmRepoAddAndUpdateWorks(final boolean anonymous) throws Exception {
-        final String hostport = this.init(anonymous);
+        final String hostPort = this.init(anonymous);
         this.con = this.putToLocalhost(anonymous);
-        MatcherAssert.assertThat(
-            "Response status is 200",
-            this.con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
-        );
+        Assertions.assertEquals(200, this.con.getResponseCode());
         exec(
             "helm", "init",
             "--stable-repo-url",
             String.format(
                 "http://%s:%s@%s",
                 HelmSliceIT.USER, HelmSliceIT.PSWD,
-                hostport
+                hostPort
             ),
             "--client-only", "--debug"
         );
-        MatcherAssert.assertThat(
-            "Chart repository was added",
-            this.helmRepoAdd(anonymous, "chartrepo"),
-            new IsEqual<>(true)
-        );
-        MatcherAssert.assertThat(
-            "helm repo update is successful",
-            exec("helm", "repo", "update"),
-            new IsEqual<>(true)
-        );
-        MatcherAssert.assertThat(
-            "One item was added into events queue", this.events.size() == 1
-        );
+        Assertions.assertTrue(helmRepoAdd(anonymous), "Chart repository was added");
+        Assertions.assertTrue(exec("helm", "repo", "update"), "Helm repo update is successful");
+        Assertions.assertEquals(1, this.events.size(), "One item was added into events queue");
     }
 
     private String init(final boolean anonymous) {
         this.port = new RandomFreePort().get();
-        final String hostport = String.format("host.testcontainers.internal:%d/", this.port);
-        this.url = String.format("http://%s", hostport);
+        final String hostPort = String.format("host.testcontainers.internal:%d/", this.port);
+        this.url = String.format("http://%s", hostPort);
         Testcontainers.exposeHostPorts(this.port);
         if (anonymous) {
             this.server = new VertxSliceServer(
                 HelmSliceIT.VERTX,
-                new LoggingSlice(new HelmSlice(this.storage, this.url, Optional.of(this.events))),
+                new LoggingSlice(
+                    new HelmSlice(
+                        this.storage, this.url, Policy.FREE,
+                        (username, password) -> Optional.of(AuthUser.ANONYMOUS),
+                        "*", Optional.of(this.events)
+                    )
+                ),
                 this.port
             );
         } else {
@@ -211,12 +196,12 @@ final class HelmSliceIT {
             );
         this.server.start();
         this.cntn.start();
-        return hostport;
+        return hostPort;
     }
 
-    private boolean helmRepoAdd(final boolean anonymous, final String chartrepo) throws Exception {
+    private boolean helmRepoAdd(final boolean anonymous) throws Exception {
         final List<String> cmdlst = new ArrayList<>(
-            Arrays.asList("helm", "repo", "add", chartrepo, this.url)
+            Arrays.asList("helm", "repo", "add", "chartrepo", this.url)
         );
         if (!anonymous) {
             cmdlst.add("--username");

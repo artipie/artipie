@@ -39,16 +39,16 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Test for {@link RpmSlice}, uses dnf and yum rpm-package managers,
  * checks that list and install works with and without authentication.
- * @since 0.10
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
 @Disabled("https://github.com/artipie/artipie/issues/1409")
 public final class RpmSliceS3ITCase {
@@ -135,7 +135,7 @@ public final class RpmSliceS3ITCase {
     })
     void canListAndInstallFromArtipieRepo(final String linux,
         final String mngr, final String rey) throws Exception {
-        this.start(Policy.FREE, Authentication.ANONYMOUS, "", linux);
+        this.start(Policy.FREE, (username, password) -> Optional.empty(), "", linux);
         MatcherAssert.assertThat(
             "Lists 'time' package",
             this.exec(mngr, rey, "list"),

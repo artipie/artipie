@@ -10,14 +10,12 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.headers.Accept;
 import com.artipie.http.headers.ContentType;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.web.client.HttpResponse;
 import io.vertx.reactivex.ext.web.client.WebClient;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +23,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 /**
  * Tests for files adapter.
@@ -61,7 +62,16 @@ final class FileSliceITCase {
     void setUp() {
         this.vertx = Vertx.vertx();
         this.storage = new InMemoryStorage();
-        this.server = new VertxSliceServer(this.vertx, new FilesSlice(this.storage));
+        this.server = new VertxSliceServer(
+            this.vertx,
+            new FilesSlice(
+                this.storage,
+                Policy.FREE,
+                (username, password) -> Optional.empty(),
+                FilesSlice.ANY_REPO,
+                Optional.empty()
+            )
+        );
         this.port = this.server.start();
     }
 
@@ -163,9 +173,7 @@ final class FileSliceITCase {
                 StandardCharsets.UTF_8
             ),
             new IsEqual<>(
-                Arrays.asList(fone, ftwo, fthree)
-                    .stream()
-                    .collect(Collectors.joining("\n"))
+                String.join("\n", fone, ftwo, fthree)
             )
         );
         MatcherAssert.assertThat(

@@ -32,12 +32,6 @@ import org.reactivestreams.Publisher;
 
 /**
  * NuGet repository HTTP front end.
- *
- * @since 0.1
- * @todo #84:30min Refactor NuGet class, reduce number of fields.
- *  There are too many fields and constructor parameters as result in this class.
- *  Probably it is needed to extract some additional abstractions to reduce it,
- *  joint Permissions and Identities might be one of them.
  */
 public final class NuGet implements Slice {
 
@@ -70,16 +64,6 @@ public final class NuGet implements Slice {
      * Artifact events.
      */
     private final Optional<Queue<ArtifactEvent>> events;
-
-    /**
-     * Ctor.
-     *
-     * @param url Base URL.
-     * @param repository Repository.
-     */
-    public NuGet(final URL url, final Repository repository) {
-        this(url, repository, Policy.FREE, Authentication.ANONYMOUS, "*", Optional.empty());
-    }
 
     /**
      * Ctor.

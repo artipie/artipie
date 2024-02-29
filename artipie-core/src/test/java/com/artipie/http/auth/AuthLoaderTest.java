@@ -7,6 +7,9 @@ package com.artipie.http.auth;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.ArtipieException;
 import java.util.Collections;
+
+import custom.auth.first.FirstAuthFactory;
+import custom.auth.second.SecondAuthFactory;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
@@ -31,7 +34,7 @@ class AuthLoaderTest {
                 "first",
                 Yaml.createYamlMappingBuilder().build()
             ),
-            new IsInstanceOf(Authentication.ANONYMOUS.getClass())
+            new IsInstanceOf(FirstAuthFactory.FirstAuth.class)
         );
         MatcherAssert.assertThat(
             "second auth was created",
@@ -39,7 +42,7 @@ class AuthLoaderTest {
                 "second",
                 Yaml.createYamlMappingBuilder().build()
             ),
-            new IsInstanceOf(Authentication.ANONYMOUS.getClass())
+            new IsInstanceOf(SecondAuthFactory.SecondAuth.class)
         );
     }
 

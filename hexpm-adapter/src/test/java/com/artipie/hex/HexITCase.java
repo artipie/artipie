@@ -9,6 +9,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.hex.http.HexSlice;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.security.policy.Policy;
@@ -37,10 +38,8 @@ import org.testcontainers.containers.GenericContainer;
 
 /**
  * HexPM integration test.
- * @since 0.1
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class HexITCase {
     /**
      * Vertx instance.
@@ -181,7 +180,7 @@ final class HexITCase {
     private Pair<Policy<?>, Authentication> auth(final boolean anonymous) {
         final Pair<Policy<?>, Authentication> res;
         if (anonymous) {
-            res = new ImmutablePair<>(Policy.FREE, Authentication.ANONYMOUS);
+            res = new ImmutablePair<>(Policy.FREE, (name, pswd) -> Optional.of(AuthUser.ANONYMOUS));
         } else {
             res = new ImmutablePair<>(
                 new PolicyByUsername(HexITCase.USER.getKey()),

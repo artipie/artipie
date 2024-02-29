@@ -31,21 +31,6 @@ import java.util.Queue;
 public final class HexSlice extends Slice.Wrap {
 
     /**
-     * Ctor with default parameters for free access.
-     *
-     * @param storage The storage for package.
-     */
-    public HexSlice(final Storage storage) {
-        this(
-            storage,
-            Policy.FREE,
-            Authentication.ANONYMOUS,
-            Optional.empty(),
-            "*"
-        );
-    }
-
-    /**
      * Ctor.
      *
      * @param storage The storage for package.
