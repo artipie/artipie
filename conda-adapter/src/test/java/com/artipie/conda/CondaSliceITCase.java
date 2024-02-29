@@ -9,6 +9,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.conda.http.CondaSlice;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
@@ -40,9 +41,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * Conda adapter integration test.
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
 public final class CondaSliceITCase {
 
@@ -95,7 +94,7 @@ public final class CondaSliceITCase {
                     new CondaSlice(
                         storage,
                         Policy.FREE,
-                        (username, password) -> Optional.empty(),
+                        (username, password) -> Optional.of(AuthUser.ANONYMOUS),
                         new TestCondaTokens(),
                         url, "*",
                         Optional.of(events)
