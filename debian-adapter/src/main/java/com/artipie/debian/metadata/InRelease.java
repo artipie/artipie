@@ -7,10 +7,10 @@ package com.artipie.debian.metadata;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.debian.Config;
 import com.artipie.debian.GpgConfig;
 import com.artipie.debian.misc.GpgClearsign;
+
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -65,8 +65,8 @@ public interface InRelease {
             final CompletionStage<Void> res;
             if (this.config.gpg().isPresent()) {
                 final GpgConfig gpg = this.config.gpg().get();
-                res = this.asto.value(release).thenApply(PublisherAs::new)
-                    .thenCompose(PublisherAs::bytes)
+                res = this.asto.value(release)
+                    .thenCompose(Content::asBytesFuture)
                     .thenCompose(
                         bytes -> gpg.key().thenApply(
                             key -> new GpgClearsign(bytes).signedContent(key, gpg.password())

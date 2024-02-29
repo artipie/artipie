@@ -7,21 +7,18 @@ package com.artipie.asto.memory;
 import com.artipie.asto.ArtipieIOException;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.asto.ext.PublisherAs;
-import java.util.NavigableMap;
-import java.util.TreeMap;
-import java.util.concurrent.CompletionException;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.NavigableMap;
+import java.util.TreeMap;
+import java.util.concurrent.CompletionException;
+
 /**
  * Tests for {@link BenchmarkStorage#move(Key, Key)}.
- * @since 1.2.0
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class BenchmarkStorageMoveTest {
     @Test
     void movesWhenPresentInLocalAndNotDeleted() {
@@ -32,16 +29,10 @@ final class BenchmarkStorageMoveTest {
         final Key dest = new Key.From("destination");
         bench.save(src, new Content.From(data)).join();
         bench.move(src, dest).join();
-        MatcherAssert.assertThat(
-            "Value was not moved to destination key",
-            new PublisherAs(bench.value(dest).join()).bytes().toCompletableFuture().join(),
-            new IsEqual<>(data)
-        );
-        MatcherAssert.assertThat(
-            "Source key in local was not removed",
-            bench.exists(src).join(),
-            new IsEqual<>(false)
-        );
+        Assertions.assertArrayEquals(data, bench.value(dest).join().asBytes(),
+            "Value was not moved to destination key");
+        Assertions.assertFalse(bench.exists(src).join(),
+            "Source key in local was not removed");
     }
 
     @Test
@@ -55,16 +46,10 @@ final class BenchmarkStorageMoveTest {
         bench.save(dest, Content.EMPTY).join();
         bench.delete(dest).join();
         bench.move(src, dest).join();
-        MatcherAssert.assertThat(
-            "Value was not moved to destination key",
-            new PublisherAs(bench.value(dest).join()).bytes().toCompletableFuture().join(),
-            new IsEqual<>(data)
-        );
-        MatcherAssert.assertThat(
-            "Source key in local was not removed",
-            bench.exists(src).join(),
-            new IsEqual<>(false)
-        );
+        Assertions.assertArrayEquals(data, bench.value(dest).join().asBytes(),
+            "Value was not moved to destination key");
+        Assertions.assertFalse(bench.exists(src).join(),
+            "Source key in local was not removed");
     }
 
     @Test
@@ -77,16 +62,10 @@ final class BenchmarkStorageMoveTest {
         final InMemoryStorage memory = new InMemoryStorage(backdata);
         final BenchmarkStorage bench = new BenchmarkStorage(memory);
         bench.move(src, dest).join();
-        MatcherAssert.assertThat(
-            "Value was not moved to destination key",
-            new PublisherAs(bench.value(dest).join()).bytes().toCompletableFuture().join(),
-            new IsEqual<>(data)
-        );
-        MatcherAssert.assertThat(
-            "Source key in backend storage should not be touched",
-            bench.exists(src).join(),
-            new IsEqual<>(true)
-        );
+        Assertions.assertArrayEquals(data, bench.value(dest).join().asBytes(),
+            "Value was not moved to destination key");
+        Assertions.assertTrue(bench.exists(src).join(),
+            "Source key in backend storage should not be touched");
     }
 
     @Test
@@ -101,16 +80,10 @@ final class BenchmarkStorageMoveTest {
         final BenchmarkStorage bench = new BenchmarkStorage(memory);
         bench.delete(dest).join();
         bench.move(src, dest).join();
-        MatcherAssert.assertThat(
-            "Value was not moved to destination key",
-            new PublisherAs(bench.value(dest).join()).bytes().toCompletableFuture().join(),
-            new IsEqual<>(data)
-        );
-        MatcherAssert.assertThat(
-            "Source key in backend storage should not be touched",
-            bench.exists(src).join(),
-            new IsEqual<>(true)
-        );
+        Assertions.assertArrayEquals(data, bench.value(dest).join().asBytes(),
+            "Value was not moved to destination key");
+        Assertions.assertTrue(bench.exists(src).join(),
+            "Source key in backend storage should not be touched");
     }
 
     @Test

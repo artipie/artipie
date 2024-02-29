@@ -7,23 +7,21 @@ package com.artipie.asto.cache;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.net.ConnectException;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+
 /**
  * Test for {@link FromRemoteCache}.
- * @since 0.30
  */
 final class FromRemoteCacheTest {
 
@@ -47,22 +45,16 @@ final class FromRemoteCacheTest {
     void obtainsItemFromRemoteAndCaches() {
         final byte[] content = "123".getBytes();
         final Key key = new Key.From("item");
-        MatcherAssert.assertThat(
-            "Returns content from remote",
-            new PublisherAs(
-                this.cache.load(
-                    key,
-                    () -> CompletableFuture.completedFuture(Optional.of(new Content.From(content))),
-                    CacheControl.Standard.ALWAYS
-                ).toCompletableFuture().join().get()
-            ).bytes().toCompletableFuture().join(),
-            new IsEqual<>(content)
+        Assertions.assertArrayEquals(
+            content,
+            this.cache.load(
+                key,
+                () -> CompletableFuture.completedFuture(Optional.of(new Content.From(content))),
+                CacheControl.Standard.ALWAYS
+            ).toCompletableFuture().join().orElseThrow().asBytes(),
+            "Returns content from remote"
         );
-        MatcherAssert.assertThat(
-            "Saves to storage",
-            new PublisherAs(this.storage.value(key).join()).bytes().toCompletableFuture().join(),
-            new IsEqual<>(content)
-        );
+        Assertions.assertArrayEquals(content, this.storage.value(key).join().asBytes());
     }
 
     @Test
@@ -70,16 +62,14 @@ final class FromRemoteCacheTest {
         final byte[] content = "765".getBytes();
         final Key key = new Key.From("key");
         this.storage.save(key, new Content.From(content)).join();
-        MatcherAssert.assertThat(
-            "Returns content from cache",
-            new PublisherAs(
-                this.cache.load(
-                    key,
-                    () -> CompletableFuture.completedFuture(Optional.empty()),
-                    CacheControl.Standard.ALWAYS
-                ).toCompletableFuture().join().get()
-            ).bytes().toCompletableFuture().join(),
-            new IsEqual<>(content)
+        Assertions.assertArrayEquals(
+            content,
+            this.cache.load(
+                key,
+                () -> CompletableFuture.completedFuture(Optional.empty()),
+                CacheControl.Standard.ALWAYS
+            ).toCompletableFuture().join().orElseThrow().asBytes(),
+            "Returns content from cache"
         );
     }
 
@@ -88,16 +78,14 @@ final class FromRemoteCacheTest {
         final byte[] content = "098".getBytes();
         final Key key = new Key.From("some");
         this.storage.save(key, new Content.From(content)).join();
-        MatcherAssert.assertThat(
-            "Returns content from storage",
-            new PublisherAs(
-                this.cache.load(
-                    key,
-                    new Remote.Failed(new IOException("IO error")),
-                    CacheControl.Standard.ALWAYS
-                ).toCompletableFuture().join().get()
-            ).bytes().toCompletableFuture().join(),
-            new IsEqual<>(content)
+        Assertions.assertArrayEquals(
+            content,
+            this.cache.load(
+                key,
+                new Remote.Failed(new IOException("IO error")),
+                CacheControl.Standard.ALWAYS
+            ).toCompletableFuture().join().orElseThrow().asBytes(),
+            "Returns content from storage"
         );
     }
 

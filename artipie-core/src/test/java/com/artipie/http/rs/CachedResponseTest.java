@@ -5,20 +5,19 @@
 package com.artipie.http.rs;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import io.reactivex.Flowable;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link CachedResponse}.
- *
- * @since 0.17
  */
 class CachedResponseTest {
 
@@ -44,8 +43,8 @@ class CachedResponseTest {
         ).toCompletableFuture().join();
         final AtomicReference<byte[]> capture = new AtomicReference<>();
         cached.send(
-            (status, headers, body) -> new PublisherAs(body).bytes().thenAccept(capture::set)
+            (status, headers, body) -> new Content.From(body).asBytesFuture().thenAccept(capture::set)
         ).toCompletableFuture().join();
-        MatcherAssert.assertThat(capture.get(), new IsEqual<>(content));
+        Assertions.assertArrayEquals(content, capture.get());
     }
 }

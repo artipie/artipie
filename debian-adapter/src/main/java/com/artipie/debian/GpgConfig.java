@@ -5,15 +5,15 @@
 package com.artipie.debian;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.slice.KeyFromPath;
+
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Gpg configuration.
- * @since 0.4
  */
 public interface GpgConfig {
 
@@ -89,8 +89,7 @@ public interface GpgConfig {
         @Override
         public CompletionStage<byte[]> key() {
             return this.storage.value(new KeyFromPath(this.yaml.string(FromYaml.GPG_SECRET_KEY)))
-                .thenApply(PublisherAs::new)
-                .thenCompose(PublisherAs::bytes);
+                .thenCompose(Content::asBytesFuture);
         }
     }
 }

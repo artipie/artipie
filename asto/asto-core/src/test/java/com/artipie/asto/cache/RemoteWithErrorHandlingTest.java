@@ -6,32 +6,30 @@ package com.artipie.asto.cache;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.FailedCompletionStage;
-import com.artipie.asto.ext.PublisherAs;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.net.ConnectException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link Remote.WithErrorHandling}.
- * @since 0.32
  */
 class RemoteWithErrorHandlingTest {
 
     @Test
     void returnsContentFromOrigin() {
         final byte[] bytes = "123".getBytes();
-        MatcherAssert.assertThat(
-            new PublisherAs(
-                new Remote.WithErrorHandling(
-                    () -> CompletableFuture.completedFuture(
-                        Optional.of(new Content.From(bytes))
-                    )
-                ).get().toCompletableFuture().join().get()
-            ).bytes().toCompletableFuture().join(),
-            new IsEqual<>(bytes)
+        Assertions.assertArrayEquals(
+            bytes,
+            new Remote.WithErrorHandling(
+                () -> CompletableFuture.completedFuture(
+                    Optional.of(new Content.From(bytes))
+                )
+            ).get().toCompletableFuture().join().orElseThrow().asBytes()
         );
     }
 

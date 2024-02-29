@@ -7,7 +7,6 @@ package com.artipie.docker.asto;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.RepoName;
@@ -18,17 +17,17 @@ import com.artipie.docker.manifest.JsonManifest;
 import com.artipie.docker.manifest.Layer;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.ref.ManifestRef;
+import com.google.common.base.Strings;
+
+import javax.json.JsonException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
-import javax.json.JsonException;
 
 /**
  * Asto implementation of {@link Manifests}.
- *
- * @since 0.3
  */
 public final class AstoManifests implements Manifests {
 
@@ -74,7 +73,7 @@ public final class AstoManifests implements Manifests {
 
     @Override
     public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
-        return new PublisherAs(content).bytes().thenCompose(
+        return content.asBytesFuture().thenCompose(
             bytes -> this.blobs.put(new TrustedBlobSource(bytes))
                 .thenApply(blob -> new JsonManifest(blob.digest(), bytes))
                 .thenCompose(
@@ -94,12 +93,10 @@ public final class AstoManifests implements Manifests {
                         blobOpt -> blobOpt
                             .map(
                                 blob -> blob.content()
-                                    .thenApply(PublisherAs::new)
-                                    .thenCompose(PublisherAs::bytes)
-                                    .<Manifest>thenApply(
-                                        bytes -> new JsonManifest(blob.digest(), bytes)
+                                    .thenCompose(Content::asBytesFuture)
+                                    .thenApply(bytes -> Optional.<Manifest>of(
+                                        new JsonManifest(blob.digest(), bytes))
                                     )
-                                    .thenApply(Optional::of)
                             )
                             .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()))
                     )
@@ -141,10 +138,8 @@ public final class AstoManifests implements Manifests {
                 digests.map(
                     digest -> this.blobs.blob(digest).thenCompose(
                         opt -> {
-                            if (!opt.isPresent()) {
-                                throw new InvalidManifestException(
-                                    String.format("Blob does not exist: %s", digest)
-                                );
+                            if (opt.isEmpty()) {
+                                throw new InvalidManifestException("Blob does not exist: " + digest);
                             }
                             return CompletableFuture.allOf();
                         }
@@ -153,10 +148,8 @@ public final class AstoManifests implements Manifests {
                 Stream.of(
                     CompletableFuture.runAsync(
                         () -> {
-                            if (manifest.mediaTypes().isEmpty()) {
-                                throw new InvalidManifestException(
-                                    "Required field `mediaType` is empty"
-                                );
+                            if(Strings.isNullOrEmpty(manifest.mediaType())){
+                                throw new InvalidManifestException("Required field `mediaType` is empty");
                             }
                         }
                     )
@@ -203,18 +196,12 @@ public final class AstoManifests implements Manifests {
         final Key key = this.layout.manifest(this.name, ref);
         return this.asto.exists(key).thenCompose(
             exists -> {
-                final CompletionStage<Optional<Digest>> stage;
                 if (exists) {
-                    stage = this.asto.value(key)
-                        .thenCompose(
-                            pub -> new PublisherAs(pub).asciiString()
-                        )
-                        .<Digest>thenApply(Digest.FromString::new)
-                        .thenApply(Optional::of);
-                } else {
-                    stage = CompletableFuture.completedFuture(Optional.empty());
+                    return this.asto.value(key)
+                        .thenCompose(Content::asStringFuture)
+                        .thenApply(val -> Optional.of(new Digest.FromString(val)));
                 }
-                return stage;
+                return CompletableFuture.completedFuture(Optional.empty());
             }
         );
     }

@@ -4,9 +4,9 @@
  */
 package  com.artipie.conan.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.rq.RequestLineFrom;
 import io.vavr.Tuple2;
 import java.io.StringReader;
@@ -138,7 +138,7 @@ public final class ConansEntityV2 {
                 final CompletableFuture<BaseConanSlice.RequestResult> result;
                 if (exist) {
                     result = storage.value(key).thenCompose(
-                        content -> new PublisherAs(content).asciiString().thenApply(
+                        content -> content.asStringFuture().thenApply(
                             string -> {
                                 final JsonParser parser = Json.createParser(
                                     new StringReader(string)
@@ -245,18 +245,14 @@ public final class ConansEntityV2 {
                 ));
             return getStorage().exists(key).thenCompose(
                 exist -> {
-                    final CompletableFuture<RequestResult> result;
                     if (exist) {
-                        result = getStorage().value(key).thenCompose(
-                            content -> new PublisherAs(content).bytes().thenApply(
-                                bytes -> new RequestResult(
-                                    bytes, ConansEntityV2.getContentType(key.string())
-                                ))
-                        );
-                    } else {
-                        result = CompletableFuture.completedFuture(new RequestResult());
+                        return getStorage().value(key)
+                            .thenCompose(Content::asBytesFuture)
+                            .thenApply(bytes -> new RequestResult(
+                                bytes, ConansEntityV2.getContentType(key.string())
+                            ));
                     }
-                    return result;
+                    return CompletableFuture.completedFuture(new RequestResult());
                 }
             );
         }
@@ -319,18 +315,15 @@ public final class ConansEntityV2 {
                 ));
             return getStorage().exists(key).thenCompose(
                 exist -> {
-                    final CompletableFuture<RequestResult> result;
                     if (exist) {
-                        result = getStorage().value(key).thenCompose(
-                            content -> new PublisherAs(content).bytes().thenApply(
+                        return getStorage().value(key).thenCompose(
+                            content -> content.asBytesFuture().thenApply(
                                 bytes -> new RequestResult(
                                     bytes, ConansEntityV2.getContentType(key.string())
                                 ))
                         );
-                    } else {
-                        result = CompletableFuture.completedFuture(new RequestResult());
                     }
-                    return result;
+                    return CompletableFuture.completedFuture(new RequestResult());
                 }
             );
         }

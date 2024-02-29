@@ -32,17 +32,7 @@ import org.testcontainers.DockerClientFactory;
 
 /**
  * Test case for etcd-storage.
- * @since 1.0
- * @todo #309:30min Run Etcd in windows containers while testing on windows.
- *  Currently, when we try to run integration tests based on testcontainers within a platform
- *  windows, we notice that Etcd container (presently based on Linux) doesn't work. We have to build
- *  and publish an Etcd docker image based on windows to avoid this issue.
- *  Please, build an Etcd image for windows (version 3.5.1) and write tests so as to detect before
- *  running integration tests, the type of platform (linux or windows) in order to pull the right
- *  docker image. After that, enable the test below for windows by removing
- *  {@code @DisabledOnOs(OS.WINDOWS)}.
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
 final class EtcdStorageITCase {
 
