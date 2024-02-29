@@ -4,17 +4,19 @@
  */
 package com.artipie.asto;
 
+import com.artipie.asto.ext.PublisherAs;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Optional;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Content that can be stored in {@link Storage}.
- *
- * @since 0.15
  */
 public interface Content extends Publisher<ByteBuffer> {
 
@@ -31,9 +33,43 @@ public interface Content extends Publisher<ByteBuffer> {
     Optional<Long> size();
 
     /**
-     * Empty content.
+     * Reads bytes from content into memory.
      *
-     * @since 0.24
+     * @return Byte array as CompletionStage
+     */
+    default CompletableFuture<byte[]> asBytesFuture() {
+        return new PublisherAs(this).bytes().toCompletableFuture();
+    }
+
+    /**
+     * Reads bytes from content into memory.
+     *
+     * @return Byte array
+     */
+    default byte[] asBytes() {
+        return this.asBytesFuture().join();
+    }
+
+    /**
+     * Reads bytes from content as string in the {@code StandardCharsets.UTF_8} charset.
+     *
+     * @return String as CompletionStage
+     */
+    default CompletableFuture<String> asStringFuture() {
+        return new PublisherAs(this).string(StandardCharsets.UTF_8).toCompletableFuture();
+    }
+
+    /**
+     * Reads bytes from content as string in the {@code StandardCharsets.UTF_8} charset.
+     *
+     * @return String
+     */
+    default String asString() {
+        return this.asStringFuture().join();
+    }
+
+    /**
+     * Empty content.
      */
     final class Empty implements Content {
 
@@ -50,8 +86,6 @@ public interface Content extends Publisher<ByteBuffer> {
 
     /**
      * Key built from byte buffers publisher and total size if it is known.
-     *
-     * @since 0.15
      */
     final class From implements Content {
 

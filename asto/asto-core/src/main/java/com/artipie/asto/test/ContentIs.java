@@ -5,14 +5,14 @@
 package com.artipie.asto.test;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.nio.charset.Charset;
-import java.util.concurrent.ExecutionException;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
+
+import java.nio.charset.Charset;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Matcher for {@link Content}.
@@ -59,9 +59,7 @@ public final class ContentIs extends TypeSafeMatcher<Content> {
     public boolean matchesSafely(final Content item) {
         try {
             return this.matcher.matches(
-                Uninterruptibles.getUninterruptibly(
-                    new PublisherAs(item).bytes().toCompletableFuture()
-                )
+                Uninterruptibles.getUninterruptibly(item.asBytesFuture())
             );
         } catch (final ExecutionException err) {
             throw new IllegalStateException("Failed to read content", err);

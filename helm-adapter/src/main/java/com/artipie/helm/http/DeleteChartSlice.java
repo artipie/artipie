@@ -4,9 +4,9 @@
  */
 package com.artipie.helm.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.helm.ChartYaml;
 import com.artipie.helm.TgzArchive;
 import com.artipie.helm.metadata.IndexYaml;
@@ -19,6 +19,8 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Single;
+import org.reactivestreams.Publisher;
+
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -30,11 +32,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.reactivestreams.Publisher;
 
 /**
  * Endpoint for removing chart by name or by name and version.
- * @since 0.3
  */
 final class DeleteChartSlice implements Slice {
     /**
@@ -123,33 +123,25 @@ final class DeleteChartSlice implements Slice {
                     keys -> CompletableFuture.allOf(
                         keys.stream().map(
                             key -> this.storage.value(key)
-                                .thenApply(PublisherAs::new)
-                                .thenCompose(PublisherAs::bytes)
-                                .thenApply(TgzArchive::new)
-                                .thenCompose(
-                                    tgz -> {
-                                        final CompletionStage<Void> res;
-                                        final ChartYaml chart = tgz.chartYaml();
-                                        if (chart.name().equals(name)) {
-                                            res = this.wasChartDeleted(chart, vers, key)
-                                                .thenCompose(
-                                                    wasdel -> {
-                                                        wasdeleted.compareAndSet(false, wasdel);
-                                                        return CompletableFuture.allOf();
-                                                    }
-                                                );
-                                        } else {
-                                            res = CompletableFuture.allOf();
-                                        }
-                                        return res;
+                                .thenCompose(Content::asBytesFuture)
+                                .thenCompose(bytes -> {
+                                    TgzArchive tgz = new TgzArchive(bytes);
+                                    final ChartYaml chart = tgz.chartYaml();
+                                    if (chart.name().equals(name)) {
+                                        return this.wasChartDeleted(chart, vers, key)
+                                            .thenCompose(
+                                                wasdel -> {
+                                                    wasdeleted.compareAndSet(false, wasdel);
+                                                    return CompletableFuture.allOf();
+                                                }
+                                            );
                                     }
-                                )
+                                    return CompletableFuture.allOf();
+                                })
                         ).toArray(CompletableFuture[]::new)
                     ).thenApply(
                         noth -> {
-                            final Response resp;
                             if (wasdeleted.get()) {
-                                resp = StandardRs.OK;
                                 this.events.ifPresent(
                                     queue -> queue.add(
                                         vers.map(
@@ -163,10 +155,9 @@ final class DeleteChartSlice implements Slice {
                                         )
                                     )
                                 );
-                            } else {
-                                resp = StandardRs.NOT_FOUND;
+                                return StandardRs.OK;
                             }
-                            return resp;
+                            return StandardRs.NOT_FOUND;
                         }
                     )
                 )

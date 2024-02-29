@@ -6,39 +6,32 @@ package com.artipie.asto.test;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.IsNull;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 /**
  * Test for {@link TestResource}.
- * @since 0.24
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class TestResourceTest {
 
     @Test
     void readsResourceBytes() {
-        MatcherAssert.assertThat(
-            new TestResource("test.txt").asBytes(),
-            new IsEqual<>("hello world".getBytes())
+        Assertions.assertArrayEquals(
+            "hello world".getBytes(),
+            new TestResource("test.txt").asBytes()
         );
     }
 
     @Test
     void readsResourceAsStream() {
-        MatcherAssert.assertThat(
-            new TestResource("test.txt").asInputStream(),
-            new IsNot<>(new IsNull<>())
-        );
+        Assertions.assertNotNull(new TestResource("test.txt").asInputStream());
     }
 
     @Test
@@ -46,11 +39,8 @@ class TestResourceTest {
         final Storage storage = new InMemoryStorage();
         final String path = "test.txt";
         new TestResource(path).saveTo(storage);
-        MatcherAssert.assertThat(
-            new PublisherAs(storage.value(new Key.From(path)).join())
-                .bytes().toCompletableFuture().join(),
-            new IsEqual<>("hello world".getBytes())
-        );
+        Assertions.assertEquals("hello world",
+            storage.value(new Key.From(path)).join().asString());
     }
 
     @Test
@@ -68,9 +58,9 @@ class TestResourceTest {
         final Storage storage = new InMemoryStorage();
         final Key key = new Key.From("one");
         new TestResource("test.txt").saveTo(storage, key);
-        MatcherAssert.assertThat(
-            new PublisherAs(storage.value(key).join()).bytes().toCompletableFuture().join(),
-            new IsEqual<>("hello world".getBytes())
+        Assertions.assertArrayEquals(
+            "hello world".getBytes(),
+            storage.value(key).join().asBytes()
         );
     }
 
@@ -79,18 +69,8 @@ class TestResourceTest {
         final Storage storage = new InMemoryStorage();
         final Key base = new Key.From("base");
         new TestResource("folder").addFilesTo(storage, base);
-        MatcherAssert.assertThat(
-            "Adds one.txt",
-            new PublisherAs(storage.value(new Key.From(base, "one.txt")).join())
-                .bytes().toCompletableFuture().join(),
-            new IsEqual<>("one".getBytes())
-        );
-        MatcherAssert.assertThat(
-            "Adds two.txt",
-            new PublisherAs(storage.value(new Key.From(base, "two.txt")).join())
-                .bytes().toCompletableFuture().join(),
-            new IsEqual<>("two".getBytes())
-        );
+        Assertions.assertEquals("one", storage.value(new Key.From(base, "one.txt")).join().asString());
+        Assertions.assertEquals("two", storage.value(new Key.From(base, "two.txt")).join().asString());
     }
 
 }
