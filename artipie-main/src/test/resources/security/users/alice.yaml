@@ -6,6 +6,10 @@ permissions:
       - "*"
     my-npm:
       - "*"
+    my-gem:
+      - "*"
+    my-gem-port:
+      - "*"
   docker_repository_permissions:
     "*":
       "*":
