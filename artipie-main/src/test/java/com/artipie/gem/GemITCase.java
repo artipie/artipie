@@ -22,9 +22,7 @@ import org.testcontainers.containers.BindMode;
 
 /**
  * Integration tests for Gem repository.
- * @since 0.13
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class GemITCase {
 
@@ -41,6 +39,7 @@ final class GemITCase {
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("gem/gem.yml", "my-gem")
             .withRepoConfig("gem/gem-port.yml", "my-gem-port")
+            .withUser("security/users/alice.yaml", "alice")
             .withExposedPorts(8081),
         () -> new TestDeployment.ClientContainer("ruby:2.7.2")
             .withWorkingDirectory("/w")
@@ -60,7 +59,7 @@ final class GemITCase {
             new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(
-                    new ListOf<String>(
+                    new ListOf<>(
                         String.format("POST http://artipie:%s/%s/api/v1/gems", port, repo),
                         "201 Created"
                     )
@@ -68,7 +67,7 @@ final class GemITCase {
             ),
             "env", String.format(
                 "GEM_HOST_API_KEY=%s",
-                new String(Base64.getEncoder().encode("any:any".getBytes(StandardCharsets.UTF_8)))
+                new String(Base64.getEncoder().encode("alice:123".getBytes(StandardCharsets.UTF_8)))
             ),
             "gem", "push", "-v", "/w/rails-6.0.2.2.gem", "--host",
             String.format("http://artipie:%s/%s", port, repo)
@@ -88,7 +87,7 @@ final class GemITCase {
             new ContainerResultMatcher(
                 new IsEqual<>(0),
                 new StringContainsInOrder(
-                    new ListOf<String>(
+                    new ListOf<>(
                         String.format(
                             "GET http://artipie:%s/%s/quick/Marshal.4.8/%sspec.rz",
                             port, repo, GemITCase.RAILS

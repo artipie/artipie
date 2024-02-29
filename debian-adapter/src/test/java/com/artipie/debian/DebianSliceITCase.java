@@ -13,19 +13,10 @@ import com.artipie.debian.http.DebianSlice;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Pattern;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -44,14 +35,20 @@ import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Pattern;
+
 /**
  * Test for {@link com.artipie.debian.http.DebianSlice}.
- * @since 0.1
- * @todo #2:30min Find (or create) package without any dependencies or necessary settings
- *  for install test: current package `aglfn_1.7-3_all.deb` is now successfully downloaded and
- *  unpacked, but then debian needs to configure it and fails.
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 public final class DebianSliceITCase {
 
@@ -100,6 +97,8 @@ public final class DebianSliceITCase {
             new LoggingSlice(
                 new DebianSlice(
                     this.storage,
+                    Policy.FREE,
+                    (username, password) -> Optional.empty(),
                     new Config.FromYaml(
                         "artipie",
                         Yaml.createYamlMappingBuilder()
@@ -107,7 +106,8 @@ public final class DebianSliceITCase {
                             .add("Architectures", "amd64")
                             .build(),
                         new InMemoryStorage()
-                    ), Optional.ofNullable(this.events)
+                    ),
+                    Optional.ofNullable(this.events)
                 )
             )
         );

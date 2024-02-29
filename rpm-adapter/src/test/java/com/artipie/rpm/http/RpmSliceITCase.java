@@ -19,8 +19,6 @@ import com.artipie.security.policy.PolicyByUsername;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.text.StringContainsInOrder;
@@ -35,12 +33,14 @@ import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+
 /**
  * Test for {@link RpmSlice}, uses dnf and yum rpm-package managers,
  * checks that list and install works with and without authentication.
- * @since 0.10
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
 public final class RpmSliceITCase {
 
@@ -86,7 +86,7 @@ public final class RpmSliceITCase {
     })
     void canListAndInstallFromArtipieRepo(final String linux,
         final String mngr, final String rey) throws Exception {
-        this.start(Policy.FREE, Authentication.ANONYMOUS, "", linux);
+        this.start(Policy.FREE, (username, password) -> Optional.empty(), "", linux);
         MatcherAssert.assertThat(
             "Lists 'time' package",
             this.exec(mngr, rey, "list"),

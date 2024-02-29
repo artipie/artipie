@@ -38,25 +38,6 @@ public final class GemSlice extends Slice.Wrap {
      * Ctor.
      *
      * @param storage The storage.
-     */
-    public GemSlice(final Storage storage) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, "", Optional.empty());
-    }
-
-    /**
-     * Ctor.
-     *
-     * @param storage The storage.
-     * @param events Artifact events queue
-     */
-    public GemSlice(final Storage storage, final Optional<Queue<ArtifactEvent>> events) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, "", events);
-    }
-
-    /**
-     * Ctor.
-     *
-     * @param storage The storage.
      * @param policy The policy.
      * @param auth The auth.
      * @param name Repository name

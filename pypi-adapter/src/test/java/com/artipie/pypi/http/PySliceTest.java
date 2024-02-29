@@ -18,8 +18,8 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
+import com.artipie.security.policy.Policy;
 import io.reactivex.Flowable;
-import java.util.Collections;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
@@ -28,11 +28,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.Collections;
+import java.util.Optional;
+
 /**
  * Test for {@link PySlice}.
  * @since 0.6
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class PySliceTest {
 
     /**
@@ -48,7 +50,11 @@ class PySliceTest {
     @BeforeEach
     void init() {
         this.storage = new InMemoryStorage();
-        this.slice = new PySlice(this.storage);
+        this.slice = new PySlice(
+            this.storage, Policy.FREE,
+            (username, password) -> Optional.empty(),
+            "*", Optional.empty()
+        );
     }
 
     @Test

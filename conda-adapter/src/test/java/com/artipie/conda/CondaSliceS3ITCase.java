@@ -9,14 +9,14 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.factory.Config;
 import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.conda.http.CondaSlice;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.text.StringContainsInOrder;
@@ -32,11 +32,13 @@ import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
 /**
  * Conda adapter integration test.
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class CondaSliceS3ITCase {
 
     /**
@@ -155,7 +157,15 @@ public final class CondaSliceS3ITCase {
             );
         this.server = new VertxSliceServer(
             CondaSliceS3ITCase.VERTX,
-            new LoggingSlice(new BodyLoggingSlice(new CondaSlice(storage, url, events))),
+            new LoggingSlice(
+                new BodyLoggingSlice(
+                    new CondaSlice(
+                        storage, Policy.FREE,
+                        (username, password) -> Optional.of(AuthUser.ANONYMOUS),
+                        new TestCondaTokens(), url, "*", Optional.of(events)
+                    )
+                )
+            ),
             this.port
         );
         this.server.start();

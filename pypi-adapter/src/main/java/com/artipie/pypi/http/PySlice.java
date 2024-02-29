@@ -35,16 +35,7 @@ import java.util.regex.Pattern;
  *
  * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class PySlice extends Slice.Wrap {
-
-    /**
-     * Ctor.
-     * @param storage The storage and default parameters for free access.
-     */
-    public PySlice(final Storage storage) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, "*", Optional.empty());
-    }
 
     /**
      * Primary ctor.
@@ -54,8 +45,13 @@ public final class PySlice extends Slice.Wrap {
      * @param name Repository name
      * @param queue Events queue
      */
-    public PySlice(final Storage storage, final Policy<?> policy, final Authentication auth,
-        final String name, final Optional<Queue<ArtifactEvent>> queue) {
+    public PySlice(
+        final Storage storage,
+        final Policy<?> policy,
+        final Authentication auth,
+        final String name,
+        final Optional<Queue<ArtifactEvent>> queue
+    ) {
         super(
             new SliceRoute(
                 new RtRulePath(

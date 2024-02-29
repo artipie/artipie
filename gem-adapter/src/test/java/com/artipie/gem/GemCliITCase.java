@@ -7,16 +7,11 @@ package com.artipie.gem;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.gem.http.GemSlice;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.slice.LoggingSlice;
+import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -29,12 +24,18 @@ import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.Transferable;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 /**
  * A test which ensures {@code gem} console tool compatibility with the adapter.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledIfSystemProperty(named = "os.name", matches = "Windows.*")
 final class GemCliITCase {
 
@@ -59,12 +60,17 @@ final class GemCliITCase {
     private String base;
 
     @BeforeEach
-    void setUp(@TempDir final Path temp) throws Exception {
+    void setUp(@TempDir final Path temp) {
         this.vertx = Vertx.vertx();
         this.server = new VertxSliceServer(
             this.vertx,
             new LoggingSlice(
-                new GemSlice(new FileStorage(temp))
+                new GemSlice(
+                    new FileStorage(temp),
+                    Policy.FREE,
+                    (username, password) -> Optional.of(AuthUser.ANONYMOUS),
+                    ""
+                )
             )
         );
         final int port = this.server.start();
@@ -90,8 +96,7 @@ final class GemCliITCase {
     }
 
     @Test
-    void gemPushAndInstallWorks()
-        throws IOException, InterruptedException {
+    void gemPushAndInstallWorks() {
         final Set<String> gems = new HashSet<>(
             Arrays.asList(
                 "builder-3.2.4.gem", "rails-6.0.2.2.gem",

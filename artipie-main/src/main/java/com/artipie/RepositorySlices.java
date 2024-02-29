@@ -62,6 +62,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import io.vertx.core.Vertx;
+
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -179,7 +180,15 @@ public class RepositorySlices {
                 );
                 break;
             case "gem":
-                slice = trimPathSlice(new GemSlice(cfg.storage()));
+                slice = trimPathSlice(
+                    new GemSlice(
+                        cfg.storage(),
+                        securityPolicy(),
+                        authentication(),
+                        cfg.name(),
+                        artifactEvents()
+                    )
+                );
                 break;
             case "helm":
                 slice = trimPathSlice(

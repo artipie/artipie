@@ -8,6 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -28,6 +29,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
+
+import java.util.Optional;
 
 /**
  * IT case for {@link GoSlice}: it runs Testcontainer with latest version of golang,
@@ -140,15 +143,9 @@ public final class GoSliceITCase {
      * @return Identities instance
      */
     private static Authentication users(final boolean anonymous) {
-        final Authentication res;
-        if (anonymous) {
-            res = Authentication.ANONYMOUS;
-        } else {
-            res = new Authentication.Single(
-                GoSliceITCase.USER.getKey(), GoSliceITCase.USER.getValue()
-            );
-        }
-        return res;
+        return anonymous
+            ? (name, pswd) -> Optional.of(AuthUser.ANONYMOUS)
+            : new Authentication.Single(GoSliceITCase.USER.getKey(), GoSliceITCase.USER.getValue());
     }
 
     /**

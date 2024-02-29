@@ -22,35 +22,14 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
+
 import java.util.Optional;
 import java.util.Queue;
 
 /**
  * Debian slice.
- * @since 0.1
  */
 public final class DebianSlice extends Slice.Wrap {
-
-    /**
-     * Ctor.
-     * @param storage Storage
-     * @param config Repository configuration
-     */
-    public DebianSlice(final Storage storage, final Config config) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, config, Optional.empty());
-    }
-
-    /**
-     * Ctor.
-     * @param storage Storage
-     * @param config Repository configuration
-     * @param events Artifact events queue
-     */
-    public DebianSlice(
-        final Storage storage, final Config config, final Optional<Queue<ArtifactEvent>> events
-    ) {
-        this(storage, Policy.FREE, Authentication.ANONYMOUS, config, events);
-    }
 
     /**
      * Ctor.
@@ -61,8 +40,10 @@ public final class DebianSlice extends Slice.Wrap {
      * @param events Artifact events queue
      */
     public DebianSlice(
-        final Storage storage, final Policy<?> policy,
-        final Authentication users, final Config config,
+        final Storage storage,
+        final Policy<?> policy,
+        final Authentication users,
+        final Config config,
         final Optional<Queue<ArtifactEvent>> events
     ) {
         super(
