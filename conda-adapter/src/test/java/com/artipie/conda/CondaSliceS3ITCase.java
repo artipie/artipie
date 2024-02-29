@@ -9,6 +9,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.factory.Config;
 import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.conda.http.CondaSlice;
+import com.artipie.http.auth.AuthUser;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
@@ -160,7 +161,7 @@ public final class CondaSliceS3ITCase {
                 new BodyLoggingSlice(
                     new CondaSlice(
                         storage, Policy.FREE,
-                        (username, password) -> Optional.empty(),
+                        (username, password) -> Optional.of(AuthUser.ANONYMOUS),
                         new TestCondaTokens(), url, "*", Optional.of(events)
                     )
                 )
