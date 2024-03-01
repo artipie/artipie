@@ -29,6 +29,7 @@
         <exclude name="LawOfDemeter"/>
         <exclude name="SignatureDeclareThrowsException"/>
         <exclude name="ExcessiveImports"/>
+        <exclude name="TooManyMethods "/>
     </rule>
     <rule ref="category/java/design.xml/CognitiveComplexity">
         <properties>
@@ -40,11 +41,6 @@
             <property name="classReportLevel" value="80" />
             <property name="methodReportLevel" value="15" />
             <property name="cycloOptions" value="" />
-        </properties>
-    </rule>
-    <rule ref="category/java/design.xml/TooManyMethods">
-        <properties>
-            <property name="maxmethods" value="12" />
         </properties>
     </rule>
     <rule ref="category/java/documentation.xml">

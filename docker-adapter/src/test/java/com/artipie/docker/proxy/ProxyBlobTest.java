@@ -5,7 +5,6 @@
 package com.artipie.docker.proxy;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.Digest;
 import com.artipie.docker.RepoName;
 import com.artipie.http.Headers;
@@ -14,20 +13,19 @@ import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.common.RsError;
 import io.reactivex.Flowable;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Tests for {@link ProxyBlob}.
- *
- * @since 0.3
  */
 class ProxyBlobTest {
 
@@ -49,10 +47,7 @@ class ProxyBlobTest {
             new Digest.FromString("sha256:123"),
             data.length
         ).content().toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            new PublisherAs(content).bytes().toCompletableFuture().join(),
-            new IsEqual<>(data)
-        );
+        MatcherAssert.assertThat(content.asBytes(), new IsEqual<>(data));
         MatcherAssert.assertThat(
             content.size(),
             new IsEqual<>(Optional.of((long) data.length))
@@ -80,53 +75,34 @@ class ProxyBlobTest {
     void shouldNotFinishSendWhenContentReceived() {
         final AtomicReference<CompletionStage<Void>> capture = new AtomicReference<>();
         this.captureConnectionAccept(capture, false);
-        MatcherAssert.assertThat(
-            capture.get().toCompletableFuture().isDone(),
-            new IsEqual<>(false)
-        );
+        Assertions.assertFalse(capture.get().toCompletableFuture().isDone());
     }
 
     @Test
     void shouldFinishSendWhenContentConsumed() {
         final AtomicReference<CompletionStage<Void>> capture = new AtomicReference<>();
-        final Content content = this.captureConnectionAccept(capture, false);
-        new PublisherAs(content).bytes().toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            capture.get().toCompletableFuture().isDone(),
-            new IsEqual<>(true)
-        );
+        this.captureConnectionAccept(capture, false).asBytes();
+        Assertions.assertTrue(capture.get().toCompletableFuture().isDone());
     }
 
     @Test
     @SuppressWarnings("PMD.EmptyCatchBlock")
     void shouldFinishSendWhenContentIsBad() {
         final AtomicReference<CompletionStage<Void>> capture = new AtomicReference<>();
-        final Content content = this.captureConnectionAccept(capture, true);
-        try {
-            new PublisherAs(content).bytes().toCompletableFuture().join();
-        } catch (final CompletionException ex) {
-        }
-        MatcherAssert.assertThat(
-            capture.get().toCompletableFuture().isDone(),
-            new IsEqual<>(true)
-        );
+        this.captureConnectionAccept(capture, true).asBytes();
+        Assertions.assertTrue(capture.get().toCompletableFuture().isDone());
     }
 
     @Test
     void shouldHandleStatus() {
         final byte[] data = "content".getBytes();
         final CompletableFuture<Content> content = new ProxyBlob(
-            (line, headers, body) -> new RsError(
-                new IllegalArgumentException()
-            ),
+            (line, headers, body) -> new RsError(new IllegalArgumentException()),
             new RepoName.Valid("test-2"),
             new Digest.FromString("sha256:567"),
             data.length
         ).content().toCompletableFuture();
-        Assertions.assertThrows(
-            CompletionException.class,
-            content::join
-        );
+        Assertions.assertThrows(CompletionException.class, content::join);
     }
 
     private Content captureConnectionAccept(

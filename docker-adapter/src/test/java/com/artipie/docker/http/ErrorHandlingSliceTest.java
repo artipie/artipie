@@ -6,7 +6,6 @@ package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.FailedCompletionStage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.error.InvalidDigestException;
 import com.artipie.docker.error.InvalidManifestException;
 import com.artipie.docker.error.InvalidRepoNameException;
@@ -24,12 +23,6 @@ import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.StandardRs;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -39,12 +32,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.stream.Stream;
+
 /**
  * Tests for {@link ErrorHandlingSlice}.
- *
- * @since 0.5
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ErrorHandlingSliceTest {
 
     @Test
@@ -66,7 +62,7 @@ class ErrorHandlingSliceTest {
                 );
                 MatcherAssert.assertThat(
                     "Body unmodified",
-                    new PublisherAs(rqbody).bytes().toCompletableFuture().join(),
+                    new Content.From(rqbody).asBytes(),
                     new IsEqual<>(body)
                 );
                 return StandardRs.OK;
@@ -220,7 +216,7 @@ class ErrorHandlingSliceTest {
                     new UnsupportedError().code()
                 )
             )
-        ).collect(Collectors.toList());
+        ).toList();
         return Stream.concat(
             plain.stream(),
             plain.stream().map(Arguments::get).map(

@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
@@ -16,6 +15,17 @@ import com.artipie.docker.Layers;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Upload;
 import io.reactivex.Flowable;
+import org.hamcrest.Description;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.collection.IsEmptyCollection;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsInstanceOf;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -28,21 +38,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
-import org.hamcrest.Description;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.hamcrest.TypeSafeMatcher;
-import org.hamcrest.collection.IsEmptyCollection;
-import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsInstanceOf;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link AstoUpload}.
- *
- * @since 0.2
  */
 class AstoUploadTest {
 
@@ -159,8 +157,6 @@ class AstoUploadTest {
 
     /**
      * Matcher for {@link Upload} content.
-     *
-     * @since 0.12
      */
     private final class IsUploadWithContent extends TypeSafeMatcher<Upload> {
 
@@ -197,16 +193,14 @@ class AstoUploadTest {
         /**
          * Captured put content.
          */
-        private volatile byte[] ccontent;
+        private volatile byte[] content;
 
         @Override
         public CompletionStage<Blob> put(final BlobSource source) {
             final Key key = new Key.From(UUID.randomUUID().toString());
             source.saveTo(AstoUploadTest.this.storage, key).toCompletableFuture().join();
-            this.ccontent = AstoUploadTest.this.storage.value(key)
-                .thenApply(PublisherAs::new)
-                .thenCompose(PublisherAs::bytes)
-                .toCompletableFuture().join();
+            this.content = AstoUploadTest.this.storage.value(key)
+                .thenCompose(Content::asBytesFuture).join();
             return CompletableFuture.completedFuture(null);
         }
 
@@ -221,7 +215,7 @@ class AstoUploadTest {
         }
 
         public byte[] content() {
-            return this.ccontent;
+            return this.content;
         }
     }
 }
