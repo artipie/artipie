@@ -7,32 +7,30 @@ package com.artipie.nuget;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.nuget.metadata.NuspecField;
 import com.artipie.nuget.metadata.Version;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
 import org.cactoos.io.ReaderOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Tests for {@link Versions}.
- *
- * @since 0.1
  */
 class VersionsTest {
 
@@ -92,13 +90,10 @@ class VersionsTest {
         final Key.From key = new Key.From("foo");
         final JsonObject data = Json.createObjectBuilder().build();
         new Versions(data).save(this.storage, key).toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            "Saved versions are not identical to versions initial content",
-            this.storage.value(key)
-                .thenApply(PublisherAs::new)
-                .thenCompose(PublisherAs::bytes)
-                .join(),
-            new IsEqual<>(data.toString().getBytes(StandardCharsets.US_ASCII))
+        Assertions.assertEquals(
+            data.toString(),
+            this.storage.value(key).join().asString(),
+            "Saved versions are not identical to versions initial content"
         );
     }
 

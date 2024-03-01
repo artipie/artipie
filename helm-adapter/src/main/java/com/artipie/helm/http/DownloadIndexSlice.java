@@ -8,7 +8,6 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.helm.ChartYaml;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.http.Headers;
@@ -21,6 +20,8 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.KeyFromPath;
+import org.reactivestreams.Publisher;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,12 +36,10 @@ import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.reactivestreams.Publisher;
 
 /**
  * Download index file endpoint. Return index file with urls that are
  * based on requested URL.
- * @since 0.3
  */
 final class DownloadIndexSlice implements Slice {
     /**
@@ -154,12 +153,12 @@ final class DownloadIndexSlice implements Slice {
          * @return Modified content with prepended URLs
          */
         public CompletionStage<Content> value() {
-            return new PublisherAs(this.original)
-                .bytes()
+            return this.original
+                .asBytesFuture()
                 .thenApply(bytes -> new String(bytes, StandardCharsets.UTF_8))
                 .thenApply(IndexYamlMapping::new)
                 .thenApply(this::update)
-                .thenApply(idx -> idx.toContent().get());
+                .thenApply(idx -> idx.toContent().orElseThrow());
         }
 
         /**

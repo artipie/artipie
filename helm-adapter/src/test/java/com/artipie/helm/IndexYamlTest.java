@@ -6,18 +6,12 @@ package com.artipie.helm;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.helm.metadata.IndexYaml;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.helm.test.ContentOfIndex;
 import com.google.common.base.Throwables;
-import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -28,9 +22,14 @@ import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Test case for {@link IndexYaml}.
- * @since 0.2
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class IndexYamlTest {
@@ -238,10 +237,7 @@ final class IndexYamlTest {
 
     private Map<String, Object> chartYaml(final String file) {
         return new TgzArchive(
-            new PublisherAs(
-                new Content.From(new TestResource(file).asBytes())
-            ).bytes()
-            .toCompletableFuture().join()
+            new Content.From(new TestResource(file).asBytes()).asBytes()
         ).chartYaml()
         .fields();
     }
@@ -249,10 +245,7 @@ final class IndexYamlTest {
     private void update(final String chart) {
         this.yaml.update(
             new TgzArchive(
-                new PublisherAs(
-                    new Content.From(new TestResource(chart).asBytes())
-                ).bytes()
-                .toCompletableFuture().join()
+                new Content.From(new TestResource(chart).asBytes()).asBytes()
             )
         ).blockingGet();
     }

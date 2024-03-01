@@ -9,7 +9,6 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.helm.metadata.ParsedChartName;
 import com.artipie.helm.metadata.YamlWriter;
@@ -19,6 +18,8 @@ import com.artipie.helm.misc.SpaceInBeginning;
 import com.artipie.http.misc.TokenizerFlatProc;
 import hu.akarnokd.rxjava2.interop.FlowableInterop;
 import io.reactivex.Flowable;
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -33,13 +34,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Add writer of info about charts to index file.
- * @since 0.3
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.NPathComplexity", "PMD.CognitiveComplexity"})
+@SuppressWarnings({"PMD.NPathComplexity", "PMD.CognitiveComplexity"})
 interface AddWriter {
     /**
      * Add info about charts to index. If index contains a chart with the same
@@ -265,40 +264,37 @@ interface AddWriter {
             final SortedSet<Key> charts, final YamlWriter writer
         ) {
             final AtomicReference<String> prev = new AtomicReference<>();
-            CompletableFuture<Void> future = CompletableFuture.allOf();
-            for (final Key key: charts) {
-                future = future.thenCompose(
+            CompletableFuture<Void> res = CompletableFuture.allOf();
+            for (final Key key : charts) {
+                res = res.thenCompose(
                     noth -> this.storage.value(key)
-                        .thenApply(PublisherAs::new)
-                        .thenCompose(PublisherAs::bytes)
-                        .thenApply(TgzArchive::new)
-                        .thenAccept(
-                            tgz -> {
-                                final Map<String, Object> fields;
-                                fields = new HashMap<>(tgz.chartYaml().fields());
-                                fields.putAll(tgz.metadata(Optional.empty()));
-                                fields.put("created", new DateTimeNow().asString());
-                                final String name = (String) fields.get("name");
-                                try {
-                                    if (!name.equals(prev.get())) {
-                                        writer.writeLine(String.format("%s:", name), 1);
-                                    }
-                                    prev.set(name);
-                                    writer.writeLine("-", 1);
-                                    final String[] splitted = new ChartYaml(fields)
-                                        .toString()
-                                        .split("\n");
-                                    for (final String line : splitted) {
-                                        writer.writeLine(line, 2);
-                                    }
-                                } catch (final IOException exc) {
-                                    throw new ArtipieIOException(exc);
+                        .thenCompose(Content::asBytesFuture)
+                        .thenAccept(bytes -> {
+                            TgzArchive tgz = new TgzArchive(bytes);
+                            final Map<String, Object> fields;
+                            fields = new HashMap<>(tgz.chartYaml().fields());
+                            fields.putAll(tgz.metadata(Optional.empty()));
+                            fields.put("created", new DateTimeNow().asString());
+                            final String name = (String) fields.get("name");
+                            try {
+                                if (!name.equals(prev.get())) {
+                                    writer.writeLine(String.format("%s:", name), 1);
                                 }
+                                prev.set(name);
+                                writer.writeLine("-", 1);
+                                final String[] splitted = new ChartYaml(fields)
+                                    .toString()
+                                    .split("\n");
+                                for (final String line : splitted) {
+                                    writer.writeLine(line, 2);
+                                }
+                            } catch (final IOException exc) {
+                                throw new ArtipieIOException(exc);
                             }
-                        )
+                        })
                 );
             }
-            return future;
+            return res;
         }
 
         /**

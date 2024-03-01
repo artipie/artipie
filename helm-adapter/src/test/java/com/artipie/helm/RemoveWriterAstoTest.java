@@ -7,12 +7,21 @@ package com.artipie.helm;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.helm.metadata.IndexYaml;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.helm.test.ContentOfIndex;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsInstanceOf;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,25 +33,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.IsInstanceOf;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Test for {@link RemoveWriter.Asto}.
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class RemoveWriterAstoTest {
-    /**
-     * Temporary directory for all tests.
-     */
+
     @TempDir
     Path dir;
 
@@ -56,9 +52,6 @@ final class RemoveWriterAstoTest {
      */
     private Path out;
 
-    /**
-     * Storage.
-     */
     private Storage storage;
 
     @BeforeEach
@@ -77,20 +70,17 @@ final class RemoveWriterAstoTest {
         new TestResource(chart).saveTo(this.storage);
         this.delete(chart);
         final IndexYamlMapping index = new ContentOfIndex(this.storage).index(this.pathToIndex());
-        MatcherAssert.assertThat(
-            "Removed version exists",
+        Assertions.assertFalse(
             index.byChartAndVersion("ark", "1.0.1").isPresent(),
-            new IsEqual<>(false)
+            "Removed version exists"
         );
-        MatcherAssert.assertThat(
-            "Extra version of chart was deleted",
+        Assertions.assertTrue(
             index.byChartAndVersion("ark", "1.2.0").isPresent(),
-            new IsEqual<>(true)
+            "Extra version of chart was deleted"
         );
-        MatcherAssert.assertThat(
-            "Extra chart was deleted",
+        Assertions.assertTrue(
             index.byChartAndVersion("tomcat", "0.4.1").isPresent(),
-            new IsEqual<>(true)
+            "Extra chart was deleted"
         );
     }
 
@@ -121,10 +111,9 @@ final class RemoveWriterAstoTest {
         new TestResource("index/index-one-ark.yaml").saveTo(this.storage, this.source);
         new TestResource(chart).saveTo(this.storage);
         this.delete(chart);
-        MatcherAssert.assertThat(
+        Assertions.assertTrue(
             new ContentOfIndex(this.storage).index(this.pathToIndex())
-                .entries().isEmpty(),
-            new IsEqual<>(true)
+                .entries().isEmpty()
         );
     }
 
@@ -151,8 +140,7 @@ final class RemoveWriterAstoTest {
         keys.forEach(
             key -> {
                 final ChartYaml chart = new TgzArchive(
-                    new PublisherAs(this.storage.value(key).join()).bytes()
-                        .toCompletableFuture().join()
+                    this.storage.value(key).join().asBytes()
                 ).chartYaml();
                 todelete.putIfAbsent(chart.name(), new HashSet<>());
                 todelete.get(chart.name()).add(chart.version());

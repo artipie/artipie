@@ -4,7 +4,7 @@
  */
 package com.artipie.http.client.jetty;
 
-import com.artipie.asto.ext.PublisherAs;
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.HttpServer;
@@ -21,14 +21,6 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import io.reactivex.Flowable;
 import io.vertx.core.http.HttpServerOptions;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.eclipse.jetty.client.HttpClient;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -41,10 +33,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 /**
  * Tests for {@link JettyClientSlice} with HTTP server.
- *
- * @since 0.1
  */
 class JettyClientSliceTest {
 
@@ -151,7 +150,7 @@ class JettyClientSliceTest {
         final AtomicReference<byte[]> actual = new AtomicReference<>();
         this.server.update(
             (rqline, rqheaders, rqbody) -> new AsyncResponse(
-                new PublisherAs(rqbody).bytes().thenApply(
+                new Content.From(rqbody).asBytesFuture().thenApply(
                     bytes -> {
                         actual.set(bytes);
                         return StandardRs.EMPTY;

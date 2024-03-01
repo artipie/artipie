@@ -86,10 +86,10 @@ class ProxyBlobTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.EmptyCatchBlock")
     void shouldFinishSendWhenContentIsBad() {
         final AtomicReference<CompletionStage<Void>> capture = new AtomicReference<>();
-        this.captureConnectionAccept(capture, true).asBytes();
+        final Content content = this.captureConnectionAccept(capture, true);
+        Assertions.assertThrows(CompletionException.class, content::asBytes);
         Assertions.assertTrue(capture.get().toCompletableFuture().isDone());
     }
 

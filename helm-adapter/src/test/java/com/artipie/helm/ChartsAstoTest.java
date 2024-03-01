@@ -6,14 +6,8 @@ package com.artipie.helm;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cactoos.list.ListOf;
 import org.cactoos.set.SetOf;
@@ -22,15 +16,17 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Test for {@link Charts.Asto}.
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class ChartsAstoTest {
-    /**
-     * Storage.
-     */
+
     private Storage storage;
 
     @BeforeEach
@@ -88,11 +84,8 @@ final class ChartsAstoTest {
             gotchart,
             new IsEqual<>(
                 new TgzArchive(
-                new PublisherAs(
-                    this.storage.value(new Key.From(tomcattgz)).join()
-                ).bytes()
-                .toCompletableFuture().join()
-            ).chartYaml().fields()
+                    this.storage.value(new Key.From(tomcattgz)).join().asBytes()
+                ).chartYaml().fields()
             )
         );
     }

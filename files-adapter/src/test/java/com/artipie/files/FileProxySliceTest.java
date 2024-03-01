@@ -9,7 +9,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.cache.FromRemoteCache;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
@@ -27,10 +26,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
-import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyIterable;
@@ -38,12 +33,14 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Tests for {@link FileProxySlice}.
- *
- * @since 0.7
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class FileProxySliceTest {
 
     /**
@@ -66,7 +63,7 @@ final class FileProxySliceTest {
                 (rqline, rqheaders, rqbody) -> {
                     headers.set(rqheaders);
                     return new AsyncResponse(
-                        new PublisherAs(rqbody).bytes().thenApply(
+                        new Content.From(rqbody).asBytesFuture().thenApply(
                             bytes -> {
                                 body.set(bytes);
                                 return StandardRs.OK;

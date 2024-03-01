@@ -29,7 +29,7 @@
         <exclude name="LawOfDemeter"/>
         <exclude name="SignatureDeclareThrowsException"/>
         <exclude name="ExcessiveImports"/>
-        <exclude name="TooManyMethods "/>
+        <exclude name="TooManyMethods"/>
     </rule>
     <rule ref="category/java/design.xml/CognitiveComplexity">
         <properties>

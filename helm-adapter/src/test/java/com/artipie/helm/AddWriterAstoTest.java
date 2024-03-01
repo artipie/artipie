@@ -41,11 +41,8 @@ import org.junit.jupiter.api.Test;
  * Test for {@link AddWriter.Asto}.
  * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class AddWriterAstoTest {
-    /**
-     * Temporary directory for all tests.
-     */
+
     private Path dir;
 
     /**
@@ -84,10 +81,9 @@ final class AddWriterAstoTest {
 
     @Test
     void writesToIndexAboutNewChart() {
-        final String tomcat = "tomcat-0.4.1.tgz";
         new TestResource("index/index-one-ark.yaml")
             .saveTo(this.storage, IndexYaml.INDEX_YAML);
-        final Map<String, Set<Pair<String, ChartYaml>>> pckgs = packagesWithTomcat(tomcat);
+        final Map<String, Set<Pair<String, ChartYaml>>> pckgs = packagesWithTomcat();
         new AddWriter.Asto(this.storage)
             .add(this.source, this.out, pckgs)
             .toCompletableFuture().join();
@@ -111,10 +107,9 @@ final class AddWriterAstoTest {
 
     @Test
     void failsToWriteInfoAboutExistedVersion() {
-        final String tomcat = "tomcat-0.4.1.tgz";
         new TestResource("index.yaml")
             .saveTo(this.storage, IndexYaml.INDEX_YAML);
-        final Map<String, Set<Pair<String, ChartYaml>>> pckgs = packagesWithTomcat(tomcat);
+        final Map<String, Set<Pair<String, ChartYaml>>> pckgs = packagesWithTomcat();
         final CompletionException exc = Assertions.assertThrows(
             CompletionException.class,
             () -> new AddWriter.Asto(this.storage)
@@ -145,20 +140,17 @@ final class AddWriterAstoTest {
             index.entries().keySet(),
             Matchers.containsInAnyOrder("tomcat", "ark")
         );
-        MatcherAssert.assertThat(
-            "Tomcat is absent",
+        Assertions.assertTrue(
             index.byChartAndVersion("tomcat", "0.4.1").isPresent(),
-            new IsEqual<>(true)
+            "Tomcat is absent"
         );
-        MatcherAssert.assertThat(
-            "Ark 1.0.1 is absent",
+        Assertions.assertTrue(
             index.byChartAndVersion("ark", "1.0.1").isPresent(),
-            new IsEqual<>(true)
+            "Ark 1.0.1 is absent"
         );
-        MatcherAssert.assertThat(
-            "Ark 1.2.0 is absent",
+        Assertions.assertTrue(
             index.byChartAndVersion("ark", "1.2.0").isPresent(),
-            new IsEqual<>(true)
+            "Ark 1.2.0 is absent"
         );
     }
 
@@ -182,12 +174,12 @@ final class AddWriterAstoTest {
         return new Key.From(this.out.getFileName().toString());
     }
 
-    private static Map<String, Set<Pair<String, ChartYaml>>> packagesWithTomcat(final String path) {
+    private static Map<String, Set<Pair<String, ChartYaml>>> packagesWithTomcat() {
         final Map<String, Set<Pair<String, ChartYaml>>> pckgs = new HashMap<>();
         final Set<Pair<String, ChartYaml>> entries = new HashSet<>();
         entries.add(
             new ImmutablePair<>(
-                "0.4.1", new TgzArchive(new TestResource(path).asBytes()).chartYaml()
+                "0.4.1", new TgzArchive(new TestResource("tomcat-0.4.1.tgz").asBytes()).chartYaml()
             )
         );
         pckgs.put("tomcat", entries);
