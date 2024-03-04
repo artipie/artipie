@@ -156,13 +156,8 @@ public final class S3Storage implements Storage {
         return result.thenCompose(
             estimated -> {
                 final CompletionStage<Void> res;
-                if (
-                    this.multipart && (estimated.size().isEmpty() ||
-                        estimated
-                        .size()
-                        .filter(x -> x >= S3Storage.MIN_MULTIPART)
-                        .isPresent())
-                ) {
+                if (this.isMultipartRequired(estimated))
+                {
                     res = this.putMultipart(key, estimated);
                 } else {
                     res = this.put(key, estimated);
@@ -321,6 +316,18 @@ public final class S3Storage implements Storage {
                     return finished;
                 }
             ).thenCompose(Function.identity())
+        );
+    }
+
+    /**
+     * Checks if multipart save is required for provided Content.
+     * @param content Content with input data.
+     * @return true, if Content requires multipart processing.
+     */
+    private boolean isMultipartRequired(final Content content) {
+        return this.multipart && (
+            content.size().isEmpty() ||
+                content.size().filter(x -> x >= S3Storage.MIN_MULTIPART).isPresent()
         );
     }
 

@@ -86,7 +86,7 @@ final class MultipartUpload {
      */
     public CompletionStage<Void> upload(final Content content) {
         final AtomicInteger counter = new AtomicInteger();
-        return new Merging(MultipartUpload.MIN_PART_SIZE).mergeFlow(
+        return new Merging(MultipartUpload.MIN_PART_SIZE, MultipartUpload.MIN_PART_SIZE * 2).mergeFlow(
             Flowable.fromPublisher(content).concatMap(
                 buffer -> Flowable.fromPublisher(
                     new Splitting(buffer, MultipartUpload.MIN_PART_SIZE).publisher()

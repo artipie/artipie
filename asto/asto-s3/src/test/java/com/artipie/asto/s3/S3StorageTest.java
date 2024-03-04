@@ -111,19 +111,18 @@ class S3StorageTest {
         final int s3MinPartSize = 5 * 1024 * 1024;
         final int s3MinMultipart = 10 * 1024 * 1024;
         final int totalSize = s3MinMultipart * 2;
-        final int itemSize = s3MinPartSize / 1000;
-        final int count = totalSize / itemSize;
-        final int totalSend = itemSize * count;
         final Random rnd = new Random();
-        final byte[] sentData = new byte[totalSend];
+        final byte[] sentData = new byte[totalSize];
         final Callable<Flowable<ByteBuffer>> getGenerator = () -> Flowable.generate(
             AtomicInteger::new,
             (counter, output) -> {
-                final int idx = counter.getAndAdd(1);
-                if (idx < count) {
-                    final byte[] data = new byte[itemSize];
+                final int sent = counter.get();
+                final int sz = Math.min(totalSize - sent, rnd.nextInt(s3MinPartSize));
+                counter.getAndAdd(sz);
+                if (sent < totalSize) {
+                    final byte[] data = new byte[sz];
                     rnd.nextBytes(data);
-                    for (int i = 0, j = idx * itemSize; i < data.length; ++i, ++j) {
+                    for (int i = 0, j = sent; i < data.length; ++i, ++j) {
                         sentData[j] = data[i];
                     }
                     output.onNext(ByteBuffer.wrap(data));
@@ -134,8 +133,8 @@ class S3StorageTest {
             });
         MatcherAssert.assertThat("Generator results mismatch",
             new PublisherAs(new Content.From(getGenerator.call())).bytes()
-                .toCompletableFuture().join().length,
-            Matchers.equalTo(sentData.length)
+                .toCompletableFuture().join(),
+            Matchers.equalTo(sentData)
         );
         this.storage().save(new Key.From(key), new Content.From(getGenerator.call())).join();
         MatcherAssert.assertThat("Saved results mismatch (S3 client)",
