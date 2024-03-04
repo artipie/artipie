@@ -6,7 +6,6 @@ package com.artipie;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -46,32 +45,19 @@ import org.reactivestreams.Publisher;
 
 /**
  * Integration tests for multipart feature.
- * @since 1.2
  */
 final class MultipartITCase {
 
-    /**
-     * Vertx instance.
-     */
     private Vertx vertx;
 
-    /**
-     * Vertx slice server instance.
-     */
     private VertxSliceServer server;
 
-    /**
-     * Server port.
-     */
     private int port;
 
-    /**
-     * Container for slice.
-     */
     private SliceContainer container;
 
     @BeforeEach
-    void init() throws Exception {
+    void init() {
         this.vertx = Vertx.vertx();
         this.container = new SliceContainer();
         this.server = new VertxSliceServer(this.vertx, this.container);
@@ -79,7 +65,7 @@ final class MultipartITCase {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         this.server.stop();
         this.server.close();
         this.vertx.close();
@@ -91,7 +77,7 @@ final class MultipartITCase {
         final AtomicReference<String> result = new AtomicReference<>();
         this.container.deploy(
             (line, headers, body) -> new AsyncResponse(
-                new PublisherAs(
+                new Content.From(
                     Flowable.fromPublisher(
                         new RqMultipart(new Headers.From(headers), body).inspect(
                             (part, sink) -> {
@@ -108,7 +94,7 @@ final class MultipartITCase {
                             }
                         )
                     ).flatMap(part -> part)
-                ).asciiString().thenAccept(result::set).thenApply(
+                ).asStringFuture().thenAccept(result::set).thenApply(
                     none -> StandardRs.OK
                 )
             )
@@ -135,12 +121,11 @@ final class MultipartITCase {
     }
 
     @Test
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     void parseBigMultiparRequest() throws Exception {
         final AtomicReference<String> result = new AtomicReference<>();
         this.container.deploy(
             (line, headers, body) -> new AsyncResponse(
-                new PublisherAs(
+                new Content.From(
                     Flowable.fromPublisher(
                         new RqMultipart(new Headers.From(headers), body).inspect(
                             (part, sink) -> {
@@ -157,12 +142,12 @@ final class MultipartITCase {
                             }
                         )
                     ).flatMap(part -> part)
-                ).asciiString().thenAccept(result::set).thenApply(
+                ).asStringFuture().thenAccept(result::set).thenApply(
                     none -> StandardRs.OK
                 )
             )
         );
-        final byte[] buf = testData(2048 * 17);
+        final byte[] buf = testData();
         try (CloseableHttpClient cli = HttpClients.createDefault()) {
             final HttpPost post = new HttpPost(String.format("http://localhost:%d/", this.port));
             post.setEntity(
@@ -215,7 +200,7 @@ final class MultipartITCase {
                 ).toList().to(SingleInterop.get()).thenApply(none -> StandardRs.OK)
             )
         );
-        final byte[] buf = testData(2048 * 17);
+        final byte[] buf = testData();
         final String filename = "data.bin";
         try (CloseableHttpClient cli = HttpClients.createDefault()) {
             final HttpPost post = new HttpPost(String.format("http://localhost:%d/", this.port));
@@ -241,11 +226,11 @@ final class MultipartITCase {
 
     /**
      * Create new test data buffer for payload.
-     * @param size Buffer size
+     *
      * @return Byte array
      */
-    private static byte[] testData(final int size) {
-        final byte[] buf = new byte[size];
+    private static byte[] testData() {
+        final byte[] buf = new byte[34816];
         final byte[] chunk = "0123456789ABCDEF\n".getBytes(StandardCharsets.US_ASCII);
         for (int pos = 0; pos < buf.length; pos += chunk.length) {
             System.arraycopy(chunk, 0, buf, pos, chunk.length);

@@ -6,23 +6,24 @@ package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.Yaml;
-import com.amihaiemil.eoyaml.YamlInput;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.amihaiemil.eoyaml.YamlNode;
 import com.artipie.api.RepositoryName;
+import com.artipie.asto.ArtipieIOException;
+import com.artipie.asto.Content;
 import com.artipie.asto.Copy;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
-import com.artipie.asto.ext.PublisherAs;
-import com.artipie.asto.misc.UncheckedIOFunc;
 import com.artipie.settings.cache.StoragesCache;
 import com.jcabi.log.Logger;
+
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Repository data management.
- * @since 0.1
  */
 public final class RepoData {
     /**
@@ -115,36 +116,38 @@ public final class RepoData {
     private CompletionStage<Storage> repoStorage(final RepositoryName rname) {
         return new ConfigFile(String.format("%s.yaml", rname.toString()))
             .valueFrom(this.configStorage)
-            .thenApply(PublisherAs::new)
-            .thenCompose(PublisherAs::asciiString)
-            .thenApply(Yaml::createYamlInput)
-            .thenApply(new UncheckedIOFunc<>(YamlInput::readYamlMapping))
-            .thenApply(yaml -> yaml.yamlMapping("repo").value(RepoData.STORAGE))
-            .thenCompose(
-                node -> {
-                    final CompletionStage<Storage> res;
-                    if (node instanceof Scalar) {
-                        res = new AliasSettings(this.configStorage).find(
-                            new Key.From(rname.toString())
-                        ).thenApply(
-                            aliases -> aliases.storage(
-                                this.storagesCache,
-                                ((Scalar) node).value()
-                            )
-                        );
-                    } else if (node instanceof YamlMapping) {
-                        res = CompletableFuture.completedStage(
-                            this.storagesCache.storage((YamlMapping) node)
-                        );
-                    } else {
-                        res = CompletableFuture.failedFuture(
-                            new IllegalStateException(
-                                String.format("Invalid storage config: %s", node)
-                            )
-                        );
-                    }
-                    return res;
+            .thenCompose(Content::asStringFuture)
+            .thenCompose(val -> {
+                final YamlMapping yaml;
+                try {
+                    yaml = Yaml.createYamlInput(val).readYamlMapping();
+                } catch (IOException err) {
+                    throw new ArtipieIOException(err);
                 }
-            );
+                YamlNode node = yaml.yamlMapping("repo").value(RepoData.STORAGE);
+                final CompletionStage<Storage> res;
+                if (node instanceof Scalar) {
+                    res = new AliasSettings(this.configStorage).find(
+                        new Key.From(rname.toString())
+                    ).thenApply(
+                        aliases -> aliases.storage(
+                            this.storagesCache,
+                            ((Scalar) node).value()
+                        )
+                    );
+                } else if (node instanceof YamlMapping) {
+                    res = CompletableFuture.completedStage(
+                        this.storagesCache.storage((YamlMapping) node)
+                    );
+                } else {
+                    res = CompletableFuture.failedFuture(
+                        new IllegalStateException(
+                            String.format("Invalid storage config: %s", node)
+                        )
+                    );
+                }
+                return res;
+
+            });
     }
 }

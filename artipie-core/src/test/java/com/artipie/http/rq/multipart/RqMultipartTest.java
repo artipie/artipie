@@ -5,7 +5,6 @@
 package com.artipie.http.rq.multipart;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.ContentType;
@@ -98,9 +97,9 @@ final class RqMultipartTest {
                 new ContentType("multipart/mixed; boundary=\"92fd51d48f874720a066238b824c0146\""),
                 new Content.From(payload.getBytes(StandardCharsets.US_ASCII))
             ).parts()
-        ).<String>flatMapSingle(
+        ).flatMapSingle(
             part -> Single.fromFuture(
-                new PublisherAs(part).string(StandardCharsets.US_ASCII).toCompletableFuture()
+                new Content.From(part).asStringFuture()
             ).map(body -> String.format("%s: %s", new ContentDisposition(part.headers()).fieldName(), body))
         ).toList().blockingGet();
         MatcherAssert.assertThat(
@@ -247,7 +246,7 @@ final class RqMultipartTest {
                 }
             )
         ).flatMapSingle(
-            part -> Single.fromFuture(new PublisherAs(part).asciiString().toCompletableFuture())
+            part -> Single.fromFuture(new Content.From(part).asStringFuture())
         ).toList().blockingGet();
         MatcherAssert.assertThat("parts must have one element", parts, Matchers.hasSize(1));
         MatcherAssert.assertThat(
