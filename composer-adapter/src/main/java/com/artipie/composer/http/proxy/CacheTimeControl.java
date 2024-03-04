@@ -4,11 +4,12 @@
  */
 package com.artipie.composer.http.proxy;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.cache.CacheControl;
 import com.artipie.asto.cache.Remote;
-import com.artipie.composer.misc.ContentAsJson;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -18,11 +19,6 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Check if saved item is expired by comparing time value.
- * @since 0.4
- * @todo #77:30min Move this class to asto.
- *  Move this class to asto module as soon as the implementation will
- *  be checked on convenience and rightness (e.g. this class will be used
- *  for implementation in this adapter and proper tests will be added).
  */
 final class CacheTimeControl implements CacheControl {
     /**
@@ -66,8 +62,7 @@ final class CacheTimeControl implements CacheControl {
                     final CompletionStage<Boolean> res;
                     if (exists) {
                         res = this.storage.value(CacheTimeControl.CACHE_FILE)
-                            .thenApply(ContentAsJson::new)
-                            .thenCompose(ContentAsJson::value)
+                            .thenCompose(Content::asJsonObjectFuture)
                             .thenApply(
                                 json -> {
                                     final String key = item.string();

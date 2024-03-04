@@ -6,7 +6,6 @@ package com.artipie.maven;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.auth.AuthUser;
@@ -21,14 +20,6 @@ import com.jcabi.matchers.XhtmlMatchers;
 import com.jcabi.xml.XML;
 import com.jcabi.xml.XMLDocument;
 import io.vertx.reactivex.core.Vertx;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.cactoos.list.ListOf;
@@ -49,42 +40,31 @@ import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.stream.Collectors;
+
 /**
  * Maven integration test.
- * @since 0.5
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
 public final class MavenITCase {
 
-    /**
-     * Vertx instance.
-     */
     private static final Vertx VERTX = Vertx.vertx();
 
-    /**
-     * Test user.
-     */
     private static final Pair<String, String> USER = new ImmutablePair<>("Alladin", "openSesame");
 
-    /**
-     * Temporary directory for all tests.
-     */
     @TempDir
     Path tmp;
 
-    /**
-     * Vertx slice server instance.
-     */
     private VertxSliceServer server;
 
-    /**
-     * Container.
-     */
     private GenericContainer<?> cntn;
 
-    /**
-     * Storage.
-     */
     private Storage storage;
 
     /**
@@ -92,9 +72,6 @@ public final class MavenITCase {
      */
     private int port;
 
-    /**
-     * Artifact events.
-     */
     private Queue<ArtifactEvent> events;
 
     @ParameterizedTest
@@ -108,7 +85,7 @@ public final class MavenITCase {
                 "-Dartifact=com.artipie:helloworld:0.1"
             ),
             new StringContainsInOrder(
-                new ListOf<String>(
+                new ListOf<>(
                     String.format("Downloaded from my-repo: http://host.testcontainers.internal:%d/com/artipie/helloworld/0.1/helloworld-0.1.jar (11 B", this.port),
                     "BUILD SUCCESS"
                 )
@@ -185,8 +162,7 @@ public final class MavenITCase {
             "Maven metadata xml is not correct",
             new XMLDocument(
                 this.storage.value(new Key.From("com/artipie/helloworld/maven-metadata.xml"))
-                    .thenCompose(content -> new PublisherAs(content).string(StandardCharsets.UTF_8))
-                    .join()
+                    .join().asString()
             ),
             new AllOf<>(
                 new ListOf<Matcher<? super XML>>(
@@ -224,8 +200,7 @@ public final class MavenITCase {
             "Maven metadata xml is not correct",
             new XMLDocument(
                 this.storage.value(new Key.From("com/artipie/helloworld/maven-metadata.xml"))
-                    .thenCompose(content -> new PublisherAs(content).string(StandardCharsets.UTF_8))
-                    .join()
+                    .join().asString()
             ),
             new AllOf<>(
                 new ListOf<Matcher<? super XML>>(

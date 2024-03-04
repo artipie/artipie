@@ -15,9 +15,13 @@ import com.artipie.http.rs.StandardRs;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.misc.DateTimeNowStr;
 import com.artipie.npm.misc.DescSortedVersions;
-import com.artipie.npm.misc.JsonFromPublisher;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.common.collect.Sets;
+import org.reactivestreams.Publisher;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonPatchBuilder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -27,18 +31,12 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonPatchBuilder;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice to handle `npm unpublish package@0.0.0` command requests.
  * It unpublishes a single version of package when multiple
  * versions are published.
- * @since 0.9
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class UnpublishPutSlice implements Slice {
     /**
      * Pattern for `referer` header value.
@@ -89,7 +87,7 @@ final class UnpublishPutSlice implements Slice {
                 exists -> {
                     final CompletionStage<Response> res;
                     if (exists) {
-                        res = new JsonFromPublisher(publisher).json()
+                        res = new Content.From(publisher).asJsonObjectFuture()
                             .thenCompose(update -> this.updateMeta(update, key))
                             .thenAccept(
                                 ver -> this.events.ifPresent(
@@ -120,8 +118,7 @@ final class UnpublishPutSlice implements Slice {
         final JsonObject update, final Key meta
     ) {
         return this.asto.value(meta)
-            .thenApply(JsonFromPublisher::new)
-            .thenCompose(JsonFromPublisher::json).thenCompose(
+            .thenCompose(Content::asJsonObjectFuture).thenCompose(
                 source -> {
                     final JsonPatchBuilder patch = Json.createPatchBuilder();
                     final String diff = versionToRemove(update, source);

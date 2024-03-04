@@ -10,12 +10,12 @@ import com.artipie.asto.Storage;
 import com.artipie.npm.MetaUpdate;
 import com.artipie.npm.Publish;
 import com.artipie.npm.TgzArchive;
-import com.artipie.npm.misc.JsonFromPublisher;
+
+import javax.json.JsonObject;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
-import javax.json.JsonObject;
 
 /**
  * The NPM publish front.
@@ -23,8 +23,6 @@ import javax.json.JsonObject;
  * {@code npm publish command} and to:
  *  1. to generate source archives
  *  2. meta.json file
- *
- * @since 0.9
  */
 public final class CliPublish implements Publish {
     /**
@@ -82,7 +80,7 @@ public final class CliPublish implements Publish {
      */
     private CompletableFuture<JsonObject> artifactJson(final Key artifact) {
         return this.storage.value(artifact)
-            .thenCompose(bytes -> new JsonFromPublisher(bytes).json());
+            .thenCompose(Content::asJsonObjectFuture);
     }
 
     /**
@@ -91,7 +89,7 @@ public final class CliPublish implements Publish {
      * @param uploaded The uploaded json
      * @return Completion or error signal.
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     private CompletableFuture<Long> updateSourceArchives(final JsonObject uploaded) {
         final AtomicLong size = new AtomicLong();
         final Set<String> attachments = uploaded.getJsonObject(CliPublish.ATTACHMENTS).keySet();

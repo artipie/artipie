@@ -6,7 +6,6 @@ package com.artipie.pypi.http;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.jetty.JettyClientSlices;
@@ -16,10 +15,6 @@ import com.artipie.http.slice.LoggingSlice;
 import com.artipie.pypi.PypiDeployment;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
@@ -33,11 +28,15 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Test for {@link PyProxySlice}.
  * @since 0.7
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
 final class PyProxySliceITCase {
 
@@ -70,7 +69,7 @@ final class PyProxySliceITCase {
     private final PypiDeployment container = new PypiDeployment();
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         this.client.start();
         this.storage = new InMemoryStorage();
         this.server = new VertxSliceServer(
@@ -126,9 +125,7 @@ final class PyProxySliceITCase {
         );
         MatcherAssert.assertThat(
             "Index page was added to storage",
-            new PublisherAs(
-                this.storage.value(new Key.From(key)).join()
-            ).asciiString().toCompletableFuture().join(),
+            this.storage.value(new Key.From(key)).join().asString(),
             new StringContainsInOrder(expected)
         );
         con.disconnect();
@@ -147,8 +144,7 @@ final class PyProxySliceITCase {
         );
         MatcherAssert.assertThat(
             "Nothing was added to storage",
-            this.storage.list(Key.ROOT).join().isEmpty(),
-            new IsEqual<>(true)
+            this.storage.list(Key.ROOT).join().isEmpty()
         );
         con.disconnect();
     }
@@ -166,15 +162,14 @@ final class PyProxySliceITCase {
         );
         MatcherAssert.assertThat(
             "Alarm time index page was added to storage",
-            new PublisherAs(this.storage.value(new Key.From("alarmtime")).join()).asciiString()
-                .toCompletableFuture().join(),
+            this.storage.value(new Key.From("alarmtime")).join().asString(),
             new StringContainsInOrder(new ListOf<>("<!DOCTYPE html>", "Links for alarmtime"))
         );
         con.disconnect();
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         this.client.stop();
         this.server.stop();
     }

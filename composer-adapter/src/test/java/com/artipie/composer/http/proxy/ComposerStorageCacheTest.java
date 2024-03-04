@@ -13,7 +13,6 @@ import com.artipie.asto.cache.Remote;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.composer.AstoRepository;
 import com.artipie.composer.Repository;
-import com.artipie.composer.misc.ContentAsJson;
 import org.cactoos.set.SetOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -66,10 +65,8 @@ final class ComposerStorageCacheTest {
         );
         MatcherAssert.assertThat(
             "Info about save time was not saved in cache file",
-            new ContentAsJson(
-                this.storage.value(CacheTimeControl.CACHE_FILE).join()
-            ).value().toCompletableFuture().join()
-            .keySet(),
+            this.storage.value(CacheTimeControl.CACHE_FILE).join()
+                .asJsonObject().keySet(),
             new IsEqual<>(new SetOf<>(key))
         );
     }
@@ -117,10 +114,8 @@ final class ComposerStorageCacheTest {
         );
         MatcherAssert.assertThat(
             "Info about save time was not updated in cache file",
-            new ContentAsJson(
-                this.storage.value(CacheTimeControl.CACHE_FILE).join()
-            ).value().toCompletableFuture().join()
-            .getString(key),
+            this.storage.value(CacheTimeControl.CACHE_FILE).join()
+                .asJsonObject().getString(key),
             new IsNot<>(new IsEqual<>(expired))
         );
         MatcherAssert.assertThat(

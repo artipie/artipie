@@ -4,21 +4,22 @@
  */
 package com.artipie.http.rq.multipart;
 
-import com.artipie.asto.ext.PublisherAs;
+import com.artipie.asto.Content;
 import io.reactivex.internal.functions.Functions;
 import io.reactivex.subjects.SingleSubject;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test case for {@link MultiPart}.
@@ -60,9 +61,7 @@ final class MultiPartTest {
             }
         );
         MatcherAssert.assertThat(
-            new PublisherAs(subj.flatMapPublisher(Functions.identity()))
-                .string(StandardCharsets.US_ASCII)
-                .toCompletableFuture().get(),
+            new Content.From(subj.flatMapPublisher(Functions.identity())).asString(),
             Matchers.equalTo("{\"foo\": \"bar\", \"val\": [4]}")
         );
     }
@@ -83,9 +82,7 @@ final class MultiPartTest {
             }
         );
         MatcherAssert.assertThat(
-            new PublisherAs(subj.flatMapPublisher(Functions.identity()))
-                .string(StandardCharsets.US_ASCII)
-                .toCompletableFuture().get(),
+            new Content.From(subj.flatMapPublisher(Functions.identity())).asString(),
             Matchers.equalTo("")
         );
     }

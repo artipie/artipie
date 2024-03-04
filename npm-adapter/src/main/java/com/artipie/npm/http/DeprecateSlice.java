@@ -12,22 +12,21 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.npm.PackageNameFromUrl;
-import com.artipie.npm.misc.JsonFromPublisher;
+import org.apache.commons.lang3.StringUtils;
+import org.reactivestreams.Publisher;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonPatchBuilder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonPatchBuilder;
-import org.apache.commons.lang3.StringUtils;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice to handle `npm deprecate` command requests.
- * @since 0.8
  */
 public final class DeprecateSlice implements Slice {
     /**
@@ -61,19 +60,20 @@ public final class DeprecateSlice implements Slice {
                 exists -> {
                     final CompletionStage<Response> res;
                     if (exists) {
-                        res = new JsonFromPublisher(publisher).json()
+                        res = new Content.From(publisher).asJsonObjectFuture()
                             .thenApply(json -> json.getJsonObject("versions"))
                             .thenCombine(
                                 this.storage.value(key)
-                                    .thenApply(JsonFromPublisher::new)
-                                    .thenCompose(JsonFromPublisher::json),
+                                    .thenCompose(Content::asJsonObjectFuture),
                                 (body, meta) -> DeprecateSlice.deprecate(body, meta).toString()
-                            ).thenCompose(
-                                str -> this.storage.save(
-                                    key, new Content.From(str.getBytes(StandardCharsets.UTF_8))
-                                )
-                            )
-                            .thenApply(nothing -> StandardRs.OK);
+                            ).thenApply(
+                                str -> {
+                                    this.storage.save(
+                                        key, new Content.From(str.getBytes(StandardCharsets.UTF_8))
+                                    );
+                                    return StandardRs.OK;
+                                }
+                            );
                     } else {
                         res = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
                     }

@@ -6,9 +6,6 @@ package com.artipie.composer.http.proxy;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.test.TestResource;
-import com.artipie.composer.misc.ContentAsJson;
-import java.util.Optional;
-import javax.json.JsonObject;
 import org.cactoos.set.SetOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -16,6 +13,9 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import javax.json.JsonObject;
+import java.util.Optional;
 
 /**
  * Test for {@link MergePackage.WithRemote}.
@@ -37,7 +37,7 @@ final class MergePackageWithRemoteTest {
     void returnsFromRemoteForEmptyLocal() {
         final String name = "psr/log";
         final byte[] remote = new TestResource("merge/remote.json").asBytes();
-        final JsonObject pkgs = this.pkgsFromMerged(name, "{}".getBytes(), remote);
+        final JsonObject pkgs = this.packagesFromMerged("{}".getBytes(), remote);
         MatcherAssert.assertThat(
             "Contains required package name",
             pkgs.keySet(),
@@ -64,7 +64,7 @@ final class MergePackageWithRemoteTest {
         final String name = "psr/log";
         final byte[] remote = new TestResource("merge/remote.json").asBytes();
         final byte[] local = new TestResource("merge/local.json").asBytes();
-        final JsonObject pkgs = this.pkgsFromMerged(name, local, remote);
+        final JsonObject pkgs = this.packagesFromMerged(local, remote);
         MatcherAssert.assertThat(
             "Contains required package name",
             pkgs.keySet(),
@@ -91,7 +91,7 @@ final class MergePackageWithRemoteTest {
         final String name = "psr/log";
         final byte[] local = new TestResource("merge/local.json").asBytes();
         MatcherAssert.assertThat(
-            this.pkgsFromMerged(name, local, "{}".getBytes()).keySet(),
+            this.packagesFromMerged(local, "{}".getBytes()).keySet(),
             new IsEqual<>(new SetOf<>(name))
         );
     }
@@ -115,11 +115,9 @@ final class MergePackageWithRemoteTest {
             ).toCompletableFuture().join();
     }
 
-    private JsonObject pkgsFromMerged(final String name, final byte[] local, final byte[] remote) {
-        return new ContentAsJson(
-            this.mergedContent(name, local, remote).get()
-        ).value()
-        .toCompletableFuture().join()
-        .getJsonObject("packages");
+    private JsonObject packagesFromMerged(final byte[] local, final byte[] remote) {
+        return this.mergedContent("psr/log", local, remote)
+            .orElseThrow().asJsonObject()
+            .getJsonObject("packages");
     }
 }

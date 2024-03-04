@@ -4,7 +4,7 @@
  */
 package com.artipie.asto;
 
-import com.artipie.asto.ext.PublisherAs;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -42,7 +42,12 @@ public interface Content extends Publisher<ByteBuffer> {
      * @return Byte array as CompletableFuture
      */
     default CompletableFuture<byte[]> asBytesFuture() {
-        return new PublisherAs(this).bytes().toCompletableFuture();
+        return new Concatenation(this)
+            .single()
+            .map(buf -> new Remaining(buf, true))
+            .map(Remaining::bytes)
+            .to(SingleInterop.get())
+            .toCompletableFuture();
     }
 
     /**
@@ -60,7 +65,7 @@ public interface Content extends Publisher<ByteBuffer> {
      * @return String as CompletableFuture
      */
     default CompletableFuture<String> asStringFuture() {
-        return new PublisherAs(this).string(StandardCharsets.UTF_8).toCompletableFuture();
+        return this.asBytesFuture().thenApply(bytes -> new String(bytes, StandardCharsets.UTF_8));
     }
 
     /**

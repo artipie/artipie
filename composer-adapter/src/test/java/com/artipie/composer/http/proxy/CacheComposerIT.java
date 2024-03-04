@@ -9,7 +9,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.composer.AstoRepository;
-import com.artipie.composer.misc.ContentAsJson;
 import com.artipie.composer.test.ComposerSimple;
 import com.artipie.composer.test.PackageSimple;
 import com.artipie.composer.test.SourceServer;
@@ -20,14 +19,6 @@ import com.artipie.http.slice.LoggingSlice;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import javax.json.Json;
 import org.cactoos.list.ListOf;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -44,6 +35,15 @@ import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
+
+import javax.json.Json;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 /**
  * Integration test for {@link ComposerProxySlice}.
@@ -174,11 +174,8 @@ final class CacheComposerIT {
         );
         MatcherAssert.assertThat(
             "Info about cached package was not added to the cache file",
-            new ContentAsJson(
-                this.storage.value(CacheTimeControl.CACHE_FILE).join()
-            ).value().toCompletableFuture().join()
-            .containsKey(name),
-            new IsEqual<>(true)
+            this.storage.value(CacheTimeControl.CACHE_FILE)
+                .join().asJsonObject().containsKey(name)
         );
     }
 

@@ -4,11 +4,13 @@
  */
 package com.artipie.asto.ext;
 
+import com.artipie.asto.Content;
 import io.reactivex.Single;
 import io.reactivex.functions.Function;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import org.reactivestreams.Publisher;
 
 /**
  * Rx publisher transformer to single.
@@ -55,7 +57,7 @@ public final class ContentAs<T>
         final Single<? extends Publisher<ByteBuffer>> content
     ) {
         return content.flatMap(
-            pub -> Single.fromFuture(new PublisherAs(pub).bytes().toCompletableFuture())
+            pub -> Single.fromFuture(new Content.From(pub).asBytesFuture())
         ).map(this.transform);
     }
 }

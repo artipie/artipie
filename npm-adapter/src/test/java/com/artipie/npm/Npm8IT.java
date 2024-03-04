@@ -12,19 +12,10 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.npm.http.NpmSlice;
-import com.artipie.npm.misc.JsonFromPublisher;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
-import javax.json.JsonObject;
 import org.apache.commons.io.FileUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -40,18 +31,21 @@ import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
+import javax.json.JsonObject;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
+
 /**
  * Make sure the library is compatible with npm 8 cli tools.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
 public final class Npm8IT {
 
-    /**
-     * Temporary directory for all tests.
-     */
     private Path tmp;
 
     /**
@@ -142,10 +136,8 @@ public final class Npm8IT {
             "npm", "publish", String.format("tmp/%s/", proj), "--registry", this.url,
             "--loglevel", "verbose"
         );
-        final JsonObject meta = new JsonFromPublisher(
-            this.repo.value(new Key.From(String.format("%s/meta.json", proj)))
-                .toCompletableFuture().join()
-        ).json().toCompletableFuture().join();
+        final JsonObject meta = this.repo.value(new Key.From(String.format("%s/meta.json", proj)))
+            .join().asJsonObject();
         MatcherAssert.assertThat(
             "Metadata should be valid",
             meta.getJsonObject("versions")
@@ -167,19 +159,19 @@ public final class Npm8IT {
     @Test
     void npmInstallWorks() throws Exception {
         final String proj = "@hello/simple-npm-project";
-        this.saveFilesToRegistry(proj);
+        this.saveFilesToRegistry();
         MatcherAssert.assertThat(
             this.exec("npm", "install", proj, "--registry", this.url, "--loglevel", "verbose"),
             new StringContainsInOrder(Arrays.asList("added 1 package", this.url, proj))
         );
         MatcherAssert.assertThat(
             "Installed project should contain index.js",
-            this.inNpmModule(proj, "index.js"),
+            this.inNpmModule("index.js"),
             new IsEqual<>(true)
         );
         MatcherAssert.assertThat(
             "Installed project should contain package.json",
-            this.inNpmModule(proj, "package.json"),
+            this.inNpmModule("package.json"),
             new IsEqual<>(true)
         );
     }
@@ -203,19 +195,19 @@ public final class Npm8IT {
         MatcherAssert.assertThat("Events queue has one item", this.events.size() == 1);
     }
 
-    private void saveFilesToRegistry(final String proj) {
-        new TestResource(String.format("storage/%s/meta.json", proj)).saveTo(
+    private void saveFilesToRegistry() {
+        new TestResource(String.format("storage/%s/meta.json", "@hello/simple-npm-project")).saveTo(
             this.repo,
-            new Key.From(proj, "meta.json")
+            new Key.From("@hello/simple-npm-project", "meta.json")
         );
-        new TestResource(String.format("storage/%s/-/%s-1.0.1.tgz", proj, proj)).saveTo(
+        new TestResource(String.format("storage/%s/-/%s-1.0.1.tgz", "@hello/simple-npm-project", "@hello/simple-npm-project")).saveTo(
             this.repo,
-            new Key.From(proj, "-", String.format("%s-1.0.1.tgz", proj))
+            new Key.From("@hello/simple-npm-project", "-", String.format("%s-1.0.1.tgz", "@hello/simple-npm-project"))
         );
     }
 
-    private boolean inNpmModule(final String proj, final String file) {
-        return this.data.exists(new Key.From("node_modules", proj, file)).join();
+    private boolean inNpmModule(final String file) {
+        return this.data.exists(new Key.From("node_modules", "@hello/simple-npm-project", file)).join();
     }
 
     private String exec(final String... command) throws Exception {

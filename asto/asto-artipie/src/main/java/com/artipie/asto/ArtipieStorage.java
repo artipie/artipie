@@ -4,7 +4,6 @@
  */
 package com.artipie.asto;
 
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
@@ -16,22 +15,20 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.slice.ContentWithSize;
 import io.reactivex.Flowable;
+
+import javax.json.Json;
+import javax.json.JsonReader;
+import javax.json.JsonString;
 import java.io.StringReader;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.json.Json;
-import javax.json.JsonReader;
-import javax.json.JsonString;
 
 /**
  * Proxy storage for a file-adapter via HTTP.
- *
- * @since 0.1
  */
 public final class ArtipieStorage implements Storage {
 
@@ -89,19 +86,17 @@ public final class ArtipieStorage implements Storage {
             (status, rsheaders, rsbody) -> {
                 final CompletableFuture<Void> term = new CompletableFuture<>();
                 if (status.success()) {
-                    new PublisherAs(
+                    new Content.From(
                         Flowable.fromPublisher(rsbody)
                             .doOnError(term::completeExceptionally)
                             .doOnTerminate(() -> term.complete(null))
-                    ).string(StandardCharsets.UTF_8)
-                        .thenApply(s -> promise.complete(ArtipieStorage.parse(s)));
+                    ).asStringFuture().thenApply(s -> promise.complete(ArtipieStorage.parse(s)));
                 } else {
                     promise.completeExceptionally(
                         new ArtipieIOException(
                             String.format(
                                 "Cannot get lists blobs contained in given path [prefix=%s, status=%s]",
-                                prefix,
-                                status
+                                prefix, status
                             )
                         )
                     );
@@ -116,7 +111,7 @@ public final class ArtipieStorage implements Storage {
     public CompletableFuture<Void> save(final Key key, final Content content) {
         return this.remote.response(
             new RequestLine(RqMethod.PUT, ArtipieStorage.uri(key)).toString(),
-            new Headers.From(new ContentLength(content.size().get())),
+            new Headers.From(new ContentLength(content.size().orElseThrow())),
             content
         ).send(
             (status, rsheaders, rsbody) -> {
@@ -128,8 +123,7 @@ public final class ArtipieStorage implements Storage {
                         new ArtipieIOException(
                             String.format(
                                 "Entry is not created [key=%s, status=%s]",
-                                key,
-                                status
+                                key, status
                             )
                         )
                     );
@@ -168,8 +162,7 @@ public final class ArtipieStorage implements Storage {
                         new ArtipieIOException(
                             String.format(
                                 "Cannot get a value [key=%s, status=%s]",
-                                key,
-                                status
+                                key, status
                             )
                         )
                     );
@@ -196,8 +189,7 @@ public final class ArtipieStorage implements Storage {
                         new ArtipieIOException(
                             String.format(
                                 "Entry is not deleted [key=%s, status=%s]",
-                                key,
-                                status
+                                key, status
                             )
                         )
                     );

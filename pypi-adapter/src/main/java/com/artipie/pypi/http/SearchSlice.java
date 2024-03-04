@@ -7,7 +7,6 @@ package com.artipie.pypi.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.streams.ContentAsStream;
 import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Headers;
@@ -21,19 +20,18 @@ import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.pypi.meta.Metadata;
 import com.artipie.pypi.meta.PackageInfo;
 import com.jcabi.xml.XMLDocument;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Search slice.
- * @since 0.7
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UnusedPrivateMethod"})
 public final class SearchSlice implements Slice {
 
     /**
@@ -177,14 +175,14 @@ public final class SearchSlice implements Slice {
          */
         CompletionStage<String> get() {
             final String query = "//member/value/array/data/value/string/text()";
-            return new PublisherAs(this.body).string(StandardCharsets.UTF_8).thenApply(
+            return new Content.From(this.body).asStringFuture().thenApply(
                 xml -> new XMLDocument(xml)
                     .nodes("/*[local-name()='methodCall']/*[local-name()='params']/*[local-name()='param']/*[local-name()='value']/*[local-name()='struct']/*[local-name()='member']")
             ).thenApply(
                 nodes -> nodes.stream()
                     .filter(
                         node -> "name".equals(node.xpath("//member/name/text()").get(0))
-                        && !node.xpath(query).isEmpty()
+                            && !node.xpath(query).isEmpty()
                     )
                     .findFirst()
                     .map(node -> node.xpath(query))

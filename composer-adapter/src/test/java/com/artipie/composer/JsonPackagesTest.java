@@ -10,9 +10,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
-import com.artipie.composer.misc.ContentAsJson;
-import java.util.Optional;
-import javax.json.JsonObject;
 import org.cactoos.set.SetOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -20,6 +17,9 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import javax.json.JsonObject;
+import java.util.Optional;
 
 /**
  * Tests for {@link JsonPackages}.
@@ -80,7 +80,7 @@ class JsonPackagesTest {
             this.versions(json).getJsonObject(
                 this.pack.version(Optional.empty())
                     .toCompletableFuture().join()
-                    .get()
+                    .orElseThrow()
             ),
             new IsNot<>(new IsNull<>())
         );
@@ -97,7 +97,7 @@ class JsonPackagesTest {
             new IsEqual<>(
                 new SetOf<>(
                     "1.1.0",
-                    this.pack.version(Optional.empty()).toCompletableFuture().join().get()
+                    this.pack.version(Optional.empty()).toCompletableFuture().join().orElseThrow()
                 )
             )
         );
@@ -114,10 +114,7 @@ class JsonPackagesTest {
     }
 
     private JsonObject json(final Key key) {
-        return new ContentAsJson(
-            this.storage.value(key)
-                .toCompletableFuture().join()
-        ).value().toCompletableFuture().join();
+        return this.storage.value(key).join().asJsonObject();
     }
 
     private JsonObject versions(final JsonObject json) {

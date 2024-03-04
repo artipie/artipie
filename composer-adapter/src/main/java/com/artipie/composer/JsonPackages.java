@@ -7,14 +7,14 @@ package com.artipie.composer;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.composer.misc.ContentAsJson;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
 /**
  * PHP Composer packages registry built from JSON.
@@ -58,8 +58,7 @@ public final class JsonPackages implements Packages {
     @Override
     @SuppressWarnings("PMD.CognitiveComplexity")
     public CompletionStage<Packages> add(final Package pack, final Optional<String> vers) {
-        return new ContentAsJson(this.source)
-            .value()
+        return this.source.asJsonObjectFuture()
             .thenCompose(
                 json -> {
                     if (json.isNull(JsonPackages.ATTRIBUTE)) {
@@ -79,7 +78,7 @@ public final class JsonPackages implements Packages {
                                 return pack.version(vers).thenCombine(
                                     pack.json(),
                                     (vrsn, pkg) -> {
-                                        if (!vrsn.isPresent()) {
+                                        if (vrsn.isEmpty()) {
                                             throw new IllegalStateException(String.format("Failed to add package `%s` to packages.json because version is absent", pname));
                                         }
                                         final JsonObject foradd;

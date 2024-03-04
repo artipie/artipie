@@ -11,21 +11,19 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.composer.http.Archive;
-import com.artipie.composer.misc.ContentAsJson;
-import java.util.Optional;
-import javax.json.JsonObject;
 import org.cactoos.set.SetOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.json.JsonObject;
+import java.util.Optional;
+
 /**
  * Tests for {@link AstoRepository#addArchive(Archive, Content)}.
- *
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class AstoRepositoryAddArchiveTest {
     /**
      * Storage used in tests.
@@ -81,11 +79,9 @@ final class AstoRepositoryAddArchiveTest {
     @Test
     void shouldAddArchive() {
         this.saveZipArchive();
-        MatcherAssert.assertThat(
+        Assertions.assertTrue(
             this.storage.exists(new Key.From("artifacts", this.name.full()))
-                .toCompletableFuture()
-                .join(),
-            new IsEqual<>(true)
+                .toCompletableFuture().join()
         );
     }
 
@@ -98,10 +94,8 @@ final class AstoRepositoryAddArchiveTest {
     }
 
     private JsonObject packages(final Key key) {
-        return this.storage.value(key)
-            .thenApply(ContentAsJson::new)
-            .thenCompose(ContentAsJson::value)
-            .toCompletableFuture().join()
+        return this.storage.value(key).join()
+            .asJsonObject()
             .getJsonObject("packages");
     }
 }

@@ -9,14 +9,9 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.npm.http.NpmSlice;
-import com.artipie.npm.misc.JsonFromPublisher;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.net.URI;
-import java.nio.file.Path;
-import java.util.Arrays;
-import javax.json.JsonObject;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
@@ -32,12 +27,14 @@ import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
+import javax.json.JsonObject;
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.Arrays;
+
 /**
  * Make sure the library is compatible with npm cli tools.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
 public final class NpmIT {
 
@@ -111,11 +108,9 @@ public final class NpmIT {
             new Key.From(String.format("tmp/%s", proj))
         );
         this.exec("npm", "publish", String.format("tmp/%s", proj), "--registry", this.url);
-        final JsonObject meta = new JsonFromPublisher(
-            this.repo.value(
-                new Key.From(String.format("%s/meta.json", proj))
-            ).toCompletableFuture().join()
-        ).json().toCompletableFuture().join();
+        final JsonObject meta = this.repo.value(
+            new Key.From(String.format("%s/meta.json", proj))
+        ).join().asJsonObject();
         MatcherAssert.assertThat(
             "Metadata should be valid",
             meta.getJsonObject("versions")
@@ -136,7 +131,7 @@ public final class NpmIT {
     @Test
     void npmInstallWorks() throws Exception {
         final String proj = "@hello/simple-npm-project";
-        this.saveFilesToRegustry(proj);
+        this.saveFilesToRegustry();
         MatcherAssert.assertThat(
             this.exec("npm", "install", proj, "--registry", this.url),
             new StringContainsInOrder(
@@ -145,12 +140,12 @@ public final class NpmIT {
         );
         MatcherAssert.assertThat(
             "Installed project should contain index.js",
-            this.inNpmModule(proj, "index.js"),
+            this.inNpmModule("index.js"),
             new IsEqual<>(true)
         );
         MatcherAssert.assertThat(
             "Installed project should contain package.json",
-            this.inNpmModule(proj, "package.json"),
+            this.inNpmModule("package.json"),
             new IsEqual<>(true)
         );
     }
@@ -177,17 +172,17 @@ public final class NpmIT {
         );
     }
 
-    private void saveFilesToRegustry(final String proj) {
-        new TestResource(String.format("storage/%s/meta.json", proj)).saveTo(
-            this.repo, new Key.From(proj, "meta.json")
+    private void saveFilesToRegustry() {
+        new TestResource(String.format("storage/%s/meta.json", "@hello/simple-npm-project")).saveTo(
+            this.repo, new Key.From("@hello/simple-npm-project", "meta.json")
         );
-        new TestResource(String.format("storage/%s/-/%s-1.0.1.tgz", proj, proj)).saveTo(
-            this.repo, new Key.From(proj, "-", String.format("%s-1.0.1.tgz", proj))
+        new TestResource(String.format("storage/%s/-/%s-1.0.1.tgz", "@hello/simple-npm-project", "@hello/simple-npm-project")).saveTo(
+            this.repo, new Key.From("@hello/simple-npm-project", "-", String.format("%s-1.0.1.tgz", "@hello/simple-npm-project"))
         );
     }
 
-    private boolean inNpmModule(final String proj, final String file) {
-        return this.data.exists(new Key.From("node_modules", proj, file)).join();
+    private boolean inNpmModule(final String file) {
+        return this.data.exists(new Key.From("node_modules", "@hello/simple-npm-project", file)).join();
     }
 
     private String exec(final String... command) throws Exception {
