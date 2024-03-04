@@ -9,10 +9,11 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.rx.RxStorageWrapper;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Observable;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,11 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 /**
  * Checksums for Maven artifact.
- * @since 0.5
  */
 public final class RepositoryChecksums {
 
@@ -62,7 +61,7 @@ public final class RepositoryChecksums {
             .filter(key -> SUPPORTED_ALGS.contains(extension(key)))
             .flatMapSingle(
                 item -> SingleInterop.fromFuture(
-                    this.repo.value(item).thenCompose(pub -> new PublisherAs(pub).asciiString())
+                    this.repo.value(item).thenCompose(Content::asStringFuture)
                         .thenApply(hash -> new ImmutablePair<>(extension(item), hash))
                 )
             ).reduce(

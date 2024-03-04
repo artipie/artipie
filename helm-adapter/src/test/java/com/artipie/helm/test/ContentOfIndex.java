@@ -6,13 +6,11 @@ package com.artipie.helm.test;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.helm.metadata.IndexYaml;
 import com.artipie.helm.metadata.IndexYamlMapping;
 
 /**
  * Class for using test scope. It helps to get content of index from storage.
- * @since 0.3
  */
 public final class ContentOfIndex {
     /**
@@ -42,11 +40,6 @@ public final class ContentOfIndex {
      * @return Index file from storage.
      */
     public IndexYamlMapping index(final Key path) {
-        return new IndexYamlMapping(
-            new PublisherAs(
-                this.storage.value(path).join()
-            ).asciiString()
-            .toCompletableFuture().join()
-        );
+        return new IndexYamlMapping(this.storage.value(path).join().asString());
     }
 }

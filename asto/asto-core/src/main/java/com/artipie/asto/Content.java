@@ -9,6 +9,10 @@ import io.reactivex.Flowable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -26,16 +30,16 @@ public interface Content extends Publisher<ByteBuffer> {
     Content EMPTY = new Empty();
 
     /**
-     * Provides size of content in bytes if known.
+     * Provides size of the content in bytes if known.
      *
      * @return Size of content in bytes if known.
      */
     Optional<Long> size();
 
     /**
-     * Reads bytes from content into memory.
+     * Reads bytes from the content into memory.
      *
-     * @return Byte array as CompletionStage
+     * @return Byte array as CompletableFuture
      */
     default CompletableFuture<byte[]> asBytesFuture() {
         return new PublisherAs(this).bytes().toCompletableFuture();
@@ -51,21 +55,43 @@ public interface Content extends Publisher<ByteBuffer> {
     }
 
     /**
-     * Reads bytes from content as string in the {@code StandardCharsets.UTF_8} charset.
+     * Reads bytes from the content as a string in the {@code StandardCharsets.UTF_8} charset.
      *
-     * @return String as CompletionStage
+     * @return String as CompletableFuture
      */
     default CompletableFuture<String> asStringFuture() {
         return new PublisherAs(this).string(StandardCharsets.UTF_8).toCompletableFuture();
     }
 
     /**
-     * Reads bytes from content as string in the {@code StandardCharsets.UTF_8} charset.
+     * Reads bytes from the content as a string in the {@code StandardCharsets.UTF_8} charset.
      *
      * @return String
      */
     default String asString() {
         return this.asStringFuture().join();
+    }
+
+    /**
+     * Reads bytes from the content as a JSON object.
+     *
+     * @return JsonObject as CompletableFuture
+     */
+    default CompletableFuture<JsonObject> asJsonObjectFuture() {
+        return this.asStringFuture().thenApply(val -> {
+            try (JsonReader reader = Json.createReader(new StringReader(val))) {
+                return reader.readObject();
+            }
+        });
+    }
+
+    /**
+     * Reads bytes from the content as a JSON object.
+     *
+     * @return JsonObject
+     */
+    default JsonObject asJsonObject() {
+        return this.asJsonObjectFuture().join();
     }
 
     /**

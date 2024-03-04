@@ -4,11 +4,9 @@
  */
 package com.artipie.docker.proxy;
 
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.Catalog;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsAnything;
 import org.junit.jupiter.api.AfterEach;
@@ -17,10 +15,10 @@ import org.junit.jupiter.api.Test;
 import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
+import java.util.Optional;
+
 /**
  * Integration tests for {@link ProxyDocker}.
- *
- * @since 0.10
  */
 final class ProxyDockerIT {
 
@@ -35,7 +33,7 @@ final class ProxyDockerIT {
     private ProxyDocker docker;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         this.client = new JettyClientSlices(
             new HttpClientSettings().setFollowRedirects(true)
         );
@@ -44,7 +42,7 @@ final class ProxyDockerIT {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         this.client.stop();
     }
 
@@ -53,9 +51,7 @@ final class ProxyDockerIT {
         MatcherAssert.assertThat(
             this.docker.catalog(Optional.empty(), Integer.MAX_VALUE)
                 .thenApply(Catalog::json)
-                .thenApply(PublisherAs::new)
-                .thenCompose(PublisherAs::asciiString)
-                .toCompletableFuture().join(),
+                .toCompletableFuture().join().asString(),
             new StringIsJson.Object(new JsonHas("repositories", new IsAnything<>()))
         );
     }

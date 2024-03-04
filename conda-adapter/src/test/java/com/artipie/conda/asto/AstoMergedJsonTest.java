@@ -6,12 +6,8 @@ package com.artipie.conda.asto;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
-import java.nio.charset.StandardCharsets;
-import javax.json.Json;
-import javax.json.JsonObject;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.json.JSONException;
@@ -19,11 +15,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Test for {@link AstoMergedJson}.
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class AstoMergedJsonTest {
 
     /**
@@ -46,7 +44,7 @@ class AstoMergedJsonTest {
         new TestResource("MergedJsonTest/mp1_input.json")
             .saveTo(this.asto, AstoMergedJsonTest.KEY);
         new AstoMergedJson(this.asto, AstoMergedJsonTest.KEY).merge(
-            new MapOf<String, JsonObject>(
+            new MapOf<>(
                 this.packageItem("notebook-6.1.1-py38_0.conda", "notebook-conda.json"),
                 this.packageItem("pyqt-5.6.0-py36h0386399_5.tar.bz2", "pyqt-tar.json")
             )
@@ -65,26 +63,21 @@ class AstoMergedJsonTest {
     @Test
     void addsItemsWhenInputIsAbsent() throws JSONException {
         new AstoMergedJson(this.asto, AstoMergedJsonTest.KEY).merge(
-            new MapOf<String, JsonObject>(
+            new MapOf<>(
                 this.packageItem("notebook-6.1.1-py38_0.conda", "notebook-conda.json"),
                 this.packageItem("pyqt-5.6.0-py36h0386399_5.tar.bz2", "pyqt-tar.json")
             )
         ).toCompletableFuture().join();
         JSONAssert.assertEquals(
             this.getRepodata(),
-            new String(
-                new TestResource("AstoMergedJsonTest/addsItemsWhenInputIsAbsent.json")
-                    .asBytes(),
-                StandardCharsets.UTF_8
-            ),
+            new TestResource("AstoMergedJsonTest/addsItemsWhenInputIsAbsent.json")
+                .asString(),
             true
         );
     }
 
     private String getRepodata() {
-        return new PublisherAs(
-            this.asto.value(AstoMergedJsonTest.KEY).toCompletableFuture().join()
-        ).asciiString().toCompletableFuture().join();
+        return this.asto.value(AstoMergedJsonTest.KEY).join().asString();
     }
 
     private MapEntry<String, JsonObject> packageItem(final String filename,

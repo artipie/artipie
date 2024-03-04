@@ -4,25 +4,24 @@
  */
 package com.artipie.maven.asto;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Copy;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.ext.KeyLastPart;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.maven.Maven;
 import com.artipie.maven.http.PutMetadataSlice;
 import com.artipie.maven.metadata.MavenMetadata;
 import com.jcabi.xml.XMLDocument;
+import org.xembly.Directives;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import org.xembly.Directives;
 
 /**
  * Maven front for artipie maven adaptor.
- *
- * @since 0.2
  */
 public final class AstoMaven implements Maven {
 
@@ -61,7 +60,7 @@ public final class AstoMaven implements Maven {
                 versions ->
                     this.storage.value(
                         new Key.From(upload, PutMetadataSlice.SUB_META, AstoMaven.MAVEN_META)
-                    ).thenCompose(pub -> new PublisherAs(pub).asciiString())
+                    ).thenCompose(Content::asStringFuture)
                         .thenCompose(
                             str -> {
                                 versions.add(new KeyLastPart(upload).get());

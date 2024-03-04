@@ -5,17 +5,12 @@
 package com.artipie.docker.composite;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.rs.StandardRs;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
@@ -24,10 +19,13 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Tests for {@link MultiReadDocker}.
- *
- * @since 0.3
  */
 final class MultiReadDockerTest {
 
@@ -57,7 +55,7 @@ final class MultiReadDockerTest {
                     json -> new FakeCatalogDocker(() -> new Content.From(json.getBytes()))
                 ).collect(Collectors.toList())
             ).catalog(Optional.of(new RepoName.Simple("four")), limit).thenCompose(
-                catalog -> new PublisherAs(catalog.json()).asciiString()
+                catalog -> catalog.json().asStringFuture()
             ).toCompletableFuture().join(),
             new StringIsJson.Object(
                 new JsonHas(

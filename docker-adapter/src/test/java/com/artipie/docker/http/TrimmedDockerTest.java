@@ -5,7 +5,6 @@
 package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Layers;
@@ -14,8 +13,6 @@ import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Uploads;
 import com.artipie.docker.fake.FakeCatalogDocker;
-import java.util.Optional;
-import java.util.concurrent.CompletionStage;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
@@ -27,11 +24,12 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
+import java.util.Optional;
+import java.util.concurrent.CompletionStage;
+
 /**
  * Test for {@link TrimmedDocker}.
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class TrimmedDockerTest {
 
     /**
@@ -96,7 +94,7 @@ class TrimmedDockerTest {
         );
         MatcherAssert.assertThat(
             "Returns catalog with prefixes",
-            new PublisherAs(result.json()).asciiString().toCompletableFuture().join(),
+            result.json().asString(),
             new StringIsJson.Object(
                 new JsonHas(
                     "repositories",

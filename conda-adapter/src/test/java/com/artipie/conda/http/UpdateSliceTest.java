@@ -7,7 +7,6 @@ package com.artipie.conda.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.Headers;
@@ -18,12 +17,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.json.JSONException;
@@ -34,11 +27,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+
 /**
  * Test for {@link UpdateSlice}.
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UpdateSliceTest {
 
     /**
@@ -58,9 +56,6 @@ class UpdateSliceTest {
      */
     private Storage asto;
 
-    /**
-     * Artifact events.
-     */
     private Queue<ArtifactEvent> events;
 
     @BeforeEach
@@ -93,12 +88,8 @@ class UpdateSliceTest {
             new IsEqual<>(true)
         );
         JSONAssert.assertEquals(
-            new PublisherAs(this.asto.value(new Key.From("linux-64", "repodata.json")).join())
-                .asciiString().toCompletableFuture().join(),
-            new String(
-                new TestResource(String.format("UpdateSliceTest/%s", result)).asBytes(),
-                StandardCharsets.UTF_8
-            ),
+            this.asto.value(new Key.From("linux-64", "repodata.json")).join().asString(),
+            new TestResource(String.format("UpdateSliceTest/%s", result)).asString(),
             true
         );
         MatcherAssert.assertThat("Package info was added to events queue", this.events.size() == 1);
@@ -129,16 +120,11 @@ class UpdateSliceTest {
         );
         MatcherAssert.assertThat(
             "Package was saved to storage",
-            this.asto.exists(key).join(),
-            new IsEqual<>(true)
+            this.asto.exists(key).join()
         );
         JSONAssert.assertEquals(
-            new PublisherAs(this.asto.value(new Key.From("linux-64", "repodata.json")).join())
-                .asciiString().toCompletableFuture().join(),
-            new String(
-                new TestResource("UpdateSliceTest/addsPackageToRepo.json").asBytes(),
-                StandardCharsets.UTF_8
-            ),
+            this.asto.value(new Key.From("linux-64", "repodata.json")).join().asString(),
+            new TestResource("UpdateSliceTest/addsPackageToRepo.json").asString(),
             true
         );
         MatcherAssert.assertThat("Package info was added to events queue", this.events.size() == 1);

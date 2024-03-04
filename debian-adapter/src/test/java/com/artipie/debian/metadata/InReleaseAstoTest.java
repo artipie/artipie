@@ -8,12 +8,10 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.ContentIs;
 import com.artipie.asto.test.TestResource;
 import com.artipie.debian.Config;
-import java.nio.charset.StandardCharsets;
 import org.cactoos.list.ListOf;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -22,11 +20,11 @@ import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Test for {@link InRelease.Asto}.
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class InReleaseAstoTest {
 
     /**
@@ -56,8 +54,7 @@ class InReleaseAstoTest {
             )
         ).generate(key).toCompletableFuture().join();
         MatcherAssert.assertThat(
-            new PublisherAs(this.asto.value(new Key.From("dists", name, "InRelease")).join())
-                .asciiString().toCompletableFuture().join(),
+            this.asto.value(new Key.From("dists", name, "InRelease")).join().asString(),
             new AllOf<>(
                 new ListOf<Matcher<? super String>>(
                     new StringContains(new String(new TestResource("Release").asBytes())),

@@ -6,17 +6,17 @@ package com.artipie.conan;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonValue;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonValue;
 
 /**
  * Conan V2 API basic revisions index update methods.
@@ -57,16 +57,13 @@ public class RevisionsIndexCore {
     public CompletableFuture<JsonArray> loadRevisionData(final Key key) {
         return this.storage.exists(key).thenCompose(
             exist -> {
-                final CompletableFuture<JsonArray> revs;
                 if (exist) {
-                    revs = this.storage.value(key).thenCompose(
-                        content -> new PublisherAs(content).asciiString().thenApply(
-                            string -> Json.createReader(new StringReader(string)).readObject()
-                                .getJsonArray(RevisionsIndexCore.REVISIONS)));
-                } else {
-                    revs = CompletableFuture.completedFuture(Json.createArrayBuilder().build());
+                    return this.storage.value(key).thenCompose(
+                        content -> content.asJsonObjectFuture().thenApply(
+                            json -> json.getJsonArray(RevisionsIndexCore.REVISIONS))
+                    );
                 }
-                return revs;
+                return CompletableFuture.completedFuture(Json.createArrayBuilder().build());
             }
         );
     }
@@ -89,7 +86,7 @@ public class RevisionsIndexCore {
                     });
                 return max.map(
                     jsonValue -> Integer.parseInt(
-                        RevisionsIndexCore.getJsonStr(jsonValue, RevisionsIndexCore.REVISION)
+                        RevisionsIndexCore.getJsonStr(jsonValue)
                     )).orElse(-1);
             });
     }
@@ -104,7 +101,7 @@ public class RevisionsIndexCore {
         return this.loadRevisionData(key).thenCompose(
             array -> {
                 final int index = RevisionsIndexCore.jsonIndexOf(
-                    array, RevisionsIndexCore.REVISION, revision
+                    array, revision
                 );
                 final JsonArrayBuilder updated = Json.createArrayBuilder(array);
                 if (index >= 0) {
@@ -127,7 +124,7 @@ public class RevisionsIndexCore {
                 final CompletableFuture<Boolean> revs;
                 if (exist) {
                     revs = this.storage.value(key).thenCompose(
-                        content -> new PublisherAs(content).asciiString().thenCompose(
+                        content -> content.asStringFuture().thenCompose(
                             string -> this.removeRevData(string, revision, key)
                         )
                     );
@@ -148,18 +145,19 @@ public class RevisionsIndexCore {
             .thenApply(
                 array -> array.stream().map(
                     value -> Integer.parseInt(
-                        RevisionsIndexCore.getJsonStr(value, RevisionsIndexCore.REVISION)
+                        RevisionsIndexCore.getJsonStr(value)
                     )).collect(Collectors.toList()));
     }
 
     /**
      * Extracts string from json object field.
+     *
      * @param object Json object.
-     * @param key Object key to extract.
      * @return Json object field value as String.
      */
-    private static String getJsonStr(final JsonValue object, final String key) {
-        return object.asJsonObject().get(key).toString().replaceAll("\"", "");
+    private static String getJsonStr(final JsonValue object) {
+        return object.asJsonObject()
+            .get(RevisionsIndexCore.REVISION).toString().replaceAll("\"", "");
     }
 
     /**
@@ -171,34 +169,31 @@ public class RevisionsIndexCore {
      */
     private CompletableFuture<Boolean> removeRevData(final String content, final int revision,
         final Key target) {
-        final CompletableFuture<Boolean> result;
         final JsonArray revisions = Json.createReader(new StringReader(content)).readObject()
             .getJsonArray(RevisionsIndexCore.REVISIONS);
         final int index = RevisionsIndexCore.jsonIndexOf(
-            revisions, RevisionsIndexCore.REVISION, revision
+            revisions, revision
         );
-        final JsonArrayBuilder updated = Json.createArrayBuilder(revisions);
         if (index >= 0) {
+            final JsonArrayBuilder updated = Json.createArrayBuilder(revisions);
             updated.remove(index);
-            result = this.storage.save(target, new RevContent(updated.build()).toContent())
+            return this.storage.save(target, new RevContent(updated.build()).toContent())
                 .thenApply(nothing -> true);
-        } else {
-            result = CompletableFuture.completedFuture(false);
         }
-        return result;
+        return CompletableFuture.completedFuture(false);
     }
 
     /**
      * Returns index of json element with key == targetValue.
+     *
      * @param array Json array to search.
-     * @param key Array element key to search.
      * @param value Target value for key to search.
      * @return Index if json array, or -1 if not found.
      */
-    private static int jsonIndexOf(final JsonArray array, final String key, final Object value) {
+    private static int jsonIndexOf(final JsonArray array, final Object value) {
         int index = -1;
         for (int idx = 0; idx < array.size(); ++idx) {
-            if (RevisionsIndexCore.getJsonStr(array.get(idx), key).equals(value.toString())) {
+            if (RevisionsIndexCore.getJsonStr(array.get(idx)).equals(value.toString())) {
                 index = idx;
                 break;
             }

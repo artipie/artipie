@@ -9,7 +9,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.ext.ContentAs;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.factory.Config;
 import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.asto.rx.RxStorage;
@@ -21,6 +20,7 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -218,8 +218,7 @@ final class RxStorageWrapperS3Test {
         final RxStorageWrapper rxsto = new RxStorageWrapper(this.original);
         rxsto.save(key, new Content.From(data.getBytes(StandardCharsets.US_ASCII))).blockingAwait();
         final String result = this.original.value(key).thenApplyAsync(content -> {
-            final String res = new PublisherAs(content).asciiString().toCompletableFuture().join();
-            MatcherAssert.assertThat("Values must match", res.equals(data));
+            MatcherAssert.assertThat("Values must match", content.asString().equals(data));
             return rxsto.value(key).to(ContentAs.STRING).to(SingleInterop.get()).thenApply(s -> s).toCompletableFuture().join();
         }, executor).toCompletableFuture().join();
         MatcherAssert.assertThat("Values must match", result.equals(data));

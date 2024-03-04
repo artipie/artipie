@@ -9,15 +9,11 @@ import com.amihaiemil.eoyaml.YamlMappingBuilder;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.debian.AstoGzArchive;
 import com.artipie.debian.Config;
 import com.artipie.http.slice.KeyFromPath;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -29,11 +25,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+
 /**
  * Test for {@link Release.Asto}.
  * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ReleaseAstoTest {
 
     /**
@@ -66,11 +65,10 @@ class ReleaseAstoTest {
         release.create().toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Correct release file was created",
-            new PublisherAs(this.asto.value(new KeyFromPath("dists/abc/Release")).join())
-                .asciiString().toCompletableFuture().join(),
+            this.asto.value(new KeyFromPath("dists/abc/Release")).join().asString(),
             Matchers.allOf(
                 new StringContainsInOrder(
-                    new ListOf<String>(
+                    new ListOf<>(
                         "Codename: abc",
                         "Architectures: amd intel",
                         "Components: main",
@@ -105,10 +103,9 @@ class ReleaseAstoTest {
         ).create().toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Release file was created",
-            new PublisherAs(this.asto.value(new KeyFromPath("dists/my-super-deb/Release")).join())
-                .asciiString().toCompletableFuture().join(),
+            this.asto.value(new KeyFromPath("dists/my-super-deb/Release")).join().asString(),
             new StringContainsInOrder(
-                new ListOf<String>(
+                new ListOf<>(
                     "Codename: my-super-deb",
                     "Architectures: arm",
                     "Components: main",
@@ -152,8 +149,7 @@ class ReleaseAstoTest {
         release.update(key).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Release file was updated",
-            new PublisherAs(this.asto.value(new KeyFromPath("dists/my-deb/Release")).join())
-                .asciiString().toCompletableFuture().join(),
+            this.asto.value(new KeyFromPath("dists/my-deb/Release")).join().asString(),
             Matchers.allOf(
                 new StringContainsInOrder(content),
                 new StringContains(" 9751b63dcb589f0d84d20dcf5a0d347939c6f4f09d7911c40f330bfe6ffe686e 26 main/binary-intel/Packages.gz\n"),
@@ -196,8 +192,7 @@ class ReleaseAstoTest {
         content.add(" 3608bca1e44ea6c4d268eb6db02260269892c0b42b86bbf1e77a6fa16c3c9282 3 main/binary-intel/Packages\n");
         MatcherAssert.assertThat(
             "Release file was updated",
-            new PublisherAs(this.asto.value(new KeyFromPath("dists/my-repo/Release")).join())
-                .asciiString().toCompletableFuture().join(),
+            this.asto.value(new KeyFromPath("dists/my-repo/Release")).join().asString(),
             new IsEqual<>(String.join("\n", content))
         );
         MatcherAssert.assertThat(
@@ -236,8 +231,7 @@ class ReleaseAstoTest {
         content.add(" 35e1d1aeed3f7179b02a0dfde8f4e826e191649ee2acfd6da6b2ce7a12aa0f8b 3 main/binary-intel/Packages\n");
         MatcherAssert.assertThat(
             "Release file updated",
-            new PublisherAs(this.asto.value(new KeyFromPath("dists/deb-test/Release")).join())
-                .asciiString().toCompletableFuture().join(),
+            this.asto.value(new KeyFromPath("dists/deb-test/Release")).join().asString(),
             new IsEqual<>(String.join("\n", content))
         );
         MatcherAssert.assertThat(

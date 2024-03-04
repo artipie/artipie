@@ -5,13 +5,9 @@
 package com.artipie.docker.misc;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.fake.FullTagsManifests;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -20,10 +16,12 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Tests for {@link JoinedTagsSource}.
- *
- * @since 0.10
  */
 final class JoinedTagsSourceTest {
 
@@ -43,7 +41,7 @@ final class JoinedTagsSourceTest {
                 Optional.of(new Tag.Valid("four")),
                 limit
             ).tags().thenCompose(
-                tags -> new PublisherAs(tags.json()).asciiString()
+                tags -> tags.json().asStringFuture()
             ).toCompletableFuture().join(),
             new StringIsJson.Object(
                 Matchers.allOf(

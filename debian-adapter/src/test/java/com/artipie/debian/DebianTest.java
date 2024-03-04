@@ -8,14 +8,9 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.ContentIs;
 import com.artipie.asto.test.TestResource;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.cactoos.list.ListOf;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -26,6 +21,11 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Test for {@link Debian.Asto}.
@@ -120,8 +120,7 @@ class DebianTest {
         final Key release = this.debian.generateRelease().toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Generates Release index",
-            new PublisherAs(this.storage.value(release).join()).asciiString()
-                .toCompletableFuture().join(),
+            this.storage.value(release).join().asString(),
             new StringContainsInOrder(DebianTest.RELEASE_LINES)
         );
         MatcherAssert.assertThat(
@@ -132,11 +131,9 @@ class DebianTest {
         this.debian.generateInRelease(release).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Generates InRelease index",
-            new PublisherAs(
-                this.storage.value(new Key.From("dists", DebianTest.NAME, "InRelease")).join()
-            ).asciiString().toCompletableFuture().join(),
+            this.storage.value(new Key.From("dists", DebianTest.NAME, "InRelease")).join().asString(),
             new AllOf<>(
-                new ListOf<Matcher<? super String>>(
+                new ListOf<>(
                     new StringContainsInOrder(DebianTest.RELEASE_LINES),
                     new StringContains("-----BEGIN PGP SIGNED MESSAGE-----"),
                     new StringContains("Hash: SHA256"),
@@ -148,7 +145,7 @@ class DebianTest {
     }
 
     @Test
-    void updatesPackagesIndexAndReleaseFile() throws IOException {
+    void updatesPackagesIndexAndReleaseFile() {
         final String pckg = "pspp_1.2.0-3_amd64.deb";
         final Key.From key = new Key.From("some_repo", pckg);
         new TestResource(pckg).saveTo(this.storage, key);
@@ -159,7 +156,7 @@ class DebianTest {
             "Packages index was updated",
             new AstoGzArchive(this.storage).unpack(DebianTest.PACKAGES),
             new AllOf<>(
-                new ListOf<Matcher<? super String>>(
+                new ListOf<>(
                     new StringContains("\n\n"),
                     new StringContains(this.pspp()),
                     new StringContains(this.aglfn())
@@ -179,10 +176,9 @@ class DebianTest {
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Updates Release index",
-            new PublisherAs(this.storage.value(release).join()).asciiString()
-                .toCompletableFuture().join(),
+            this.storage.value(release).join().asString(),
             new AllOf<>(
-                new ListOf<Matcher<? super String>>(
+                new ListOf<>(
                     new StringContainsInOrder(DebianTest.RELEASE_LINES),
                     new IsNot<>(
                         new StringContains("abc123 123 my_deb_repo/binary/amd64/Packages.gz")

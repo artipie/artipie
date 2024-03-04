@@ -11,7 +11,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
 import com.artipie.asto.ext.KeyLastPart;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -27,6 +26,9 @@ import com.artipie.scheduling.ArtifactEvent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -37,15 +39,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.reactivestreams.Publisher;
 
 /**
  * This slice accepts PUT requests with maven-metadata.xml checksums, picks up corresponding
  * maven-metadata.xml from the package upload temp location and saves the checksum. If upload
  * is ready to be added in the repository (see {@link ValidUpload#ready(Key)}), this slice initiate
  * repository update.
- * @since 0.8
  */
 public final class PutMetadataChecksumSlice implements Slice {
 
@@ -113,11 +112,10 @@ public final class PutMetadataChecksumSlice implements Slice {
         final Publisher<ByteBuffer> body) {
         final Matcher matcher = PutMetadataChecksumSlice.PTN
             .matcher(new RequestLineFrom(line).uri().getPath());
-        final Response res;
         if (matcher.matches()) {
             final String alg = matcher.group("alg");
             final String pkg = matcher.group("pkg");
-            res = new AsyncResponse(
+            return new AsyncResponse(
                 this.findAndSave(body, alg, pkg).thenCompose(
                     key -> {
                         final CompletionStage<Response> resp;
@@ -146,10 +144,8 @@ public final class PutMetadataChecksumSlice implements Slice {
                     }
                 )
             );
-        } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
-        return res;
+        return new RsWithStatus(RsStatus.BAD_REQUEST);
     }
 
     /**
@@ -199,7 +195,7 @@ public final class PutMetadataChecksumSlice implements Slice {
      */
     private CompletionStage<Optional<Key>> findAndSave(final Publisher<ByteBuffer> body,
         final String alg, final String pkg) {
-        return new PublisherAs(body).asciiString().thenCompose(
+        return new Content.From(body).asStringFuture().thenCompose(
             sum -> new RxStorageWrapper(this.asto).list(
                 new Key.From(UploadSlice.TEMP, pkg)
             ).flatMapObservable(Observable::fromIterable)

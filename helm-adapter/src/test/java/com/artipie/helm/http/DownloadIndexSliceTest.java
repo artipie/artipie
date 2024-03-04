@@ -8,7 +8,6 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.helm.ChartYaml;
@@ -20,10 +19,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.google.common.base.Throwables;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
@@ -33,11 +28,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Test case for {@link DownloadIndexSlice}.
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class DownloadIndexSliceTest {
     /**
      * Storage.
@@ -62,7 +60,7 @@ final class DownloadIndexSliceTest {
                 Content.EMPTY
             ).send(
                 (status, headers, body) -> {
-                    cbody.set(new PublisherAs(body).asciiString().toCompletableFuture().join());
+                    cbody.set(new Content.From(body).asString());
                     cstatus.set(status);
                     return CompletableFuture.allOf();
                 }

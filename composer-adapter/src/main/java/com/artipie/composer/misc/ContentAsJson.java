@@ -5,12 +5,12 @@
 package com.artipie.composer.misc;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
-import java.io.StringReader;
-import java.util.concurrent.CompletionStage;
+
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import java.io.StringReader;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Auxiliary class for converting content to json.
@@ -35,8 +35,8 @@ public final class ContentAsJson {
      * @return JSON object
      */
     public CompletionStage<JsonObject> value() {
-        return new PublisherAs(this.source)
-            .asciiString()
+        return this.source
+            .asStringFuture()
             .thenApply(
                 str -> {
                     try (JsonReader reader = Json.createReader(new StringReader(str))) {
