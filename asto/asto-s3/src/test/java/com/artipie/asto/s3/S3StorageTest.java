@@ -22,11 +22,14 @@ import com.google.common.io.ByteStreams;
 import io.reactivex.Flowable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -98,6 +101,47 @@ class S3StorageTest {
             new Content.OneTime(new Content.From(data))
         ).join();
         MatcherAssert.assertThat(this.download(client, key), Matchers.equalTo(data));
+    }
+
+    @Test
+    @Timeout(150)
+    void shouldUploadLargeChunkedContent(final AmazonS3 client) throws Exception {
+        final String key = "big/data";
+        final int s3MinPartSize = 5 * 1024 * 1024;
+        final int s3MinMultipart = 10 * 1024 * 1024;
+        final int totalSize = s3MinMultipart * 2;
+        final Random rnd = new Random();
+        final byte[] sentData = new byte[totalSize];
+        final Callable<Flowable<ByteBuffer>> getGenerator = () -> Flowable.generate(
+            AtomicInteger::new,
+            (counter, output) -> {
+                final int sent = counter.get();
+                final int sz = Math.min(totalSize - sent, rnd.nextInt(s3MinPartSize));
+                counter.getAndAdd(sz);
+                if (sent < totalSize) {
+                    final byte[] data = new byte[sz];
+                    rnd.nextBytes(data);
+                    for (int i = 0, j = sent; i < data.length; ++i, ++j) {
+                        sentData[j] = data[i];
+                    }
+                    output.onNext(ByteBuffer.wrap(data));
+                } else {
+                    output.onComplete();
+                }
+                return counter;
+            });
+        MatcherAssert.assertThat("Generator results mismatch",
+            new Content.From(getGenerator.call()).asBytes(),
+            Matchers.equalTo(sentData)
+        );
+        this.storage().save(new Key.From(key), new Content.From(getGenerator.call())).join();
+        MatcherAssert.assertThat("Saved results mismatch (S3 client)",
+            this.download(client, key), Matchers.equalTo(sentData)
+        );
+        MatcherAssert.assertThat("Saved results mismatch (S3Storage)",
+            this.storage().value(new Key.From(key)).toCompletableFuture().get().asBytes(),
+            Matchers.equalTo(sentData)
+        );
     }
 
     @Test
