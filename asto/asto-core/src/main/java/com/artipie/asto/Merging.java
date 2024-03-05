@@ -21,14 +21,9 @@ public class Merging {
     private final int minSize;
 
     /**
-     * Count of bytes accumulated.
+     * Maximum output block size.
      */
-    private int accumulated;
-
-    /**
-     * Data accumulator array.
-     */
-    private byte[] accumulator;
+    private final int maxSize;
 
     /**
      * Ctor.
@@ -38,41 +33,100 @@ public class Merging {
      */
     public Merging(final int minSize, final int maxSize) {
         this.minSize = minSize;
-        this.accumulator = new byte[maxSize];
+        this.maxSize = maxSize;
     }
 
     /**
      * Merge Flowable ByteBuffer objects and produce ByteBuffer objects with target size.
-     * @param source Source of data blocks.
+     * @param source Source of data blocks. Must be sequential source.
      * @return Flowable with merged blocks.
      */
     public Flowable<ByteBuffer> mergeFlow(final Flowable<ByteBuffer> source) {
-        this.accumulated = 0;
+        final MergeState state = new MergeState(maxSize);
         return source.concatMap(chunk -> {
-            if (chunk.remaining() > this.accumulator.length) {
+            if (chunk.remaining() > maxSize) {
                 throw new ArtipieIOException("Input chunk is bigger than maximum size");
             }
-            final int diff = Math.min(chunk.remaining(), this.accumulator.length - accumulated);
-            chunk.get(chunk.position(), accumulator, accumulated, diff);
-            accumulated += diff;
+            final int diff = Math.min(chunk.remaining(), maxSize - state.getAccumulated());
+            state.add(chunk, diff);
             chunk.position(chunk.position() + diff);
-            if (accumulated < this.minSize) {
+            if (state.getAccumulated() < this.minSize) {
                 return Flowable.empty();
             }
-            final ByteBuffer payload = ByteBuffer.wrap(accumulator, 0, accumulated);
-            accumulated = 0;
-            this.accumulator = new byte[this.accumulator.length];
+            final ByteBuffer payload = state.wrapAccumulated();
+            state.reset(maxSize);
             final int remaining = chunk.remaining();
-            chunk.get(accumulator, accumulated, remaining);
-            accumulated += remaining;
+            state.add(chunk, remaining);
             return Flowable.just(payload);
         }).concatWith(Maybe.defer(() -> {
-            if (accumulated == 0) {
+            if (state.getAccumulated() == 0) {
                 return Maybe.empty();
             }
-            final ByteBuffer payload = ByteBuffer.wrap(accumulator, 0, accumulated);
-            accumulated = 0;
-            return Maybe.just(payload);
+            return Maybe.just(state.wrapAccumulated());
         }));
+    }
+
+    /**
+     * Current state of the flow merging.
+     */
+    private class MergeState {
+
+        /**
+         * Data accumulator array.
+         */
+        private byte[] accumulator;
+
+        /**
+         * Count of bytes accumulated.
+         */
+        private int accumulated;
+
+        /**
+         * Ctor.
+         *
+         * @param size Accumulator size. Maximum size of data accumulated.
+         */
+        MergeState(final int size) {
+            this.accumulator = new byte[size];
+        }
+
+        /**
+         * Returns amount of bytes currently accumulated.
+         *
+         * @return Count of bytes accumulated.
+         */
+        public int getAccumulated() {
+            return accumulated;
+        }
+
+        /**
+         * Resets `accumulated` and creates new accumulator array.
+         *
+         * @param size Accumulator size. Maximum size of data accumulated.
+         */
+        public void reset(final int size) {
+            this.accumulator = new byte[size];
+            this.accumulated = 0;
+        }
+
+        /**
+         * Wrap accumulated data array in ByteBuffer.
+         *
+         * @return ByteBuffer instance backed by accumulator array. See `reset()` to change backing array.
+         */
+        public ByteBuffer wrapAccumulated() {
+            return ByteBuffer.wrap(this.accumulator, 0, this.accumulated);
+        }
+
+        /**
+         * Add `length` bytes from `chunk` to the accumulator array.
+         *
+         * @param chunk ByteBuffer with data.
+         * @param count Amount of bytes to accumulate from `chunk`.
+         */
+        public void add(final ByteBuffer chunk, final int count) {
+            chunk.get(chunk.position(), this.accumulator, this.accumulated, count);
+            this.accumulated += count;
+        }
     }
 }

@@ -16,7 +16,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.factory.Config;
 import com.artipie.asto.factory.StoragesLoader;
 import com.google.common.io.ByteStreams;
@@ -132,8 +131,7 @@ class S3StorageTest {
                 return counter;
             });
         MatcherAssert.assertThat("Generator results mismatch",
-            new PublisherAs(new Content.From(getGenerator.call())).bytes()
-                .toCompletableFuture().join(),
+            new Content.From(getGenerator.call()).asBytes(),
             Matchers.equalTo(sentData)
         );
         this.storage().save(new Key.From(key), new Content.From(getGenerator.call())).join();
@@ -141,8 +139,8 @@ class S3StorageTest {
             this.download(client, key), Matchers.equalTo(sentData)
         );
         MatcherAssert.assertThat("Saved results mismatch (S3Storage)",
-            new PublisherAs(this.storage().value(new Key.From(key)).toCompletableFuture().get())
-                .bytes().toCompletableFuture().join(), Matchers.equalTo(sentData)
+            this.storage().value(new Key.From(key)).toCompletableFuture().get().asBytes(),
+            Matchers.equalTo(sentData)
         );
     }
 
