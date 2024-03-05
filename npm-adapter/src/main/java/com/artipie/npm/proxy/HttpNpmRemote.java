@@ -5,7 +5,6 @@
 package com.artipie.npm.proxy;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
@@ -20,20 +19,19 @@ import com.artipie.npm.proxy.model.NpmPackage;
 import com.jcabi.log.Logger;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Base NPM Remote client implementation. It calls remote NPM repository
  * to download NPM packages and assets. It uses underlying Vertx Web Client inside
  * and works in Rx-way.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class HttpNpmRemote implements NpmRemote {
 
     /**
@@ -53,7 +51,7 @@ public final class HttpNpmRemote implements NpmRemote {
     public Maybe<NpmPackage> loadPackage(final String name) {
         return Maybe.fromFuture(
             this.performRemoteRequest(name).thenCompose(
-                pair -> new PublisherAs(pair.getKey()).asciiString().thenApply(
+                pair -> pair.getKey().asStringFuture().thenApply(
                     str -> new NpmPackage(
                         name,
                         new CachedContent(str, name).value().toString(),

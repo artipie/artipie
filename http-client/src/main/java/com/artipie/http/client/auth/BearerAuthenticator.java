@@ -4,15 +4,16 @@
  */
 package com.artipie.http.client.auth;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.UriClientSlice;
-import com.artipie.http.client.misc.PublisherAs;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import io.reactivex.Flowable;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
@@ -21,8 +22,6 @@ import java.util.stream.Collectors;
 
 /**
  * Bearer authenticator using specified authenticator and format to get required token.
- *
- * @since 0.4
  */
 public final class BearerAuthenticator implements Authenticator {
 
@@ -86,7 +85,7 @@ public final class BearerAuthenticator implements Authenticator {
             Headers.EMPTY,
             Flowable.empty()
         ).send(
-            (status, headers, body) -> new PublisherAs(body).bytes()
+            (status, headers, body) -> new Content.From(body).asBytesFuture()
                 .thenApply(this.format::token)
                 .thenCompose(
                     token -> {

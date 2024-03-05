@@ -9,7 +9,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.asto.streams.ContentAsStream;
 import com.artipie.debian.Config;
@@ -18,20 +17,20 @@ import com.artipie.debian.misc.GpgClearsign;
 import com.artipie.debian.misc.SizeAndDigest;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Observable;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Release metadata file.
  * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public interface Release {
 
     /**
@@ -114,11 +113,11 @@ public interface Release {
             final String key = pckg.string().replace(this.subDir(), "");
             return this.packageData(pckg).thenCompose(
                 pair -> this.asto.value(this.key()).thenCompose(
-                    content -> new PublisherAs(content).asciiString().thenApply(
-                        str -> Asto.addReplace(str, key, pair.getLeft())
-                    ).thenApply(
-                        str -> Asto.addReplace(str, key.replace(".gz", ""), pair.getRight())
-                    )
+                    content -> content.asStringFuture()
+                        .thenApply(str -> {
+                            String val = Asto.addReplace(str, key, pair.getLeft());
+                            return Asto.addReplace(val, key.replace(".gz", ""), pair.getRight());
+                        })
                 )
             ).thenApply(str -> str.getBytes(StandardCharsets.UTF_8))
                 .thenCompose(

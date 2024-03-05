@@ -6,7 +6,6 @@ package com.artipie.npm;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.slice.LoggingSlice;
@@ -14,9 +13,6 @@ import com.artipie.npm.http.NpmSlice;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.net.URI;
-import java.nio.file.Path;
-import java.util.Arrays;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
@@ -31,17 +27,16 @@ import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.Arrays;
+
 /**
  * IT for npm dist-tags command.
- * @since 0.8
  */
 @DisabledOnOs(OS.WINDOWS)
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class NpmDistTagsIT {
 
-    /**
-     * Temporary directory for all tests.
-     */
     @TempDir
     Path tmp;
 
@@ -130,8 +125,7 @@ public final class NpmDistTagsIT {
         );
         MatcherAssert.assertThat(
             "Meta file was updated",
-            new PublisherAs(this.storage.value(meta).join()).asciiString()
-                .toCompletableFuture().join(),
+            this.storage.value(meta).join().asString(),
             new StringContainsInOrder(Arrays.asList(tag, ver))
         );
     }
@@ -151,8 +145,7 @@ public final class NpmDistTagsIT {
         );
         MatcherAssert.assertThat(
             "Meta file was updated",
-            new PublisherAs(this.storage.value(meta).join()).asciiString()
-                .toCompletableFuture().join(),
+            this.storage.value(meta).join().asString(),
             new IsNot<>(new StringContainsInOrder(Arrays.asList(tag, "1.0.0")))
         );
     }

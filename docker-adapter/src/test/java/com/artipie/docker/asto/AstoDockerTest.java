@@ -8,19 +8,18 @@ package com.artipie.docker.asto;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 /**
  * Test case for {@link AstoDocker}.
- * @since 0.1
  */
 final class AstoDockerTest {
     @Test
@@ -46,7 +45,7 @@ final class AstoDockerTest {
             .catalog(Optional.empty(), Integer.MAX_VALUE)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
-            new PublisherAs(catalog.json()).asciiString().toCompletableFuture().join(),
+            catalog.json().asString(),
             new IsEqual<>("{\"repositories\":[\"my-alpine\",\"test\"]}")
         );
     }

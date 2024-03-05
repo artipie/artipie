@@ -5,18 +5,17 @@
 package  com.artipie.conan;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
-import java.io.StringReader;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.stream.JsonParser;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.Test;
+import java.io.StringReader;
 
 /**
  * Tests for RevContent class.
- * @since 0.1
  */
 class RevContentTest {
 
@@ -30,15 +29,10 @@ class RevContentTest {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
         final RevContent revc = new RevContent(builder.build());
         final Content content = revc.toContent();
-        final JsonParser parser = new PublisherAs(content).asciiString().thenApply(
-            str -> Json.createParser(new StringReader(str))
-        ).toCompletableFuture().join();
+        final JsonParser parser = Json.createParser(new StringReader(content.asString()));
         parser.next();
         final JsonArray revs = parser.getObject().getJsonArray(RevContentTest.REVISIONS);
-        MatcherAssert.assertThat(
-            "The json array must be empty",
-            revs.size() == 0
-        );
+        MatcherAssert.assertThat("The json array must be empty", revs.isEmpty());
     }
 
     @Test
@@ -48,13 +42,11 @@ class RevContentTest {
         builder.add(testval);
         final RevContent revc = new RevContent(builder.build());
         final Content content = revc.toContent();
-        final JsonParser parser = new PublisherAs(content).asciiString().thenApply(
-            str -> Json.createParser(new StringReader(str))
-        ).toCompletableFuture().join();
+        final JsonParser parser = Json.createParser(new StringReader(content.asString()));
         parser.next();
         final JsonArray revs = parser.getObject().getJsonArray(RevContentTest.REVISIONS);
         MatcherAssert.assertThat(
-            "The size of the json array is incorrent",
+            "The size of the json array is incorrect",
             revs.size() == 1
         );
         MatcherAssert.assertThat(

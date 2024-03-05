@@ -5,23 +5,21 @@
 package com.artipie.docker.misc;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonString;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonString;
 
 /**
  * Parsed {@link Tags} that is capable of extracting tags list and repository name
  * from origin {@link Tags}.
- *
- * @since 0.10
  */
 public final class ParsedTags implements Tags {
 
@@ -74,7 +72,7 @@ public final class ParsedTags implements Tags {
      * @return JSON root.
      */
     private CompletionStage<JsonObject> root() {
-        return new PublisherAs(this.origin.json()).bytes().thenApply(
+        return this.origin.json().asBytesFuture().thenApply(
             bytes -> Json.createReader(new ByteArrayInputStream(bytes)).readObject()
         );
     }

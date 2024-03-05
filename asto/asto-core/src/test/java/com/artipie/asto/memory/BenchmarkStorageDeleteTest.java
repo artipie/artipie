@@ -7,21 +7,18 @@ package com.artipie.asto.memory;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.ValueNotFoundException;
-import com.artipie.asto.ext.PublisherAs;
-import java.util.NavigableMap;
-import java.util.TreeMap;
-import java.util.concurrent.CompletionException;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.NavigableMap;
+import java.util.TreeMap;
+import java.util.concurrent.CompletionException;
+
 /**
  * Tests for {@link BenchmarkStorage#delete(Key)}.
- * @since 1.2.0
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class BenchmarkStorageDeleteTest {
     @Test
     void obtainsValueWhichWasAddedBySameKeyAfterDeletionToVerifyDeletedWasReset() {
@@ -32,12 +29,7 @@ final class BenchmarkStorageDeleteTest {
         bench.delete(key).join();
         final byte[] upd = "updated data".getBytes();
         bench.save(key, new Content.From(upd)).join();
-        MatcherAssert.assertThat(
-            new PublisherAs(bench.value(key).join())
-                .bytes()
-                .toCompletableFuture().join(),
-            new IsEqual<>(upd)
-        );
+        Assertions.assertArrayEquals(upd, bench.value(key).join().asBytes());
     }
 
     @Test

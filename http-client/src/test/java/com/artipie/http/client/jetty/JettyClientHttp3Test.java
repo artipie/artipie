@@ -9,21 +9,11 @@ import com.artipie.asto.Splitting;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.Headers;
 import com.artipie.http.client.HttpClientSettings;
-import com.artipie.http.client.misc.PublisherAs;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpStatus;
@@ -43,12 +33,21 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Test for {@link JettyClientSlices} and http3.
- * @since 0.3
  */
 @SuppressWarnings(
-    {"PMD.AvoidDuplicateLiterals", "PMD.StaticAccessToStaticFields", "PMD.LongVariable"}
+    {"PMD.StaticAccessToStaticFields", "PMD.LongVariable"}
 )
 public final class JettyClientHttp3Test {
 
@@ -132,7 +131,7 @@ public final class JettyClientHttp3Test {
                     )
                 );
                 MatcherAssert.assertThat(
-                    new PublisherAs(publisher).bytes().toCompletableFuture().join(),
+                    new Content.From(publisher).asBytes(),
                     new IsEqual<>(GET_SOME_DATA.getBytes())
                 );
                 latch.countDown();

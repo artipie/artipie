@@ -7,24 +7,21 @@ package com.artipie.asto.blocking;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link BlockingStorage}.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class BlockingStorageTest {
 
     /**
@@ -47,10 +44,7 @@ final class BlockingStorageTest {
     void shouldExistWhenKeyIsSavedToOriginalStorage() {
         final Key key = new Key.From("test_key_1");
         this.original.save(key, new Content.From("some data1".getBytes())).join();
-        MatcherAssert.assertThat(
-            this.blocking.exists(key),
-            new IsEqual<>(true)
-        );
+        Assertions.assertTrue(this.blocking.exists(key));
     }
 
     @Test
@@ -75,10 +69,7 @@ final class BlockingStorageTest {
     void shouldExistInOriginalWhenKeyIsSavedByBlocking() throws Exception {
         final Key key = new Key.From("test_key_2");
         this.blocking.save(key, "test data2".getBytes());
-        MatcherAssert.assertThat(
-            this.original.exists(key).get(),
-            new IsEqual<>(true)
-        );
+        Assertions.assertTrue(this.original.exists(key).get());
     }
 
     @Test
@@ -88,12 +79,7 @@ final class BlockingStorageTest {
         final Key destination = new Key.From("shouldMove-destination");
         this.original.save(source, new Content.From(data)).join();
         this.blocking.move(source, destination);
-        MatcherAssert.assertThat(
-            new PublisherAs(
-                this.original.value(destination).join()
-            ).bytes().toCompletableFuture().join(),
-            Matchers.equalTo(data)
-        );
+        Assertions.assertArrayEquals(data, this.original.value(destination).join().asBytes());
     }
 
     @Test
@@ -101,10 +87,7 @@ final class BlockingStorageTest {
         final Key key = new Key.From("test_key_6");
         this.original.save(key, Content.EMPTY).join();
         this.blocking.delete(key);
-        MatcherAssert.assertThat(
-            this.original.exists(key).get(),
-            new IsEqual<>(false)
-        );
+        Assertions.assertFalse(this.original.exists(key).get());
     }
 
     @Test
@@ -118,10 +101,7 @@ final class BlockingStorageTest {
                 page.getBytes(StandardCharsets.UTF_8)
             )
         ).join();
-        MatcherAssert.assertThat(
-            this.blocking.size(key),
-            new IsEqual<>((long) page.length())
-        );
+        Assertions.assertEquals(page.length(), this.blocking.size(key));
     }
 
     @Test
@@ -132,11 +112,8 @@ final class BlockingStorageTest {
         this.original.save(new Key.From("root2", "r2a"), Content.EMPTY).join();
         this.original.save(new Key.From("root3"), Content.EMPTY).join();
         this.blocking.deleteAll(prefix);
-        MatcherAssert.assertThat(
-            "Original should not have items with key prefix",
-            this.original.list(prefix).join().size(),
-            new IsEqual<>(0)
-        );
+        Assertions.assertEquals(0, this.original.list(prefix).join().size(),
+            "Original should not have items with key prefix");
         MatcherAssert.assertThat(
             "Original should list other items",
             this.original.list(Key.ROOT).join(),
@@ -155,10 +132,7 @@ final class BlockingStorageTest {
         this.original.save(new Key.From("dir2/subdir", "file3"), Content.EMPTY).join();
         this.original.save(new Key.From("file4"), Content.EMPTY).join();
         this.blocking.deleteAll(Key.ROOT);
-        MatcherAssert.assertThat(
-            "Original should not have any more item",
-            this.original.list(Key.ROOT).join().size(),
-            new IsEqual<>(0)
-        );
+        Assertions.assertEquals(0, this.original.list(Key.ROOT).join().size(),
+            "Original should not have any more item");
     }
 }

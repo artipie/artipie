@@ -4,19 +4,18 @@
  */
 package com.artipie.maven.metadata;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.jcabi.xml.XMLDocument;
-import java.nio.charset.StandardCharsets;
-import java.util.Comparator;
-import java.util.concurrent.CompletionStage;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Comparator;
+import java.util.concurrent.CompletionStage;
+
 /**
  * Read information from metadata file.
- * @since 0.5
  */
 public final class ArtifactsMetadata {
 
@@ -46,7 +45,7 @@ public final class ArtifactsMetadata {
     public CompletionStage<String> maxVersion(final Key location) {
         return this.storage.value(new Key.From(location, ArtifactsMetadata.MAVEN_METADATA))
             .thenCompose(
-                content -> new PublisherAs(content).string(StandardCharsets.UTF_8)
+                content -> content.asStringFuture()
                 .thenApply(
                     metadata -> new XMLDocument(metadata).xpath("//version/text()").stream()
                         .max(Comparator.comparing(Version::new)).orElseThrow(
@@ -65,15 +64,13 @@ public final class ArtifactsMetadata {
      */
     public CompletionStage<Pair<String, String>> groupAndArtifact(final Key location) {
         return this.storage.value(new Key.From(location, ArtifactsMetadata.MAVEN_METADATA))
-            .thenCompose(
-                content -> new PublisherAs(content).string(StandardCharsets.UTF_8)
-                    .thenApply(XMLDocument::new)
-                    .thenApply(
-                        doc -> new ImmutablePair<>(
-                            doc.xpath("//groupId/text()").get(0),
-                            doc.xpath("//artifactId/text()").get(0)
-                        )
-                    )
-            );
+            .thenCompose(Content::asStringFuture)
+            .thenApply(val -> {
+                XMLDocument doc = new XMLDocument(val);
+                return new ImmutablePair<>(
+                    doc.xpath("//groupId/text()").get(0),
+                    doc.xpath("//artifactId/text()").get(0)
+                );
+            });
     }
 }

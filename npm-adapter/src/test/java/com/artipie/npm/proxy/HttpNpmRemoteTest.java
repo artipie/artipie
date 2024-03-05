@@ -5,7 +5,6 @@
 package com.artipie.npm.proxy;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -17,11 +16,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.npm.proxy.http.RsNotFound;
 import com.artipie.npm.proxy.model.NpmAsset;
 import com.artipie.npm.proxy.model.NpmPackage;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.OffsetDateTime;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -30,11 +24,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.OffsetDateTime;
+
 /**
  * Http NPM Remote client test.
- * @since 0.1
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 public final class HttpNpmRemoteTest {
 
     /**
@@ -106,9 +104,7 @@ public final class HttpNpmRemoteTest {
             );
             MatcherAssert.assertThat(
                 "Content of asset is correct",
-                new PublisherAs(asset.dataPublisher())
-                    .asciiString()
-                    .toCompletableFuture().join(),
+                new Content.From(asset.dataPublisher()).asString(),
                 new IsEqual<>(HttpNpmRemoteTest.DEF_CONTENT)
             );
             MatcherAssert.assertThat(

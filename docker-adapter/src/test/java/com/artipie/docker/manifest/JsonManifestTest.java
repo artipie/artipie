@@ -4,17 +4,8 @@
  */
 package com.artipie.docker.manifest;
 
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.Digest;
 import com.artipie.docker.error.InvalidManifestException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.json.Json;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -22,12 +13,18 @@ import org.hamcrest.core.IsIterableContaining;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Tests for {@link JsonManifest}.
- *
- * @since 0.2
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class JsonManifestTest {
 
     @Test
@@ -47,12 +44,12 @@ class JsonManifestTest {
         );
         Assertions.assertThrows(
             InvalidManifestException.class,
-            manifest::mediaTypes
+            manifest::mediaType
         );
     }
 
     @Test
-    void shouldConvertToSameType() throws Exception {
+    void shouldConvertToSameType() {
         final JsonManifest manifest = new JsonManifest(
             new Digest.Sha256("123"),
             "{\"mediaType\":\"type2\"}".getBytes()
@@ -181,10 +178,7 @@ class JsonManifestTest {
             new Digest.Sha256("123"),
             data
         );
-        MatcherAssert.assertThat(
-            new PublisherAs(manifest.content()).bytes().toCompletableFuture().join(),
-            new IsEqual<>(data)
-        );
+        Assertions.assertArrayEquals(data, manifest.content().asBytes());
     }
 
     /**

@@ -4,10 +4,13 @@
  */
 package com.artipie.helm;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.helm.misc.DateTimeNow;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,13 +20,10 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Encapsulates logic for obtaining some meta info for charts from
  * chart yaml file from tgz archive.
- * @since 0.3
  */
 interface Charts {
     /**
@@ -66,16 +66,13 @@ interface Charts {
             return CompletableFuture.allOf(
                 charts.stream().map(
                     key -> this.storage.value(key)
-                        .thenApply(PublisherAs::new)
-                        .thenCompose(PublisherAs::bytes)
-                        .thenApply(TgzArchive::new)
-                        .thenAccept(
-                            tgz -> {
-                                final ChartYaml chart = tgz.chartYaml();
-                                pckgs.putIfAbsent(chart.name(), new HashSet<>());
-                                pckgs.get(chart.name()).add(chart.version());
-                            }
-                        )
+                        .thenCompose(Content::asBytesFuture)
+                        .thenAccept(bytes -> {
+                            TgzArchive tgz = new TgzArchive(bytes);
+                            final ChartYaml chart = tgz.chartYaml();
+                            pckgs.putIfAbsent(chart.name(), new HashSet<>());
+                            pckgs.get(chart.name()).add(chart.version());
+                        })
                 ).toArray(CompletableFuture[]::new)
             ).thenApply(noth -> pckgs);
         }
@@ -88,10 +85,11 @@ interface Charts {
             return CompletableFuture.allOf(
                 charts.stream().map(
                     key -> this.storage.value(key)
-                        .thenApply(PublisherAs::new)
-                        .thenCompose(PublisherAs::bytes)
-                        .thenApply(TgzArchive::new)
-                        .thenAccept(tgz -> Asto.addChartFromTgzToPackages(tgz, pckgs))
+                        .thenCompose(Content::asBytesFuture)
+                        .thenAccept(bytes -> {
+                            TgzArchive tgz = new TgzArchive(bytes);
+                            Asto.addChartFromTgzToPackages(tgz, pckgs);
+                        })
                 ).toArray(CompletableFuture[]::new)
             ).thenApply(noth -> pckgs);
         }

@@ -6,21 +6,20 @@ package com.artipie.composer.http.proxy;
 
 import com.artipie.asto.Content;
 import com.artipie.composer.JsonPackage;
-import com.artipie.composer.misc.ContentAsJson;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
 
 /**
  * Merging info about different versions of packages.
- * @since 0.4
  */
 public interface MergePackage {
     /**
@@ -91,30 +90,25 @@ public interface MergePackage {
 
         /**
          * Obtains `packages` entry from file.
-         * @param pkgs Content of `package.json` file
+         * @param packages Content of `package.json` file
          * @return Packages entry from file.
          */
-        private static CompletionStage<Optional<JsonObject>> packagesFrom(final Content pkgs) {
-            return new ContentAsJson(pkgs).value()
-                .thenApply(json -> json.getJsonObject("packages"))
-                .thenApply(Optional::ofNullable);
+        private static CompletionStage<Optional<JsonObject>> packagesFrom(final Content packages) {
+            return packages.asJsonObjectFuture()
+                .thenApply(json -> Optional.ofNullable(json.getJsonObject("packages")));
         }
 
         /**
          * Obtains `packages` entry from file.
          * @param pkgs Optional content of `package.json` file
-         * @return Packages entry from file if content is presented, otherwise empty..
+         * @return Packages entry from file if content is presented, otherwise empty.
          */
         private static CompletionStage<Optional<JsonObject>> packagesFromOpt(
             final Optional<? extends Content> pkgs
         ) {
-            final CompletionStage<Optional<JsonObject>> res;
-            if (pkgs.isPresent()) {
-                res = WithRemote.packagesFrom(pkgs.get());
-            } else {
-                res = CompletableFuture.completedFuture(Optional.empty());
-            }
-            return res;
+            return pkgs.isPresent() ? WithRemote.packagesFrom(pkgs.get())
+                : CompletableFuture.completedFuture(Optional.empty());
+
         }
 
         /**
@@ -124,13 +118,8 @@ public interface MergePackage {
          *  contain package, empty json will be returned.
          */
         private JsonObject packageByNameFrom(final Optional<JsonObject> json) {
-            final JsonObject res;
-            if (json.isPresent() && json.get().containsKey(this.name)) {
-                res = json.get().getJsonObject(this.name);
-            } else {
-                res = Json.createObjectBuilder().build();
-            }
-            return res;
+            return json.isPresent() && json.get().containsKey(this.name)
+                ? json.get().getJsonObject(this.name) : Json.createObjectBuilder().build();
         }
 
         /**

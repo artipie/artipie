@@ -7,14 +7,18 @@ package  com.artipie.conan.http;
 import com.artipie.asto.ArtipieIOException;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqParams;
 import com.google.common.base.Strings;
 import io.vavr.Tuple2;
+import org.apache.http.client.utils.URIBuilder;
+import org.ini4j.Wini;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,11 +28,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
-import org.apache.http.client.utils.URIBuilder;
-import org.ini4j.Wini;
 
 /**
  * Conan /v1/conans/* REST APIs.
@@ -36,7 +35,6 @@ import org.ini4j.Wini;
  * Package recipe ("source code") could be built to multiple package binaries with different
  * configuration (conaninfo.txt).
  * Artipie-conan storage structure for now corresponds to standard conan_server.
- * @since 0.1
  */
 public final class ConansEntity {
 
@@ -221,34 +219,33 @@ public final class ConansEntity {
             final JsonObjectBuilder jsonbuilder,
             final String pkghash
         ) throws IOException {
-            return new PublisherAs(content)
-                .string(StandardCharsets.UTF_8).thenApply(
-                    data -> {
-                        final Wini conaninfo;
-                        try {
-                            conaninfo = new Wini(new StringReader(data));
-                        } catch (final IOException exception) {
-                            throw new ArtipieIOException(exception);
-                        }
-                        final JsonObjectBuilder pkgbuilder = Json.createObjectBuilder();
-                        conaninfo.forEach(
-                            (secname, section) -> {
-                                final JsonObjectBuilder jsection = section.entrySet().stream()
-                                    .filter(e -> e.getValue() != null).collect(
-                                        Json::createObjectBuilder, (js, e) ->
-                                            js.add(e.getKey(), e.getValue()),
-                                        (js1, js2) -> {
-                                        }
-                                    );
-                                pkgbuilder.add(secname, jsection);
-                            });
-                        final String hashfield = "recipe_hash";
-                        final String hashvalue = conaninfo.get(hashfield).keySet()
-                            .iterator().next();
-                        pkgbuilder.add(hashfield, hashvalue);
-                        jsonbuilder.add(pkghash, pkgbuilder);
-                        return jsonbuilder.build().toString();
-                    }).toCompletableFuture();
+            return content.asStringFuture().thenApply(
+                data -> {
+                    final Wini conaninfo;
+                    try {
+                        conaninfo = new Wini(new StringReader(data));
+                    } catch (final IOException exception) {
+                        throw new ArtipieIOException(exception);
+                    }
+                    final JsonObjectBuilder pkgbuilder = Json.createObjectBuilder();
+                    conaninfo.forEach(
+                        (secname, section) -> {
+                            final JsonObjectBuilder jsection = section.entrySet().stream()
+                                .filter(e -> e.getValue() != null).collect(
+                                    Json::createObjectBuilder, (js, e) ->
+                                        js.add(e.getKey(), e.getValue()),
+                                    (js1, js2) -> {
+                                    }
+                                );
+                            pkgbuilder.add(secname, jsection);
+                        });
+                    final String hashfield = "recipe_hash";
+                    final String hashvalue = conaninfo.get(hashfield).keySet()
+                        .iterator().next();
+                    pkgbuilder.add(hashfield, hashvalue);
+                    jsonbuilder.add(pkghash, pkgbuilder);
+                    return jsonbuilder.build().toString();
+                });
         }
 
         /**

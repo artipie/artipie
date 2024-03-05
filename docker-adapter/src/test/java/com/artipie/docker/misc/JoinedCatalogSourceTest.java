@@ -5,12 +5,8 @@
 package com.artipie.docker.misc;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.fake.FakeCatalogDocker;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -19,10 +15,12 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Tests for {@link JoinedCatalogSource}.
- *
- * @since 0.10
  */
 final class JoinedCatalogSourceTest {
 
@@ -40,7 +38,7 @@ final class JoinedCatalogSourceTest {
                 Optional.of(new RepoName.Simple("four")),
                 limit
             ).catalog().thenCompose(
-                catalog -> new PublisherAs(catalog.json()).asciiString()
+                catalog -> catalog.json().asStringFuture()
             ).toCompletableFuture().join(),
             new StringIsJson.Object(
                 new JsonHas(
@@ -67,7 +65,7 @@ final class JoinedCatalogSourceTest {
                 ),
                 new FakeCatalogDocker(() -> new Content.From(json.getBytes()))
             ).catalog().thenCompose(
-                catalog -> new PublisherAs(catalog.json()).asciiString()
+                catalog -> catalog.json().asStringFuture()
             ).toCompletableFuture().join(),
             new IsEqual<>(json)
         );

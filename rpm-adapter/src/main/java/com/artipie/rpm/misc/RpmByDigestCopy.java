@@ -10,17 +10,16 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
 import com.artipie.asto.ext.KeyLastPart;
-import com.artipie.asto.ext.PublisherAs;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Copy rpms from one storage to another filtering by digests.
- * @since 0.11
  */
 public final class RpmByDigestCopy {
 
@@ -89,7 +88,7 @@ public final class RpmByDigestCopy {
 
     /**
      * Handle rpm: calc its digest and check whether it's present in digests list, save if to
-     * storage if necessary.
+     * storage is necessary.
      * @param dest Where to copy
      * @param rpm Rpm file key
      * @param content Rpm content
@@ -98,7 +97,7 @@ public final class RpmByDigestCopy {
     private CompletionStage<Void> handleRpm(
         final Storage dest, final Key rpm, final Content content
     ) {
-        return new PublisherAs(content).bytes().thenCompose(
+        return content.asBytesFuture().thenCompose(
             source -> new ContentDigest(new Content.From(source), this.algorithm)
                 .hex().thenCompose(
                     hex -> {

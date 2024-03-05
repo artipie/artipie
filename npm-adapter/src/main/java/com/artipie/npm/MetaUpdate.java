@@ -9,15 +9,15 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
-import com.artipie.npm.misc.JsonFromPublisher;
+import org.apache.commons.codec.binary.Hex;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonPatchBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonPatchBuilder;
-import org.apache.commons.codec.binary.Hex;
 
 /**
  * Updating `meta.json` file.
@@ -57,26 +57,22 @@ public interface MetaUpdate {
             return storage.exists(keymeta)
                 .thenCompose(
                     exists -> {
-                        final CompletionStage<Meta> meta;
                         if (exists) {
-                            meta = storage.value(keymeta)
-                                .thenApply(JsonFromPublisher::new)
-                                .thenCompose(JsonFromPublisher::json)
+                            return storage.value(keymeta)
+                                .thenCompose(Content::asJsonObjectFuture)
                                 .thenApply(Meta::new);
-                        } else {
-                            meta = CompletableFuture.completedFuture(
-                                new Meta(
-                                    new NpmPublishJsonToMetaSkelethon(this.json).skeleton()
-                                )
-                            );
                         }
-                        return meta;
+                        return CompletableFuture.completedFuture(
+                            new Meta(new NpmPublishJsonToMetaSkelethon(this.json).skeleton())
+                        );
                     })
-                .thenApply(meta -> meta.updatedMeta(this.json))
                 .thenCompose(
-                    meta -> storage.save(
-                        keymeta, new Content.From(meta.toString().getBytes(StandardCharsets.UTF_8))
-                    )
+                    meta -> {
+                        JsonObject updated = meta.updatedMeta(this.json);
+                        return storage.save(
+                            keymeta, new Content.From(updated.toString().getBytes(StandardCharsets.UTF_8))
+                        );
+                    }
                 );
         }
     }

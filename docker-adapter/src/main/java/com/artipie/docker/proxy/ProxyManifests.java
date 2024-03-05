@@ -6,7 +6,6 @@ package com.artipie.docker.proxy;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.FailedCompletionStage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
@@ -30,8 +29,6 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Proxy implementation of {@link Repo}.
- *
- * @since 0.3
  */
 public final class ProxyManifests implements Manifests {
 
@@ -82,7 +79,7 @@ public final class ProxyManifests implements Manifests {
                 final CompletionStage<Optional<Manifest>> result;
                 if (status == RsStatus.OK) {
                     final Digest digest = new DigestHeader(headers).value();
-                    result = new PublisherAs(body).bytes().thenApply(
+                    result = new Content.From(body).asBytesFuture().thenApply(
                         bytes -> Optional.of(new JsonManifest(digest, bytes))
                     );
                 } else if (status == RsStatus.NOT_FOUND) {
@@ -109,9 +106,7 @@ public final class ProxyManifests implements Manifests {
             (status, headers, body) -> {
                 final CompletionStage<Tags> result;
                 if (status == RsStatus.OK) {
-                    result = new PublisherAs(body).bytes().thenApply(
-                        bytes -> () -> new Content.From(bytes)
-                    );
+                    result = CompletableFuture.completedFuture(()-> new Content.From(body));
                 } else {
                     result = unexpected(status);
                 }

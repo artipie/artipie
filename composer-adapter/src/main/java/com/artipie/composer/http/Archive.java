@@ -6,7 +6,11 @@ package com.artipie.composer.http;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.asto.ext.PublisherAs;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+
+import javax.json.Json;
+import javax.json.JsonObject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,15 +18,10 @@ import java.io.UncheckedIOException;
 import java.util.concurrent.CompletionStage;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import javax.json.Json;
-import javax.json.JsonObject;
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 
 /**
  * Interface for working with archive file. For example, obtaining
  * composer json file from archive.
- * @since 0.4
  */
 public interface Archive {
     /**
@@ -72,7 +71,7 @@ public interface Archive {
 
         @Override
         public CompletionStage<JsonObject> composerFrom(final Content archive) {
-            return new PublisherAs(archive).bytes()
+            return archive.asBytesFuture()
                 .thenApply(
                     bytes -> {
                         try (
@@ -106,8 +105,7 @@ public interface Archive {
         public CompletionStage<Content> replaceComposerWith(
             final Content archive, final byte[] composer
         ) {
-            return new PublisherAs(archive)
-                .bytes()
+            return archive.asBytesFuture()
                 .thenApply(
                     bytes -> {
                         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -149,7 +147,6 @@ public interface Archive {
     /**
      * Name of archive consisting of name and version.
      * For example, "name-1.0.1.tgz".
-     * @since 0.4
      */
     class Name {
         /**

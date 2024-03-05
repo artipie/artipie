@@ -7,7 +7,6 @@ package com.artipie.maven.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -29,7 +28,6 @@ import org.reactivestreams.Publisher;
  * reads `latest` version from the file and saves it to the temp location adding version and `meta`
  * before the filename:
  * `.upload/${package_name}/${version}/meta/maven-metadata.xml`.
- * @since 0.8
  */
 public final class PutMetadataSlice implements Slice {
 
@@ -62,16 +60,18 @@ public final class PutMetadataSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
-        final Response res;
+    public Response response(
+        final String line,
+        final Iterable<Map.Entry<String, String>> headers,
+        final Publisher<ByteBuffer> body
+    ) {
         final Matcher matcher = PutMetadataSlice.PTN_META.matcher(
             new RequestLineFrom(line).uri().getPath()
         );
         if (matcher.matches()) {
             final Key pkg = new KeyFromPath(matcher.group("pkg"));
-            res = new AsyncResponse(
-                new PublisherAs(body).asciiString().thenCombine(
+            return new AsyncResponse(
+                new Content.From(body).asStringFuture().thenCombine(
                     this.asto.list(new Key.From(UploadSlice.TEMP, pkg)),
                     (xml, list) -> {
                         final Optional<String> snapshot = new DeployMetadata(xml).snapshots()
@@ -79,18 +79,14 @@ public final class PutMetadataSlice implements Slice {
                                 item -> list.stream().anyMatch(key -> key.string().contains(item))
                             ).findFirst();
                         final Key key;
-                        if (snapshot.isPresent()) {
-                            key = new Key.From(
-                                UploadSlice.TEMP, pkg.string(), snapshot.get(),
-                                PutMetadataSlice.SUB_META, PutMetadataSlice.MAVEN_METADATA
-                            );
-                        } else {
-                            key = new Key.From(
-                                UploadSlice.TEMP, pkg.string(),
-                                new DeployMetadata(xml).release(), PutMetadataSlice.SUB_META,
-                                PutMetadataSlice.MAVEN_METADATA
-                            );
-                        }
+                        key = snapshot.map(s -> new Key.From(
+                            UploadSlice.TEMP, pkg.string(), s,
+                            PutMetadataSlice.SUB_META, PutMetadataSlice.MAVEN_METADATA
+                        )).orElseGet(() -> new Key.From(
+                            UploadSlice.TEMP, pkg.string(),
+                            new DeployMetadata(xml).release(), PutMetadataSlice.SUB_META,
+                            PutMetadataSlice.MAVEN_METADATA
+                        ));
                         return this.asto.save(
                             key,
                             new Content.From(xml.getBytes(StandardCharsets.US_ASCII))
@@ -98,9 +94,7 @@ public final class PutMetadataSlice implements Slice {
                     }
                 ).thenApply(nothing -> new RsWithStatus(RsStatus.CREATED))
             );
-        } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
-        return res;
+        return new RsWithStatus(RsStatus.BAD_REQUEST);
     }
 }

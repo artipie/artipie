@@ -9,7 +9,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.ext.KeyLastPart;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
@@ -18,11 +17,6 @@ import com.artipie.maven.http.PutMetadataSlice;
 import com.jcabi.matchers.XhtmlMatchers;
 import com.jcabi.xml.XML;
 import com.jcabi.xml.XMLDocument;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.cactoos.list.ListOf;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -32,11 +26,14 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Test for {@link AstoMaven}.
- * @since 0.8
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class AstoMavenTest {
 
     /**
@@ -88,8 +85,7 @@ final class AstoMavenTest {
             "Maven metadata xml is not correct",
             new XMLDocument(
                 this.storage.value(new Key.From(AstoMavenTest.ASTO, "maven-metadata.xml"))
-                    .thenCompose(content -> new PublisherAs(content).string(StandardCharsets.UTF_8))
-                    .join()
+                    .join().asString()
             ),
             new AllOf<>(
                 new ListOf<Matcher<? super XML>>(
@@ -136,8 +132,7 @@ final class AstoMavenTest {
             "Maven metadata xml is not correct",
             new XMLDocument(
                 this.storage.value(new Key.From(AstoMavenTest.LGR, "maven-metadata.xml"))
-                    .thenCompose(content -> new PublisherAs(content).string(StandardCharsets.UTF_8))
-                    .join()
+                    .join().asString()
             ),
             new AllOf<>(
                 new ListOf<Matcher<? super XML>>(
@@ -207,8 +202,7 @@ final class AstoMavenTest {
             "Maven metadata xml is not correct",
             new XMLDocument(
                 this.storage.value(new Key.From(AstoMavenTest.LGR, "maven-metadata.xml"))
-                    .thenCompose(content -> new PublisherAs(content).string(StandardCharsets.UTF_8))
-                    .join()
+                    .join().asString()
             ),
             new AllOf<>(
                 new ListOf<Matcher<? super XML>>(
@@ -244,8 +238,7 @@ final class AstoMavenTest {
         MatcherAssert.assertThat(
             new XMLDocument(
                 this.storage.value(new Key.From(AstoMavenTest.ASTO, "maven-metadata.xml"))
-                    .thenCompose(content -> new PublisherAs(content).string(StandardCharsets.UTF_8))
-                    .join()
+                    .join().asString()
             ),
             new AllOf<>(
                 new ListOf<Matcher<? super XML>>(

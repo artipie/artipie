@@ -6,7 +6,6 @@ package com.artipie.docker.cache;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.LoggingStorage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ExampleStorage;
@@ -23,10 +22,6 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.ref.ManifestRef;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.common.base.Stopwatch;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -38,12 +33,14 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Tests for {@link CacheManifests}.
- *
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CacheManifestsTest {
     @ParameterizedTest
     @CsvSource({
@@ -88,7 +85,7 @@ final class CacheManifestsTest {
             cache, Optional.of(events), "my-docker-proxy"
         ).get(ref).toCompletableFuture().join();
         final Stopwatch stopwatch = Stopwatch.createStarted();
-        while (!cache.manifests().get(ref).toCompletableFuture().join().isPresent()) {
+        while (cache.manifests().get(ref).toCompletableFuture().join().isEmpty()) {
             final int timeout = 10;
             if (stopwatch.elapsed(TimeUnit.SECONDS) > timeout) {
                 break;
@@ -134,7 +131,7 @@ final class CacheManifestsTest {
                     )
                 ), Optional.empty(), "*"
             ).tags(Optional.of(new Tag.Valid("four")), limit).thenCompose(
-                tags -> new PublisherAs(tags.json()).asciiString()
+                tags -> tags.json().asStringFuture()
             ).toCompletableFuture().join(),
             new StringIsJson.Object(
                 Matchers.allOf(

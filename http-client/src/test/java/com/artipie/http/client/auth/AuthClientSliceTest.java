@@ -5,7 +5,6 @@
 package com.artipie.http.client.auth;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Headers;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Authorization;
@@ -187,7 +186,7 @@ final class AuthClientSliceTest {
         final AtomicReference<List<byte[]>> capture = new AtomicReference<>(new ArrayList<>(0));
         new AuthClientSlice(
             (line, headers, body) -> new AsyncResponse(
-                new PublisherAs(body).bytes().thenApply(
+                new Content.From(body).asBytesFuture().thenApply(
                     bytes -> {
                         capture.get().add(bytes);
                         return new RsWithStatus(RsStatus.UNAUTHORIZED);

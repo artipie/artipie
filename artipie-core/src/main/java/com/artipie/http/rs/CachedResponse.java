@@ -5,23 +5,22 @@
 package com.artipie.http.rs;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.reactivestreams.Publisher;
 
 /**
  * Response that caches origin response once it first sent and can replay it many times.
  * <p>It can be useful when testing one response against multiple matchers, and response
  * from slice should be called only once.</p>
- * @since 0.17
  */
 public final class CachedResponse implements Response {
 
@@ -54,13 +53,12 @@ public final class CachedResponse implements Response {
         return String.format(
             "(%s: state=%s)",
             this.getClass().getSimpleName(),
-            this.con.toString()
+            this.con
         );
     }
 
     /**
      * Connection that keeps response state and can reply it to other connection.
-     * @since 0.16
      */
     private static final class StatefulConnection implements Connection {
 
@@ -81,10 +79,10 @@ public final class CachedResponse implements Response {
 
         @Override
         public CompletionStage<Void> accept(final RsStatus stts, final Headers hdrs,
-            final Publisher<ByteBuffer> bdy) {
+            final Publisher<ByteBuffer> body) {
             this.status = stts;
             this.headers = hdrs;
-            return new PublisherAs(bdy).bytes().thenAccept(
+            return new Content.From(body).asBytesFuture().thenAccept(
                 bytes -> this.body = bytes
             );
         }

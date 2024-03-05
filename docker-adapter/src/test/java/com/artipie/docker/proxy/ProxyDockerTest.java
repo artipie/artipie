@@ -5,7 +5,6 @@
 package com.artipie.docker.proxy;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
 import com.artipie.http.async.AsyncResponse;
@@ -13,10 +12,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyIterable;
 import org.hamcrest.core.IsEqual;
@@ -25,10 +20,13 @@ import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Tests for {@link ProxyDocker}.
- *
- * @since 0.3
  */
 final class ProxyDockerTest {
 
@@ -54,7 +52,7 @@ final class ProxyDockerTest {
                 cline.set(line);
                 cheaders.set(headers);
                 return new AsyncResponse(
-                    new PublisherAs(body).bytes().thenApply(
+                    new Content.From(body).asBytesFuture().thenApply(
                         bytes -> {
                             cbody.set(bytes);
                             return StandardRs.EMPTY;
@@ -87,7 +85,7 @@ final class ProxyDockerTest {
             new ProxyDocker(
                 (line, headers, body) -> new RsWithBody(new Content.From(bytes))
             ).catalog(Optional.empty(), Integer.MAX_VALUE).thenCompose(
-                catalog -> new PublisherAs(catalog.json()).bytes()
+                catalog -> catalog.json().asBytesFuture()
             ).toCompletableFuture().join(),
             new IsEqual<>(bytes)
         );

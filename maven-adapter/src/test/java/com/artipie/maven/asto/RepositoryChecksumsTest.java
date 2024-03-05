@@ -8,19 +8,17 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
-import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Test case for {@link RepositoryChecksums}.
- *
- * @since 0.5
  */
 final class RepositoryChecksumsTest {
 
@@ -70,30 +68,22 @@ final class RepositoryChecksumsTest {
         new RepositoryChecksums(storage).generate(key).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Generates sha1",
-            new PublisherAs(
-                storage.value(new Key.From(String.format("%s.sha1", key.string()))).join()
-            ).asciiString().toCompletableFuture().join(),
+                storage.value(new Key.From(String.format("%s.sha1", key.string()))).join().asString(),
             new IsEqual<>(DigestUtils.sha1Hex(content))
         );
         MatcherAssert.assertThat(
             "Generates sha256",
-            new PublisherAs(
-                storage.value(new Key.From(String.format("%s.sha256", key.string()))).join()
-            ).asciiString().toCompletableFuture().join(),
+                storage.value(new Key.From(String.format("%s.sha256", key.string()))).join().asString(),
             new IsEqual<>(DigestUtils.sha256Hex(content))
         );
         MatcherAssert.assertThat(
             "Generates sha512",
-            new PublisherAs(
-                storage.value(new Key.From(String.format("%s.sha512", key.string()))).join()
-            ).asciiString().toCompletableFuture().join(),
+                storage.value(new Key.From(String.format("%s.sha512", key.string()))).join().asString(),
             new IsEqual<>(DigestUtils.sha512Hex(content))
         );
         MatcherAssert.assertThat(
             "Generates md5",
-            new PublisherAs(
-                storage.value(new Key.From(String.format("%s.md5", key.string()))).join()
-            ).asciiString().toCompletableFuture().join(),
+                storage.value(new Key.From(String.format("%s.md5", key.string()))).join().asString(),
             new IsEqual<>(DigestUtils.md5Hex(content))
         );
     }

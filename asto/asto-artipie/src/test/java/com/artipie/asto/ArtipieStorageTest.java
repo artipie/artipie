@@ -5,7 +5,6 @@
 package com.artipie.asto;
 
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
@@ -17,14 +16,6 @@ import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyIterable;
@@ -33,10 +24,17 @@ import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
 /**
  * Test case for {@link ArtipieStorage}.
- *
- * @since 0.1
  */
 public final class ArtipieStorageTest {
 
@@ -55,12 +53,13 @@ public final class ArtipieStorageTest {
                         line.set(rqline);
                         headers.set(rqheaders);
                         return new AsyncResponse(
-                            new PublisherAs(rqbody).bytes().thenApply(
-                                bytes -> {
-                                    body.set(bytes);
-                                    return StandardRs.OK;
-                                }
-                            )
+                            new Content.From(rqbody).asBytesFuture()
+                                .thenApply(
+                                    bytes -> {
+                                        body.set(bytes);
+                                        return StandardRs.OK;
+                                    }
+                                )
                         );
                     }
                 ), new URI("http://host/path1")
@@ -112,12 +111,13 @@ public final class ArtipieStorageTest {
                         line.set(rqline);
                         headers.set(rqheaders);
                         return new AsyncResponse(
-                            new PublisherAs(rqbody).bytes().thenApply(
-                                bytes -> {
-                                    body.set(bytes);
-                                    return StandardRs.OK;
-                                }
-                            )
+                            new Content.From(rqbody).asBytesFuture()
+                                .thenApply(
+                                    bytes -> {
+                                        body.set(bytes);
+                                        return StandardRs.OK;
+                                    }
+                                )
                         );
                     }
                 ), new URI("http://host/path2")

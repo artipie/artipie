@@ -7,7 +7,6 @@ package com.artipie.pypi.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.Headers;
@@ -18,18 +17,19 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
 
 /**
  * Test for {@link WheelSlice}.
@@ -73,9 +73,7 @@ class WheelSliceTest {
         );
         MatcherAssert.assertThat(
             "Saves content to storage",
-            new PublisherAs(
-                this.asto.value(new Key.From("artipie-sample", filename)).join()
-            ).bytes().toCompletableFuture().join(),
+                this.asto.value(new Key.From("artipie-sample", filename)).join().asBytes(),
             new IsEqual<>(body)
         );
         MatcherAssert.assertThat(
@@ -104,9 +102,7 @@ class WheelSliceTest {
         );
         MatcherAssert.assertThat(
             "Saves content to storage",
-            new PublisherAs(
-                this.asto.value(new Key.From(path, "abtests", filename)).join()
-            ).bytes().toCompletableFuture().join(),
+            this.asto.value(new Key.From(path, "abtests", filename)).join().asBytes(),
             new IsEqual<>(body)
         );
         MatcherAssert.assertThat(

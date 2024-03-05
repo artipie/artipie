@@ -8,11 +8,11 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.ArtipieIOException;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.settings.AliasSettings;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.Settings;
 import com.artipie.settings.StorageByAlias;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,7 +25,6 @@ public class MapRepositories implements Repositories {
 
     private final Settings settings;
 
-//    private final Map<String, RepoConfig> map;
     private final Map<String, RepoConfig> map;
 
     public MapRepositories(final Settings settings) {
@@ -57,9 +56,7 @@ public class MapRepositories implements Repositories {
                 final CompletableFuture<StorageByAlias> alias = new AliasSettings(storage)
                     .find(key);
                 final String content = file.valueFrom(storage)
-                    .thenApply(PublisherAs::new)
-                    .thenCompose(PublisherAs::asciiString)
-                    .toCompletableFuture().join();
+                    .toCompletableFuture().join().asString();
                 try {
                     final RepoConfig cfg = new RepoConfig(
                         alias.join(), new Key.From(file.name()),

@@ -5,7 +5,6 @@
 package com.artipie.docker.http;
 
 import com.artipie.asto.Key;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Response;
@@ -114,9 +113,7 @@ class ManifestEntityGetTest {
     }
 
     private static byte[] bytes(final Key key) {
-        return new PublisherAs(
-            new ExampleStorage().value(key).join()
-        ).bytes().toCompletableFuture().join();
+        return new ExampleStorage().value(key).join().asBytes();
     }
 
     /**

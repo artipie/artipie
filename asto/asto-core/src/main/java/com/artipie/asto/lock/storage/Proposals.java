@@ -9,7 +9,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ValueNotFoundException;
-import com.artipie.asto.ext.PublisherAs;
+
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Optional;
@@ -78,7 +78,7 @@ final class Proposals {
                     .map(
                         proposal -> this.valueIfPresent(proposal).thenCompose(
                             value -> value.map(
-                                content -> new PublisherAs(content).asciiString().thenCompose(
+                                content -> content.asStringFuture().thenCompose(
                                     expiration -> {
                                         if (isNotExpired(expiration, now)) {
                                             throw new ArtipieIOException(

@@ -7,21 +7,18 @@ package com.artipie.asto.memory;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.ValueNotFoundException;
-import com.artipie.asto.ext.PublisherAs;
-import java.util.NavigableMap;
-import java.util.TreeMap;
-import java.util.concurrent.CompletionException;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.NavigableMap;
+import java.util.TreeMap;
+import java.util.concurrent.CompletionException;
+
 /**
  * Test for {@link BenchmarkStorage}.
- * @since 1.1.0
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class BenchmarkStorageTest {
     @Test
     void obtainsValueFromBackendIfAbsenceInLocal() {
@@ -31,10 +28,7 @@ final class BenchmarkStorageTest {
         backdata.put(key.string(), data);
         final InMemoryStorage memory = new InMemoryStorage(backdata);
         final BenchmarkStorage bench = new BenchmarkStorage(memory);
-        MatcherAssert.assertThat(
-            this.valueFrom(bench, key),
-            new IsEqual<>(data)
-        );
+        Assertions.assertArrayEquals(data, this.valueFrom(bench, key));
     }
 
     @Test
@@ -44,10 +38,7 @@ final class BenchmarkStorageTest {
         final BenchmarkStorage bench = new BenchmarkStorage(new InMemoryStorage());
         bench.save(key, new Content.From(data)).join();
         bench.save(new Key.From("another"), Content.EMPTY).join();
-        MatcherAssert.assertThat(
-            this.valueFrom(bench, key),
-            new IsEqual<>(data)
-        );
+        Assertions.assertArrayEquals(data, this.valueFrom(bench, key));
     }
 
     @Test
@@ -59,10 +50,7 @@ final class BenchmarkStorageTest {
         backdata.put(key.string(), back);
         final BenchmarkStorage bench = new BenchmarkStorage(new InMemoryStorage(backdata));
         bench.save(key, new Content.From(lcl)).join();
-        MatcherAssert.assertThat(
-            this.valueFrom(bench, key),
-            new IsEqual<>(lcl)
-        );
+        Assertions.assertArrayEquals(lcl, this.valueFrom(bench, key));
     }
 
     @Test
@@ -72,16 +60,9 @@ final class BenchmarkStorageTest {
         final Key key = new Key.From("somekey");
         final byte[] data = "should save in local".getBytes();
         bench.save(key, new Content.From(data)).join();
-        MatcherAssert.assertThat(
-            "Value was not saved in local storage",
-            this.valueFrom(bench, key),
-            new IsEqual<>(data)
-        );
-        MatcherAssert.assertThat(
-            "Value was saved in backend storage",
-            memory.exists(key).join(),
-            new IsEqual<>(false)
-        );
+        Assertions.assertArrayEquals(data, this.valueFrom(bench, key),
+            "Value was not saved in local storage");
+        Assertions.assertFalse(memory.exists(key).join(), "Value was saved in backend storage");
     }
 
     @Test
@@ -102,8 +83,6 @@ final class BenchmarkStorageTest {
     }
 
     private byte[] valueFrom(final BenchmarkStorage bench, final Key key) {
-        return new PublisherAs(bench.value(key).join())
-            .bytes()
-            .toCompletableFuture().join();
+        return bench.value(key).join().asBytes();
     }
 }

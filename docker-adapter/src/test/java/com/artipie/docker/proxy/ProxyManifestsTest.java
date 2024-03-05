@@ -5,7 +5,6 @@
 package com.artipie.docker.proxy;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Digest;
 import com.artipie.docker.RepoName;
@@ -19,21 +18,19 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyIterable;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Tests for {@link ProxyManifests}.
- *
- * @since 0.3
  */
 class ProxyManifestsTest {
 
@@ -54,18 +51,13 @@ class ProxyManifestsTest {
             },
             new RepoName.Valid("test")
         ).get(new ManifestRef.FromString("abc")).toCompletableFuture().join();
-        MatcherAssert.assertThat(found.isPresent(), new IsEqual<>(true));
-        final Manifest manifest = found.get();
-        MatcherAssert.assertThat(manifest.digest().string(), new IsEqual<>(digest));
+        Assertions.assertTrue(found.isPresent());
+        final Manifest manifest = found.orElseThrow();
+        Assertions.assertEquals(digest, manifest.digest().string());
         final Content content = manifest.content();
-        MatcherAssert.assertThat(
-            new PublisherAs(content).bytes().toCompletableFuture().join(),
-            new IsEqual<>(data)
-        );
-        MatcherAssert.assertThat(
-            content.size(),
-            new IsEqual<>(Optional.of((long) data.length))
-        );
+        Assertions.assertArrayEquals(data, content.asBytes());
+        Assertions.assertEquals(Optional.of((long) data.length), content.size());
+
     }
 
     @Test
@@ -79,7 +71,7 @@ class ProxyManifestsTest {
             },
             new RepoName.Valid("my-test")
         ).get(new ManifestRef.FromString("latest")).toCompletableFuture().join();
-        MatcherAssert.assertThat(found.isPresent(), new IsEqual<>(false));
+        Assertions.assertFalse(found.isPresent());
     }
 
     @Test
@@ -95,7 +87,7 @@ class ProxyManifestsTest {
                 cline.set(line);
                 cheaders.set(headers);
                 return new AsyncResponse(
-                    new PublisherAs(body).bytes().thenApply(
+                    new Content.From(body).asBytesFuture().thenApply(
                         bytes -> {
                             cbody.set(bytes);
                             return StandardRs.EMPTY;
@@ -114,23 +106,19 @@ class ProxyManifestsTest {
             cheaders.get(),
             new IsEmptyIterable<>()
         );
-        MatcherAssert.assertThat(
-            "Sends no body to remote",
-            cbody.get().length,
-            new IsEqual<>(0)
-        );
+        Assertions.assertEquals(0, cbody.get().length, "Sends no body to remote");
     }
 
     @Test
     void shouldReturnCatalogFromRemote() {
         final byte[] bytes = "{\"repositories\":[\"one\",\"two\"]}".getBytes();
-        MatcherAssert.assertThat(
+        Assertions.assertArrayEquals(
+            bytes,
             new ProxyDocker(
                 (line, headers, body) -> new RsWithBody(new Content.From(bytes))
             ).catalog(Optional.empty(), Integer.MAX_VALUE).thenCompose(
-                catalog -> new PublisherAs(catalog.json()).bytes()
-            ).toCompletableFuture().join(),
-            new IsEqual<>(bytes)
+                catalog -> catalog.json().asBytesFuture()
+            ).toCompletableFuture().join()
         );
     }
 

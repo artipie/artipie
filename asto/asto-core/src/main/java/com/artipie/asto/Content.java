@@ -4,17 +4,23 @@
  */
 package com.artipie.asto;
 
+import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Optional;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Content that can be stored in {@link Storage}.
- *
- * @since 0.15
  */
 public interface Content extends Publisher<ByteBuffer> {
 
@@ -24,16 +30,77 @@ public interface Content extends Publisher<ByteBuffer> {
     Content EMPTY = new Empty();
 
     /**
-     * Provides size of content in bytes if known.
+     * Provides size of the content in bytes if known.
      *
      * @return Size of content in bytes if known.
      */
     Optional<Long> size();
 
     /**
-     * Empty content.
+     * Reads bytes from the content into memory.
      *
-     * @since 0.24
+     * @return Byte array as CompletableFuture
+     */
+    default CompletableFuture<byte[]> asBytesFuture() {
+        return new Concatenation(this)
+            .single()
+            .map(buf -> new Remaining(buf, true))
+            .map(Remaining::bytes)
+            .to(SingleInterop.get())
+            .toCompletableFuture();
+    }
+
+    /**
+     * Reads bytes from content into memory.
+     *
+     * @return Byte array
+     */
+    default byte[] asBytes() {
+        return this.asBytesFuture().join();
+    }
+
+    /**
+     * Reads bytes from the content as a string in the {@code StandardCharsets.UTF_8} charset.
+     *
+     * @return String as CompletableFuture
+     */
+    default CompletableFuture<String> asStringFuture() {
+        return this.asBytesFuture().thenApply(bytes -> new String(bytes, StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Reads bytes from the content as a string in the {@code StandardCharsets.UTF_8} charset.
+     *
+     * @return String
+     */
+    default String asString() {
+        return this.asStringFuture().join();
+    }
+
+    /**
+     * Reads bytes from the content as a JSON object.
+     *
+     * @return JsonObject as CompletableFuture
+     */
+    default CompletableFuture<JsonObject> asJsonObjectFuture() {
+        return this.asStringFuture().thenApply(val -> {
+            try (JsonReader reader = Json.createReader(new StringReader(val))) {
+                return reader.readObject();
+            }
+        });
+    }
+
+    /**
+     * Reads bytes from the content as a JSON object.
+     *
+     * @return JsonObject
+     */
+    default JsonObject asJsonObject() {
+        return this.asJsonObjectFuture().join();
+    }
+
+    /**
+     * Empty content.
      */
     final class Empty implements Content {
 
@@ -50,8 +117,6 @@ public interface Content extends Publisher<ByteBuffer> {
 
     /**
      * Key built from byte buffers publisher and total size if it is known.
-     *
-     * @since 0.15
      */
     final class From implements Content {
 

@@ -6,7 +6,6 @@ package com.artipie.npm.proxy;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.rx.RxStorage;
 import com.artipie.npm.proxy.model.NpmAsset;
 import com.artipie.npm.proxy.model.NpmPackage;
@@ -15,15 +14,14 @@ import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
+
 import java.nio.charset.StandardCharsets;
 
 /**
  * Base NPM Proxy storage implementation. It encapsulates storage format details
  * and allows to handle both primary data and metadata files within one calls.
  * It uses underlying RxStorage and works in Rx-way.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RxNpmProxyStorage implements NpmProxyStorage {
     /**
      * Underlying storage.
@@ -78,13 +76,7 @@ public final class RxNpmProxyStorage implements NpmProxyStorage {
     public Maybe<NpmPackage> getPackage(final String name) {
         return this.storage.exists(new Key.From(name, "meta.json"))
             .flatMapMaybe(
-                exists -> {
-                    if (exists) {
-                        return this.readPackage(name).toMaybe();
-                    } else {
-                        return Maybe.empty();
-                    }
-                }
+                exists -> exists ? this.readPackage(name).toMaybe() : Maybe.empty()
             );
     }
 
@@ -92,13 +84,7 @@ public final class RxNpmProxyStorage implements NpmProxyStorage {
     public Maybe<NpmAsset> getAsset(final String path) {
         return this.storage.exists(new Key.From(path))
             .flatMapMaybe(
-                exists -> {
-                    if (exists) {
-                        return this.readAsset(path).toMaybe();
-                    } else {
-                        return Maybe.empty();
-                    }
-                }
+                exists -> exists ? this.readAsset(path).toMaybe() : Maybe.empty()
             );
     }
 
@@ -109,13 +95,11 @@ public final class RxNpmProxyStorage implements NpmProxyStorage {
      */
     private Single<NpmPackage> readPackage(final String name) {
         return this.storage.value(new Key.From(name, "meta.json"))
-            .map(PublisherAs::new)
-            .map(PublisherAs::bytes)
+            .map(Content::asBytesFuture)
             .flatMap(SingleInterop::fromFuture)
             .zipWith(
                 this.storage.value(new Key.From(name, "meta.meta"))
-                    .map(PublisherAs::new)
-                    .map(PublisherAs::bytes)
+                    .map(Content::asBytesFuture)
                     .flatMap(SingleInterop::fromFuture)
                     .map(metadata -> new String(metadata, StandardCharsets.UTF_8))
                     .map(JsonObject::new),
@@ -137,8 +121,7 @@ public final class RxNpmProxyStorage implements NpmProxyStorage {
         return this.storage.value(new Key.From(path))
             .zipWith(
                 this.storage.value(new Key.From(String.format("%s.meta", path)))
-                    .map(PublisherAs::new)
-                    .map(PublisherAs::bytes)
+                    .map(Content::asBytesFuture)
                     .flatMap(SingleInterop::fromFuture)
                     .map(metadata -> new String(metadata, StandardCharsets.UTF_8))
                     .map(JsonObject::new),

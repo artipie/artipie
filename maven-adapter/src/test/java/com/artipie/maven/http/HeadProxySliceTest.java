@@ -5,7 +5,6 @@
 package com.artipie.maven.http;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Headers;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
@@ -17,16 +16,16 @@ import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
-import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyIterable;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Test for {@link HeadProxySlice}.
- * @since 0.8
  */
 class HeadProxySliceTest {
 
@@ -45,7 +44,7 @@ class HeadProxySliceTest {
                 );
                 MatcherAssert.assertThat(
                     "Body is empty",
-                    new PublisherAs(body).bytes().toCompletableFuture().join(),
+                    new Content.From(body).asBytes(),
                     new IsEqual<>(new byte[]{})
                 );
                 return CompletableFuture.allOf();

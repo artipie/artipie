@@ -11,13 +11,9 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.npm.http.NpmSlice;
-import com.artipie.npm.misc.JsonFromPublisher;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import java.net.URI;
-import java.nio.file.Path;
-import java.util.Arrays;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
@@ -33,17 +29,16 @@ import org.testcontainers.containers.GenericContainer;
 import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.Arrays;
+
 /**
  * IT case for `npm deprecate` command.
- * @since 0.8
  */
 @DisabledOnOs(OS.WINDOWS)
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class NpmDeprecateIT {
 
-    /**
-     * Temporary directory for all tests.
-     */
     @TempDir
     Path tmp;
 
@@ -118,9 +113,8 @@ public final class NpmDeprecateIT {
         );
         MatcherAssert.assertThat(
             "Metadata file was updates",
-            new JsonFromPublisher(
-                this.repo.value(new Key.From(pkg, "meta.json")).join()
-            ).json().join(),
+            this.repo.value(new Key.From(pkg, "meta.json"))
+                .join().asJsonObject(),
             new JsonHas(
                 "versions",
                 new JsonHas(

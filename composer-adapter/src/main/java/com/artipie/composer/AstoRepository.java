@@ -7,8 +7,10 @@ package com.artipie.composer;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.composer.http.Archive;
+
+import javax.json.Json;
+import javax.json.JsonObject;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -17,15 +19,10 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import javax.json.Json;
-import javax.json.JsonObject;
 
 /**
  * PHP Composer repository that stores packages in a {@link Storage}.
- *
- * @since 0.3
  */
-@SuppressWarnings("PMD.TooManyMethods")
 public final class AstoRepository implements Repository {
 
     /**
@@ -76,35 +73,32 @@ public final class AstoRepository implements Repository {
         final Key key = new Key.From(UUID.randomUUID().toString());
         return this.asto.save(key, content).thenCompose(
             nothing -> this.asto.value(key)
-                .thenApply(PublisherAs::new)
-                .thenCompose(PublisherAs::bytes)
-                .thenCompose(
-                    bytes -> {
-                        final Package pack = new JsonPackage(bytes);
-                        return CompletableFuture.allOf(
-                            this.packages().thenCompose(
+                .thenCompose(Content::asBytesFuture)
+                .thenCompose(bytes -> {
+                    final Package pack = new JsonPackage(bytes);
+                    return CompletableFuture.allOf(
+                        this.packages().thenCompose(
+                            packages -> packages.orElse(new JsonPackages())
+                                .add(pack, vers)
+                                .thenCompose(
+                                    pkgs -> pkgs.save(
+                                        this.asto, AstoRepository.ALL_PACKAGES
+                                    )
+                                )
+                        ).toCompletableFuture(),
+                        pack.name().thenCompose(
+                            name -> this.packages(name).thenCompose(
                                 packages -> packages.orElse(new JsonPackages())
                                     .add(pack, vers)
                                     .thenCompose(
-                                        pkgs -> pkgs.save(
-                                            this.asto, AstoRepository.ALL_PACKAGES
-                                        )
+                                        pkgs -> pkgs.save(this.asto, name.key())
                                     )
-                            ).toCompletableFuture(),
-                            pack.name().thenCompose(
-                                name -> this.packages(name).thenCompose(
-                                    packages -> packages.orElse(new JsonPackages())
-                                        .add(pack, vers)
-                                        .thenCompose(
-                                            pkgs -> pkgs.save(this.asto, name.key())
-                                        )
-                                )
-                            ).toCompletableFuture()
-                        ).thenCompose(
-                            ignored -> this.asto.delete(key)
-                        );
-                    }
-                )
+                            )
+                        ).toCompletableFuture()
+                    ).thenCompose(
+                        ignored -> this.asto.delete(key)
+                    );
+                })
         );
     }
 

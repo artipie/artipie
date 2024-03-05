@@ -5,33 +5,32 @@
 package com.artipie.http.rq.multipart;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RqHeaders;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.reactivestreams.Publisher;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Test case for multipart request parser.
- * @since 1.0
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class RqMultipartTest {
 
     @Test
     @Timeout(1)
-    void processesFullMultipartRequest() throws Exception {
+    void processesFullMultipartRequest() {
         final String first = String.join(
             "\n",
             "1) This is implicitly typed plain ASCII text.",
@@ -65,10 +64,8 @@ final class RqMultipartTest {
                 new ContentType("multipart/mixed; boundary=\"simple boundary\""),
                 new Content.From(simple.getBytes(StandardCharsets.US_ASCII))
             ).parts()
-        ).<String>flatMapSingle(
-            part -> Single.fromFuture(
-                new PublisherAs(part).string(StandardCharsets.US_ASCII).toCompletableFuture()
-            )
+        ).flatMapSingle(
+            part -> Single.fromFuture(new Content.From(part).asStringFuture())
         ).toList().blockingGet();
         MatcherAssert.assertThat(
             parsed,
@@ -100,9 +97,9 @@ final class RqMultipartTest {
                 new ContentType("multipart/mixed; boundary=\"92fd51d48f874720a066238b824c0146\""),
                 new Content.From(payload.getBytes(StandardCharsets.US_ASCII))
             ).parts()
-        ).<String>flatMapSingle(
+        ).flatMapSingle(
             part -> Single.fromFuture(
-                new PublisherAs(part).string(StandardCharsets.US_ASCII).toCompletableFuture()
+                new Content.From(part).asStringFuture()
             ).map(body -> String.format("%s: %s", new ContentDisposition(part.headers()).fieldName(), body))
         ).toList().blockingGet();
         MatcherAssert.assertThat(
@@ -207,8 +204,10 @@ final class RqMultipartTest {
                 new Content.From(payload.getBytes(StandardCharsets.US_ASCII))
             ).filter(headers -> new ContentDisposition(headers).fieldName().equals("x-amz-signature"))
         ).flatMap(part -> part);
-        final byte[] target = new PublisherAs(body).bytes().toCompletableFuture().join();
-        MatcherAssert.assertThat(target, Matchers.equalTo("0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII)));
+        Assertions.assertEquals(
+            "0000000000000000000000000000000000000000",
+            new Content.From(body).asString()
+        );
     }
 
     @Test
@@ -247,7 +246,7 @@ final class RqMultipartTest {
                 }
             )
         ).flatMapSingle(
-            part -> Single.fromFuture(new PublisherAs(part).asciiString().toCompletableFuture())
+            part -> Single.fromFuture(new Content.From(part).asStringFuture())
         ).toList().blockingGet();
         MatcherAssert.assertThat("parts must have one element", parts, Matchers.hasSize(1));
         MatcherAssert.assertThat(
@@ -258,15 +257,14 @@ final class RqMultipartTest {
     }
 
     @Test
-    void parseCondaPayload() throws Exception {
-        final byte[] payload = new TestResource("multipart").asBytes();
+    void parseCondaPayload() {
         final int size = Flowable.fromPublisher(
-            new RqMultipart(
-                new ContentType("multipart/mixed; boundary=\"92fd51d48f874720a066238b824c0146\""),
-                new Content.From(payload)
-            ).parts()
-        ).flatMap(Flowable::fromPublisher)
+                new RqMultipart(
+                    new ContentType("multipart/mixed; boundary=\"92fd51d48f874720a066238b824c0146\""),
+                    new Content.From(new TestResource("multipart").asBytes())
+                ).parts()
+            ).flatMap(Flowable::fromPublisher)
             .reduce(0, (acc, chunk) -> acc + chunk.remaining()).blockingGet();
-        MatcherAssert.assertThat(size, Matchers.equalTo(4163));
+        Assertions.assertEquals(4163, size);
     }
 }

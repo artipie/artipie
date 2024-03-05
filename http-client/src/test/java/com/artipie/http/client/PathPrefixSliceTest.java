@@ -5,22 +5,20 @@
 package com.artipie.http.client;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.StandardRs;
-import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Tests for {@link PathPrefixSlice}.
- *
- * @since 0.3
  */
 final class PathPrefixSliceTest {
 
@@ -63,7 +61,7 @@ final class PathPrefixSliceTest {
                 );
                 MatcherAssert.assertThat(
                     "Body is preserved",
-                    new PublisherAs(rqbody).bytes().toCompletableFuture().join(),
+                    new Content.From(rqbody).asBytesFuture().toCompletableFuture().join(),
                     new IsEqual<>(body)
                 );
                 return StandardRs.OK;

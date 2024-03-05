@@ -10,18 +10,9 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.cache.CacheControl;
 import com.artipie.asto.cache.Remote;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.composer.AstoRepository;
 import com.artipie.composer.Repository;
-import com.artipie.composer.misc.ContentAsJson;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import javax.json.Json;
 import org.cactoos.set.SetOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -29,20 +20,21 @@ import org.hamcrest.core.IsNot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Tests for {@link ComposerStorageCache}.
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class ComposerStorageCacheTest {
-    /**
-     * Test storage.
-     */
+
     private Storage storage;
 
-    /**
-     * Repository.
-     */
     private Repository repo;
 
     @BeforeEach
@@ -57,13 +49,11 @@ final class ComposerStorageCacheTest {
         final String key = "vendor/package";
         MatcherAssert.assertThat(
             "Content was not obtained from remote",
-            new PublisherAs(
-                new ComposerStorageCache(this.repo).load(
-                    new Key.From(key),
-                    () -> CompletableFuture.completedFuture(Optional.of(new Content.From(body))),
-                    CacheControl.Standard.ALWAYS
-                ).toCompletableFuture().join().get()
-            ).bytes().toCompletableFuture().join(),
+            new ComposerStorageCache(this.repo).load(
+                new Key.From(key),
+                () -> CompletableFuture.completedFuture(Optional.of(new Content.From(body))),
+                CacheControl.Standard.ALWAYS
+            ).toCompletableFuture().join().orElseThrow().asBytes(),
             new IsEqual<>(body)
         );
         MatcherAssert.assertThat(
@@ -75,10 +65,8 @@ final class ComposerStorageCacheTest {
         );
         MatcherAssert.assertThat(
             "Info about save time was not saved in cache file",
-            new ContentAsJson(
-                this.storage.value(CacheTimeControl.CACHE_FILE).join()
-            ).value().toCompletableFuture().join()
-            .keySet(),
+            this.storage.value(CacheTimeControl.CACHE_FILE).join()
+                .asJsonObject().keySet(),
             new IsEqual<>(new SetOf<>(key))
         );
     }
@@ -93,13 +81,11 @@ final class ComposerStorageCacheTest {
             new Content.From(body)
         ).join();
         MatcherAssert.assertThat(
-            new PublisherAs(
-                new ComposerStorageCache(this.repo).load(
-                    new Key.From(key),
-                    () -> CompletableFuture.completedFuture(Optional.empty()),
-                    new CacheTimeControl(this.storage)
-                ).toCompletableFuture().join().get()
-            ).bytes().toCompletableFuture().join(),
+            new ComposerStorageCache(this.repo).load(
+                new Key.From(key),
+                () -> CompletableFuture.completedFuture(Optional.empty()),
+                new CacheTimeControl(this.storage)
+            ).toCompletableFuture().join().orElseThrow().asBytes(),
             new IsEqual<>(body)
         );
     }
@@ -119,30 +105,24 @@ final class ComposerStorageCacheTest {
         ).join();
         MatcherAssert.assertThat(
             "Content was not obtained from remote when cache is expired",
-            new PublisherAs(
-                new ComposerStorageCache(this.repo).load(
-                    new Key.From(key),
-                    () -> CompletableFuture.completedFuture(Optional.of(new Content.From(updated))),
-                    new CacheTimeControl(this.storage)
-                ).toCompletableFuture().join().get()
-            ).bytes().toCompletableFuture().join(),
+            new ComposerStorageCache(this.repo).load(
+                new Key.From(key),
+                () -> CompletableFuture.completedFuture(Optional.of(new Content.From(updated))),
+                new CacheTimeControl(this.storage)
+            ).toCompletableFuture().join().orElseThrow().asBytes(),
             new IsEqual<>(updated)
         );
         MatcherAssert.assertThat(
             "Info about save time was not updated in cache file",
-            new ContentAsJson(
-                this.storage.value(CacheTimeControl.CACHE_FILE).join()
-            ).value().toCompletableFuture().join()
-            .getString(key),
+            this.storage.value(CacheTimeControl.CACHE_FILE).join()
+                .asJsonObject().getString(key),
             new IsNot<>(new IsEqual<>(expired))
         );
         MatcherAssert.assertThat(
             "Cached item was not overwritten",
-            new PublisherAs(
-                this.storage.value(
-                    new Key.From(ComposerStorageCache.CACHE_FOLDER, String.format("%s.json", key))
-                ).join()
-            ).bytes().toCompletableFuture().join(),
+            this.storage.value(
+                new Key.From(ComposerStorageCache.CACHE_FOLDER, String.format("%s.json", key))
+            ).join().asBytes(),
             new IsEqual<>(updated)
         );
     }

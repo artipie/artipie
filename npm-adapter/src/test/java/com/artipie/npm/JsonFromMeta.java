@@ -6,14 +6,13 @@ package com.artipie.npm;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
-import java.io.StringReader;
+
 import javax.json.Json;
 import javax.json.JsonObject;
+import java.io.StringReader;
 
 /**
  * Json object from meta file for usage in tests.
- * @since 0.9
  */
 public final class JsonFromMeta {
     /**
@@ -43,10 +42,7 @@ public final class JsonFromMeta {
     public JsonObject json() {
         return Json.createReader(
             new StringReader(
-                new PublisherAs(
-                    this.storage.value(new Key.From(this.path, "meta.json")).join()
-                ).asciiString()
-                    .toCompletableFuture().join()
+                this.storage.value(new Key.From(this.path, "meta.json")).join().asString()
             )
         ).readObject();
     }

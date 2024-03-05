@@ -5,19 +5,19 @@
 package com.artipie.docker.asto;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
 import com.artipie.docker.RepoName;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Tests for {@link AstoLayers}.
@@ -50,7 +50,7 @@ final class AstoLayersTest {
             .toCompletableFuture().join().digest();
         final Optional<Blob> found = this.blobs.blob(digest).toCompletableFuture().join();
         MatcherAssert.assertThat(found.isPresent(), new IsEqual<>(true));
-        MatcherAssert.assertThat(bytes(found.get()), new IsEqual<>(data));
+        MatcherAssert.assertThat(bytes(found.orElseThrow()), new IsEqual<>(data));
     }
 
     @Test
@@ -60,7 +60,7 @@ final class AstoLayersTest {
             .toCompletableFuture().join().digest();
         final Optional<Blob> found = this.layers.get(digest).toCompletableFuture().join();
         MatcherAssert.assertThat(found.isPresent(), new IsEqual<>(true));
-        MatcherAssert.assertThat(found.get().digest(), new IsEqual<>(digest));
+        MatcherAssert.assertThat(found.orElseThrow().digest(), new IsEqual<>(digest));
         MatcherAssert.assertThat(bytes(found.get()), new IsEqual<>(data));
     }
 
@@ -114,8 +114,6 @@ final class AstoLayersTest {
     }
 
     private static byte[] bytes(final Blob blob) {
-        return new PublisherAs(blob.content().toCompletableFuture().join())
-            .bytes()
-            .toCompletableFuture().join();
+        return blob.content().toCompletableFuture().join().asBytes();
     }
 }

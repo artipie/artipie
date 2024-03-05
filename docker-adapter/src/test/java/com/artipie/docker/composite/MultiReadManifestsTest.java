@@ -5,7 +5,6 @@
 package com.artipie.docker.composite;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.Digest;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
@@ -13,8 +12,6 @@ import com.artipie.docker.fake.FakeManifests;
 import com.artipie.docker.fake.FullTagsManifests;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.ref.ManifestRef;
-import java.util.Arrays;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -26,12 +23,12 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Tests for {@link MultiReadManifests}.
- *
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class MultiReadManifestsTest {
 
     @ParameterizedTest
@@ -82,7 +79,7 @@ final class MultiReadManifestsTest {
                     )
                 )
             ).tags(Optional.of(new Tag.Valid("four")), limit).thenCompose(
-                tags -> new PublisherAs(tags.json()).asciiString()
+                tags -> tags.json().asStringFuture()
             ).toCompletableFuture().join(),
             new StringIsJson.Object(
                 Matchers.allOf(

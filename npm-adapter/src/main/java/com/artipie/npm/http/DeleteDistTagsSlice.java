@@ -7,7 +7,6 @@ package com.artipie.npm.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -15,18 +14,17 @@ import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
-import java.io.StringReader;
+import org.reactivestreams.Publisher;
+
+import javax.json.Json;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
-import javax.json.Json;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that removes dist-tag to meta.json.
- * @since 0.8
  */
 public final class DeleteDistTagsSlice implements Slice {
 
@@ -63,13 +61,10 @@ public final class DeleteDistTagsSlice implements Slice {
             resp = new AsyncResponse(
                 this.storage.exists(meta).thenCompose(
                     exists -> {
-                        final CompletableFuture<Response> res;
                         if (exists) {
-                            res = this.storage.value(meta)
-                                .thenCompose(content -> new PublisherAs(content).asciiString())
+                            return this.storage.value(meta)
+                                .thenCompose(Content::asJsonObjectFuture)
                                 .thenApply(
-                                    str -> Json.createReader(new StringReader(str)).readObject()
-                                ).thenApply(
                                     json -> Json.createObjectBuilder(json).add(
                                         DeleteDistTagsSlice.FIELD,
                                         Json.createObjectBuilder()
@@ -81,15 +76,14 @@ public final class DeleteDistTagsSlice implements Slice {
                                     ).build()
                                 ).thenApply(
                                     json -> json.toString().getBytes(StandardCharsets.UTF_8)
-                                ).thenCompose(
-                                    bytes -> this.storage.save(meta, new Content.From(bytes))
                                 ).thenApply(
-                                    nothing -> StandardRs.OK
+                                    bytes -> {
+                                        this.storage.save(meta, new Content.From(bytes));
+                                        return StandardRs.OK;
+                                    }
                                 );
-                        } else {
-                            res = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
                         }
-                        return res;
+                        return CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
                     }
                 )
             );

@@ -8,23 +8,21 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.rpm.Digest;
 import com.artipie.rpm.RepoConfig;
 import com.artipie.rpm.meta.XmlPackage;
 import com.jcabi.xml.XMLDocument;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.AllOf;
 import org.llorllale.cactoos.matchers.MatcherOf;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+
 /**
  * Matcher for checking rempomd.xml file presence and information in the storage.
- *
- * @since 1.1
  */
 public final class StorageHasRepoMd extends AllOf<Storage> {
 
@@ -86,15 +84,13 @@ public final class StorageHasRepoMd extends AllOf<Storage> {
         final Optional<Content> repomd = storage.list(StorageHasRepoMd.BASE).join().stream()
             .filter(item -> item.string().contains(pckg.lowercase())).findFirst()
             .map(item -> storage.value(new Key.From(item)).join());
-        boolean res = false;
         if (repomd.isPresent()) {
             final String checksum = new ContentDigest(
                 repomd.get(),
                 digest::messageDigest
             ).hex().toCompletableFuture().join();
-            res = !new XMLDocument(
-                new PublisherAs(storage.value(StorageHasRepoMd.REPOMD).join())
-                    .asciiString().toCompletableFuture().join()
+            return  !new XMLDocument(
+                storage.value(StorageHasRepoMd.REPOMD).join().asString()
             ).nodes(
                 String.format(
                     "/*[name()='repomd']/*[name()='data' and @type='%s']/*[name()='checksum' and @type='%s' and text()='%s']",
@@ -104,6 +100,6 @@ public final class StorageHasRepoMd extends AllOf<Storage> {
                 )
             ).isEmpty();
         }
-        return res;
+        return false;
     }
 }

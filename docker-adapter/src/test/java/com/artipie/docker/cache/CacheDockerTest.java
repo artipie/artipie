@@ -5,14 +5,12 @@
 package com.artipie.docker.cache;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.rs.StandardRs;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
@@ -20,6 +18,8 @@ import wtf.g4s8.hamcrest.json.JsonContains;
 import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
+
+import java.util.Optional;
 
 /**
  * Tests for {@link CacheDocker}.
@@ -48,7 +48,7 @@ final class CacheDockerTest {
                 fake("{\"repositories\":[\"one\",\"three\",\"four\"]}"),
                 fake("{\"repositories\":[\"one\",\"two\"]}"), Optional.empty(), "*"
             ).catalog(Optional.of(new RepoName.Simple("four")), limit).thenCompose(
-                catalog -> new PublisherAs(catalog.json()).asciiString()
+                catalog -> catalog.json().asStringFuture()
             ).toCompletableFuture().join(),
             new StringIsJson.Object(
                 new JsonHas(

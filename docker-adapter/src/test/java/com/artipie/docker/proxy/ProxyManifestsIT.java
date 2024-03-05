@@ -4,12 +4,10 @@
  */
 package com.artipie.docker.proxy;
 
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tags;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsAnything;
@@ -20,10 +18,10 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
+import java.util.Optional;
+
 /**
  * Integration tests for {@link ProxyManifests}.
- *
- * @since 0.10
  */
 final class ProxyManifestsIT {
 
@@ -33,7 +31,7 @@ final class ProxyManifestsIT {
     private JettyClientSlices client;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         this.client = new JettyClientSlices(
             new HttpClientSettings().setFollowRedirects(true)
         );
@@ -41,7 +39,7 @@ final class ProxyManifestsIT {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         this.client.stop();
     }
 
@@ -54,9 +52,7 @@ final class ProxyManifestsIT {
                 new RepoName.Simple(repo)
             ).tags(Optional.empty(), Integer.MAX_VALUE)
                 .thenApply(Tags::json)
-                .thenApply(PublisherAs::new)
-                .thenCompose(PublisherAs::asciiString)
-                .toCompletableFuture().join(),
+                .toCompletableFuture().join().asString(),
             new StringIsJson.Object(
                 Matchers.allOf(
                     new JsonHas("name", new JsonValueIs(repo)),

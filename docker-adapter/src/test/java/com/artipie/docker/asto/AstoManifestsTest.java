@@ -7,7 +7,6 @@ package com.artipie.docker.asto;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.docker.Blob;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.RepoName;
@@ -16,10 +15,6 @@ import com.artipie.docker.Tags;
 import com.artipie.docker.error.InvalidManifestException;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.ref.ManifestRef;
-import java.util.Optional;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
-import javax.json.Json;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -29,6 +24,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+
+import javax.json.Json;
+import java.util.Optional;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Tests for {@link AstoManifests}.
@@ -143,15 +143,15 @@ final class AstoManifestsTest {
         final Tags tags = this.manifests.tags(Optional.empty(), Integer.MAX_VALUE)
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
-            new PublisherAs(tags.json()).asciiString().toCompletableFuture().join(),
+            tags.json().asString(),
             new IsEqual<>("{\"name\":\"my-alpine\",\"tags\":[\"1\",\"latest\"]}")
         );
     }
 
     private byte[] manifest(final ManifestRef ref) {
         return this.manifests.get(ref)
-            .thenApply(Optional::get)
-            .thenCompose(mnf -> new PublisherAs(mnf.content()).bytes())
+            .thenApply(res -> res.orElseThrow().content())
+            .thenCompose(Content::asBytesFuture)
             .toCompletableFuture().join();
     }
 

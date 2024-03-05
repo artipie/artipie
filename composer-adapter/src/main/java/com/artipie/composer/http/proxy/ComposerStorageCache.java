@@ -10,7 +10,9 @@ import com.artipie.asto.cache.Cache;
 import com.artipie.asto.cache.CacheControl;
 import com.artipie.asto.cache.Remote;
 import com.artipie.composer.Repository;
-import com.artipie.composer.misc.ContentAsJson;
+
+import javax.json.Json;
+import javax.json.JsonObject;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -19,14 +21,11 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import javax.json.Json;
-import javax.json.JsonObject;
 
 /**
  * Cache implementation that tries to obtain items from storage cache,
  * validates it and returns if valid. If item is not present in storage or is not valid,
  * it is loaded from remote.
- * @since 0.4
  */
 public final class ComposerStorageCache implements Cache {
     /**
@@ -135,8 +134,7 @@ public final class ComposerStorageCache implements Cache {
                 nothing -> this.repo.exclusively(
                     CacheTimeControl.CACHE_FILE,
                     nthng -> this.repo.value(CacheTimeControl.CACHE_FILE)
-                        .thenApply(ContentAsJson::new)
-                        .thenCompose(ContentAsJson::value)
+                        .thenCompose(Content::asJsonObjectFuture)
                         .thenApply(json -> ComposerStorageCache.addTimeFor(json, name))
                         .thenCompose(json -> this.repo.save(tmp, new Content.From(json)))
                         .thenCompose(noth -> this.repo.delete(CacheTimeControl.CACHE_FILE))

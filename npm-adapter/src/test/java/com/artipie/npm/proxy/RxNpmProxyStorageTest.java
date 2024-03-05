@@ -7,7 +7,6 @@ package com.artipie.npm.proxy;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.npm.proxy.model.NpmAsset;
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.Test;
  * NPM Proxy storage test.
  * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RxNpmProxyStorageTest {
     /**
      * Last modified date for both package and asset.
@@ -71,7 +69,7 @@ public final class RxNpmProxyStorageTest {
 
     @Test
     public void savesPackage() throws IOException {
-        this.doSavePackage("asdas", RxNpmProxyStorageTest.REFRESHED);
+        this.doSavePackage();
         MatcherAssert.assertThat(
             this.publisherAsStr("asdas/meta.json"),
             new IsEqual<>(RxNpmProxyStorageTest.readContent())
@@ -91,7 +89,7 @@ public final class RxNpmProxyStorageTest {
     @Test
     public void savesAsset() {
         final String path = "asdas/-/asdas-1.0.0.tgz";
-        this.doSaveAsset(path);
+        this.doSaveAsset();
         MatcherAssert.assertThat(
             "Content of asset is correct",
             this.publisherAsStr(path),
@@ -114,7 +112,7 @@ public final class RxNpmProxyStorageTest {
     @Test
     public void loadsPackage() throws IOException {
         final String name = "asdas";
-        this.doSavePackage(name, RxNpmProxyStorageTest.REFRESHED);
+        this.doSavePackage();
         final NpmPackage pkg = this.storage.getPackage(name).blockingGet();
         MatcherAssert.assertThat(
             "Package name is correct",
@@ -141,7 +139,7 @@ public final class RxNpmProxyStorageTest {
     @Test
     public void loadsAsset() {
         final String path = "asdas/-/asdas-1.0.0.tgz";
-        this.doSaveAsset(path);
+        this.doSaveAsset();
         final NpmAsset asset = this.storage.getAsset(path).blockingGet();
         MatcherAssert.assertThat(
             "Path to asset is correct",
@@ -150,9 +148,7 @@ public final class RxNpmProxyStorageTest {
         );
         MatcherAssert.assertThat(
             "Content of asset is correct",
-            new PublisherAs(asset.dataPublisher())
-                .asciiString()
-                .toCompletableFuture().join(),
+            new Content.From(asset.dataPublisher()).asString(),
             new IsEqual<>(RxNpmProxyStorageTest.DEF_CONTENT)
         );
         MatcherAssert.assertThat(
@@ -190,28 +186,25 @@ public final class RxNpmProxyStorageTest {
     }
 
     private String publisherAsStr(final String path) {
-        return new PublisherAs(
-            this.delegate.value(new Key.From(path)).join()
-        ).asciiString()
-        .toCompletableFuture().join();
+        return this.delegate.value(new Key.From(path)).join().asString();
     }
 
-    private void doSavePackage(final String name, final OffsetDateTime refreshed)
+    private void doSavePackage()
         throws IOException {
         this.storage.save(
             new NpmPackage(
-                name,
+                "asdas",
                 RxNpmProxyStorageTest.readContent(),
                 RxNpmProxyStorageTest.MODIFIED,
-                refreshed
+                RxNpmProxyStorageTest.REFRESHED
             )
         ).blockingAwait();
     }
 
-    private void doSaveAsset(final String path) {
+    private void doSaveAsset() {
         this.storage.save(
             new NpmAsset(
-                path,
+                "asdas/-/asdas-1.0.0.tgz",
                 new Content.From(RxNpmProxyStorageTest.DEF_CONTENT.getBytes()),
                 RxNpmProxyStorageTest.MODIFIED,
                 RxNpmProxyStorageTest.CONTENT_TYPE

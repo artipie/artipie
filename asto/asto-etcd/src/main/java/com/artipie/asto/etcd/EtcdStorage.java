@@ -13,7 +13,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.UnderLockOperation;
 import com.artipie.asto.ValueNotFoundException;
 import com.artipie.asto.ext.CompletableFutureSupport;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.asto.lock.storage.StorageLock;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
@@ -21,6 +20,7 @@ import io.etcd.jetcd.KeyValue;
 import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.GetOption.SortOrder;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Comparator;
@@ -107,7 +107,7 @@ public final class EtcdStorage implements Storage {
         return future.thenApply(
             rsp -> rsp.getKvs().stream()
                 .map(kv -> new String(kv.getKey().getBytes(), StandardCharsets.UTF_8))
-                .map(str -> new Key.From(str))
+                .map(Key.From::new)
                 .distinct()
                 .collect(Collectors.toList())
         );
@@ -124,7 +124,7 @@ public final class EtcdStorage implements Storage {
                 )
             ).get();
         }
-        return new PublisherAs(content).bytes()
+        return content.asBytesFuture()
             .thenApply(ByteSequence::from)
             .thenCompose(data -> this.client.getKVClient().put(keyToSeq(key), data))
             .thenApply(ignore -> (Void) null).toCompletableFuture();
@@ -144,10 +144,8 @@ public final class EtcdStorage implements Storage {
                 Comparator.comparingLong(KeyValue::getVersion)
             )
         ).thenApply(
-            kv -> kv.orElseThrow(
-                () -> new ValueNotFoundException(key)
-            )
-        ).thenApply(kv -> new EtcdMeta(kv));
+            kv -> new EtcdMeta(kv.orElseThrow(() -> new ValueNotFoundException(key)))
+        );
     }
 
     @Override
@@ -157,13 +155,10 @@ public final class EtcdStorage implements Storage {
                 Comparator.comparingLong(KeyValue::getVersion)
             )
         ).thenApply(
-            kv -> kv.orElseThrow(
-                () -> new ValueNotFoundException(key)
-            ).getValue().getBytes()
-        ).thenApply(
-            bytes -> new Content.OneTime(
-                new Content.From(bytes)
-            )
+            kv -> {
+                byte[] data = kv.orElseThrow(() -> new ValueNotFoundException(key)).getValue().getBytes();
+                return new Content.OneTime(new Content.From(data));
+            }
         );
     }
 

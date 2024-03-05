@@ -5,9 +5,9 @@
 package  com.artipie.conan.http;
 
 import com.artipie.ArtipieException;
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.ext.PublisherAs;
 import com.artipie.conan.ItemTokenizer;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -21,6 +21,11 @@ import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceUpload;
+import org.reactivestreams.Publisher;
+
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
+import javax.json.stream.JsonParser;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -28,10 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import javax.json.stream.JsonParser;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice for Conan package data uploading support.
@@ -91,18 +92,16 @@ public final class ConanUpload {
 
     /**
      * Match pattern for the request.
+     *
      * @param line Request line.
-     * @param pathwrap Wrapper object for Conan protocol request path.
      * @return Corresponding matcher for the request.
      */
-    private static Matcher matchRequest(final String line, final PathWrap pathwrap) {
-        final Matcher matcher = pathwrap.getPattern().matcher(
+    private static Matcher matchRequest(final String line) {
+        final Matcher matcher = ConanUpload.UPLOAD_SRC_PATH.getPattern().matcher(
             new RequestLineFrom(line).uri().getPath()
         );
         if (!matcher.matches()) {
-            throw new ArtipieException(
-                String.join("Request parameters doesn't match: ", line)
-            );
+            throw new ArtipieException("Request parameters doesn't match: " + line);
         }
         return matcher;
     }
@@ -152,7 +151,7 @@ public final class ConanUpload {
         @Override
         public Response response(final String line,
             final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
-            final Matcher matcher = matchRequest(line, ConanUpload.UPLOAD_SRC_PATH);
+            final Matcher matcher = matchRequest(line);
             final String path = matcher.group(ConanUpload.URI_PATH);
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
             return new AsyncResponse(
@@ -179,7 +178,7 @@ public final class ConanUpload {
          */
         private CompletableFuture<Response> generateUrls(final Publisher<ByteBuffer> body,
             final String path, final String hostname) {
-            return new PublisherAs(body).asciiString().thenApply(
+            return new Content.From(body).asStringFuture().thenApply(
                 str -> {
                     final JsonParser parser = Json.createParser(new StringReader(str));
                     parser.next();
