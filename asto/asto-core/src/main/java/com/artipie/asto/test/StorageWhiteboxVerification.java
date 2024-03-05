@@ -442,7 +442,7 @@ public abstract class StorageWhiteboxVerification {
                 final Storage storage = pair.getValue();
                 final Key key = new Key.From("shouldFailConcurrentExclusivelyForSameKey");
                 final FakeOperation operation = new FakeOperation();
-                storage.exclusively(key, operation);
+                final CompletionStage<Void> exclusively = storage.exclusively(key, operation);
                 operation.started.join();
                 try {
                     final CompletionException completion = Assertions.assertThrows(
@@ -459,6 +459,7 @@ public abstract class StorageWhiteboxVerification {
                     );
                 } finally {
                     operation.finished.complete(null);
+                    exclusively.toCompletableFuture().join();
                 }
             }
         );
@@ -472,7 +473,7 @@ public abstract class StorageWhiteboxVerification {
                 final Key one = new Key.From("shouldRunExclusivelyForDiffKey-1");
                 final Key two = new Key.From("shouldRunExclusivelyForDiffKey-2");
                 final FakeOperation operation = new FakeOperation();
-                storage.exclusively(one, operation);
+                final CompletionStage<Void> exclusively = storage.exclusively(one, operation);
                 operation.started.join();
                 try {
                     Assertions.assertDoesNotThrow(
@@ -483,6 +484,7 @@ public abstract class StorageWhiteboxVerification {
                     );
                 } finally {
                     operation.finished.complete(null);
+                    exclusively.toCompletableFuture().join();
                 }
             }
         );
