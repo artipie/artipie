@@ -18,6 +18,19 @@ import java.util.stream.StreamSupport;
  */
 public final class GenericAuthenticator implements Authenticator {
 
+    public static Authenticator create(ClientSlices client, String username, String pwd) {
+        if (username == null && pwd == null) {
+            return new GenericAuthenticator(client);
+        }
+        if (username == null) {
+            throw new IllegalStateException("`username` is not specified for remote");
+        }
+        if (pwd == null) {
+            throw new IllegalStateException("`password` is not specified for remote");
+        }
+        return new GenericAuthenticator(client, username, pwd);
+    }
+
     /**
      * Basic authenticator used when required.
      */

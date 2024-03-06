@@ -1,6 +1,5 @@
 repo:
   type: maven
-  path: mvn
   storage:
     type: fs
     path: /var/artipie/maven

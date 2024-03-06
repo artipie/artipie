@@ -22,8 +22,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link HttpClientSettings}.
- *
- * @since 0.9
  */
 class HttpClientSettingsTest {
 
@@ -95,12 +93,12 @@ class HttpClientSettingsTest {
 
     @Test
     void shouldInitRepoConfigFromFile() throws Exception {
-        final RepoConfig cfg = new RepoConfig(
-            new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
-            new Key.From("aaa"),
+        final RepoConfig cfg = RepoConfig.from(
             Yaml.createYamlInput(
                 new TestResource("docker/docker-proxy-http-client.yml").asInputStream()
             ).readYamlMapping(),
+            new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
+            new Key.From("aaa"),
             new TestStoragesCache(), false
         );
         final HttpClientSettings stn = cfg.httpClientSettings()

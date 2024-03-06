@@ -34,15 +34,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Tests for {@link DockerProxy}.
- *
- * @since 0.9
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DockerProxyTest {
 
-    /**
-     * Storages caches.
-     */
     private StoragesCache cache;
 
     @BeforeEach
@@ -75,8 +69,7 @@ class DockerProxyTest {
 
     @ParameterizedTest
     @MethodSource("badConfigs")
-    void shouldFailBuildFromBadConfig(final String yaml) throws Exception {
-//        final Slice slice = dockerProxy(this.cache, yaml);
+    void shouldFailBuildFromBadConfig(final String yaml) {
         Assertions.assertThrows(
             RuntimeException.class,
             () -> dockerProxy(this.cache, yaml).response(
@@ -90,16 +83,14 @@ class DockerProxyTest {
     }
 
     private static DockerProxy dockerProxy(
-        final StoragesCache cache,
-        final String yaml
+        StoragesCache cache, String yaml
     ) throws IOException {
         return new DockerProxy(
             new JettyClientSlices(),
-            new RepoConfig(
-                new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
-                Key.ROOT,
+            RepoConfig.from(
                 Yaml.createYamlInput(yaml).readYamlMapping(),
-                cache
+                new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
+                Key.ROOT, cache, false
             ),
             Policy.FREE,
             (username, password) -> Optional.empty(),
@@ -110,7 +101,7 @@ class DockerProxyTest {
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static Stream<String> goodConfigs() {
         return Stream.of(
-            "repo:\n  remotes:\n    - url: registry-1.docker.io",
+            "repo:\n  type: docker-proxy\n  remotes:\n    - url: registry-1.docker.io",
             String.join(
                 "\n",
                 "repo:",
@@ -119,6 +110,7 @@ class DockerProxyTest {
                 "    - url: registry-1.docker.io",
                 "      username: admin",
                 "      password: qwerty",
+                "      priority: 1500",
                 "      cache:",
                 "        storage:",
                 "          type: fs",

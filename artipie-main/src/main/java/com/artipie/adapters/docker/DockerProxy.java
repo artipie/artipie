@@ -20,12 +20,11 @@ import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.client.ClientSlices;
+import com.artipie.http.client.RemoteConfig;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.repo.RepoConfig;
-import com.artipie.settings.repo.proxy.ProxyConfig;
-import com.artipie.settings.repo.proxy.YamlProxyConfig;
 import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
@@ -84,8 +83,7 @@ public final class DockerProxy implements Slice {
             final Optional<Queue<ArtifactEvent>> events
     ) {
         final Docker proxies = new MultiReadDocker(
-            new YamlProxyConfig(cfg)
-                .remotes().stream().map(r -> proxy(client, cfg, events, r))
+            cfg.remotes().stream().map(r -> proxy(client, cfg, events, r))
                 .collect(Collectors.toList())
         );
         Docker docker = cfg.storageOpt()
@@ -121,10 +119,10 @@ public final class DockerProxy implements Slice {
             final ClientSlices client,
             final RepoConfig cfg,
             final Optional<Queue<ArtifactEvent>> events,
-            final ProxyConfig.Remote remote
+            final RemoteConfig remote
     ) {
         final Docker proxy = new ProxyDocker(
-            new AuthClientSlice(client.from(remote.url()), remote.auth(client))
+            AuthClientSlice.withClientSlice(client, remote)
         );
         return cfg.storageOpt().<Docker>map(
             cache -> new CacheDocker(

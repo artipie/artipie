@@ -11,8 +11,6 @@ import java.net.URI;
 
 /**
  * Slices collection that provides client slices by host and port.
- *
- * @since 0.1
  */
 public interface ClientSlices {
 

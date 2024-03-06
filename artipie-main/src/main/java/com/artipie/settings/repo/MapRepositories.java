@@ -58,13 +58,12 @@ public class MapRepositories implements Repositories {
                 final String content = file.valueFrom(storage)
                     .toCompletableFuture().join().asString();
                 try {
-                    final RepoConfig cfg = new RepoConfig(
-                        alias.join(), new Key.From(file.name()),
+                    this.map.put(file.name(), RepoConfig.from(
                         Yaml.createYamlInput(content).readYamlMapping(),
+                        alias.join(), new Key.From(file.name()),
                         this.settings.caches().storagesCache(),
                         this.settings.metrics().storage()
-                    );
-                    this.map.put(file.name(), cfg);
+                    ));
                 } catch (IOException e) {
                     throw new ArtipieIOException(e);
                 }

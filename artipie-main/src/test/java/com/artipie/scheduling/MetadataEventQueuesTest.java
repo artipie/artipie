@@ -26,9 +26,7 @@ import org.quartz.impl.matchers.GroupMatcher;
 
 /**
  * Test for {@link MetadataEventQueues}.
- * @since 0.31
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class MetadataEventQueuesTest {
 
     /**
@@ -49,11 +47,11 @@ class MetadataEventQueuesTest {
 
     @Test
     void createsQueueAndAddsJob() throws SchedulerException, InterruptedException {
-        final RepoConfig cfg = new RepoConfig(
+        final RepoConfig cfg = RepoConfig.from(
+            new RepoConfigYaml("npm-proxy").withFileStorage(Path.of("a/b/c")).yaml(),
             new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
             new Key.From("my-npm-proxy"),
-            new RepoConfigYaml("npm-proxy").withFileStorage(Path.of("a/b/c")).yaml(),
-            new TestStoragesCache()
+            new TestStoragesCache(), false
         );
         final MetadataEventQueues events = new MetadataEventQueues(
             new LinkedList<>(), this.service
@@ -63,7 +61,7 @@ class MetadataEventQueuesTest {
         final Optional<Queue<ProxyArtifactEvent>> second = events.proxyEventQueues(cfg);
         MatcherAssert.assertThat(
             "After second call the same queue is returned",
-            first.get(), new IsEqual<>(second.get())
+            first.get(), new IsEqual<>(second.orElseThrow())
         );
         Thread.sleep(2000);
         final List<String> groups = new StdSchedulerFactory().getScheduler().getJobGroupNames();
@@ -81,14 +79,14 @@ class MetadataEventQueuesTest {
 
     @Test
     void createsQueueAndStartsGivenAmountOfJobs() throws SchedulerException, InterruptedException {
-        final RepoConfig cfg = new RepoConfig(
-            new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
-            new Key.From("my-maven-proxy"),
+        final RepoConfig cfg = RepoConfig.from(
             new RepoConfigYaml("maven-proxy").withFileStorage(Path.of("a/b/c")).withSettings(
                 Yaml.createYamlMappingBuilder().add("threads_count", "4")
                     .add("interval_seconds", "5").build()
             ).yaml(),
-            new TestStoragesCache()
+            new StorageByAlias(Yaml.createYamlMappingBuilder().build()),
+            new Key.From("my-maven-proxy"),
+            new TestStoragesCache(), false
         );
         final MetadataEventQueues events =
             new MetadataEventQueues(new LinkedList<>(), this.service);
