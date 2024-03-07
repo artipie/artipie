@@ -8,10 +8,11 @@ import com.artipie.asto.Content;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
-import java.util.Collection;
-import java.util.Optional;
+
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * {@link Tags} that is a page of given tags list.
@@ -28,7 +29,7 @@ public final class TagsPage implements Tags {
     /**
      * Tags.
      */
-    private final Collection<Tag> tags;
+    private final List<String> tags;
 
     /**
      * From which tag to start, exclusive.
@@ -50,7 +51,7 @@ public final class TagsPage implements Tags {
      */
     public TagsPage(
         final RepoName repo,
-        final Collection<Tag> tags,
+        final List<String> tags,
         final Optional<Tag> from,
         final int limit
     ) {
@@ -64,7 +65,6 @@ public final class TagsPage implements Tags {
     public Content json() {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
         this.tags.stream()
-            .map(Tag::value)
             .filter(name -> this.from.map(last -> name.compareTo(last.value()) > 0).orElse(true))
             .sorted()
             .distinct()

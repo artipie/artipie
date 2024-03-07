@@ -8,18 +8,17 @@ import com.artipie.docker.Manifests;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 
 /**
  * Source of tags built by loading and merging multiple tag lists.
- *
- * @since 0.10
  */
 public final class JoinedTagsSource {
 
@@ -86,16 +85,18 @@ public final class JoinedTagsSource {
      * @return Tags.
      */
     public CompletionStage<Tags> tags() {
-        final List<CompletionStage<List<Tag>>> all = this.manifests.stream().map(
-            mnfsts -> mnfsts.tags(this.from, this.limit)
-                .thenApply(ParsedTags::new)
-                .thenCompose(ParsedTags::tags)
-                .exceptionally(err -> Collections.emptyList())
-        ).collect(Collectors.toList());
-        return CompletableFuture.allOf(all.toArray(new CompletableFuture<?>[0])).thenApply(
-            nothing -> all.stream().flatMap(
-                stage -> stage.toCompletableFuture().join().stream()
-            ).collect(Collectors.toList())
-        ).thenApply(names -> new TagsPage(this.repo, names, this.from, this.limit));
+        CompletableFuture<List<String>>[] futs = new CompletableFuture[manifests.size()];
+        for (int i = 0; i < manifests.size(); i++) {
+            futs[i] = manifests.get(i).tags(from, limit)
+                .thenCompose(tags -> new ParsedTags(tags).tags())
+                .toCompletableFuture()
+                .exceptionally(err -> Collections.emptyList());
+        }
+        return CompletableFuture.allOf(futs)
+            .thenApply(v -> {
+                List<String> names = new ArrayList<>();
+                Arrays.stream(futs).forEach(fut -> names.addAll(fut.join()));
+                return new TagsPage(repo, names, from, limit);
+            });
     }
 }

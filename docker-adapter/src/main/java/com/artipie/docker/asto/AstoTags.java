@@ -9,11 +9,11 @@ import com.artipie.asto.Key;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Asto implementation of {@link Tags}. Tags created from list of keys.
@@ -73,8 +73,8 @@ final class AstoTags implements Tags {
     @Override
     public Content json() {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
-        this.tags().stream()
-            .map(Tag::value)
+        new Children(this.root, this.keys).names()
+            .stream()
             .filter(tag -> this.from.map(last -> tag.compareTo(last.value()) > 0).orElse(true))
             .limit(this.limit)
             .forEach(builder::add);
@@ -86,16 +86,5 @@ final class AstoTags implements Tags {
                 .toString()
                 .getBytes()
         );
-    }
-
-    /**
-     * Convert keys to ordered set of tags.
-     *
-     * @return Ordered tags.
-     */
-    private Collection<Tag> tags() {
-        return new Children(this.root, this.keys).names().stream()
-            .map(Tag.Valid::new)
-            .collect(Collectors.toList());
     }
 }
