@@ -69,7 +69,7 @@ SOFTWARE.
           <groupId>org.apache.commons</groupId>
           <artifactId>commons-compress</artifactId>
         </exclusion>
-        <!-- org.bouncycastle:bcpg-jdk15on:1.69 is excluded because of some vulnerabilities, version 1.70 is used -->
+        <!-- org.bouncycastle:bcpg-jdk15on:1.69 is excluded because of some vulnerabilities -->
         <exclusion>
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcpg-jdk15on</artifactId>
@@ -78,8 +78,8 @@ SOFTWARE.
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpg-jdk15on</artifactId>
-      <version>1.70</version>
+      <artifactId>bcpg-lts8on</artifactId>
+      <version>${bouncycastle-lts.version}</version>
     </dependency>
     <dependency>
       <groupId>javax.xml.bind</groupId>
