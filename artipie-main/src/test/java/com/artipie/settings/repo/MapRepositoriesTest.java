@@ -20,6 +20,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.nio.file.Path;
+import java.util.NoSuchElementException;
 
 /**
  * Tests for cache of files with configuration in {@link MapRepositories}.
@@ -89,10 +90,7 @@ final class MapRepositoriesTest {
         new RepoConfigYaml(MapRepositoriesTest.TYPE)
             .withStorageAlias("alias")
             .saveTo(this.storage, MapRepositoriesTest.REPO);
-        Assertions.assertThrows(
-            IllegalStateException.class,
-            () -> this.repoConfig().storageOpt()
-        );
+        Assertions.assertThrows(NoSuchElementException.class, this::repoConfig);
     }
 
     @Test
@@ -117,11 +115,7 @@ final class MapRepositoriesTest {
                 ).build().toString().getBytes()
             )
         ).join();
-        Assertions.assertThrows(
-            IllegalStateException.class,
-            () -> this.repoConfig()
-                .storageOpt()
-        );
+        Assertions.assertThrows(NoSuchElementException.class, this::repoConfig);
     }
 
     @Test
@@ -130,11 +124,7 @@ final class MapRepositoriesTest {
         new RepoConfigYaml(MapRepositoriesTest.TYPE)
             .withStorageAlias("unknown alias")
             .saveTo(this.storage, MapRepositoriesTest.REPO);
-        Assertions.assertThrows(
-            IllegalStateException.class,
-            () -> this.repoConfig()
-                .storageOpt()
-        );
+        Assertions.assertThrows(NoSuchElementException.class, this::repoConfig);
     }
 
     @Test
