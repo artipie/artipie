@@ -22,6 +22,8 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -40,6 +42,16 @@ public final class ProxyManifests implements Manifests {
             new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json"),
             new Header("Accept", "application/vnd.docker.distribution.manifest.list.v2+json")
     );
+
+    public static String uri(String repo, int limit, String from) {
+        String lim = limit > 0 ? "n=" + limit : null;
+        String last = Strings.isNullOrEmpty(from) ? null : "last=" + from;
+        String params = Joiner.on("&").skipNulls().join(lim, last);
+
+        return String.format("/v2/%s/tags/list%s",
+            repo, Strings.isNullOrEmpty(params) ? "" : '?' + params
+        );
+    }
 
     /**
      * Remote repository.
@@ -94,11 +106,11 @@ public final class ProxyManifests implements Manifests {
 
     @Override
     public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+        String fromStr = from.map(Tag::value).orElse(null);
         return new ResponseSink<>(
             this.remote.response(
                 new RequestLine(
-                    RqMethod.GET,
-                    new TagsListUri(this.name, from, limit).string()
+                    RqMethod.GET, uri(name.value(), limit, fromStr)
                 ).toString(),
                 Headers.EMPTY,
                 Content.EMPTY

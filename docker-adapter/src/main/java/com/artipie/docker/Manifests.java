@@ -41,41 +41,4 @@ public interface Manifests {
      * @return Tags.
      */
     CompletionStage<Tags> tags(Optional<Tag> from, int limit);
-
-    /**
-     * Abstract decorator for Manifests.
-     *
-     * @since 0.3
-     */
-    abstract class Wrap implements Manifests {
-
-        /**
-         * Origin manifests.
-         */
-        private final Manifests manifests;
-
-        /**
-         * Ctor.
-         *
-         * @param manifests Manifests.
-         */
-        protected Wrap(final Manifests manifests) {
-            this.manifests = manifests;
-        }
-
-        @Override
-        public final CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
-            return this.manifests.put(ref, content);
-        }
-
-        @Override
-        public final CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
-            return this.manifests.get(ref);
-        }
-
-        @Override
-        public final CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
-            return this.manifests.tags(from, limit);
-        }
-    }
 }
