@@ -29,7 +29,6 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -50,7 +49,6 @@ import java.util.UUID;
  * checks that list and install works with and without authentication.
  */
 @DisabledOnOs(OS.WINDOWS)
-@Disabled("https://github.com/artipie/artipie/issues/1409")
 public final class RpmSliceS3ITCase {
 
     @RegisterExtension
