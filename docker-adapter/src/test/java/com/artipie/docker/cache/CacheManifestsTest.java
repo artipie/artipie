@@ -10,6 +10,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.Layers;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
@@ -19,7 +20,6 @@ import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeManifests;
 import com.artipie.docker.fake.FullTagsManifests;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.common.base.Stopwatch;
 import org.hamcrest.MatcherAssert;
@@ -65,7 +65,7 @@ final class CacheManifestsTest {
             Optional.empty(), "*"
         );
         MatcherAssert.assertThat(
-            manifests.get(new ManifestRef.FromString("ref"))
+            manifests.get(ManifestReference.from("ref"))
                 .toCompletableFuture().join()
                 .map(Manifest::digest)
                 .map(Digest::hex),
@@ -75,7 +75,7 @@ final class CacheManifestsTest {
 
     @Test
     void shouldCacheManifest() throws Exception {
-        final ManifestRef ref = new ManifestRef.FromTag(new Tag.Valid("1"));
+        final ManifestReference ref = ManifestReference.from("1");
         final Queue<ArtifactEvent> events = new ConcurrentLinkedQueue<>();
         final Repo cache = new AstoDocker(new LoggingStorage(new InMemoryStorage()))
             .repo(new RepoName.Simple("my-cache"));

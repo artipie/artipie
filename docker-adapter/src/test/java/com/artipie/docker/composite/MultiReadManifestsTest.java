@@ -6,12 +6,12 @@ package com.artipie.docker.composite;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.fake.FakeManifests;
 import com.artipie.docker.fake.FullTagsManifests;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -55,7 +55,7 @@ final class MultiReadManifestsTest {
             )
         );
         MatcherAssert.assertThat(
-            manifests.get(new ManifestRef.FromString("ref"))
+            manifests.get(ManifestReference.from("ref"))
                 .toCompletableFuture().join()
                 .map(Manifest::digest)
                 .map(Digest::hex),

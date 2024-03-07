@@ -7,6 +7,7 @@ package com.artipie.docker.proxy;
 import com.artipie.asto.Content;
 import com.artipie.asto.FailedCompletionStage;
 import com.artipie.docker.Digest;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
@@ -15,7 +16,6 @@ import com.artipie.docker.Tags;
 import com.artipie.docker.http.DigestHeader;
 import com.artipie.docker.manifest.JsonManifest;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
@@ -63,12 +63,12 @@ public final class ProxyManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
         return new ResponseSink<>(
             this.remote.response(
                 new RequestLine(RqMethod.GET, new ManifestPath(this.name, ref).string()).toString(),

@@ -7,14 +7,12 @@ package com.artipie.docker;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
+
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Docker repository manifests.
- *
- * @since 0.3
  */
 public interface Manifests {
 
@@ -25,7 +23,7 @@ public interface Manifests {
      * @param content Manifest content.
      * @return Added manifest.
      */
-    CompletionStage<Manifest> put(ManifestRef ref, Content content);
+    CompletionStage<Manifest> put(ManifestReference ref, Content content);
 
     /**
      * Get manifest by reference.
@@ -33,7 +31,7 @@ public interface Manifests {
      * @param ref Manifest reference
      * @return Manifest instance if it is found, empty if manifest is absent.
      */
-    CompletionStage<Optional<Manifest>> get(ManifestRef ref);
+    CompletionStage<Optional<Manifest>> get(ManifestReference ref);
 
     /**
      * List manifest tags.
@@ -66,12 +64,12 @@ public interface Manifests {
         }
 
         @Override
-        public final CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+        public final CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
             return this.manifests.put(ref, content);
         }
 
         @Override
-        public final CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+        public final CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
             return this.manifests.get(ref);
         }
 

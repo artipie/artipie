@@ -6,8 +6,8 @@
 package com.artipie.docker.ref;
 
 import com.artipie.docker.Digest;
-import com.artipie.docker.Tag;
-import java.util.Arrays;
+import com.artipie.docker.ManifestReference;
+import com.artipie.docker.error.InvalidTagNameException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.AllOf;
@@ -17,16 +17,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
+
 /**
- * Test case for {@link ManifestRef}.
- * @since 0.1
+ * Test case for {@link ManifestReference}.
  */
-public final class ManifestRefTest {
+public final class ManifestReferenceTest {
 
     @Test
     void resolvesDigestString() {
         MatcherAssert.assertThat(
-            new ManifestRef.FromString("sha256:1234").link().string(),
+            ManifestReference.from("sha256:1234").link().string(),
             Matchers.equalTo("revisions/sha256/1234/link")
         );
     }
@@ -34,7 +35,7 @@ public final class ManifestRefTest {
     @Test
     void resolvesTagString() {
         MatcherAssert.assertThat(
-            new ManifestRef.FromString("1.0").link().string(),
+            ManifestReference.from("1.0").link().string(),
             Matchers.equalTo("tags/1.0/current/link")
         );
     }
@@ -45,17 +46,17 @@ public final class ManifestRefTest {
         "a:b:c",
         ".123"
     })
-    void failsToResolveInvalid(final String string) {
+    void failsToResolveInvalid(final String tag) {
         final Throwable throwable = Assertions.assertThrows(
-            IllegalStateException.class,
-            () -> new ManifestRef.FromString(string).link().string()
+            InvalidTagNameException.class,
+            () -> ManifestReference.from(tag).link().string()
         );
         MatcherAssert.assertThat(
             throwable.getMessage(),
             new AllOf<>(
                 Arrays.asList(
-                    new StringContains(true, "Unsupported reference"),
-                    new StringContains(false, string)
+                    new StringContains(true, "Invalid tag"),
+                    new StringContains(false, tag)
                 )
             )
         );
@@ -64,7 +65,7 @@ public final class ManifestRefTest {
     @Test
     void resolvesDigestLink() {
         MatcherAssert.assertThat(
-            new ManifestRef.FromDigest(new Digest.Sha256("0000")).link().string(),
+            ManifestReference.from(new Digest.Sha256("0000")).link().string(),
             Matchers.equalTo("revisions/sha256/0000/link")
         );
     }
@@ -72,7 +73,7 @@ public final class ManifestRefTest {
     @Test
     void resolvesTagLink() {
         MatcherAssert.assertThat(
-            new ManifestRef.FromTag(new Tag.Valid("latest")).link().string(),
+            ManifestReference.fromTag("latest").link().string(),
             Matchers.equalTo("tags/latest/current/link")
         );
     }
@@ -80,7 +81,7 @@ public final class ManifestRefTest {
     @Test
     void stringFromDigestRef() {
         MatcherAssert.assertThat(
-            new ManifestRef.FromDigest(new Digest.Sha256("0123")).string(),
+            ManifestReference.from(new Digest.Sha256("0123")).reference(),
             Matchers.equalTo("sha256:0123")
         );
     }
@@ -89,7 +90,7 @@ public final class ManifestRefTest {
     void stringFromTagRef() {
         final String tag = "0.2";
         MatcherAssert.assertThat(
-            new ManifestRef.FromTag(new Tag.Valid(tag)).string(),
+            ManifestReference.fromTag(tag).reference(),
             Matchers.equalTo(tag)
         );
     }
@@ -98,7 +99,7 @@ public final class ManifestRefTest {
     void stringFromStringRef() {
         final String value = "whatever";
         MatcherAssert.assertThat(
-            new ManifestRef.FromString(value).string(),
+            ManifestReference.from(value).reference(),
             Matchers.equalTo(value)
         );
     }

@@ -7,7 +7,7 @@ package com.artipie.docker.asto;
 import com.artipie.asto.Key;
 import com.artipie.docker.Digest;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.ref.ManifestRef;
+import com.artipie.docker.ManifestReference;
 
 /**
  * Original storage layout that is compatible with reference Docker Registry implementation.
@@ -27,7 +27,7 @@ public final class DefaultLayout implements Layout {
     }
 
     @Override
-    public Key manifest(final RepoName repo, final ManifestRef ref) {
+    public Key manifest(final RepoName repo, final ManifestReference ref) {
         return new Key.From(this.manifests(repo), ref.link().string());
     }
 

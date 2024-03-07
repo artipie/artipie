@@ -10,7 +10,7 @@ import com.artipie.docker.Digest;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.http.DigestHeader;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
+import com.artipie.docker.ManifestReference;
 import com.artipie.http.Headers;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rs.RsFull;
@@ -50,7 +50,7 @@ class ProxyManifestsTest {
                 );
             },
             new RepoName.Valid("test")
-        ).get(new ManifestRef.FromString("abc")).toCompletableFuture().join();
+        ).get(ManifestReference.from("abc")).toCompletableFuture().join();
         Assertions.assertTrue(found.isPresent());
         final Manifest manifest = found.orElseThrow();
         Assertions.assertEquals(digest, manifest.digest().string());
@@ -70,7 +70,7 @@ class ProxyManifestsTest {
                 return new RsWithStatus(RsStatus.NOT_FOUND);
             },
             new RepoName.Valid("my-test")
-        ).get(new ManifestRef.FromString("latest")).toCompletableFuture().join();
+        ).get(ManifestReference.from("latest")).toCompletableFuture().join();
         Assertions.assertFalse(found.isPresent());
     }
 

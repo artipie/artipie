@@ -5,14 +5,15 @@
 package com.artipie.docker.composite;
 
 import com.artipie.asto.Content;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.JoinedTagsSource;
-import com.artipie.docker.ref.ManifestRef;
 import com.jcabi.log.Logger;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -49,12 +50,12 @@ public final class MultiReadManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
         return firstNotEmpty(
             this.manifests.stream().map(
                 mnfsts -> mnfsts.get(ref).handle(
@@ -65,7 +66,7 @@ public final class MultiReadManifests implements Manifests {
                         } else {
                             Logger.error(
                                 this, "Failed to read manifest %s: %[exception]s",
-                                ref.string(),
+                                ref.reference(),
                                 throwable
                             );
                             result = CompletableFuture.completedFuture(Optional.empty());

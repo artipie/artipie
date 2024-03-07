@@ -10,11 +10,10 @@ import com.artipie.asto.Storage;
 import com.artipie.docker.Blob;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.error.InvalidManifestException;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
+import com.artipie.docker.ManifestReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -32,10 +31,7 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Tests for {@link AstoManifests}.
- *
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class AstoManifestsTest {
 
     /**
@@ -60,8 +56,7 @@ final class AstoManifestsTest {
     @Test
     @Timeout(5)
     void shouldReadManifest() {
-        final ManifestRef ref = new ManifestRef.FromTag(new Tag.Valid("1"));
-        final byte[] manifest = this.manifest(ref);
+        final byte[] manifest = this.manifest(ManifestReference.from("1"));
         MatcherAssert.assertThat(manifest.length, Matchers.equalTo(528));
     }
 
@@ -69,7 +64,7 @@ final class AstoManifestsTest {
     @Timeout(5)
     void shouldReadNoManifestIfAbsent() throws Exception {
         final Optional<Manifest> manifest = this.manifests.get(
-            new ManifestRef.FromTag(new Tag.Valid("2"))
+            ManifestReference.from("2")
         ).toCompletableFuture().get();
         MatcherAssert.assertThat(manifest.isPresent(), new IsEqual<>(false));
     }
@@ -82,12 +77,12 @@ final class AstoManifestsTest {
         final Blob layer = this.blobs.put(new TrustedBlobSource("layer".getBytes()))
             .toCompletableFuture().join();
         final byte[] data = this.getJsonBytes(config, layer, "my-type");
-        final ManifestRef ref = new ManifestRef.FromTag(new Tag.Valid("some-tag"));
+        final ManifestReference ref = ManifestReference.fromTag("some-tag");
         final Manifest manifest = this.manifests.put(ref, new Content.From(data))
             .toCompletableFuture().join();
         MatcherAssert.assertThat(this.manifest(ref), new IsEqual<>(data));
         MatcherAssert.assertThat(
-            this.manifest(new ManifestRef.FromDigest(manifest.digest())),
+            this.manifest(ManifestReference.from(manifest.digest())),
             new IsEqual<>(data)
         );
     }
@@ -101,7 +96,7 @@ final class AstoManifestsTest {
             .toCompletableFuture().join();
         final byte[] data = this.getJsonBytes(config, layer, "");
         final CompletionStage<Manifest> future = this.manifests.put(
-            new ManifestRef.FromTag(new Tag.Valid("ddd")),
+            ManifestReference.fromTag("ddd"),
             new Content.From(data)
         );
         final CompletionException exception = Assertions.assertThrows(
@@ -124,7 +119,7 @@ final class AstoManifestsTest {
     @Timeout(5)
     void shouldFailPutInvalidManifest() {
         final CompletionStage<Manifest> future = this.manifests.put(
-            new ManifestRef.FromTag(new Tag.Valid("ttt")),
+            ManifestReference.from("ttt"),
             Content.EMPTY
         );
         final CompletionException exception = Assertions.assertThrows(
@@ -148,7 +143,7 @@ final class AstoManifestsTest {
         );
     }
 
-    private byte[] manifest(final ManifestRef ref) {
+    private byte[] manifest(final ManifestReference ref) {
         return this.manifests.get(ref)
             .thenApply(res -> res.orElseThrow().content())
             .thenCompose(Content::asBytesFuture)

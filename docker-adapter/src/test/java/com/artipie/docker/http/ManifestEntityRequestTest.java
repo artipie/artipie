@@ -30,7 +30,7 @@ class ManifestEntityRequestTest {
         final ManifestEntity.Request request = new ManifestEntity.Request(
             new RequestLine(RqMethod.GET, "/v2/my-repo/manifests/sha256:123abc").toString()
         );
-        MatcherAssert.assertThat(request.reference().string(), new IsEqual<>("sha256:123abc"));
+        MatcherAssert.assertThat(request.reference().reference(), new IsEqual<>("sha256:123abc"));
     }
 
     @Test

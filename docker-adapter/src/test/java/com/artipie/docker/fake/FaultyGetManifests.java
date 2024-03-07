@@ -6,28 +6,27 @@ package com.artipie.docker.fake;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.FailedCompletionStage;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
+
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Manifests implementation that fails to get manifest.
- *
- * @since 0.3
  */
 public final class FaultyGetManifests implements Manifests {
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
         return new FailedCompletionStage<>(new IllegalStateException());
     }
 
