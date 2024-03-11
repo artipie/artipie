@@ -43,19 +43,9 @@ public interface Script {
         GROOVY("groovy", "groovy"),
 
         /**
-         * Mvel script type.
-         */
-        MVEL("mvel", "mvel"),
-
-        /**
          * PPython script type.
          */
-        PYTHON("python", "py"),
-
-        /**
-         * Ruby script type.
-         */
-        RUBY("ruby", "rb");
+        PYTHON("python", "py");
 
         /**
          * Script language name, for ScriptEngineManager.

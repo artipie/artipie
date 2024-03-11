@@ -36,7 +36,6 @@ SOFTWARE.
   <description>Debian adapter</description>
   <inceptionYear>2020</inceptionYear>
   <properties>
-    <org.bouncycastle.version>1.70</org.bouncycastle.version>
     <jmh.version>1.29</jmh.version>
     <header.license>${project.basedir}/../LICENSE.header</header.license>
   </properties>
@@ -73,13 +72,13 @@ SOFTWARE.
     <!-- Dependency for PGP and GPG Encryption-Decryption -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcmail-jdk15on</artifactId>
-      <version>${org.bouncycastle.version}</version>
+      <artifactId>bcmail-lts8on</artifactId>
+      <version>${bouncycastle-lts.version}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpg-jdk15on</artifactId>
-      <version>${org.bouncycastle.version}</version>
+      <artifactId>bcpg-lts8on</artifactId>
+      <version>${bouncycastle-lts.version}</version>
     </dependency>
     <dependency>
       <groupId>org.cactoos</groupId>

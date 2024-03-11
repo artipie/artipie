@@ -22,9 +22,7 @@ Scrips must have a file extension corresponding to one of the supported scriptin
 | Scripting language | File extension |
 |--------------------|----------------|
 | Groovy             | .groovy        |
-| Mvel               | .mvel          |
-| Python             | .py            |
-| Ruby               | .rb            |
+| Python 2           | .py            |
 
 ### Accessing Artipie objects
 
