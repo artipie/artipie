@@ -82,14 +82,6 @@ SOFTWARE.
       </exclusions>
     </dependency>
     <!-- New versions of deps of used in adapter deps to get rid of overdue -->
-    <!--io.reactivex.rxjava2:rxjava-->
-    <dependency>
-      <groupId>org.mvel</groupId>
-      <artifactId>mvel2</artifactId>
-      <version>${mvel.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <!--software.amazon.awssdk:netty-nio-client-->
     <dependency>
       <groupId>com.typesafe.netty</groupId>
       <artifactId>netty-reactive-streams-http</artifactId>

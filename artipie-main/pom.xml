@@ -182,20 +182,9 @@ SOFTWARE.
             <version>2.7.3</version>
         </dependency>
         <dependency>
-            <groupId>org.jruby</groupId>
-            <artifactId>jruby</artifactId>
-            <version>9.4.2.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.jetty.http3</groupId>
             <artifactId>jetty-http3-server</artifactId>
             <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mvel</groupId>
-            <artifactId>mvel2</artifactId>
-            <version>${mvel.version}</version>
-            <scope>compile</scope>
         </dependency>
         <!--        adapters      -->
         <dependency>
