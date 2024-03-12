@@ -33,18 +33,6 @@ public interface ClientSlices {
     }
 
     /**
-     * Create {@code Slice} form a URI.
-     *
-     * @param uri URI.
-     * @return Client slice sending HTTP requests to the specified uri.
-     */
-    default Slice from(URI uri) {
-        return "https".equals(uri.getScheme())
-            ? this.https(uri.getHost(), uri.getPort())
-            : this.http(uri.getHost(), uri.getPort());
-    }
-
-    /**
      * Create client slice sending HTTP requests to specified host on port 80.
      *
      * @param host Host name.

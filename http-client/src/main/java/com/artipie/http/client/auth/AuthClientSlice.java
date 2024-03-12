@@ -28,7 +28,7 @@ public final class AuthClientSlice implements Slice {
 
     public static AuthClientSlice withClientSlice(ClientSlices client, RemoteConfig cfg) {
         return new AuthClientSlice(
-            client.from(cfg.uri()),
+            client.from(cfg.uri().toString()),
             GenericAuthenticator.create(client, cfg.username(), cfg.pwd())
         );
     }

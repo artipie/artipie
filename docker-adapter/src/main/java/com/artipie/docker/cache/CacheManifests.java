@@ -106,8 +106,7 @@ public final class CacheManifests implements Manifests {
                         result = this.cache.manifests().get(ref).exceptionally(ignored -> original);
                     }
                 } else {
-                    LOGGER.warn("Failed getting manifest: [ref={}, error={}]",
-                            ref.reference(), throwable.getMessage());
+                    LOGGER.error("Failed getting manifest ref=" + ref.reference(), throwable);
                     result = this.cache.manifests().get(ref);
                 }
                 return result;
