@@ -126,8 +126,8 @@ final class CachedProxySlice implements Slice {
                                                 Flowable.fromPublisher(rsbody)
                                                 .doOnError(term::completeExceptionally)
                                                 .doOnTerminate(() -> term.complete(null));
-                                            promise.complete(Optional.of(new Content.From(res)));
                                             this.addEventToQueue(key);
+                                            promise.complete(Optional.of(new Content.From(res)));
                                         } else {
                                             promise.complete(Optional.empty());
                                         }
