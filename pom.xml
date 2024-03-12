@@ -79,7 +79,7 @@ SOFTWARE.
     <maven.compiler.release>21</maven.compiler.release>
     <header.license>LICENSE.header</header.license>
     <junit-platform.version>5.10.0</junit-platform.version>
-    <vertx.version>4.5.1</vertx.version>
+    <vertx.version>4.5.4</vertx.version>
     <guava.version>33.0.0-jre</guava.version>
     <javax.json.version>1.1.4</javax.json.version>
     <jetty.version>12.0.6</jetty.version>
@@ -106,18 +106,6 @@ SOFTWARE.
       <url>https://repo.maven.apache.org/maven2</url>
     </repository>
   </repositories>
-  <developers>
-    <developer>
-      <id>github.com/dgarus</id>
-      <name>Denis Garus</name>
-      <email>g4s8.public@gmail.com</email>
-      <organization>Artipie</organization>
-      <organizationUrl>https://www.artipie.com</organizationUrl>
-      <roles>
-        <role>maintainer</role>
-      </roles>
-    </developer>
-  </developers>
   <dependencyManagement>
   <dependencies>
       <dependency>
