@@ -98,7 +98,7 @@ class RepositoryHttpIT {
             )
         );
         this.port = this.server.start();
-        final int sourceport = new RandomFreePort().get();
+        final int sourceport = RandomFreePort.get();
         this.sourceserver = new SourceServer(RepositoryHttpIT.VERTX, sourceport);
         Testcontainers.exposeHostPorts(this.port, sourceport);
         this.cntn = new GenericContainer<>("composer:2.0.9")

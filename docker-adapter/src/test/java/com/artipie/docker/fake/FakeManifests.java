@@ -5,28 +5,23 @@
 package com.artipie.docker.fake;
 
 import com.artipie.asto.Content;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
+
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Auxiliary class for tests for {@link com.artipie.docker.cache.CacheManifests}.
- *
- * @since 0.5
  */
 public final class FakeManifests implements Manifests {
-    /**
-     * Manifests.
-     */
+
     private final Manifests mnfs;
 
     /**
-     * Ctor.
-     *
      * @param type Type of manifests.
      * @param code Code of manifests.
      */
@@ -35,12 +30,12 @@ public final class FakeManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
         return this.mnfs.put(ref, content);
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
         return this.mnfs.get(ref);
     }
 

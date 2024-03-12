@@ -6,6 +6,7 @@ package com.artipie.docker.cache;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
@@ -15,7 +16,6 @@ import com.artipie.docker.asto.CheckedBlobSource;
 import com.artipie.docker.manifest.Layer;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.JoinedTagsSource;
-import com.artipie.docker.ref.ManifestRef;
 import com.artipie.scheduling.ArtifactEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +28,6 @@ import java.util.function.Function;
 
 /**
  * Cache implementation of {@link Repo}.
- *
- * @since 0.3
  */
 public final class CacheManifests implements Manifests {
 
@@ -84,12 +82,12 @@ public final class CacheManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
         return this.origin.manifests().get(ref).handle(
             (original, throwable) -> {
                 final CompletionStage<Optional<Manifest>> result;
@@ -101,15 +99,14 @@ public final class CacheManifests implements Manifests {
                             result = this.copy(ref).thenApply(unused -> original);
                         } else {
                             LOGGER.warn("Cannot add manifest to cache: [manifest={}, mediaType={}]",
-                                    ref.string(), manifest.mediaType());
+                                    ref.reference(), manifest.mediaType());
                             result = CompletableFuture.completedFuture(original);
                         }
                     } else {
                         result = this.cache.manifests().get(ref).exceptionally(ignored -> original);
                     }
                 } else {
-                    LOGGER.warn("Failed getting manifest: [ref={}, error={}]",
-                            ref.string(), throwable.getMessage());
+                    LOGGER.error("Failed getting manifest ref=" + ref.reference(), throwable);
                     result = this.cache.manifests().get(ref);
                 }
                 return result;
@@ -130,7 +127,7 @@ public final class CacheManifests implements Manifests {
      * @param ref Manifest reference.
      * @return Copy completion.
      */
-    private CompletionStage<Void> copy(final ManifestRef ref) {
+    private CompletionStage<Void> copy(final ManifestReference ref) {
         return this.origin.manifests().get(ref).thenApply(Optional::get).thenCompose(
             manifest -> CompletableFuture.allOf(
                 this.copy(manifest.config()).toCompletableFuture(),
@@ -148,7 +145,7 @@ public final class CacheManifests implements Manifests {
                         queue -> queue.add(
                             new ArtifactEvent(
                                 CacheManifests.REPO_TYPE, this.rname,
-                                ArtifactEvent.DEF_OWNER, this.name.value(), ref.string(),
+                                ArtifactEvent.DEF_OWNER, this.name.value(), ref.reference(),
                                 manifest.layers().stream().mapToLong(Layer::size).sum()
                             )
                         )
@@ -159,7 +156,7 @@ public final class CacheManifests implements Manifests {
         ).handle(
             (ignored, ex) -> {
                 if (ex != null) {
-                    LOGGER.error("Failed to cache manifest " + ref.string(), ex);
+                    LOGGER.error("Failed to cache manifest " + ref.reference(), ex);
                 }
                 return null;
             }
@@ -175,7 +172,7 @@ public final class CacheManifests implements Manifests {
     private CompletionStage<Void> copy(final Digest digest) {
         return this.origin.layers().get(digest).thenCompose(
             blob -> {
-                if (!blob.isPresent()) {
+                if (blob.isEmpty()) {
                     throw new IllegalArgumentException(
                         String.format("Failed loading blob %s", digest)
                     );

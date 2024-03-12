@@ -11,18 +11,16 @@ import java.net.URI;
 
 /**
  * Slices collection that provides client slices by host and port.
- *
- * @since 0.1
  */
 public interface ClientSlices {
 
     /**
-     * Create {@code Slice} form a config URL string.
-     * <p>The config URL string can be just a host name, for example, `registry-1.docker.io`.
+     * Create {@code Slice} form a URL string.
+     * <p>The URL string can be just a host name, for example, `registry-1.docker.io`.
      * In that case, it will be used `https` schema and default port 443.
      *
-     * @param url Create new scratch file from selection.
-     * @return Client slice sending HTTP requests to specified url.
+     * @param url URL string.
+     * @return Client slice sending HTTP requests to the specified url string.
      */
     default Slice from(String url) {
         URI uri = URI.create(url);

@@ -5,29 +5,28 @@
 package com.artipie.docker.composite;
 
 import com.artipie.asto.Content;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.fake.FullTagsManifests;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
 /**
  * Tests for {@link ReadWriteManifests}.
- *
- * @since 0.5
  */
 final class ReadWriteManifestsTest {
 
     @Test
     void shouldCallGetWithCorrectRef() {
-        final ManifestRef ref = new ManifestRef.FromString("get");
+        final ManifestReference ref = ManifestReference.from("get");
         final CaptureGetManifests fake = new CaptureGetManifests();
         new ReadWriteManifests(fake, new CapturePutManifests()).get(ref)
             .toCompletableFuture().join();
@@ -40,7 +39,7 @@ final class ReadWriteManifestsTest {
     @Test
     void shouldCallPutPassingCorrectData() {
         final byte[] data = "data".getBytes();
-        final ManifestRef ref = new ManifestRef.FromString("ref");
+        final ManifestReference ref = ManifestReference.from("ref");
         final CapturePutManifests fake = new CapturePutManifests();
         new ReadWriteManifests(new CaptureGetManifests(), fake).put(
             ref,
@@ -53,7 +52,7 @@ final class ReadWriteManifestsTest {
         );
         MatcherAssert.assertThat(
             "Size of content from put method is wrong.",
-            fake.content().size().get(),
+            fake.content().size().orElseThrow(),
             new IsEqual<>((long) data.length)
         );
     }
@@ -95,15 +94,15 @@ final class ReadWriteManifestsTest {
         /**
          * Manifest reference.
          */
-        private volatile ManifestRef refcheck;
+        private volatile ManifestReference refcheck;
 
         @Override
-        public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+        public CompletionStage<Manifest> put(ManifestReference ref, Content content) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+        public CompletionStage<Optional<Manifest>> get(ManifestReference ref) {
             this.refcheck = ref;
             return CompletableFuture.completedFuture(Optional.empty());
         }
@@ -113,7 +112,7 @@ final class ReadWriteManifestsTest {
             throw new UnsupportedOperationException();
         }
 
-        public ManifestRef ref() {
+        public ManifestReference ref() {
             return this.refcheck;
         }
     }
@@ -128,7 +127,7 @@ final class ReadWriteManifestsTest {
         /**
          * Manifest reference.
          */
-        private volatile ManifestRef refcheck;
+        private volatile ManifestReference refcheck;
 
         /**
          * Manifest content.
@@ -136,14 +135,14 @@ final class ReadWriteManifestsTest {
         private volatile Content contentcheck;
 
         @Override
-        public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+        public CompletionStage<Manifest> put(ManifestReference ref, Content content) {
             this.refcheck = ref;
             this.contentcheck = content;
             return CompletableFuture.completedFuture(null);
         }
 
         @Override
-        public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+        public CompletionStage<Optional<Manifest>> get(ManifestReference ref) {
             throw new UnsupportedOperationException();
         }
 
@@ -152,7 +151,7 @@ final class ReadWriteManifestsTest {
             throw new UnsupportedOperationException();
         }
 
-        public ManifestRef ref() {
+        public ManifestReference ref() {
             return this.refcheck;
         }
 

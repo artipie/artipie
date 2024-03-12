@@ -5,21 +5,20 @@
 package com.artipie.docker;
 
 import com.artipie.docker.error.InvalidTagNameException;
-import java.util.Arrays;
+import com.artipie.docker.misc.Validator;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
+
 /**
  * Tests for {@link Tag.Valid}.
- *
- * @since 0.2
  */
-class TagValidTest {
+class TagValidatorTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -31,10 +30,9 @@ class TagValidTest {
         "_some_tag",
         "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567"
     })
-    void shouldGetValueWhenValid(final String original) {
-        final Tag.Valid tag = new Tag.Valid(original);
-        MatcherAssert.assertThat(tag.valid(), new IsEqual<>(true));
-        MatcherAssert.assertThat(tag.value(), new IsEqual<>(original));
+    void shouldGetValueWhenValid(final String tag) {
+        Assertions.assertTrue(Validator.isValidTag(tag));
+        Assertions.assertEquals(tag, Validator.validateTag(tag));
     }
 
     @ParameterizedTest
@@ -46,19 +44,17 @@ class TagValidTest {
         "-my-tag",
         "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678"
     })
-    void shouldFailToGetValueWhenInvalid(final String original) {
-        final Tag.Valid tag = new Tag.Valid(original);
-        MatcherAssert.assertThat(tag.valid(), new IsEqual<>(false));
+    void shouldFailToGetValueWhenInvalid(final String tag) {
+        Assertions.assertFalse(Validator.isValidTag(tag));
         final Throwable throwable = Assertions.assertThrows(
-            InvalidTagNameException.class,
-            tag::value
+            InvalidTagNameException.class, () -> Validator.validateTag(tag)
         );
         MatcherAssert.assertThat(
             throwable.getMessage(),
             new AllOf<>(
                 Arrays.asList(
                     new StringContains(true, "Invalid tag"),
-                    new StringContains(false, original)
+                    new StringContains(false, tag)
                 )
             )
         );

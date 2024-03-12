@@ -5,27 +5,27 @@
 package com.artipie.docker.composite;
 
 import com.artipie.asto.Content;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.JoinedTagsSource;
-import com.artipie.docker.ref.ManifestRef;
-import com.jcabi.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Multi-read {@link Manifests} implementation.
- *
- * @since 0.3
  */
 public final class MultiReadManifests implements Manifests {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MultiReadManifests.class);
 
     /**
      * Repository name.
@@ -49,65 +49,36 @@ public final class MultiReadManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
-        return firstNotEmpty(
-            this.manifests.stream().map(
-                mnfsts -> mnfsts.get(ref).handle(
+    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+        return CompletableFuture.supplyAsync(() -> {
+            for (Manifests m : manifests) {
+                Optional<Manifest> res = m.get(ref).handle(
                     (manifest, throwable) -> {
-                        final CompletableFuture<Optional<Manifest>> result;
+                        final Optional<Manifest> result;
                         if (throwable == null) {
-                            result = CompletableFuture.completedFuture(manifest);
+                            result = manifest;
                         } else {
-                            Logger.error(
-                                this, "Failed to read manifest %s: %[exception]s",
-                                ref.string(),
-                                throwable
-                            );
-                            result = CompletableFuture.completedFuture(Optional.empty());
+                            LOGGER.error("Failed to read manifest " + ref.reference(), throwable);
+                            result = Optional.empty();
                         }
                         return result;
                     }
-                ).thenCompose(Function.identity())
-            ).collect(Collectors.toList())
-        );
+                ).toCompletableFuture().join();
+                if (res.isPresent()) {
+                    return res;
+                }
+            }
+            return Optional.empty();
+        });
     }
 
     @Override
     public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
         return new JoinedTagsSource(this.name, this.manifests, from, limit).tags();
-    }
-
-    /**
-     * Returns a new CompletionStage that is completed when first CompletionStage
-     * from the list completes with non-empty result.
-     * The result stage may be completed with empty value
-     *
-     * @param stages Completion stages.
-     * @param <T> Result type.
-     * @return Completion stage with first non-empty result.
-     */
-    private static <T> CompletionStage<Optional<T>> firstNotEmpty(
-        final List<CompletionStage<Optional<T>>> stages
-    ) {
-        final CompletableFuture<Optional<T>> promise = new CompletableFuture<>();
-        CompletionStage<Void> preceeding = CompletableFuture.allOf();
-        for (final CompletionStage<Optional<T>> stage : stages) {
-            preceeding = stage.thenCombine(
-                preceeding,
-                (opt, nothing) -> {
-                    if (opt.isPresent()) {
-                        promise.complete(opt);
-                    }
-                    return nothing;
-                }
-            );
-        }
-        preceeding.thenRun(() -> promise.complete(Optional.empty()));
-        return promise;
     }
 }

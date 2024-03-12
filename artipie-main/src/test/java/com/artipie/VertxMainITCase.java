@@ -16,9 +16,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Test for {@link VertxMain}.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class VertxMainITCase {
 
     /**
@@ -63,7 +61,7 @@ final class VertxMainITCase {
             "Artipie started and responding 200",
             new ContainerResultMatcher(
                 ContainerResultMatcher.SUCCESS,
-                new StringContains("HTTP/1.1 500 Internal Server Error")
+                new StringContains("HTTP/1.1 404 Not Found")
             ),
             "curl", "-i", "-X", "GET",
             "http://artipie-invalid-repo-config:8080/my-file/item.txt"

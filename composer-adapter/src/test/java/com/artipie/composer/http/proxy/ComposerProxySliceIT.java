@@ -44,10 +44,8 @@ import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 
 /**
  * Integration test for {@link ComposerProxySlice}.
- * @since 0.4
  */
 @DisabledOnOs(OS.WINDOWS)
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class ComposerProxySliceIT {
     /**
      * Vertx instance.
@@ -112,7 +110,7 @@ final class ComposerProxySliceIT {
             )
         );
         final int port = this.server.start();
-        this.sourceport = new RandomFreePort().get();
+        this.sourceport = RandomFreePort.get();
         Testcontainers.exposeHostPorts(port, this.sourceport);
         this.cntn = new GenericContainer<>("composer:2.0.9")
             .withCommand("tail", "-f", "/dev/null")

@@ -5,18 +5,17 @@
 package com.artipie.docker.composite;
 
 import com.artipie.asto.Content;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
+
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Read-write {@link Manifests} implementation.
- *
- * @since 0.3
  */
 public final class ReadWriteManifests implements Manifests {
 
@@ -42,12 +41,12 @@ public final class ReadWriteManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
         return this.write.put(ref, content);
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
         return this.read.get(ref);
     }
 

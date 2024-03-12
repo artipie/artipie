@@ -6,20 +6,19 @@ package com.artipie.docker.fake;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.JsonManifest;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Manifests implementation that contains manifest.
- *
- * @since 0.3
  */
 public final class FullGetManifests implements Manifests {
 
@@ -54,12 +53,12 @@ public final class FullGetManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestRef ref, final Content ignored) {
+    public CompletionStage<Manifest> put(final ManifestReference ref, final Content ignored) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
         return CompletableFuture.completedFuture(
             Optional.of(
                 new JsonManifest(

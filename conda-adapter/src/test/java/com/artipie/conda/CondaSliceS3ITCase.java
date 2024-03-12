@@ -88,7 +88,7 @@ public final class CondaSliceS3ITCase {
 
     @BeforeEach
     void initialize() throws Exception {
-        this.port = new RandomFreePort().get();
+        this.port = RandomFreePort.get();
         final Queue<ArtifactEvent> events = new ConcurrentLinkedDeque<>();
         final String url = String.format("http://host.testcontainers.internal:%d", this.port);
         Testcontainers.exposeHostPorts(this.port);

@@ -9,7 +9,6 @@ import com.artipie.docker.Tag;
 import com.google.common.base.Splitter;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import wtf.g4s8.hamcrest.json.JsonContains;
@@ -17,25 +16,15 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
  * Tests for {@link TagsPage}.
  */
 final class TagsPageTest {
-
-    private Collection<Tag> tags;
-
-    @BeforeEach
-    void setUp() {
-        this.tags = Stream.of("3", "1", "2", "4", "5", "4")
-            .map(Tag.Valid::new)
-            .collect(Collectors.toList());
-    }
 
     @ParameterizedTest
     @CsvSource({
@@ -50,7 +39,7 @@ final class TagsPageTest {
         MatcherAssert.assertThat(
             new TagsPage(
                 new RepoName.Simple(repo),
-                this.tags,
+                Arrays.asList("3", "1", "2", "4", "5", "4"),
                 Optional.ofNullable(from).map(Tag.Valid::new),
                 Optional.ofNullable(limit).orElse(Integer.MAX_VALUE)
             ).json().asString(),

@@ -12,10 +12,8 @@ import java.util.TreeSet;
 
 /**
  * Direct children keys for root from collection of keys.
- *
- * @since 0.9
  */
-class Children {
+public class Children {
 
     /**
      * Root key.
@@ -33,7 +31,7 @@ class Children {
      * @param root Root key.
      * @param keys List of keys inside root.
      */
-    Children(final Key root, final Collection<Key> keys) {
+    public Children(final Key root, final Collection<Key> keys) {
         this.root = root;
         this.keys = keys;
     }
@@ -61,7 +59,7 @@ class Children {
         Key child = key;
         while (true) {
             final Optional<Key> parent = child.parent();
-            if (!parent.isPresent()) {
+            if (parent.isEmpty()) {
                 throw new IllegalStateException(
                     String.format("Key %s does not belong to root %s", key, this.root)
                 );

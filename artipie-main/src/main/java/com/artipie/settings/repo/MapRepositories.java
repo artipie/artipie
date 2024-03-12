@@ -5,15 +5,15 @@
 package com.artipie.settings.repo;
 
 import com.amihaiemil.eoyaml.Yaml;
-import com.artipie.asto.ArtipieIOException;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.settings.AliasSettings;
 import com.artipie.settings.ConfigFile;
 import com.artipie.settings.Settings;
 import com.artipie.settings.StorageByAlias;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -22,6 +22,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MapRepositories implements Repositories {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(MapRepositories.class);
 
     private final Settings settings;
 
@@ -58,15 +60,14 @@ public class MapRepositories implements Repositories {
                 final String content = file.valueFrom(storage)
                     .toCompletableFuture().join().asString();
                 try {
-                    final RepoConfig cfg = new RepoConfig(
-                        alias.join(), new Key.From(file.name()),
+                    this.map.put(file.name(), RepoConfig.from(
                         Yaml.createYamlInput(content).readYamlMapping(),
+                        alias.join(), new Key.From(file.name()),
                         this.settings.caches().storagesCache(),
                         this.settings.metrics().storage()
-                    );
-                    this.map.put(file.name(), cfg);
-                } catch (IOException e) {
-                    throw new ArtipieIOException(e);
+                    ));
+                } catch (Exception e) {
+                    LOGGER.error("Can't parse the repository config file: " + file.name(), e);
                 }
             }
         }

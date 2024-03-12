@@ -6,7 +6,7 @@ package com.artipie.docker.asto;
 
 import com.artipie.asto.Key;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.ref.ManifestRef;
+import com.artipie.docker.ManifestReference;
 
 /**
  * Manifests layout in storage. Used to evaluate location for manifest link in storage.
@@ -22,7 +22,7 @@ public interface ManifestsLayout {
      * @param ref Manifest reference.
      * @return Key for storing manifest.
      */
-    Key manifest(RepoName repo, ManifestRef ref);
+    Key manifest(RepoName repo, ManifestReference ref);
 
     /**
      * Create tags key.

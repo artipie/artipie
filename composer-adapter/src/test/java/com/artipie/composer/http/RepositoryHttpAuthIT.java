@@ -40,11 +40,8 @@ import org.testcontainers.shaded.org.apache.commons.io.FileUtils;
 
 /**
  * Integration test for PHP Composer repository with auth.
- *
- * @since 0.4
  */
 @DisabledOnOs(OS.WINDOWS)
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class RepositoryHttpAuthIT {
     /**
      * Vertx instance for using in test.
@@ -86,8 +83,8 @@ final class RepositoryHttpAuthIT {
         this.temp = Files.createTempDirectory("");
         this.project = this.temp.resolve("project");
         this.project.toFile().mkdirs();
-        this.port = new RandomFreePort().get();
-        final int sourceport = new RandomFreePort().get();
+        this.port = RandomFreePort.get();
+        final int sourceport = RandomFreePort.get();
         final Slice slice = new PhpComposer(
             new AstoRepository(new InMemoryStorage()),
             new PolicyByUsername(TestAuthentication.ALICE.name()),

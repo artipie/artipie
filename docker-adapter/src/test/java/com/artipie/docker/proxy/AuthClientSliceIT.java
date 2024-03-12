@@ -4,26 +4,23 @@
  */
 package com.artipie.docker.proxy;
 
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 /**
  * Integration test for {@link AuthClientSlice}.
- *
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class AuthClientSliceIT {
 
     /**
@@ -37,7 +34,7 @@ class AuthClientSliceIT {
     private AuthClientSlice slice;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         this.client = new JettyClientSlices();
         this.client.start();
         this.slice = new AuthClientSlice(
@@ -47,7 +44,7 @@ class AuthClientSliceIT {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         this.client.stop();
     }
 
@@ -55,7 +52,7 @@ class AuthClientSliceIT {
     void getManifestByTag() {
         final RepoName name = new RepoName.Valid("library/busybox");
         final ProxyManifests manifests = new ProxyManifests(this.slice, name);
-        final ManifestRef ref = new ManifestRef.FromTag(new Tag.Valid("latest"));
+        final ManifestReference ref = ManifestReference.fromTag("latest");
         final Optional<Manifest> manifest = manifests.get(ref).toCompletableFuture().join();
         MatcherAssert.assertThat(
             manifest.isPresent(),

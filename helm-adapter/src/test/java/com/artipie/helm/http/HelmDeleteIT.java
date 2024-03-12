@@ -33,9 +33,7 @@ import java.util.stream.Stream;
 
 /**
  * IT for remove operation.
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class HelmDeleteIT {
     /**
      * Vert instance.
@@ -71,7 +69,7 @@ final class HelmDeleteIT {
     void setUp() {
         this.storage = new InMemoryStorage();
         this.events = new ConcurrentLinkedQueue<>();
-        this.port = new RandomFreePort().get();
+        this.port = RandomFreePort.get();
         this.server = new VertxSliceServer(
             HelmDeleteIT.VERTX,
             new LoggingSlice(

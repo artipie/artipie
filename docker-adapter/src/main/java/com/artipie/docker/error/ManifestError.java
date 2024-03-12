@@ -4,28 +4,27 @@
  */
 package com.artipie.docker.error;
 
-import com.artipie.docker.ref.ManifestRef;
+import com.artipie.docker.ManifestReference;
+
 import java.util.Optional;
 
 /**
  * This error is returned when the manifest, identified by name and tag
  * is unknown to the repository.
- *
- * @since 0.5
  */
 public final class ManifestError implements DockerError {
 
     /**
      * Manifest reference.
      */
-    private final ManifestRef ref;
+    private final ManifestReference ref;
 
     /**
      * Ctor.
      *
      * @param ref Manifest reference.
      */
-    public ManifestError(final ManifestRef ref) {
+    public ManifestError(ManifestReference ref) {
         this.ref = ref;
     }
 
@@ -41,6 +40,6 @@ public final class ManifestError implements DockerError {
 
     @Override
     public Optional<String> detail() {
-        return Optional.of(this.ref.string());
+        return Optional.of(this.ref.reference());
     }
 }

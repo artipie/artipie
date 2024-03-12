@@ -17,14 +17,12 @@ import com.artipie.docker.junit.DockerClient;
 import com.artipie.docker.junit.DockerClientSupport;
 import com.artipie.docker.junit.DockerRepository;
 import com.artipie.docker.proxy.ProxyDocker;
-import com.artipie.docker.ref.ManifestRef;
+import com.artipie.docker.ManifestReference;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.google.common.base.Stopwatch;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.StringContains;
@@ -34,12 +32,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Integration test for {@link ProxyDocker}.
- *
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DockerClientSupport
 @DisabledOnOs(OS.WINDOWS)
 final class CachingProxyITCase {
@@ -151,11 +149,11 @@ final class CachingProxyITCase {
         final Manifests manifests = this.cache.repo(
             new RepoName.Simple(this.img.name())
         ).manifests();
-        final ManifestRef ref = new ManifestRef.FromDigest(
+        final ManifestReference ref = ManifestReference.from(
             new Digest.FromString(this.img.digest())
         );
         final Stopwatch stopwatch = Stopwatch.createStarted();
-        while (!manifests.get(ref).toCompletableFuture().join().isPresent()) {
+        while (manifests.get(ref).toCompletableFuture().join().isEmpty()) {
             if (stopwatch.elapsed(TimeUnit.SECONDS) > TimeUnit.MINUTES.toSeconds(1)) {
                 throw new IllegalStateException(
                     String.format(

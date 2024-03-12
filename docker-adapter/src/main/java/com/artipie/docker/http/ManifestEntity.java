@@ -14,7 +14,7 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.docker.ref.ManifestRef;
+import com.artipie.docker.ManifestReference;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
@@ -33,13 +33,14 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Manifest entity in Docker HTTP API..
@@ -101,7 +102,7 @@ final class ManifestEntity {
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body) {
             final Request request = new Request(line);
-            final ManifestRef ref = request.reference();
+            final ManifestReference ref = request.reference();
             return new AsyncResponse(
                 this.docker.repo(request.name()).manifests().get(ref).thenApply(
                     manifest -> manifest.<Response>map(
@@ -155,7 +156,7 @@ final class ManifestEntity {
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
-            final ManifestRef ref = request.reference();
+            final ManifestReference ref = request.reference();
             return new AsyncResponse(
                 this.docker.repo(name).manifests().get(ref).thenApply(
                     manifest -> manifest.<Response>map(
@@ -224,16 +225,16 @@ final class ManifestEntity {
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
-            final ManifestRef ref = request.reference();
+            final ManifestReference ref = request.reference();
             return new AsyncResponse(
                 this.docker.repo(name).manifests().put(ref, new Content.From(body)).thenApply(
                     manifest -> {
-                        if (this.events.isPresent() && new Tag.Valid(ref.string()).valid()) {
+                        if (this.events.isPresent() && new Tag.Valid(ref.reference()).valid()) {
                             this.events.get().add(
                                 new ArtifactEvent(
                                     ManifestEntity.REPO_TYPE, this.rname,
                                     new Login(new Headers.From(headers)).getValue(),
-                                    name.value(), ref.string(),
+                                    name.value(), ref.reference(),
                                     manifest.layers().stream().mapToLong(Layer::size).sum()
                                 )
                             );
@@ -241,7 +242,7 @@ final class ManifestEntity {
                         return new RsWithHeaders(
                             new RsWithStatus(RsStatus.CREATED),
                             new Location(
-                                String.format("/v2/%s/manifests/%s", name.value(), ref.string())
+                                String.format("/v2/%s/manifests/%s", name.value(), ref.reference())
                             ),
                             new ContentLength("0"),
                             new DigestHeader(manifest.digest())
@@ -308,7 +309,7 @@ final class ManifestEntity {
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
-            final ManifestRef ref = request.reference();
+            final ManifestReference ref = request.reference();
             return new AsyncResponse(
                 this.docker.repo(name).manifests().get(ref).thenApply(
                     manifest -> {
@@ -387,8 +388,8 @@ final class ManifestEntity {
          *
          * @return Manifest reference.
          */
-        ManifestRef reference() {
-            return new ManifestRef.FromString(this.rqregex.path().group("reference"));
+        ManifestReference reference() {
+            return ManifestReference.from(this.rqregex.path().group("reference"));
         }
 
     }

@@ -108,7 +108,10 @@ final class JettyClientSlice implements Slice {
                 }
         );
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Send {}\n{}", request, request.getHeaders().asString());
+            LOGGER.debug("Send {} {}:{}{} {} \n{}",
+                request.getMethod(), request.getHost(), request.getPort(), request.getPath(), request.getVersion(),
+                request.getHeaders().asString()
+            );
         }
         request.send(
                 result -> {

@@ -8,6 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.docker.Digest;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
@@ -16,7 +17,6 @@ import com.artipie.docker.error.InvalidManifestException;
 import com.artipie.docker.manifest.JsonManifest;
 import com.artipie.docker.manifest.Layer;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ref.ManifestRef;
 import com.google.common.base.Strings;
 
 import javax.json.JsonException;
@@ -72,7 +72,7 @@ public final class AstoManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestRef ref, final Content content) {
+    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
         return content.asBytesFuture().thenCompose(
             bytes -> this.blobs.put(new TrustedBlobSource(bytes))
                 .thenApply(blob -> new JsonManifest(blob.digest(), bytes))
@@ -85,7 +85,7 @@ public final class AstoManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestRef ref) {
+    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
         return this.readLink(ref).thenCompose(
             digestOpt -> digestOpt.map(
                 digest -> this.blobs.blob(digest)
@@ -165,9 +165,9 @@ public final class AstoManifests implements Manifests {
      * @param digest Blob digest.
      * @return Signal that links are added.
      */
-    private CompletableFuture<Void> addManifestLinks(final ManifestRef ref, final Digest digest) {
+    private CompletableFuture<Void> addManifestLinks(final ManifestReference ref, final Digest digest) {
         return CompletableFuture.allOf(
-            this.addLink(new ManifestRef.FromDigest(digest), digest),
+            this.addLink(ManifestReference.from(digest), digest),
             this.addLink(ref, digest)
         );
     }
@@ -179,7 +179,7 @@ public final class AstoManifests implements Manifests {
      * @param digest Blob digest.
      * @return Link key.
      */
-    private CompletableFuture<Void> addLink(final ManifestRef ref, final Digest digest) {
+    private CompletableFuture<Void> addLink(final ManifestReference ref, final Digest digest) {
         return this.asto.save(
             this.layout.manifest(this.name, ref),
             new Content.From(digest.string().getBytes(StandardCharsets.US_ASCII))
@@ -192,7 +192,7 @@ public final class AstoManifests implements Manifests {
      * @param ref Manifest reference.
      * @return Blob digest, empty if no link found.
      */
-    private CompletableFuture<Optional<Digest>> readLink(final ManifestRef ref) {
+    private CompletableFuture<Optional<Digest>> readLink(final ManifestReference ref) {
         final Key key = this.layout.manifest(this.name, ref);
         return this.asto.exists(key).thenCompose(
             exists -> {

@@ -5,8 +5,6 @@
 package com.artipie.docker.misc;
 
 import com.artipie.asto.Content;
-import com.artipie.docker.Tag;
-import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyCollection;
@@ -16,23 +14,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
+
 /**
  * Test for {@link ParsedTags}.
- *
- * @since 0.10
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ParsedTagsTest {
 
     @Test
     void parsesTags() {
         MatcherAssert.assertThat(
-            new ParsedTags(
+            new ArrayList<>(new ParsedTags(
                 () -> new Content.From("{\"tags\":[\"one\",\"two\"]}".getBytes())
-            ).tags().toCompletableFuture().join()
-                .stream()
-                .map(Tag::value)
-                .collect(Collectors.toList()),
+            ).tags().toCompletableFuture().join()),
             Matchers.contains("one", "two")
         );
     }

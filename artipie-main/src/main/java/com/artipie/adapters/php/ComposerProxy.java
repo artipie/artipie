@@ -11,72 +11,53 @@ import com.artipie.composer.http.proxy.ComposerStorageCache;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
+import com.artipie.http.client.RemoteConfig;
+import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.settings.repo.RepoConfig;
-import com.artipie.settings.repo.proxy.ProxyConfig;
-import com.artipie.settings.repo.proxy.YamlProxyConfig;
-import java.net.URI;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import org.reactivestreams.Publisher;
 
 /**
  * Php Composer proxy slice.
- * @since 0.20
  */
 public final class ComposerProxy implements Slice {
-    /**
-     * HTTP client.
-     */
-    private final ClientSlices client;
+
+    private final Slice slice;
 
     /**
-     * Repository configuration.
-     */
-    private final RepoConfig cfg;
-
-    /**
-     * Ctor.
      * @param client HTTP client
      * @param cfg Repository configuration
      */
-    public ComposerProxy(final ClientSlices client, final RepoConfig cfg) {
-        this.client = client;
-        this.cfg = cfg;
-    }
-
-    @Override
-    public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
-    ) {
-        final Collection<? extends ProxyConfig.Remote> remotes =
-            new YamlProxyConfig(this.cfg).remotes();
-        if (remotes.isEmpty()) {
-            throw new IllegalArgumentException("No remotes were specified");
-        }
-        if (remotes.size() > 1) {
-            throw new IllegalArgumentException("Only one remote is allowed");
-        }
-        final ProxyConfig.Remote remote = remotes.iterator().next();
-        final Optional<Storage> asto = this.cfg.storageOpt();
-        return asto.map(
+    public ComposerProxy(ClientSlices client, RepoConfig cfg) {
+        final RemoteConfig remote = cfg.remoteConfig();
+        final Optional<Storage> asto = cfg.storageOpt();
+        slice = asto.map(
             cache -> new ComposerProxySlice(
-                this.client,
-                URI.create(remote.url()),
-                new AstoRepository(this.cfg.storage()),
-                remote.auth(this.client),
+                client,
+                remote.uri(),
+                new AstoRepository(cfg.storage()),
+                GenericAuthenticator.create(client, remote.username(), remote.pwd()),
                 new ComposerStorageCache(new AstoRepository(cache))
             )
         ).orElseGet(
             () -> new ComposerProxySlice(
-                this.client,
-                URI.create(remote.url()),
-                new AstoRepository(this.cfg.storage()),
-                remote.auth(this.client)
+                client,
+                remote.uri(),
+                new AstoRepository(cfg.storage()),
+                GenericAuthenticator.create(client, remote.username(), remote.pwd())
             )
-        ).response(line, headers, body);
+        );
+    }
+
+    @Override
+    public Response response(
+        String line,
+        Iterable<Map.Entry<String, String>> headers,
+        Publisher<ByteBuffer> body
+    ) {
+        return slice.response(line, headers, body);
     }
 }

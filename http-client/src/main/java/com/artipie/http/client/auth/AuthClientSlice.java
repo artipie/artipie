@@ -9,6 +9,9 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.client.ClientSlices;
+import com.artipie.http.client.RemoteConfig;
+import com.artipie.http.client.UriClientSlice;
 import com.artipie.http.rs.RsStatus;
 import com.google.common.collect.Iterables;
 import io.reactivex.Flowable;
@@ -22,6 +25,20 @@ import java.util.Map;
  * Slice augmenting requests with authentication when needed.
  */
 public final class AuthClientSlice implements Slice {
+
+    public static AuthClientSlice withClientSlice(ClientSlices client, RemoteConfig cfg) {
+        return new AuthClientSlice(
+            client.from(cfg.uri().toString()),
+            GenericAuthenticator.create(client, cfg.username(), cfg.pwd())
+        );
+    }
+
+    public static AuthClientSlice withUriClientSlice(ClientSlices client, RemoteConfig cfg) {
+        return new AuthClientSlice(
+            new UriClientSlice(client, cfg.uri()),
+            GenericAuthenticator.create(client, cfg.username(), cfg.pwd())
+        );
+    }
 
     /**
      * Origin slice.

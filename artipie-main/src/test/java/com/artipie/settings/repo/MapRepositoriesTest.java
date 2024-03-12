@@ -13,14 +13,14 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.settings.AliasSettings;
 import com.artipie.settings.Settings;
 import com.artipie.test.TestSettings;
-import java.nio.file.Path;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import java.nio.file.Path;
+import java.util.NoSuchElementException;
 
 /**
  * Tests for cache of files with configuration in {@link MapRepositories}.
@@ -55,12 +55,7 @@ final class MapRepositoriesTest {
             .withStorageAlias(alias)
             .saveTo(this.storage, MapRepositoriesTest.REPO);
         this.saveAliasConfig(alias, filename);
-        MatcherAssert.assertThat(
-            this.repoConfig()
-                .storageOpt()
-                .isPresent(),
-            new IsEqual<>(true)
-        );
+        Assertions.assertTrue(this.repoConfig().storageOpt().isPresent());
     }
 
     @Test
@@ -68,12 +63,7 @@ final class MapRepositoriesTest {
         new RepoConfigYaml(MapRepositoriesTest.TYPE)
             .withFileStorage(Path.of("some", "somepath"))
             .saveTo(this.storage, MapRepositoriesTest.REPO);
-        MatcherAssert.assertThat(
-            this.repoConfig()
-                .storageOpt()
-                .isPresent(),
-            new IsEqual<>(true)
-        );
+        Assertions.assertTrue(this.repoConfig().storageOpt().isPresent());
     }
 
     @Test
@@ -91,8 +81,7 @@ final class MapRepositoriesTest {
             .saveTo(this.storage, MapRepositoriesTest.REPO);
         Assertions.assertThrows(
             IllegalStateException.class,
-            () -> this.repoConfig()
-                .storage()
+            () -> this.repoConfig().storage()
         );
     }
 
@@ -101,11 +90,7 @@ final class MapRepositoriesTest {
         new RepoConfigYaml(MapRepositoriesTest.TYPE)
             .withStorageAlias("alias")
             .saveTo(this.storage, MapRepositoriesTest.REPO);
-        Assertions.assertThrows(
-            IllegalStateException.class,
-            () -> this.repoConfig()
-                .storageOpt()
-        );
+        Assertions.assertThrows(NoSuchElementException.class, this::repoConfig);
     }
 
     @Test
@@ -130,11 +115,7 @@ final class MapRepositoriesTest {
                 ).build().toString().getBytes()
             )
         ).join();
-        Assertions.assertThrows(
-            IllegalStateException.class,
-            () -> this.repoConfig()
-                .storageOpt()
-        );
+        Assertions.assertThrows(NoSuchElementException.class, this::repoConfig);
     }
 
     @Test
@@ -143,38 +124,25 @@ final class MapRepositoriesTest {
         new RepoConfigYaml(MapRepositoriesTest.TYPE)
             .withStorageAlias("unknown alias")
             .saveTo(this.storage, MapRepositoriesTest.REPO);
-        Assertions.assertThrows(
-            IllegalStateException.class,
-            () -> this.repoConfig()
-                .storageOpt()
-        );
+        Assertions.assertThrows(NoSuchElementException.class, this::repoConfig);
     }
 
     @Test
     void readFromCacheAndRefreshCacheData() {
         Key key = new Key.From("some-repo.yaml");
-        String old = "some: data";
         new BlockingStorage(this.settings.repoConfigsStorage())
-            .save(key, old.getBytes());
+            .save(key, "repo:\n  type: old_type".getBytes());
         Repositories repos = new MapRepositories(this.settings);
-
-        String newData = "some: new data";
         new BlockingStorage(this.settings.repoConfigsStorage())
-            .save(key, newData.getBytes());
+            .save(key, "repo:\n  type: new_type".getBytes());
 
-        Assertions.assertEquals(
-            repos.config(key.string())
-                .orElseThrow()
-                .toString(), old
-        );
+        Assertions.assertEquals("old_type",
+            repos.config(key.string()).orElseThrow().type());
 
         repos.refresh();
 
-        Assertions.assertEquals(
-            repos.config(key.string())
-                .orElseThrow()
-                .toString(), newData
-        );
+        Assertions.assertEquals("new_type",
+            repos.config(key.string()).orElseThrow().type());
     }
 
     @Test
