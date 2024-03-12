@@ -159,7 +159,7 @@ final class HelmSliceIT {
     }
 
     private String init(final boolean anonymous) {
-        this.port = new RandomFreePort().get();
+        this.port = RandomFreePort.get();
         final String hostPort = String.format("host.testcontainers.internal:%d/", this.port);
         this.url = String.format("http://%s", hostPort);
         Testcontainers.exposeHostPorts(this.port);

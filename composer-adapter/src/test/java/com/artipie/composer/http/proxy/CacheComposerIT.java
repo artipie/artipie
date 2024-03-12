@@ -47,10 +47,8 @@ import java.time.ZonedDateTime;
 
 /**
  * Integration test for {@link ComposerProxySlice}.
- * @since 0.4
  */
 @DisabledOnOs(OS.WINDOWS)
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CacheComposerIT {
     /**
      * Vertx instance.
@@ -115,7 +113,7 @@ final class CacheComposerIT {
             )
         );
         final int port = this.server.start();
-        this.sourceport = new RandomFreePort().get();
+        this.sourceport = RandomFreePort.get();
         Testcontainers.exposeHostPorts(port, this.sourceport);
         this.cntn = new GenericContainer<>("composer:2.0.9")
             .withCommand("tail", "-f", "/dev/null")

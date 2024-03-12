@@ -18,10 +18,7 @@ import org.testcontainers.utility.DockerImageName;
 
 /**
  * A class with base utility  for tests, that instantiates container with python runtime.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
 public final class PypiDeployment implements BeforeEachCallback, AfterEachCallback {
 
     /**
@@ -32,7 +29,7 @@ public final class PypiDeployment implements BeforeEachCallback, AfterEachCallba
     /**
      * Port.
      */
-    private final int prt = new RandomFreePort().get();
+    private final int prt = RandomFreePort.get();
 
     /**
      * Executes a bash command in a python container.

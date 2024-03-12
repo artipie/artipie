@@ -38,10 +38,8 @@ import org.testcontainers.images.builder.Transferable;
  * This test uses docker linux image with nuget client.
  * Authorisation is not used here as NuGet client hangs up on pushing a package
  * when authentication is required.
- * @since 0.1
  */
 @DisabledOnOs(OS.WINDOWS)
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class NugetITCase {
 
     /**
@@ -67,7 +65,7 @@ class NugetITCase {
     @BeforeEach
     void setUp() throws Exception {
         this.events = new ConcurrentLinkedQueue<>();
-        final int port = new RandomFreePort().get();
+        final int port = RandomFreePort.get();
         final String base = String.format("http://host.testcontainers.internal:%s", port);
         this.server = new VertxSliceServer(
             new LoggingSlice(

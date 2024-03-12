@@ -84,7 +84,7 @@ public final class CondaSliceITCase {
     void initialize() throws Exception {
         this.tmp = Files.createTempDirectory("conda-test");
         this.storage = new InMemoryStorage();
-        this.port = new RandomFreePort().get();
+        this.port = RandomFreePort.get();
         this.events = new ConcurrentLinkedDeque<>();
         final String url = String.format("http://host.testcontainers.internal:%d", this.port);
         this.server = new VertxSliceServer(

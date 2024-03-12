@@ -70,8 +70,8 @@ public final class SliceITCase {
     private int port;
 
     @BeforeEach
-    void init() throws Exception {
-        this.port = new RandomFreePort().get();
+    void init() {
+        this.port = RandomFreePort.get();
         this.server = new VertxSliceServer(SliceITCase.TARGET, this.port);
         this.server.start();
     }

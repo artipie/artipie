@@ -43,9 +43,7 @@ import org.junit.jupiter.api.condition.JRE;
 
 /**
  * Integration test for servlet slice wrapper.
- * @since 0.19
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledForJreRange(min = JRE.JAVA_11, disabledReason = "HTTP client is not supported prior JRE_11")
 final class ServletWrapITCase {
 
@@ -60,8 +58,8 @@ final class ServletWrapITCase {
     private HttpRequest.Builder req;
 
     @BeforeEach
-    void setUp() throws Exception {
-        final int port = new RandomFreePort().get();
+    void setUp() {
+        final int port = RandomFreePort.get();
         this.server = new Server(port);
         this.req = HttpRequest.newBuilder(URI.create(String.format("http://localhost:%d", port)));
     }

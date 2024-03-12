@@ -83,7 +83,7 @@ final class HttpZipArchiveIT {
     @BeforeEach
     void setUp() throws IOException {
         this.tmp = Files.createTempDirectory("");
-        this.port = new RandomFreePort().get();
+        this.port = RandomFreePort.get();
         this.url = String.format("http://host.testcontainers.internal:%s", this.port);
         this.events = new LinkedList<>();
         final AstoRepository asto = new AstoRepository(

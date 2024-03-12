@@ -16,7 +16,7 @@ final class RandomFreePortTest {
     @Test
     void returnsFreePort() {
         MatcherAssert.assertThat(
-            new RandomFreePort().get(),
+            RandomFreePort.get(),
             new IsInstanceOf(Integer.class)
         );
     }
