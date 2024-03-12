@@ -10,14 +10,14 @@ import java.net.ServerSocket;
 
 /**
  * Provides random free port.
- * @since 0.18
  */
 public final class RandomFreePort {
     /**
      * Returns free port.
+     *
      * @return Free port.
      */
-    public int get() {
+    public static int get() {
         try (ServerSocket socket = new ServerSocket(0)) {
             return socket.getLocalPort();
         } catch (final IOException exc) {

@@ -14,7 +14,6 @@ import com.artipie.scheduling.ProxyArtifactEvent;
 import com.artipie.settings.repo.RepoConfig;
 import org.reactivestreams.Publisher;
 
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
@@ -39,7 +38,7 @@ public final class PypiProxy implements Slice {
     ) {
         final RemoteConfig remote = cfg.remoteConfig();
         slice = new PyProxySlice(
-            client, URI.create(remote.url()),
+            client, remote.uri(),
             GenericAuthenticator.create(client, remote.username(), remote.pwd()),
             cfg.storageOpt().orElseThrow(
                 () -> new IllegalStateException("Python proxy requires proxy storage to be set")

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -53,10 +54,10 @@ public final class RepoConfigTest {
     void remotesPriority() throws Exception {
         List<RemoteConfig> remotes = readFull().remotes();
         Assertions.assertEquals(4, remotes.size());
-        Assertions.assertEquals(new RemoteConfig("host4.com", 200, null, null), remotes.getFirst());
-        Assertions.assertEquals(new RemoteConfig("host1.com", 100, null, null), remotes.get(1));
-        Assertions.assertEquals(new RemoteConfig("host2.com", 0, "test_user", "12345"), remotes.get(2));
-        Assertions.assertEquals(new RemoteConfig("host3.com", -10, null, null), remotes.get(3));
+        Assertions.assertEquals(new RemoteConfig(URI.create("host4.com"), 200, null, null), remotes.getFirst());
+        Assertions.assertEquals(new RemoteConfig(URI.create("host1.com"), 100, null, null), remotes.get(1));
+        Assertions.assertEquals(new RemoteConfig(URI.create("host2.com"), 0, "test_user", "12345"), remotes.get(2));
+        Assertions.assertEquals(new RemoteConfig(URI.create("host3.com"), -10, null, null), remotes.get(3));
     }
 
     @Test

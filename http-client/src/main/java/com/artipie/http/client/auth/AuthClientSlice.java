@@ -17,7 +17,6 @@ import com.google.common.collect.Iterables;
 import io.reactivex.Flowable;
 import org.reactivestreams.Publisher;
 
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
@@ -29,14 +28,14 @@ public final class AuthClientSlice implements Slice {
 
     public static AuthClientSlice withClientSlice(ClientSlices client, RemoteConfig cfg) {
         return new AuthClientSlice(
-            client.from(cfg.url()),
+            client.from(cfg.uri()),
             GenericAuthenticator.create(client, cfg.username(), cfg.pwd())
         );
     }
 
     public static AuthClientSlice withUriClientSlice(ClientSlices client, RemoteConfig cfg) {
         return new AuthClientSlice(
-            new UriClientSlice(client, URI.create(cfg.url())),
+            new UriClientSlice(client, cfg.uri()),
             GenericAuthenticator.create(client, cfg.username(), cfg.pwd())
         );
     }

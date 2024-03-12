@@ -16,7 +16,6 @@ import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.settings.repo.RepoConfig;
 import org.reactivestreams.Publisher;
 
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +37,7 @@ public final class ComposerProxy implements Slice {
         slice = asto.map(
             cache -> new ComposerProxySlice(
                 client,
-                URI.create(remote.url()),
+                remote.uri(),
                 new AstoRepository(cfg.storage()),
                 GenericAuthenticator.create(client, remote.username(), remote.pwd()),
                 new ComposerStorageCache(new AstoRepository(cache))
@@ -46,7 +45,7 @@ public final class ComposerProxy implements Slice {
         ).orElseGet(
             () -> new ComposerProxySlice(
                 client,
-                URI.create(remote.url()),
+                remote.uri(),
                 new AstoRepository(cfg.storage()),
                 GenericAuthenticator.create(client, remote.username(), remote.pwd())
             )

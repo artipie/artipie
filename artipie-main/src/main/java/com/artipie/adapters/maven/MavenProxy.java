@@ -17,7 +17,6 @@ import com.artipie.scheduling.ProxyArtifactEvent;
 import com.artipie.settings.repo.RepoConfig;
 import org.reactivestreams.Publisher;
 
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
@@ -43,7 +42,7 @@ public final class MavenProxy implements Slice {
         slice = new GroupSlice(
             cfg.remotes().stream().map(
                 remote -> new MavenProxySlice(
-                    client, URI.create(remote.url()),
+                    client, remote.uri(),
                     GenericAuthenticator.create(client, remote.username(), remote.pwd()),
                     asto.<Cache>map(FromStorageCache::new).orElse(Cache.NOP),
                     asto.flatMap(ignored -> queue),

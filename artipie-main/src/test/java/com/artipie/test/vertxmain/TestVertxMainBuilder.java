@@ -10,6 +10,7 @@ import com.amihaiemil.eoyaml.YamlSequence;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.VertxMain;
 import com.artipie.asto.test.TestResource;
+import com.artipie.http.client.RemoteConfig;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.net.ServerSocket;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -163,11 +165,11 @@ public class TestVertxMainBuilder {
      * Creates a docker-proxy repository config file in the server's work directory.
      *
      * @param name    Repository name
-     * @param remotes Remotes registry urls
+     * @param remotes Remotes registry configs
      * @return TestVertxMainBuilder
      * @throws IOException If the create operation failed
      */
-    public TestVertxMainBuilder withDockerProxyRepo(String name, URI... remotes) throws IOException {
+    public TestVertxMainBuilder withDockerProxyRepo(String name, RemoteConfig... remotes) throws IOException {
         saveRepoConfig(name,
                 Yaml.createYamlMappingBuilder()
                         .add("type", "docker-proxy")
@@ -187,22 +189,30 @@ public class TestVertxMainBuilder {
      * @throws IOException If the create operation failed
      */
     public TestVertxMainBuilder withDockerProxyRepo(String name, Path data, URI... remotes) throws IOException {
+        RemoteConfig[] configs = Arrays.stream(remotes)
+            .map(uri -> new RemoteConfig(uri, 0, null, null))
+            .toArray(RemoteConfig[]::new);
         saveRepoConfig(name,
                 Yaml.createYamlMappingBuilder()
                         .add("type", "docker-proxy")
-                        .add("remotes", remotesYaml(remotes))
+                        .add("remotes", remotesYaml(configs))
                         .add("storage", fileStorageCfg(data))
                         .build()
         );
         return this;
     }
 
-    private YamlSequence remotesYaml(URI... remotes) {
+    private YamlSequence remotesYaml(RemoteConfig... remotes) {
         Assertions.assertNotEquals(0, remotes.length, "Empty remotes");
         YamlSequenceBuilder res = Yaml.createYamlSequenceBuilder();
-        for (URI url : remotes) {
+        for (RemoteConfig cfg : remotes) {
             res = res.add(
-                    Yaml.createYamlMappingBuilder().add("url", url.toString()).build()
+                Yaml.createYamlMappingBuilder()
+                    .add("url", cfg.uri().toString())
+                    .add("priority", String.valueOf(cfg.priority()))
+                    .add("username", cfg.username())
+                    .add("password", cfg.pwd())
+                    .build()
             );
         }
         return res.build();
