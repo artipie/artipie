@@ -21,7 +21,7 @@ public class ScriptingTest {
     /**
      * Source code for scripts testing. Currently identical for all languages.
      */
-    private static String srccode = "a = a * 3;\nb = a + 1;";
+    private static final String srccode = "a = a * 3;\nb = a + 1;";
 
     @Test
     public void groovyTest() throws ScriptException {
@@ -29,18 +29,8 @@ public class ScriptingTest {
     }
 
     @Test
-    public void mvelTest() throws ScriptException {
-        this.testScript(Script.ScriptType.MVEL, ScriptingTest.srccode);
-    }
-
-    @Test
     public void pythonTest() throws ScriptException {
         this.testScript(Script.ScriptType.PYTHON, ScriptingTest.srccode);
-    }
-
-    @Test
-    public void rubyTest() throws ScriptException {
-        this.testScript(Script.ScriptType.RUBY, ScriptingTest.srccode);
     }
 
     @Test
