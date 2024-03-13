@@ -5,6 +5,7 @@
 package com.artipie.test;
 
 import com.artipie.asto.misc.Cleanable;
+import com.artipie.cache.StoragesCache;
 import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.cache.FiltersCache;
 

@@ -7,6 +7,7 @@ package com.artipie.docker;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.adapters.docker.DockerProxy;
 import com.artipie.asto.Key;
+import com.artipie.cache.StoragesCache;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.client.jetty.JettyClientSlices;

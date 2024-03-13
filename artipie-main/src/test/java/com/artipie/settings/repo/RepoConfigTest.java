@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
+import com.artipie.cache.StoragesCache;
 import com.artipie.http.client.RemoteConfig;
 import com.artipie.settings.StorageByAlias;
 import com.artipie.test.TestStoragesCache;

@@ -4,13 +4,15 @@
  */
 package com.artipie.test;
 
+import com.artipie.cache.StoragesCache;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test storages caches.
  * @since 0.28
  */
-public final class TestStoragesCache extends CachedStorages {
+public final class TestStoragesCache extends StoragesCache {
 
     /**
      * Counter for `invalidateAll()` method calls.

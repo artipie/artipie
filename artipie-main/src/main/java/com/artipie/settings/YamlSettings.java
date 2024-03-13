@@ -15,7 +15,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.factory.Config;
 import com.artipie.auth.AuthFromEnv;
-import com.artipie.cache.CachedStorages;
 import com.artipie.cache.StoragesCache;
 import com.artipie.db.ArtifactDbFactory;
 import com.artipie.db.DbConsumer;
@@ -125,7 +124,7 @@ public final class YamlSettings implements Settings {
             this.meta(), auth, new PolicyStorage(this.meta()).parse()
         );
         this.acach = new ArtipieCaches.All(
-            auth, new CachedStorages(), this.security.policy(), new GuavaFiltersCache()
+            auth, new StoragesCache(), this.security.policy(), new GuavaFiltersCache()
         );
         this.mctx = new MetricsContext(this.meta());
         this.events = YamlSettings.initArtifactsEvents(this.meta(), quartz, path);
