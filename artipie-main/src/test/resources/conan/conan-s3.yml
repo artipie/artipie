@@ -1,0 +1,14 @@
+---
+repo:
+  type: conan
+  port: 9301
+  url: http://artipie:8080/my-conan
+  storage:
+    type: s3
+    bucket: buck1
+    region: s3test
+    endpoint: http://minic:9000
+    credentials:
+      type: basic
+      accessKeyId: minioadmin
+      secretAccessKey: minioadmin
