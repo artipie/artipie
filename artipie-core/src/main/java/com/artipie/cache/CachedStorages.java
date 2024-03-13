@@ -2,25 +2,24 @@
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
  * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
-package com.artipie.settings.cache;
+package com.artipie.cache;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
 import com.artipie.asto.factory.Config;
-import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.jfr.JfrStorage;
 import com.artipie.jfr.StorageCreateEvent;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
-import com.artipie.settings.Settings;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import org.apache.commons.lang3.NotImplementedException;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Implementation of cache for storages with similar configurations
@@ -29,11 +28,6 @@ import org.apache.commons.lang3.NotImplementedException;
  * @since 0.23
  */
 public class CachedStorages implements StoragesCache {
-
-    /**
-     * Storages factory.
-     */
-    public static final StoragesLoader STORAGES = new StoragesLoader();
 
     /**
      * Cache for storages.
@@ -50,17 +44,6 @@ public class CachedStorages implements StoragesCache {
                 TimeUnit.MILLISECONDS
             ).softValues()
             .build();
-    }
-
-    @Override
-    public Storage storage(final Settings settings) {
-        final YamlMapping yaml = settings.meta().yamlMapping("storage");
-        if (yaml == null) {
-            throw new ArtipieException(
-                String.format("Failed to find storage configuration in \n%s", settings)
-            );
-        }
-        return this.storage(yaml);
     }
 
     @Override

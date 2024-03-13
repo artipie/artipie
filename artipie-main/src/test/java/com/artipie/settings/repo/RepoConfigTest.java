@@ -10,7 +10,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.client.RemoteConfig;
 import com.artipie.settings.StorageByAlias;
-import com.artipie.settings.cache.StoragesCache;
 import com.artipie.test.TestStoragesCache;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

@@ -10,7 +10,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.settings.cache.StoragesCache;
 import com.artipie.test.TestStoragesCache;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;

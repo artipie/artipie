@@ -63,4 +63,12 @@ final class PropertyTest {
                 .asLongOrDefault(567L)
         );
     }
+
+    @Test
+    void propertiesFileDoesNotExist() {
+        Assertions.assertTrue(
+            new ArtipieProperties("file_does_not_exist.properties")
+                .valueBy("aaa").isEmpty()
+        );
+    }
 }

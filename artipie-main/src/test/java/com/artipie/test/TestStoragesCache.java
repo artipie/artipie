@@ -4,7 +4,6 @@
  */
 package com.artipie.test;
 
-import com.artipie.settings.cache.CachedStorages;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

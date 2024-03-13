@@ -7,8 +7,8 @@ package com.artipie.api;
 import com.artipie.api.perms.ApiAliasPermission;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.cache.StoragesCache;
 import com.artipie.security.policy.Policy;
-import com.artipie.settings.cache.StoragesCache;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.openapi.RouterBuilder;
 import java.io.StringReader;
@@ -51,7 +51,7 @@ public final class StorageAliasesRest extends BaseRest {
      * @param policy Artipie policy
      */
     public StorageAliasesRest(final StoragesCache caches, final BlockingStorage asto,
-        final Policy<?> policy) {
+                              final Policy<?> policy) {
         this.caches = caches;
         this.asto = asto;
         this.policy = policy;

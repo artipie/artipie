@@ -16,7 +16,6 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.StorageByAlias;
-import com.artipie.settings.cache.StoragesCache;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.test.TestStoragesCache;
 import io.reactivex.Flowable;

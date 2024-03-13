@@ -6,7 +6,7 @@ package com.artipie.settings;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Storage;
-import com.artipie.settings.cache.StoragesCache;
+import com.artipie.cache.StoragesCache;
 
 /**
  * Obtain storage by alias from aliases settings yaml.
