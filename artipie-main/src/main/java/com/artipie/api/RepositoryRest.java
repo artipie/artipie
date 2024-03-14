@@ -25,9 +25,7 @@ import org.eclipse.jetty.http.HttpStatus;
 /**
  * Rest-api operations for repositories settings CRUD
  * (create/read/update/delete) operations.
- * @since 0.26
  */
-@SuppressWarnings("PMD.OnlyOneReturn")
 public final class RepositoryRest extends BaseRest {
 
     /**
