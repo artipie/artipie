@@ -29,10 +29,8 @@ import java.util.Arrays;
 
 /**
  * Integration tests for Conan repository.
- * @since 0.23
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class ConanS3ITCase {
 
     /**
@@ -101,7 +99,7 @@ public final class ConanS3ITCase {
             "timeout", "30",  "sh", "-c", "until nc -z localhost 9000; do sleep 0.1; done"
         );
         final int s3port = this.client.getMappedPort(ConanS3ITCase.S3_PORT);
-        this.repository = new StoragesLoader()
+        this.repository = StoragesLoader.STORAGES
             .newObject(
                 "s3",
                 new Config.YamlStorageConfig(
