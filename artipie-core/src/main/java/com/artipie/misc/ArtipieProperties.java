@@ -5,7 +5,9 @@
 package com.artipie.misc;
 
 import com.artipie.asto.ArtipieIOException;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -100,12 +102,12 @@ public final class ArtipieProperties {
      * Load content of file.
      */
     private void loadProperties() {
-        try {
-            this.properties.load(
-                Thread.currentThread()
-                    .getContextClassLoader()
-                    .getResourceAsStream(this.filename)
-            );
+        try (InputStream stream = Thread.currentThread()
+            .getContextClassLoader()
+            .getResourceAsStream(this.filename)) {
+            if (stream != null) {
+                this.properties.load(stream);
+            }
         } catch (final IOException exc) {
             throw new ArtipieIOException(exc);
         }

@@ -59,7 +59,7 @@ public class StorageValuePipelineS3Test {
     void setUp(final AmazonS3 client) {
         this.bucket = UUID.randomUUID().toString();
         client.createBucket(this.bucket);
-        asto = new StoragesLoader()
+        asto = StoragesLoader.STORAGES
             .newObject(
                 "s3",
                 new Config.YamlStorageConfig(

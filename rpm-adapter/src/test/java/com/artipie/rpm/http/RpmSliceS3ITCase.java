@@ -105,7 +105,7 @@ public final class RpmSliceS3ITCase {
     void setUp(final AmazonS3 client) {
         this.bucket = UUID.randomUUID().toString();
         client.createBucket(this.bucket);
-        this.storage = new StoragesLoader()
+        this.storage = StoragesLoader.STORAGES
             .newObject(
                 "s3",
                 new Config.YamlStorageConfig(

@@ -17,10 +17,8 @@ import org.testcontainers.containers.GenericContainer;
 
 /**
  * Redis storage verification test.
- *
- * @since 0.1
  */
-@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 @DisabledOnOs(OS.WINDOWS)
 public final class RedisStorageWhiteboxVerificationTest extends StorageWhiteboxVerification {
 
@@ -49,7 +47,7 @@ public final class RedisStorageWhiteboxVerificationTest extends StorageWhiteboxV
         RedisStorageWhiteboxVerificationTest.redis = new GenericContainer<>("redis:3-alpine")
             .withExposedPorts(RedisStorageWhiteboxVerificationTest.DEF_PORT);
         RedisStorageWhiteboxVerificationTest.redis.start();
-        RedisStorageWhiteboxVerificationTest.storage = new StoragesLoader().newObject(
+        RedisStorageWhiteboxVerificationTest.storage = StoragesLoader.STORAGES.newObject(
             "redis", config(RedisStorageWhiteboxVerificationTest.redis.getFirstMappedPort())
         );
     }

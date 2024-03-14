@@ -4,6 +4,7 @@
  */
 package com.artipie.settings.repo;
 
+import com.amihaiemil.eoyaml.Scalar;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
 import com.amihaiemil.eoyaml.YamlSequence;
@@ -11,11 +12,11 @@ import com.artipie.asto.Key;
 import com.artipie.asto.LoggingStorage;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
+import com.artipie.cache.StoragesCache;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.RemoteConfig;
 import com.artipie.micrometer.MicrometerStorage;
 import com.artipie.settings.StorageByAlias;
-import com.artipie.settings.cache.StoragesCache;
 import com.google.common.base.Strings;
 
 import java.net.MalformedURLException;
@@ -54,12 +55,26 @@ public final class RepoConfig {
         YamlNode storageNode = repoYaml.value("storage");
         if (storageNode != null) {
             Storage sub = new SubStorage(prefix,
-                new LoggingStorage(cache.storage(aliases, storageNode))
+                new LoggingStorage(storage(cache, aliases, storageNode))
             );
             storage = metrics ? new MicrometerStorage(sub) : sub;
         }
 
         return new RepoConfig(repoYaml, prefix.string(), type, storage);
+    }
+
+    static Storage storage(StoragesCache storages, StorageByAlias aliases, YamlNode node) {
+        final Storage res;
+        if (node instanceof Scalar) {
+            res = aliases.storage(storages, ((Scalar) node).value());
+        } else if (node instanceof YamlMapping) {
+            res = storages.storage((YamlMapping) node);
+        } else {
+            throw new IllegalStateException(
+                String.format("Invalid storage config: %s", node)
+            );
+        }
+        return res;
     }
 
     private final YamlMapping repoYaml;

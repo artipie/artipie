@@ -4,10 +4,11 @@
  */
 package com.artipie.jfr;
 
-import java.nio.ByteBuffer;
-import java.util.function.BiConsumer;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
+
+import java.nio.ByteBuffer;
+import java.util.function.BiConsumer;
 
 /**
  * Content wrapper that allows to get byte buffers count and size of content’s data.

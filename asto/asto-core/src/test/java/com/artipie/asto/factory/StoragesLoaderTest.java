@@ -26,7 +26,7 @@ public final class StoragesLoaderTest {
     @Test
     void shouldCreateFileStorage() {
         MatcherAssert.assertThat(
-            new StoragesLoader()
+            StoragesLoader.STORAGES
                 .newObject(
                     "fs",
                     new Config.YamlStorageConfig(Yaml.createYamlMappingBuilder()
@@ -42,7 +42,7 @@ public final class StoragesLoaderTest {
     void shouldThrowExceptionWhenTypeIsWrong() {
         Assertions.assertThrows(
             StorageNotFoundException.class,
-            () -> new StoragesLoader()
+            () -> StoragesLoader.STORAGES
                 .newObject(
                     "wrong-storage-type",
                     new Config.YamlStorageConfig(Yaml.createYamlMappingBuilder().build())

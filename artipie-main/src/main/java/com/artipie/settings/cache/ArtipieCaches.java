@@ -5,6 +5,7 @@
 package com.artipie.settings.cache;
 
 import com.artipie.asto.misc.Cleanable;
+import com.artipie.cache.StoragesCache;
 import com.artipie.security.policy.CachedYamlPolicy;
 import com.artipie.security.policy.Policy;
 
