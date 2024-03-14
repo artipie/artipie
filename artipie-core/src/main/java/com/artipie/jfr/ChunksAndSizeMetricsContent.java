@@ -5,10 +5,11 @@
 package com.artipie.jfr;
 
 import com.artipie.asto.Content;
+import org.reactivestreams.Subscriber;
+
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import org.reactivestreams.Subscriber;
 
 /**
  * Content wrapper that allows to get byte buffers count and size of content’s data.
