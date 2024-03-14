@@ -29,8 +29,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class StoragesCache implements Cleanable<YamlMapping> {
 
-    public static StoragesLoader STORAGES = new StoragesLoader();
-
     /**
      * Cache for storages.
      */
@@ -69,14 +67,14 @@ public class StoragesCache implements Cleanable<YamlMapping> {
                     if (event.isEnabled()) {
                         event.begin();
                         res = new JfrStorage(
-                            StoragesCache.STORAGES
+                            StoragesLoader.STORAGES
                                 .newObject(type, new Config.YamlStorageConfig(yaml))
                         );
                         event.storage = res.identifier();
                         event.commit();
                     } else {
                         res = new JfrStorage(
-                            StoragesCache.STORAGES
+                            StoragesLoader.STORAGES
                                 .newObject(type, new Config.YamlStorageConfig(yaml))
                         );
                     }
