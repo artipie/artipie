@@ -13,15 +13,12 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for EtcdStorageFactory.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class EtcdStorageFactoryTest {
     @Test
     void shouldCreateEtcdStorage() {
         MatcherAssert.assertThat(
-            new StoragesLoader()
+            StoragesLoader.STORAGES
                 .newObject(
                     "etcd",
                     new Config.YamlStorageConfig(

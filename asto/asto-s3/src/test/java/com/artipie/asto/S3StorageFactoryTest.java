@@ -14,10 +14,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for Storages.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class S3StorageFactoryTest {
 
     /**
@@ -27,7 +24,7 @@ public final class S3StorageFactoryTest {
     @Test
     void shouldCreateS3StorageConfigHasCredentials() {
         MatcherAssert.assertThat(
-            new StoragesLoader()
+            StoragesLoader.STORAGES
                 .newObject(
                     "s3",
                     new Config.YamlStorageConfig(
@@ -57,7 +54,7 @@ public final class S3StorageFactoryTest {
     @Test
     void shouldCreateS3StorageConfigDoesNotHaveCredentials() {
         MatcherAssert.assertThat(
-            new StoragesLoader()
+            StoragesLoader.STORAGES
                 .newObject(
                     "s3",
                     new Config.YamlStorageConfig(

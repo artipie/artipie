@@ -14,6 +14,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.factory.Config;
+import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.auth.AuthFromEnv;
 import com.artipie.cache.StoragesCache;
 import com.artipie.db.ArtifactDbFactory;
@@ -288,7 +289,7 @@ public final class YamlSettings implements Settings {
                     ).findFirst().map(node -> node.yamlMapping(YamlSettings.NODE_STORAGE));
                 if (asto.isPresent()) {
                     res = Optional.of(
-                        StoragesCache.STORAGES.newObject(
+                        StoragesLoader.STORAGES.newObject(
                             asto.get().string(YamlSettings.NODE_TYPE),
                             new Config.YamlStorageConfig(asto.get())
                         )
@@ -297,7 +298,7 @@ public final class YamlSettings implements Settings {
                     && YamlSettings.ARTIPIE.equals(policy.string(YamlSettings.NODE_TYPE))
                     && policy.yamlMapping(YamlSettings.NODE_STORAGE) != null) {
                     res = Optional.of(
-                        StoragesCache.STORAGES.newObject(
+                        StoragesLoader.STORAGES.newObject(
                             policy.yamlMapping(YamlSettings.NODE_STORAGE)
                                 .string(YamlSettings.NODE_TYPE),
                             new Config.YamlStorageConfig(

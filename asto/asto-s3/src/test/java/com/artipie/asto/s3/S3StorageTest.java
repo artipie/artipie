@@ -300,7 +300,7 @@ class S3StorageTest {
     }
 
     private Storage storage() {
-        return new StoragesLoader()
+        return StoragesLoader.STORAGES
             .newObject(
                 "s3",
                 new Config.YamlStorageConfig(

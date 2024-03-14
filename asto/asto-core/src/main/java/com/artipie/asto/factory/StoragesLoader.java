@@ -28,7 +28,7 @@ public final class StoragesLoader
     /**
      * Ctor.
      */
-    public StoragesLoader() {
+    private StoragesLoader() {
         this(System.getenv());
     }
 

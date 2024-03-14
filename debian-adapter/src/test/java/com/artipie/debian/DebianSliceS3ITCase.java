@@ -106,7 +106,7 @@ public final class DebianSliceS3ITCase {
     void init(final AmazonS3 client) throws IOException, InterruptedException {
         this.bucket = UUID.randomUUID().toString();
         client.createBucket(this.bucket);
-        this.storage = new StoragesLoader()
+        this.storage = StoragesLoader.STORAGES
             .newObject(
                 "s3",
                 new com.artipie.asto.factory.Config.YamlStorageConfig(

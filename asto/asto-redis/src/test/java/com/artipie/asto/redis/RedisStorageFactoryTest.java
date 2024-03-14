@@ -23,10 +23,7 @@ import org.testcontainers.containers.GenericContainer;
 
 /**
  * Tests for redis storage factory.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
 public final class RedisStorageFactoryTest {
     /**
@@ -49,7 +46,7 @@ public final class RedisStorageFactoryTest {
     @Test
     void shouldCreateRedisStorage() {
         MatcherAssert.assertThat(
-            new StoragesLoader()
+            StoragesLoader.STORAGES
                 .newObject("redis", redisConfig(this.redis.getFirstMappedPort())),
             new IsInstanceOf(RedisStorage.class)
         );
@@ -59,7 +56,7 @@ public final class RedisStorageFactoryTest {
     void shouldThrowExceptionWhenConfigIsNotDefined() {
         Assertions.assertThrows(
             NullPointerException.class,
-            () -> new StoragesLoader()
+            () -> StoragesLoader.STORAGES
                 .newObject(
                     "redis",
                     new Config.YamlStorageConfig(
@@ -74,12 +71,12 @@ public final class RedisStorageFactoryTest {
         final Key key = new Key.From("test_key");
         final byte[] data = "test_data".getBytes();
         new BlockingStorage(
-            new StoragesLoader()
+            StoragesLoader.STORAGES
                 .newObject("redis", redisConfig(this.redis.getFirstMappedPort()))
         ).save(key, data);
         MatcherAssert.assertThat(
             new BlockingStorage(
-                new StoragesLoader()
+                StoragesLoader.STORAGES
                     .newObject(
                         "redis",
                         redisConfig(
@@ -97,7 +94,7 @@ public final class RedisStorageFactoryTest {
         final Key key = new Key.From("test_key");
         final byte[] data = "test_data".getBytes();
         new BlockingStorage(
-            new StoragesLoader()
+            StoragesLoader.STORAGES
                 .newObject(
                     "redis", redisConfig(this.redis.getFirstMappedPort(), "redis_obj_1")
                 )
@@ -105,7 +102,7 @@ public final class RedisStorageFactoryTest {
         MatcherAssert.assertThat(
             "Should create RedisStorage based on an object with name 'redis_obj_1'",
             new BlockingStorage(
-                new StoragesLoader()
+                StoragesLoader.STORAGES
                     .newObject(
                         "redis",
                         redisConfig(
@@ -119,7 +116,7 @@ public final class RedisStorageFactoryTest {
         MatcherAssert.assertThat(
             "Should not exist in RedisStorage based on an object with name 'redis_obj_2'",
             new BlockingStorage(
-                new StoragesLoader()
+                StoragesLoader.STORAGES
                     .newObject(
                         "redis",
                         redisConfig(
