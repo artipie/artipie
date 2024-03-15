@@ -83,7 +83,7 @@ public final class ProxyBlob implements Blob {
         String blobPath = String.format("/v2/%s/blobs/%s", this.name.value(), this.dig.string());
         final CompletableFuture<Content> result = new CompletableFuture<>();
         this.remote.response(
-            new RequestLine(RqMethod.GET, blobPath).toString(),
+            new RequestLine(RqMethod.GET, blobPath),
             Headers.EMPTY,
             Flowable.empty()
         ).send(

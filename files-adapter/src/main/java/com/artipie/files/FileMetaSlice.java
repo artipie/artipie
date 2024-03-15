@@ -11,10 +11,12 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.slice.KeyFromPath;
+import org.reactivestreams.Publisher;
+
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -22,16 +24,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that returns metadata of a file when user requests it.
- *
- * @since 1.0
- * @todo #107:30min Add test coverage for `FileMetaSlice`
- *  We should test that this slice return expected metadata (`X-Artipie-MD5`,
- *  `X-Artipie-Size` and `X-Artipie-CreatedAt`) when an user specify URL parameter
- *  `meta` to true. We should also check that nothing is return in the opposite case.
  */
 public final class FileMetaSlice implements Slice {
 
@@ -62,12 +57,12 @@ public final class FileMetaSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> iterable,
         final Publisher<ByteBuffer> publisher
     ) {
         final Response raw = this.origin.response(line, iterable, publisher);
-        final URI uri = new RequestLineFrom(line).uri();
+        final URI uri = line.uri();
         final Optional<String> meta = new RqParams(uri).value(FileMetaSlice.META_PARAM);
         final Response response;
         if (meta.isPresent() && Boolean.parseBoolean(meta.get())) {

@@ -13,7 +13,7 @@ import com.artipie.helm.metadata.IndexYaml;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
@@ -75,11 +75,11 @@ final class DeleteChartSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final URI uri = new RequestLineFrom(line).uri();
+        final URI uri = line.uri();
         final Matcher matcher = DeleteChartSlice.PTRN_DEL_CHART.matcher(uri.getPath());
         final Response res;
         if (matcher.matches()) {

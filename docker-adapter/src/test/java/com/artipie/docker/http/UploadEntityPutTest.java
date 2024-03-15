@@ -67,7 +67,7 @@ class UploadEntityPutTest {
             "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7"
         );
         final Response response = this.slice.response(
-            UploadEntityPutTest.requestLine(name, upload.uuid(), digest).toString(),
+            UploadEntityPutTest.requestLine(name, upload.uuid(), digest),
             Headers.EMPTY,
             Flowable.empty()
         );
@@ -117,7 +117,7 @@ class UploadEntityPutTest {
     @Test
     void shouldReturnNotFoundWhenUploadNotExists() {
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345").toString(),
+            new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345"),
             Headers.EMPTY,
             Flowable.empty()
         );

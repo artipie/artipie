@@ -13,6 +13,7 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.ManifestReference;
 import com.artipie.http.Headers;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
@@ -40,7 +41,7 @@ class ProxyManifestsTest {
         final String digest = "sha256:123";
         final Optional<Manifest> found = new ProxyManifests(
             (line, headers, body) -> {
-                if (!line.startsWith("GET /v2/test/manifests/abc ")) {
+                if (!line.toString().startsWith("GET /v2/test/manifests/abc ")) {
                     throw new IllegalArgumentException();
                 }
                 return new RsFull(
@@ -64,7 +65,7 @@ class ProxyManifestsTest {
     void shouldGetEmptyWhenNotFound() {
         final Optional<Manifest> found = new ProxyManifests(
             (line, headers, body) -> {
-                if (!line.startsWith("GET /v2/my-test/manifests/latest ")) {
+                if (!line.toString().startsWith("GET /v2/my-test/manifests/latest ")) {
                     throw new IllegalArgumentException();
                 }
                 return new RsWithStatus(RsStatus.NOT_FOUND);
@@ -78,7 +79,7 @@ class ProxyManifestsTest {
     void shouldSendRequestCatalogFromRemote() {
         final String name = "my-alpine";
         final int limit = 123;
-        final AtomicReference<String> cline = new AtomicReference<>();
+        final AtomicReference<RequestLine> cline = new AtomicReference<>();
         final AtomicReference<Iterable<Map.Entry<String, String>>> cheaders;
         cheaders = new AtomicReference<>();
         final AtomicReference<byte[]> cbody = new AtomicReference<>();
@@ -98,7 +99,7 @@ class ProxyManifestsTest {
         ).catalog(Optional.of(new RepoName.Simple(name)), limit).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Sends expected line to remote",
-            cline.get(),
+            cline.get().toString(),
             new StringStartsWith(String.format("GET /v2/_catalog?n=%d&last=%s ", limit, name))
         );
         MatcherAssert.assertThat(

@@ -64,7 +64,7 @@ class PySliceTest {
         this.storage.save(new Key.From(key), new Content.From(content)).join();
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine("GET", "/simple").toString(),
+                new RequestLine("GET", "/simple"),
                 Collections.emptyList(),
                 Flowable.empty()
             ),
@@ -88,7 +88,7 @@ class PySliceTest {
         this.storage.save(new Key.From(key), new Content.From(content)).join();
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine("GET", "/").toString(),
+                new RequestLine("GET", "/"),
                 Collections.emptyList(),
                 Flowable.empty()
             ),
@@ -109,7 +109,7 @@ class PySliceTest {
     void redirectsToNormalizedPath() {
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine("GET", "/one/Two_three").toString(),
+                new RequestLine("GET", "/one/Two_three"),
                 Collections.emptyList(),
                 Flowable.empty()
             ),
@@ -124,7 +124,7 @@ class PySliceTest {
     void returnsBadRequestOnEmptyPost() {
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine("POST", "/sample.tar").toString(),
+                new RequestLine("POST", "/sample.tar"),
                 new Headers.From("content-type", "multipart/form-data; boundary=\"abc123\""),
                 Flowable.empty()
             ),
@@ -146,7 +146,7 @@ class PySliceTest {
         this.storage.save(new Key.From(key), new Content.From(content.getBytes())).join();
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine("GET", key).toString(),
+                new RequestLine("GET", key),
                 Collections.emptyList(),
                 Flowable.empty()
             ),

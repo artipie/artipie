@@ -7,7 +7,7 @@ package  com.artipie.conan.http;
 import com.artipie.asto.ArtipieIOException;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.google.common.base.Strings;
 import io.vavr.Tuple2;
@@ -115,7 +115,7 @@ public final class ConansEntity {
         }
 
         @Override
-        public CompletableFuture<RequestResult> getResult(final RequestLineFrom request,
+        public CompletableFuture<RequestResult> getResult(final RequestLine request,
             final String hostname, final Matcher matcher) {
             final String pkghash = matcher.group(ConansEntity.URI_HASH);
             final String uripath = matcher.group(ConansEntity.URI_PATH);
@@ -157,7 +157,7 @@ public final class ConansEntity {
         }
 
         @Override
-        public CompletableFuture<RequestResult> getResult(final RequestLineFrom request,
+        public CompletableFuture<RequestResult> getResult(final RequestLine request,
             final String hostname, final Matcher matcher) {
             final String uripath = matcher.group(ConansEntity.URI_PATH);
             return BaseConanSlice.generateJson(
@@ -197,7 +197,7 @@ public final class ConansEntity {
         }
 
         @Override
-        public CompletableFuture<RequestResult> getResult(final RequestLineFrom request,
+        public CompletableFuture<RequestResult> getResult(final RequestLine request,
             final String hostname, final Matcher matcher) {
             final String uripath = matcher.group(ConansEntity.URI_PATH);
             final String pkgpath = String.join("", uripath, ConansEntity.PKG_BIN_DIR);
@@ -308,7 +308,7 @@ public final class ConansEntity {
         }
 
         @Override
-        public CompletableFuture<RequestResult> getResult(final RequestLineFrom request,
+        public CompletableFuture<RequestResult> getResult(final RequestLine request,
             final String hostname, final Matcher matcher) {
             final String uripath = matcher.group(ConansEntity.URI_PATH);
             final String hash = matcher.group(ConansEntity.URI_HASH);
@@ -341,7 +341,7 @@ public final class ConansEntity {
         }
 
         @Override
-        public CompletableFuture<RequestResult> getResult(final RequestLineFrom request,
+        public CompletableFuture<RequestResult> getResult(final RequestLine request,
             final String hostname, final Matcher matcher) {
             final String question = new RqParams(request.uri()).value("q").orElse("");
             return this.getStorage().list(Key.ROOT).thenApply(
@@ -387,7 +387,7 @@ public final class ConansEntity {
         }
 
         @Override
-        public CompletableFuture<RequestResult> getResult(final RequestLineFrom request,
+        public CompletableFuture<RequestResult> getResult(final RequestLine request,
             final String hostname, final Matcher matcher) {
             return this.checkPkg(matcher, hostname).thenApply(RequestResult::new);
         }
@@ -440,7 +440,7 @@ public final class ConansEntity {
         }
 
         @Override
-        public CompletableFuture<RequestResult> getResult(final RequestLineFrom request,
+        public CompletableFuture<RequestResult> getResult(final RequestLine request,
             final String hostname, final Matcher matcher) {
             return this.checkPkg(matcher, hostname).thenApply(RequestResult::new);
         }
@@ -495,7 +495,7 @@ public final class ConansEntity {
 
         @Override
         public CompletableFuture<RequestResult> getResult(
-            final RequestLineFrom request, final String hostname, final Matcher matcher
+            final RequestLine request, final String hostname, final Matcher matcher
         ) {
             return this.getPkgInfoJson(matcher).thenApply(RequestResult::new);
         }

@@ -14,7 +14,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -70,12 +70,11 @@ final class DownloadIndexSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final RequestLineFrom rqline = new RequestLineFrom(line);
-        final String uri = rqline.uri().getPath();
+        final String uri = line.uri().getPath();
         final Matcher matcher = DownloadIndexSlice.PTRN.matcher(uri);
         final Response resp;
         if (matcher.matches()) {

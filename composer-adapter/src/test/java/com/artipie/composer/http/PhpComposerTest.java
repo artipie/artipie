@@ -37,9 +37,9 @@ class PhpComposerTest {
     /**
      * Request line to get all packages.
      */
-    private static final String GET_PACKAGES = new RequestLine(
+    private static final RequestLine GET_PACKAGES = new RequestLine(
         RqMethod.GET, "/packages.json"
-    ).toString();
+    );
 
     /**
      * Storage used in tests.
@@ -69,7 +69,7 @@ class PhpComposerTest {
             data
         );
         final Response response = this.php.response(
-            new RequestLine(RqMethod.GET, "/p/vendor/package.json").toString(),
+            new RequestLine(RqMethod.GET, "/p/vendor/package.json"),
             Collections.emptyList(),
             Flowable.empty()
         );
@@ -88,7 +88,7 @@ class PhpComposerTest {
     @Test
     void shouldFailGetPackageMetadataWhenNotExists() {
         final Response response = this.php.response(
-            new RequestLine(RqMethod.GET, "/p/vendor/unknown-package.json").toString(),
+            new RequestLine(RqMethod.GET, "/p/vendor/unknown-package.json"),
             Collections.emptyList(),
             Flowable.empty()
         );
@@ -135,7 +135,7 @@ class PhpComposerTest {
     @Test
     void shouldPutRoot() {
         final Response response = this.php.response(
-            new RequestLine(RqMethod.PUT, "/").toString(),
+            new RequestLine(RqMethod.PUT, "/"),
             Collections.emptyList(),
             new Content.From(
                 new TestResource("minimal-package.json").asBytes()

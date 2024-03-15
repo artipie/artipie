@@ -5,7 +5,8 @@
 package com.artipie.npm;
 
 import com.artipie.ArtipieException;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
+
 import java.util.regex.Pattern;
 
 /**
@@ -17,13 +18,16 @@ public class PackageNameFromUrl {
     /**
      * Request url.
      */
-    private final String url;
+    private final RequestLine url;
+
+    public PackageNameFromUrl(String url) {
+        this.url = RequestLine.from(url);
+    }
 
     /**
-     * Ctor.
      * @param url Request url
      */
-    public PackageNameFromUrl(final String url) {
+    public PackageNameFromUrl(RequestLine url) {
         this.url = url;
     }
 
@@ -32,7 +36,7 @@ public class PackageNameFromUrl {
      * @return Package name
      */
     public String value() {
-        final String abspath = new RequestLineFrom(this.url).uri().getPath();
+        final String abspath = this.url.uri().getPath();
         final String context = "/";
         if (abspath.startsWith(context)) {
             return abspath.replaceFirst(

@@ -108,7 +108,7 @@ public final class HttpNpmRemote implements NpmRemote {
     private CompletableFuture<Pair<Content, Headers>> performRemoteRequest(final String name) {
         final CompletableFuture<Pair<Content, Headers>> promise = new CompletableFuture<>();
         this.origin.response(
-            new RequestLine(RqMethod.GET, String.format("/%s", name)).toString(),
+            new RequestLine(RqMethod.GET, String.format("/%s", name)),
             Headers.EMPTY, Content.EMPTY
         ).send(
             (rsstatus, rsheaders, rsbody) -> {

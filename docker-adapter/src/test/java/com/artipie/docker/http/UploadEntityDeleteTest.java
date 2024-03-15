@@ -54,7 +54,7 @@ final class UploadEntityDeleteTest {
             .toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
         final Response get = this.slice.response(
-            new RequestLine(RqMethod.DELETE, String.format("%s", path)).toString(),
+            new RequestLine(RqMethod.DELETE, String.format("%s", path)),
             Headers.EMPTY,
             Flowable.empty()
         );
@@ -77,7 +77,7 @@ final class UploadEntityDeleteTest {
         upload.cancel().toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
         final Response get = this.slice.response(
-            new RequestLine(RqMethod.DELETE, String.format("%s", path)).toString(),
+            new RequestLine(RqMethod.DELETE, String.format("%s", path)),
             Headers.EMPTY,
             Flowable.empty()
         );

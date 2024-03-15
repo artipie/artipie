@@ -6,6 +6,7 @@ package com.artipie.http.slice;
 
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
@@ -65,8 +66,8 @@ public final class SliceOptional<T> implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> head,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> head,
+                             final Publisher<ByteBuffer> body) {
         final Response response;
         final T target = this.source.get();
         if (this.predicate.test(target)) {

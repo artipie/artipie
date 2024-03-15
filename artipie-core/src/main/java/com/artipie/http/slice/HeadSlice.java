@@ -13,7 +13,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.headers.ContentLength;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.StandardRs;
@@ -29,12 +29,6 @@ import org.reactivestreams.Publisher;
 
 /**
  * A {@link Slice} which only serves metadata on Binary files.
- *
- * @since 0.26.2
- * @todo #397:30min Use this class in artipie/files-adapter.
- *  We should replace {@link HeadSlice} of artipie/files-adapter by
- *  this one. Before doing this task, be sure that at least version
- *  1.8.1 of artipie/http has been released.
  */
 public final class HeadSlice implements Slice {
 
@@ -51,11 +45,9 @@ public final class HeadSlice implements Slice {
     /**
      * Function to get response headers.
      */
-    private final BiFunction<String, Headers, CompletionStage<Headers>> resheaders;
+    private final BiFunction<RequestLine, Headers, CompletionStage<Headers>> resheaders;
 
     /**
-     * Ctor.
-     *
      * @param storage Storage
      */
     public HeadSlice(final Storage storage) {
@@ -76,12 +68,12 @@ public final class HeadSlice implements Slice {
             storage,
             transform,
             (line, headers) -> {
-                final URI uri = new RequestLineFrom(line).uri();
+                final URI uri = line.uri();
                 final Key key = transform.apply(uri.getPath());
                 return storage.metadata(key)
                     .thenApply(
                         meta -> meta.read(Meta.OP_SIZE)
-                            .orElseThrow(() -> new IllegalStateException())
+                            .orElseThrow(IllegalStateException::new)
                     ).thenApply(
                         size -> new Headers.From(
                             new ContentFileName(uri),
@@ -102,7 +94,7 @@ public final class HeadSlice implements Slice {
     public HeadSlice(
         final Storage storage,
         final Function<String, Key> transform,
-        final BiFunction<String, Headers, CompletionStage<Headers>> resheaders
+        final BiFunction<RequestLine, Headers, CompletionStage<Headers>> resheaders
     ) {
         this.storage = storage;
         this.transform = transform;
@@ -111,13 +103,13 @@ public final class HeadSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
         return new AsyncResponse(
             CompletableFuture
-                .supplyAsync(new RequestLineFrom(line)::uri)
+                .supplyAsync(line::uri)
                 .thenCompose(
                     uri -> {
                         final Key key = this.transform.apply(uri.getPath());

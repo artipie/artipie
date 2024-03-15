@@ -57,7 +57,7 @@ class UploadEntityPatchTest {
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, uuid);
         final byte[] data = "data".getBytes();
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.PATCH, String.format("%s", path)).toString(),
+            new RequestLine(RqMethod.PATCH, String.format("%s", path)),
             Headers.EMPTY,
             Flowable.just(ByteBuffer.wrap(data))
         );
@@ -76,7 +76,7 @@ class UploadEntityPatchTest {
     @Test
     void shouldReturnNotFoundWhenUploadNotExists() {
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.PATCH, "/v2/test/blobs/uploads/12345").toString(),
+            new RequestLine(RqMethod.PATCH, "/v2/test/blobs/uploads/12345"),
             Headers.EMPTY,
             Flowable.empty()
         );

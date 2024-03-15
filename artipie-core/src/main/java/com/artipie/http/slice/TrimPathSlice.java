@@ -4,17 +4,21 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.ArtipieException;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.google.common.collect.Iterables;
+import org.apache.http.client.utils.URIBuilder;
+import org.reactivestreams.Publisher;
+
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -22,8 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.http.client.utils.URIBuilder;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that removes the first part from the request URI.
@@ -34,8 +36,6 @@ import org.reactivestreams.Publisher;
  * <p>
  * The full path will be available as the value of {@code X-FullPath} header.
  * </p>
- *
- * @since 0.8
  */
 public final class TrimPathSlice implements Slice {
 
@@ -79,12 +79,11 @@ public final class TrimPathSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final RequestLineFrom rline = new RequestLineFrom(line);
-        final URI uri = rline.uri();
+        final URI uri = line.uri();
         final String full = uri.getPath();
         final Matcher matcher = this.ptn.matcher(full);
         final Response response;
@@ -92,14 +91,16 @@ public final class TrimPathSlice implements Slice {
         if (matcher.matches() && recursion) {
             response = this.slice.response(line, headers, body);
         } else if (matcher.matches() && !recursion) {
+            URI respUri;
+            try {
+                respUri = new URIBuilder(uri)
+                    .setPath(asPath(matcher.group(1)))
+                    .build();
+            } catch (URISyntaxException e) {
+                throw new ArtipieException(e);
+            }
             response = this.slice.response(
-                new RequestLine(
-                    rline.method().toString(),
-                    new URIBuilder(uri)
-                        .setPath(asPath(matcher.group(1)))
-                        .toString(),
-                    rline.version()
-                ).toString(),
+                new RequestLine(line.method(), respUri, line.version()),
                 Iterables.concat(
                     headers,
                     Collections.singletonList(new Header(TrimPathSlice.HDR_FULL_PATH, full))
@@ -125,7 +126,6 @@ public final class TrimPathSlice implements Slice {
      * @param path Path
      * @return Normalized path
      */
-    @SuppressWarnings("PMD.OnlyOneReturn")
     private static String normalized(final String path) {
         final String clear = Objects.requireNonNull(path).trim();
         if (clear.isEmpty()) {
@@ -145,7 +145,6 @@ public final class TrimPathSlice implements Slice {
      * @param result Result of matching
      * @return Path string
      */
-    @SuppressWarnings("PMD.OnlyOneReturn")
     private static String asPath(final String result) {
         if (result == null || result.isEmpty()) {
             return "/";

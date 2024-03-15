@@ -10,7 +10,7 @@ import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -51,10 +51,10 @@ final class ApiGetSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line,
+    public Response response(final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
-        final Matcher matcher = PATH_PATTERN.matcher(new RequestLineFrom(line).uri().toString());
+        final Matcher matcher = PATH_PATTERN.matcher(line.uri().toString());
         if (!matcher.find()) {
             throw new ArtipieHttpException(
                 RsStatus.BAD_REQUEST, String.format("Invalid URI: `%s`", matcher.toString())

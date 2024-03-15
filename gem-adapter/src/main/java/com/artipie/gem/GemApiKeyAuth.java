@@ -9,6 +9,7 @@ import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.headers.Authorization;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -39,7 +40,7 @@ public final class GemApiKeyAuth implements AuthScheme {
     @Override
     public CompletionStage<Result> authenticate(
         final Iterable<Map.Entry<String, String>> headers,
-        final String header
+        final RequestLine line
     ) {
         return new RqHeaders(headers, Authorization.NAME).stream()
             .findFirst()

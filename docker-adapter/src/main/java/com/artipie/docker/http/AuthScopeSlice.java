@@ -9,6 +9,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthzSlice;
 import com.artipie.http.auth.OperationControl;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.security.policy.Policy;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -63,7 +64,7 @@ final class AuthScopeSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {

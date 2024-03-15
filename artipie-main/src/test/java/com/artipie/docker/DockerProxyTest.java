@@ -50,7 +50,7 @@ class DockerProxyTest {
         final Slice slice = dockerProxy(this.cache, yaml);
         MatcherAssert.assertThat(
             slice.response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Flowable.empty()
             ),
@@ -73,7 +73,7 @@ class DockerProxyTest {
         Assertions.assertThrows(
             RuntimeException.class,
             () -> dockerProxy(this.cache, yaml).response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Flowable.empty()
             ).send(

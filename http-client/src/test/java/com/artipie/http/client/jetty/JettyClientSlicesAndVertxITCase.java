@@ -38,14 +38,9 @@ import org.reactivestreams.Publisher;
 
 /**
  * Tests for {@link JettyClientSlices} and vertx.
- *
- * @since 0.3
  */
 final class JettyClientSlicesAndVertxITCase {
 
-    /**
-     * Vertx instance.
-     */
     private static final Vertx VERTX = Vertx.vertx();
 
     /**
@@ -127,7 +122,7 @@ final class JettyClientSlicesAndVertxITCase {
 
         @Override
         public Response response(
-            final String line,
+            final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> pub
         ) {
@@ -140,9 +135,7 @@ final class JettyClientSlicesAndVertxITCase {
                 slice = new AuthClientSlice(origin, Authenticator.ANONYMOUS);
             }
             slice.response(
-                new RequestLine(
-                    RqMethod.GET, "/"
-                ).toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(

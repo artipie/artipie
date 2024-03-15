@@ -4,6 +4,8 @@
  */
 package com.artipie.http.auth;
 
+import com.artipie.http.rq.RequestLine;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,11 +14,7 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Authentication scheme such as Basic, Bearer etc.
- *
- * @since 0.17
  */
-@SuppressWarnings({"PMD.ProhibitPublicStaticMethods",
-    "PMD.ConstructorOnlyInitializesOrCallOtherConstructors"})
 public interface AuthScheme {
 
     /**
@@ -38,7 +36,7 @@ public interface AuthScheme {
      * @param line Request line.
      * @return Authentication result.
      */
-    CompletionStage<Result> authenticate(Iterable<Map.Entry<String, String>> headers, String line);
+    CompletionStage<Result> authenticate(Iterable<Map.Entry<String, String>> headers, RequestLine line);
 
     /**
      * Authenticate HTTP request by its headers.
@@ -47,7 +45,7 @@ public interface AuthScheme {
      * @return Authentication result.
      */
     default CompletionStage<Result> authenticate(final Iterable<Map.Entry<String, String>> headers) {
-        return this.authenticate(headers, "");
+        return this.authenticate(headers, null);
     }
 
     /**
@@ -205,7 +203,7 @@ public interface AuthScheme {
         @Override
         public CompletionStage<Result> authenticate(
             final Iterable<Map.Entry<String, String>> headers,
-            final String line
+            final RequestLine line
         ) {
             return CompletableFuture.completedFuture(
                 AuthScheme.result(this.usr, this.chllng)

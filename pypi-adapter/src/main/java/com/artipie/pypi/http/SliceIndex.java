@@ -14,7 +14,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLinePrefix;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
@@ -51,11 +51,11 @@ final class SliceIndex implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> publisher
     ) {
-        final Key rqkey = new KeyFromPath(new RequestLineFrom(line).uri().toString());
+        final Key rqkey = new KeyFromPath(line.uri().toString());
         final String prefix = new RequestLinePrefix(rqkey.string(), headers).get();
         return new AsyncResponse(
             SingleInterop.fromFuture(this.storage.list(rqkey))

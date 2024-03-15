@@ -41,10 +41,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link NuGet}.
  * Package metadata resource.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class NuGetPackageMetadataTest {
 
     /**
@@ -95,7 +92,7 @@ class NuGetPackageMetadataTest {
             new RequestLine(
                 RqMethod.GET,
                 "/registrations/newtonsoft.json/index.json"
-            ).toString(),
+            ),
             new TestAuthentication.Headers(),
             Flowable.empty()
         );
@@ -116,7 +113,7 @@ class NuGetPackageMetadataTest {
             new RequestLine(
                 RqMethod.GET,
                 "/registrations/my.lib/index.json"
-            ).toString(),
+            ),
             new TestAuthentication.Headers(),
             Flowable.empty()
         );
@@ -137,7 +134,7 @@ class NuGetPackageMetadataTest {
             new RequestLine(
                 RqMethod.PUT,
                 "/registrations/newtonsoft.json/index.json"
-            ).toString(),
+            ),
             new TestAuthentication.Headers(),
             Flowable.empty()
         );
@@ -151,7 +148,7 @@ class NuGetPackageMetadataTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/registrations/my-utils/index.json"
-                ).toString(),
+                ),
                 Headers.EMPTY,
                 Flowable.empty()
             ),

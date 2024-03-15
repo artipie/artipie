@@ -16,11 +16,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import io.vertx.core.Vertx;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;
@@ -28,6 +23,12 @@ import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.jupiter.api.Test;
 import wtf.g4s8.hamcrest.json.JsonHas;
+
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Test for {@link ConanUpload}.
@@ -55,9 +56,8 @@ public class ConanUploadUrlsTest {
         final Response response = new ConanUpload.UploadUrls(storage, new ItemTokenizer(Vertx.vertx())).response(
             new RequestLine(
                 "POST",
-                "/v1/conans/zmqpp/4.2.0/_/_/upload_urls",
-                "HTTP/1.1"
-            ).toString(),
+                "/v1/conans/zmqpp/4.2.0/_/_/upload_urls"
+            ),
             Arrays.asList(
                 new MapEntry<>("Content-Size", Long.toString(data.length)),
                 new MapEntry<>("Host", "localhost")

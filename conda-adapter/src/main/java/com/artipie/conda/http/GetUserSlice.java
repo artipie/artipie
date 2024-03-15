@@ -10,6 +10,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.headers.WwwAuthenticate;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
@@ -43,8 +44,8 @@ final class GetUserSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+                             final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             this.scheme.authenticate(headers, line).thenApply(
                 result -> {

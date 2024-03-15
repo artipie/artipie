@@ -55,7 +55,7 @@ final class DownloadIndexSliceTest {
         new TestResource("index.yaml").saveTo(this.storage);
         new DownloadIndexSlice(base, this.storage)
             .response(
-                new RequestLine(RqMethod.GET, "/index.yaml").toString(),
+                new RequestLine(RqMethod.GET, "/index.yaml"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(
@@ -123,7 +123,7 @@ final class DownloadIndexSliceTest {
             .saveTo(this.storage, new Key.From("index.yaml"));
         new DownloadIndexSlice(base, this.storage)
             .response(
-                new RequestLine(RqMethod.GET, "/index.yaml").toString(),
+                new RequestLine(RqMethod.GET, "/index.yaml"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send((status, headers, body) -> CompletableFuture.completedFuture(null))

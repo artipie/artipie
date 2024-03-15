@@ -38,8 +38,6 @@ public final class ArtipieStorage implements Storage {
     private final Slice remote;
 
     /**
-     * New storage slice.
-     *
      * @param clients HTTP clients
      * @param remote Remote URI
      */
@@ -48,8 +46,6 @@ public final class ArtipieStorage implements Storage {
     }
 
     /**
-     * Ctor.
-     *
      * @param remote Remote slice
      */
     ArtipieStorage(final Slice remote) {
@@ -57,17 +53,12 @@ public final class ArtipieStorage implements Storage {
     }
 
     /**
-     * Ctor.
-     *
      * @param clients HTTP clients
      * @param remote Remote URI
      * @param auth Authenticator
      */
-    public ArtipieStorage(final ClientSlices clients, final URI remote,
-        final Authenticator auth) {
-        this(
-            new AuthClientSlice(new UriClientSlice(clients, remote), auth)
-        );
+    public ArtipieStorage(ClientSlices clients, URI remote, Authenticator auth) {
+        this(new AuthClientSlice(new UriClientSlice(clients, remote), auth));
     }
 
     @Override
@@ -79,7 +70,7 @@ public final class ArtipieStorage implements Storage {
     public CompletableFuture<Collection<Key>> list(final Key prefix) {
         final CompletableFuture<Collection<Key>> promise = new CompletableFuture<>();
         this.remote.response(
-            new RequestLine(RqMethod.GET, ArtipieStorage.uri(prefix)).toString(),
+            new RequestLine(RqMethod.GET, ArtipieStorage.uri(prefix)),
             new Headers.From("Accept", "application/json"),
             Content.EMPTY
         ).send(
@@ -110,7 +101,7 @@ public final class ArtipieStorage implements Storage {
     @Override
     public CompletableFuture<Void> save(final Key key, final Content content) {
         return this.remote.response(
-            new RequestLine(RqMethod.PUT, ArtipieStorage.uri(key)).toString(),
+            new RequestLine(RqMethod.PUT, ArtipieStorage.uri(key)),
             new Headers.From(new ContentLength(content.size().orElseThrow())),
             content
         ).send(
@@ -147,7 +138,7 @@ public final class ArtipieStorage implements Storage {
     public CompletableFuture<Content> value(final Key key) {
         final CompletableFuture<Content> promise = new CompletableFuture<>();
         this.remote.response(
-            new RequestLine(RqMethod.GET, ArtipieStorage.uri(key)).toString(),
+            new RequestLine(RqMethod.GET, ArtipieStorage.uri(key)),
             Headers.EMPTY,
             Content.EMPTY
         ).send(
@@ -176,7 +167,7 @@ public final class ArtipieStorage implements Storage {
     @Override
     public CompletableFuture<Void> delete(final Key key) {
         return this.remote.response(
-            new RequestLine(RqMethod.DELETE, ArtipieStorage.uri(key)).toString(),
+            new RequestLine(RqMethod.DELETE, ArtipieStorage.uri(key)),
             Headers.EMPTY,
             Content.EMPTY
         ).send(

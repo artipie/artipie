@@ -12,6 +12,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
@@ -251,7 +252,7 @@ final class MultipartITCase {
 
         @Override
         @SuppressWarnings("PMD.OnlyOneReturn")
-        public Response response(final String line,
+        public Response response(final RequestLine line,
             final Iterable<Entry<String, String>> headers,
             final Publisher<ByteBuffer> body) {
             if (this.target == null) {

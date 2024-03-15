@@ -12,7 +12,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.npm.misc.DateTimeNowStr;
@@ -67,10 +67,10 @@ public final class DownloadAssetSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line,
+    public Response response(final RequestLine line,
         final Iterable<Map.Entry<String, String>> rqheaders,
         final Publisher<ByteBuffer> body) {
-        final String tgz = this.path.value(new RequestLineFrom(line).uri().getPath());
+        final String tgz = this.path.value(line.uri().getPath());
         return new AsyncResponse(
             this.npm.getAsset(tgz).map(
                 asset -> {

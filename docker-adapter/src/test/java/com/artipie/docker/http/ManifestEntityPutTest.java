@@ -62,7 +62,7 @@ class ManifestEntityPutTest {
         final String path = "/v2/my-alpine/manifests/1";
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine(RqMethod.PUT, String.format("%s", path)).toString(),
+                new RequestLine(RqMethod.PUT, String.format("%s", path)),
                 Headers.EMPTY,
                 this.manifest()
             ),
@@ -92,7 +92,7 @@ class ManifestEntityPutTest {
         final String path = String.format("/v2/my-alpine/manifests/%s", digest);
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine(RqMethod.PUT, String.format("%s", path)).toString(),
+                new RequestLine(RqMethod.PUT, String.format("%s", path)),
                 Headers.EMPTY,
                 this.manifest()
             ),

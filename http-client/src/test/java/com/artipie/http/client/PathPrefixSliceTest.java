@@ -7,7 +7,6 @@ package com.artipie.http.client;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.StandardRs;
 import org.hamcrest.MatcherAssert;
@@ -41,17 +40,17 @@ final class PathPrefixSliceTest {
             (rsline, rqheaders, rqbody) -> {
                 MatcherAssert.assertThat(
                     "Path is modified",
-                    new RequestLineFrom(rsline).uri().getRawPath(),
+                    rsline.uri().getRawPath(),
                     new IsEqual<>(path)
                 );
                 MatcherAssert.assertThat(
                     "Query is preserved",
-                    new RequestLineFrom(rsline).uri().getRawQuery(),
+                    rsline.uri().getRawQuery(),
                     new IsEqual<>(query)
                 );
                 MatcherAssert.assertThat(
                     "Method is preserved",
-                    new RequestLineFrom(rsline).method(),
+                    rsline.method(),
                     new IsEqual<>(method)
                 );
                 MatcherAssert.assertThat(
@@ -68,7 +67,7 @@ final class PathPrefixSliceTest {
             },
             prefix
         ).response(
-            new RequestLine(method, line).toString(),
+            new RequestLine(method, line),
             headers,
             new Content.From(body)
         ).send(

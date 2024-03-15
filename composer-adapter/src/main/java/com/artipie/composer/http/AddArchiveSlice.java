@@ -12,10 +12,12 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.scheduling.ArtifactEvent;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
@@ -23,12 +25,10 @@ import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice for adding a package to the repository in ZIP format.
  * See <a href="https://getcomposer.org/doc/05-repositories.md#artifact">Artifact repository</a>.
- * @since 0.4
  */
 @SuppressWarnings({"PMD.SingularField", "PMD.UnusedPrivateField"})
 final class AddArchiveSlice implements Slice {
@@ -86,12 +86,11 @@ final class AddArchiveSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final RequestLineFrom rqline = new RequestLineFrom(line);
-        final String uri = rqline.uri().getPath();
+        final String uri = line.uri().getPath();
         final Matcher matcher = AddArchiveSlice.PATH.matcher(uri);
         final Response resp;
         if (matcher.matches()) {

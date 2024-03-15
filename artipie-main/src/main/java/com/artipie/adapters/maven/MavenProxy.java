@@ -12,6 +12,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.http.group.GroupSlice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.maven.http.MavenProxySlice;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import com.artipie.settings.repo.RepoConfig;
@@ -54,7 +55,7 @@ public final class MavenProxy implements Slice {
 
     @Override
     public Response response(
-        String line,
+        RequestLine line,
         Iterable<Map.Entry<String, String>> headers,
         Publisher<ByteBuffer> body
     ) {

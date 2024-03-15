@@ -83,7 +83,7 @@ public final class ProxyManifests implements Manifests {
     public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
         return new ResponseSink<>(
             this.remote.response(
-                new RequestLine(RqMethod.GET, new ManifestPath(this.name, ref).string()).toString(),
+                new RequestLine(RqMethod.GET, new ManifestPath(this.name, ref).string()),
                 MANIFEST_ACCEPT_HEADERS,
                 Content.EMPTY
             ),
@@ -111,7 +111,7 @@ public final class ProxyManifests implements Manifests {
             this.remote.response(
                 new RequestLine(
                     RqMethod.GET, uri(name.value(), limit, fromStr)
-                ).toString(),
+                ),
                 Headers.EMPTY,
                 Content.EMPTY
             ),

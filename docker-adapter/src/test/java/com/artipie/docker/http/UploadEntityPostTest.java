@@ -54,7 +54,7 @@ class UploadEntityPostTest {
     @Test
     void shouldStartUpload() {
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.POST, "/v2/test/blobs/uploads/").toString(),
+            new RequestLine(RqMethod.POST, "/v2/test/blobs/uploads/"),
             Headers.EMPTY,
             Flowable.empty()
         );

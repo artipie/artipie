@@ -7,7 +7,7 @@ package com.artipie.http;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
@@ -46,7 +46,7 @@ public final class LatestSlice implements Slice {
 
     @Override
     public Response response(
-        final String line, final Iterable<Map.Entry<String, String>> headers,
+        final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             CompletableFuture.supplyAsync(
@@ -62,8 +62,8 @@ public final class LatestSlice implements Slice {
      * @param line Received request line
      * @return A URI path with replaced latest.
      */
-    private static String normalized(final String line) {
-        final URI received = new RequestLineFrom(line).uri();
+    private static String normalized(final RequestLine line) {
+        final URI received = line.uri();
         String path = received.getPath();
         final String latest = "latest";
         if (path.endsWith(latest)) {

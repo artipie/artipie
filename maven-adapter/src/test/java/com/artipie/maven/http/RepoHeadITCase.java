@@ -9,7 +9,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
@@ -128,13 +128,13 @@ class RepoHeadITCase {
 
         @Override
         public Response response(
-            final String line,
+            final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body
         ) {
             return new AsyncResponse(
                 new RepoHead(this.client.https("repo.maven.apache.org"))
-                    .head(new RequestLineFrom(line).uri().toString())
+                    .head(line.uri().toString())
                     .handle(
                         (head, throwable) -> {
                             final CompletionStage<Response> res;

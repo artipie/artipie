@@ -30,9 +30,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Test for {@link DeleteChartSlice}.
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class DeleteChartSliceTest {
 
     /**
@@ -65,7 +63,7 @@ final class DeleteChartSliceTest {
             new DeleteChartSlice(
                 this.storage, Optional.of(this.events), DeleteChartSliceTest.RNAME
             ).response(
-                new RequestLine(RqMethod.DELETE, rqline).toString(),
+                new RequestLine(RqMethod.DELETE, rqline),
                 Headers.EMPTY,
                 Content.EMPTY
             ),
@@ -87,7 +85,7 @@ final class DeleteChartSliceTest {
             new DeleteChartSlice(
                 this.storage, Optional.of(this.events), DeleteChartSliceTest.RNAME
             ).response(
-                new RequestLine(RqMethod.DELETE, "/charts/ark").toString(),
+                new RequestLine(RqMethod.DELETE, "/charts/ark"),
                 Headers.EMPTY,
                 Content.EMPTY
             ),
@@ -123,7 +121,7 @@ final class DeleteChartSliceTest {
             new DeleteChartSlice(
                 this.storage, Optional.of(this.events), DeleteChartSliceTest.RNAME
             ).response(
-                new RequestLine(RqMethod.DELETE, "/charts/ark/1.0.1").toString(),
+                new RequestLine(RqMethod.DELETE, "/charts/ark/1.0.1"),
                 Headers.EMPTY,
                 Content.EMPTY
             ),
@@ -159,7 +157,7 @@ final class DeleteChartSliceTest {
             new DeleteChartSlice(
                 this.storage, Optional.ofNullable(this.events), DeleteChartSliceTest.RNAME
             ).response(
-                new RequestLine(RqMethod.DELETE, rqline).toString(),
+                new RequestLine(RqMethod.DELETE, rqline),
                 Headers.EMPTY,
                 Content.EMPTY
             ),

@@ -32,15 +32,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.policy.Policy;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsNot;
@@ -52,6 +43,16 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.testcontainers.shaded.com.google.common.collect.Sets;
 
+import java.nio.ByteBuffer;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+
 /**
  * Tests for {@link DockerSlice}.
  * Authentication & authorization tests.
@@ -60,7 +61,6 @@ import org.testcontainers.shaded.com.google.common.collect.Sets;
  * @todo #434:30min test `shouldReturnForbiddenWhenUserHasNoRequiredPermissionOnSecondManifestPut`
  *  fails in github actions, locally it works fine. Figure out what is the problem and fix it.
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.OnlyOneConstructorShouldDoInitialization"})
 public final class AuthTest {
 
     /**
@@ -81,7 +81,7 @@ public final class AuthTest {
                 new TestPolicy(
                     new DockerRepositoryPermission("*", "whatever", DockerActions.PULL.mask())
                 )
-            ).response(line.toString(), Headers.EMPTY, Content.EMPTY),
+            ).response(line, Headers.EMPTY, Content.EMPTY),
             new IsUnauthorizedResponse()
         );
     }
@@ -93,7 +93,7 @@ public final class AuthTest {
             method.slice(
                 new DockerRepositoryPermission("*", "whatever", DockerActions.PULL.mask())
             ).response(
-                line.toString(),
+                line,
                 method.headers(new TestAuthentication.User("chuck", "letmein")),
                 Content.EMPTY
             ),
@@ -110,7 +110,7 @@ public final class AuthTest {
     ) {
         MatcherAssert.assertThat(
             method.slice(permission).response(
-                line.toString(),
+                line,
                 method.headers(TestAuthentication.BOB),
                 Content.EMPTY
             ),
@@ -126,7 +126,7 @@ public final class AuthTest {
         final DockerRepositoryPermission permission =
             new DockerRepositoryPermission("*", "my-alpine", DockerActions.PUSH.mask());
         basic.slice(permission).response(
-            line.toString(),
+            line,
             basic.headers(TestAuthentication.ALICE),
             this.manifest()
         );
@@ -162,7 +162,7 @@ public final class AuthTest {
     void shouldOverwriteManifestIfAllowed() {
         final Basic basic = new Basic(this.docker);
         final String path = "/v2/my-alpine/manifests/abc";
-        final String line = new RequestLine(RqMethod.PUT, path).toString();
+        final RequestLine line = new RequestLine(RqMethod.PUT, path);
         final DockerRepositoryPermission permission =
             new DockerRepositoryPermission("*", "my-alpine", DockerActions.OVERWRITE.mask());
         final Flowable<ByteBuffer> manifest = this.manifest();
@@ -210,7 +210,7 @@ public final class AuthTest {
         final Permission permission
     ) {
         final Response response = method.slice(permission).response(
-            line.toString(),
+            line,
             method.headers(TestAuthentication.ALICE),
             Content.EMPTY
         );
@@ -233,7 +233,7 @@ public final class AuthTest {
         final Permission permission
     ) {
         final Response response = method.slice(new TestPolicy(permission, "anonymous", "Alice"))
-            .response(line.toString(), Headers.EMPTY, Content.EMPTY);
+            .response(line, Headers.EMPTY, Content.EMPTY);
         MatcherAssert.assertThat(
             response,
             new AllOf<>(

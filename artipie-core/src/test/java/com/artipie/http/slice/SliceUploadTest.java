@@ -26,9 +26,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test case for {@link SliceUpload}.
- * @since 0.6
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class SliceUploadTest {
 
     @Test
@@ -40,7 +38,7 @@ public final class SliceUploadTest {
         MatcherAssert.assertThat(
             "Wrong HTTP status returned",
             new SliceUpload(storage).response(
-                new RequestLine("PUT", path, "HTTP/1.1").toString(),
+                new RequestLine("PUT", path, "HTTP/1.1"),
                 Collections.singleton(
                     new MapEntry<>("Content-Size", Long.toString(data.length))
                 ),
@@ -68,7 +66,7 @@ public final class SliceUploadTest {
             "Wrong HTTP status returned",
             new SliceUpload(new InMemoryStorage(), new RepositoryEvents("files", "my-repo", queue))
                 .response(
-                    new RequestLine("PUT", "uploads/file.txt", "HTTP/1.1").toString(),
+                    new RequestLine("PUT", "uploads/file.txt", "HTTP/1.1"),
                     Collections.singleton(
                         new MapEntry<>("Content-Size", Long.toString(data.length))
                     ),

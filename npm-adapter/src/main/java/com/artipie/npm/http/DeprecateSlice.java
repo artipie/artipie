@@ -10,6 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.npm.PackageNameFromUrl;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +50,7 @@ public final class DeprecateSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> iterable,
         final Publisher<ByteBuffer> publisher
     ) {

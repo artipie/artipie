@@ -6,10 +6,8 @@
 package com.artipie.npm.http;
 
 import com.artipie.http.Slice;
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import com.artipie.http.rq.RequestLine;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -17,9 +15,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.ByteBuffer;
+import java.util.Collections;
+
 /**
  * Tests ReplacePathSlice.
- * @since 0.6
  */
 @ExtendWith(MockitoExtension.class)
 public class ReplacePathSliceTest {
@@ -32,22 +32,19 @@ public class ReplacePathSliceTest {
 
     @Test
     public void rootPathWorks() {
-        final ArgumentCaptor<String> path = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<RequestLine> path = ArgumentCaptor.forClass(RequestLine.class);
         Mockito.when(
             this.underlying.response(path.capture(), Mockito.any(), Mockito.any())
         ).thenReturn(null);
         final ReplacePathSlice slice = new ReplacePathSlice("/", this.underlying);
-        final String expected = "GET /some-path HTTP/1.1\r\n";
+        final RequestLine expected = RequestLine.from("GET /some-path HTTP/1.1");
         slice.response(expected, Collections.emptyList(), sub -> ByteBuffer.allocate(0));
-        MatcherAssert.assertThat(
-            path.getValue(),
-            new IsEqual<>(expected)
-        );
+        Assertions.assertEquals(expected, path.getValue());
     }
 
     @Test
     public void compoundPathWorks() {
-        final ArgumentCaptor<String> path = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<RequestLine> path = ArgumentCaptor.forClass(RequestLine.class);
         Mockito.when(
             this.underlying.response(path.capture(), Mockito.any(), Mockito.any())
         ).thenReturn(null);
@@ -56,13 +53,10 @@ public class ReplacePathSliceTest {
             this.underlying
         );
         slice.response(
-            "GET /compound/ctx/path/abc-def HTTP/1.1\r\n",
+            RequestLine.from("GET /compound/ctx/path/abc-def HTTP/1.1"),
             Collections.emptyList(),
             sub -> ByteBuffer.allocate(0)
         );
-        MatcherAssert.assertThat(
-            path.getValue(),
-            new IsEqual<>("GET /abc-def HTTP/1.1\r\n")
-        );
+        Assertions.assertEquals(new RequestLine("GET", "/abc-def"), path.getValue());
     }
 }

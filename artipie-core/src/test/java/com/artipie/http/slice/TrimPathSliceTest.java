@@ -45,7 +45,7 @@ final class TrimPathSliceTest {
     @Test
     void failIfUriPathDoesntMatch() throws Exception {
         new TrimPathSlice((line, headers, body) -> StandardRs.EMPTY, "none").response(
-            requestLine("http://www.w3.org").toString(),
+            requestLine("http://www.w3.org"),
             Collections.emptyList(),
             Flowable.empty()
         ).send(
@@ -133,7 +133,7 @@ final class TrimPathSliceTest {
     }
 
     private static void verify(final Slice slice, final RequestLine line) throws Exception {
-        slice.response(line.toString(), Collections.emptyList(), Flowable.empty())
+        slice.response(line, Collections.emptyList(), Flowable.empty())
             .send((status, headers, body) -> CompletableFuture.completedFuture(null))
             .toCompletableFuture()
             .get();

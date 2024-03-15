@@ -50,7 +50,7 @@ class BlobEntityGetTest {
             new RequestLine(
                 RqMethod.GET,
                 String.format("/v2/test/blobs/%s", digest)
-            ).toString(),
+            ),
             Headers.EMPTY,
             Flowable.empty()
         );
@@ -80,7 +80,7 @@ class BlobEntityGetTest {
                         "/v2/test/blobs/%s",
                         "sha256:0123456789012345678901234567890123456789012345678901234567890123"
                     )
-                ).toString(),
+                ),
                 Headers.EMPTY,
                 Flowable.empty()
             ),

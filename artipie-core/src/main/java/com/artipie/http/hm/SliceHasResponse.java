@@ -68,7 +68,7 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
     public SliceHasResponse(final Matcher<? extends Response> rsp, final RequestLine line,
         final Headers headers, final Content body) {
         this.rsp = rsp;
-        this.responser = slice -> slice.response(line.toString(), headers, body);
+        this.responser = slice -> slice.response(line, headers, body);
     }
 
     @Override

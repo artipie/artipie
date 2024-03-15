@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+
+import com.artipie.http.rq.RequestLine;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -42,7 +44,7 @@ final class BearerAuthSchemeTest {
             "realm=\"artipie.com\""
         ).authenticate(
             new Headers.From(new Authorization.Bearer(token)),
-            "GET http://not/used HTTP/1.1"
+            RequestLine.from("GET http://not/used HTTP/1.1")
         ).toCompletableFuture().join();
         MatcherAssert.assertThat(
             capture.get(),
@@ -58,7 +60,7 @@ final class BearerAuthSchemeTest {
             tkn -> CompletableFuture.completedFuture(Optional.of(user)),
             "whatever"
         ).authenticate(
-            new Headers.From(new Authorization.Bearer("abc")), "GET http://any HTTP/1.1"
+            new Headers.From(new Authorization.Bearer("abc")), RequestLine.from("GET http://any HTTP/1.1")
         ).toCompletableFuture().join();
         Assertions.assertSame(AuthScheme.AuthStatus.AUTHENTICATED, result.status());
         MatcherAssert.assertThat(result.user(), Matchers.is(user));
@@ -71,7 +73,7 @@ final class BearerAuthSchemeTest {
             tkn -> CompletableFuture.completedFuture(Optional.empty()), params
         ).authenticate(
             new Headers.From(new Header("X-Something", "some value")),
-            "GET http://ignored HTTP/1.1"
+            RequestLine.from("GET http://ignored HTTP/1.1")
         ).toCompletableFuture().join();
         Assertions.assertSame(
             AuthScheme.AuthStatus.NO_CREDENTIALS,
@@ -90,7 +92,7 @@ final class BearerAuthSchemeTest {
         final AuthScheme.Result result = new BearerAuthScheme(
             tkn -> CompletableFuture.completedFuture(Optional.empty()),
             params
-        ).authenticate(headers, "GET http://ignored HTTP/1.1")
+        ).authenticate(headers, RequestLine.from("GET http://ignored HTTP/1.1"))
             .toCompletableFuture()
             .join();
         Assertions.assertNotSame(AuthScheme.AuthStatus.AUTHENTICATED, result.status());

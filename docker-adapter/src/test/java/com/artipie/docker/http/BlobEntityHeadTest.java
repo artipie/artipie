@@ -21,10 +21,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link DockerSlice}.
  * Blob Head endpoint.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class BlobEntityHeadTest {
 
     /**
@@ -48,7 +45,7 @@ class BlobEntityHeadTest {
             new RequestLine(
                 RqMethod.HEAD,
                 String.format("/v2/test/blobs/%s", digest)
-            ).toString(),
+            ),
             Headers.EMPTY,
             Flowable.empty()
         );
@@ -73,7 +70,7 @@ class BlobEntityHeadTest {
                         "/v2/test/blobs/%s",
                         "sha256:0123456789012345678901234567890123456789012345678901234567890123"
                     )
-                ).toString(),
+                ),
                 Headers.EMPTY,
                 Flowable.empty()
             ),

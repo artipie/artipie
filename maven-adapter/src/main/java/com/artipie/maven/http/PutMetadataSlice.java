@@ -10,7 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.KeyFromPath;
@@ -61,13 +61,11 @@ public final class PutMetadataSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final Matcher matcher = PutMetadataSlice.PTN_META.matcher(
-            new RequestLineFrom(line).uri().getPath()
-        );
+        final Matcher matcher = PutMetadataSlice.PTN_META.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final Key pkg = new KeyFromPath(matcher.group("pkg"));
             return new AsyncResponse(

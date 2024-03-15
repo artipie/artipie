@@ -10,7 +10,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.npm.proxy.NpmProxy;
@@ -50,11 +50,11 @@ public final class DownloadPackageSlice implements Slice {
 
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
-    public Response response(final String line,
+    public Response response(final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
-            this.npm.getPackage(this.path.value(new RequestLineFrom(line).uri().getPath()))
+            this.npm.getPackage(this.path.value(line.uri().getPath()))
                 .map(
                     pkg -> (Response) new RsFull(
                         RsStatus.OK,

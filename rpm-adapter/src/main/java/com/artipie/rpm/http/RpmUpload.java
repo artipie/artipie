@@ -12,7 +12,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.rpm.RepoConfig;
@@ -20,6 +20,8 @@ import com.artipie.rpm.asto.AstoRepoAdd;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
@@ -29,14 +31,10 @@ import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice for rpm packages upload.
- *
- * @since 0.8.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RpmUpload implements Slice {
 
     /**
@@ -80,7 +78,7 @@ public final class RpmUpload implements Slice {
 
     @Override
     public Response response(
-        final String line, final Iterable<Map.Entry<String, String>> headers,
+        final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         final Request request = new Request(line);
         final Key key = request.file();
@@ -149,14 +147,14 @@ public final class RpmUpload implements Slice {
         /**
          * Request line.
          */
-        private final String line;
+        private final RequestLine line;
 
         /**
          * Ctor.
          *
          * @param line Line from request
          */
-        Request(final String line) {
+        Request(final RequestLine line) {
             this.line = line;
         }
 
@@ -202,7 +200,7 @@ public final class RpmUpload implements Slice {
          * @return Path matcher.
          */
         private Matcher path() {
-            final String path = new RequestLineFrom(this.line).uri().getPath();
+            final String path = this.line.uri().getPath();
             final Matcher matcher = PTRN.matcher(path);
             if (!matcher.matches()) {
                 throw new IllegalStateException(String.format("Unexpected path: %s", path));
@@ -218,7 +216,7 @@ public final class RpmUpload implements Slice {
          *  <code>false</code> - otherwise.
          */
         private boolean hasParamValue(final String param) {
-            return Optional.ofNullable(new RequestLineFrom(this.line).uri().getQuery())
+            return Optional.ofNullable(this.line.uri().getQuery())
                 .map(query -> Streams.stream(Splitter.on("&").split(query)))
                 .orElse(Stream.empty())
                 .anyMatch(part -> part.equals(param));

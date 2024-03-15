@@ -31,7 +31,7 @@ class ProxyLayersTest {
         final String digest = "sha256:123";
         final Optional<Blob> blob = new ProxyLayers(
             (line, headers, body) -> {
-                if (!line.startsWith(String.format("HEAD /v2/test/blobs/%s ", digest))) {
+                if (!line.toString().startsWith(String.format("HEAD /v2/test/blobs/%s ", digest))) {
                     throw new IllegalArgumentException();
                 }
                 return new RsFull(
@@ -59,7 +59,7 @@ class ProxyLayersTest {
         final String repo = "my-test";
         final Optional<Blob> found = new ProxyLayers(
             (line, headers, body) -> {
-                if (!line.startsWith(String.format("HEAD /v2/%s/blobs/%s ", repo, digest))) {
+                if (!line.toString().startsWith(String.format("HEAD /v2/%s/blobs/%s ", repo, digest))) {
                     throw new IllegalArgumentException();
                 }
                 return new RsWithStatus(RsStatus.NOT_FOUND);

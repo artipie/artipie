@@ -9,6 +9,7 @@ import com.artipie.docker.error.DockerError;
 import com.artipie.docker.error.UnsupportedError;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -43,7 +44,7 @@ final class ErrorHandlingSlice implements Slice {
     @Override
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {

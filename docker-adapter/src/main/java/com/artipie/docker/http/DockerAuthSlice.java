@@ -8,6 +8,7 @@ import com.artipie.docker.error.DeniedError;
 import com.artipie.docker.error.UnauthorizedError;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import java.nio.ByteBuffer;
@@ -39,7 +40,7 @@ final class DockerAuthSlice implements Slice {
 
     @Override
     public Response response(
-        final String rqline,
+        final RequestLine rqline,
         final Iterable<Map.Entry<String, String>> rqheaders,
         final Publisher<ByteBuffer> rqbody) {
         final Response response = this.origin.response(rqline, rqheaders, rqbody);

@@ -22,6 +22,7 @@ import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.RemoteConfig;
 import com.artipie.http.client.auth.AuthClientSlice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.repo.RepoConfig;
@@ -63,7 +64,7 @@ public final class DockerProxy implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {

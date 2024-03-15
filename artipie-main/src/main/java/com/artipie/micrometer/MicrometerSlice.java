@@ -8,7 +8,7 @@ import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
@@ -74,9 +74,9 @@ public final class MicrometerSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> head,
-        final Publisher<ByteBuffer> body) {
-        final String method = new RequestLineFrom(line).method().value();
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> head,
+                             final Publisher<ByteBuffer> body) {
+        final String method = line.method().value();
         final Counter.Builder cnt = Counter.builder("artipie.request.counter")
             .description("HTTP requests counter")
             .tag(MicrometerSlice.METHOD, method);

@@ -18,7 +18,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -84,7 +84,7 @@ final class WheelSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> iterable,
         final Publisher<ByteBuffer> publisher
     ) {
@@ -100,7 +100,7 @@ final class WheelSlice implements Slice {
                         final CompletionStage<RsStatus> res;
                         if (new ValidFilename(info, filename).valid()) {
                             final Key name = new Key.From(
-                                new KeyFromPath(new RequestLineFrom(line).uri().toString()),
+                                new KeyFromPath(line.uri().toString()),
                                 new NormalizedProjectName.Simple(info.name()).value(),
                                 filename
                             );

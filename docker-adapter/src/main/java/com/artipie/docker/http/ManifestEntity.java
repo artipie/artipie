@@ -26,6 +26,7 @@ import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Location;
 import com.artipie.http.headers.Login;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
@@ -90,7 +91,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Pull(new Request(line).name())
             );
@@ -98,7 +99,7 @@ final class ManifestEntity {
 
         @Override
         public Response response(
-            final String line,
+            final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body) {
             final Request request = new Request(line);
@@ -142,7 +143,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Pull(new Request(line).name())
             );
@@ -150,7 +151,7 @@ final class ManifestEntity {
 
         @Override
         public Response response(
-            final String line,
+            final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body
         ) {
@@ -211,7 +212,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Push(new Request(line).name())
             );
@@ -219,7 +220,7 @@ final class ManifestEntity {
 
         @Override
         public Response response(
-            final String line,
+            final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body
         ) {
@@ -304,7 +305,7 @@ final class ManifestEntity {
 
         @Override
         public Response response(
-            final String line, final Iterable<Map.Entry<String, String>> headers,
+            final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body
         ) {
             final Request request = new Request(line);
@@ -345,7 +346,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name,
                 new Scope.Repository.OverwriteTags(new Request(line).name())
@@ -370,7 +371,7 @@ final class ManifestEntity {
          *
          * @param line HTTP request line.
          */
-        Request(final String line) {
+        Request(final RequestLine line) {
             this.rqregex = new RqByRegex(line, ManifestEntity.PATH);
         }
 

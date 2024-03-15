@@ -28,7 +28,7 @@ class AuthClientSliceTest {
 
     @Test
     void shouldNotModifyRequestAndResponseIfNoAuthRequired() {
-        final String line = new RequestLine(RqMethod.GET, "/file.txt").toString();
+        final RequestLine line = new RequestLine(RqMethod.GET, "/file.txt");
         final Header header = new Header("x-name", "some value");
         final byte[] body = "text".getBytes();
         final RsStatus status = RsStatus.OK;

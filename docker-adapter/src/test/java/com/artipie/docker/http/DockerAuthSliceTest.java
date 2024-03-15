@@ -47,7 +47,7 @@ public final class DockerAuthSliceTest {
                     new Headers.From(headers)
                 )
             ).response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Flowable.empty()
             ),
@@ -75,7 +75,7 @@ public final class DockerAuthSliceTest {
                     new Headers.From(headers)
                 )
             ).response(
-                new RequestLine(RqMethod.GET, "/file.txt").toString(),
+                new RequestLine(RqMethod.GET, "/file.txt"),
                 Headers.EMPTY,
                 Content.EMPTY
             ),
@@ -105,7 +105,7 @@ public final class DockerAuthSliceTest {
                     Flowable.just(ByteBuffer.wrap(body))
                 )
             ).response(
-                new RequestLine(RqMethod.GET, "/some/path").toString(),
+                new RequestLine(RqMethod.GET, "/some/path"),
                 Headers.EMPTY,
                 Flowable.empty()
             ),

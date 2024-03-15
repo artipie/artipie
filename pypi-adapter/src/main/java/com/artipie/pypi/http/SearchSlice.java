@@ -13,6 +13,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.common.RsError;
@@ -48,8 +49,8 @@ public final class SearchSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+                             final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             new NameFromXml(body).get().thenCompose(
                 name -> {

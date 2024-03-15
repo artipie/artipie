@@ -120,7 +120,7 @@ class SliceListingTest {
         );
     }
 
-    private static String rqLineFrom(final String path) {
-        return new RequestLine("GET", path, "HTTP/1.1").toString();
+    private static RequestLine rqLineFrom(final String path) {
+        return new RequestLine("GET", path, "HTTP/1.1");
     }
 }

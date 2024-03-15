@@ -10,27 +10,24 @@ import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.scheduling.RepositoryEvents;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice to upload the resource to storage by key from path.
  * @see SliceDownload
- * @since 0.6
  */
 public final class SliceUpload implements Slice {
 
-    /**
-     * Storage.
-     */
     private final Storage storage;
 
     /**
@@ -85,11 +82,11 @@ public final class SliceUpload implements Slice {
     }
 
     @Override
-    public Response response(final String line,
+    public Response response(final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
-            CompletableFuture.supplyAsync(() -> new RequestLineFrom(line).uri().getPath())
+            CompletableFuture.supplyAsync(() -> line.uri().getPath())
                 .thenApply(this.transform)
                 .thenCompose(
                     key -> {

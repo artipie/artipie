@@ -9,7 +9,7 @@ import com.artipie.asto.Splitting;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
@@ -272,20 +272,20 @@ class Http3ServerTest {
 
         @Override
         public Response response(
-            final String line, final Iterable<Map.Entry<String, String>> headers,
+            final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body
         ) {
             final Response res;
-            if (line.contains("no_data")) {
+            if (line.toString().contains("no_data")) {
                 res = new RsWithHeaders(
                     new RsWithStatus(RsStatus.OK),
                     new Header(
-                        Http3ServerTest.RQ_METHOD, new RequestLineFrom(line).method().value()
+                        Http3ServerTest.RQ_METHOD, line.method().value()
                     )
                 );
-            } else if (line.contains("small_data")) {
+            } else if (line.toString().contains("small_data")) {
                 res = new RsWithBody(new RsWithStatus(RsStatus.OK), Http3ServerTest.SMALL_DATA);
-            } else if (line.contains("random_chunks")) {
+            } else if (line.toString().contains("random_chunks")) {
                 final Random random = new Random();
                 final byte[] data = new byte[Http3ServerTest.SIZE];
                 random.nextBytes(data);
@@ -300,7 +300,7 @@ class Http3ServerTest {
                             .delay(random.nextInt(5_000), TimeUnit.MILLISECONDS)
                     )
                 );
-            } else if (line.contains("return_back")) {
+            } else if (line.toString().contains("return_back")) {
                 res = new RsWithBody(new RsWithStatus(RsStatus.OK), body);
             } else {
                 res = StandardRs.NOT_FOUND;

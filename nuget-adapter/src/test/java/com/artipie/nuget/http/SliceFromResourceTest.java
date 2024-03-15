@@ -51,7 +51,7 @@ public class SliceFromResourceTest {
                 }
             }
         ).response(
-            new RequestLine(RqMethod.GET, "/some/path").toString(),
+            new RequestLine(RqMethod.GET, "/some/path"),
             new Headers.From(Collections.singleton(header)),
             Flowable.empty()
         );
@@ -83,7 +83,7 @@ public class SliceFromResourceTest {
                 }
             }
         ).response(
-            new RequestLine(RqMethod.PUT, "/some/other/path").toString(),
+            new RequestLine(RqMethod.PUT, "/some/other/path"),
             new Headers.From(Collections.singleton(header)),
             Flowable.just(ByteBuffer.wrap(content))
         );

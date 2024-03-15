@@ -136,7 +136,7 @@ class ConansEntityTest {
                 .saveTo(storage, new Key.From(file));
         }
         final Response response = factory.apply(storage).response(
-            new RequestLine(RqMethod.GET, request).toString(),
+            new RequestLine(RqMethod.GET, request),
             new Headers.From("Host", "localhost:9300"), Content.EMPTY
         );
         final String expected = Json.createReader(

@@ -8,7 +8,7 @@ import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import org.reactivestreams.Publisher;
 
@@ -42,7 +42,7 @@ public final class JfrSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
@@ -66,7 +66,7 @@ public final class JfrSlice implements Slice {
      * @return The response.
      */
     private Response wrapResponse(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body,
         final SliceResponseEvent event
@@ -88,9 +88,8 @@ public final class JfrSlice implements Slice {
             (chunks, size) -> {
                 event.end();
                 if (event.shouldCommit()) {
-                    final RequestLineFrom rqLine = new RequestLineFrom(line);
-                    event.method = rqLine.method().value();
-                    event.path = rqLine.uri().getPath();
+                    event.method = line.method().value();
+                    event.path = line.uri().getPath();
                     event.headers = JfrSlice.headersAsString(headers);
                     event.responseChunks = chunks;
                     event.responseSize = size;

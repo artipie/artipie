@@ -110,7 +110,7 @@ class ManageUsersTest {
                     System.lineSeparator(),
                     "type: plain",
                     "pass: xyz",
-                    "email: Alice@example.com",
+                    "email: \"Alice@example.com\"",
                     "roles:",
                     "  - reader",
                     "  - creator"
@@ -154,7 +154,7 @@ class ManageUsersTest {
                     System.lineSeparator(),
                     "type: plain",
                     "pass: xyz",
-                    "email: Alice@example.com",
+                    "email: \"Alice@example.com\"",
                     "roles:",
                     "  - reader",
                     "  - creator"
@@ -209,7 +209,7 @@ class ManageUsersTest {
                     System.lineSeparator(),
                     "type: plain",
                     "pass: \"[poiu\"",
-                    "email: john@example.com",
+                    "email: \"john@example.com\"",
                     "roles:",
                     "  - \"java-dev\"",
                     "permissions:",
@@ -241,7 +241,7 @@ class ManageUsersTest {
                     System.lineSeparator(),
                     "type: plain",
                     "pass: bdhdb",
-                    "email: john@example.com",
+                    "email: \"john@example.com\"",
                     "enabled: true"
                 )
             )
@@ -267,7 +267,7 @@ class ManageUsersTest {
                     System.lineSeparator(),
                     "type: plain",
                     "pass: bdhdb",
-                    "email: john@example.com",
+                    "email: \"john@example.com\"",
                     "enabled: false"
                 )
             )

@@ -8,6 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLine;
 import com.jcabi.log.Logger;
 import org.reactivestreams.Publisher;
 
@@ -34,8 +35,8 @@ final class BodyLoggingSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+                             final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             new Content.From(body).asBytesFuture().thenApply(
                 bytes -> {

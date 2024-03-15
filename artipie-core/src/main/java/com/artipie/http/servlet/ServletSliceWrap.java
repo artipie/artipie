@@ -9,6 +9,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
+import com.artipie.http.rq.RqMethod;
 import com.jcabi.log.Logger;
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +31,6 @@ import org.cqfn.rio.stream.ReactiveInputStream;
 /**
  * Slice wrapper for using in servlet API. Class is not used in Artipie, but required for
  * CloudArtifact project.
- * @since 0.18
  */
 public final class ServletSliceWrap {
 
@@ -79,18 +79,14 @@ public final class ServletSliceWrap {
      * @param rsp Servlet response
      * @return Future
      */
-    @SuppressWarnings({"PMD.OnlyOneReturn", "PMD.AvoidCatchingGenericException"})
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public CompletionStage<Void> handle(final HttpServletRequest req,
         final HttpServletResponse rsp) {
         try {
             final URI uri = new URIBuilder(req.getRequestURI())
                 .setCustomQuery(req.getQueryString()).build();
             return this.target.response(
-                new RequestLine(
-                    req.getMethod(),
-                    uri.toASCIIString(),
-                    req.getProtocol()
-                ).toString(),
+                new RequestLine(RqMethod.valueOf(req.getMethod()), uri, req.getProtocol()),
                 ServletSliceWrap.headers(req),
                 new ReactiveInputStream(req.getInputStream()).read(Buffers.Standard.K8)
             ).send(new ServletConnection(rsp));

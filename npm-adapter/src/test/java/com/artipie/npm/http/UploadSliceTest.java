@@ -9,6 +9,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.http.slice.TrimPathSlice;
@@ -75,7 +76,7 @@ public final class UploadSliceTest {
             .build().toString();
         MatcherAssert.assertThat(
             slice.response(
-                "PUT /ctx/package HTTP/1.1",
+                RequestLine.from("PUT /ctx/package HTTP/1.1"),
                 Collections.emptyList(),
                 Flowable.just(ByteBuffer.wrap(json.getBytes()))
             ),
@@ -99,7 +100,7 @@ public final class UploadSliceTest {
         Assertions.assertThrows(
             Exception.class,
             () -> slice.response(
-                "PUT /my-repo/my-package HTTP/1.1",
+                RequestLine.from("PUT /my-repo/my-package HTTP/1.1"),
                 Collections.emptyList(),
                 Flowable.just(ByteBuffer.wrap("{}".getBytes()))
             ).send(

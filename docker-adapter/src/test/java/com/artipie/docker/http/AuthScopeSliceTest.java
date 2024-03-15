@@ -11,14 +11,8 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthUser;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.StandardRs;
-import java.nio.ByteBuffer;
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -26,30 +20,35 @@ import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 
+import java.nio.ByteBuffer;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Tests for {@link AuthScopeSlice}.
- *
- * @since 0.11
  */
 class AuthScopeSliceTest {
 
     @Test
     void testScope() {
-        final String line = "GET /resource.txt HTTP/1.1";
+        final RequestLine line = RequestLine.from("GET /resource.txt HTTP/1.1");
         final AtomicReference<String> perm = new AtomicReference<>();
-        final AtomicReference<String> aline = new AtomicReference<>();
+        final AtomicReference<RequestLine> aline = new AtomicReference<>();
         new AuthScopeSlice(
             new ScopeSlice() {
                 @Override
-                public DockerRepositoryPermission permission(final String rqline,
-                    final String name) {
+                public DockerRepositoryPermission permission(RequestLine rqline, String name) {
                     aline.set(rqline);
                     return new DockerRepositoryPermission(name, "bar", DockerActions.PULL.mask());
                 }
 
                 @Override
                 public Response response(
-                    final String line,
+                    final RequestLine line,
                     final Iterable<Map.Entry<String, String>> headers,
                     final Publisher<ByteBuffer> body
                 ) {

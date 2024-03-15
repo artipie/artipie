@@ -74,7 +74,7 @@ final class FileProxySliceTest {
             ),
             new URI("http://host/path")
         ).response(
-            new RequestLine(RqMethod.GET, "/").toString(),
+            new RequestLine(RqMethod.GET, "/"),
             new Headers.From("X-Name", "Value"),
             new Content.From("data".getBytes())
         ).send(

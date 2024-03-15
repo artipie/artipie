@@ -9,7 +9,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.OperationControl;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -22,13 +22,14 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
+import org.reactivestreams.Publisher;
+
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import org.reactivestreams.Publisher;
 
 /**
  * NuGet repository HTTP front end.
@@ -93,15 +94,14 @@ public final class NuGet implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
         final Response response;
-        final RequestLineFrom request = new RequestLineFrom(line);
-        final String path = request.uri().getPath();
+        final String path = line.uri().getPath();
         final Resource resource = this.resource(path);
-        final RqMethod method = request.method();
+        final RqMethod method = line.method();
         if (method.equals(RqMethod.GET)) {
             response = resource.get(new Headers.From(headers));
         } else if (method.equals(RqMethod.PUT)) {

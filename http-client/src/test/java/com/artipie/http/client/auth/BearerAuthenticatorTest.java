@@ -9,7 +9,6 @@ import com.artipie.http.Headers;
 import com.artipie.http.client.FakeClientSlices;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.WwwAuthenticate;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
 import java.net.URI;
@@ -35,7 +34,7 @@ class BearerAuthenticatorTest {
         final AtomicReference<String> querycapture = new AtomicReference<>();
         final FakeClientSlices fake = new FakeClientSlices(
             (rsline, rqheaders, rqbody) -> {
-                final URI uri = new RequestLineFrom(rsline).uri();
+                final URI uri = rsline.uri();
                 pathcapture.set(uri.getRawPath());
                 querycapture.set(uri.getRawQuery());
                 return StandardRs.OK;

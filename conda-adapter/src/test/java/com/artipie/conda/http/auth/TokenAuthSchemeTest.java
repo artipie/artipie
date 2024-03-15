@@ -12,6 +12,8 @@ import com.artipie.http.headers.Authorization;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+
+import com.artipie.http.rq.RequestLine;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +33,7 @@ class TokenAuthSchemeTest {
         Assertions.assertSame(
             new TokenAuthScheme(new TestTokenAuth()).authenticate(
                 new Headers.From(new Authorization.Token(TokenAuthSchemeTest.TKN)),
-                "GET /not/used HTTP/1.1"
+                RequestLine.from("GET /not/used HTTP/1.1")
             ).toCompletableFuture().join().status(),
             AuthScheme.AuthStatus.AUTHENTICATED
         );
@@ -42,7 +44,7 @@ class TokenAuthSchemeTest {
         Assertions.assertSame(
             new TokenAuthScheme(new TestTokenAuth()).authenticate(
                 Headers.EMPTY,
-                String.format("GET /t/%s/my-repo/repodata.json HTTP/1.1", TokenAuthSchemeTest.TKN)
+                RequestLine.from(String.format("GET /t/%s/my-repo/repodata.json HTTP/1.1", TokenAuthSchemeTest.TKN))
             ).toCompletableFuture().join().status(),
             AuthScheme.AuthStatus.AUTHENTICATED
         );
@@ -52,7 +54,7 @@ class TokenAuthSchemeTest {
     void doesAuthorizeAsAnonymousIfTokenIsNotPresent() {
         final AuthScheme.Result result = new TokenAuthScheme(new TestTokenAuth()).authenticate(
             Headers.EMPTY,
-            "GET /any HTTP/1.1"
+            RequestLine.from("GET /any HTTP/1.1")
         ).toCompletableFuture().join();
         Assertions.assertSame(
             result.status(),
@@ -66,7 +68,7 @@ class TokenAuthSchemeTest {
         Assertions.assertSame(
             new TokenAuthScheme(new TestTokenAuth()).authenticate(
                 new Headers.From(new Authorization.Token("098xyz")),
-                "GET /ignored HTTP/1.1"
+                RequestLine.from("GET /ignored HTTP/1.1")
             ).toCompletableFuture().join().status(),
             AuthScheme.AuthStatus.FAILED
         );
@@ -77,7 +79,7 @@ class TokenAuthSchemeTest {
         Assertions.assertSame(
             new TokenAuthScheme(new TestTokenAuth()).authenticate(
                 Headers.EMPTY,
-                "GET /t/any/my-conda/repodata.json HTTP/1.1"
+                RequestLine.from("GET /t/any/my-conda/repodata.json HTTP/1.1")
             ).toCompletableFuture().join().status(),
             AuthScheme.AuthStatus.FAILED
         );

@@ -4,20 +4,20 @@
  */
 package com.artipie.docker.misc;
 
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Request by RegEx pattern.
- * @since 0.3
  */
 public final class RqByRegex {
 
     /**
      * Request line.
      */
-    private final String line;
+    private final RequestLine line;
 
     /**
      * Pattern.
@@ -25,11 +25,15 @@ public final class RqByRegex {
     private final Pattern regex;
 
     /**
-     * Ctor.
      * @param line Request line
      * @param regex Regex
      */
+    @Deprecated
     public RqByRegex(final String line, final Pattern regex) {
+        this(RequestLine.from(line), regex);
+    }
+
+    public RqByRegex(final RequestLine line, final Pattern regex) {
         this.line = line;
         this.regex = regex;
     }
@@ -40,7 +44,7 @@ public final class RqByRegex {
      * @return Path matcher.
      */
     public Matcher path() {
-        final String path = new RequestLineFrom(this.line).uri().getPath();
+        final String path = this.line.uri().getPath();
         final Matcher matcher = this.regex.matcher(path);
         if (!matcher.matches()) {
             throw new IllegalArgumentException(String.format("Unexpected path: %s", path));

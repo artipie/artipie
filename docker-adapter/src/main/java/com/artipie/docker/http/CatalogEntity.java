@@ -10,7 +10,7 @@ import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
@@ -24,8 +24,6 @@ import org.reactivestreams.Publisher;
 /**
  * Catalog entity in Docker HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/#catalog">Catalog</a>.
- *
- * @since 0.8
  */
 final class CatalogEntity {
 
@@ -62,17 +60,17 @@ final class CatalogEntity {
         }
 
         @Override
-        public DockerRegistryPermission permission(final String line, final String name) {
+        public DockerRegistryPermission permission(final RequestLine line, final String name) {
             return new DockerRegistryPermission(name, new Scope.Registry(RegistryCategory.CATALOG));
         }
 
         @Override
         public Response response(
-            final String line,
+            final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body
         ) {
-            final RqParams params = new RqParams(new RequestLineFrom(line).uri().getQuery());
+            final RqParams params = new RqParams(line.uri().getQuery());
             return new AsyncResponse(
                 this.docker.catalog(
                     params.value("last").map(RepoName.Simple::new),

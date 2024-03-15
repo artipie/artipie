@@ -8,6 +8,7 @@ import com.artipie.asto.Storage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -88,7 +89,7 @@ public final class GoSlice implements Slice {
 
     @Override
     public Response response(
-        final String line, final Iterable<Map.Entry<String, String>> headers,
+        final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         return this.origin.response(line, headers, body);
     }

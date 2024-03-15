@@ -9,6 +9,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.RemoteConfig;
 import com.artipie.http.client.auth.GenericAuthenticator;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.pypi.http.PyProxySlice;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import com.artipie.settings.repo.RepoConfig;
@@ -48,7 +49,7 @@ public final class PypiProxy implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {

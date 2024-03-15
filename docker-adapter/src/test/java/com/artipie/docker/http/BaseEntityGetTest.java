@@ -38,7 +38,7 @@ class BaseEntityGetTest {
     @Test
     void shouldRespondOkToVersionCheck() {
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.GET, "/v2/").toString(),
+            new RequestLine(RqMethod.GET, "/v2/"),
             Headers.EMPTY,
             Flowable.empty()
         );

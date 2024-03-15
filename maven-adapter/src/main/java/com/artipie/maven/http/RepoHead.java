@@ -11,6 +11,7 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.jcabi.log.Logger;
 import io.reactivex.Flowable;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -42,7 +43,7 @@ final class RepoHead {
     CompletionStage<Optional<Headers>> head(final String path) {
         final CompletableFuture<Optional<Headers>> promise = new CompletableFuture<>();
         return this.client.response(
-            new RequestLine(RqMethod.HEAD, path).toString(), Headers.EMPTY, Flowable.empty()
+            new RequestLine(RqMethod.HEAD, path), Headers.EMPTY, Flowable.empty()
         ).send(
             (status, rsheaders, body) -> {
                 final CompletionStage<Optional<Headers>> res;

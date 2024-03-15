@@ -62,7 +62,7 @@ class CatalogEntityGetTest {
             new RequestLine(
                 RqMethod.GET,
                 String.format("/v2/_catalog?n=%d&last=%s", limit, from)
-            ).toString(),
+            ),
             Headers.EMPTY,
             Content.EMPTY
         ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();

@@ -75,7 +75,7 @@ class NuGetPackageContentTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/content/package/1.0.0/content.nupkg"
-                ).toString(),
+                ),
                 new TestAuthentication.Headers(),
                 Flowable.empty()
             ),
@@ -96,7 +96,7 @@ class NuGetPackageContentTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/content/package/1.0.0/logo.png"
-                ).toString(),
+                ),
                 new TestAuthentication.Headers(),
                 Flowable.empty()
             ),
@@ -110,7 +110,7 @@ class NuGetPackageContentTest {
             new RequestLine(
                 RqMethod.PUT,
                 "/content/package/1.0.0/content.nupkg"
-            ).toString(),
+            ),
             new TestAuthentication.Headers(),
             Flowable.empty()
         );
@@ -133,7 +133,7 @@ class NuGetPackageContentTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/content/package2/index.json"
-                ).toString(),
+                ),
                 new TestAuthentication.Headers(),
                 Flowable.empty()
             ),
@@ -151,7 +151,7 @@ class NuGetPackageContentTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/content/unknown-package/index.json"
-                ).toString(),
+                ),
                 new TestAuthentication.Headers(),
                 Flowable.empty()
             ),
@@ -166,7 +166,7 @@ class NuGetPackageContentTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/content/package/2.0.0/content.nupkg"
-                ).toString(),
+                ),
                 Headers.EMPTY,
                 Flowable.empty()
             ),

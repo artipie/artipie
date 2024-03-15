@@ -6,6 +6,7 @@ package com.artipie.npm.proxy.http;
 
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
@@ -76,7 +77,7 @@ public final class NpmProxySlice implements Slice {
     }
 
     @Override
-    public Response response(final String line,
+    public Response response(final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         return this.route.response(line, headers, body);

@@ -22,8 +22,6 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Vert.x Slice.
- *
- * @since 0.1
  */
 public final class VertxSliceServer implements Closeable {
 
@@ -53,8 +51,6 @@ public final class VertxSliceServer implements Closeable {
     private final Object sync;
 
     /**
-     * Ctor.
-     *
      * @param vertx The vertx.
      * @param served The slice to be served.
      */
@@ -63,8 +59,6 @@ public final class VertxSliceServer implements Closeable {
     }
 
     /**
-     * Ctor.
-     *
      * @param served The slice to be served.
      * @param port The port.
      */
@@ -73,8 +67,6 @@ public final class VertxSliceServer implements Closeable {
     }
 
     /**
-     * Ctor.
-     *
      * @param vertx The vertx.
      * @param served The slice to be served.
      * @param port The port.
@@ -88,8 +80,6 @@ public final class VertxSliceServer implements Closeable {
     }
 
     /**
-     * Ctor.
-     *
      * @param vertx The vertx.
      * @param served The slice to be served.
      * @param options The options to use.
@@ -169,7 +159,7 @@ public final class VertxSliceServer implements Closeable {
     private CompletionStage<Void> serve(final HttpServerRequest req) {
         final HttpServerResponse response = req.response();
         return this.served.response(
-            new RequestLine(req.method().name(), req.uri(), req.version().toString()).toString(),
+            new RequestLine(req.method().name(), req.uri(), req.version().toString()),
             req.headers(),
             req.toFlowable().map(buffer -> ByteBuffer.wrap(buffer.getBytes()))
         ).send(new ContinueConnection(response, new VertxConnection(response)));

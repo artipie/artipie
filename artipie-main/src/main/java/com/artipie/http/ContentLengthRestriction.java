@@ -4,6 +4,7 @@
  */
 package com.artipie.http;
 
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -43,7 +44,7 @@ public final class ContentLengthRestriction implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {

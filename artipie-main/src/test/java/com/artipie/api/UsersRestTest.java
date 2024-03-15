@@ -49,7 +49,7 @@ final class UsersRestTest extends RestApiServerBase {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: qwerty",
-                "email: bob@example.com",
+                "email: \"bob@example.com\"",
                 "roles:",
                 "  - admin"
             ).getBytes(StandardCharsets.UTF_8)
@@ -74,7 +74,7 @@ final class UsersRestTest extends RestApiServerBase {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: xyz",
-                "email: john@example.com",
+                "email: \"john@example.com\"",
                 "roles:",
                 "  - readers",
                 "  - tags"
@@ -112,7 +112,7 @@ final class UsersRestTest extends RestApiServerBase {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: xyz",
-                "email: any@example.com",
+                "email: \"any@example.com\"",
                 "roles:",
                 "  - reader"
             ).getBytes(StandardCharsets.UTF_8)
@@ -138,7 +138,7 @@ final class UsersRestTest extends RestApiServerBase {
                             System.lineSeparator(),
                             "type: plain",
                             "pass: qwerty",
-                            "email: mark@example.com"
+                            "email: \"mark@example.com\""
                         )
                     )
                 );
@@ -300,7 +300,7 @@ final class UsersRestTest extends RestApiServerBase {
                             System.lineSeparator(),
                             "type: plain",
                             "pass: xyz098",
-                            "email: any@example.com",
+                            "email: \"any@example.com\"",
                             "roles:",
                             "  - reader"
                         )
@@ -362,7 +362,7 @@ final class UsersRestTest extends RestApiServerBase {
                             System.lineSeparator(),
                             "type: plain",
                             "pass: abc123",
-                            "email: any@example.com",
+                            "email: \"any@example.com\"",
                             "enabled: true",
                             "roles:",
                             "  - reader"
@@ -409,7 +409,7 @@ final class UsersRestTest extends RestApiServerBase {
                             System.lineSeparator(),
                             "type: plain",
                             "pass: abc123",
-                            "email: any@example.com",
+                            "email: \"any@example.com\"",
                             "enabled: false"
                         )
                     )

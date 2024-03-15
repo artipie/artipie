@@ -12,6 +12,7 @@ import com.artipie.asto.ext.Digests;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.rpm.RepoConfig;
@@ -79,8 +80,8 @@ public final class RpmRemove implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+                             final Publisher<ByteBuffer> body) {
         final RpmUpload.Request request = new RpmUpload.Request(line);
         final Key temp = new Key.From(RpmRemove.TO_RM, request.file());
         return new AsyncResponse(

@@ -54,7 +54,7 @@ class SliceIndexTest {
         this.storage.save(new Key.From(path), new Content.From(bytes)).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/").toString(),
+                new RequestLine("GET", "/"),
                 Collections.emptyList(),
                 Flowable.empty()
             ),
@@ -69,7 +69,7 @@ class SliceIndexTest {
             .join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/").toString(),
+                new RequestLine("GET", "/"),
                 new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/pypi"),
                 Flowable.empty()
             ),
@@ -90,7 +90,7 @@ class SliceIndexTest {
         ).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/def").toString(),
+                new RequestLine("GET", "/def"),
                 Collections.emptyList(),
                 Flowable.empty()
             ),
@@ -114,7 +114,7 @@ class SliceIndexTest {
         ).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/def").toString(),
+                new RequestLine("GET", "/def"),
                 new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/repo/def"),
                 Flowable.empty()
             ),
@@ -142,7 +142,7 @@ class SliceIndexTest {
         ).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", String.format("/%s", rqline)).toString(),
+                new RequestLine("GET", String.format("/%s", rqline)),
                 Collections.emptyList(),
                 Flowable.empty()
             ),
@@ -170,7 +170,7 @@ class SliceIndexTest {
         ).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/abc").toString(),
+                new RequestLine("GET", "/abc"),
                 new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/abc"),
                 Flowable.empty()
             ),
@@ -188,7 +188,7 @@ class SliceIndexTest {
     void returnsIndexListForEmptyStorage() {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/def").toString(),
+                new RequestLine("GET", "/def"),
                 Collections.emptyList(),
                 Flowable.empty()
             ),
@@ -200,7 +200,7 @@ class SliceIndexTest {
     void returnsIndexListForEmptyStorageWithFullPath() {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/def").toString(),
+                new RequestLine("GET", "/def"),
                 new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/def"),
                 Flowable.empty()
             ),
@@ -216,7 +216,7 @@ class SliceIndexTest {
         ).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/").toString(),
+                new RequestLine("GET", "/"),
                 Collections.emptyList(),
                 Flowable.empty()
             ),

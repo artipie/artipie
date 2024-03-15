@@ -111,7 +111,7 @@ final class DockerRoutingSliceTest {
 
     private static void verify(final Slice slice, final String path) throws Exception {
         slice.response(
-            new RequestLine(RqMethod.GET, path).toString(),
+            new RequestLine(RqMethod.GET, path),
             Collections.emptyList(), Flowable.empty()
         ).send(
             (status, headers, body) -> CompletableFuture.completedFuture(null)

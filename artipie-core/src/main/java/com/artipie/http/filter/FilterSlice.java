@@ -7,6 +7,7 @@ package com.artipie.http.filter;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
@@ -17,7 +18,6 @@ import org.reactivestreams.Publisher;
 
 /**
  * Slice that filters content of repository.
- * @since 1.2
  */
 public class FilterSlice implements Slice {
     /**
@@ -31,7 +31,6 @@ public class FilterSlice implements Slice {
     private final Filters filters;
 
     /**
-     * Ctor.
      * @param origin Origin slice
      * @param yaml Yaml mapping to read filters from
      */
@@ -56,7 +55,7 @@ public class FilterSlice implements Slice {
 
     @Override
     public final Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         final Response response;

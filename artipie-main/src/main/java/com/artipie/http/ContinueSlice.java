@@ -4,6 +4,7 @@
  */
 package com.artipie.http;
 
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
@@ -34,8 +35,8 @@ public final class ContinueSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+                             final Publisher<ByteBuffer> body) {
         final Response rsp;
         if (expectsContinue(headers)) {
             rsp = new ContinueResponse(

@@ -102,7 +102,7 @@ class NuGetPackagePublishTest {
     @Test
     void shouldFailGetPackagePublish() {
         final Response response = this.nuget.response(
-            new RequestLine(RqMethod.GET, "/package").toString(),
+            new RequestLine(RqMethod.GET, "/package"),
             new TestAuthentication.Headers(),
             Flowable.empty()
         );
@@ -114,7 +114,7 @@ class NuGetPackagePublishTest {
     void shouldUnauthorizedPutPackageForAnonymousUser() {
         MatcherAssert.assertThat(
             this.nuget.response(
-                new RequestLine(RqMethod.PUT, "/package").toString(),
+                new RequestLine(RqMethod.PUT, "/package"),
                 Headers.EMPTY,
                 Flowable.fromArray(ByteBuffer.wrap("data".getBytes()))
             ),
@@ -132,7 +132,7 @@ class NuGetPackagePublishTest {
         final ByteArrayOutputStream sink = new ByteArrayOutputStream();
         entity.writeTo(sink);
         return this.nuget.response(
-            new RequestLine(RqMethod.PUT, "/package").toString(),
+            new RequestLine(RqMethod.PUT, "/package"),
             new Headers.From(
                 new TestAuthentication.Header(),
                 new Header("Content-Type", entity.getContentType().getValue())

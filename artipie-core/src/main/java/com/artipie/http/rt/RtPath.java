@@ -8,6 +8,8 @@ import com.artipie.http.Response;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
+
+import com.artipie.http.rq.RequestLine;
 import org.reactivestreams.Publisher;
 
 /**
@@ -23,7 +25,7 @@ public interface RtPath {
      * @return Response if passed routing rule
      */
     Optional<Response> response(
-        String line,
+        RequestLine line,
         Iterable<Map.Entry<String, String>> headers,
         Publisher<ByteBuffer> body
     );

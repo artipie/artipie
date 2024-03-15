@@ -7,7 +7,6 @@ package com.artipie.http.client;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.StandardRs;
 import java.net.URI;
@@ -40,7 +39,7 @@ final class UriClientSliceTest {
             fake,
             new URI(uri)
         ).response(
-            new RequestLine(RqMethod.GET, "/").toString(),
+            new RequestLine(RqMethod.GET, "/"),
             Headers.EMPTY,
             Content.EMPTY
         ).send(
@@ -76,12 +75,12 @@ final class UriClientSliceTest {
                 (rsline, rqheaders, rqbody) -> {
                     MatcherAssert.assertThat(
                         "Path is modified",
-                        new RequestLineFrom(rsline).uri().getRawPath(),
+                        rsline.uri().getRawPath(),
                         new IsEqual<>(path)
                     );
                     MatcherAssert.assertThat(
                         "Query is preserved",
-                        new RequestLineFrom(rsline).uri().getRawQuery(),
+                        rsline.uri().getRawQuery(),
                         new IsEqual<>(query)
                     );
                     return StandardRs.OK;
@@ -89,7 +88,7 @@ final class UriClientSliceTest {
             ),
             new URI(uri)
         ).response(
-            new RequestLine(RqMethod.GET, line).toString(),
+            new RequestLine(RqMethod.GET, line),
             Headers.EMPTY,
             Content.EMPTY
         ).send(

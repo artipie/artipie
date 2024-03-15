@@ -12,7 +12,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
@@ -20,21 +20,17 @@ import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.KeyFromPath;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * A {@link Slice} based on a {@link Storage}. This is the main entrypoint
  * for dispatching GET requests for artifacts.
- *
- * @since 0.5
- * @todo #117:30min Add test to verify this class.
- *  Create integration test against local maven repository to download artifacts from
- *  Artipie Maven repository and verify that all HEAD and GET requests has correct headers.
  */
 final class LocalMavenSlice implements Slice {
 
@@ -62,17 +58,16 @@ final class LocalMavenSlice implements Slice {
 
     @Override
     public Response response(
-        final String line, final Iterable<Entry<String, String>> headers,
+        final RequestLine line, final Iterable<Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final RequestLineFrom rline = new RequestLineFrom(line);
-        final Key key = new KeyFromPath(rline.uri().getPath());
+        final Key key = new KeyFromPath(line.uri().getPath());
         final Matcher match = LocalMavenSlice.PTN_ARTIFACT.matcher(new KeyLastPart(key).get());
         final Response response;
         if (match.matches()) {
-            response = this.artifactResponse(rline.method(), key);
+            response = this.artifactResponse(line.method(), key);
         } else {
-            response = this.plainResponse(rline.method(), key);
+            response = this.plainResponse(line.method(), key);
         }
         return response;
     }

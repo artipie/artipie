@@ -36,8 +36,11 @@ final class VertxConnection implements Connection {
     }
 
     @Override
-    public CompletionStage<Void> accept(final RsStatus status,
-        final Headers headers, final Publisher<ByteBuffer> body) {
+    public CompletionStage<Void> accept(
+        final RsStatus status,
+        final Headers headers,
+        final Publisher<ByteBuffer> body
+    ) {
         final int code = Integer.parseInt(status.code());
         this.rsp.setStatusCode(code);
         for (final Map.Entry<String, String> header : headers) {

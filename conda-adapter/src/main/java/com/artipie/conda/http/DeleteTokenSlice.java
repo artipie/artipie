@@ -12,6 +12,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.WwwAuthenticate;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
@@ -44,7 +45,7 @@ final class DeleteTokenSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line,
+    public Response response(final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             CompletableFuture.supplyAsync(

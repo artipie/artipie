@@ -10,6 +10,7 @@ import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -45,8 +46,8 @@ final class GzipSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+                             final Publisher<ByteBuffer> body) {
         return connection -> this.origin.response(line, headers, body).send(
             (status, rsheaders, rsbody) -> GzipSlice.gzip(connection, status, rsbody, rsheaders)
         );

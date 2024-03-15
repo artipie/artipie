@@ -45,7 +45,7 @@ class ErrorHandlingSliceTest {
 
     @Test
     void shouldPassRequestUnmodified() {
-        final String line = new RequestLine(RqMethod.GET, "/file.txt").toString();
+        final RequestLine line = new RequestLine(RqMethod.GET, "/file.txt");
         final Header header = new Header("x-name", "some value");
         final byte[] body = "text".getBytes();
         new ErrorHandlingSlice(
@@ -86,7 +86,7 @@ class ErrorHandlingSliceTest {
                 Flowable.just(ByteBuffer.wrap(body))
             ),
             Authenticator.ANONYMOUS
-        ).response(new RequestLine(RqMethod.GET, "/").toString(), Headers.EMPTY, Flowable.empty());
+        ).response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Flowable.empty());
         MatcherAssert.assertThat(
             response,
             new ResponseMatcher(status, body, header)
@@ -102,7 +102,7 @@ class ErrorHandlingSliceTest {
             new ErrorHandlingSlice(
                 (line, headers, body) -> connection -> new FailedCompletionStage<>(exception)
             ).response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Flowable.empty()
             ),
@@ -121,7 +121,7 @@ class ErrorHandlingSliceTest {
                     throw exception;
                 }
             ).response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
             ),
@@ -140,7 +140,7 @@ class ErrorHandlingSliceTest {
                     throw exception;
                 }
             ).response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
             ),
@@ -159,7 +159,7 @@ class ErrorHandlingSliceTest {
         final Exception actual = Assertions.assertThrows(
             exception.getClass(),
             () -> slice.response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(
@@ -185,7 +185,7 @@ class ErrorHandlingSliceTest {
         final Exception actual = Assertions.assertThrows(
             exception.getClass(),
             () -> slice.response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(

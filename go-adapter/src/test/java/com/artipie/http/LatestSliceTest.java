@@ -11,6 +11,7 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
 import io.reactivex.Flowable;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link LatestSlice}.
- * @since 0.3
  */
 public class LatestSliceTest {
 
@@ -51,7 +51,8 @@ public class LatestSliceTest {
         ).get();
         MatcherAssert.assertThat(
             new LatestSlice(storage).response(
-                "GET example.com/latest/news/@latest?a=b HTTP/1.1", Headers.EMPTY, Flowable.empty()
+                RequestLine.from("GET example.com/latest/news/@latest?a=b HTTP/1.1"),
+                Headers.EMPTY, Flowable.empty()
             ),
             Matchers.allOf(
                 new RsHasBody(info.getBytes()),
@@ -64,7 +65,7 @@ public class LatestSliceTest {
     void returnsNotFondWhenModuleNotFound() {
         MatcherAssert.assertThat(
             new LatestSlice(new InMemoryStorage()).response(
-                "GET example.com/first/@latest HTTP/1.1", Headers.EMPTY, Flowable.empty()
+                RequestLine.from("GET example.com/first/@latest HTTP/1.1"), Headers.EMPTY, Flowable.empty()
             ),
             new RsHasStatus(RsStatus.NOT_FOUND)
         );

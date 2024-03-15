@@ -15,6 +15,8 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+
+import com.artipie.http.rq.RequestLine;
 import org.reactivestreams.Publisher;
 
 /**
@@ -71,7 +73,7 @@ public final class ReleaseSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {

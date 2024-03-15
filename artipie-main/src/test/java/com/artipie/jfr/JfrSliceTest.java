@@ -141,7 +141,7 @@ public class JfrSliceTest {
 
         @Override
         public Response response(
-            final String line,
+            final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body) {
             Flowable.fromPublisher(body).blockingSubscribe();

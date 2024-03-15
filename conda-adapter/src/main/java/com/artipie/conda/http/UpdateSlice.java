@@ -19,7 +19,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -95,9 +95,9 @@ public final class UpdateSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
-        final Matcher matcher = UpdateSlice.PKG.matcher(new RequestLineFrom(line).uri().getPath());
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+                             final Publisher<ByteBuffer> body) {
+        final Matcher matcher = UpdateSlice.PKG.matcher(line.uri().getPath());
         final Response res;
         if (matcher.matches()) {
             final Key temp = new Key.From(UpdateSlice.TMP, matcher.group(1));

@@ -9,7 +9,7 @@ import com.artipie.composer.Repository;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
@@ -47,11 +47,11 @@ final class AddSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final String path = new RequestLineFrom(line).uri().toString();
+        final String path = line.uri().toString();
         final Matcher matcher = AddSlice.PATH_PATTERN.matcher(path);
         final Response resp;
         if (matcher.matches()) {

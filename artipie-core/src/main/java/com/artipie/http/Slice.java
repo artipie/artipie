@@ -4,9 +4,11 @@
  */
 package com.artipie.http;
 
+import com.artipie.http.rq.RequestLine;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.Map;
-import org.reactivestreams.Publisher;
 
 /**
  * Arti-pie slice.
@@ -28,7 +30,7 @@ public interface Slice {
      * @return The response.
      */
     Response response(
-        String line,
+        RequestLine line,
         Iterable<Map.Entry<String, String>> headers,
         Publisher<ByteBuffer> body
     );
@@ -56,7 +58,7 @@ public interface Slice {
 
         @Override
         public final Response response(
-            final String line,
+            final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body) {
             return this.slice.response(line, headers, body);

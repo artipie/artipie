@@ -6,10 +6,11 @@ package com.artipie.http.rt;
 
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import java.util.Collections;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
 
 /**
  * Test case for {@link ByMethodsRule}.
@@ -22,7 +23,7 @@ final class ByMethodsRuleTest {
     void matchesExpectedMethod() {
         MatcherAssert.assertThat(
             new ByMethodsRule(RqMethod.GET, RqMethod.POST).apply(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Collections.emptyList()
             ),
             Matchers.is(true)
@@ -33,7 +34,7 @@ final class ByMethodsRuleTest {
     void doesntMatchUnexpectedMethod() {
         MatcherAssert.assertThat(
             new ByMethodsRule(RqMethod.GET, RqMethod.POST).apply(
-                new RequestLine(RqMethod.DELETE, "/").toString(),
+                new RequestLine(RqMethod.DELETE, "/"),
                 Collections.emptyList()
             ),
             Matchers.is(false)

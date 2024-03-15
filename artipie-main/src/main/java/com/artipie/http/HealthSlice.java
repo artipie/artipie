@@ -7,6 +7,7 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.common.RsJson;
@@ -44,7 +45,7 @@ public final class HealthSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line,
+    public Response response(final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             this.storageStatus().thenApply(

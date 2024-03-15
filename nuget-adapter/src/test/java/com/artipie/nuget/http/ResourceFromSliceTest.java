@@ -38,7 +38,7 @@ final class ResourceFromSliceTest {
             (line, hdrs, body) -> new RsFull(
                 status,
                 hdrs,
-                Flowable.just(ByteBuffer.wrap(line.getBytes()))
+                Flowable.just(ByteBuffer.wrap(line.toString().getBytes()))
             )
         ).get(new Headers.From(Collections.singleton(header)));
         MatcherAssert.assertThat(
@@ -64,7 +64,7 @@ final class ResourceFromSliceTest {
             (line, hdrs, body) -> new RsFull(
                 status,
                 hdrs,
-                Flowable.concat(Flowable.just(ByteBuffer.wrap(line.getBytes())), body)
+                Flowable.concat(Flowable.just(ByteBuffer.wrap(line.toString().getBytes())), body)
             )
         ).put(
             new Headers.From(Collections.singleton(header)),

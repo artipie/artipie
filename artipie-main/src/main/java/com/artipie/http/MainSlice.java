@@ -5,7 +5,6 @@
 package com.artipie.http;
 
 import com.artipie.RepositorySlices;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -16,6 +15,7 @@ import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.Settings;
+
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -23,17 +23,14 @@ import java.util.regex.Pattern;
  * Slice Artipie serves on it's main port.
  * The slice handles `/.health`, `/.version` and repositories requests
  * extracting repository name from URI path.
- *
- * @since 0.11
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class MainSlice extends Slice.Wrap {
 
     /**
      * Route path returns {@code NO_CONTENT} status if path is empty.
      */
     private static final RtPath EMPTY_PATH = (line, headers, body) -> {
-        final String path = new RequestLineFrom(line).uri().getPath();
+        final String path = line.uri().getPath();
         final Optional<Response> res;
         if (path.equals("*") || path.equals("/")
             || path.replaceAll("^/+", "").split("/").length == 0) {

@@ -7,6 +7,7 @@ package com.artipie.docker.http;
 import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Response;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
@@ -29,13 +30,13 @@ public final class BaseEntity implements ScopeSlice {
     public static final Pattern PATH = Pattern.compile("^/v2/$");
 
     @Override
-    public DockerRegistryPermission permission(final String line, final String name) {
+    public DockerRegistryPermission permission(final RequestLine line, final String name) {
         return new DockerRegistryPermission(name, new Scope.Registry(RegistryCategory.BASE));
     }
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {

@@ -11,7 +11,7 @@ import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.StandardRs;
@@ -86,7 +86,7 @@ public final class UsersEntity {
         }
 
         @Override
-        public Response response(final String line,
+        public Response response(final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
             return new AsyncResponse(
                 new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
@@ -98,7 +98,7 @@ public final class UsersEntity {
                             result = new RsWithBody(
                                 StandardRs.NOT_FOUND,
                                 String.format(
-                                    UsersEntity.URI_S_NOT_FOUND, new RequestLineFrom(line).uri()
+                                    UsersEntity.URI_S_NOT_FOUND, line.uri()
                                 ),
                                 StandardCharsets.UTF_8
                             );
@@ -124,10 +124,10 @@ public final class UsersEntity {
     public static final class CredsCheck implements Slice {
 
         @Override
-        public Response response(final String line,
+        public Response response(final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
             return new AsyncResponse(
-                CompletableFuture.supplyAsync(new RequestLineFrom(line)::uri).thenCompose(
+                CompletableFuture.supplyAsync(line::uri).thenCompose(
                     uri -> CredsCheck.credsCheck().thenApply(
                         content -> {
                             final Response result;

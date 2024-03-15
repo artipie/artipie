@@ -5,15 +5,16 @@
 package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
+
 import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
  * RegExp repository filter.
- *
+ *<p>
  * Uses path part of request or full uri for matching.
- *
+ *<p>
  * Yaml format:
  * <pre>
  *   filter: regular_expression
@@ -29,8 +30,6 @@ import java.util.regex.Pattern;
  *     'case_insensitive' is optional with default value 'false'
  *       and implies to ignore case in regular expression matching.
  * </pre>
- *
- * @since 1.2
  */
 public final class RegexpFilter extends Filter {
     /**
@@ -44,13 +43,8 @@ public final class RegexpFilter extends Filter {
     private final boolean fulluri;
 
     /**
-     * Ctor.
-     *
      * @param yaml Yaml mapping to read filters from
      */
-    @SuppressWarnings(
-        {"PMD.ConstructorOnlyInitializesOrCallOtherConstructors", "PMD.AvoidDuplicateLiterals"}
-    )
     public RegexpFilter(final YamlMapping yaml) {
         super(yaml);
         this.fulluri = Boolean.parseBoolean(yaml.string("full_uri"));
@@ -62,8 +56,7 @@ public final class RegexpFilter extends Filter {
     }
 
     @Override
-    public boolean check(final RequestLineFrom line,
-        final Iterable<Map.Entry<String, String>> headers) {
+    public boolean check(RequestLine line, Iterable<Map.Entry<String, String>> headers) {
         final boolean res;
         if (this.fulluri) {
             res = this.pattern.matcher(line.uri().toString()).matches();

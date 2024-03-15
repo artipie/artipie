@@ -5,6 +5,8 @@
 package com.artipie.docker.http;
 
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
+
 import java.security.Permission;
 
 /**
@@ -21,6 +23,11 @@ public interface ScopeSlice extends Slice {
      * @param name Repository name
      * @return Scope.
      */
-    Permission permission(String line, String name);
+    @Deprecated
+    default Permission permission(String line, String name){
+        return permission(RequestLine.from(line), name);
+    }
+
+    Permission permission(RequestLine line, String name);
 
 }

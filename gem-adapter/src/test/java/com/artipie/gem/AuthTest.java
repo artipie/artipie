@@ -56,7 +56,7 @@ public class AuthTest {
                 (name, pwd) -> Optional.of(new AuthUser("user", "test")),
                 ""
             ).response(
-                new RequestLine("GET", "/api/v1/api_key").toString(),
+                new RequestLine("GET", "/api/v1/api_key"),
                 headers,
                 Flowable.empty()
             ), new RsHasBody(token.getBytes(StandardCharsets.UTF_8))
@@ -72,7 +72,7 @@ public class AuthTest {
                 (username, password) -> Optional.of(AuthUser.ANONYMOUS),
                 ""
             ).response(
-                new RequestLine("GET", "/api/v1/api_key").toString(),
+                new RequestLine("GET", "/api/v1/api_key"),
                 new Headers.From(),
                 Flowable.empty()
             ), new RsHasStatus(RsStatus.UNAUTHORIZED)
@@ -103,7 +103,7 @@ public class AuthTest {
                 new Authentication.Single(lgn, pwd),
                 repo
             ).response(
-                new RequestLine("POST", "/api/v1/gems").toString(),
+                new RequestLine("POST", "/api/v1/gems"),
                 new Headers.From(new Authorization(token)),
                 Flowable.empty()
             ), new RsHasStatus(RsStatus.FORBIDDEN)
@@ -122,7 +122,7 @@ public class AuthTest {
                 new Authentication.Single(lgn, pwd),
                 "test"
             ).response(
-                new RequestLine("GET", "specs.4.8").toString(),
+                new RequestLine("GET", "specs.4.8"),
                 new Headers.From(new Authorization(token)),
                 Flowable.empty()
             ), new RsHasStatus(RsStatus.FORBIDDEN)
@@ -165,7 +165,7 @@ public class AuthTest {
             new Authentication.Single(user, pswd),
             "test"
         ).response(
-            new RequestLine("POST", "/api/v1/gems").toString(),
+            new RequestLine("POST", "/api/v1/gems"),
             new Headers.From(
                 new Authorization(String.format("Basic %s", token))
             ),

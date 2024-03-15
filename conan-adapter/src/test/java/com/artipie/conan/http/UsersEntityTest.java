@@ -57,7 +57,7 @@ public class UsersEntityTest {
         MatcherAssert.assertThat(
             "Response must match",
             new UsersEntity.CredsCheck().response(
-                new RequestLine(RqMethod.GET, "/v1/users/check_credentials").toString(),
+                new RequestLine(RqMethod.GET, "/v1/users/check_credentials"),
                 new Headers.From("Host", "localhost"), Content.EMPTY
             ), Matchers.allOf(
                 new RsHasBody(

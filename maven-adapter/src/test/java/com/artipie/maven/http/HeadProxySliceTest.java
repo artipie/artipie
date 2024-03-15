@@ -32,7 +32,7 @@ class HeadProxySliceTest {
     @Test
     void performsRequestWithEmptyHeaderAndBody() {
         new HeadProxySlice(new SliceSimple(StandardRs.EMPTY)).response(
-            "HEAD /some/path HTTP/1.1",
+            RequestLine.from("HEAD /some/path HTTP/1.1"),
             new Headers.From("some", "value"),
             new Content.From("000".getBytes())
         ).send(

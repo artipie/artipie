@@ -33,8 +33,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link DockerSlice}.
  * Tags list GET endpoint.
- *
- * @since 0.8
  */
 class TagsEntityGetTest {
 
@@ -76,7 +74,7 @@ class TagsEntityGetTest {
             new RequestLine(
                 RqMethod.GET,
                 String.format("/v2/my-alpine/tags/list?n=%d&last=%s", limit, from)
-            ).toString(),
+            ),
             Headers.EMPTY,
             Content.EMPTY
         ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();

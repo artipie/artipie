@@ -4,6 +4,7 @@
  */
 package com.artipie.http;
 
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.common.RsJson;
 import com.artipie.misc.ArtipieProperties;
 import java.nio.ByteBuffer;
@@ -31,7 +32,7 @@ public final class VersionSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {

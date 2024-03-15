@@ -13,6 +13,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -75,8 +76,8 @@ final class SubmitGemSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Iterable<Entry<String, String>> headers,
+                             final Publisher<ByteBuffer> body) {
         final Key key = new Key.From(
             "gems", UUID.randomUUID().toString().replace("-", "").concat(".gem")
         );

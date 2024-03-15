@@ -5,13 +5,14 @@
 package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.YamlMapping;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
+
 import java.util.Map;
 import java.util.Optional;
 
 /**
  * Repository content filter.
- *
+ *<p>
  * Yaml format:
  * <pre>
  *   priority: priority_value
@@ -19,8 +20,6 @@ import java.util.Optional;
  *   where
  *     'priority_value' is optional and provides priority value. Default value is zero priority.
  * </pre>
- *
- * @since 1.2
  */
 public abstract class Filter {
     /**
@@ -65,8 +64,7 @@ public abstract class Filter {
      * @param headers Request headers.
      * @return True if request matched to access conditions.
      */
-    public abstract boolean check(RequestLineFrom line,
-        Iterable<Map.Entry<String, String>> headers);
+    public abstract boolean check(RequestLine line, Iterable<Map.Entry<String, String>> headers);
 
     /**
      * Wrap is a decorative wrapper for Filter.
@@ -80,8 +78,6 @@ public abstract class Filter {
         private final Filter filter;
 
         /**
-         * Ctor.
-         *
          * @param filter Filter.
          * @param yaml Yaml mapping
          */
@@ -90,7 +86,6 @@ public abstract class Filter {
             this.filter = filter;
         }
 
-        @Override
         /**
          * Checks conditions to get access to repository content.
          *
@@ -98,7 +93,8 @@ public abstract class Filter {
          * @param headers Request headers.
          * @return True if request matched to access conditions.
          */
-        public boolean check(final RequestLineFrom line,
+        @Override
+        public boolean check(final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers) {
             return this.filter.check(line, headers);
         }

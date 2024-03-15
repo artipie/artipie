@@ -9,6 +9,8 @@ import com.artipie.http.Slice;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
+
+import com.artipie.http.rq.RequestLine;
 import org.reactivestreams.Publisher;
 
 /**
@@ -18,7 +20,6 @@ import org.reactivestreams.Publisher;
  * {@link RtRule} passed, then the request will be redirected to
  * underlying {@link Slice}.
  * </p>
- * @since 0.10
  */
 public final class RtRulePath implements RtPath {
 
@@ -44,7 +45,7 @@ public final class RtRulePath implements RtPath {
 
     @Override
     public Optional<Response> response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {

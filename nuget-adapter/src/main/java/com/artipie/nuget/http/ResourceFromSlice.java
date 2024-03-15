@@ -65,7 +65,7 @@ final class ResourceFromSlice implements Resource {
         final Publisher<ByteBuffer> body
     ) {
         return this.origin.response(
-            new RequestLine(method.value(), this.path).toString(),
+            new RequestLine(method.value(), this.path),
             headers,
             body
         );

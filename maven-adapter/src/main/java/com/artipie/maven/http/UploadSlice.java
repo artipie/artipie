@@ -9,7 +9,7 @@ import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.ContentWithSize;
@@ -45,13 +45,16 @@ public final class UploadSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(
+        final RequestLine line,
+        final Iterable<Map.Entry<String, String>> headers,
+        final Publisher<ByteBuffer> body
+    ) {
         return new AsyncResponse(
             this.asto.save(
                 new Key.From(
                     UploadSlice.TEMP,
-                    new KeyFromPath(new RequestLineFrom(line).uri().getPath())
+                    new KeyFromPath(line.uri().getPath())
                 ),
                 new ContentWithSize(body, headers)
             ).thenApply(nothing -> new RsWithStatus(RsStatus.CREATED))

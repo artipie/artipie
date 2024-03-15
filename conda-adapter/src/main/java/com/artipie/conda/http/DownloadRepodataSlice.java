@@ -13,7 +13,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentFileName;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -30,7 +30,6 @@ import org.reactivestreams.Publisher;
 /**
  * Slice to download repodata.json. If the repodata item does not exists in storage, empty
  * json is returned.
- * @since 0.4
  */
 public final class DownloadRepodataSlice implements Slice {
 
@@ -53,11 +52,11 @@ public final class DownloadRepodataSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+                             final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             CompletableFuture
-                .supplyAsync(() -> new RequestLineFrom(line).uri().getPath())
+                .supplyAsync(() -> line.uri().getPath())
                 .thenCompose(
                     path -> {
                         final Matcher matcher = DownloadRepodataSlice.RQ_PATH.matcher(path);

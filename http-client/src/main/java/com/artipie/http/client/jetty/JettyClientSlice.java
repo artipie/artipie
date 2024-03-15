@@ -9,7 +9,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 /**
  * ClientSlices implementation using Jetty HTTP client as back-end.
  * <a href="https://eclipse.dev/jetty/documentation/jetty-12/programming-guide/index.html#pg-client-http-non-blocking">Docs</a>
- * @since 0.1
  */
 final class JettyClientSlice implements Slice {
 
@@ -82,17 +81,15 @@ final class JettyClientSlice implements Slice {
         this.port = port;
     }
 
-    @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final RequestLineFrom req = new RequestLineFrom(line);
-        final Request request = this.buildRequest(headers, req);
+        final Request request = this.buildRequest(headers, line);
         final CompletableFuture<Response> res = new CompletableFuture<>();
         final List<Content.Chunk> buffers = new LinkedList<>();
-        if (req.method() != RqMethod.HEAD) {
+        if (line.method() != RqMethod.HEAD) {
             final AsyncRequestContent async = new AsyncRequestContent();
             Flowable.fromPublisher(body).doOnComplete(async::close).forEach(
                 buf -> async.write(buf, Callback.NOOP)
@@ -149,7 +146,7 @@ final class JettyClientSlice implements Slice {
      */
     private Request buildRequest(
         final Iterable<Map.Entry<String, String>> headers,
-        final RequestLineFrom req
+        final RequestLine req
     ) {
         final String scheme;
         if (this.secure) {

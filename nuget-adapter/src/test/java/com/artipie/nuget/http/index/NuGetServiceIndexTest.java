@@ -66,7 +66,7 @@ class NuGetServiceIndexTest {
     @Test
     void shouldGetIndex() {
         final Response response = this.nuget.response(
-            new RequestLine(RqMethod.GET, "/index.json").toString(),
+            new RequestLine(RqMethod.GET, "/index.json"),
             Collections.emptyList(),
             Flowable.empty()
         );
@@ -109,7 +109,7 @@ class NuGetServiceIndexTest {
     @Test
     void shouldFailPutIndex() {
         final Response response = this.nuget.response(
-            new RequestLine(RqMethod.PUT, "/index.json").toString(),
+            new RequestLine(RqMethod.PUT, "/index.json"),
             Collections.emptyList(),
             Flowable.empty()
         );

@@ -117,7 +117,7 @@ public final class Http3Server {
                 Http3Server.this.slice.response(
                     new RequestLine(
                         request.getMethod(), request.getHttpURI().getPath(), Http3Server.HTTP_3
-                    ).toString(),
+                    ),
                     request.getHttpFields().stream()
                         .map(field -> new Header(field.getName(), field.getValue()))
                         .collect(Collectors.toList()),
@@ -142,7 +142,7 @@ public final class Http3Server {
                                     new RequestLine(
                                         request.getMethod(), request.getHttpURI().getPath(),
                                         Http3Server.HTTP_3
-                                    ).toString(),
+                                    ),
                                     request.getHttpFields().stream().map(
                                         field -> new Header(field.getName(), field.getValue())
                                     ).collect(Collectors.toList()),

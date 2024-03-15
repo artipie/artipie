@@ -49,7 +49,7 @@ final class ProxyDockerTest {
         final AtomicReference<byte[]> cbody = new AtomicReference<>();
         new ProxyDocker(
             (line, headers, body) -> {
-                cline.set(line);
+                cline.set(line.toString());
                 cheaders.set(headers);
                 return new AsyncResponse(
                     new Content.From(body).asBytesFuture().thenApply(

@@ -34,7 +34,7 @@ class ProxyBlobTest {
         final byte[] data = "data".getBytes();
         final Content content = new ProxyBlob(
             (line, headers, body) -> {
-                if (!line.startsWith("GET /v2/test/blobs/sha256:123 ")) {
+                if (!line.toString().startsWith("GET /v2/test/blobs/sha256:123 ")) {
                     throw new IllegalArgumentException();
                 }
                 return new RsFull(

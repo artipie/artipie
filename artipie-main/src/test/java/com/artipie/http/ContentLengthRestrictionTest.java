@@ -5,14 +5,16 @@
 package com.artipie.http;
 
 import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import io.reactivex.Flowable;
-import java.util.Collections;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.Collections;
 
 /**
  * Test for {@link ContentLengthRestriction}.
@@ -28,7 +30,7 @@ class ContentLengthRestrictionTest {
             (line, headers, body) -> new RsWithStatus(RsStatus.OK),
             limit
         );
-        final Response response = slice.response("", this.headers("11"), Flowable.empty());
+        final Response response = slice.response(new RequestLine("GET", "/"), this.headers("11"), Flowable.empty());
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.PAYLOAD_TOO_LARGE));
     }
 
@@ -39,7 +41,7 @@ class ContentLengthRestrictionTest {
             (line, headers, body) -> new RsWithStatus(RsStatus.OK),
             limit
         );
-        final Response response = slice.response("", this.headers(value), Flowable.empty());
+        final Response response = slice.response(new RequestLine("GET", "/"), this.headers(value), Flowable.empty());
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.OK));
     }
 
@@ -50,7 +52,7 @@ class ContentLengthRestrictionTest {
             (line, headers, body) -> new RsWithStatus(RsStatus.OK),
             limit
         );
-        final Response response = slice.response("", Collections.emptySet(), Flowable.empty());
+        final Response response = slice.response(new RequestLine("GET", "/"), Collections.emptySet(), Flowable.empty());
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.OK));
     }
 

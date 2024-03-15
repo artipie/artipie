@@ -21,7 +21,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
@@ -41,7 +41,6 @@ import org.reactivestreams.Publisher;
 
 /**
  * Debian update slice adds uploaded slice to the storage and updates Packages index.
- * @since 0.1
  */
 public final class UpdateSlice implements Slice {
 
@@ -80,9 +79,9 @@ public final class UpdateSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
-        final Key key = new KeyFromPath(new RequestLineFrom(line).uri().getPath());
+    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+                             final Publisher<ByteBuffer> body) {
+        final Key key = new KeyFromPath(line.uri().getPath());
         return new AsyncResponse(
             this.asto.save(key, new Content.From(body))
                 .thenCompose(nothing -> this.asto.value(key))

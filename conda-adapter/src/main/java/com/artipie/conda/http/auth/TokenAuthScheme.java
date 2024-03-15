@@ -8,8 +8,9 @@ import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.headers.Authorization;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -48,17 +49,19 @@ public final class TokenAuthScheme implements AuthScheme {
     }
 
     @Override
-    public CompletionStage<Result> authenticate(final Iterable<Map.Entry<String, String>> headers,
-        final String line) {
+    public CompletionStage<Result> authenticate(
+        final Iterable<Map.Entry<String, String>> headers,
+        final RequestLine line) {
+        if (line == null) {
+            throw new IllegalArgumentException("Request line cannot be null");
+        }
         final CompletionStage<Optional<AuthUser>> fut = new RqHeaders(headers, Authorization.NAME)
             .stream()
             .findFirst()
             .map(this::user)
             .orElseGet(
                 () -> {
-                    final Matcher mtchr = TokenAuthScheme.PTRN.matcher(
-                        new RequestLineFrom(line).uri().toString()
-                    );
+                    final Matcher mtchr = TokenAuthScheme.PTRN.matcher(line.uri().toString());
                     return mtchr.matches()
                         ? this.auth.user(mtchr.group(1))
                         : CompletableFuture.completedFuture(Optional.of(AuthUser.ANONYMOUS));

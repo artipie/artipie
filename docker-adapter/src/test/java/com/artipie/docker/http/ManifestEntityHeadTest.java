@@ -24,10 +24,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link DockerSlice}.
  * Manifest HEAD endpoint.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ManifestEntityHeadTest {
 
     /**
@@ -44,7 +41,7 @@ class ManifestEntityHeadTest {
     void shouldRespondOkWhenManifestFoundByTag() {
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine(RqMethod.HEAD, "/v2/my-alpine/manifests/1").toString(),
+                new RequestLine(RqMethod.HEAD, "/v2/my-alpine/manifests/1"),
                 new Headers(),
                 Flowable.empty()
             ),
@@ -67,7 +64,7 @@ class ManifestEntityHeadTest {
                 new RequestLine(
                     RqMethod.HEAD,
                     String.format("/v2/my-alpine/manifests/%s", digest)
-                ).toString(),
+                ),
                 new Headers(),
                 Flowable.empty()
             ),
@@ -79,7 +76,7 @@ class ManifestEntityHeadTest {
     void shouldReturnNotFoundForUnknownTag() {
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine(RqMethod.HEAD, "/v2/my-alpine/manifests/2").toString(),
+                new RequestLine(RqMethod.HEAD, "/v2/my-alpine/manifests/2"),
                 new Headers(),
                 Flowable.empty()
             ),
@@ -96,7 +93,7 @@ class ManifestEntityHeadTest {
                     String.format(
                         "/v2/my-alpine/manifests/%s",
                         "sha256:0123456789012345678901234567890123456789012345678901234567890123"
-                    )).toString(),
+                    )),
                 new Headers(),
                 Flowable.empty()
             ),

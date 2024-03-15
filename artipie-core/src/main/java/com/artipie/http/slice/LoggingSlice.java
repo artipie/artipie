@@ -8,6 +8,7 @@ import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.jcabi.log.Logger;
 import java.nio.ByteBuffer;
@@ -58,7 +59,7 @@ public final class LoggingSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {

@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.misc.RandomFreePort;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.RsStatus;
@@ -21,12 +20,6 @@ import com.artipie.http.slice.SliceSimple;
 import jakarta.servlet.GenericServlet;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import java.io.Serial;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.List;
 import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -40,6 +33,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
+
+import java.io.Serial;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
 
 /**
  * Integration test for servlet slice wrapper.
@@ -151,9 +151,8 @@ final class ServletWrapITCase {
             (line, header, body) -> new RsWithBody(
                 StandardRs.OK,
                 new Content.From(
-                    new RqParams(
-                        new RequestLineFrom(line).uri().getQuery()
-                    ).value("foo").orElse("none").getBytes()
+                    new RqParams(line.uri().getQuery())
+                        .value("foo").orElse("none").getBytes()
                 )
             )
         );

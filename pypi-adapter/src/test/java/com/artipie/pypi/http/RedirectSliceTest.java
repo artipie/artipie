@@ -17,16 +17,14 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link RedirectSlice}.
- * @since 0.6
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RedirectSliceTest {
 
     @Test
     void redirectsToNormalizedName() {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
-                new RequestLine(RqMethod.GET, "/one/two/three_four").toString(),
+                new RequestLine(RqMethod.GET, "/one/two/three_four"),
                 Collections.emptyList(),
                 Flowable.empty()
             ),
@@ -41,7 +39,7 @@ class RedirectSliceTest {
     void redirectsToNormalizedNameWithSlashAtTheEnd() {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
-                new RequestLine(RqMethod.GET, "/one/two/three_four/").toString(),
+                new RequestLine(RqMethod.GET, "/one/two/three_four/"),
                 Collections.emptyList(),
                 Flowable.empty()
             ),
@@ -56,7 +54,7 @@ class RedirectSliceTest {
     void redirectsToNormalizedNameWhenFillPathIsPresent() {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
-                new RequestLine(RqMethod.GET, "/three/F.O.U.R").toString(),
+                new RequestLine(RqMethod.GET, "/three/F.O.U.R"),
                 new Headers.From("X-FullPath", "/one/two/three/F.O.U.R"),
                 Flowable.empty()
             ),
@@ -71,7 +69,7 @@ class RedirectSliceTest {
     void normalizesOnlyLastPart() {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
-                new RequestLine(RqMethod.GET, "/three/One_Two").toString(),
+                new RequestLine(RqMethod.GET, "/three/One_Two"),
                 new Headers.From("X-FullPath", "/One_Two/three/One_Two"),
                 Flowable.empty()
             ),

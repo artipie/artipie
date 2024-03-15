@@ -12,16 +12,17 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import org.reactivestreams.Publisher;
 
 /**
  * This slice lists blobs contained in given path.
@@ -92,12 +93,12 @@ public final class ListBlobsSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line,
+    public Response response(final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             CompletableFuture
-                .supplyAsync(new RequestLineFrom(line)::uri)
+                .supplyAsync(line::uri)
                 .thenCompose(
                     uri -> {
                         final Key key = this.transform.apply(uri.getPath());

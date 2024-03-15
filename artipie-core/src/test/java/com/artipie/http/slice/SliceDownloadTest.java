@@ -85,7 +85,7 @@ public final class SliceDownloadTest {
         );
     }
 
-    private static String rqLineFrom(final String path) {
-        return new RequestLine("GET", path, "HTTP/1.1").toString();
+    private static RequestLine rqLineFrom(final String path) {
+        return new RequestLine("GET", path, "HTTP/1.1");
     }
 }

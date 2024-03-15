@@ -46,7 +46,7 @@ final class AuthClientSliceTest {
             (line, headers, body) -> StandardRs.EMPTY,
             fake
         ).response(
-            new RequestLine(RqMethod.GET, "/").toString(),
+            new RequestLine(RqMethod.GET, "/"),
             new Headers.From("X-Header", "The Value"),
             Content.EMPTY
         ).send(
@@ -71,7 +71,7 @@ final class AuthClientSliceTest {
             },
             new FakeAuthenticator(new Headers.From(auth))
         ).response(
-            new RequestLine(RqMethod.GET, "/resource").toString(),
+            new RequestLine(RqMethod.GET, "/resource"),
             new Headers.From(original),
             Content.EMPTY
         ).send(
@@ -94,7 +94,7 @@ final class AuthClientSliceTest {
             ),
             fake
         ).response(
-            new RequestLine(RqMethod.GET, "/foo/bar").toString(),
+            new RequestLine(RqMethod.GET, "/foo/bar"),
             Headers.EMPTY,
             Content.EMPTY
         ).send(
@@ -116,7 +116,7 @@ final class AuthClientSliceTest {
             },
             Authenticator.ANONYMOUS
         ).response(
-            new RequestLine(RqMethod.GET, "/secret/resource").toString(),
+            new RequestLine(RqMethod.GET, "/secret/resource"),
             Headers.EMPTY,
             Content.EMPTY
         ).send(
@@ -141,7 +141,7 @@ final class AuthClientSliceTest {
             },
             new FakeAuthenticator(Headers.EMPTY, new Headers.From(auth))
         ).response(
-            new RequestLine(RqMethod.GET, "/top/secret").toString(),
+            new RequestLine(RqMethod.GET, "/top/secret"),
             new Headers.From(original),
             Content.EMPTY
         ).send(
@@ -164,7 +164,7 @@ final class AuthClientSliceTest {
             },
             new FakeAuthenticator(Headers.EMPTY)
         ).response(
-            new RequestLine(RqMethod.GET, "/path").toString(),
+            new RequestLine(RqMethod.GET, "/path"),
             Headers.EMPTY,
             Content.EMPTY
         ).send(
@@ -195,7 +195,7 @@ final class AuthClientSliceTest {
             ),
             new FakeAuthenticator(auth, auth)
         ).response(
-            new RequestLine(RqMethod.GET, "/api").toString(),
+            new RequestLine(RqMethod.GET, "/api"),
             Headers.EMPTY,
             new Content.OneTime(new Content.From(request))
         ).send(

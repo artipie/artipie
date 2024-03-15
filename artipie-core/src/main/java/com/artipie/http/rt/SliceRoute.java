@@ -6,6 +6,7 @@ package com.artipie.http.rt;
 
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
@@ -22,10 +23,8 @@ import org.reactivestreams.Publisher;
  * <p>
  * {@link Slice} implementation which redirect requests to {@link Slice}
  * in {@link Path} if {@link RtRule} matched.
- * </p>
  * <p>
  * Usage:
- * </p>
  * <pre><code>
  * new SliceRoute(
  *   new SliceRoute.Path(
@@ -36,7 +35,6 @@ import org.reactivestreams.Publisher;
  *   )
  * );
  * </code></pre>
- * @since 0.5
  */
 public final class SliceRoute implements Slice {
 
@@ -62,7 +60,7 @@ public final class SliceRoute implements Slice {
     }
 
     @Override
-    public Response response(final String line,
+    public Response response(final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body) {
         return this.routes.stream()
@@ -85,7 +83,6 @@ public final class SliceRoute implements Slice {
      * {@link RtRule} passed, then the request will be redirected to
      * underlying {@link Slice}.
      * </p>
-     * @since 0.5
      * @deprecated Use {@link RtRulePath} instead
      */
     @Deprecated
@@ -107,7 +104,7 @@ public final class SliceRoute implements Slice {
 
         @Override
         public Optional<Response> response(
-            final String line,
+            final RequestLine line,
             final Iterable<Map.Entry<String, String>> headers,
             final Publisher<ByteBuffer> body
         ) {

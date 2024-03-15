@@ -54,7 +54,7 @@ public final class RpmUploadTest {
         MatcherAssert.assertThat(
             "ACCEPTED 202 returned",
             new RpmUpload(this.storage, new RepoConfig.Simple(), events).response(
-                new RequestLine("PUT", "/uploaded.rpm").toString(),
+                new RequestLine("PUT", "/uploaded.rpm"),
                 new ListOf<Map.Entry<String, String>>(),
                 Flowable.fromArray(ByteBuffer.wrap(content))
             ),
@@ -80,7 +80,7 @@ public final class RpmUploadTest {
         new BlockingStorage(this.storage).save(key, "uploaded package".getBytes());
         MatcherAssert.assertThat(
             new RpmUpload(this.storage, new RepoConfig.Simple(), Optional.empty()).response(
-                new RequestLine("PUT", "/replaced.rpm?override=true").toString(),
+                new RequestLine("PUT", "/replaced.rpm?override=true"),
                 Headers.EMPTY,
                 Flowable.fromArray(ByteBuffer.wrap(content))
             ),
@@ -101,7 +101,7 @@ public final class RpmUploadTest {
         new BlockingStorage(this.storage).save(key, content);
         MatcherAssert.assertThat(
             new RpmUpload(this.storage, new RepoConfig.Simple(), events).response(
-                new RequestLine("PUT", "/not-replaced.rpm").toString(),
+                new RequestLine("PUT", "/not-replaced.rpm"),
                 Headers.EMPTY,
                 Flowable.fromArray(ByteBuffer.wrap("second package content".getBytes()))
             ),
@@ -120,7 +120,7 @@ public final class RpmUploadTest {
         MatcherAssert.assertThat(
             "ACCEPTED 202 returned",
             new RpmUpload(this.storage, new RepoConfig.Simple(), Optional.empty()).response(
-                new RequestLine("PUT", "/my-package.rpm?skip_update=true").toString(),
+                new RequestLine("PUT", "/my-package.rpm?skip_update=true"),
                 Headers.EMPTY,
                 Flowable.fromArray(ByteBuffer.wrap(content))
             ),
@@ -147,7 +147,7 @@ public final class RpmUploadTest {
             new RpmUpload(
                 this.storage, new RepoConfig.Simple(RepoConfig.UpdateMode.CRON), Optional.empty()
             ).response(
-                new RequestLine("PUT", "/abc-package.rpm").toString(),
+                new RequestLine("PUT", "/abc-package.rpm"),
                 Headers.EMPTY,
                 Flowable.fromArray(ByteBuffer.wrap(content))
             ),

@@ -15,17 +15,18 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
 import com.jcabi.log.Logger;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import org.reactivestreams.Publisher;
 
 /**
  * Composer proxy slice with cache support.
@@ -71,11 +72,11 @@ final class CachedProxySlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final String name = new RequestLineFrom(line)
+        final String name = line
             .uri().getPath().replaceAll("^/p2?/", "")
             .replaceAll("~.*", "")
             .replaceAll("\\^.*", "")
@@ -115,7 +116,7 @@ final class CachedProxySlice implements Slice {
      * @return Content from respond of remote. If there were some errors,
      *  empty will be returned.
      */
-    private CompletionStage<Optional<? extends Content>> packageFromRemote(final String line) {
+    private CompletionStage<Optional<? extends Content>> packageFromRemote(final RequestLine line) {
         return new Remote.WithErrorHandling(
             () -> {
                 final CompletableFuture<Optional<? extends Content>> promise;

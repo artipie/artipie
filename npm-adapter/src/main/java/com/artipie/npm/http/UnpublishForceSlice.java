@@ -9,7 +9,7 @@ import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
@@ -29,7 +29,6 @@ import org.reactivestreams.Publisher;
  * Request line to this slice looks like `/[<@scope>/]pkg/-rev/undefined`.
  * It unpublishes the whole package or a single version of package
  * when only one version is published.
- * @since 0.8
  */
 final class UnpublishForceSlice implements Slice {
     /**
@@ -67,20 +66,19 @@ final class UnpublishForceSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
+        final RequestLine line,
         final Iterable<Map.Entry<String, String>> headers,
         final Publisher<ByteBuffer> body
     ) {
-        final RequestLineFrom rqline = new RequestLineFrom(line);
-        final String uri = rqline.uri().getPath();
+        final String uri = line.uri().getPath();
         final Matcher matcher = UnpublishForceSlice.PTRN.matcher(uri);
         final Response resp;
         if (matcher.matches()) {
             final String pkg = new PackageNameFromUrl(
                 String.format(
-                    "%s %s %s", rqline.method(),
+                    "%s %s %s", line.method(),
                     uri.substring(0, uri.indexOf("/-rev/")),
-                    rqline.version()
+                    line.version()
                 )
             ).value();
             CompletionStage<Void> res = this.storage.deleteAll(new Key.From(pkg));

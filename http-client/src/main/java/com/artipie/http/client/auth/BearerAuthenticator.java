@@ -81,7 +81,7 @@ public final class BearerAuthenticator implements Authenticator {
             .collect(Collectors.joining("&"));
         final CompletableFuture<String> promise = new CompletableFuture<>();
         return new AuthClientSlice(new UriClientSlice(this.client, realm), this.auth).response(
-            new RequestLine(RqMethod.GET, String.format("?%s", query)).toString(),
+            new RequestLine(RqMethod.GET, String.format("?%s", query)),
             Headers.EMPTY,
             Flowable.empty()
         ).send(
