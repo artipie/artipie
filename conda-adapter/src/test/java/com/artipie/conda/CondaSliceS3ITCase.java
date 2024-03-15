@@ -136,7 +136,7 @@ public final class CondaSliceS3ITCase {
         .withWorkingDirectory("/home/");
         this.cntn.start();
         final int minioport = this.cntn.getMappedPort(9000);
-        final Storage storage = new StoragesLoader()
+        final Storage storage = StoragesLoader.STORAGES
             .newObject(
                 "s3",
                 new Config.YamlStorageConfig(

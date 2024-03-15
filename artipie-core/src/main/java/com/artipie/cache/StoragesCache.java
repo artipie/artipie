@@ -2,38 +2,32 @@
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
  * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
-package com.artipie.settings.cache;
+package com.artipie.cache;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Storage;
 import com.artipie.asto.factory.Config;
 import com.artipie.asto.factory.StoragesLoader;
+import com.artipie.asto.misc.Cleanable;
 import com.artipie.jfr.JfrStorage;
 import com.artipie.jfr.StorageCreateEvent;
 import com.artipie.misc.ArtipieProperties;
 import com.artipie.misc.Property;
-import com.artipie.settings.Settings;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
+import org.apache.commons.lang3.NotImplementedException;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Implementation of cache for storages with similar configurations
  * in Artipie settings using {@link LoadingCache}.
- *
- * @since 0.23
  */
-public class CachedStorages implements StoragesCache {
-
-    /**
-     * Storages factory.
-     */
-    public static final StoragesLoader STORAGES = new StoragesLoader();
+public class StoragesCache implements Cleanable<YamlMapping> {
 
     /**
      * Cache for storages.
@@ -43,7 +37,7 @@ public class CachedStorages implements StoragesCache {
     /**
      * Ctor.
      */
-    public CachedStorages() {
+    public StoragesCache() {
         this.cache = CacheBuilder.newBuilder()
             .expireAfterWrite(
                 new Property(ArtipieProperties.STORAGE_TIMEOUT).asLongOrDefault(180_000L),
@@ -52,40 +46,35 @@ public class CachedStorages implements StoragesCache {
             .build();
     }
 
-    @Override
-    public Storage storage(final Settings settings) {
-        final YamlMapping yaml = settings.meta().yamlMapping("storage");
-        if (yaml == null) {
-            throw new ArtipieException(
-                String.format("Failed to find storage configuration in \n%s", settings)
-            );
-        }
-        return this.storage(yaml);
-    }
-
-    @Override
+    /**
+     * Finds storage by specified in settings configuration cache or creates
+     * a new item and caches it.
+     *
+     * @param yaml Storage settings
+     * @return Storage
+     */
     public Storage storage(final YamlMapping yaml) {
+        final String type = yaml.string("type");
+        if (Strings.isNullOrEmpty(type)) {
+            throw new ArtipieException("Storage type cannot be null or empty.");
+        }
         try {
             return this.cache.get(
                 yaml,
                 () -> {
-                    final String type = yaml.string("type");
-                    if (Strings.isNullOrEmpty(type)) {
-                        throw new IllegalArgumentException("Storage type cannot be null or empty.");
-                    }
                     final Storage res;
                     final StorageCreateEvent event = new StorageCreateEvent();
                     if (event.isEnabled()) {
                         event.begin();
                         res = new JfrStorage(
-                            CachedStorages.STORAGES
+                            StoragesLoader.STORAGES
                                 .newObject(type, new Config.YamlStorageConfig(yaml))
                         );
                         event.storage = res.identifier();
                         event.commit();
                     } else {
                         res = new JfrStorage(
-                            CachedStorages.STORAGES
+                            StoragesLoader.STORAGES
                                 .newObject(type, new Config.YamlStorageConfig(yaml))
                         );
                     }
@@ -97,7 +86,11 @@ public class CachedStorages implements StoragesCache {
         }
     }
 
-    @Override
+    /**
+     * Returns the approximate number of entries in this cache.
+     *
+     * @return Number of entries
+     */
     public long size() {
         return this.cache.size();
     }

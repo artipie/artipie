@@ -14,16 +14,13 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for Storages.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class VertxFileStorageFactoryTest {
 
     @Test
     void shouldCreateVertxFileStorage() {
         MatcherAssert.assertThat(
-            new StoragesLoader()
+            StoragesLoader.STORAGES
                 .newObject(
                     "vertx-file",
                     new Config.YamlStorageConfig(

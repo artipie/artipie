@@ -5,6 +5,7 @@
 package com.artipie.misc;
 
 import com.artipie.ArtipieException;
+
 import java.util.Optional;
 
 /**

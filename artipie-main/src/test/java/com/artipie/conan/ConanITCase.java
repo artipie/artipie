@@ -63,10 +63,8 @@ public final class ConanITCase {
     @Test
     public void incorrectPortFailTest() throws IOException {
         for (final String file : ConanITCase.CONAN_TEST_PKG) {
-            this.containers.putBinaryToArtipie(
-                new TestResource(
-                    String.join("/", ConanITCase.SRV_RES_PREFIX, file)
-                ).asBytes(),
+            this.containers.putResourceToArtipie(
+                String.join("/", ConanITCase.SRV_RES_PREFIX, file),
                 String.join("/", ConanITCase.SRV_REPO_PREFIX, file)
             );
         }
@@ -85,10 +83,8 @@ public final class ConanITCase {
     @Test
     public void incorrectPkgFailTest() throws IOException {
         for (final String file : ConanITCase.CONAN_TEST_PKG) {
-            this.containers.putBinaryToArtipie(
-                new TestResource(
-                    String.join("/", ConanITCase.SRV_RES_PREFIX, file)
-                ).asBytes(),
+            this.containers.putResourceToArtipie(
+                String.join("/", ConanITCase.SRV_RES_PREFIX, file),
                 String.join("/", ConanITCase.SRV_REPO_PREFIX, file)
             );
         }
@@ -103,15 +99,13 @@ public final class ConanITCase {
     @Test
     public void installFromArtipie() throws IOException {
         for (final String file : ConanITCase.CONAN_TEST_PKG) {
-            this.containers.putBinaryToArtipie(
-                new TestResource(
-                    String.join("/", ConanITCase.SRV_RES_PREFIX, file)
-                ).asBytes(),
+            this.containers.putResourceToArtipie(
+                String.join("/", ConanITCase.SRV_RES_PREFIX, file),
                 String.join("/", ConanITCase.SRV_REPO_PREFIX, file)
             );
         }
         this.containers.assertExec(
-            "Conan remote add failed", new ContainerResultMatcher(),
+            "Conan install failed", new ContainerResultMatcher(),
             "conan install zlib/1.2.13@ -r conan-test".split(" ")
         );
     }
@@ -150,7 +144,7 @@ public final class ConanITCase {
         );
         this.containers.assertExec(
             "rm cache failed", new ContainerResultMatcher(),
-            "rm -rf /home/conan/.conan/data".split(" ")
+            "rm -rf /root/.conan/data".split(" ")
         );
         this.containers.assertExec(
             "Conan install (conan-test) failed", new ContainerResultMatcher(),

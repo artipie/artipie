@@ -8,6 +8,7 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.factory.Config;
 import com.artipie.asto.factory.StoragesLoader;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
@@ -15,16 +16,16 @@ import java.io.UncheckedIOException;
  * Policy factory to create {@link CachedYamlPolicy}. Yaml policy is read from storage,
  * and it's required to describe this storage in the configuration.
  * Configuration format is the following:
- *
+ *<pre>{@code
  * policy:
  *   type: artipie
  *   eviction_millis: 60000 # not required, default 3 min
  *   storage:
  *     type: fs
  *     path: /some/path
- *
+ *}</pre>
  * The storage itself is expected to have yaml files with permissions in the following structure:
- *
+ *<pre>{@code
  * ..
  * ├── roles
  * │   ├── java-dev.yaml
@@ -34,7 +35,7 @@ import java.io.UncheckedIOException;
  * │   ├── david.yaml
  * │   ├── jane.yaml
  * │   ├── ...
- *
+ *}</pre>
  * @since 1.2
  */
 @ArtipiePolicyFactory("artipie")
@@ -53,7 +54,7 @@ public final class YamlPolicyFactory implements PolicyFactory {
         try {
             return new CachedYamlPolicy(
                 new BlockingStorage(
-                    new StoragesLoader().newObject(
+                    StoragesLoader.STORAGES.newObject(
                         sub.string("type"),
                         new Config.YamlStorageConfig(
                             Yaml.createYamlInput(sub.toString()).readYamlMapping()

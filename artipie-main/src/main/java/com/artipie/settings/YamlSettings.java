@@ -14,7 +14,9 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
 import com.artipie.asto.factory.Config;
+import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.auth.AuthFromEnv;
+import com.artipie.cache.StoragesCache;
 import com.artipie.db.ArtifactDbFactory;
 import com.artipie.db.DbConsumer;
 import com.artipie.http.auth.AuthLoader;
@@ -24,18 +26,18 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.scheduling.MetadataEventQueues;
 import com.artipie.scheduling.QuartzService;
 import com.artipie.settings.cache.ArtipieCaches;
-import com.artipie.settings.cache.CachedStorages;
 import com.artipie.settings.cache.CachedUsers;
 import com.artipie.settings.cache.GuavaFiltersCache;
 import com.jcabi.log.Logger;
+import org.quartz.SchedulerException;
+
+import javax.sql.DataSource;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Consumer;
-import javax.sql.DataSource;
-import org.quartz.SchedulerException;
 
 /**
  * Settings built from YAML.
@@ -123,7 +125,7 @@ public final class YamlSettings implements Settings {
             this.meta(), auth, new PolicyStorage(this.meta()).parse()
         );
         this.acach = new ArtipieCaches.All(
-            auth, new CachedStorages(), this.security.policy(), new GuavaFiltersCache()
+            auth, new StoragesCache(), this.security.policy(), new GuavaFiltersCache()
         );
         this.mctx = new MetricsContext(this.meta());
         this.events = YamlSettings.initArtifactsEvents(this.meta(), quartz, path);
@@ -131,7 +133,11 @@ public final class YamlSettings implements Settings {
 
     @Override
     public Storage configStorage() {
-        return this.acach.storagesCache().storage(this);
+        final YamlMapping yaml = meta().yamlMapping("storage");
+        if (yaml == null) {
+            throw new ArtipieException("Failed to find storage configuration in \n" + this);
+        }
+        return this.acach.storagesCache().storage(yaml);
     }
 
     @Override
@@ -283,7 +289,7 @@ public final class YamlSettings implements Settings {
                     ).findFirst().map(node -> node.yamlMapping(YamlSettings.NODE_STORAGE));
                 if (asto.isPresent()) {
                     res = Optional.of(
-                        CachedStorages.STORAGES.newObject(
+                        StoragesLoader.STORAGES.newObject(
                             asto.get().string(YamlSettings.NODE_TYPE),
                             new Config.YamlStorageConfig(asto.get())
                         )
@@ -292,7 +298,7 @@ public final class YamlSettings implements Settings {
                     && YamlSettings.ARTIPIE.equals(policy.string(YamlSettings.NODE_TYPE))
                     && policy.yamlMapping(YamlSettings.NODE_STORAGE) != null) {
                     res = Optional.of(
-                        CachedStorages.STORAGES.newObject(
+                        StoragesLoader.STORAGES.newObject(
                             policy.yamlMapping(YamlSettings.NODE_STORAGE)
                                 .string(YamlSettings.NODE_TYPE),
                             new Config.YamlStorageConfig(

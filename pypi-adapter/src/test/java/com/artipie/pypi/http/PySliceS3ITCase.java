@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import java.io.IOException;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -73,10 +73,10 @@ public final class PySliceS3ITCase {
     private final PypiDeployment container = new PypiDeployment();
 
     @BeforeEach
-    void start(final AmazonS3 client) throws IOException, InterruptedException {
+    void start(final AmazonS3 client) {
         this.bucket = UUID.randomUUID().toString();
         client.createBucket(this.bucket);
-        this.asto = new StoragesLoader()
+        this.asto = StoragesLoader.STORAGES
             .newObject(
                 "s3",
                 new com.artipie.asto.factory.Config.YamlStorageConfig(

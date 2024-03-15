@@ -36,10 +36,7 @@ import org.testcontainers.containers.GenericContainer;
 
 /**
  * Tests for {@link RedisStorage}.
- *
- * @since 0.1
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 @DisabledOnOs(OS.WINDOWS)
 public final class RedisStorageTest {
     /**
@@ -57,7 +54,7 @@ public final class RedisStorageTest {
         this.redis = new GenericContainer<>("redis:3-alpine")
             .withExposedPorts(6379);
         this.redis.start();
-        this.storage = new StoragesLoader()
+        this.storage = StoragesLoader.STORAGES
             .newObject("redis", config(this.redis.getFirstMappedPort()));
     }
 

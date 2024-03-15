@@ -32,8 +32,6 @@ import java.util.stream.Collectors;
 
 /**
  * Tests for {@link RxStorageWrapper}.
- *
- * @since 1.11
  */
 final class RxStorageWrapperS3Test {
 
@@ -64,7 +62,7 @@ final class RxStorageWrapperS3Test {
     void setUp(final AmazonS3 client) {
         this.bucket = UUID.randomUUID().toString();
         client.createBucket(this.bucket);
-        this.original = new StoragesLoader()
+        this.original = StoragesLoader.STORAGES
             .newObject(
                 "s3",
                 new Config.YamlStorageConfig(

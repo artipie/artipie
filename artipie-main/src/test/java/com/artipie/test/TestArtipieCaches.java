@@ -5,9 +5,10 @@
 package com.artipie.test;
 
 import com.artipie.asto.misc.Cleanable;
+import com.artipie.cache.StoragesCache;
 import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.cache.FiltersCache;
-import com.artipie.settings.cache.StoragesCache;
+
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.lang3.NotImplementedException;
 

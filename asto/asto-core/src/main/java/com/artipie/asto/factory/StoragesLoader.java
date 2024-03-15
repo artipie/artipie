@@ -13,11 +13,11 @@ import java.util.Set;
 
 /**
  * Storages to get instance of storage.
- *
- * @since 1.13.0
  */
 public final class StoragesLoader
     extends FactoryLoader<StorageFactory, ArtipieStorageFactory, Config, Storage> {
+
+    public static StoragesLoader STORAGES = new StoragesLoader();
 
     /**
      * Environment parameter to define packages to find storage factories.
@@ -28,7 +28,7 @@ public final class StoragesLoader
     /**
      * Ctor.
      */
-    public StoragesLoader() {
+    private StoragesLoader() {
         this(System.getenv());
     }
 

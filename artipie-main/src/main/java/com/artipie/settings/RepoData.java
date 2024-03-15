@@ -15,7 +15,7 @@ import com.artipie.asto.Copy;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.SubStorage;
-import com.artipie.settings.cache.StoragesCache;
+import com.artipie.cache.StoragesCache;
 import com.jcabi.log.Logger;
 
 import java.io.IOException;
