@@ -42,7 +42,7 @@ public final class ArtipieStorageTest {
     void shouldSave() throws Exception {
         final Key key = new Key.From("a", "b", "hello.txt");
         final byte[] content = "Hello world!!!".getBytes();
-        final AtomicReference<String> line = new AtomicReference<>();
+        final AtomicReference<RequestLine> line = new AtomicReference<>();
         final AtomicReference<Iterable<Map.Entry<String, String>>> headers =
             new AtomicReference<>();
         final AtomicReference<byte[]> body = new AtomicReference<>();
@@ -71,7 +71,7 @@ public final class ArtipieStorageTest {
             new IsEqual<>(
                 new RequestLine(
                     RqMethod.PUT, String.format("/path1/%s", key)
-                ).toString()
+                )
             )
         );
         MatcherAssert.assertThat(
@@ -100,7 +100,7 @@ public final class ArtipieStorageTest {
     @Test
     void shouldDelete() throws Exception {
         final Key key = new Key.From("delkey");
-        final AtomicReference<String> line = new AtomicReference<>();
+        final AtomicReference<RequestLine> line = new AtomicReference<>();
         final AtomicReference<Iterable<Map.Entry<String, String>>> headers =
             new AtomicReference<>();
         final AtomicReference<byte[]> body = new AtomicReference<>();
@@ -123,15 +123,12 @@ public final class ArtipieStorageTest {
                 ), new URI("http://host/path2")
             )
         ).delete(key);
-        MatcherAssert.assertThat(
-            "Request line to delete a value",
+        Assertions.assertEquals(
+            new RequestLine(RqMethod.DELETE, String.format("/path2/%s", key)),
             line.get(),
-            new IsEqual<>(
-                new RequestLine(
-                    RqMethod.DELETE, String.format("/path2/%s", key)
-                ).toString()
-            )
+            "Request line to delete a value"
         );
+
         MatcherAssert.assertThat(
             "Headers are empty",
             headers.get(),
