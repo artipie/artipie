@@ -31,7 +31,6 @@ import org.reactivestreams.Publisher;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +38,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Binary files proxy {@link Slice} implementation.
- * @since 0.4
  */
 public final class FileProxySlice implements Slice {
 
@@ -138,7 +136,7 @@ public final class FileProxySlice implements Slice {
 
     @Override
     public Response response(
-        final RequestLine line, final Iterable<Map.Entry<String, String>> ignored,
+        final RequestLine line, final Headers ignored,
         final Publisher<ByteBuffer> pub
     ) {
         final AtomicReference<Headers> headers = new AtomicReference<>();
@@ -186,7 +184,7 @@ public final class FileProxySlice implements Slice {
                     final Response result;
                     if (throwable == null && content.isPresent()) {
                         result = new RsFull(
-                            RsStatus.OK, new Headers.From(headers.get()), content.get()
+                            RsStatus.OK, headers.get(), content.get()
                         );
                     } else {
                         result = new RsWithStatus(RsStatus.NOT_FOUND);

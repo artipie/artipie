@@ -15,7 +15,6 @@ import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -42,7 +41,7 @@ final class SliceByPath implements Slice {
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final Optional<Key> key = SliceByPath.keyFromPath(line.uri().getPath());

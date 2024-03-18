@@ -7,6 +7,7 @@ package com.artipie.http.slice;
 import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -17,7 +18,6 @@ import com.artipie.scheduling.RepositoryEvents;
 import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -82,29 +82,21 @@ public final class SliceUpload implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
+        Key key = transform.apply(line.uri().getPath());
+        CompletableFuture<Void> res = this.storage.save(key, new ContentWithSize(body, headers));
+        if (this.events.isPresent()) {
+            res = res.thenCompose(
+                nothing -> this.storage.metadata(key)
+                    .thenApply(meta -> meta.read(Meta.OP_SIZE).orElseThrow())
+                    .thenAccept(
+                        size -> this.events.get()
+                            .addUploadEventByKey(key, size, headers)
+                    )
+            );
+        }
         return new AsyncResponse(
-            CompletableFuture.supplyAsync(() -> line.uri().getPath())
-                .thenApply(this.transform)
-                .thenCompose(
-                    key -> {
-                        CompletableFuture<Void> res =
-                            this.storage.save(key, new ContentWithSize(body, headers));
-                        if (this.events.isPresent()) {
-                            res = res.thenCompose(
-                                nothing -> this.storage.metadata(key).thenApply(
-                                    meta -> meta.read(Meta.OP_SIZE).get()
-                                ).thenAccept(
-                                    size -> this.events.get()
-                                        .addUploadEventByKey(key, size, headers)
-                                )
-                            );
-                        }
-                        return res;
-                    }
-                ).thenApply(rsp -> new RsWithStatus(RsStatus.CREATED))
+            res.thenApply(rsp -> new RsWithStatus(RsStatus.CREATED))
         );
     }
 }

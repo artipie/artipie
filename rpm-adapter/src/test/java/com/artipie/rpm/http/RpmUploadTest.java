@@ -16,25 +16,21 @@ import com.artipie.rpm.RepoConfig;
 import com.artipie.rpm.TestRpm;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
-import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+
 /**
  * Test for {@link RpmUpload}.
- *
- * @since 0.8.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RpmUploadTest {
 
     /**
@@ -55,7 +51,7 @@ public final class RpmUploadTest {
             "ACCEPTED 202 returned",
             new RpmUpload(this.storage, new RepoConfig.Simple(), events).response(
                 new RequestLine("PUT", "/uploaded.rpm"),
-                new ListOf<Map.Entry<String, String>>(),
+                Headers.EMPTY,
                 Flowable.fromArray(ByteBuffer.wrap(content))
             ),
             new RsHasStatus(RsStatus.ACCEPTED)

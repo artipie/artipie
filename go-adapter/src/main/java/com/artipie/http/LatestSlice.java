@@ -18,7 +18,6 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import org.reactivestreams.Publisher;
@@ -27,17 +26,12 @@ import org.reactivestreams.Publisher;
  * Go mod slice: this slice returns json-formatted metadata about go module as
  * described in "JSON-formatted metadata(.info file body) about the latest known version"
  * section of readme.
- * @since 0.3
  */
 public final class LatestSlice implements Slice {
 
-    /**
-     * Storage.
-     */
     private final Storage storage;
 
     /**
-     * Ctor.
      * @param storage Storage
      */
     public LatestSlice(final Storage storage) {
@@ -46,7 +40,7 @@ public final class LatestSlice implements Slice {
 
     @Override
     public Response response(
-        final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+        final RequestLine line, final Headers headers,
         final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             CompletableFuture.supplyAsync(

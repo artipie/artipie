@@ -12,6 +12,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.composer.AllPackages;
 import com.artipie.composer.AstoRepository;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
@@ -26,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -70,7 +70,7 @@ class PhpComposerTest {
         );
         final Response response = this.php.response(
             new RequestLine(RqMethod.GET, "/p/vendor/package.json"),
-            Collections.emptyList(),
+            Headers.EMPTY,
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -89,7 +89,7 @@ class PhpComposerTest {
     void shouldFailGetPackageMetadataWhenNotExists() {
         final Response response = this.php.response(
             new RequestLine(RqMethod.GET, "/p/vendor/unknown-package.json"),
-            Collections.emptyList(),
+            Headers.EMPTY,
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -105,7 +105,7 @@ class PhpComposerTest {
         new BlockingStorage(this.storage).save(new AllPackages(), data);
         final Response response = this.php.response(
             PhpComposerTest.GET_PACKAGES,
-            Collections.emptyList(),
+            Headers.EMPTY,
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -123,7 +123,7 @@ class PhpComposerTest {
     void shouldFailGetAllPackagesWhenNotExists() {
         final Response response = this.php.response(
             PhpComposerTest.GET_PACKAGES,
-            Collections.emptyList(),
+            Headers.EMPTY,
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -136,7 +136,7 @@ class PhpComposerTest {
     void shouldPutRoot() {
         final Response response = this.php.response(
             new RequestLine(RqMethod.PUT, "/"),
-            Collections.emptyList(),
+            Headers.EMPTY,
             new Content.From(
                 new TestResource("minimal-package.json").asBytes()
             )

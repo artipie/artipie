@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 
 /**
  * Authentication mechanism to verify user.
- * @since 0.8
  */
 public interface Authentication {
 

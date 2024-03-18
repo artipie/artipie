@@ -13,15 +13,14 @@ import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import io.reactivex.Flowable;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 /**
  * Tests for {@link ProxyLayers}.
- *
- * @since 0.3
  */
 class ProxyLayersTest {
 
@@ -36,7 +35,7 @@ class ProxyLayersTest {
                 }
                 return new RsFull(
                     RsStatus.OK,
-                    new Headers.From(new ContentLength(String.valueOf(size))),
+                    Headers.from(new ContentLength(String.valueOf(size))),
                     Flowable.empty()
                 );
             },
@@ -44,7 +43,7 @@ class ProxyLayersTest {
         ).get(new Digest.FromString(digest)).toCompletableFuture().join();
         MatcherAssert.assertThat(blob.isPresent(), new IsEqual<>(true));
         MatcherAssert.assertThat(
-            blob.get().digest().string(),
+            blob.orElseThrow().digest().string(),
             new IsEqual<>(digest)
         );
         MatcherAssert.assertThat(

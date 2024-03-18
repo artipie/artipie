@@ -105,7 +105,7 @@ public final class ServletSliceWrap {
      * @return Artipie headers
      */
     private static Headers headers(final HttpServletRequest req) {
-        return new Headers.From(
+        return new Headers(
             Collections.list(req.getHeaderNames()).stream().flatMap(
                 name -> Collections.list(req.getHeaders(name)).stream()
                     .map(val -> new Header(name, val))

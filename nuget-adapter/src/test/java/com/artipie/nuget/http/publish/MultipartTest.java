@@ -8,24 +8,22 @@ import com.artipie.asto.Concatenation;
 import com.artipie.asto.Remaining;
 import com.artipie.http.Headers;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.util.Collections;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
+
 /**
  * Tests for {@link Multipart}.
- *
- * @since 0.1
  */
 class MultipartTest {
 
     @Test
     void shouldReadFirstPart() {
         final Multipart multipart = new Multipart(
-            new Headers.From("Content-Type", "multipart/form-data; boundary=\"simple boundary\""),
+            Headers.from("Content-Type", "multipart/form-data; boundary=\"simple boundary\""),
             Flowable.just(
                 ByteBuffer.wrap(
                     String.join(
@@ -47,7 +45,7 @@ class MultipartTest {
 
     @Test
     void shouldFailIfNoContentTypeHeader() {
-        final Multipart multipart = new Multipart(Collections.emptySet(), Flowable.empty());
+        final Multipart multipart = new Multipart(Headers.EMPTY, Flowable.empty());
         final Throwable throwable = Assertions.assertThrows(
             IllegalStateException.class,
             () -> Flowable.fromPublisher(multipart.first()).blockingFirst()
@@ -61,7 +59,7 @@ class MultipartTest {
     @Test
     void shouldFailIfNoParts() {
         final Multipart multipart = new Multipart(
-            new Headers.From("content-type", "multipart/form-data; boundary=123"),
+            Headers.from("content-type", "multipart/form-data; boundary=123"),
             Flowable.just(ByteBuffer.wrap("--123--".getBytes()))
         );
         final Throwable throwable = Assertions.assertThrows(

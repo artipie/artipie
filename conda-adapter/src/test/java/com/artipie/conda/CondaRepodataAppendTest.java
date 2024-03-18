@@ -18,9 +18,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link CondaRepodata.Remove}.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class CondaRepodataAppendTest {
 
     @Test

@@ -23,7 +23,6 @@ import com.google.common.collect.Streams;
 import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -78,7 +77,7 @@ public final class RpmUpload implements Slice {
 
     @Override
     public Response response(
-        final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+        final RequestLine line, final Headers headers,
         final Publisher<ByteBuffer> body) {
         final Request request = new Request(line);
         final Key key = request.file();
@@ -112,8 +111,7 @@ public final class RpmUpload implements Slice {
                                                 info -> queue.add(
                                                     new ArtifactEvent(
                                                         RpmUpload.REPO_TYPE, this.config.name(),
-                                                        new Login(new Headers.From(headers))
-                                                            .getValue(),
+                                                        new Login(headers).getValue(),
                                                         info.name(), info.version(),
                                                         info.packageSize()
                                                     )

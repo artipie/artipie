@@ -29,7 +29,7 @@ public final class ContentLengthTest {
     void shouldExtractLongValueFromHeaders() {
         final long length = 123;
         final ContentLength header = new ContentLength(
-            new Headers.From(
+            Headers.from(
                 new Header("Content-Type", "application/octet-stream"),
                 new Header("content-length", String.valueOf(length)),
                 new Header("X-Something", "Some Value")

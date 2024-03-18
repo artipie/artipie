@@ -8,21 +8,20 @@ import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.jcabi.log.Logger;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.logging.Level;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that logs incoming requests and outgoing responses.
- *
- * @since 0.8
  */
 @SuppressWarnings("PMD.AvoidCatchingGenericException")
 public final class LoggingSlice implements Slice {
@@ -60,7 +59,7 @@ public final class LoggingSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final StringBuilder msg = new StringBuilder(">> ").append(line);
@@ -105,11 +104,8 @@ public final class LoggingSlice implements Slice {
      * @param builder Target {@link StringBuilder}.
      * @param headers Headers to be appended.
      */
-    private static void append(
-        final StringBuilder builder,
-        final Iterable<Map.Entry<String, String>> headers
-    ) {
-        for (final Map.Entry<String, String> header : headers) {
+    private static void append(StringBuilder builder, Headers headers) {
+        for (Header header : headers) {
             builder.append('\n').append(header.getKey()).append(": ").append(header.getValue());
         }
     }

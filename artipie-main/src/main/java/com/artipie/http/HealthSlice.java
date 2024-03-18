@@ -14,7 +14,6 @@ import com.artipie.http.rs.common.RsJson;
 import com.artipie.settings.Settings;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.json.Json;
@@ -46,7 +45,7 @@ public final class HealthSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+                             final Headers headers, final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             this.storageStatus().thenApply(
                 ok ->

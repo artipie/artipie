@@ -28,7 +28,6 @@ import org.reactivestreams.Publisher;
 import java.net.URI;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +38,6 @@ import java.util.stream.StreamSupport;
 /**
  * Slice that proxies request with given request line and empty headers and body,
  * caches and returns response from remote.
- * @since 0.7
  */
 final class ProxySlice implements Slice {
 
@@ -86,7 +84,7 @@ final class ProxySlice implements Slice {
 
     @Override
     public Response response(
-        final RequestLine line, final Iterable<Map.Entry<String, String>> ignored,
+        final RequestLine line, final Headers ignored,
         final Publisher<ByteBuffer> pub
     ) {
         final AtomicReference<Headers> headers = new AtomicReference<>();
@@ -127,7 +125,7 @@ final class ProxySlice implements Slice {
                         result.complete(
                             new RsFull(
                                 RsStatus.OK,
-                                new Headers.From(ProxySlice.contentType(headers.get(), line)),
+                                Headers.from(ProxySlice.contentType(headers.get(), line)),
                                 content.get()
                             )
                         );

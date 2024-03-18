@@ -4,15 +4,16 @@
  */
 package com.artipie.http.filter;
 
+import com.artipie.http.Headers;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.StandardRs;
 import io.reactivex.Flowable;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Tests for {@link FilterSlice}.
@@ -55,7 +56,7 @@ public class FilterSliceTest {
         MatcherAssert.assertThat(
             slice.response(
                 FiltersTestUtil.get(FilterSliceTest.PATH),
-                Collections.emptySet(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             new IsEqual<>(StandardRs.OK)
@@ -79,7 +80,7 @@ public class FilterSliceTest {
         slice
             .response(
                 FiltersTestUtil.get(FilterSliceTest.PATH),
-                Collections.emptySet(),
+                Headers.EMPTY,
                 Flowable.empty()
             )
             .send(

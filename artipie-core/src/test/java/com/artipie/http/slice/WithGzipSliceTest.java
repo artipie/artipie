@@ -26,9 +26,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link WithGzipSlice}.
- * @since 1.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class WithGzipSliceTest {
 
     @Test
@@ -43,7 +41,7 @@ class WithGzipSliceTest {
                     new RsHasHeaders(new ContentLength(20), new Header("Content-Encoding", "gzip"))
                 ),
                 new RequestLine(RqMethod.GET, "/"),
-                new Headers.From(new Header("accept-encoding", "gzip")),
+                Headers.from(new Header("accept-encoding", "gzip")),
                 Content.EMPTY
             )
         );
@@ -56,7 +54,7 @@ class WithGzipSliceTest {
         MatcherAssert.assertThat(
             new WithGzipSlice(
                 new SliceSimple(
-                    new RsFull(RsStatus.CREATED, new Headers.From(hdr), new Content.From(data))
+                    new RsFull(RsStatus.CREATED, Headers.from(hdr), new Content.From(data))
                 )
             ),
             new SliceHasResponse(

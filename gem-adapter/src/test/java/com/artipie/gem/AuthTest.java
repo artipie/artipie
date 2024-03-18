@@ -24,16 +24,17 @@ import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.policy.Policy;
 import com.artipie.security.policy.PolicyByUsername;
 import io.reactivex.Flowable;
+import org.cactoos.text.Base64Encoded;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.AllOf;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.PermissionCollection;
 import java.util.Arrays;
 import java.util.Optional;
-import org.cactoos.text.Base64Encoded;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.AllOf;
-import org.junit.jupiter.api.Test;
 
 /**
  * A test for api key endpoint.
@@ -46,7 +47,7 @@ public class AuthTest {
     @Test
     public void keyIsReturned() {
         final String token = "aGVsbG86d29ybGQ=";
-        final Headers headers = new Headers.From(
+        final Headers headers = Headers.from(
             new Authorization(String.format("Basic %s", token))
         );
         MatcherAssert.assertThat(
@@ -73,7 +74,7 @@ public class AuthTest {
                 ""
             ).response(
                 new RequestLine("GET", "/api/v1/api_key"),
-                new Headers.From(),
+                Headers.EMPTY,
                 Flowable.empty()
             ), new RsHasStatus(RsStatus.UNAUTHORIZED)
         );
@@ -104,7 +105,7 @@ public class AuthTest {
                 repo
             ).response(
                 new RequestLine("POST", "/api/v1/gems"),
-                new Headers.From(new Authorization(token)),
+                Headers.from(new Authorization(token)),
                 Flowable.empty()
             ), new RsHasStatus(RsStatus.FORBIDDEN)
         );
@@ -123,7 +124,7 @@ public class AuthTest {
                 "test"
             ).response(
                 new RequestLine("GET", "specs.4.8"),
-                new Headers.From(new Authorization(token)),
+                Headers.from(new Authorization(token)),
                 Flowable.empty()
             ), new RsHasStatus(RsStatus.FORBIDDEN)
         );
@@ -166,9 +167,7 @@ public class AuthTest {
             "test"
         ).response(
             new RequestLine("POST", "/api/v1/gems"),
-            new Headers.From(
-                new Authorization(String.format("Basic %s", token))
-            ),
+            Headers.from(new Authorization("Basic " + token)),
             Flowable.just(
                 ByteBuffer.wrap(new TestResource("rails-6.0.2.2.gem").asBytes())
             )

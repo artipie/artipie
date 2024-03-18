@@ -4,10 +4,7 @@
  */
 package com.artipie.http.rq;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import org.cactoos.iterable.IterableOf;
+import com.artipie.http.Headers;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -29,7 +26,7 @@ public final class RqHeadersTest {
         MatcherAssert.assertThat(
             "RqHeaders didn't find headers by name",
             new RqHeaders(
-                new IterableOf<Map.Entry<String, String>>(
+                Headers.from(
                     new MapEntry<>("x-header", first),
                     new MapEntry<>("Accept", "application/json"),
                     new MapEntry<>("X-Header", second)
@@ -46,7 +43,7 @@ public final class RqHeadersTest {
         MatcherAssert.assertThat(
             "RqHeaders.Single didn't find expected header",
             new RqHeaders.Single(
-                Arrays.asList(
+                Headers.from(
                     new MapEntry<>("Content-type", value),
                     new MapEntry<>("Range", "100")
                 ),
@@ -60,7 +57,7 @@ public final class RqHeadersTest {
     void singleFailsIfNoHeadersFound() {
         Assertions.assertThrows(
             IllegalStateException.class,
-            () -> new RqHeaders.Single(Collections.emptyList(), "Empty").asString()
+            () -> new RqHeaders.Single(Headers.EMPTY, "Empty").asString()
         );
     }
 
@@ -69,7 +66,7 @@ public final class RqHeadersTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new RqHeaders.Single(
-                Arrays.asList(
+                Headers.from(
                     new MapEntry<>("Content-length", "1024"),
                     new MapEntry<>("Content-Length", "1025")
                 ),

@@ -8,8 +8,11 @@ import com.artipie.asto.Key;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Header;
+import com.google.common.base.Strings;
+
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -19,24 +22,20 @@ import java.util.Optional;
  * <p>
  * Maven client supports {@code X-Checksum-*} headers for different hash algorithms,
  * {@code ETag} header for caching, {@code Content-Type} and {@code Content-Disposition}.
- * </p>
- * @since 0.5
  */
-final class ArtifactHeaders extends Headers.Wrap {
+@SuppressWarnings({"PMD.UseUtilityClass", "PMD.ProhibitPublicStaticMethods"})
+final class ArtifactHeaders {
 
     /**
      * Headers from artifact key and checksums.
      * @param location Artifact location
      * @param checksums Artifact checksums
      */
-    ArtifactHeaders(final Key location, final Map<String, String> checksums) {
-        super(
-            new Headers.From(
-                checksumsHeader(checksums),
-                contentDisposition(location),
-                contentType(location)
-            )
-        );
+    public static Headers from(Key location, Map<String, String> checksums) {
+        return new Headers()
+            .add(contentDisposition(location))
+            .add(contentType(location))
+            .addAll(new Headers(checksumsHeader(checksums)));
     }
 
     /**
@@ -56,17 +55,19 @@ final class ArtifactHeaders extends Headers.Wrap {
      * @param checksums Artifact checksums
      * @return Checksum header and {@code ETag} header
      */
-    private static Headers checksumsHeader(final Map<String, String> checksums) {
-        final ArrayList<Map.Entry<String, String>> headers =
-            new ArrayList<>(checksums.size() + 1);
-        for (final Map.Entry<String, String> entry : checksums.entrySet()) {
-            headers.add(
-                new Header(String.format("X-Checksum-%s", entry.getKey()), entry.getValue())
-            );
+    private static List<Header> checksumsHeader(final Map<String, String> checksums) {
+        List<Header> res = new ArrayList<>(checksums.size() + 1);
+        res.addAll(
+            checksums.entrySet()
+                .stream()
+                .map(entry -> new Header("X-Checksum-" + entry.getKey(), entry.getValue()))
+                .toList()
+        );
+        String sha1 = checksums.get("sha1");
+        if (!Strings.isNullOrEmpty(sha1)) {
+            res.add(new Header("ETag", sha1));
         }
-        Optional.ofNullable(checksums.get("sha1"))
-            .ifPresent(sha -> headers.add(new Header("ETag", sha)));
-        return new Headers.From(headers);
+        return res;
     }
 
     /**
@@ -77,17 +78,11 @@ final class ArtifactHeaders extends Headers.Wrap {
     private static Header contentType(final Key key) {
         final String type;
         final String src = key.string();
-        switch (extension(key)) {
-            case "jar":
-                type = "application/java-archive";
-                break;
-            case "pom":
-                type = "application/x-maven-pom+xml";
-                break;
-            default:
-                type = URLConnection.guessContentTypeFromName(src);
-                break;
-        }
+        type = switch (extension(key)) {
+            case "jar" -> "application/java-archive";
+            case "pom" -> "application/x-maven-pom+xml";
+            default -> URLConnection.guessContentTypeFromName(src);
+        };
         return new Header("Content-Type", Optional.ofNullable(type).orElse("*"));
     }
 

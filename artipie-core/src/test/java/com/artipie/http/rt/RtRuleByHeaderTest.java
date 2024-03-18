@@ -22,7 +22,7 @@ class RtRuleByHeaderTest {
         final String name = "some header";
         Assertions.assertTrue(
             new RtRule.ByHeader(name).apply(
-                new RequestLine("GET", "/"), new Headers.From(new MapEntry<>(name, "any value"))
+                new RequestLine("GET", "/"), Headers.from(new MapEntry<>(name, "any value"))
             )
         );
     }
@@ -39,7 +39,7 @@ class RtRuleByHeaderTest {
         final String name = "content-type";
         Assertions.assertTrue(
             new RtRule.ByHeader(name, Pattern.compile("text/html.*")).apply(
-                new RequestLine("GET", "/some/path"), new Headers.From(new MapEntry<>(name, "text/html; charset=utf-8"))
+                new RequestLine("GET", "/some/path"), Headers.from(new MapEntry<>(name, "text/html; charset=utf-8"))
             )
         );
     }
@@ -49,7 +49,7 @@ class RtRuleByHeaderTest {
         final String name = "Accept-Encoding";
         Assertions.assertFalse(
             new RtRule.ByHeader(name, Pattern.compile("gzip.*")).apply(
-                new RequestLine("GET", "/another/path"), new Headers.From(new MapEntry<>(name, "deflate"))
+                new RequestLine("GET", "/another/path"), Headers.from(new MapEntry<>(name, "deflate"))
             )
         );
     }

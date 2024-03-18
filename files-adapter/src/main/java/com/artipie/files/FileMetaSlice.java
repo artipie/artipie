@@ -11,6 +11,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.RsWithHeaders;
@@ -58,7 +59,7 @@ public final class FileMetaSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> iterable,
+        final Headers iterable,
         final Publisher<ByteBuffer> publisher
     ) {
         final Response raw = this.origin.response(line, iterable, publisher);
@@ -76,8 +77,7 @@ public final class FileMetaSlice implements Slice {
                                 result = this.storage.metadata(key)
                                     .thenApply(
                                         mtd -> new RsWithHeaders(
-                                            raw,
-                                            new FileHeaders(mtd)
+                                            raw, from(mtd)
                                         )
                                     );
                             } else {
@@ -94,34 +94,21 @@ public final class FileMetaSlice implements Slice {
     }
 
     /**
-     * File headers from Meta.
-     * @since 1.0
+     * Headers from meta.
+     *
+     * @param mtd Meta
+     * @return Headers
      */
-    private static final class FileHeaders extends Headers.Wrap {
-
-        /**
-         * Ctor.
-         * @param mtd Meta
-         */
-        FileHeaders(final Meta mtd) {
-            super(FileHeaders.from(mtd));
-        }
-
-        /**
-         * Headers from meta.
-         * @param mtd Meta
-         * @return Headers
-         */
-        private static Headers from(final Meta mtd) {
-            final Map<Meta.OpRWSimple<?>, String> fmtd = new HashMap<>();
-            fmtd.put(Meta.OP_MD5, "X-Artipie-MD5");
-            fmtd.put(Meta.OP_CREATED_AT, "X-Artipie-CreatedAt");
-            fmtd.put(Meta.OP_SIZE, "X-Artipie-Size");
-            final Map<String, String> hdrs = new HashMap<>();
-            for (final Map.Entry<Meta.OpRWSimple<?>, String> entry : fmtd.entrySet()) {
-                hdrs.put(entry.getValue(), mtd.read(entry.getKey()).get().toString());
-            }
-            return new Headers.From(hdrs.entrySet());
-        }
+    private static Headers from(final Meta mtd) {
+        final Map<Meta.OpRWSimple<?>, String> fmtd = new HashMap<>();
+        fmtd.put(Meta.OP_MD5, "X-Artipie-MD5");
+        fmtd.put(Meta.OP_CREATED_AT, "X-Artipie-CreatedAt");
+        fmtd.put(Meta.OP_SIZE, "X-Artipie-Size");
+        return new Headers(
+            fmtd.entrySet().stream()
+                .map(entry ->
+                    new Header(entry.getValue(), mtd.read(entry.getKey()).orElseThrow().toString()))
+                .toList()
+        );
     }
 }

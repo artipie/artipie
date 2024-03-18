@@ -6,6 +6,7 @@ package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Docker;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.error.ManifestError;
@@ -14,7 +15,6 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.docker.ManifestReference;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
@@ -38,7 +38,6 @@ import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.regex.Pattern;
@@ -46,8 +45,6 @@ import java.util.regex.Pattern;
 /**
  * Manifest entity in Docker HTTP API..
  * See <a href="https://docs.docker.com/registry/spec/api/#manifest">Manifest</a>.
- *
- * @since 0.2
  */
 final class ManifestEntity {
 
@@ -82,8 +79,6 @@ final class ManifestEntity {
         private final Docker docker;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          */
         Head(final Docker docker) {
@@ -100,7 +95,7 @@ final class ManifestEntity {
         @Override
         public Response response(
             final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers,
+            final Headers headers,
             final Publisher<ByteBuffer> body) {
             final Request request = new Request(line);
             final ManifestReference ref = request.reference();
@@ -152,7 +147,7 @@ final class ManifestEntity {
         @Override
         public Response response(
             final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers,
+            final Headers headers,
             final Publisher<ByteBuffer> body
         ) {
             final Request request = new Request(line);
@@ -221,7 +216,7 @@ final class ManifestEntity {
         @Override
         public Response response(
             final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers,
+            final Headers headers,
             final Publisher<ByteBuffer> body
         ) {
             final Request request = new Request(line);
@@ -234,7 +229,7 @@ final class ManifestEntity {
                             this.events.get().add(
                                 new ArtifactEvent(
                                     ManifestEntity.REPO_TYPE, this.rname,
-                                    new Login(new Headers.From(headers)).getValue(),
+                                    new Login(headers).getValue(),
                                     name.value(), ref.reference(),
                                     manifest.layers().stream().mapToLong(Layer::size).sum()
                                 )
@@ -305,7 +300,7 @@ final class ManifestEntity {
 
         @Override
         public Response response(
-            final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+            final RequestLine line, final Headers headers,
             final Publisher<ByteBuffer> body
         ) {
             final Request request = new Request(line);

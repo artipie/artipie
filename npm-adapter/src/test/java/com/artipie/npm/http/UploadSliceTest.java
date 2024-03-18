@@ -7,6 +7,7 @@ package com.artipie.npm.http;
 
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
@@ -16,25 +17,22 @@ import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.npm.Publish;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import javax.json.Json;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
+import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * UploadSliceTest.
- *
- * @since 0.5
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class UploadSliceTest {
 
     /**
@@ -77,7 +75,7 @@ public final class UploadSliceTest {
         MatcherAssert.assertThat(
             slice.response(
                 RequestLine.from("PUT /ctx/package HTTP/1.1"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.just(ByteBuffer.wrap(json.getBytes()))
             ),
             new RsHasStatus(RsStatus.OK)
@@ -101,12 +99,12 @@ public final class UploadSliceTest {
             Exception.class,
             () -> slice.response(
                 RequestLine.from("PUT /my-repo/my-package HTTP/1.1"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.just(ByteBuffer.wrap("{}".getBytes()))
             ).send(
                 (rsStatus, headers, publisher) -> CompletableFuture.allOf()
             ).toCompletableFuture().join()
         );
-        MatcherAssert.assertThat("Events queue is empty", this.events.size() == 0);
+        MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
     }
 }

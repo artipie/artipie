@@ -26,14 +26,13 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
+
 import java.util.Optional;
 import java.util.Queue;
 import java.util.regex.Pattern;
 
 /**
  * PyPi HTTP entry point.
- *
- * @since 0.2
  */
 public final class PySlice extends Slice.Wrap {
 
@@ -62,7 +61,7 @@ public final class PySlice extends Slice.Wrap {
                     new BasicAuthzSlice(
                         new SliceWithHeaders(
                             new SliceDownload(storage),
-                            new Headers.From(new ContentType("application/octet-stream"))
+                            Headers.from(new ContentType("application/octet-stream"))
                         ),
                         auth,
                         new OperationControl(

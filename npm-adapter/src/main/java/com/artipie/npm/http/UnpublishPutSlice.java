@@ -8,6 +8,7 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -25,7 +26,6 @@ import javax.json.JsonObject;
 import javax.json.JsonPatchBuilder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -76,7 +76,7 @@ final class UnpublishPutSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> publisher
     ) {
         final String pkg = new PackageNameFromUrl(

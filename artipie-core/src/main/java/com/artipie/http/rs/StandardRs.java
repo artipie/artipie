@@ -39,7 +39,7 @@ public enum StandardRs implements Response {
         new RsWithBody(
             new RsWithHeaders(
                 new RsWithStatus(RsStatus.NOT_FOUND),
-                new Headers.From("Content-Type", "application/json")
+                Headers.from("Content-Type", "application/json")
             ),
             ByteBuffer.wrap("{\"error\" : \"not found\"}".getBytes())
         )

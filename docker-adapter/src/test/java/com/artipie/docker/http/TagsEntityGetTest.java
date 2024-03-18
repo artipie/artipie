@@ -48,7 +48,7 @@ class TagsEntityGetTest {
             new SliceHasResponse(
                 new ResponseMatcher(
                     RsStatus.OK,
-                    new Headers.From(
+                    Headers.from(
                         new ContentLength(tags.length),
                         new ContentType("application/json; charset=utf-8")
                     ),

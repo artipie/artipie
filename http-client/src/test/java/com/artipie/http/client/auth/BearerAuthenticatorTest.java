@@ -11,15 +11,16 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Test;
+
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link BearerAuthenticator}.
@@ -48,7 +49,7 @@ class BearerAuthenticatorTest {
             bytes -> "token",
             Authenticator.ANONYMOUS
         ).authenticate(
-            new Headers.From(
+            Headers.from(
                 new WwwAuthenticate(
                     String.format(
                         "Bearer realm=\"https://%s:%d%s\",param1=\"1\",param2=\"abc\"",
@@ -86,7 +87,7 @@ class BearerAuthenticatorTest {
 
     @Test
     void shouldRequestTokenUsingAuthenticator() {
-        final AtomicReference<Iterable<java.util.Map.Entry<String, String>>> capture;
+        final AtomicReference<Headers> capture;
         capture = new AtomicReference<>();
         final Header auth = new Header("X-Header", "Value");
         final FakeClientSlices fake = new FakeClientSlices(
@@ -98,9 +99,9 @@ class BearerAuthenticatorTest {
         new BearerAuthenticator(
             fake,
             bytes -> "something",
-            ignored -> CompletableFuture.completedFuture(new Headers.From(auth))
+            ignored -> CompletableFuture.completedFuture(Headers.from(auth))
         ).authenticate(
-            new Headers.From(
+            Headers.from(
                 new WwwAuthenticate("Bearer realm=\"https://whatever\"")
             )
         ).toCompletableFuture().join();
@@ -125,7 +126,7 @@ class BearerAuthenticatorTest {
             },
             Authenticator.ANONYMOUS
         ).authenticate(
-            new Headers.From(new WwwAuthenticate("Bearer realm=\"http://localhost\""))
+            Headers.from(new WwwAuthenticate("Bearer realm=\"http://localhost\""))
         ).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Token response sent to token format",

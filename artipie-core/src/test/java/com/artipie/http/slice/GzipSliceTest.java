@@ -16,13 +16,14 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPOutputStream;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link GzipSlice}.
@@ -38,14 +39,14 @@ class GzipSliceTest {
         MatcherAssert.assertThat(
             new GzipSlice(
                 new SliceSimple(
-                    new RsFull(RsStatus.FOUND, new Headers.From(hdr), new Content.From(data))
+                    new RsFull(RsStatus.FOUND, Headers.from(hdr), new Content.From(data))
                 )
             ),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.FOUND),
                     new RsHasHeaders(
-                        new Headers.From(
+                        Headers.from(
                             new Header("Content-encoding", "gzip"),
                             hdr,
                             new ContentLength(13)

@@ -22,7 +22,6 @@ import com.jcabi.log.Logger;
 import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -73,7 +72,7 @@ final class CachedProxySlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final String name = line

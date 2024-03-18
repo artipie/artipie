@@ -4,11 +4,10 @@
  */
 package com.artipie.http.rq;
 
+import com.artipie.http.Headers;
+
 import java.util.AbstractList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Request headers.
@@ -33,7 +32,6 @@ import java.util.stream.StreamSupport;
  * <p>
  * &gt; Field names are case-insensitive
  * </p>
- * @since 0.4
  */
 public final class RqHeaders extends AbstractList<String> {
 
@@ -47,11 +45,8 @@ public final class RqHeaders extends AbstractList<String> {
      * @param headers All headers
      * @param name Header name
      */
-    public RqHeaders(final Iterable<Map.Entry<String, String>> headers, final String name) {
-        this.origin = StreamSupport.stream(headers.spliterator(), false)
-            .filter(entry -> entry.getKey().equalsIgnoreCase(name))
-            .map(Map.Entry::getValue)
-            .collect(Collectors.toList());
+    public RqHeaders(Headers headers, String name) {
+        this.origin = headers.values(name);
     }
 
     @Override
@@ -90,7 +85,7 @@ public final class RqHeaders extends AbstractList<String> {
          * @param headers All header values
          * @param name Header name
          */
-        public Single(final Iterable<Map.Entry<String, String>> headers, final String name) {
+        public Single(final Headers headers, final String name) {
             this.headers = new RqHeaders(headers, name);
         }
 

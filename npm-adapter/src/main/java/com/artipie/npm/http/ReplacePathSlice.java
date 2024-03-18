@@ -5,11 +5,11 @@
 
 package com.artipie.npm.http;
 
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.regex.Pattern;
 import org.reactivestreams.Publisher;
 
@@ -43,7 +43,7 @@ public final class ReplacePathSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body) {
         return this.original.response(
             new RequestLine(

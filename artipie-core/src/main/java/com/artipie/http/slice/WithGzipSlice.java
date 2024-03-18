@@ -15,13 +15,10 @@ import java.util.regex.Pattern;
  * compress output body with gzip and adds {@code Content-Encoding: gzip} header.
  * <p>
  * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Encoding">Headers Docs</a>.
- * @since 1.1
  */
 public final class WithGzipSlice extends Slice.Wrap {
 
     /**
-     * Ctor.
-     *
      * @param origin Slice.
      */
     public WithGzipSlice(final Slice origin) {

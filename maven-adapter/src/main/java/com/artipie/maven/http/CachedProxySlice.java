@@ -97,8 +97,8 @@ final class CachedProxySlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
-                             final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers,
+                             Publisher<ByteBuffer> body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         final AtomicReference<Headers> rshdr = new AtomicReference<>(Headers.EMPTY);
         return new AsyncResponse(

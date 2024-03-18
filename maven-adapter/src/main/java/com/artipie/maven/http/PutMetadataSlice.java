@@ -7,6 +7,7 @@ package com.artipie.maven.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -17,7 +18,6 @@ import com.artipie.http.slice.KeyFromPath;
 import com.artipie.maven.metadata.DeployMetadata;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,7 +62,7 @@ public final class PutMetadataSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final Matcher matcher = PutMetadataSlice.PTN_META.matcher(line.uri().getPath());

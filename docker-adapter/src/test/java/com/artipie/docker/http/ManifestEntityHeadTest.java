@@ -6,6 +6,7 @@ package com.artipie.docker.http;
 
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.asto.AstoDocker;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasHeaders;
@@ -42,7 +43,9 @@ class ManifestEntityHeadTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine(RqMethod.HEAD, "/v2/my-alpine/manifests/1"),
-                new Headers(),
+                Headers.from(
+                    new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/*")
+                ),
                 Flowable.empty()
             ),
             new ResponseMatcher(
@@ -65,7 +68,9 @@ class ManifestEntityHeadTest {
                     RqMethod.HEAD,
                     String.format("/v2/my-alpine/manifests/%s", digest)
                 ),
-                new Headers(),
+                Headers.from(
+                    new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/*")
+                ),
                 Flowable.empty()
             ),
             new ResponseMatcher(digest, 528)
@@ -77,7 +82,9 @@ class ManifestEntityHeadTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine(RqMethod.HEAD, "/v2/my-alpine/manifests/2"),
-                new Headers(),
+                Headers.from(
+                    new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/*")
+                ),
                 Flowable.empty()
             ),
             new IsErrorsResponse(RsStatus.NOT_FOUND, "MANIFEST_UNKNOWN")
@@ -94,27 +101,13 @@ class ManifestEntityHeadTest {
                         "/v2/my-alpine/manifests/%s",
                         "sha256:0123456789012345678901234567890123456789012345678901234567890123"
                     )),
-                new Headers(),
+                Headers.from(
+                    new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/*")
+                ),
                 Flowable.empty()
             ),
             new IsErrorsResponse(RsStatus.NOT_FOUND, "MANIFEST_UNKNOWN")
         );
-    }
-
-    /**
-     * Headers set for getting manifest.
-     *
-     * @since 0.4
-     */
-    private static class Headers extends com.artipie.http.Headers.Wrap {
-
-        Headers() {
-            super(
-                new Headers.From(
-                    new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/*")
-                )
-            );
-        }
     }
 
     /**

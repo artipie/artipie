@@ -4,6 +4,7 @@
  */
 package com.artipie.npm.proxy.http;
 
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
@@ -17,14 +18,12 @@ import com.artipie.http.slice.SliceSimple;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import org.reactivestreams.Publisher;
 
 /**
  * Main HTTP slice NPM Proxy adapter.
- * @since 0.1
  */
 public final class NpmProxySlice implements Slice {
     /**
@@ -33,14 +32,11 @@ public final class NpmProxySlice implements Slice {
     private final SliceRoute route;
 
     /**
-     * Ctor.
-     *
      * @param path NPM proxy repo path ("" if NPM proxy should handle ROOT context path),
      *  or, in other words, repository name
      * @param npm NPM Proxy facade
      * @param packages Queue with uploaded from remote packages
      */
-    @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
     public NpmProxySlice(
         final String path, final NpmProxy npm, final Optional<Queue<ProxyArtifactEvent>> packages
     ) {
@@ -78,7 +74,7 @@ public final class NpmProxySlice implements Slice {
 
     @Override
     public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body) {
         return this.route.response(line, headers, body);
     }

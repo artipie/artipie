@@ -4,6 +4,7 @@
  */
 package com.artipie.http.rt;
 
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -26,7 +27,7 @@ public interface RtPath {
      */
     Optional<Response> response(
         RequestLine line,
-        Iterable<Map.Entry<String, String>> headers,
+        Headers headers,
         Publisher<ByteBuffer> body
     );
 }

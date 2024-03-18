@@ -17,7 +17,6 @@ import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -142,7 +141,7 @@ public class JfrSliceTest {
         @Override
         public Response response(
             final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers,
+            final Headers headers,
             final Publisher<ByteBuffer> body) {
             Flowable.fromPublisher(body).blockingSubscribe();
             return this.res;

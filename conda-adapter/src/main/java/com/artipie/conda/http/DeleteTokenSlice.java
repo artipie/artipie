@@ -17,17 +17,16 @@ import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import org.reactivestreams.Publisher;
+
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Delete token slice.
  * <a href="https://api.anaconda.org/docs#/authentication/delete_authentications">Documentation</a>.
  * This slice checks if the token is valid and returns 201 if yes. Token itself is not removed
  * from the Artipie.
- * @since 0.5
  */
 final class DeleteTokenSlice implements Slice {
 
@@ -46,7 +45,7 @@ final class DeleteTokenSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+                             final Headers headers, final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             CompletableFuture.supplyAsync(
                 () -> new RqHeaders(headers, Authorization.NAME)
@@ -69,7 +68,7 @@ final class DeleteTokenSlice implements Slice {
                     CompletableFuture.completedFuture(
                         new RsWithHeaders(
                             new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            new Headers.From(new WwwAuthenticate(TokenAuthScheme.NAME))
+                            Headers.from(new WwwAuthenticate(TokenAuthScheme.NAME))
                         )
                     )
                 )

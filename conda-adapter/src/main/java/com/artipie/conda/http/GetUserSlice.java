@@ -18,16 +18,13 @@ import com.artipie.http.rs.common.RsJson;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonStructure;
 import org.reactivestreams.Publisher;
 
 /**
  * Slice to handle `GET /user` request.
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class GetUserSlice implements Slice {
 
     /**
@@ -44,7 +41,7 @@ final class GetUserSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             this.scheme.authenticate(headers, line).thenApply(
@@ -57,7 +54,7 @@ final class GetUserSlice implements Slice {
                     }
                     return new RsWithHeaders(
                         new RsWithStatus(RsStatus.UNAUTHORIZED),
-                        new Headers.From(new WwwAuthenticate(result.challenge()))
+                        Headers.from(new WwwAuthenticate(result.challenge()))
                     );
                 }
             )

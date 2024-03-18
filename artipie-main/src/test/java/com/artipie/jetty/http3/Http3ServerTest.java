@@ -6,6 +6,7 @@ package com.artipie.jetty.http3;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
@@ -19,7 +20,6 @@ import com.artipie.nuget.RandomFreePort;
 import io.reactivex.Flowable;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -46,9 +46,7 @@ import org.reactivestreams.Publisher;
 
 /**
  * Test for {@link Http3Server}.
- * @since 0.31
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class Http3ServerTest {
 
     /**
@@ -272,7 +270,7 @@ class Http3ServerTest {
 
         @Override
         public Response response(
-            final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+            final RequestLine line, final Headers headers,
             final Publisher<ByteBuffer> body
         ) {
             final Response res;

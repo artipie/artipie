@@ -28,7 +28,7 @@ class RequestLinePrefixTest {
     })
     void returnsPrefix(final String full, final String line, final String res) {
         MatcherAssert.assertThat(
-            new RequestLinePrefix(line, new Headers.From("X-FullPath", full)).get(),
+            new RequestLinePrefix(line, Headers.from("X-FullPath", full)).get(),
             new IsEqual<>(res)
         );
     }

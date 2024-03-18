@@ -8,7 +8,9 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.conan.ItemTokenizer;
 import com.artipie.conan.ItemTokenizer.ItemInfo;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.headers.Header;
 import com.artipie.http.hm.IsJson;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
@@ -16,7 +18,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import io.vertx.core.Vertx;
-import org.cactoos.map.MapEntry;
 import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -28,11 +29,9 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 /**
  * Test for {@link ConanUpload}.
- * @since 0.1
  */
 public class ConanUploadUrlsTest {
 
@@ -58,9 +57,9 @@ public class ConanUploadUrlsTest {
                 "POST",
                 "/v1/conans/zmqpp/4.2.0/_/_/upload_urls"
             ),
-            Arrays.asList(
-                new MapEntry<>("Content-Size", Long.toString(data.length)),
-                new MapEntry<>("Host", "localhost")
+            Headers.from(
+                new Header("Content-Size", Long.toString(data.length)),
+                new Header("Host", "localhost")
             ),
             Flowable.just(ByteBuffer.wrap(data))
         );

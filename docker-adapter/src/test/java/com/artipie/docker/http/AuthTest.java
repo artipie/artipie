@@ -57,15 +57,11 @@ import java.util.stream.Stream;
  * Tests for {@link DockerSlice}.
  * Authentication & authorization tests.
  *
- * @since 0.8
  * @todo #434:30min test `shouldReturnForbiddenWhenUserHasNoRequiredPermissionOnSecondManifestPut`
  *  fails in github actions, locally it works fine. Figure out what is the problem and fix it.
  */
 public final class AuthTest {
 
-    /**
-     * Docker used in tests.
-     */
     private Docker docker;
 
     @BeforeEach
@@ -424,9 +420,7 @@ public final class AuthTest {
 
         @Override
         public Headers headers(final TestAuthentication.User user) {
-            return new Headers.From(
-                new Authorization.Bearer(token(user))
-            );
+            return Headers.from(new Authorization.Bearer(token(user)));
         }
 
         @Override

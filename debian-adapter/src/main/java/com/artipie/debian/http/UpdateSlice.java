@@ -30,7 +30,6 @@ import com.artipie.scheduling.ArtifactEvent;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -79,7 +78,7 @@ public final class UpdateSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         return new AsyncResponse(
@@ -103,9 +102,7 @@ public final class UpdateSlice implements Slice {
                             CompletionStage<Void> upd = this.generateIndexes(key, control, common);
                             if (this.events.isPresent()) {
                                 upd = upd.thenCompose(
-                                    nothing -> this.logEvents(
-                                        key, control, common, new Headers.From(headers)
-                                    )
+                                    nothing -> this.logEvents(key, control, common, headers)
                                 );
                             }
                             res = upd.thenApply(nothing -> StandardRs.OK);

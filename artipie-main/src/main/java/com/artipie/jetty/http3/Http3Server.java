@@ -6,15 +6,11 @@ package com.artipie.jetty.http3;
 
 import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.http3.api.Session;
 import org.eclipse.jetty.http3.api.Stream;
@@ -24,9 +20,13 @@ import org.eclipse.jetty.http3.server.RawHTTP3ServerConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Http3 server.
- * @since 0.31
  */
 public final class Http3Server {
 
@@ -118,9 +118,12 @@ public final class Http3Server {
                     new RequestLine(
                         request.getMethod(), request.getHttpURI().getPath(), Http3Server.HTTP_3
                     ),
-                    request.getHttpFields().stream()
-                        .map(field -> new Header(field.getName(), field.getValue()))
-                        .collect(Collectors.toList()),
+                    new Headers(
+                        request.getHttpFields()
+                            .stream()
+                            .map(field -> new Header(field.getName(), field.getValue()))
+                            .toList()
+                    ),
                     Content.EMPTY
                 ).send(new Http3Connection(stream));
                 return null;
@@ -143,9 +146,12 @@ public final class Http3Server {
                                         request.getMethod(), request.getHttpURI().getPath(),
                                         Http3Server.HTTP_3
                                     ),
-                                    request.getHttpFields().stream().map(
-                                        field -> new Header(field.getName(), field.getValue())
-                                    ).collect(Collectors.toList()),
+                                    new Headers(
+                                        request.getHttpFields()
+                                            .stream()
+                                            .map(field -> new Header(field.getName(), field.getValue()))
+                                            .toList()
+                                    ),
                                     Flowable.fromArray(buffers.toArray(ByteBuffer[]::new))
                                 ).send(new Http3Connection(stream));
                             }

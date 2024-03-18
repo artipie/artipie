@@ -26,7 +26,6 @@ import org.reactivestreams.Publisher;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -49,7 +48,7 @@ public final class SearchSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             new NameFromXml(body).get().thenCompose(
@@ -83,7 +82,7 @@ public final class SearchSlice implements Slice {
                     final Response res;
                     if (throwable == null) {
                         res = new RsFull(
-                            RsStatus.OK, new Headers.From("content-type", "text/xml"), content
+                            RsStatus.OK, Headers.from("content-type", "text/xml"), content
                         );
                     } else {
                         res = new RsError(

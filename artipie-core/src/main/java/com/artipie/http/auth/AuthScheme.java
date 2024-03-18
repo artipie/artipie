@@ -4,9 +4,9 @@
  */
 package com.artipie.http.auth;
 
+import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -36,7 +36,7 @@ public interface AuthScheme {
      * @param line Request line.
      * @return Authentication result.
      */
-    CompletionStage<Result> authenticate(Iterable<Map.Entry<String, String>> headers, RequestLine line);
+    CompletionStage<Result> authenticate(Headers headers, RequestLine line);
 
     /**
      * Authenticate HTTP request by its headers.
@@ -44,7 +44,7 @@ public interface AuthScheme {
      * @param headers Request headers.
      * @return Authentication result.
      */
-    default CompletionStage<Result> authenticate(final Iterable<Map.Entry<String, String>> headers) {
+    default CompletionStage<Result> authenticate(Headers headers) {
         return this.authenticate(headers, null);
     }
 
@@ -202,8 +202,7 @@ public interface AuthScheme {
 
         @Override
         public CompletionStage<Result> authenticate(
-            final Iterable<Map.Entry<String, String>> headers,
-            final RequestLine line
+            Headers headers, RequestLine line
         ) {
             return CompletableFuture.completedFuture(
                 AuthScheme.result(this.usr, this.chllng)

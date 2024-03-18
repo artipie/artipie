@@ -8,6 +8,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.KeyLastPart;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -23,7 +24,6 @@ import com.artipie.http.slice.KeyFromPath;
 import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
-import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,7 +58,7 @@ final class LocalMavenSlice implements Slice {
 
     @Override
     public Response response(
-        final RequestLine line, final Iterable<Entry<String, String>> headers,
+        final RequestLine line, final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final Key key = new KeyFromPath(line.uri().getPath());

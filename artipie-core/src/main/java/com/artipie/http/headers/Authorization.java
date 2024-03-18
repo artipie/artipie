@@ -8,6 +8,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.BearerAuthScheme;
 import com.artipie.http.rq.RqHeaders;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.regex.Matcher;
@@ -15,10 +16,8 @@ import java.util.regex.Pattern;
 
 /**
  * Authorization header.
- *
- * @since 0.12
  */
-public final class Authorization extends Header.Wrap {
+public final class Authorization extends Header {
 
     /**
      * Header name.
@@ -31,8 +30,6 @@ public final class Authorization extends Header.Wrap {
     private static final Pattern VALUE = Pattern.compile("(?<scheme>[^ ]+) (?<credentials>.+)");
 
     /**
-     * Ctor.
-     *
      * @param scheme Authentication scheme.
      * @param credentials Credentials.
      */
@@ -50,8 +47,6 @@ public final class Authorization extends Header.Wrap {
     }
 
     /**
-     * Ctor.
-     *
      * @param headers Headers to extract header from.
      */
     public Authorization(final Headers headers) {
@@ -97,11 +92,9 @@ public final class Authorization extends Header.Wrap {
      *
      * @since 0.12
      */
-    public static final class Basic extends Header.Wrap {
+    public static final class Basic extends Header {
 
         /**
-         * Ctor.
-         *
          * @param username User name.
          * @param password Password.
          */
@@ -114,8 +107,6 @@ public final class Authorization extends Header.Wrap {
         }
 
         /**
-         * Ctor.
-         *
          * @param credentials Credentials.
          */
         public Basic(final String credentials) {
@@ -167,11 +158,9 @@ public final class Authorization extends Header.Wrap {
      *
      * @since 0.12
      */
-    public static final class Bearer extends Header.Wrap {
+    public static final class Bearer extends Header {
 
         /**
-         * Ctor.
-         *
          * @param token Token.
          */
         public Bearer(final String token) {
@@ -193,7 +182,7 @@ public final class Authorization extends Header.Wrap {
      *
      * @since 0.23
      */
-    public static final class Token extends Header.Wrap {
+    public static final class Token extends Header {
 
         /**
          * Ctor.

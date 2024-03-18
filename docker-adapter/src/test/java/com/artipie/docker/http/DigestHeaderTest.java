@@ -14,8 +14,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test case for {@link DigestHeader}.
- *
- * @since 0.2
  */
 public final class DigestHeaderTest {
 
@@ -40,7 +38,7 @@ public final class DigestHeaderTest {
     void shouldExtractValueFromHeaders() {
         final String digest = "sha256:123";
         final DigestHeader header = new DigestHeader(
-            new Headers.From(
+            Headers.from(
                 new Header("Content-Type", "application/octet-stream"),
                 new Header("docker-content-digest", digest),
                 new Header("X-Something", "Some Value")

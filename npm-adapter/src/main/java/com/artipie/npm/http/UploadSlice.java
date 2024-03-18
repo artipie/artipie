@@ -22,17 +22,15 @@ import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.Publish;
 import com.artipie.scheduling.ArtifactEvent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
-import org.reactivestreams.Publisher;
 
 /**
  * UploadSlice.
- *
- * @since 0.1
  */
 public final class UploadSlice implements Slice {
 
@@ -80,7 +78,7 @@ public final class UploadSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body) {
         final String pkg = new PackageNameFromUrl(line).value();
         final Key uploaded = new Key.From(
@@ -102,7 +100,7 @@ public final class UploadSlice implements Slice {
                             info -> this.events.get().add(
                                 new ArtifactEvent(
                                     UploadSlice.REPO_TYPE, this.rname,
-                                    new Login(new Headers.From(headers)).getValue(),
+                                    new Login(headers).getValue(),
                                     info.packageName(), info.packageVersion(), info.tarSize()
                                 )
                             )

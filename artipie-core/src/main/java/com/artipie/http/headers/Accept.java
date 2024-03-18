@@ -4,12 +4,13 @@
  */
 package com.artipie.http.headers;
 
+import com.artipie.http.Headers;
 import com.artipie.http.rq.RqHeaders;
+import wtf.g4s8.mime.MimeType;
+
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import wtf.g4s8.mime.MimeType;
 
 /**
  * Accept header, check
@@ -28,13 +29,13 @@ public final class Accept {
     /**
      * Headers.
      */
-    private final Iterable<Map.Entry<String, String>> headers;
+    private final Headers headers;
 
     /**
      * Ctor.
      * @param headers Headers to extract `accept` header from
      */
-    public Accept(final Iterable<Map.Entry<String, String>> headers) {
+    public Accept(Headers headers) {
         this.headers = headers;
     }
 
@@ -43,7 +44,6 @@ public final class Accept {
      * corresponding order.
      * @return Set or the values
      */
-    @SuppressWarnings("PMD.OnlyOneReturn")
     public List<String> values() {
         final RqHeaders rqh = new RqHeaders(this.headers, Accept.NAME);
         if (rqh.size() == 0) {

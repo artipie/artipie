@@ -21,10 +21,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test case for {@link Gem} SDK.
- *
- * @since 1.0
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class GemTest {
 
     @Test

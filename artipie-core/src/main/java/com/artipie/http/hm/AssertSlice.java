@@ -9,14 +9,14 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.StandardRs;
-import java.nio.ByteBuffer;
-import java.util.Map;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.reactivestreams.Publisher;
+
+import java.nio.ByteBuffer;
 
 /**
  * Slice implementation which assert request data against specified matchers.
@@ -77,13 +77,12 @@ public final class AssertSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine lne, final Iterable<Map.Entry<String, String>> headers,
-                             final Publisher<ByteBuffer> publ) {
+    public Response response(RequestLine lne, Headers headers, Publisher<ByteBuffer> publ) {
         MatcherAssert.assertThat(
             "Wrong request line", lne, this.line
         );
         MatcherAssert.assertThat(
-            "Wrong headers", new Headers.From(headers), this.head
+            "Wrong headers", headers, this.head
         );
         MatcherAssert.assertThat(
             "Wrong body", publ, this.body

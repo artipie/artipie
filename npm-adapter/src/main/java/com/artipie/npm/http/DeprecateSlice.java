@@ -7,6 +7,7 @@ package com.artipie.npm.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -21,7 +22,6 @@ import javax.json.JsonObject;
 import javax.json.JsonPatchBuilder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
@@ -51,7 +51,7 @@ public final class DeprecateSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> iterable,
+        final Headers iterable,
         final Publisher<ByteBuffer> publisher
     ) {
         final String pkg = new PackageNameFromUrl(line).value();

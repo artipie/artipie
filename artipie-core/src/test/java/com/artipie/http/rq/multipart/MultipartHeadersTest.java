@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test case for multipart headers.
- * @since 1.0
  */
 final class MultipartHeadersTest {
 
@@ -38,7 +37,7 @@ final class MultipartHeadersTest {
             headers.push(ByteBuffer.wrap(sub.getBytes()));
         }
         MatcherAssert.assertThat(
-            headers,
+            headers.headers(),
             Matchers.containsInAnyOrder(
                 new Header("Accept", "application/json"),
                 new Header("Connection", "keep-alive"),
@@ -60,7 +59,7 @@ final class MultipartHeadersTest {
             )
         );
         MatcherAssert.assertThat(
-            new ContentDisposition(headers).fieldName(),
+            new ContentDisposition(headers.headers()).fieldName(),
             new IsEqual<>(":action")
         );
     }

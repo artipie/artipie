@@ -6,6 +6,7 @@ package com.artipie.gem.http;
 
 import com.artipie.asto.Storage;
 import com.artipie.gem.Gem;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -17,7 +18,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map.Entry;
+
 import org.reactivestreams.Publisher;
 
 /**
@@ -40,7 +41,7 @@ final class DepsGemSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             new Gem(this.repo).dependencies(

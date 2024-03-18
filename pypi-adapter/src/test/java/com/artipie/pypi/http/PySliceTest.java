@@ -28,12 +28,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.Collections;
 import java.util.Optional;
 
 /**
  * Test for {@link PySlice}.
- * @since 0.6
  */
 class PySliceTest {
 
@@ -65,7 +63,7 @@ class PySliceTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine("GET", "/simple"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             Matchers.allOf(
@@ -89,7 +87,7 @@ class PySliceTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine("GET", "/"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             Matchers.allOf(
@@ -110,7 +108,7 @@ class PySliceTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine("GET", "/one/Two_three"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             new ResponseMatcher(
@@ -125,7 +123,7 @@ class PySliceTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine("POST", "/sample.tar"),
-                new Headers.From("content-type", "multipart/form-data; boundary=\"abc123\""),
+                Headers.from("content-type", "multipart/form-data; boundary=\"abc123\""),
                 Flowable.empty()
             ),
             new RsHasStatus(RsStatus.BAD_REQUEST)
@@ -147,7 +145,7 @@ class PySliceTest {
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine("GET", key),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             new ResponseMatcher(

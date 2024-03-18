@@ -20,6 +20,12 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.PolicyByUsername;
 import com.google.common.io.Resources;
 import io.reactivex.Flowable;
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URL;
@@ -28,19 +34,11 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link NuGet}.
  * Package publish resource.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class NuGetPackagePublishTest {
 
     /**
@@ -103,7 +101,7 @@ class NuGetPackagePublishTest {
     void shouldFailGetPackagePublish() {
         final Response response = this.nuget.response(
             new RequestLine(RqMethod.GET, "/package"),
-            new TestAuthentication.Headers(),
+            TestAuthentication.HEADERS,
             Flowable.empty()
         );
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
@@ -133,8 +131,8 @@ class NuGetPackagePublishTest {
         entity.writeTo(sink);
         return this.nuget.response(
             new RequestLine(RqMethod.PUT, "/package"),
-            new Headers.From(
-                new TestAuthentication.Header(),
+            Headers.from(
+                TestAuthentication.HEADER,
                 new Header("Content-Type", entity.getContentType().getValue())
             ),
             Flowable.fromArray(ByteBuffer.wrap(sink.toByteArray()))

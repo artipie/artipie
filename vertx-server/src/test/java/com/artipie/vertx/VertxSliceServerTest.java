@@ -14,13 +14,6 @@ import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.web.client.HttpResponse;
 import io.vertx.reactivex.ext.web.client.WebClient;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.ServerSocket;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.concurrent.CompletableFuture;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -35,12 +28,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.ServerSocket;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Ensure that {@link VertxSliceServer} works correctly.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.TooManyMethods")
 public final class VertxSliceServerTest {
 
     /**
@@ -91,9 +88,7 @@ public final class VertxSliceServerTest {
     @Test
     public void serverHandlesBasicRequest() {
         this.start(
-            (line, headers, body) -> connection -> connection.accept(
-                RsStatus.OK, new Headers.From(headers), body
-            )
+            (line, headers, body) -> connection -> connection.accept(RsStatus.OK, headers, body)
         );
         final String expected = "Hello World!";
         final String actual = this.client.post(this.port, VertxSliceServerTest.HOST, "/hello")
@@ -109,9 +104,7 @@ public final class VertxSliceServerTest {
         this.start(
             (line, headers, body) -> connection -> connection.accept(
                 RsStatus.OK,
-                new Headers.From(
-                    Collections.emptyList()
-                ),
+                Headers.EMPTY,
                 Flowable.fromArray(ByteBuffer.wrap(expected.getBytes()))
             )
         );
@@ -129,9 +122,7 @@ public final class VertxSliceServerTest {
         this.start(
             (line, headers, body) -> connection -> connection.accept(
                 RsStatus.OK,
-                new Headers.From(
-                    clh,
-                    Integer.toString(expected.length())
+                Headers.from(clh, Integer.toString(expected.length())
                 ),
                 Flowable.fromArray(ByteBuffer.wrap(expected.getBytes()))
             )
@@ -204,9 +195,7 @@ public final class VertxSliceServerTest {
         this.start(
             (line, headers, body) -> connection -> connection.accept(
                 RsStatus.OK,
-                new Headers.From(
-                    Collections.emptyList()
-                ),
+                Headers.EMPTY,
                 Flowable.error(exception)
             )
         );
@@ -221,8 +210,7 @@ public final class VertxSliceServerTest {
         final VertxSliceServer srv = new VertxSliceServer(
             this.vertx,
             (line, headers, body) ->
-                connection ->
-                    connection.accept(RsStatus.OK, new Headers.From(headers), body)
+                connection -> connection.accept(RsStatus.OK, headers, body)
         );
         MatcherAssert.assertThat(srv.start(), new IsNot<>(new IsEqual<>(0)));
     }
@@ -233,12 +221,7 @@ public final class VertxSliceServerTest {
         final VertxSliceServer srv = new VertxSliceServer(
             this.vertx,
             (line, headers, body) ->
-                connection ->
-                    connection.accept(
-                        RsStatus.OK,
-                        new Headers.From(headers),
-                        body
-                    ),
+                connection -> connection.accept(RsStatus.OK, headers, body),
             new HttpServerOptions().setPort(expected)
         );
         MatcherAssert.assertThat(srv.start(), new IsEqual<>(expected));

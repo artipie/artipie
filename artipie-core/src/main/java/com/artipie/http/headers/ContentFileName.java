@@ -9,10 +9,8 @@ import java.nio.file.Paths;
 
 /**
  * Content-Disposition header for a file.
- *
- * @since 0.17.8
  */
-public final class ContentFileName extends Header.Wrap {
+public final class ContentFileName extends Header {
     /**
      * Ctor.
      *

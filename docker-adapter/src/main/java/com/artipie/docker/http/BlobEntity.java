@@ -11,6 +11,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.error.BlobUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
@@ -21,7 +22,6 @@ import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
@@ -79,7 +79,7 @@ final class BlobEntity {
         @Override
         public Response response(
             final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers,
+            final Headers headers,
             final Publisher<ByteBuffer> body
         ) {
             final Request request = new Request(line);
@@ -139,7 +139,7 @@ final class BlobEntity {
         @Override
         public Response response(
             final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers,
+            final Headers headers,
             final Publisher<ByteBuffer> body
         ) {
             final Request request = new Request(line);

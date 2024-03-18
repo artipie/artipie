@@ -32,7 +32,7 @@ class TokenAuthSchemeTest {
     void canAuthorizeByHeader() {
         Assertions.assertSame(
             new TokenAuthScheme(new TestTokenAuth()).authenticate(
-                new Headers.From(new Authorization.Token(TokenAuthSchemeTest.TKN)),
+                Headers.from(new Authorization.Token(TokenAuthSchemeTest.TKN)),
                 RequestLine.from("GET /not/used HTTP/1.1")
             ).toCompletableFuture().join().status(),
             AuthScheme.AuthStatus.AUTHENTICATED
@@ -67,7 +67,7 @@ class TokenAuthSchemeTest {
     void doesNotAuthorizeByWrongTokenInHeader() {
         Assertions.assertSame(
             new TokenAuthScheme(new TestTokenAuth()).authenticate(
-                new Headers.From(new Authorization.Token("098xyz")),
+                Headers.from(new Authorization.Token("098xyz")),
                 RequestLine.from("GET /ignored HTTP/1.1")
             ).toCompletableFuture().join().status(),
             AuthScheme.AuthStatus.FAILED

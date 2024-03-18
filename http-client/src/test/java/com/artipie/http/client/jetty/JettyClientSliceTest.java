@@ -34,9 +34,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -117,16 +114,16 @@ class JettyClientSliceTest {
 
     @Test
     void shouldSendHeaders() {
-        final AtomicReference<Iterable<Map.Entry<String, String>>> actual = new AtomicReference<>();
+        final AtomicReference<Headers> actual = new AtomicReference<>();
         this.server.update(
             (rqline, rqheaders, rqbody) -> {
-                actual.set(new Headers.From(rqheaders));
+                actual.set(rqheaders);
                 return StandardRs.EMPTY;
             }
         );
         this.slice.response(
             new RequestLine(RqMethod.GET, "/something"),
-            new Headers.From(
+            Headers.from(
                 new Header("My-Header", "MyValue"),
                 new Header("Another-Header", "AnotherValue")
             ),
@@ -185,14 +182,13 @@ class JettyClientSliceTest {
 
     @Test
     void shouldReceiveHeaders() {
-        final List<Map.Entry<String, String>> headers = Arrays.asList(
+        Headers headers = Headers.from(
             new Header("Content-Type", "text/plain"),
             new Header("WWW-Authenticate", "Basic")
         );
         this.server.update(
             (rqline, rqheaders, rqbody) -> new RsWithHeaders(
-                StandardRs.EMPTY,
-                new Headers.From(headers)
+                StandardRs.EMPTY, headers
             )
         );
         MatcherAssert.assertThat(

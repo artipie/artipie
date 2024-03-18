@@ -5,6 +5,7 @@
 package com.artipie.conda.http;
 
 import com.artipie.asto.ext.KeyLastPart;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
@@ -13,7 +14,6 @@ import com.artipie.http.rs.common.RsJson;
 import com.artipie.http.slice.KeyFromPath;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import javax.json.Json;
 import org.reactivestreams.Publisher;
 
@@ -28,7 +28,7 @@ import org.reactivestreams.Publisher;
 public final class GetPackageSlice implements Slice {
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         return new RsJson(
             RsStatus.NOT_FOUND,

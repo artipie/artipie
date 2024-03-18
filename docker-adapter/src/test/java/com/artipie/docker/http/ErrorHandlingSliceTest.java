@@ -68,7 +68,7 @@ class ErrorHandlingSliceTest {
                 return StandardRs.OK;
             }
         ).response(
-            line, new Headers.From(header), Flowable.just(ByteBuffer.wrap(body))
+            line, Headers.from(header), Flowable.just(ByteBuffer.wrap(body))
         ).send(
             (status, rsheaders, rsbody) -> CompletableFuture.allOf()
         ).toCompletableFuture().join();
@@ -82,7 +82,7 @@ class ErrorHandlingSliceTest {
         final Response response = new AuthClientSlice(
             (rsline, rsheaders, rsbody) -> new RsFull(
                 status,
-                new Headers.From(header),
+                Headers.from(header),
                 Flowable.just(ByteBuffer.wrap(body))
             ),
             Authenticator.ANONYMOUS

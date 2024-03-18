@@ -65,7 +65,7 @@ class WheelSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine(RqMethod.POST, "/"),
-                new Headers.From(
+                Headers.from(
                     new ContentType(String.format("multipart/form-data; boundary=\"%s\"", boundary))
                 ),
                 new Content.From(this.multipartBody(body, boundary, filename))
@@ -94,7 +94,7 @@ class WheelSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine("POST", String.format("/%s", path)),
-                new Headers.From(
+                Headers.from(
                     new ContentType(String.format("multipart/form-data; boundary=\"%s\"", boundary))
                 ),
                 new Content.From(this.multipartBody(body, boundary, filename))
@@ -121,7 +121,7 @@ class WheelSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(RqMethod.POST, "/"),
-                new Headers.From(
+                Headers.from(
                     new ContentType(String.format("multipart/form-data; boundary=\"%s\"", boundary))
                 ),
                 new Content.From(this.multipartBody(body, boundary, filename))
@@ -148,9 +148,9 @@ class WheelSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(RqMethod.POST, "/"),
-                new Headers.From(
+                Headers.from(
                     new ContentType(String.format("multipart/form-data; boundary=\"%s\"", boundary))
-            ),
+                ),
                 new Content.From(this.multipartBody(body, boundary, filename))
             )
         );

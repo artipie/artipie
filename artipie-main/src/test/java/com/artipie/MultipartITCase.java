@@ -27,7 +27,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -80,7 +79,7 @@ final class MultipartITCase {
             (line, headers, body) -> new AsyncResponse(
                 new Content.From(
                     Flowable.fromPublisher(
-                        new RqMultipart(new Headers.From(headers), body).inspect(
+                        new RqMultipart(headers, body).inspect(
                             (part, sink) -> {
                                 final ContentDisposition cds =
                                     new ContentDisposition(part.headers());
@@ -128,7 +127,7 @@ final class MultipartITCase {
             (line, headers, body) -> new AsyncResponse(
                 new Content.From(
                     Flowable.fromPublisher(
-                        new RqMultipart(new Headers.From(headers), body).inspect(
+                        new RqMultipart(headers, body).inspect(
                             (part, sink) -> {
                                 final ContentDisposition cds =
                                     new ContentDisposition(part.headers());
@@ -177,7 +176,7 @@ final class MultipartITCase {
         this.container.deploy(
             (line, headers, body) -> new AsyncResponse(
                 Flowable.fromPublisher(
-                    new RqMultipart(new Headers.From(headers), body).inspect(
+                    new RqMultipart(headers, body).inspect(
                         (part, sink) -> {
                             final ContentDisposition cds =
                                 new ContentDisposition(part.headers());
@@ -253,7 +252,7 @@ final class MultipartITCase {
         @Override
         @SuppressWarnings("PMD.OnlyOneReturn")
         public Response response(final RequestLine line,
-            final Iterable<Entry<String, String>> headers,
+            final Headers headers,
             final Publisher<ByteBuffer> body) {
             if (this.target == null) {
                 return new RsWithBody(

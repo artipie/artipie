@@ -34,7 +34,7 @@ final class PathPrefixSliceTest {
         final String prefix, final String line, final String path, final String query
     ) {
         final RqMethod method = RqMethod.GET;
-        final Headers headers = new Headers.From("X-Header", "The Value");
+        final Headers headers = Headers.from("X-Header", "The Value");
         final byte[] body = "request body".getBytes();
         new PathPrefixSlice(
             (rsline, rqheaders, rqbody) -> {

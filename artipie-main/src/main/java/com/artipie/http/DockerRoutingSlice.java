@@ -13,16 +13,15 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.perms.FreePermissions;
 import com.artipie.settings.Settings;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.http.client.utils.URIBuilder;
 import org.reactivestreams.Publisher;
 
+import java.nio.ByteBuffer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Slice decorator which redirects all Docker V2 API requests to Artipie format paths.
- * @since 0.9
  */
 public final class DockerRoutingSlice implements Slice {
 
@@ -58,7 +57,7 @@ public final class DockerRoutingSlice implements Slice {
 
     @Override
     @SuppressWarnings("PMD.NestedIfDepthCheck")
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         final String path = line.uri().getPath();
         final Matcher matcher = PTN_PATH.matcher(path);
@@ -82,7 +81,7 @@ public final class DockerRoutingSlice implements Slice {
                         new URIBuilder(line.uri()).setPath(group).toString(),
                         line.version()
                     ),
-                    new Headers.From(headers, DockerRoutingSlice.HDR_REAL_PATH, path),
+                    headers.copy().add(DockerRoutingSlice.HDR_REAL_PATH, path),
                     body
                 );
             }
@@ -113,7 +112,7 @@ public final class DockerRoutingSlice implements Slice {
 
         @Override
         public Response response(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers,
+                                 final Headers headers,
             final Publisher<ByteBuffer> body) {
             return this.origin.response(
                 new RequestLine(

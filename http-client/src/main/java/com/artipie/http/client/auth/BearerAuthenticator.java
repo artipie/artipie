@@ -59,7 +59,8 @@ public final class BearerAuthenticator implements Authenticator {
 
     @Override
     public CompletionStage<Headers> authenticate(final Headers headers) {
-        return this.authenticate(new WwwAuthenticate(headers)).thenApply(Headers.From::new);
+        return this.authenticate(new WwwAuthenticate(headers))
+            .thenApply(Headers::from);
     }
 
     /**

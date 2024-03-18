@@ -5,6 +5,7 @@
 package com.artipie.composer.http;
 
 import com.artipie.composer.Repository;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -14,7 +15,7 @@ import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.KeyFromPath;
 import java.nio.ByteBuffer;
-import java.util.Map;
+
 import org.reactivestreams.Publisher;
 
 /**
@@ -38,7 +39,7 @@ final class DownloadArchiveSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final String path = line.uri().getPath();

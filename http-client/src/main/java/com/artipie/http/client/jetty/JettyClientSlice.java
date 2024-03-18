@@ -31,7 +31,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * ClientSlices implementation using Jetty HTTP client as back-end.
@@ -82,9 +81,7 @@ final class JettyClientSlice implements Slice {
     }
 
     public Response response(
-        final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        RequestLine line, Headers headers, Publisher<ByteBuffer> body
     ) {
         final Request request = this.buildRequest(headers, line);
         final CompletableFuture<Response> res = new CompletableFuture<>();
@@ -115,7 +112,7 @@ final class JettyClientSlice implements Slice {
                     if (result.getFailure() == null) {
                         Response response = new RsFull(
                                 new RsStatus.ByCode(result.getResponse().getStatus()).find(),
-                                new ResponseHeaders(result.getResponse().getHeaders()),
+                            from(result.getResponse().getHeaders()),
                                 Flowable.fromIterable(buffers).map(
                                         chunk -> {
                                             final ByteBuffer item = chunk.getByteBuffer();
@@ -138,16 +135,21 @@ final class JettyClientSlice implements Slice {
         return new AsyncResponse(res);
     }
 
+    private Headers from(HttpFields fields) {
+        return new Headers(
+            fields.stream()
+                .map(field -> new Header(field.getName(), field.getValue()))
+                .toList()
+        );
+    }
+
     /**
      * Builds jetty basic request from artipie request line and headers.
      * @param headers Headers
      * @param req Artipie request line
      * @return Jetty request
      */
-    private Request buildRequest(
-        final Iterable<Map.Entry<String, String>> headers,
-        final RequestLine req
-    ) {
+    private Request buildRequest(Headers headers, RequestLine req) {
         final String scheme;
         if (this.secure) {
             scheme = "https";
@@ -168,29 +170,6 @@ final class JettyClientSlice implements Slice {
             request.headers(mutable -> mutable.add(header.getKey(), header.getValue()));
         }
         return request;
-    }
-
-    /**
-     * Headers from {@link HttpFields}.
-     *
-     * @since 0.1
-     */
-    private static class ResponseHeaders extends Headers.Wrap {
-
-        /**
-         * Ctor.
-         *
-         * @param response Response to extract headers from.
-         */
-        ResponseHeaders(final HttpFields response) {
-            super(
-                new Headers.From(
-                    response.stream()
-                        .map(header -> new Header(header.getName(), header.getValue()))
-                        .collect(Collectors.toList())
-                )
-            );
-        }
     }
 
     /**

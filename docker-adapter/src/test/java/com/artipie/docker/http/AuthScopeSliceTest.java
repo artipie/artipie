@@ -24,7 +24,6 @@ import java.nio.ByteBuffer;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Enumeration;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -49,7 +48,7 @@ class AuthScopeSliceTest {
                 @Override
                 public Response response(
                     final RequestLine line,
-                    final Iterable<Map.Entry<String, String>> headers,
+                    final Headers headers,
                     final Publisher<ByteBuffer> body
                 ) {
                     return StandardRs.OK;

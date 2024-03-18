@@ -32,7 +32,6 @@ import org.reactivestreams.Publisher;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -108,8 +107,8 @@ public final class PutMetadataChecksumSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
-                             final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers,
+                             Publisher<ByteBuffer> body) {
         final Matcher matcher = PutMetadataChecksumSlice.PTN.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final String alg = matcher.group("alg");
@@ -154,8 +153,8 @@ public final class PutMetadataChecksumSlice implements Slice {
      * @param headers Request headers
      * @return Response: BAD_REQUEST if not valid, CREATED otherwise
      */
-    private CompletionStage<Response> validateAndUpdate(final String pkg, final Key location,
-        final Iterable<Map.Entry<String, String>> headers) {
+    private CompletionStage<Response> validateAndUpdate(
+        String pkg, Key location, Headers headers) {
         return this.valid.validate(location, new Key.From(pkg)).thenCompose(
             correct -> {
                 final CompletionStage<Response> upd;
@@ -169,7 +168,7 @@ public final class PutMetadataChecksumSlice implements Slice {
                             size -> this.events.get().add(
                                 new ArtifactEvent(
                                     PutMetadataChecksumSlice.REPO_TYPE, this.rname,
-                                    new Login(new Headers.From(headers)).getValue(),
+                                    new Login(headers).getValue(),
                                     MavenSlice.EVENT_INFO.formatArtifactName(pkg), version, size
                                 )
                             )

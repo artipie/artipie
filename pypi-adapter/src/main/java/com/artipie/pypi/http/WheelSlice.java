@@ -32,35 +32,24 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * WheelSlice save and manage whl and tgz entries.
- *
- * @since 0.2
  */
 final class WheelSlice implements Slice {
 
-    /**
-     * Repository type.
-     */
     private static final String TYPE = "pypi";
 
-    /**
-     * The Storage.
-     */
     private final Storage storage;
 
-    /**
-     * Events queue.
-     */
     private final Optional<Queue<ArtifactEvent>> events;
 
     /**
@@ -85,12 +74,12 @@ final class WheelSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> iterable,
+        final Headers iterable,
         final Publisher<ByteBuffer> publisher
     ) {
         final Key.From key = new Key.From(UUID.randomUUID().toString());
         return new AsyncResponse(
-            this.filePart(new Headers.From(iterable), publisher, key).thenCompose(
+            this.filePart(iterable, publisher, key).thenCompose(
                 filename -> this.storage.value(key).thenCompose(
                     val -> new ContentAsStream<PackageInfo>(val).process(
                         input -> new Metadata.FromArchive(input, filename).read()
@@ -186,14 +175,14 @@ final class WheelSlice implements Slice {
      */
     private CompletionStage<Void> putArtifactToQueue(
         final Key key, final PackageInfo info, final String filename,
-        final Iterable<Map.Entry<String, String>> headers
+        Headers headers
     ) {
         return this.storage.metadata(key).thenApply(meta -> meta.read(Meta.OP_SIZE).get())
             .thenAccept(
                 size -> this.events.get().add(
                     new ArtifactEvent(
                         WheelSlice.TYPE, this.rname,
-                        new Login(new Headers.From(headers)).getValue(),
+                        new Login(headers).getValue(),
                         String.join("/", info.name(), filename),
                         info.version(), size
                     )

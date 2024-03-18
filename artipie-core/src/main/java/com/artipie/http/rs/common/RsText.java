@@ -58,10 +58,8 @@ public final class RsText extends Response.Wrap {
             new RsWithBody(
                 new RsWithHeaders(
                     origin,
-                    new Headers.From(
-                        new ContentType(
-                            String.format("text/plain; charset=%s", encoding.displayName())
-                        )
+                    Headers.from(
+                        new ContentType("text/plain; charset=" + encoding.displayName())
                     )
                 ),
                 text, encoding

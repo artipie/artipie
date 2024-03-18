@@ -30,9 +30,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link BasicAuthzSlice}.
- * @since 1.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class BasicAuthzSliceTest {
 
     @Test
@@ -55,7 +53,7 @@ class BasicAuthzSliceTest {
                     )
                 ),
                 new RequestLine("GET", "/foo"),
-                new Headers.From(new Authorization.Basic(user, "pwd")),
+                Headers.from(new Authorization.Basic(user, "pwd")),
                 Content.EMPTY
             )
         );
@@ -77,7 +75,7 @@ class BasicAuthzSliceTest {
                     new RsHasStatus(RsStatus.UNAUTHORIZED),
                     new RsHasHeaders(new Header("WWW-Authenticate", "Basic realm=\"artipie\""))
                 ),
-                new Headers.From(new Authorization.Basic("aaa", "bbbb")),
+                Headers.from(new Authorization.Basic("aaa", "bbbb")),
                 new RequestLine("POST", "/bar", "HTTP/1.2")
             )
         );
@@ -98,7 +96,7 @@ class BasicAuthzSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.FORBIDDEN),
                 new RequestLine("DELETE", "/baz", "HTTP/1.3"),
-                new Headers.From(new Authorization.Basic(name, "123")),
+                Headers.from(new Authorization.Basic(name, "123")),
                 Content.EMPTY
             )
         );
@@ -124,7 +122,7 @@ class BasicAuthzSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.UNAUTHORIZED),
                 new RequestLine("DELETE", "/baz", "HTTP/1.3"),
-                new Headers.From(new Header("WWW-Authenticate", "Basic realm=\"artipie\"")),
+                Headers.from(new Header("WWW-Authenticate", "Basic realm=\"artipie\"")),
                 Content.EMPTY
             )
         );
@@ -149,7 +147,7 @@ class BasicAuthzSliceTest {
                     new RsHasHeaders(new Header(AuthzSlice.LOGIN_HDR, "Aladdin"))
                 ),
                 new RequestLine("PUT", "/my-endpoint"),
-                new Headers.From(new Authorization.Basic(aladdin, pswd)),
+                Headers.from(new Authorization.Basic(aladdin, pswd)),
                 Content.EMPTY
             )
         );

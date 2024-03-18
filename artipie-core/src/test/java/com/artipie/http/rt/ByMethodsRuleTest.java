@@ -4,13 +4,12 @@
  */
 package com.artipie.http.rt;
 
+import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-
-import java.util.Collections;
 
 /**
  * Test case for {@link ByMethodsRule}.
@@ -24,7 +23,7 @@ final class ByMethodsRuleTest {
         MatcherAssert.assertThat(
             new ByMethodsRule(RqMethod.GET, RqMethod.POST).apply(
                 new RequestLine(RqMethod.GET, "/"),
-                Collections.emptyList()
+                Headers.EMPTY
             ),
             Matchers.is(true)
         );
@@ -35,7 +34,7 @@ final class ByMethodsRuleTest {
         MatcherAssert.assertThat(
             new ByMethodsRule(RqMethod.GET, RqMethod.POST).apply(
                 new RequestLine(RqMethod.DELETE, "/"),
-                Collections.emptyList()
+                Headers.EMPTY
             ),
             Matchers.is(false)
         );

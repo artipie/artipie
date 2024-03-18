@@ -7,6 +7,7 @@ package com.artipie.npm.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -19,7 +20,6 @@ import org.reactivestreams.Publisher;
 import javax.json.Json;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
@@ -49,7 +49,7 @@ public final class DeleteDistTagsSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> iterable,
+        final Headers iterable,
         final Publisher<ByteBuffer> body) {
         final Matcher matcher = AddDistTagsSlice.PTRN.matcher(line.uri().getPath());
         final Response resp;

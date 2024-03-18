@@ -258,7 +258,6 @@ public final class RqMultipart {
 
         /**
          * Check if part was accepted or rejected.
-         * @param err
          */
         private void check() {
             if (this.accepted != null) {

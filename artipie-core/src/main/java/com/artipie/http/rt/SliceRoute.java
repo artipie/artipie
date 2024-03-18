@@ -4,19 +4,20 @@
  */
 package com.artipie.http.rt;
 
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import org.reactivestreams.Publisher;
 
 /**
  * Routing slice.
@@ -61,7 +62,7 @@ public final class SliceRoute implements Slice {
 
     @Override
     public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body) {
         return this.routes.stream()
             .map(item -> item.response(line, headers, body))
@@ -104,9 +105,9 @@ public final class SliceRoute implements Slice {
 
         @Override
         public Optional<Response> response(
-            final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            RequestLine line,
+            Headers headers,
+            Publisher<ByteBuffer> body
         ) {
             return this.wrapped.response(line, headers, body);
         }

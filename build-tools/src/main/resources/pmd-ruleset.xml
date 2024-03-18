@@ -22,6 +22,7 @@
         <exclude name="OnlyOneReturn"/>
         <exclude name="LocalVariableCouldBeFinal"/>
         <exclude name="LongVariable"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
     </rule>
 
     <rule ref="category/java/design.xml">

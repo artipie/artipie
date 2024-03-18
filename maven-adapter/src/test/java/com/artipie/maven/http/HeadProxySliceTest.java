@@ -33,7 +33,7 @@ class HeadProxySliceTest {
     void performsRequestWithEmptyHeaderAndBody() {
         new HeadProxySlice(new SliceSimple(StandardRs.EMPTY)).response(
             RequestLine.from("HEAD /some/path HTTP/1.1"),
-            new Headers.From("some", "value"),
+            Headers.from("some", "value"),
             new Content.From("000".getBytes())
         ).send(
             (status, headers, body) -> {
@@ -55,7 +55,7 @@ class HeadProxySliceTest {
     @Test
     void passesStatusAndHeadersFromResponse() {
         final RsStatus status = RsStatus.CREATED;
-        final Headers.From headers = new Headers.From("abc", "123");
+        final Headers headers = Headers.from("abc", "123");
         MatcherAssert.assertThat(
             new HeadProxySlice(
                 new SliceSimple(new RsWithHeaders(new RsWithStatus(status), headers))

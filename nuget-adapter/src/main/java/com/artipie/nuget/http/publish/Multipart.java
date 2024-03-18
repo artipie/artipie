@@ -7,6 +7,11 @@ package com.artipie.nuget.http.publish;
 import com.artipie.asto.Concatenation;
 import com.artipie.asto.Content;
 import com.artipie.asto.Remaining;
+import com.artipie.http.Headers;
+import org.apache.commons.fileupload.MultipartStream;
+import org.apache.commons.fileupload.ParameterParser;
+import org.reactivestreams.Publisher;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,14 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.StreamSupport;
-import org.apache.commons.fileupload.MultipartStream;
-import org.apache.commons.fileupload.ParameterParser;
-import org.reactivestreams.Publisher;
 
 /**
  * HTTP 'multipart/form-data' request.
- *
- * @since 0.1
  */
 final class Multipart {
 
@@ -34,7 +34,7 @@ final class Multipart {
     /**
      * Request headers.
      */
-    private final Iterable<Map.Entry<String, String>> headers;
+    private final Headers headers;
 
     /**
      * Request body.
@@ -47,10 +47,7 @@ final class Multipart {
      * @param headers Request headers.
      * @param body Request body.
      */
-    Multipart(
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
-    ) {
+    Multipart(Headers headers, Publisher<ByteBuffer> body) {
         this.headers = headers;
         this.body = body;
     }

@@ -17,15 +17,15 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.StandardRs;
+import org.reactivestreams.Publisher;
+
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import org.reactivestreams.Publisher;
 
 /**
  * A {@link Slice} which only serves metadata on Binary files.
@@ -75,7 +75,7 @@ public final class HeadSlice implements Slice {
                         meta -> meta.read(Meta.OP_SIZE)
                             .orElseThrow(IllegalStateException::new)
                     ).thenApply(
-                        size -> new Headers.From(
+                        size -> Headers.from(
                             new ContentFileName(uri),
                             new ContentLength(size)
                         )
@@ -104,7 +104,7 @@ public final class HeadSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         return new AsyncResponse(
@@ -119,7 +119,7 @@ public final class HeadSlice implements Slice {
                                     final CompletionStage<Response> result;
                                     if (exist) {
                                         result = this.resheaders
-                                            .apply(line, new Headers.From(headers))
+                                            .apply(line, headers)
                                                 .thenApply(
                                                     hdrs -> new RsWithHeaders(StandardRs.OK, hdrs)
                                                 );

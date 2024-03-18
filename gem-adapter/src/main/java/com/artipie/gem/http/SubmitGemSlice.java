@@ -20,7 +20,6 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.ContentWithSize;
 import com.artipie.scheduling.ArtifactEvent;
 import java.nio.ByteBuffer;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
@@ -31,7 +30,6 @@ import org.reactivestreams.Publisher;
 
 /**
  * A slice, which servers gem packages.
- * @since 1.0
  */
 final class SubmitGemSlice implements Slice {
 
@@ -76,7 +74,7 @@ final class SubmitGemSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         final Key key = new Key.From(
             "gems", UUID.randomUUID().toString().replace("-", "").concat(".gem")
@@ -98,7 +96,7 @@ final class SubmitGemSlice implements Slice {
                                     size -> this.events.get().add(
                                         new ArtifactEvent(
                                             SubmitGemSlice.REPO_TYPE, this.name,
-                                            new Login(new Headers.From(headers)).getValue(),
+                                            new Login(headers).getValue(),
                                             pair.getKey(), pair.getValue(), size
                                         )
                                     )

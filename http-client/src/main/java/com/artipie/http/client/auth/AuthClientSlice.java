@@ -20,7 +20,6 @@ import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Slice augmenting requests with authentication when needed.
@@ -57,16 +56,13 @@ public final class AuthClientSlice implements Slice {
      * @param origin Origin slice.
      * @param auth Authenticator.
      */
-    public AuthClientSlice(final Slice origin, final Authenticator auth) {
+    public AuthClientSlice(Slice origin, Authenticator auth) {
         this.origin = origin;
         this.auth = auth;
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             new Content.From(body).asBytesFuture().thenApply(
                 array -> Flowable.fromArray(ByteBuffer.wrap(Arrays.copyOf(array, array.length)))
@@ -75,7 +71,7 @@ public final class AuthClientSlice implements Slice {
                     .thenCompose(
                         first -> this.origin.response(
                             line,
-                            new Headers.From(headers, first),
+                            headers.copy().addAll(first),
                             copy
                         ).send(
                             (rsstatus, rsheaders, rsbody) -> {
@@ -87,7 +83,7 @@ public final class AuthClientSlice implements Slice {
                                                     return connection.accept(rsstatus, rsheaders, rsbody);
                                                 }
                                                 return this.origin.response(
-                                                    line, new Headers.From(headers, authHeaders), copy
+                                                    line, headers.copy().addAll(authHeaders), copy
                                                 ).send(connection);
                                             }
                                         );

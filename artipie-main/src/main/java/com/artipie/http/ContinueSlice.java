@@ -8,16 +8,15 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice which sends {@code 100 Continue} status if expected before actual response.
  * See <a href="https://tools.ietf.org/html/rfc7231#section-6.2.1">rfc7231</a>.
- * @since 0.19
  */
 public final class ContinueSlice implements Slice {
 
@@ -35,8 +34,8 @@ public final class ContinueSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
-                             final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers,
+                             Publisher<ByteBuffer> body) {
         final Response rsp;
         if (expectsContinue(headers)) {
             rsp = new ContinueResponse(
@@ -53,7 +52,7 @@ public final class ContinueSlice implements Slice {
      * @param headers Request headers
      * @return True if expects
      */
-    private static boolean expectsContinue(final Iterable<Map.Entry<String, String>> headers) {
+    private static boolean expectsContinue(Headers headers) {
         return new RqHeaders(headers, "expect")
             .stream()
             .anyMatch(val -> val.equalsIgnoreCase("100-continue"));

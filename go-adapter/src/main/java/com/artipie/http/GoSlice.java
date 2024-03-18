@@ -23,10 +23,10 @@ import com.artipie.http.slice.SliceWithHeaders;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.regex.Pattern;
 import org.reactivestreams.Publisher;
+
+import java.nio.ByteBuffer;
+import java.util.regex.Pattern;
 
 /**
  * Slice implementation that provides HTTP API (Go module proxy protocol) for Golang repository.
@@ -89,7 +89,7 @@ public final class GoSlice implements Slice {
 
     @Override
     public Response response(
-        final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+        final RequestLine line, final Headers headers,
         final Publisher<ByteBuffer> body) {
         return this.origin.response(line, headers, body);
     }
@@ -108,7 +108,7 @@ public final class GoSlice implements Slice {
         return new BasicAuthzSlice(
             new SliceWithHeaders(
                 new SliceDownload(storage),
-                new Headers.From("content-type", type)
+                Headers.from("content-type", type)
             ),
             users,
             new OperationControl(policy, new AdapterBasicPermission(name, Action.Standard.READ))

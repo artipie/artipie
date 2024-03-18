@@ -17,15 +17,15 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
+import org.reactivestreams.Publisher;
+
+import javax.json.Json;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.json.Json;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice to download repodata.json. If the repodata item does not exists in storage, empty
@@ -52,7 +52,7 @@ public final class DownloadRepodataSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             CompletableFuture
@@ -84,7 +84,7 @@ public final class DownloadRepodataSlice implements Slice {
                             ).thenApply(
                                 content -> new RsFull(
                                     RsStatus.OK,
-                                    new Headers.From(
+                                    Headers.from(
                                         new ContentFileName(new KeyLastPart(key).get())
                                     ),
                                     content

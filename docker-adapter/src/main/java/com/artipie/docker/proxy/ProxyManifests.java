@@ -34,7 +34,7 @@ import java.util.concurrent.CompletionStage;
  */
 public final class ProxyManifests implements Manifests {
 
-    private static final Headers MANIFEST_ACCEPT_HEADERS = new Headers.From(
+    private static final Headers MANIFEST_ACCEPT_HEADERS = Headers.from(
             new Header("Accept", "application/json"),
             new Header("Accept", "application/vnd.oci.image.index.v1+json"),
             new Header("Accept", "application/vnd.oci.image.manifest.v1+json"),

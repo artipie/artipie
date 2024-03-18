@@ -11,7 +11,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
-import java.util.Collections;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +24,7 @@ class RedirectSliceTest {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
                 new RequestLine(RqMethod.GET, "/one/two/three_four"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             new ResponseMatcher(
@@ -40,7 +39,7 @@ class RedirectSliceTest {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
                 new RequestLine(RqMethod.GET, "/one/two/three_four/"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             new ResponseMatcher(
@@ -55,7 +54,7 @@ class RedirectSliceTest {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
                 new RequestLine(RqMethod.GET, "/three/F.O.U.R"),
-                new Headers.From("X-FullPath", "/one/two/three/F.O.U.R"),
+                Headers.from("X-FullPath", "/one/two/three/F.O.U.R"),
                 Flowable.empty()
             ),
             new ResponseMatcher(
@@ -70,7 +69,7 @@ class RedirectSliceTest {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
                 new RequestLine(RqMethod.GET, "/three/One_Two"),
-                new Headers.From("X-FullPath", "/One_Two/three/One_Two"),
+                Headers.from("X-FullPath", "/One_Two/three/One_Two"),
                 Flowable.empty()
             ),
             new ResponseMatcher(

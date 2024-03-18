@@ -9,6 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -19,19 +20,18 @@ import com.artipie.rpm.RepoConfig;
 import com.artipie.rpm.asto.AstoRepoRemove;
 import com.artipie.rpm.meta.PackageInfo;
 import com.artipie.scheduling.ArtifactEvent;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.StreamSupport;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.reactivestreams.Publisher;
 
 /**
  * Rpm endpoint to remove packages accepts file checksum of the package to remove
@@ -42,7 +42,6 @@ import org.reactivestreams.Publisher;
  * initiates removing files process.
  * If request is not valid (see {@link RpmRemove#validate(Key, Pair)}),
  * `BAD_REQUEST` status is returned.
- * @since 1.9
  */
 public final class RpmRemove implements Slice {
 
@@ -80,8 +79,8 @@ public final class RpmRemove implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
-                             final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers,
+                             Publisher<ByteBuffer> body) {
         final RpmUpload.Request request = new RpmUpload.Request(line);
         final Key temp = new Key.From(RpmRemove.TO_RM, request.file());
         return new AsyncResponse(
@@ -154,11 +153,9 @@ public final class RpmRemove implements Slice {
      * @param headers Headers
      * @return Pair of algorithm and checksum if header was found
      */
-    private static Optional<Pair<String, String>> checksum(
-        final Iterable<Map.Entry<String, String>> headers
-    ) {
+    private static Optional<Pair<String, String>> checksum(Headers headers) {
         final String name = "x-checksum-";
-        return StreamSupport.stream(headers.spliterator(), false)
+        return headers.stream()
             .map(hdr -> new ImmutablePair<>(hdr.getKey().toLowerCase(Locale.US), hdr.getValue()))
             .filter(hdr -> hdr.getKey().startsWith(name))
             .findFirst().map(

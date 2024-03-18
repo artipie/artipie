@@ -20,8 +20,6 @@ import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
@@ -31,9 +29,6 @@ import java.util.function.Function;
  * formatter.
  * It also converts URI path to storage {@link com.artipie.asto.Key}
  * and use it to access storage.
- * </p>
- *
- * @since 0.8
  */
 public final class ListBlobsSlice implements Slice {
 
@@ -93,26 +88,18 @@ public final class ListBlobsSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
+        final Key key = this.transform.apply(line.uri().getPath());
         return new AsyncResponse(
-            CompletableFuture
-                .supplyAsync(line::uri)
-                .thenCompose(
-                    uri -> {
-                        final Key key = this.transform.apply(uri.getPath());
-                        return this.storage.list(key)
-                            .thenApply(
-                                keys -> {
-                                    final String text = this.format.apply(keys);
-                                    return new RsFull(
-                                        RsStatus.OK,
-                                        new Headers.From(new ContentType(this.mtype)),
-                                        new Content.From(text.getBytes(StandardCharsets.UTF_8))
-                                    );
-                                }
-                            );
+            this.storage.list(key)
+                .thenApply(
+                    keys -> {
+                        final String text = this.format.apply(keys);
+                        return new RsFull(
+                            RsStatus.OK,
+                            Headers.from(new ContentType(this.mtype)),
+                            new Content.From(text.getBytes(StandardCharsets.UTF_8))
+                        );
                     }
                 )
         );

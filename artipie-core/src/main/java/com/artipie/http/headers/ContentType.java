@@ -9,10 +9,8 @@ import com.artipie.http.rq.RqHeaders;
 
 /**
  * Content-Type header.
- *
- * @since 0.11
  */
-public final class ContentType extends Header.Wrap {
+public final class ContentType extends Header {
 
     /**
      * Header name.

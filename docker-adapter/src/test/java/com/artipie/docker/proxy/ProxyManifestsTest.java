@@ -7,12 +7,13 @@ package com.artipie.docker.proxy;
 import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Digest;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.http.DigestHeader;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ManifestReference;
 import com.artipie.http.Headers;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
@@ -25,7 +26,6 @@ import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,7 +46,7 @@ class ProxyManifestsTest {
                 }
                 return new RsFull(
                     RsStatus.OK,
-                    new Headers.From(new DigestHeader(new Digest.FromString(digest))),
+                    Headers.from(new DigestHeader(new Digest.FromString(digest))),
                     new Content.From(data)
                 );
             },
@@ -80,7 +80,7 @@ class ProxyManifestsTest {
         final String name = "my-alpine";
         final int limit = 123;
         final AtomicReference<RequestLine> cline = new AtomicReference<>();
-        final AtomicReference<Iterable<Map.Entry<String, String>>> cheaders;
+        final AtomicReference<Iterable<Header>> cheaders;
         cheaders = new AtomicReference<>();
         final AtomicReference<byte[]> cbody = new AtomicReference<>();
         new ProxyDocker(

@@ -7,13 +7,13 @@ package com.artipie.gem.http;
 import com.artipie.asto.Storage;
 import com.artipie.gem.Gem;
 import com.artipie.http.ArtipieHttpException;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.reactivestreams.Publisher;
@@ -52,7 +52,7 @@ final class ApiGetSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body) {
         final Matcher matcher = PATH_PATTERN.matcher(line.uri().toString());
         if (!matcher.find()) {

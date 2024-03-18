@@ -40,7 +40,7 @@ public final class BasicAuthenticator implements Authenticator {
     @Override
     public CompletionStage<Headers> authenticate(final Headers headers) {
         return CompletableFuture.completedFuture(
-            new Headers.From(new Authorization.Basic(this.username, this.password))
+            Headers.from(new Authorization.Basic(this.username, this.password))
         );
     }
 }

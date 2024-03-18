@@ -7,12 +7,11 @@ package com.artipie.scheduling;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Login;
-import java.util.Map;
+
 import java.util.Queue;
 
 /**
  * Repository events.
- * @since 1.3
  */
 public final class RepositoryEvents {
 
@@ -58,10 +57,10 @@ public final class RepositoryEvents {
      * @param headers Request headers
      */
     public void addUploadEventByKey(final Key key, final long size,
-        final Iterable<Map.Entry<String, String>> headers) {
+        final Headers headers) {
         this.queue.add(
             new ArtifactEvent(
-                this.rtype, this.rname, new Login(new Headers.From(headers)).getValue(),
+                this.rtype, this.rname, new Login(headers).getValue(),
                 key.string(), RepositoryEvents.VERSION, size
             )
         );

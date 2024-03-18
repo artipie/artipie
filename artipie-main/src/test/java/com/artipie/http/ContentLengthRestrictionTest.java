@@ -14,12 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.Collections;
-
 /**
  * Test for {@link ContentLengthRestriction}.
- *
- * @since 0.2
  */
 class ContentLengthRestrictionTest {
 
@@ -52,11 +48,11 @@ class ContentLengthRestrictionTest {
             (line, headers, body) -> new RsWithStatus(RsStatus.OK),
             limit
         );
-        final Response response = slice.response(new RequestLine("GET", "/"), Collections.emptySet(), Flowable.empty());
+        final Response response = slice.response(new RequestLine("GET", "/"), Headers.EMPTY, Flowable.empty());
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.OK));
     }
 
-    private Headers.From headers(final String value) {
-        return new Headers.From("Content-Length", value);
+    private Headers headers(final String value) {
+        return Headers.from("Content-Length", value);
     }
 }

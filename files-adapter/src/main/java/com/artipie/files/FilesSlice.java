@@ -34,6 +34,7 @@ import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;
+
 import java.util.Optional;
 import java.util.Queue;
 import java.util.regex.Pattern;
@@ -96,7 +97,7 @@ public final class FilesSlice extends Slice.Wrap {
                                 new HeadSlice(storage),
                                 storage
                             ),
-                            new Headers.From(new ContentType(FilesSlice.OCTET_STREAM))
+                            Headers.from(new ContentType(FilesSlice.OCTET_STREAM))
                         ),
                         auth,
                         new OperationControl(
@@ -148,7 +149,7 @@ public final class FilesSlice extends Slice.Wrap {
                                         new SliceDownload(storage),
                                         storage
                                     ),
-                                    new Headers.From(new ContentType(FilesSlice.OCTET_STREAM))
+                                    Headers.from(new ContentType(FilesSlice.OCTET_STREAM))
                                 )
                             )
                         ),

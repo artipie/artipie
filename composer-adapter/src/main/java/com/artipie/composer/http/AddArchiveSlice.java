@@ -19,7 +19,6 @@ import com.artipie.scheduling.ArtifactEvent;
 import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -87,7 +86,7 @@ final class AddArchiveSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final String uri = line.uri().getPath();
@@ -101,12 +100,12 @@ final class AddArchiveSlice implements Slice {
             if (this.events.isPresent()) {
                 res = res.thenCompose(
                     nothing -> this.repository.storage().metadata(archive.name().artifact())
-                        .thenApply(meta -> meta.read(Meta.OP_SIZE).get())
+                        .thenApply(meta -> meta.read(Meta.OP_SIZE).orElseThrow())
                 ).thenAccept(
                     size -> this.events.get().add(
                         new ArtifactEvent(
                             AddArchiveSlice.REPO_TYPE, this.rname,
-                            new Login(new Headers.From(headers)).getValue(), archive.name().full(),
+                            new Login(headers).getValue(), archive.name().full(),
                             archive.name().version(), size
                         )
                     )

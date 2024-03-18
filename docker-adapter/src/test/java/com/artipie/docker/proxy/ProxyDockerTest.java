@@ -8,6 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.Header;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
@@ -44,7 +45,7 @@ final class ProxyDockerTest {
         final String name = "my-alpine";
         final int limit = 123;
         final AtomicReference<String> cline = new AtomicReference<>();
-        final AtomicReference<Iterable<Map.Entry<String, String>>> cheaders;
+        final AtomicReference<Iterable<Header>> cheaders;
         cheaders = new AtomicReference<>();
         final AtomicReference<byte[]> cbody = new AtomicReference<>();
         new ProxyDocker(

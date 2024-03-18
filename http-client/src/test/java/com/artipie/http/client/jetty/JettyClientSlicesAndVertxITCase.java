@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.cactoos.text.TextOf;
 import org.hamcrest.MatcherAssert;
@@ -123,7 +122,7 @@ final class JettyClientSlicesAndVertxITCase {
         @Override
         public Response response(
             final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers,
+            final Headers headers,
             final Publisher<ByteBuffer> pub
         ) {
             final CompletableFuture<Response> promise = new CompletableFuture<>();

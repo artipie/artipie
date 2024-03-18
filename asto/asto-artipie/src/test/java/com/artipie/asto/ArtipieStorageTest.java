@@ -5,6 +5,7 @@
 package com.artipie.asto;
 
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
@@ -18,7 +19,6 @@ import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.collection.IsEmptyIterable;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Assertions;
@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -43,7 +42,7 @@ public final class ArtipieStorageTest {
         final Key key = new Key.From("a", "b", "hello.txt");
         final byte[] content = "Hello world!!!".getBytes();
         final AtomicReference<RequestLine> line = new AtomicReference<>();
-        final AtomicReference<Iterable<Map.Entry<String, String>>> headers =
+        final AtomicReference<Headers> headers =
             new AtomicReference<>();
         final AtomicReference<byte[]> body = new AtomicReference<>();
         new BlockingStorage(
@@ -101,7 +100,7 @@ public final class ArtipieStorageTest {
     void shouldDelete() throws Exception {
         final Key key = new Key.From("delkey");
         final AtomicReference<RequestLine> line = new AtomicReference<>();
-        final AtomicReference<Iterable<Map.Entry<String, String>>> headers =
+        final AtomicReference<Headers> headers =
             new AtomicReference<>();
         final AtomicReference<byte[]> body = new AtomicReference<>();
         new BlockingStorage(
@@ -129,11 +128,7 @@ public final class ArtipieStorageTest {
             "Request line to delete a value"
         );
 
-        MatcherAssert.assertThat(
-            "Headers are empty",
-            headers.get(),
-            new IsEmptyIterable<>()
-        );
+        Assertions.assertTrue(headers.get().isEmpty(), "Headers are empty");
         MatcherAssert.assertThat(
             "Body is empty",
             body.get(),

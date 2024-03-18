@@ -6,6 +6,7 @@
 package com.artipie.npm.http;
 
 import com.artipie.asto.Storage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthUser;
@@ -28,7 +29,6 @@ import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -37,7 +37,6 @@ import org.reactivestreams.Publisher;
 /**
  * NpmSlice is a http layer in npm adapter.
  *
- * @since 0.3
  * @todo #340:30min Implement `/npm` endpoint properly: for now `/npm` simply returns 200 OK
  *  status without any body. We need to figure out what information can (or should) be returned
  *  by registry on this request and add it. Here are several links that might be useful
@@ -265,7 +264,7 @@ public final class NpmSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body) {
         return this.route.response(line, headers, body);
     }

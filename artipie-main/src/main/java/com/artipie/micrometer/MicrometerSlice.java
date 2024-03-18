@@ -16,7 +16,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import io.vertx.micrometer.backends.BackendRegistries;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -26,7 +25,6 @@ import org.reactivestreams.Publisher;
 
 /**
  * Calculated uploaded and downloaded body size for all requests.
- * @since 0.28
  */
 public final class MicrometerSlice implements Slice {
 
@@ -74,7 +72,7 @@ public final class MicrometerSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> head,
+    public Response response(final RequestLine line, final Headers head,
                              final Publisher<ByteBuffer> body) {
         final String method = line.method().value();
         final Counter.Builder cnt = Counter.builder("artipie.request.counter")

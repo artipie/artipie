@@ -8,6 +8,7 @@ import com.artipie.docker.Docker;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.RegistryCategory;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
@@ -17,7 +18,6 @@ import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.regex.Pattern;
 import org.reactivestreams.Publisher;
 
@@ -67,7 +67,7 @@ final class CatalogEntity {
         @Override
         public Response response(
             final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers,
+            final Headers headers,
             final Publisher<ByteBuffer> body
         ) {
             final RqParams params = new RqParams(line.uri().getQuery());

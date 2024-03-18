@@ -4,10 +4,11 @@
  */
 package com.artipie.http.auth;
 
+import com.artipie.http.Headers;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import java.util.Map;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -47,8 +48,7 @@ public final class BearerAuthScheme implements AuthScheme {
     }
 
     @Override
-    public CompletionStage<Result> authenticate(final Iterable<Map.Entry<String, String>> headers,
-        final RequestLine line) {
+    public CompletionStage<Result> authenticate(Headers headers, RequestLine line) {
         return new RqHeaders(headers, Authorization.NAME)
             .stream()
             .findFirst()

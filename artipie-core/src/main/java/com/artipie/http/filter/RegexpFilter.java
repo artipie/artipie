@@ -5,9 +5,9 @@
 package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -56,7 +56,7 @@ public final class RegexpFilter extends Filter {
     }
 
     @Override
-    public boolean check(RequestLine line, Iterable<Map.Entry<String, String>> headers) {
+    public boolean check(RequestLine line, Headers headers) {
         final boolean res;
         if (this.fulluri) {
             res = this.pattern.matcher(line.uri().toString()).matches();

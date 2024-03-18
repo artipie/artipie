@@ -25,7 +25,7 @@ class SliceWithHeadersTest {
         final String value = "text/plain";
         MatcherAssert.assertThat(
             new SliceWithHeaders(
-                new SliceSimple(StandardRs.EMPTY), new Headers.From(header, value)
+                new SliceSimple(StandardRs.EMPTY), Headers.from(header, value)
             ).response(RequestLine.from("GET /some/text HTTP/1.1"), Headers.EMPTY, Flowable.empty()),
             new RsHasHeaders(new Header(header, value))
         );
@@ -41,7 +41,7 @@ class SliceWithHeadersTest {
             new SliceWithHeaders(
                 new SliceSimple(
                     new RsWithHeaders(StandardRs.EMPTY, hone, vone)
-                ), new Headers.From(htwo, vtwo)
+                ), Headers.from(htwo, vtwo)
             ).response(RequestLine.from("GET /any/text HTTP/1.1"), Headers.EMPTY, Flowable.empty()),
             new RsHasHeaders(
                 new Header(hone, vone), new Header(htwo, vtwo)

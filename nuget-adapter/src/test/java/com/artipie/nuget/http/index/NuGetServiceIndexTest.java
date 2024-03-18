@@ -5,6 +5,7 @@
 package com.artipie.nuget.http.index;
 
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
@@ -34,7 +35,6 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -67,7 +67,7 @@ class NuGetServiceIndexTest {
     void shouldGetIndex() {
         final Response response = this.nuget.response(
             new RequestLine(RqMethod.GET, "/index.json"),
-            Collections.emptyList(),
+            Headers.EMPTY,
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -110,7 +110,7 @@ class NuGetServiceIndexTest {
     void shouldFailPutIndex() {
         final Response response = this.nuget.response(
             new RequestLine(RqMethod.PUT, "/index.json"),
-            Collections.emptyList(),
+            Headers.EMPTY,
             Flowable.empty()
         );
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));

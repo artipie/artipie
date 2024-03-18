@@ -4,14 +4,14 @@
  */
 package com.artipie.http.rt;
 
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.Optional;
-
 import com.artipie.http.rq.RequestLine;
 import org.reactivestreams.Publisher;
+
+import java.nio.ByteBuffer;
+import java.util.Optional;
 
 /**
  * Rule-based route path.
@@ -45,16 +45,13 @@ public final class RtRulePath implements RtPath {
 
     @Override
     public Optional<Response> response(
-        final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        RequestLine line,
+        Headers headers,
+        Publisher<ByteBuffer> body
     ) {
-        final Optional<Response> res;
         if (this.rule.apply(line, headers)) {
-            res = Optional.of(this.slice.response(line, headers, body));
-        } else {
-            res = Optional.empty();
+            return Optional.of(this.slice.response(line, headers, body));
         }
-        return res;
+        return Optional.empty();
     }
 }

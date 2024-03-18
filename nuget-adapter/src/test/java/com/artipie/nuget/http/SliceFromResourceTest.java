@@ -15,17 +15,16 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.util.Collections;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 
+import java.nio.ByteBuffer;
+import java.util.Collections;
+
 /**
  * Tests for {@link SliceFromResource}.
- *
- * @since 0.2
  */
 public class SliceFromResourceTest {
 
@@ -52,7 +51,7 @@ public class SliceFromResourceTest {
             }
         ).response(
             new RequestLine(RqMethod.GET, "/some/path"),
-            new Headers.From(Collections.singleton(header)),
+            Headers.from(Collections.singleton(header)),
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -84,7 +83,7 @@ public class SliceFromResourceTest {
             }
         ).response(
             new RequestLine(RqMethod.PUT, "/some/other/path"),
-            new Headers.From(Collections.singleton(header)),
+            Headers.from(Collections.singleton(header)),
             Flowable.just(ByteBuffer.wrap(content))
         );
         MatcherAssert.assertThat(

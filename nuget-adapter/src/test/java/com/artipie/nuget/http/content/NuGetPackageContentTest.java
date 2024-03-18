@@ -76,7 +76,7 @@ class NuGetPackageContentTest {
                     RqMethod.GET,
                     "/content/package/1.0.0/content.nupkg"
                 ),
-                new TestAuthentication.Headers(),
+                TestAuthentication.HEADERS,
                 Flowable.empty()
             ),
             new AllOf<>(
@@ -97,7 +97,7 @@ class NuGetPackageContentTest {
                     RqMethod.GET,
                     "/content/package/1.0.0/logo.png"
                 ),
-                new TestAuthentication.Headers(),
+                TestAuthentication.HEADERS,
                 Flowable.empty()
             ),
             new RsHasStatus(RsStatus.NOT_FOUND)
@@ -111,7 +111,7 @@ class NuGetPackageContentTest {
                 RqMethod.PUT,
                 "/content/package/1.0.0/content.nupkg"
             ),
-            new TestAuthentication.Headers(),
+            TestAuthentication.HEADERS,
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -134,7 +134,7 @@ class NuGetPackageContentTest {
                     RqMethod.GET,
                     "/content/package2/index.json"
                 ),
-                new TestAuthentication.Headers(),
+                TestAuthentication.HEADERS,
                 Flowable.empty()
             ),
             Matchers.allOf(
@@ -152,7 +152,7 @@ class NuGetPackageContentTest {
                     RqMethod.GET,
                     "/content/unknown-package/index.json"
                 ),
-                new TestAuthentication.Headers(),
+                TestAuthentication.HEADERS,
                 Flowable.empty()
             ),
             new RsHasStatus(RsStatus.NOT_FOUND)

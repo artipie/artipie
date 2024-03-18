@@ -5,186 +5,109 @@
 package com.artipie.http;
 
 import com.artipie.http.headers.Header;
-import com.google.common.collect.Iterables;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Spliterator;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * HTTP request headers.
  *
  * @since 0.8
  */
-public interface Headers extends Iterable<Map.Entry<String, String>> {
+public class Headers implements Iterable<Header> {
 
-    /**
-     * Empty headers.
-     */
-    Headers EMPTY = new From(Collections.emptyList());
+    public static Headers EMPTY = new Headers(Collections.<Header>emptyList());
 
-    /**
-     * {@link Headers} created from something.
-     *
-     * @since 0.8
-     */
-    final class From implements Headers {
-
-        /**
-         * Origin headers.
-         */
-        private final Iterable<Map.Entry<String, String>> origin;
-
-        /**
-         * Ctor.
-         *
-         * @param name Header name.
-         * @param value Header value.
-         */
-        public From(final String name, final String value) {
-            this(new Header(name, value));
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param origin Origin headers.
-         * @param name Additional header name.
-         * @param value Additional header value.
-         */
-        public From(
-            final Iterable<Map.Entry<String, String>> origin,
-            final String name, final String value
-        ) {
-            this(origin, new Header(name, value));
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param header Header.
-         */
-        public From(final Map.Entry<String, String> header) {
-            this(Collections.singleton(header));
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param origin Origin headers.
-         * @param additional Additional headers.
-         */
-        public From(
-            final Iterable<Map.Entry<String, String>> origin,
-            final Map.Entry<String, String> additional
-        ) {
-            this(origin, Collections.singleton(additional));
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param origin Origin headers.
-         */
-        @SafeVarargs
-        public From(final Map.Entry<String, String>... origin) {
-            this(Arrays.asList(origin));
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param origin Origin headers.
-         * @param additional Additional headers.
-         */
-        @SafeVarargs
-        public From(
-            final Iterable<Map.Entry<String, String>> origin,
-            final Map.Entry<String, String>... additional
-        ) {
-            this(origin, Arrays.asList(additional));
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param origin Origin headers.
-         * @param additional Additional headers.
-         */
-        public From(
-            final Iterable<Map.Entry<String, String>> origin,
-            final Iterable<Map.Entry<String, String>> additional
-        ) {
-            this(Iterables.concat(origin, additional));
-        }
-
-        /**
-         * Ctor.
-         *
-         * @param origin Origin headers.
-         */
-        public From(final Iterable<Map.Entry<String, String>> origin) {
-            this.origin = origin;
-        }
-
-        @Override
-        public Iterator<Map.Entry<String, String>> iterator() {
-            return this.origin.iterator();
-        }
-
-        @Override
-        public void forEach(final Consumer<? super Map.Entry<String, String>> action) {
-            this.origin.forEach(action);
-        }
-
-        @Override
-        public Spliterator<Map.Entry<String, String>> spliterator() {
-            return this.origin.spliterator();
-        }
+    public static Headers from(String name, String value) {
+        return from(new Header(name, value));
     }
 
-    /**
-     * Abstract decorator for {@link Headers}.
-     * @since 0.10
-     */
-    abstract class Wrap implements Headers {
+    public static Headers from(Header header) {
+        List<Header> list = new ArrayList<>();
+        list.add(header);
+        return new Headers(list);
+    }
 
-        /**
-         * Origin headers.
-         */
-        private final Iterable<Map.Entry<String, String>> origin;
+    public static Headers from(Iterable<Map.Entry<String, String>> multiMap) {
+        return new Headers(
+            StreamSupport.stream(multiMap.spliterator(), false)
+                .map(Header::new)
+                .toList()
+        );
+    }
 
-        /**
-         * Ctor.
-         * @param origin Origin headers
-         */
-        protected Wrap(final Iterable<Map.Entry<String, String>> origin) {
-            this.origin = origin;
-        }
+    @SafeVarargs
+    public static Headers from(Map.Entry<String, String>... entries) {
+        return new Headers(Arrays.stream(entries).map(Header::new).toList());
+    }
 
-        /**
-         * Ctor.
-         * @param origin Origin headers
-         */
-        protected Wrap(final Header... origin) {
-            this(Arrays.asList(origin));
-        }
+    private final List<Header> headers;
 
-        @Override
-        public final Iterator<Map.Entry<String, String>> iterator() {
-            return this.origin.iterator();
-        }
+    public Headers() {
+        this.headers = new ArrayList<>();
+    }
 
-        @Override
-        public final void forEach(final Consumer<? super Map.Entry<String, String>> action) {
-            this.origin.forEach(action);
-        }
+    public Headers(List<Header> headers) {
+        this.headers = headers;
+    }
 
-        @Override
-        public final Spliterator<Map.Entry<String, String>> spliterator() {
-            return this.origin.spliterator();
-        }
+    public Headers add(String name, String value) {
+        headers.add(new Header(name, value));
+        return this;
+    }
+
+    public Headers add(Header header) {
+        headers.add(header);
+        return this;
+    }
+
+    public Headers add(Map.Entry<String, String> entry) {
+        return add(entry.getKey(), entry.getValue());
+    }
+
+    public Headers addAll(Headers src) {
+        headers.addAll(src.headers);
+        return this;
+    }
+
+    public Headers copy() {
+        return new Headers(new ArrayList<>(headers));
+    }
+
+    public boolean isEmpty() {
+        return headers.isEmpty();
+    }
+
+    public List<String> values(String name) {
+        return headers.stream()
+            .filter(h -> h.getKey().equalsIgnoreCase(name))
+            .map(Header::getValue)
+            .toList();
+    }
+
+    @Override
+    public Iterator<Header> iterator() {
+        return headers.iterator();
+    }
+
+    public Stream<Header> stream() {
+        return headers.stream();
+    }
+
+    public List<Header> asList() {
+        return new ArrayList<>(headers);
+    }
+
+    public String asString() {
+        return headers.stream()
+            .map(h -> h.getKey() + '=' + h.getValue())
+            .collect(Collectors.joining(";"));
     }
 }

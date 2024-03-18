@@ -9,6 +9,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.conan.ItemTokenizer;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -29,7 +30,6 @@ import javax.json.stream.JsonParser;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
@@ -150,7 +150,7 @@ public final class ConanUpload {
 
         @Override
         public Response response(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+                                 final Headers headers, final Publisher<ByteBuffer> body) {
             final Matcher matcher = matchRequest(line);
             final String path = matcher.group(ConanUpload.URI_PATH);
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
@@ -243,7 +243,7 @@ public final class ConanUpload {
 
         @Override
         public Response response(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+                                 final Headers headers, final Publisher<ByteBuffer> body) {
             final String path = line.uri().getPath();
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
             final Optional<String> token = new RqParams(

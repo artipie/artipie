@@ -120,7 +120,7 @@ class ProxyBlobTest {
                 }
                 final CompletionStage<Void> accept = connection.accept(
                     RsStatus.OK,
-                    new Headers.From(new ContentLength(String.valueOf(data.length))),
+                    Headers.from(new ContentLength(String.valueOf(data.length))),
                     content
                 );
                 capture.set(accept);

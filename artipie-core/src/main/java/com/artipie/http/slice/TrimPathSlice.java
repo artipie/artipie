@@ -5,6 +5,7 @@
 package com.artipie.http.slice;
 
 import com.artipie.ArtipieException;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
@@ -13,7 +14,6 @@ import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import com.google.common.collect.Iterables;
 import org.apache.http.client.utils.URIBuilder;
 import org.reactivestreams.Publisher;
 
@@ -21,8 +21,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,10 +30,8 @@ import java.util.regex.Pattern;
  * <p>
  * For example {@code GET http://www.w3.org/pub/WWW/TheProject.html HTTP/1.1}
  * would be {@code GET http://www.w3.org/WWW/TheProject.html HTTP/1.1}.
- * </p>
  * <p>
  * The full path will be available as the value of {@code X-FullPath} header.
- * </p>
  */
 public final class TrimPathSlice implements Slice {
 
@@ -78,11 +74,7 @@ public final class TrimPathSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
-    ) {
+    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
         final URI uri = line.uri();
         final String full = uri.getPath();
         final Matcher matcher = this.ptn.matcher(full);
@@ -101,10 +93,7 @@ public final class TrimPathSlice implements Slice {
             }
             response = this.slice.response(
                 new RequestLine(line.method(), respUri, line.version()),
-                Iterables.concat(
-                    headers,
-                    Collections.singletonList(new Header(TrimPathSlice.HDR_FULL_PATH, full))
-                ),
+                headers.copy().add(new Header(TrimPathSlice.HDR_FULL_PATH, full)),
                 body
             );
         } else {

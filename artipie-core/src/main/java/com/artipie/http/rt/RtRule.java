@@ -4,11 +4,12 @@
  */
 package com.artipie.http.rt;
 
+import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqMethod;
+
 import java.util.Arrays;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -32,7 +33,7 @@ public interface RtRule {
      * @param headers Request headers
      * @return True if rule passed
      */
-    boolean apply(RequestLine line, Iterable<Map.Entry<String, String>> headers);
+    boolean apply(RequestLine line, Headers headers);
 
     /**
      * This rule is matched only when all of the rules are matched.
@@ -88,8 +89,7 @@ public interface RtRule {
         }
 
         @Override
-        public boolean apply(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers) {
+        public boolean apply(RequestLine line, Headers headers) {
             boolean match = true;
             for (final RtRule rule : this.rules) {
                 if (!rule.apply(line, headers)) {
@@ -129,8 +129,7 @@ public interface RtRule {
         }
 
         @Override
-        public boolean apply(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers) {
+        public boolean apply(RequestLine line, Headers headers) {
             boolean match = false;
             for (final RtRule rule : this.rules) {
                 if (rule.apply(line, headers)) {
@@ -187,8 +186,7 @@ public interface RtRule {
         }
 
         @Override
-        public boolean apply(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers) {
+        public boolean apply(RequestLine line, Headers headers) {
             return this.ptn.matcher(line.uri().getPath()).matches();
         }
     }
@@ -213,8 +211,7 @@ public interface RtRule {
         }
 
         @Override
-        public final boolean apply(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers) {
+        public final boolean apply(RequestLine line, Headers headers) {
             return this.origin.apply(line, headers);
         }
     }
@@ -254,7 +251,7 @@ public interface RtRule {
         }
 
         @Override
-        public boolean apply(final RequestLine line, final Iterable<Map.Entry<String, String>> headers) {
+        public boolean apply(RequestLine line, Headers headers) {
             return new RqHeaders(headers, this.name).stream()
                 .anyMatch(val -> this.ptn.matcher(val).matches());
         }

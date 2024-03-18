@@ -4,15 +4,16 @@
  */
 package com.artipie.conda.http;
 
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.common.RsJson;
+import org.reactivestreams.Publisher;
+
+import javax.json.Json;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import javax.json.Json;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice to serve on `/authentication-type`, returns stab json body.
@@ -21,8 +22,8 @@ import org.reactivestreams.Publisher;
 final class AuthTypeSlice implements Slice {
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
-                             final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers,
+                             Publisher<ByteBuffer> body) {
         return new RsJson(
             () -> Json.createObjectBuilder().add("authentication_type", "password").build(),
             StandardCharsets.UTF_8

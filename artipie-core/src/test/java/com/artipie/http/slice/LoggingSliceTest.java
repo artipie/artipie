@@ -17,7 +17,6 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.logging.Level;
@@ -39,7 +38,7 @@ class LoggingSliceTest {
             )
         ).response(
             RequestLine.from("GET /v2/ HTTP_1_1"),
-            Arrays.asList(
+            Headers.from(
                 new MapEntry<>("Content-Length", "0"),
                 new MapEntry<>("Content-Type", "whatever")
             ),

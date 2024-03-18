@@ -5,6 +5,7 @@
 package com.artipie.conda;
 
 import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -14,7 +15,6 @@ import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 /**
  * Slice decorator to log request body.
@@ -35,8 +35,8 @@ final class BodyLoggingSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
-                             final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers,
+                             Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             new Content.From(body).asBytesFuture().thenApply(
                 bytes -> {

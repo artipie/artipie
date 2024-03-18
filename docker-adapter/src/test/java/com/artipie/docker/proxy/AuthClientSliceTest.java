@@ -21,8 +21,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link AuthClientSlice}.
- *
- * @since 0.3
  */
 class AuthClientSliceTest {
 
@@ -40,7 +38,7 @@ class AuthClientSliceTest {
                 return new RsFull(status, rsheaders, rsbody);
             },
             Authenticator.ANONYMOUS
-        ).response(line, new Headers.From(header), Flowable.just(ByteBuffer.wrap(body)));
+        ).response(line, Headers.from(header), Flowable.just(ByteBuffer.wrap(body)));
         MatcherAssert.assertThat(
             response,
             new ResponseMatcher(status, body, header)

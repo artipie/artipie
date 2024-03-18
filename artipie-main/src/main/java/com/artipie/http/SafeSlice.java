@@ -11,7 +11,6 @@ import com.artipie.http.rs.RsWithStatus;
 import com.jcabi.log.Logger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import org.reactivestreams.Publisher;
 
@@ -36,7 +35,7 @@ final class SafeSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         try {
             return new RsSafe(this.origin.response(line, headers, body));

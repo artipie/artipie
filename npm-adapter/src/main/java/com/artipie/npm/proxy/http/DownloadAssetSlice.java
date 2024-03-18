@@ -19,15 +19,14 @@ import com.artipie.npm.misc.DateTimeNowStr;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import org.reactivestreams.Publisher;
 
 /**
  * HTTP slice for download asset requests.
- * @since 0.1
  */
 public final class DownloadAssetSlice implements Slice {
     /**
@@ -68,7 +67,7 @@ public final class DownloadAssetSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> rqheaders,
+        final Headers rqheaders,
         final Publisher<ByteBuffer> body) {
         final String tgz = this.path.value(line.uri().getPath());
         return new AsyncResponse(
@@ -78,7 +77,7 @@ public final class DownloadAssetSlice implements Slice {
                         queue -> queue.add(
                             new ProxyArtifactEvent(
                                 new Key.From(tgz), this.rname,
-                                new Login(new Headers.From(rqheaders)).getValue()
+                                new Login(rqheaders).getValue()
                             )
                         )
                     );
@@ -87,7 +86,7 @@ public final class DownloadAssetSlice implements Slice {
                 .map(
                     asset -> (Response) new RsFull(
                         RsStatus.OK,
-                        new Headers.From(
+                        Headers.from(
                             new Header(
                                 "Content-Type",
                                 Optional.ofNullable(

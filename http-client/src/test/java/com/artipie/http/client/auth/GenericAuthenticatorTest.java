@@ -46,7 +46,7 @@ class GenericAuthenticatorTest {
                     "Aladdin",
                     "open sesame"
                 ).authenticate(
-                    new Headers.From(new WwwAuthenticate("Basic"))
+                    Headers.from(new WwwAuthenticate("Basic"))
                 ).toCompletableFuture().join().spliterator(),
                 false
             ).map(Map.Entry::getKey).collect(Collectors.toList()),
@@ -68,7 +68,7 @@ class GenericAuthenticatorTest {
                     "bob",
                     "12345"
                 ).authenticate(
-                    new Headers.From(new WwwAuthenticate("Bearer realm=\"https://artipie.com\""))
+                    Headers.from(new WwwAuthenticate("Bearer realm=\"https://artipie.com\""))
                 ).toCompletableFuture().join().spliterator(),
                 false
             ).map(Map.Entry::getKey).collect(Collectors.toList()),

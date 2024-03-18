@@ -5,12 +5,13 @@
 package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.rq.RqHeaders;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.Optional;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
+
+import java.nio.ByteBuffer;
+import java.util.Optional;
 
 /**
  * Content with size from headers.
@@ -26,15 +27,14 @@ public final class ContentWithSize implements Content {
     /**
      * Request headers.
      */
-    private final Iterable<Map.Entry<String, String>> headers;
+    private final Headers headers;
 
     /**
      * Content with size from body and headers.
      * @param body Body
      * @param headers Headers
      */
-    public ContentWithSize(final Publisher<ByteBuffer> body,
-        final Iterable<Map.Entry<String, String>> headers) {
+    public ContentWithSize(Publisher<ByteBuffer> body, Headers headers) {
         this.body = body;
         this.headers = headers;
     }

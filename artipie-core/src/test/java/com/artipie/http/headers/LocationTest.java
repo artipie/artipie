@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test case for {@link Location}.
- *
- * @since 0.11
  */
 public final class LocationTest {
 
@@ -38,7 +36,7 @@ public final class LocationTest {
     void shouldExtractValueFromHeaders() {
         final String value = "http://artipie.com/resource";
         final Location header = new Location(
-            new Headers.From(
+            Headers.from(
                 new Header("Content-Length", "11"),
                 new Header("location", value),
                 new Header("X-Something", "Some Value")
@@ -60,7 +58,7 @@ public final class LocationTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new Location(
-                new Headers.From("Content-Type", "text/plain")
+                Headers.from("Content-Type", "text/plain")
             ).getValue()
         );
     }
@@ -70,7 +68,7 @@ public final class LocationTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new Location(
-                new Headers.From(
+                Headers.from(
                     new Location("http://artipie.com/1"),
                     new Location("http://artipie.com/2")
                 )

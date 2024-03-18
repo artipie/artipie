@@ -5,18 +5,16 @@
 
 package com.artipie.http.slice;
 
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 import com.artipie.http.rq.RequestLine;
 import org.reactivestreams.Publisher;
 
 /**
  * Simple decorator for Slice.
- *
- * @since 0.7
  */
 public final class SliceSimple implements Slice {
 
@@ -34,10 +32,7 @@ public final class SliceSimple implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
         return this.res;
     }
 }

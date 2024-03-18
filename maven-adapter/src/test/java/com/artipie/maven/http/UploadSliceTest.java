@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link UploadSlice}.
- * @since 0.8
  */
 class UploadSliceTest {
 
@@ -52,7 +51,7 @@ class UploadSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine(RqMethod.PUT, "/com/artipie/asto/0.1/asto-0.1.jar"),
-                new Headers.From(new ContentLength(data.length)),
+                Headers.from(new ContentLength(data.length)),
                 new Content.From(data)
             )
         );

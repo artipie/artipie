@@ -13,27 +13,17 @@ import com.artipie.http.rs.RsStatus;
 import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Slice wrapper to generate JFR events for every the {@code response} method call.
- *
- * @since 0.28.0
  */
 public final class JfrSlice implements Slice {
 
-    /**
-     * Original slice.
-     */
     private final Slice original;
 
     /**
-     * Ctor.
-     *
      * @param original Original slice.
      */
     public JfrSlice(final Slice original) {
@@ -43,17 +33,14 @@ public final class JfrSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
-        final Response res;
         final SliceResponseEvent event = new SliceResponseEvent();
         if (event.isEnabled()) {
-            res = this.wrapResponse(line, headers, body, event);
-        } else {
-            res = this.original.response(line, headers, body);
+            return this.wrapResponse(line, headers, body, event);
         }
-        return res;
+        return this.original.response(line, headers, body);
     }
 
     /**
@@ -67,7 +54,7 @@ public final class JfrSlice implements Slice {
      */
     private Response wrapResponse(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body,
         final SliceResponseEvent event
     ) {
@@ -90,25 +77,13 @@ public final class JfrSlice implements Slice {
                 if (event.shouldCommit()) {
                     event.method = line.method().value();
                     event.path = line.uri().getPath();
-                    event.headers = JfrSlice.headersAsString(headers);
+                    event.headers = headers.asString();
                     event.responseChunks = chunks;
                     event.responseSize = size;
                     event.commit();
                 }
             }
         );
-    }
-
-    /**
-     * Headers to String.
-     *
-     * @param headers Headers
-     * @return String
-     */
-    private static String headersAsString(final Iterable<Map.Entry<String, String>> headers) {
-        return StreamSupport.stream(headers.spliterator(), false)
-            .map(entry -> entry.getKey() + '=' + entry.getValue())
-            .collect(Collectors.joining(";"));
     }
 
     /**

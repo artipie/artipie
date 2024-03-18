@@ -19,8 +19,6 @@ import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
@@ -86,38 +84,30 @@ public final class SliceListing implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
+        final Key key = this.transform.apply(line.uri().getPath());
         return new AsyncResponse(
-            CompletableFuture
-                .supplyAsync(line::uri)
-                .thenCompose(
-                    uri -> {
-                        final Key key = this.transform.apply(uri.getPath());
-                        return this.storage.list(key)
-                            .thenApply(
-                                keys -> {
-                                    final String text = this.format.apply(keys);
-                                    return new RsFull(
-                                        RsStatus.OK,
-                                        new Headers.From(
-                                            new ContentType(
-                                                String.format(
-                                                    "%s; charset=%s",
-                                                    this.mime,
-                                                    StandardCharsets.UTF_8
-                                                )
-                                            )
-                                        ),
-                                        new Content.From(
-                                            text.getBytes(
-                                                StandardCharsets.UTF_8
-                                            )
-                                        )
-                                    );
-                                }
-                            );
+            this.storage.list(key)
+                .thenApply(
+                    keys -> {
+                        final String text = this.format.apply(keys);
+                        return new RsFull(
+                            RsStatus.OK,
+                            Headers.from(
+                                new ContentType(
+                                    String.format(
+                                        "%s; charset=%s",
+                                        this.mime,
+                                        StandardCharsets.UTF_8
+                                    )
+                                )
+                            ),
+                            new Content.From(
+                                text.getBytes(
+                                    StandardCharsets.UTF_8
+                                )
+                            )
+                        );
                     }
                 )
         );

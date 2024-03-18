@@ -93,7 +93,7 @@ class NuGetPackageMetadataTest {
                 RqMethod.GET,
                 "/registrations/newtonsoft.json/index.json"
             ),
-            new TestAuthentication.Headers(),
+            TestAuthentication.HEADERS,
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -114,7 +114,7 @@ class NuGetPackageMetadataTest {
                 RqMethod.GET,
                 "/registrations/my.lib/index.json"
             ),
-            new TestAuthentication.Headers(),
+            TestAuthentication.HEADERS,
             Flowable.empty()
         );
         MatcherAssert.assertThat(
@@ -135,7 +135,7 @@ class NuGetPackageMetadataTest {
                 RqMethod.PUT,
                 "/registrations/newtonsoft.json/index.json"
             ),
-            new TestAuthentication.Headers(),
+            TestAuthentication.HEADERS,
             Flowable.empty()
         );
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));

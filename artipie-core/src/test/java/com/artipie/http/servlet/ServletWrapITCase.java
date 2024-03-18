@@ -96,7 +96,7 @@ final class ServletWrapITCase {
         this.start(
             (line, headers, body) -> new RsWithHeaders(
                 StandardRs.OK,
-                new Headers.From("RsHeader", new RqHeaders(headers, "RqHeader").get(0))
+                Headers.from("RsHeader", new RqHeaders(headers, "RqHeader").get(0))
             )
         );
         final String value = "some-header";

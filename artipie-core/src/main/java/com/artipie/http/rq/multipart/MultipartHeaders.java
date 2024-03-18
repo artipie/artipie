@@ -7,12 +7,11 @@ package com.artipie.http.rq.multipart;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Header;
 import com.artipie.http.misc.BufAccumulator;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -24,9 +23,8 @@ import java.util.stream.Collectors;
  * it lazy parses and construt headers collection.
  * After reading headers iterable, the temporary buffer
  * becomes invalid.
- * @since 1.0
  */
-final class MultipartHeaders implements Headers {
+final class MultipartHeaders {
 
     /**
      * Sync lock.
@@ -52,15 +50,13 @@ final class MultipartHeaders implements Headers {
         this.accumulator = new BufAccumulator(cap);
     }
 
-    @Override
-    @SuppressWarnings("PMD.NullAssignment")
-    public Iterator<Map.Entry<String, String>> iterator() {
+    public Headers headers() {
         if (this.cache == null) {
             synchronized (this.lock) {
                 if (this.cache == null) {
                     final byte[] arr = this.accumulator.array();
                     final String hstr = new String(arr, StandardCharsets.US_ASCII);
-                    this.cache = new From(
+                    this.cache = new Headers(
                         Arrays.stream(hstr.split("\r\n")).filter(str -> !str.isEmpty()).map(
                             line -> {
                                 final String[] parts = line.split(":", 2);
@@ -75,7 +71,7 @@ final class MultipartHeaders implements Headers {
                 this.accumulator.close();
             }
         }
-        return this.cache.iterator();
+        return this.cache;
     }
 
     /**

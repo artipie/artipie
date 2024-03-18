@@ -71,7 +71,7 @@ public final class ArtipieStorage implements Storage {
         final CompletableFuture<Collection<Key>> promise = new CompletableFuture<>();
         this.remote.response(
             new RequestLine(RqMethod.GET, ArtipieStorage.uri(prefix)),
-            new Headers.From("Accept", "application/json"),
+            Headers.from("Accept", "application/json"),
             Content.EMPTY
         ).send(
             (status, rsheaders, rsbody) -> {
@@ -102,7 +102,7 @@ public final class ArtipieStorage implements Storage {
     public CompletableFuture<Void> save(final Key key, final Content content) {
         return this.remote.response(
             new RequestLine(RqMethod.PUT, ArtipieStorage.uri(key)),
-            new Headers.From(new ContentLength(content.size().orElseThrow())),
+            Headers.from(new ContentLength(content.size().orElseThrow())),
             content
         ).send(
             (status, rsheaders, rsbody) -> {

@@ -5,12 +5,12 @@
 package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.Map;
 
 /**
  * Glob repository filter.
@@ -40,8 +40,7 @@ public final class GlobFilter extends Filter {
     }
 
     @Override
-    public boolean check(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers) {
+    public boolean check(RequestLine line, Headers headers) {
         return this.matcher.matches(Paths.get(line.uri().getPath()));
     }
 }

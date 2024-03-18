@@ -2,9 +2,9 @@
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
  * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
-
 package com.artipie.npm.http;
 
+import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import org.junit.jupiter.api.Assertions;
@@ -16,7 +16,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.ByteBuffer;
-import java.util.Collections;
 
 /**
  * Tests ReplacePathSlice.
@@ -38,7 +37,7 @@ public class ReplacePathSliceTest {
         ).thenReturn(null);
         final ReplacePathSlice slice = new ReplacePathSlice("/", this.underlying);
         final RequestLine expected = RequestLine.from("GET /some-path HTTP/1.1");
-        slice.response(expected, Collections.emptyList(), sub -> ByteBuffer.allocate(0));
+        slice.response(expected, Headers.EMPTY, sub -> ByteBuffer.allocate(0));
         Assertions.assertEquals(expected, path.getValue());
     }
 
@@ -54,7 +53,7 @@ public class ReplacePathSliceTest {
         );
         slice.response(
             RequestLine.from("GET /compound/ctx/path/abc-def HTTP/1.1"),
-            Collections.emptyList(),
+            Headers.EMPTY,
             sub -> ByteBuffer.allocate(0)
         );
         Assertions.assertEquals(new RequestLine("GET", "/abc-def"), path.getValue());

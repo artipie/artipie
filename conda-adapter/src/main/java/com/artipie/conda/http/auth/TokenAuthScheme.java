@@ -4,6 +4,7 @@
  */
 package com.artipie.conda.http.auth;
 
+import com.artipie.http.Headers;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.TokenAuthentication;
@@ -11,7 +12,6 @@ import com.artipie.http.headers.Authorization;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -20,9 +20,7 @@ import java.util.regex.Pattern;
 
 /**
  * Conda token auth scheme.
- * @since 0.5
  */
-@SuppressWarnings("PMD.OnlyOneReturn")
 public final class TokenAuthScheme implements AuthScheme {
 
     /**
@@ -50,7 +48,7 @@ public final class TokenAuthScheme implements AuthScheme {
 
     @Override
     public CompletionStage<Result> authenticate(
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final RequestLine line) {
         if (line == null) {
             throw new IllegalArgumentException("Request line cannot be null");

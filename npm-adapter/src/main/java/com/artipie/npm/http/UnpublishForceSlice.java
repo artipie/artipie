@@ -6,6 +6,7 @@ package com.artipie.npm.http;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -16,7 +17,6 @@ import com.artipie.http.rs.StandardRs;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.scheduling.ArtifactEvent;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletionStage;
@@ -67,7 +67,7 @@ final class UnpublishForceSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final String uri = line.uri().getPath();

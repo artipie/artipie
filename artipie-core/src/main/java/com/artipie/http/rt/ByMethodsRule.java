@@ -4,13 +4,13 @@
  */
 package com.artipie.http.rt;
 
+import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -61,8 +61,7 @@ public final class ByMethodsRule implements RtRule {
         }
 
         @Override
-        public boolean apply(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers) {
+        public boolean apply(RequestLine line, Headers headers) {
             return this.origin.apply(line, headers);
         }
     }
@@ -89,8 +88,7 @@ public final class ByMethodsRule implements RtRule {
     }
 
     @Override
-    public boolean apply(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers) {
+    public boolean apply(RequestLine line, Headers headers) {
         return this.methods.contains(line.method());
     }
 }

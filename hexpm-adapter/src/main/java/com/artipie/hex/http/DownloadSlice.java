@@ -17,7 +17,6 @@ import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.StandardRs;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import org.reactivestreams.Publisher;
@@ -66,7 +65,7 @@ public final class DownloadSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final Key.From key = new Key.From(
@@ -81,7 +80,7 @@ public final class DownloadSlice implements Slice {
                             value ->
                                 new RsFull(
                                     RsStatus.OK,
-                                    new Headers.From(
+                                    Headers.from(
                                         new ContentType("application/octet-stream")
                                     ),
                                     value

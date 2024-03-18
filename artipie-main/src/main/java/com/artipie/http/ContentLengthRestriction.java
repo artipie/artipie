@@ -9,7 +9,7 @@ import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
-import java.util.Map;
+
 import org.reactivestreams.Publisher;
 
 /**
@@ -45,7 +45,7 @@ public final class ContentLengthRestriction implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final Response response;

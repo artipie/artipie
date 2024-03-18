@@ -15,9 +15,6 @@ import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -25,6 +22,10 @@ import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
 import org.junit.jupiter.api.Test;
 import org.llorllale.cactoos.matchers.Matches;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * Test for {@link ResponseMatcher}.
@@ -48,7 +49,7 @@ class ResponseMatcherTest {
 
     @Test
     void matchesStatusAndHeadersIterable() {
-        final Iterable<Map.Entry<String, String>> headers = new Headers.From("X-Name", "value");
+        Headers headers = Headers.from("X-Name", "value");
         final RsStatus status = RsStatus.OK;
         MatcherAssert.assertThat(
             new ResponseMatcher(RsStatus.OK, headers).matches(
@@ -72,7 +73,7 @@ class ResponseMatcherTest {
 
     @Test
     void matchesHeadersIterable() {
-        final Iterable<Map.Entry<String, String>> headers = new Headers.From("aaa", "bbb");
+        Headers headers = Headers.from("aaa", "bbb");
         MatcherAssert.assertThat(
             new ResponseMatcher(headers).matches(
                 new RsWithHeaders(StandardRs.EMPTY, headers)
@@ -158,9 +159,7 @@ class ResponseMatcherTest {
     @Test
     void matchesStatusBodyAndHeadersIterable() {
         final RsStatus status = RsStatus.FORBIDDEN;
-        final Iterable<Map.Entry<String, String>> headers = new Headers.From(
-            new ContentLength("4")
-        );
+        Headers headers = Headers.from(new ContentLength("4"));
         final byte[] body = "1234".getBytes();
         MatcherAssert.assertThat(
             new ResponseMatcher(status, headers, body).matches(
@@ -181,7 +180,7 @@ class ResponseMatcherTest {
                 .matches(
                     new RsWithHeaders(
                         new RsWithStatus(status),
-                        new Headers.From(header, value)
+                        Headers.from(header, value)
                     )
                 ),
             new IsEqual<>(true)

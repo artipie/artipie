@@ -11,15 +11,15 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.headers.ContentLength;
 import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Response with body.
- * @since 0.3
  */
 public final class RsWithBody implements Response {
 
@@ -135,12 +135,13 @@ public final class RsWithBody implements Response {
      * @param size Maybe size
      * @return Wrapped response
      */
-    private static Response withHeaders(final Response origin, final Optional<Long> size) {
-        return size.<Response>map(
-            val -> new RsWithHeaders(
-                origin, new Headers.From(new ContentLength(String.valueOf(val))), true
-            )
-        ).orElse(origin);
+    private static Response withHeaders(Response origin, Optional<Long> size) {
+        if (size.isPresent()) {
+            return new RsWithHeaders(
+                origin, Headers.from(new ContentLength(String.valueOf(size.get()))), true
+            );
+        }
+        return origin;
     }
 
     /**

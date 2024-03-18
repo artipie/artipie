@@ -13,7 +13,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.reactivestreams.Publisher;
 
@@ -37,7 +36,7 @@ final class HeadProxySlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         final CompletableFuture<Response> promise = new CompletableFuture<>();
         this.client.response(line, Headers.EMPTY, Content.EMPTY).send(

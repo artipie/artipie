@@ -6,12 +6,13 @@ package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
+import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -54,7 +55,7 @@ public final class Filters {
      * @param headers Request headers.
      * @return True if is allowed to get access to repository content.
      */
-    public boolean allowed(RequestLine line, Iterable<Map.Entry<String, String>> headers) {
+    public boolean allowed(RequestLine line, Headers headers) {
         final boolean included = this.includes.stream()
             .anyMatch(filter -> filter.check(line, headers));
         final boolean excluded = this.excludes.stream()

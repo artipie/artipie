@@ -6,6 +6,7 @@ package com.artipie.http.headers;
 
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RqHeaders;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -15,9 +16,8 @@ import java.util.regex.Pattern;
  * Content-Disposition header.
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition"></a>
- * @since 0.17.8
  */
-public final class ContentDisposition extends Header.Wrap {
+public final class ContentDisposition extends Header {
 
     /**
      * Header name.

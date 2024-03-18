@@ -29,20 +29,17 @@ import com.artipie.settings.cache.CachedUsers;
 import com.artipie.test.TestArtipieCaches;
 import com.artipie.test.TestSettings;
 import io.reactivex.Flowable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Test case for {@link DockerRoutingSlice}.
- *
- * @since 0.9
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class DockerRoutingSliceTest {
 
     @Test
@@ -84,12 +81,12 @@ final class DockerRoutingSliceTest {
                     Arrays.asList(
                         new RsHasStatus(RsStatus.OK),
                         new RsHasHeaders(
-                            new Headers.From("Docker-Distribution-API-Version", "registry/2.0")
+                            Headers.from("Docker-Distribution-API-Version", "registry/2.0")
                         )
                     )
                 ),
                 new RequestLine(RqMethod.GET, "/v2/"),
-                new Headers.From(new Authorization.Basic(username, password)),
+                Headers.from(new Authorization.Basic(username, password)),
                 Content.EMPTY
             )
         );
@@ -112,7 +109,7 @@ final class DockerRoutingSliceTest {
     private static void verify(final Slice slice, final String path) throws Exception {
         slice.response(
             new RequestLine(RqMethod.GET, path),
-            Collections.emptyList(), Flowable.empty()
+            Headers.EMPTY, Flowable.empty()
         ).send(
             (status, headers, body) -> CompletableFuture.completedFuture(null)
         ).toCompletableFuture().get();

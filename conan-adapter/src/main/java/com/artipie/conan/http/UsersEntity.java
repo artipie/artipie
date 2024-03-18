@@ -4,6 +4,7 @@
  */
 package  com.artipie.conan.http;
 
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -18,7 +19,6 @@ import com.artipie.http.rs.StandardRs;
 import com.google.common.base.Strings;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.reactivestreams.Publisher;
 
@@ -87,7 +87,7 @@ public final class UsersEntity {
 
         @Override
         public Response response(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+                                 final Headers headers, final Publisher<ByteBuffer> body) {
             return new AsyncResponse(
                 new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
                     authResult -> {
@@ -125,7 +125,7 @@ public final class UsersEntity {
 
         @Override
         public Response response(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+                                 final Headers headers, final Publisher<ByteBuffer> body) {
             return new AsyncResponse(
                 CompletableFuture.supplyAsync(line::uri).thenCompose(
                     uri -> CredsCheck.credsCheck().thenApply(

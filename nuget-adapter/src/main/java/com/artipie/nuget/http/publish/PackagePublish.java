@@ -26,8 +26,6 @@ import org.reactivestreams.Publisher;
 /**
  * Package publish service, used to pushing new packages and deleting existing ones.
  * See <a href="https://docs.microsoft.com/en-us/nuget/api/package-publish-resource">Push and Delete</a>
- *
- * @since 0.1
  */
 public final class PackagePublish implements Route {
 

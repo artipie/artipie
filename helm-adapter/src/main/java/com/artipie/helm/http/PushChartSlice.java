@@ -31,7 +31,6 @@ import org.reactivestreams.Publisher;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 
@@ -77,7 +76,7 @@ final class PushChartSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final Optional<String> upd = new RqParams(line.uri()).value("updateIndex");
@@ -97,7 +96,7 @@ final class PushChartSlice implements Slice {
                                     queue -> queue.add(
                                         new ArtifactEvent(
                                             PushChartSlice.REPO_TYPE, this.rname,
-                                            new Login(new Headers.From(headers)).getValue(),
+                                            new Login(headers).getValue(),
                                             chart.name(), chart.version(), tgz.size()
                                         )
                                     )

@@ -42,7 +42,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
@@ -103,7 +102,7 @@ public final class UploadSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final URI uri = line.uri();
@@ -168,16 +167,14 @@ public final class UploadSlice implements Slice {
                         if (throwable == null) {
                             result = new RsFull(
                                 RsStatus.CREATED,
-                                new Headers.From(
-                                    new HexContentType(headers).fill()
-                                ),
+                                new HexContentType(headers).fill(),
                                 Content.EMPTY
                             );
                             this.events.ifPresent(
                                 queue -> queue.add(
                                     new ArtifactEvent(
                                         UploadSlice.REPO_TYPE, this.rname,
-                                        new Login(new Headers.From(headers)).getValue(),
+                                        new Login(headers).getValue(),
                                         name.get(), version.get(), tarcontent.get().length
                                     )
                                 )

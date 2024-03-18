@@ -10,6 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
 import com.artipie.asto.ext.KeyLastPart;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -26,7 +27,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
+
 import org.reactivestreams.Publisher;
 
 /**
@@ -52,7 +53,7 @@ final class SliceIndex implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> publisher
     ) {
         final Key rqkey = new KeyFromPath(line.uri().toString());

@@ -5,9 +5,9 @@
 package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -35,7 +35,6 @@ public abstract class Filter {
     /**
      * Priority.
      */
-    @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
     private final int priority;
 
     /**
@@ -64,14 +63,14 @@ public abstract class Filter {
      * @param headers Request headers.
      * @return True if request matched to access conditions.
      */
-    public abstract boolean check(RequestLine line, Iterable<Map.Entry<String, String>> headers);
+    public abstract boolean check(RequestLine line, Headers headers);
 
     /**
      * Wrap is a decorative wrapper for Filter.
      *
      * @since 0.7
      */
-    public abstract class Wrap extends Filter {
+    public abstract static class Wrap extends Filter {
         /**
          * Origin filter.
          */
@@ -94,8 +93,7 @@ public abstract class Filter {
          * @return True if request matched to access conditions.
          */
         @Override
-        public boolean check(final RequestLine line,
-            final Iterable<Map.Entry<String, String>> headers) {
+        public boolean check(RequestLine line, Headers headers) {
             return this.filter.check(line, headers);
         }
     }

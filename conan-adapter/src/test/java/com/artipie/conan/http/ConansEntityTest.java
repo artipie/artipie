@@ -17,21 +17,21 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
+import org.json.JSONException;
+import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
+import org.skyscreamer.jsonassert.JSONAssert;
+
+import javax.json.Json;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import javax.json.Json;
-import org.json.JSONException;
-import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link ConansEntity}.
- * @since 0.1
  */
 class ConansEntityTest {
 
@@ -137,7 +137,7 @@ class ConansEntityTest {
         }
         final Response response = factory.apply(storage).response(
             new RequestLine(RqMethod.GET, request),
-            new Headers.From("Host", "localhost:9300"), Content.EMPTY
+            Headers.from("Host", "localhost:9300"), Content.EMPTY
         );
         final String expected = Json.createReader(
             new TestResource(json).asInputStream()

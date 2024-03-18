@@ -27,7 +27,6 @@ import org.reactivestreams.Publisher;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 
@@ -67,8 +66,6 @@ public final class NuGet implements Slice {
     private final Optional<Queue<ArtifactEvent>> events;
 
     /**
-     * Ctor.
-     *
      * @param url Base URL.
      * @param repository Storage for packages.
      * @param policy Access policy.
@@ -95,7 +92,7 @@ public final class NuGet implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final Response response;
@@ -103,9 +100,9 @@ public final class NuGet implements Slice {
         final Resource resource = this.resource(path);
         final RqMethod method = line.method();
         if (method.equals(RqMethod.GET)) {
-            response = resource.get(new Headers.From(headers));
+            response = resource.get(headers);
         } else if (method.equals(RqMethod.PUT)) {
-            response = resource.put(new Headers.From(headers), body);
+            response = resource.put(headers, body);
         } else {
             response = new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
         }

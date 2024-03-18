@@ -15,22 +15,22 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link AuthClientSlice}.
@@ -47,7 +47,7 @@ final class AuthClientSliceTest {
             fake
         ).response(
             new RequestLine(RqMethod.GET, "/"),
-            new Headers.From("X-Header", "The Value"),
+            Headers.from("X-Header", "The Value"),
             Content.EMPTY
         ).send(
             (status, headers, body) -> CompletableFuture.allOf()
@@ -60,23 +60,24 @@ final class AuthClientSliceTest {
 
     @Test
     void shouldAuthenticateOnceIfNotUnauthorized() {
-        final AtomicReference<Iterable<Map.Entry<String, String>>> capture;
-        capture = new AtomicReference<>();
+        final AtomicReference<Headers> capture = new AtomicReference<>();
         final Header original = new Header("Original", "Value");
         final Authorization.Basic auth = new Authorization.Basic("me", "pass");
         new AuthClientSlice(
             (line, headers, body) -> {
-                capture.set(headers);
+                Headers aa = headers.copy();
+                capture.set(aa);
                 return StandardRs.EMPTY;
             },
-            new FakeAuthenticator(new Headers.From(auth))
+            new FakeAuthenticator(Headers.from(auth))
         ).response(
             new RequestLine(RqMethod.GET, "/resource"),
-            new Headers.From(original),
+            Headers.from(original),
             Content.EMPTY
         ).send(
             (status, headers, body) -> CompletableFuture.allOf()
         ).toCompletableFuture().join();
+
         MatcherAssert.assertThat(
             capture.get(),
             Matchers.containsInAnyOrder(original, auth)
@@ -90,7 +91,7 @@ final class AuthClientSliceTest {
         new AuthClientSlice(
             (line, headers, body) -> new RsWithHeaders(
                 new RsWithStatus(RsStatus.UNAUTHORIZED),
-                new Headers.From(rsheader)
+                Headers.from(rsheader)
             ),
             fake
         ).response(
@@ -130,8 +131,7 @@ final class AuthClientSliceTest {
 
     @Test
     void shouldAuthenticateTwiceIfNotUnauthorized() {
-        final AtomicReference<Iterable<Map.Entry<String, String>>> capture;
-        capture = new AtomicReference<>();
+        final AtomicReference<Headers> capture = new AtomicReference<>();
         final Header original = new Header("RequestHeader", "Original Value");
         final Authorization.Basic auth = new Authorization.Basic("user", "password");
         new AuthClientSlice(
@@ -139,10 +139,10 @@ final class AuthClientSliceTest {
                 capture.set(headers);
                 return new RsWithStatus(RsStatus.UNAUTHORIZED);
             },
-            new FakeAuthenticator(Headers.EMPTY, new Headers.From(auth))
+            new FakeAuthenticator(Headers.EMPTY, Headers.from(auth))
         ).response(
             new RequestLine(RqMethod.GET, "/top/secret"),
-            new Headers.From(original),
+            Headers.from(original),
             Content.EMPTY
         ).send(
             (status, headers, body) -> CompletableFuture.allOf()
@@ -181,7 +181,7 @@ final class AuthClientSliceTest {
 
     @Test
     void shouldPassRequestForBothAttempts() {
-        final Headers auth = new Headers.From("some", "header");
+        final Headers auth = Headers.from("some", "header");
         final byte[] request = "request".getBytes();
         final AtomicReference<List<byte[]>> capture = new AtomicReference<>(new ArrayList<>(0));
         new AuthClientSlice(

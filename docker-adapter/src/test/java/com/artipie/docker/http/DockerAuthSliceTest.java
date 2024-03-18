@@ -18,25 +18,22 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collections;
+
 /**
  * Test case for {@link DockerAuthSlice}.
- *
- * @since 0.5
  */
 public final class DockerAuthSliceTest {
 
     @Test
     void shouldReturnErrorsWhenUnathorized() {
-        final Headers headers = new Headers.From(
+        final Headers headers = Headers.from(
             new WwwAuthenticate("Basic"),
             new Header("X-Something", "Value")
         );
@@ -44,7 +41,7 @@ public final class DockerAuthSliceTest {
             new DockerAuthSlice(
                 (rqline, rqheaders, rqbody) -> new RsWithHeaders(
                     new RsWithStatus(RsStatus.UNAUTHORIZED),
-                    new Headers.From(headers)
+                    headers.copy()
                 )
             ).response(
                 new RequestLine(RqMethod.GET, "/"),
@@ -55,7 +52,9 @@ public final class DockerAuthSliceTest {
                 Arrays.asList(
                     new IsUnauthorizedResponse(),
                     new RsHasHeaders(
-                        new Headers.From(headers, new JsonContentType(), new ContentLength("72"))
+                        headers.copy()
+                            .add(new JsonContentType())
+                            .add(new ContentLength("72"))
                     )
                 )
             )
@@ -64,7 +63,7 @@ public final class DockerAuthSliceTest {
 
     @Test
     void shouldReturnErrorsWhenForbidden() {
-        final Headers headers = new Headers.From(
+        final Headers headers = Headers.from(
             new WwwAuthenticate("Basic realm=\"123\""),
             new Header("X-Foo", "Bar")
         );
@@ -72,7 +71,7 @@ public final class DockerAuthSliceTest {
             new DockerAuthSlice(
                 (rqline, rqheaders, rqbody) -> new RsWithHeaders(
                     new RsWithStatus(RsStatus.FORBIDDEN),
-                    new Headers.From(headers)
+                    headers.copy()
                 )
             ).response(
                 new RequestLine(RqMethod.GET, "/file.txt"),
@@ -83,7 +82,9 @@ public final class DockerAuthSliceTest {
                 Arrays.asList(
                     new IsDeniedResponse(),
                     new RsHasHeaders(
-                        new Headers.From(headers, new JsonContentType(), new ContentLength("85"))
+                        headers.copy()
+                            .add(new JsonContentType())
+                            .add(new ContentLength("85"))
                     )
                 )
             )
@@ -93,15 +94,12 @@ public final class DockerAuthSliceTest {
     @Test
     void shouldNotModifyNormalResponse() {
         final RsStatus status = RsStatus.OK;
-        final Collection<Map.Entry<String, String>> headers = Collections.singleton(
-            new Header("Content-Type", "text/plain")
-        );
         final byte[] body = "data".getBytes();
         MatcherAssert.assertThat(
             new DockerAuthSlice(
                 (rqline, rqheaders, rqbody) -> new RsFull(
                     status,
-                    new Headers.From(headers),
+                    Headers.from(new Header("Content-Type", "text/plain")),
                     Flowable.just(ByteBuffer.wrap(body))
                 )
             ).response(
@@ -109,7 +107,9 @@ public final class DockerAuthSliceTest {
                 Headers.EMPTY,
                 Flowable.empty()
             ),
-            new ResponseMatcher(status, headers, body)
+            new ResponseMatcher(
+                status, Collections.singleton(new Header("Content-Type", "text/plain")), body
+            )
         );
     }
 }

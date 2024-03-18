@@ -20,7 +20,6 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.common.RsJson;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import javax.json.Json;
 import org.reactivestreams.Publisher;
 
@@ -51,7 +50,7 @@ final class GenerateTokenSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Iterable<Map.Entry<String, String>> headers,
+    public Response response(final RequestLine line, final Headers headers,
                              final Publisher<ByteBuffer> body) {
         return new AsyncResponse(
             new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
@@ -60,7 +59,7 @@ final class GenerateTokenSlice implements Slice {
                     if (result.status() == AuthScheme.AuthStatus.FAILED) {
                         res = new RsWithHeaders(
                             new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            new Headers.From(new WwwAuthenticate(result.challenge()))
+                            Headers.from(new WwwAuthenticate(result.challenge()))
                         );
                     } else {
                         res = new RsJson(

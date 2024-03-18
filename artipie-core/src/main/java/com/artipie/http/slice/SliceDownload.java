@@ -20,7 +20,6 @@ import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
@@ -64,42 +63,32 @@ public final class SliceDownload implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
+        final Key key = this.transform.apply(line.uri().getPath());
         return new AsyncResponse(
-            CompletableFuture
-                .supplyAsync(line::uri)
+            this.storage.exists(key)
                 .thenCompose(
-                    uri -> {
-                        final Key key = this.transform.apply(uri.getPath());
-                        return this.storage.exists(key)
-                            .thenCompose(
-                                exist -> {
-                                    final CompletionStage<Response> result;
-                                    if (exist) {
-                                        result = this.storage.value(key)
-                                            .thenApply(
-                                                content -> new RsFull(
-                                                    RsStatus.OK,
-                                                    new Headers.From(
-                                                        new ContentFileName(uri)
-                                                    ),
-                                                    content
-                                                )
-                                            );
-                                    } else {
-                                        result = CompletableFuture.completedFuture(
-                                            new RsWithBody(
-                                                StandardRs.NOT_FOUND,
-                                                String.format("Key %s not found", key.string()),
-                                                StandardCharsets.UTF_8
-                                            )
-                                        );
-                                    }
-                                    return result;
-                                }
+                    exist -> {
+                        final CompletionStage<Response> result;
+                        if (exist) {
+                            result = this.storage.value(key)
+                                .thenApply(
+                                    content -> new RsFull(
+                                        RsStatus.OK,
+                                        Headers.from(new ContentFileName(line.uri())),
+                                        content
+                                    )
+                                );
+                        } else {
+                            result = CompletableFuture.completedFuture(
+                                new RsWithBody(
+                                    StandardRs.NOT_FOUND,
+                                    String.format("Key %s not found", key.string()),
+                                    StandardCharsets.UTF_8
+                                )
                             );
+                        }
+                        return result;
                     }
                 )
         );

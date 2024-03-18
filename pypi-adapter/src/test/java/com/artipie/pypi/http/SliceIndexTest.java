@@ -15,21 +15,19 @@ import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Test for {@link SliceIndex}.
- * @since 0.4
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods", "unchecked"})
 class SliceIndexTest {
 
     /**
@@ -55,7 +53,7 @@ class SliceIndexTest {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             new RsHasBody(SliceIndexTest.html(new MapEntry<>(path, bytes)))
@@ -70,7 +68,7 @@ class SliceIndexTest {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/"),
-                new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/pypi"),
+                Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi"),
                 Flowable.empty()
             ),
             new RsHasBody(
@@ -91,7 +89,7 @@ class SliceIndexTest {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             new RsHasBody(
@@ -115,7 +113,7 @@ class SliceIndexTest {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
-                new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/repo/def"),
+                Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/repo/def"),
                 Flowable.empty()
             ),
             new RsHasBody(
@@ -143,7 +141,7 @@ class SliceIndexTest {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", String.format("/%s", rqline)),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             new RsHasBody(
@@ -171,7 +169,7 @@ class SliceIndexTest {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/abc"),
-                new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/abc"),
+                Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/abc"),
                 Flowable.empty()
             ),
             new RsHasBody(
@@ -189,7 +187,7 @@ class SliceIndexTest {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             new RsHasBody("<!DOCTYPE html>\n<html>\n  </body>\n\n</body>\n</html>".getBytes())
@@ -201,7 +199,7 @@ class SliceIndexTest {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
-                new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/def"),
+                Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/def"),
                 Flowable.empty()
             ),
             new RsHasBody("<!DOCTYPE html>\n<html>\n  </body>\n\n</body>\n</html>".getBytes())
@@ -217,7 +215,7 @@ class SliceIndexTest {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/"),
-                Collections.emptyList(),
+                Headers.EMPTY,
                 Flowable.empty()
             ),
             new ResponseMatcher(

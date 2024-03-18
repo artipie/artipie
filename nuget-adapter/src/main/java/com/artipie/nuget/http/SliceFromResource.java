@@ -14,12 +14,9 @@ import com.artipie.http.rs.RsWithStatus;
 import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 /**
  * Slice created from {@link Resource}.
- *
- * @since 0.2
  */
 final class SliceFromResource implements Slice {
 
@@ -40,15 +37,15 @@ final class SliceFromResource implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final Response response;
         final RqMethod method = line.method();
         if (method.equals(RqMethod.GET)) {
-            response = this.origin.get(new Headers.From(headers));
+            response = this.origin.get(headers);
         } else if (method.equals(RqMethod.PUT)) {
-            response = this.origin.put(new Headers.From(headers), body);
+            response = this.origin.put(headers, body);
         } else {
             response = new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
         }

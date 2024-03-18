@@ -151,13 +151,13 @@ public final class HttpNpmRemoteTest {
             if (path.equalsIgnoreCase("/asdas")) {
                 res = new RsFull(
                     RsStatus.OK,
-                    new Headers.From("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
+                    Headers.from("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
                     new Content.From(new TestResource("json/original.json").asBytes())
                 );
             } else if (path.equalsIgnoreCase("/asdas/-/asdas-1.0.0.tgz")) {
                 res = new RsFull(
                     RsStatus.OK,
-                    new Headers.From(
+                    Headers.from(
                         new Header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
                         new Header("Content-Type", HttpNpmRemoteTest.DEF_CONTENT_TYPE)
                     ),

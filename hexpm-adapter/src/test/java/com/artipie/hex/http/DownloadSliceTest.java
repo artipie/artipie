@@ -2,7 +2,6 @@
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
  * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
-
 package com.artipie.hex.http;
 
 import com.artipie.asto.Content;
@@ -19,27 +18,20 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import java.nio.file.Files;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.nio.file.Files;
+
 /**
  * Test for {@link DownloadSlice}.
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DownloadSliceTest {
 
-    /**
-     * Test storage.
-     */
     private Storage storage;
 
-    /**
-     * Download slice.
-     */
     private Slice slice;
 
     @BeforeEach
@@ -70,9 +62,9 @@ class DownloadSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.OK),
                 new RequestLine(RqMethod.GET, String.format("/%s", path)),
-                new Headers.From(
-                    new Headers.From(new ContentType("application/octet-stream")),
-                    new Headers.From(new ContentLength(bytes.length))
+                Headers.from(
+                    new ContentType("application/octet-stream"),
+                    new ContentLength(bytes.length)
                 ),
                 new Content.From(bytes)
             )

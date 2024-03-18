@@ -20,7 +20,6 @@ import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.Tarballs;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.reactivestreams.Publisher;
 
@@ -55,7 +54,7 @@ public final class DownloadPackageSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body) {
         final String pkg = new PackageNameFromUrl(line).value();
         final Key key = new Key.From(pkg, "meta.json");
@@ -68,7 +67,7 @@ public final class DownloadPackageSlice implements Slice {
                             .thenApply(
                                 content -> new RsFull(
                                     RsStatus.OK,
-                                    new Headers.From(
+                                    Headers.from(
                                         new Header("Content-Type", "application/json")
                                     ),
                                     content

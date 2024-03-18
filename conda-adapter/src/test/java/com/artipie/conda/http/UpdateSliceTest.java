@@ -42,7 +42,7 @@ class UpdateSliceTest {
     /**
      * Test headers.
      */
-    private static final Headers HEADERS = new Headers.From(
+    private static final Headers HEADERS = Headers.from(
         new ContentType("multipart/form-data; boundary=\"simple boundary\"")
     );
 

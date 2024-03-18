@@ -18,7 +18,6 @@ import io.reactivex.Single;
 import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 /**
  * Slice to redirect to normalized url.
@@ -34,7 +33,7 @@ public final class RedirectSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line,
-        final Iterable<Map.Entry<String, String>> headers,
+        final Headers headers,
         final Publisher<ByteBuffer> body
     ) {
         final String rqline = line.uri().toString();
@@ -50,7 +49,7 @@ public final class RedirectSlice implements Slice {
                 .map(
                     url -> new RsWithHeaders(
                         new RsWithStatus(RsStatus.MOVED_PERMANENTLY),
-                        new Headers.From("Location", url)
+                        Headers.from("Location", url)
                     )
                 )
         );
