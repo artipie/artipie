@@ -18,8 +18,6 @@ import java.util.stream.StreamSupport;
 
 /**
  * HTTP request headers.
- *
- * @since 0.8
  */
 public class Headers implements Iterable<Header> {
 
