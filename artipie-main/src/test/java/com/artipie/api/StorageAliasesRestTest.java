@@ -20,14 +20,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link StorageAliasesRest}.
- * @since 0.27
  */
-@SuppressWarnings(
-    {
-        "PMD.AvoidDuplicateLiterals",
-        "PMD.ProhibitPlainJunitAssertionsRule",
-        "PMD.TooManyMethods"}
-)
 public final class StorageAliasesRestTest extends RestApiServerBase {
 
     @Test

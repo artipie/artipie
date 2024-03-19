@@ -22,19 +22,11 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link ManageRoles}.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ManageRolesTest {
 
-    /**
-     * Test storage.
-     */
     private BlockingStorage blsto;
 
-    /**
-     * Test users.
-     */
     private CrudRoles roles;
 
     @BeforeEach

@@ -22,9 +22,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link UsersRest}.
- * @since 0.27
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class UsersRestTest extends RestApiServerBase {
 
     @Test
