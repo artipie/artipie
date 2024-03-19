@@ -29,9 +29,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link RolesRest}.
- * @since 0.27
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class RolesRestTest extends RestApiServerBase {
 
     /**

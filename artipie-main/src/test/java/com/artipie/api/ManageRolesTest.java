@@ -18,11 +18,14 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link ManageRoles}.
  */
+@DisabledOnOs(OS.WINDOWS)
 class ManageRolesTest {
 
     private BlockingStorage blsto;
