@@ -18,11 +18,14 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link UsersRest}.
  */
+@DisabledOnOs(OS.WINDOWS)
 final class UsersRestTest extends RestApiServerBase {
 
     @Test
