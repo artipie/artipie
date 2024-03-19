@@ -6,8 +6,8 @@ package com.artipie.gem;
 
 import org.cactoos.iterable.IterableOf;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -20,8 +20,8 @@ final class YamlMetaFormatTest {
         final String val = "macos";
         final YamlMetaFormat.Yamler yaml = new YamlMetaFormat.Yamler();
         new YamlMetaFormat(yaml).print(key, val);
-        Assertions.assertEquals(
-            "os: macos", yaml.build().toString()
+        MatcherAssert.assertThat(
+            yaml.build().toString(), new IsEqual<>("os: macos")
         );
     }
 
