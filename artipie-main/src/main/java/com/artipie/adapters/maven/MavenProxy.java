@@ -4,6 +4,7 @@
  */
 package com.artipie.adapters.maven;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.asto.cache.Cache;
 import com.artipie.asto.cache.FromStorageCache;
@@ -17,9 +18,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.maven.http.MavenProxySlice;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import com.artipie.settings.repo.RepoConfig;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
@@ -57,7 +56,7 @@ public final class MavenProxy implements Slice {
     public Response response(
         RequestLine line,
         Headers headers,
-        Publisher<ByteBuffer> body
+        Content body
     ) {
         return slice.response(line, headers, body);
     }

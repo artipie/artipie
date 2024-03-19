@@ -17,10 +17,8 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import org.reactivestreams.Publisher;
 
 import javax.json.Json;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -53,7 +51,7 @@ public final class DownloadRepodataSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         return new AsyncResponse(
             CompletableFuture
                 .supplyAsync(() -> line.uri().getPath())

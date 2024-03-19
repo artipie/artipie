@@ -4,22 +4,23 @@
  */
 package com.artipie.http.rs;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import io.reactivex.Flowable;
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Standard responses.
- * @since 0.8
  */
 public enum StandardRs implements Response {
     /**
      * Empty response.
      */
-    EMPTY(con -> con.accept(RsStatus.OK, Headers.EMPTY, Flowable.empty())),
+    EMPTY(con -> con.accept(RsStatus.OK, Headers.EMPTY, new Content.From(Flowable.empty()))),
     /**
      * OK 200 response.
      */

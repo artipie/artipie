@@ -4,6 +4,7 @@
  */
 package com.artipie.npm.proxy.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -17,10 +18,9 @@ import com.artipie.http.slice.LoggingSlice;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.scheduling.ProxyArtifactEvent;
-import java.nio.ByteBuffer;
+
 import java.util.Optional;
 import java.util.Queue;
-import org.reactivestreams.Publisher;
 
 /**
  * Main HTTP slice NPM Proxy adapter.
@@ -75,7 +75,7 @@ public final class NpmProxySlice implements Slice {
     @Override
     public Response response(final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         return this.route.response(line, headers, body);
     }
 }

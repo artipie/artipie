@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
  * A rule which is applied to the request metadata such as request line and
  * headers. If rule matched, then routing slice {@link SliceRoute} will
  * redirect request to target {@link com.artipie.http.Slice}.
- * </p>
  */
 public interface RtRule {
 
@@ -45,7 +44,6 @@ public interface RtRule {
     final class Multiple extends All {
 
         /**
-         * Ctor.
          * @param rules Rules array
          */
         public Multiple(final RtRule... rules) {
@@ -53,7 +51,6 @@ public interface RtRule {
         }
 
         /**
-         * Ctor.
          * @param rules Rules
          */
         public Multiple(final Iterable<RtRule> rules) {
@@ -63,7 +60,6 @@ public interface RtRule {
 
     /**
      * This rule is matched only when all of the rules are matched.
-     * @since 0.10
      */
     class All implements RtRule {
 
@@ -103,7 +99,6 @@ public interface RtRule {
 
     /**
      * This rule is matched only when any of the rules is matched.
-     * @since 0.10
      */
     final class Any implements RtRule {
 

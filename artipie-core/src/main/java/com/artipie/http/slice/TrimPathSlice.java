@@ -5,6 +5,7 @@
 package com.artipie.http.slice;
 
 import com.artipie.ArtipieException;
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -15,11 +16,9 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import org.apache.http.client.utils.URIBuilder;
-import org.reactivestreams.Publisher;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -74,7 +73,7 @@ public final class TrimPathSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         final URI uri = line.uri();
         final String full = uri.getPath();
         final Matcher matcher = this.ptn.matcher(full);

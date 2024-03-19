@@ -4,6 +4,7 @@
  */
 package com.artipie.debian.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.debian.Config;
 import com.artipie.debian.metadata.InRelease;
@@ -12,12 +13,11 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import java.nio.ByteBuffer;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import com.artipie.http.rq.RequestLine;
-import org.reactivestreams.Publisher;
 
 /**
  * Release slice decorator.
@@ -75,7 +75,7 @@ public final class ReleaseSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         return new AsyncResponse(
             this.storage.exists(this.release.key()).thenCompose(

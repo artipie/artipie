@@ -23,7 +23,7 @@ import java.util.stream.StreamSupport;
  */
 public class Headers implements Iterable<Header> {
 
-    public static Headers EMPTY = new Headers(Collections.<Header>emptyList());
+    public static Headers EMPTY = new Headers(Collections.emptyList());
 
     public static Headers from(String name, String value) {
         return from(new Header(name, value));

@@ -19,9 +19,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
 import com.jcabi.log.Logger;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -73,7 +71,7 @@ final class CachedProxySlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final String name = line
             .uri().getPath().replaceAll("^/p2?/", "")

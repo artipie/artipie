@@ -5,13 +5,12 @@
 
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import java.nio.ByteBuffer;
 
 import com.artipie.http.rq.RequestLine;
-import org.reactivestreams.Publisher;
 
 /**
  * Simple decorator for Slice.
@@ -32,7 +31,7 @@ public final class SliceSimple implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         return this.res;
     }
 }

@@ -4,6 +4,7 @@
  */
 package com.artipie.http.auth;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -13,9 +14,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import org.reactivestreams.Publisher;
-
-import java.nio.ByteBuffer;
 
 /**
  * Slice with authorization.
@@ -59,7 +57,7 @@ public final class AuthzSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         return new AsyncResponse(
             this.auth.authenticate(headers, line).thenApply(

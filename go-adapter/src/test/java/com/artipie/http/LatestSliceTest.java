@@ -14,11 +14,11 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
-import io.reactivex.Flowable;
-import java.util.concurrent.ExecutionException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * Test for {@link LatestSlice}.
@@ -52,7 +52,7 @@ public class LatestSliceTest {
         MatcherAssert.assertThat(
             new LatestSlice(storage).response(
                 RequestLine.from("GET example.com/latest/news/@latest?a=b HTTP/1.1"),
-                Headers.EMPTY, Flowable.empty()
+                Headers.EMPTY, Content.EMPTY
             ),
             Matchers.allOf(
                 new RsHasBody(info.getBytes()),
@@ -65,7 +65,7 @@ public class LatestSliceTest {
     void returnsNotFondWhenModuleNotFound() {
         MatcherAssert.assertThat(
             new LatestSlice(new InMemoryStorage()).response(
-                RequestLine.from("GET example.com/first/@latest HTTP/1.1"), Headers.EMPTY, Flowable.empty()
+                RequestLine.from("GET example.com/first/@latest HTTP/1.1"), Headers.EMPTY, Content.EMPTY
             ),
             new RsHasStatus(RsStatus.NOT_FOUND)
         );

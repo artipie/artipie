@@ -14,7 +14,6 @@ import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
@@ -35,9 +34,6 @@ class SliceIndexTest {
      */
     private static final String HDR_FULL_PATH = "X-FullPath";
 
-    /**
-     * Test storage.
-     */
     private Storage storage;
 
     @BeforeEach
@@ -54,7 +50,7 @@ class SliceIndexTest {
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasBody(SliceIndexTest.html(new MapEntry<>(path, bytes)))
         );
@@ -69,7 +65,7 @@ class SliceIndexTest {
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/"),
                 Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi"),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasBody(
                 SliceIndexTest.html(new MapEntry<>("username/pypi/abc/abc-0.1.tar.gz", bytes))
@@ -90,7 +86,7 @@ class SliceIndexTest {
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasBody(
                 SliceIndexTest.html(
@@ -114,7 +110,7 @@ class SliceIndexTest {
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
                 Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/repo/def"),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasBody(
                 SliceIndexTest.html(
@@ -142,7 +138,7 @@ class SliceIndexTest {
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", String.format("/%s", rqline)),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasBody(
                 SliceIndexTest.html(
@@ -170,7 +166,7 @@ class SliceIndexTest {
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/abc"),
                 Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/abc"),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasBody(
                 SliceIndexTest.html(
@@ -188,7 +184,7 @@ class SliceIndexTest {
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasBody("<!DOCTYPE html>\n<html>\n  </body>\n\n</body>\n</html>".getBytes())
         );
@@ -200,7 +196,7 @@ class SliceIndexTest {
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
                 Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/def"),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasBody("<!DOCTYPE html>\n<html>\n  </body>\n\n</body>\n</html>".getBytes())
         );
@@ -216,7 +212,7 @@ class SliceIndexTest {
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.OK,

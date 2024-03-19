@@ -4,6 +4,7 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -12,9 +13,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.scheduling.RepositoryEvents;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -55,7 +54,7 @@ public final class SliceDelete implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         final KeyFromPath key = new KeyFromPath(line.uri().getPath());
         return new AsyncResponse(
             this.storage.exists(key).thenCompose(

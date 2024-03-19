@@ -4,6 +4,7 @@
  */
 package com.artipie.npm.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
@@ -14,8 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.nio.ByteBuffer;
 
 /**
  * Tests ReplacePathSlice.
@@ -37,7 +36,7 @@ public class ReplacePathSliceTest {
         ).thenReturn(null);
         final ReplacePathSlice slice = new ReplacePathSlice("/", this.underlying);
         final RequestLine expected = RequestLine.from("GET /some-path HTTP/1.1");
-        slice.response(expected, Headers.EMPTY, sub -> ByteBuffer.allocate(0));
+        slice.response(expected, Headers.EMPTY, Content.EMPTY);
         Assertions.assertEquals(expected, path.getValue());
     }
 
@@ -54,7 +53,7 @@ public class ReplacePathSliceTest {
         slice.response(
             RequestLine.from("GET /compound/ctx/path/abc-def HTTP/1.1"),
             Headers.EMPTY,
-            sub -> ByteBuffer.allocate(0)
+            Content.EMPTY
         );
         Assertions.assertEquals(new RequestLine("GET", "/abc-def"), path.getValue());
     }

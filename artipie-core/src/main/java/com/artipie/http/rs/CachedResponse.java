@@ -8,9 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -78,7 +76,7 @@ public final class CachedResponse implements Response {
 
         @Override
         public CompletionStage<Void> accept(final RsStatus stts, final Headers hdrs,
-            final Publisher<ByteBuffer> body) {
+            final Content body) {
             this.status = stts;
             this.headers = hdrs;
             return new Content.From(body).asBytesFuture().thenAccept(

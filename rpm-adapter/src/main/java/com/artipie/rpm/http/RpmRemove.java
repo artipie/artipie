@@ -22,9 +22,7 @@ import com.artipie.rpm.meta.PackageInfo;
 import com.artipie.scheduling.ArtifactEvent;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
@@ -80,7 +78,7 @@ public final class RpmRemove implements Slice {
 
     @Override
     public Response response(RequestLine line, Headers headers,
-                             Publisher<ByteBuffer> body) {
+                             Content body) {
         final RpmUpload.Request request = new RpmUpload.Request(line);
         final Key temp = new Key.From(RpmRemove.TO_RM, request.file());
         return new AsyncResponse(

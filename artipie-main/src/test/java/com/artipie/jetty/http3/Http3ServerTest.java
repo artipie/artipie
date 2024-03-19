@@ -38,11 +38,11 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.reactivestreams.Publisher;
 
 /**
  * Test for {@link Http3Server}.
@@ -64,24 +64,12 @@ class Http3ServerTest {
      */
     private static final int SIZE = 1024 * 1024;
 
-    /**
-     * Server.
-     */
     private Http3Server server;
 
-    /**
-     * Client.
-     */
     private HTTP3Client client;
 
-    /**
-     * Port.
-     */
     private int port;
 
-    /**
-     * Client session.
-     */
     private Session.Client session;
 
     @BeforeEach
@@ -174,7 +162,7 @@ class Http3ServerTest {
         ).get(5, TimeUnit.SECONDS);
         MatcherAssert.assertThat("Response was not received", rlatch.await(5, TimeUnit.SECONDS));
         MatcherAssert.assertThat("Data were not received", dlatch.await(5, TimeUnit.SECONDS));
-        MatcherAssert.assertThat(resp.array(), new IsEqual<byte[]>(Http3ServerTest.SMALL_DATA));
+        Assertions.assertArrayEquals(Http3ServerTest.SMALL_DATA, resp.array());
     }
 
     @Test
@@ -216,16 +204,16 @@ class Http3ServerTest {
     }
 
     @Test
-    void putWithRequestDataResponse() throws ExecutionException, InterruptedException,
-        TimeoutException {
+    void putWithRequestDataResponse()
+        throws ExecutionException, InterruptedException, TimeoutException {
         final int size = 964;
         final MetaData.Request request = new MetaData.Request(
             "PUT", HttpURI.from(String.format("http://localhost:%d/return_back", this.port)),
             HttpVersion.HTTP_3,
             HttpFields.build()
         );
-        final CountDownLatch rlatch = new CountDownLatch(1);
-        final CountDownLatch dlatch = new CountDownLatch(1);
+        final CountDownLatch responseLatch = new CountDownLatch(1);
+        final CountDownLatch dataAvailableLatch = new CountDownLatch(1);
         final byte[] data = new byte[size];
         final ByteBuffer resp = ByteBuffer.allocate(size * 2);
         new Random().nextBytes(data);
@@ -234,7 +222,7 @@ class Http3ServerTest {
             new Stream.Client.Listener() {
                 @Override
                 public void onResponse(final Stream.Client stream, final HeadersFrame frame) {
-                    rlatch.countDown();
+                    responseLatch.countDown();
                     stream.demand();
                 }
 
@@ -245,7 +233,7 @@ class Http3ServerTest {
                         resp.put(data.getByteBuffer());
                         data.release();
                         if (data.isLast()) {
-                            dlatch.countDown();
+                            dataAvailableLatch.countDown();
                         }
                     }
                     stream.demand();
@@ -254,25 +242,22 @@ class Http3ServerTest {
         ).thenCompose(cl -> cl.data(new DataFrame(ByteBuffer.wrap(data), false)))
             .thenCompose(cl -> cl.data(new DataFrame(ByteBuffer.wrap(data), true)))
             .get(5, TimeUnit.SECONDS);
-        MatcherAssert.assertThat("Response was not received", rlatch.await(10, TimeUnit.SECONDS));
-        MatcherAssert.assertThat("Data were not received", dlatch.await(60, TimeUnit.SECONDS));
+
+        MatcherAssert.assertThat("Response was not received", responseLatch.await(10, TimeUnit.SECONDS));
+        MatcherAssert.assertThat("Data were not received", dataAvailableLatch.await(60, TimeUnit.SECONDS));
         final ByteBuffer copy = ByteBuffer.allocate(size * 2);
         copy.put(data);
         copy.put(data);
-        MatcherAssert.assertThat(resp.array(), new IsEqual<>(copy.array()));
+        Assertions.assertArrayEquals(copy.array(), resp.array());
     }
 
     /**
      * Slice for tests.
-     * @since 0.31
      */
     static final class TestSlice implements Slice {
 
         @Override
-        public Response response(
-            final RequestLine line, final Headers headers,
-            final Publisher<ByteBuffer> body
-        ) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             final Response res;
             if (line.toString().contains("no_data")) {
                 res = new RsWithHeaders(
@@ -306,5 +291,4 @@ class Http3ServerTest {
             return res;
         }
     }
-
 }

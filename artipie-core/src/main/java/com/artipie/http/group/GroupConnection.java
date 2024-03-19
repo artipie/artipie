@@ -4,12 +4,12 @@
  */
 package com.artipie.http.group;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.rs.RsStatus;
-import java.nio.ByteBuffer;
+
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * One remote target connection.
@@ -47,7 +47,7 @@ final class GroupConnection implements Connection {
 
     @Override
     public CompletionStage<Void> accept(final RsStatus status, final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         synchronized (this.results) {
             return this.results.complete(
                 this.pos, new GroupResult(status, headers, body), this.origin

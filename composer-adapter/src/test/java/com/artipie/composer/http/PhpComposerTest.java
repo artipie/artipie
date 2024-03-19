@@ -20,7 +20,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.security.policy.Policy;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +70,7 @@ class PhpComposerTest {
         final Response response = this.php.response(
             new RequestLine(RqMethod.GET, "/p/vendor/package.json"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             "Package metadata should be returned in response",
@@ -90,7 +89,7 @@ class PhpComposerTest {
         final Response response = this.php.response(
             new RequestLine(RqMethod.GET, "/p/vendor/unknown-package.json"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             "Not existing metadata should not be found",
@@ -106,7 +105,7 @@ class PhpComposerTest {
         final Response response = this.php.response(
             PhpComposerTest.GET_PACKAGES,
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,
@@ -124,7 +123,7 @@ class PhpComposerTest {
         final Response response = this.php.response(
             PhpComposerTest.GET_PACKAGES,
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,

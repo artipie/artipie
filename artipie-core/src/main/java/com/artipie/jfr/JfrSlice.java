@@ -4,15 +4,14 @@
  */
 package com.artipie.jfr;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 
@@ -34,7 +33,7 @@ public final class JfrSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final SliceResponseEvent event = new SliceResponseEvent();
         if (event.isEnabled()) {
@@ -55,19 +54,21 @@ public final class JfrSlice implements Slice {
     private Response wrapResponse(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body,
+        final Content body,
         final SliceResponseEvent event
     ) {
         event.begin();
         final Response res = this.original.response(
             line,
             headers,
-            new ChunksAndSizeMetricsPublisher(
-                body,
-                (chunks, size) -> {
-                    event.requestChunks = chunks;
-                    event.requestSize = size;
-                }
+            new Content.From(
+                new ChunksAndSizeMetricsPublisher(
+                    body,
+                    (chunks, size) -> {
+                        event.requestChunks = chunks;
+                        event.requestSize = size;
+                    }
+                )
             )
         );
         return new JfrResponse(
@@ -88,8 +89,6 @@ public final class JfrSlice implements Slice {
 
     /**
      * Response JFR wrapper.
-     *
-     * @since 0.28.0
      */
     private static final class JfrResponse implements Response {
 
@@ -124,8 +123,6 @@ public final class JfrSlice implements Slice {
 
     /**
      * Connection JFR wrapper.
-     *
-     * @since 0.28.0
      */
     private static final class JfrConnection implements Connection {
 
@@ -140,8 +137,6 @@ public final class JfrSlice implements Slice {
         private final BiConsumer<Integer, Long> callback;
 
         /**
-         * Ctor.
-         *
          * @param original Original connection.
          * @param callback Callback consumer.
          */
@@ -157,12 +152,12 @@ public final class JfrSlice implements Slice {
         public CompletionStage<Void> accept(
             final RsStatus status,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             return this.original.accept(
                 status,
                 headers,
-                new ChunksAndSizeMetricsPublisher(body, this.callback)
+                new Content.From(new ChunksAndSizeMetricsPublisher(body, this.callback))
             );
         }
     }

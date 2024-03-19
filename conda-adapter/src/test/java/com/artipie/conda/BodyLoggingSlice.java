@@ -11,9 +11,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.jcabi.log.Logger;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -36,7 +34,7 @@ final class BodyLoggingSlice implements Slice {
 
     @Override
     public Response response(RequestLine line, Headers headers,
-                             Publisher<ByteBuffer> body) {
+                             Content body) {
         return new AsyncResponse(
             new Content.From(body).asBytesFuture().thenApply(
                 bytes -> {

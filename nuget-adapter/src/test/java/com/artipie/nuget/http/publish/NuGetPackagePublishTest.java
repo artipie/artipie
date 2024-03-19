@@ -4,6 +4,7 @@
  */
 package com.artipie.nuget.http.publish;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -19,7 +20,6 @@ import com.artipie.nuget.http.TestAuthentication;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.PolicyByUsername;
 import com.google.common.io.Resources;
-import io.reactivex.Flowable;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.hamcrest.MatcherAssert;
@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -41,9 +40,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 class NuGetPackagePublishTest {
 
-    /**
-     * Tested NuGet slice.
-     */
     private NuGet nuget;
 
     /**
@@ -102,7 +98,7 @@ class NuGetPackagePublishTest {
         final Response response = this.nuget.response(
             new RequestLine(RqMethod.GET, "/package"),
             TestAuthentication.HEADERS,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
         MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
@@ -114,7 +110,7 @@ class NuGetPackagePublishTest {
             this.nuget.response(
                 new RequestLine(RqMethod.PUT, "/package"),
                 Headers.EMPTY,
-                Flowable.fromArray(ByteBuffer.wrap("data".getBytes()))
+                new Content.From("data".getBytes())
             ),
             new ResponseMatcher(
                 RsStatus.UNAUTHORIZED, Headers.EMPTY
@@ -135,7 +131,7 @@ class NuGetPackagePublishTest {
                 TestAuthentication.HEADER,
                 new Header("Content-Type", entity.getContentType().getValue())
             ),
-            Flowable.fromArray(ByteBuffer.wrap(sink.toByteArray()))
+            new Content.From(sink.toByteArray())
         );
     }
 

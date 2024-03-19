@@ -5,12 +5,12 @@
 
 package com.artipie.http.rs;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import java.nio.ByteBuffer;
+
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Response with status.
@@ -86,7 +86,7 @@ public final class RsWithStatus implements Response {
         public CompletionStage<Void> accept(
             final RsStatus ignored,
             final Headers headers,
-            final Publisher<ByteBuffer> body) {
+            final Content body) {
             return this.origin.accept(this.status, headers, body);
         }
     }

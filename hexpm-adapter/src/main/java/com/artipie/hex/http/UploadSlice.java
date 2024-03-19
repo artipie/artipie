@@ -103,7 +103,7 @@ public final class UploadSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final URI uri = line.uri();
         final String path = Objects.nonNull(uri.getPath()) ? uri.getPath() : "";

@@ -27,7 +27,6 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Flowable;
-import org.reactivestreams.Publisher;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -137,7 +136,7 @@ public final class FileProxySlice implements Slice {
     @Override
     public Response response(
         final RequestLine line, final Headers ignored,
-        final Publisher<ByteBuffer> pub
+        final Content pub
     ) {
         final AtomicReference<Headers> headers = new AtomicReference<>();
         final KeyFromPath key = new KeyFromPath(line.uri().getPath());

@@ -23,7 +23,6 @@ import com.artipie.http.slice.KeyFromPath;
 import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import io.reactivex.Flowable;
-import org.reactivestreams.Publisher;
 
 import java.net.URI;
 import java.net.URLConnection;
@@ -85,7 +84,7 @@ final class ProxySlice implements Slice {
     @Override
     public Response response(
         final RequestLine line, final Headers ignored,
-        final Publisher<ByteBuffer> pub
+        final Content pub
     ) {
         final AtomicReference<Headers> headers = new AtomicReference<>();
         final Key key = ProxySlice.keyFromPath(line);

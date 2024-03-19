@@ -4,17 +4,15 @@
  */
 package com.artipie.nuget.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import java.nio.ByteBuffer;
+
 import java.util.Arrays;
 import java.util.Comparator;
-import org.reactivestreams.Publisher;
 
 /**
  * Resource delegating requests handling to other resources, found by routing path.
- *
- * @since 0.1
  */
 public final class RoutingResource implements Resource {
 
@@ -45,9 +43,7 @@ public final class RoutingResource implements Resource {
     }
 
     @Override
-    public Response put(
-        final Headers headers,
-        final Publisher<ByteBuffer> body) {
+    public Response put(Headers headers, Content body) {
         return this.resource().put(headers, body);
     }
 

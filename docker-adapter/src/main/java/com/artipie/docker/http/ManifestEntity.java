@@ -34,9 +34,7 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Queue;
@@ -96,7 +94,7 @@ final class ManifestEntity {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body) {
+            final Content body) {
             final Request request = new Request(line);
             final ManifestReference ref = request.reference();
             return new AsyncResponse(
@@ -148,7 +146,7 @@ final class ManifestEntity {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -217,7 +215,7 @@ final class ManifestEntity {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -301,7 +299,7 @@ final class ManifestEntity {
         @Override
         public Response response(
             final RequestLine line, final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();

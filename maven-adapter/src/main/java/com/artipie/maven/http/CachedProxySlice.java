@@ -26,7 +26,6 @@ import com.jcabi.log.Logger;
 import io.reactivex.Flowable;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
 import java.util.Locale;
@@ -98,7 +97,7 @@ final class CachedProxySlice implements Slice {
 
     @Override
     public Response response(RequestLine line, Headers headers,
-                             Publisher<ByteBuffer> body) {
+                             Content body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         final AtomicReference<Headers> rshdr = new AtomicReference<>(Headers.EMPTY);
         return new AsyncResponse(

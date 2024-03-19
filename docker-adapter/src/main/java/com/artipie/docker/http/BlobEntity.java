@@ -21,11 +21,10 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Blob entity in Docker HTTP API.
@@ -80,7 +79,7 @@ final class BlobEntity {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Request request = new Request(line);
             final Digest digest = request.digest();
@@ -140,7 +139,7 @@ final class BlobEntity {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Request request = new Request(line);
             final Digest digest = request.digest();

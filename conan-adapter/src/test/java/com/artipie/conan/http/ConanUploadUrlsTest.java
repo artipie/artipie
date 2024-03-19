@@ -4,6 +4,7 @@
  */
 package  com.artipie.conan.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.conan.ItemTokenizer;
@@ -16,7 +17,6 @@ import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import io.vertx.core.Vertx;
 import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;
@@ -27,7 +27,6 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -41,7 +40,7 @@ public class ConanUploadUrlsTest {
         final String host = "test_hostname.com";
         final ItemTokenizer tokenizer = new ItemTokenizer(Vertx.vertx());
         final String token = tokenizer.generateToken(path, host);
-        final ItemInfo item = tokenizer.authenticateToken(token).toCompletableFuture().join().get();
+        final ItemInfo item = tokenizer.authenticateToken(token).toCompletableFuture().join().orElseThrow();
         MatcherAssert.assertThat("Decoded path must match", item.getPath().equals(path));
         MatcherAssert.assertThat("Decoded host must match", item.getHostname().equals(host));
     }
@@ -61,7 +60,7 @@ public class ConanUploadUrlsTest {
                 new Header("Content-Size", Long.toString(data.length)),
                 new Header("Host", "localhost")
             ),
-            Flowable.just(ByteBuffer.wrap(data))
+            new Content.From(data)
         );
         MatcherAssert.assertThat(
             "Response body must match",
@@ -123,11 +122,8 @@ public class ConanUploadUrlsTest {
 
         @Override
         protected boolean matchesSafely(final JsonValue item) {
-            boolean matches = false;
-            if (item.getValueType().equals(ValueType.STRING) && item.toString().startsWith(this.prefix, 1)) {
-                matches = true;
-            }
-            return matches;
+            return item.getValueType().equals(ValueType.STRING) &&
+                item.toString().startsWith(this.prefix, 1);
         }
     }
 }

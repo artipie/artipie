@@ -16,12 +16,11 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.maven.metadata.DeployMetadata;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * This slice accepts PUT requests with package (not snapshot) maven-metadata.xml,
@@ -63,7 +62,7 @@ public final class PutMetadataSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final Matcher matcher = PutMetadataSlice.PTN_META.matcher(line.uri().getPath());
         if (matcher.matches()) {

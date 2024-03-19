@@ -4,6 +4,7 @@
  */
 package com.artipie.vertx;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
@@ -162,7 +163,9 @@ public final class VertxSliceServer implements Closeable {
         return this.served.response(
             new RequestLine(req.method().name(), req.uri(), req.version().toString()),
             Headers.from(req.headers()),
-            req.toFlowable().map(buffer -> ByteBuffer.wrap(buffer.getBytes()))
+            new Content.From(
+                req.toFlowable().map(buffer -> ByteBuffer.wrap(buffer.getBytes()))
+            )
         ).send(new ContinueConnection(response, new VertxConnection(response)));
     }
 

@@ -6,14 +6,13 @@ package com.artipie.http;
 
 import com.artipie.RepositorySlices;
 import com.artipie.RqPath;
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -42,7 +41,7 @@ final class SliceByPath implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final Optional<Key> key = SliceByPath.keyFromPath(line.uri().getPath());
         if (key.isEmpty()) {

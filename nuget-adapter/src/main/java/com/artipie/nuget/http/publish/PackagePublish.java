@@ -5,6 +5,7 @@
 
 package com.artipie.nuget.http.publish;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
@@ -76,8 +77,6 @@ public final class PackagePublish implements Route {
     /**
      * New package resource. Used to push a package into repository.
      * See <a href="https://docs.microsoft.com/en-us/nuget/api/package-publish-resource#push-a-package">Push a package</a>
-     *
-     * @since 0.1
      */
     public static final class NewPackage implements Resource {
 
@@ -116,10 +115,7 @@ public final class PackagePublish implements Route {
         }
 
         @Override
-        public Response put(
-            final Headers headers,
-            final Publisher<ByteBuffer> body
-        ) {
+        public Response put(Headers headers, Content body) {
             return new AsyncResponse(
                 CompletableFuture.supplyAsync(
                     () -> new Multipart(headers, body).first()

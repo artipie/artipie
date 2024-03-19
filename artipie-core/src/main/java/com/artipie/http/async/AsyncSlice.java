@@ -4,14 +4,14 @@
  */
 package com.artipie.http.async;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import java.nio.ByteBuffer;
+
 import java.util.concurrent.CompletionStage;
 
 import com.artipie.http.rq.RequestLine;
-import org.reactivestreams.Publisher;
 
 /**
  * Asynchronous {@link Slice} implementation.
@@ -36,7 +36,7 @@ public final class AsyncSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         return new AsyncResponse(
             this.slice.thenApply(target -> target.response(line, headers, body))

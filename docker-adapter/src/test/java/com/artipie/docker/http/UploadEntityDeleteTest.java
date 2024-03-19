@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Docker;
 import com.artipie.docker.RepoName;
@@ -16,7 +17,6 @@ import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,10 +24,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link UploadEntity.Delete}.
  * Upload DElETE endpoint.
- *
- * @since 0.16
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class UploadEntityDeleteTest {
     /**
      * Docker registry used in tests.
@@ -56,7 +53,7 @@ final class UploadEntityDeleteTest {
         final Response get = this.slice.response(
             new RequestLine(RqMethod.DELETE, String.format("%s", path)),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             get,
@@ -79,7 +76,7 @@ final class UploadEntityDeleteTest {
         final Response get = this.slice.response(
             new RequestLine(RqMethod.DELETE, String.format("%s", path)),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             get,

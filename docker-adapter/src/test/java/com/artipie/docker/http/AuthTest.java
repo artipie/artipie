@@ -31,7 +31,6 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.policy.Policy;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsNot;
@@ -43,7 +42,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.testcontainers.shaded.com.google.common.collect.Sets;
 
-import java.nio.ByteBuffer;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Arrays;
@@ -161,7 +159,7 @@ public final class AuthTest {
         final RequestLine line = new RequestLine(RqMethod.PUT, path);
         final DockerRepositoryPermission permission =
             new DockerRepositoryPermission("*", "my-alpine", DockerActions.OVERWRITE.mask());
-        final Flowable<ByteBuffer> manifest = this.manifest();
+        Content manifest = this.manifest();
         MatcherAssert.assertThat(
             "Manifest was created for the first time",
             basic.slice(permission).response(
@@ -251,7 +249,7 @@ public final class AuthTest {
      *
      * @return Manifest content.
      */
-    private Flowable<ByteBuffer> manifest() {
+    private Content manifest() {
         final byte[] content = "config".getBytes();
         final Blob config = this.docker.repo(new RepoName.Valid("my-alpine")).layers()
             .put(new TrustedBlobSource(content))
@@ -260,7 +258,7 @@ public final class AuthTest {
             "{\"config\":{\"digest\":\"%s\"},\"layers\":[],\"mediaType\":\"my-type\"}",
             config.digest().string()
         ).getBytes();
-        return Flowable.just(ByteBuffer.wrap(data));
+        return new Content.From(data);
     }
 
     private static Stream<Arguments> setups(final Method method) {

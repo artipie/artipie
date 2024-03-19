@@ -17,7 +17,6 @@ import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,19 +24,11 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link DockerSlice}.
  * Upload GET endpoint.
- *
- * @since 0.3
  */
-@SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "PMD.AvoidDuplicateLiterals"})
 public final class UploadEntityGetTest {
-    /**
-     * Docker registry used in tests.
-     */
+
     private Docker docker;
 
-    /**
-     * Slice being tested.
-     */
     private DockerSlice slice;
 
     @BeforeEach
@@ -55,9 +46,8 @@ public final class UploadEntityGetTest {
             .toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.GET, String.format("%s", path)),
-            Headers.EMPTY,
-            Flowable.empty()
+            new RequestLine(RqMethod.GET, path),
+            Headers.EMPTY, Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,
@@ -80,9 +70,7 @@ public final class UploadEntityGetTest {
         upload.append(new Content.From(new byte[1])).toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.GET, String.format("%s", path)),
-            Headers.EMPTY,
-            Flowable.empty()
+            new RequestLine(RqMethod.GET, path), Headers.EMPTY, Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,
@@ -105,9 +93,7 @@ public final class UploadEntityGetTest {
         upload.append(new Content.From(new byte[128])).toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
         final Response get = this.slice.response(
-            new RequestLine(RqMethod.GET, String.format("%s", path)),
-            Headers.EMPTY,
-            Flowable.empty()
+            new RequestLine(RqMethod.GET, path), Headers.EMPTY, Content.EMPTY
         );
         MatcherAssert.assertThat(
             get,
@@ -124,8 +110,7 @@ public final class UploadEntityGetTest {
     void shouldReturnNotFoundWhenUploadNotExists() {
         final Response response = this.slice.response(
             new RequestLine(RqMethod.GET, "/v2/test/blobs/uploads/12345"),
-            Headers.EMPTY,
-            Flowable.empty()
+            Headers.EMPTY, Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,

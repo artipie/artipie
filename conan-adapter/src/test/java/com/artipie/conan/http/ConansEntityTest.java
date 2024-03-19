@@ -19,7 +19,6 @@ import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.json.Json;
@@ -170,7 +169,7 @@ class ConansEntityTest {
 
         @Override
         public CompletionStage<Void> accept(
-            final RsStatus status, final Headers headers, final Publisher<ByteBuffer> body
+            final RsStatus status, final Headers headers, final Content body
         ) {
             return CompletableFuture.supplyAsync(
                 () -> {

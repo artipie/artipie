@@ -4,13 +4,11 @@
  */
 package com.artipie.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
-
-import org.reactivestreams.Publisher;
 
 /**
  * Slice limiting requests size by `Content-Length` header.
@@ -46,7 +44,7 @@ public final class ContentLengthRestriction implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final Response response;
         if (new RqHeaders(headers, "Content-Length").stream().allMatch(this::withinLimit)) {

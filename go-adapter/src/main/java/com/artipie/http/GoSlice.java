@@ -4,6 +4,7 @@
  */
 package com.artipie.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
@@ -23,9 +24,7 @@ import com.artipie.http.slice.SliceWithHeaders;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.regex.Pattern;
 
 /**
@@ -90,7 +89,7 @@ public final class GoSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line, final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         return this.origin.response(line, headers, body);
     }
 

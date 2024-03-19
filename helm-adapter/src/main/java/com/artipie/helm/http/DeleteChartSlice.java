@@ -20,10 +20,8 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Single;
-import org.reactivestreams.Publisher;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -77,7 +75,7 @@ final class DeleteChartSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final URI uri = line.uri();
         final Matcher matcher = DeleteChartSlice.PTRN_DEL_CHART.matcher(uri.getPath());

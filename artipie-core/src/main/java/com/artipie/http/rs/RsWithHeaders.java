@@ -5,12 +5,11 @@
 
 package com.artipie.http.rs;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
@@ -124,7 +123,7 @@ public final class RsWithHeaders implements Response {
         public CompletionStage<Void> accept(
             final RsStatus status,
             final Headers hrs,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Headers res;
             if (this.override) {

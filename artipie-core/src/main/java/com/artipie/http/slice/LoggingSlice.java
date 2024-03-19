@@ -4,6 +4,7 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -12,9 +13,7 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.jcabi.log.Logger;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
@@ -60,7 +59,7 @@ public final class LoggingSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final StringBuilder msg = new StringBuilder(">> ").append(line);
         LoggingSlice.append(msg, headers);
@@ -135,7 +134,7 @@ public final class LoggingSlice implements Slice {
         public CompletionStage<Void> accept(
             final RsStatus status,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final StringBuilder msg = new StringBuilder("<< ").append(status);
             LoggingSlice.append(msg, headers);

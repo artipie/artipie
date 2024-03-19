@@ -4,6 +4,7 @@
  */
 package com.artipie.vertx;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rs.RsStatus;
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ServerSocket;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
@@ -105,7 +105,7 @@ public final class VertxSliceServerTest {
             (line, headers, body) -> connection -> connection.accept(
                 RsStatus.OK,
                 Headers.EMPTY,
-                Flowable.fromArray(ByteBuffer.wrap(expected.getBytes()))
+                new Content.From(expected.getBytes())
             )
         );
         final String actual = this.client.get(this.port, VertxSliceServerTest.HOST, "/hello1")
@@ -124,7 +124,7 @@ public final class VertxSliceServerTest {
                 RsStatus.OK,
                 Headers.from(clh, Integer.toString(expected.length())
                 ),
-                Flowable.fromArray(ByteBuffer.wrap(expected.getBytes()))
+                new Content.From(expected.getBytes())
             )
         );
         final HttpResponse<Buffer> response = this.client.get(
@@ -196,7 +196,7 @@ public final class VertxSliceServerTest {
             (line, headers, body) -> connection -> connection.accept(
                 RsStatus.OK,
                 Headers.EMPTY,
-                Flowable.error(exception)
+                new Content.From(Flowable.error(exception))
             )
         );
         final HttpResponse<Buffer> response = this.client.get(

@@ -37,9 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Test case for {@link DownloadIndexSlice}.
  */
 final class DownloadIndexSliceTest {
-    /**
-     * Storage.
-     */
+
     private Storage storage;
 
     @BeforeEach
@@ -60,7 +58,7 @@ final class DownloadIndexSliceTest {
                 Content.EMPTY
             ).send(
                 (status, headers, body) -> {
-                    cbody.set(new Content.From(body).asString());
+                    cbody.set(body.asString());
                     cstatus.set(status);
                     return CompletableFuture.allOf();
                 }

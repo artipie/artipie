@@ -4,6 +4,7 @@
  */
 package com.artipie.maven.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
@@ -21,9 +22,7 @@ import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.KeyFromPath;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,7 +58,7 @@ final class LocalMavenSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line, final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final Key key = new KeyFromPath(line.uri().getPath());
         final Matcher match = LocalMavenSlice.PTN_ARTIFACT.matcher(new KeyLastPart(key).get());

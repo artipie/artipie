@@ -4,6 +4,7 @@
  */
 package com.artipie.adapters.php;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.composer.AstoRepository;
 import com.artipie.composer.http.proxy.ComposerProxySlice;
@@ -16,9 +17,7 @@ import com.artipie.http.client.RemoteConfig;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.settings.repo.RepoConfig;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 
 /**
@@ -57,7 +56,7 @@ public final class ComposerProxy implements Slice {
     public Response response(
         RequestLine line,
         Headers headers,
-        Publisher<ByteBuffer> body
+        Content body
     ) {
         return slice.response(line, headers, body);
     }

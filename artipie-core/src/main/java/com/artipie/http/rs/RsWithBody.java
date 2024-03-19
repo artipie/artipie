@@ -174,10 +174,14 @@ public final class RsWithBody implements Response {
         public CompletionStage<Void> accept(
             final RsStatus status,
             final Headers headers,
-            final Publisher<ByteBuffer> none) {
+            final Content none) {
             return this.origin.accept(
-                status, headers,
-                Flowable.fromPublisher(this.body).map(ByteBuffer::duplicate)
+                status,
+                headers,
+                new Content.From(
+                    Flowable.fromPublisher(this.body)
+                        .map(ByteBuffer::duplicate)
+                )
             );
         }
     }

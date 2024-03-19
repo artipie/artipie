@@ -4,10 +4,9 @@
  */
 package com.artipie.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.rs.RsStatus;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -22,5 +21,5 @@ public interface Connection {
      * @param body The http response body.
      * @return Completion stage for accepting HTTP response.
      */
-    CompletionStage<Void> accept(RsStatus status, Headers headers, Publisher<ByteBuffer> body);
+    CompletionStage<Void> accept(RsStatus status, Headers headers, Content body);
 }

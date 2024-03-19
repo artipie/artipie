@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
@@ -12,9 +13,8 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
+
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Base entity in Docker HTTP API.
@@ -38,7 +38,7 @@ public final class BaseEntity implements ScopeSlice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         return new RsWithHeaders(
             new RsWithStatus(RsStatus.OK),

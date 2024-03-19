@@ -23,8 +23,6 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Proxy implementation of {@link Blob}.
- *
- * @since 0.3
  */
 public final class ProxyBlob implements Blob {
 
@@ -85,7 +83,7 @@ public final class ProxyBlob implements Blob {
         this.remote.response(
             new RequestLine(RqMethod.GET, blobPath),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         ).send(
             (status, headers, body) -> {
                 final CompletableFuture<Void> sent;

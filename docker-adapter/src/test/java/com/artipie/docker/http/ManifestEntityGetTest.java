@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.asto.AstoDocker;
@@ -16,7 +17,6 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.cactoos.list.ListOf;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -48,7 +48,7 @@ class ManifestEntityGetTest {
                 Headers.from(
                     new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/webp")
                 ),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 "sha256:cb8a924afdf0229ef7515d9e5b3024e23b3eb03ddbba287f4a19c6ac90b8d221",
@@ -75,7 +75,7 @@ class ManifestEntityGetTest {
                 Headers.from(
                     new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/webp")
                 ),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 digest,
@@ -92,7 +92,7 @@ class ManifestEntityGetTest {
                 Headers.from(
                     new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/webp")
                 ),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new IsErrorsResponse(RsStatus.NOT_FOUND, "MANIFEST_UNKNOWN")
         );
@@ -112,7 +112,7 @@ class ManifestEntityGetTest {
                 Headers.from(
                     new Header("Accept", "application/vnd.docker.distribution.manifest.v2+json, application/xml;q=0.9, image/webp")
                 ),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new IsErrorsResponse(RsStatus.NOT_FOUND, "MANIFEST_UNKNOWN")
         );

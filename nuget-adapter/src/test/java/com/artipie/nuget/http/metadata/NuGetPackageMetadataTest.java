@@ -23,14 +23,6 @@ import com.artipie.nuget.http.TestAuthentication;
 import com.artipie.nuget.metadata.Nuspec;
 import com.artipie.nuget.metadata.Version;
 import com.artipie.security.policy.PolicyByUsername;
-import io.reactivex.Flowable;
-import java.io.ByteArrayInputStream;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Optional;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.TypeSafeMatcher;
@@ -38,20 +30,22 @@ import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Tests for {@link NuGet}.
  * Package metadata resource.
  */
 class NuGetPackageMetadataTest {
 
-    /**
-     * Tested NuGet slice.
-     */
     private NuGet nuget;
 
-    /**
-     * Storage used by repository.
-     */
     private InMemoryStorage storage;
 
     @BeforeEach
@@ -94,7 +88,7 @@ class NuGetPackageMetadataTest {
                 "/registrations/newtonsoft.json/index.json"
             ),
             TestAuthentication.HEADERS,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,
@@ -115,7 +109,7 @@ class NuGetPackageMetadataTest {
                 "/registrations/my.lib/index.json"
             ),
             TestAuthentication.HEADERS,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,
@@ -136,7 +130,7 @@ class NuGetPackageMetadataTest {
                 "/registrations/newtonsoft.json/index.json"
             ),
             TestAuthentication.HEADERS,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
     }
@@ -150,7 +144,7 @@ class NuGetPackageMetadataTest {
                     "/registrations/my-utils/index.json"
                 ),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.UNAUTHORIZED, Headers.EMPTY

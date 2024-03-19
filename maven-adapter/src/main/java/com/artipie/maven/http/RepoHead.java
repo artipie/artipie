@@ -4,13 +4,13 @@
  */
 package com.artipie.maven.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.jcabi.log.Logger;
-import io.reactivex.Flowable;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -18,7 +18,6 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Head repository metadata.
- * @since 0.5
  */
 final class RepoHead {
 
@@ -43,7 +42,7 @@ final class RepoHead {
     CompletionStage<Optional<Headers>> head(final String path) {
         final CompletableFuture<Optional<Headers>> promise = new CompletableFuture<>();
         return this.client.response(
-            new RequestLine(RqMethod.HEAD, path), Headers.EMPTY, Flowable.empty()
+            new RequestLine(RqMethod.HEAD, path), Headers.EMPTY, Content.EMPTY
         ).send(
             (status, rsheaders, body) -> {
                 final CompletionStage<Optional<Headers>> res;

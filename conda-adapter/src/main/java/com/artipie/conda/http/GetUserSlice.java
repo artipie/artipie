@@ -4,6 +4,7 @@
  */
 package com.artipie.conda.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -16,11 +17,9 @@ import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.common.RsJson;
 import java.io.StringReader;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import javax.json.Json;
 import javax.json.JsonStructure;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice to handle `GET /user` request.
@@ -42,7 +41,7 @@ final class GetUserSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         return new AsyncResponse(
             this.scheme.authenticate(headers, line).thenApply(
                 result -> {

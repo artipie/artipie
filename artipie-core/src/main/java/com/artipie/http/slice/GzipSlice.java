@@ -47,7 +47,7 @@ final class GzipSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         return connection -> this.origin.response(line, headers, body).send(
             (status, rsheaders, rsbody) -> GzipSlice.gzip(connection, status, rsbody, rsheaders)
         );

@@ -21,7 +21,6 @@ import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.util.Callback;
-import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +80,7 @@ final class JettyClientSlice implements Slice {
     }
 
     public Response response(
-        RequestLine line, Headers headers, Publisher<ByteBuffer> body
+        RequestLine line, Headers headers, com.artipie.asto.Content body
     ) {
         final Request request = this.buildRequest(headers, line);
         final CompletableFuture<Response> res = new CompletableFuture<>();

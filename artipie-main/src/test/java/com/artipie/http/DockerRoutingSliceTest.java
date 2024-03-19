@@ -28,7 +28,6 @@ import com.artipie.settings.cache.ArtipieCaches;
 import com.artipie.settings.cache.CachedUsers;
 import com.artipie.test.TestArtipieCaches;
 import com.artipie.test.TestSettings;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.Test;
@@ -108,8 +107,7 @@ final class DockerRoutingSliceTest {
 
     private static void verify(final Slice slice, final String path) throws Exception {
         slice.response(
-            new RequestLine(RqMethod.GET, path),
-            Headers.EMPTY, Flowable.empty()
+            new RequestLine(RqMethod.GET, path), Headers.EMPTY, Content.EMPTY
         ).send(
             (status, headers, body) -> CompletableFuture.completedFuture(null)
         ).toCompletableFuture().get();
@@ -117,8 +115,6 @@ final class DockerRoutingSliceTest {
 
     /**
      * Fake settings with auth.
-     *
-     * @since 0.10
      */
     private static class SettingsWithAuth implements Settings {
 

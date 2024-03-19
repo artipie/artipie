@@ -4,6 +4,7 @@
  */
 package com.artipie.files;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
@@ -16,10 +17,8 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.slice.KeyFromPath;
-import org.reactivestreams.Publisher;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -60,7 +59,7 @@ public final class FileMetaSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers iterable,
-        final Publisher<ByteBuffer> publisher
+        final Content publisher
     ) {
         final Response raw = this.origin.response(line, iterable, publisher);
         final URI uri = line.uri();

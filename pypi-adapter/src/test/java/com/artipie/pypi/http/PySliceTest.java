@@ -19,7 +19,6 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.security.policy.Policy;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
@@ -64,7 +63,7 @@ class PySliceTest {
             this.slice.response(
                 new RequestLine("GET", "/simple"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             Matchers.allOf(
                 new RsHasBody(
@@ -88,7 +87,7 @@ class PySliceTest {
             this.slice.response(
                 new RequestLine("GET", "/"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             Matchers.allOf(
                 new RsHasBody(
@@ -109,7 +108,7 @@ class PySliceTest {
             this.slice.response(
                 new RequestLine("GET", "/one/Two_three"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.MOVED_PERMANENTLY,
@@ -124,7 +123,7 @@ class PySliceTest {
             this.slice.response(
                 new RequestLine("POST", "/sample.tar"),
                 Headers.from("content-type", "multipart/form-data; boundary=\"abc123\""),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasStatus(RsStatus.BAD_REQUEST)
         );
@@ -146,7 +145,7 @@ class PySliceTest {
             this.slice.response(
                 new RequestLine("GET", key),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.OK,

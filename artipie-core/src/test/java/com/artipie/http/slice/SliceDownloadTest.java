@@ -16,7 +16,6 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +36,7 @@ public final class SliceDownloadTest {
         storage.save(new Key.From(path), new Content.From(data)).get();
         MatcherAssert.assertThat(
             new SliceDownload(storage).response(
-                rqLineFrom("/one/two/target.txt"), Headers.EMPTY, Flowable.empty()
+                rqLineFrom("/one/two/target.txt"), Headers.EMPTY, Content.EMPTY
             ),
             new RsHasBody(data)
         );
@@ -47,7 +46,7 @@ public final class SliceDownloadTest {
     void returnsNotFoundIfKeyDoesntExist() {
         MatcherAssert.assertThat(
             new SliceDownload(new InMemoryStorage()).response(
-                rqLineFrom("/not-exists"), Headers.EMPTY, Flowable.empty()
+                rqLineFrom("/not-exists"), Headers.EMPTY, Content.EMPTY
             ),
             new RsHasStatus(RsStatus.NOT_FOUND)
         );
@@ -61,7 +60,7 @@ public final class SliceDownloadTest {
         storage.save(new Key.From(path), new Content.From(body)).get();
         MatcherAssert.assertThat(
             new SliceDownload(storage).response(
-                rqLineFrom("/empty.txt"), Headers.EMPTY, Flowable.empty()
+                rqLineFrom("/empty.txt"), Headers.EMPTY, Content.EMPTY
             ),
             new ResponseMatcher(body)
         );
@@ -75,7 +74,7 @@ public final class SliceDownloadTest {
         storage.save(new Key.From(path), new Content.From(data)).get();
         MatcherAssert.assertThat(
             new SliceDownload(storage).response(
-                rqLineFrom(path), Headers.EMPTY, Flowable.empty()
+                rqLineFrom(path), Headers.EMPTY, Content.EMPTY
             ),
             new RsHasHeaders(
                 new Header("Content-Length", "7"),

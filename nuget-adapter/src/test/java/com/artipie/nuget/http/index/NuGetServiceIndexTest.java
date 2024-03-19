@@ -4,6 +4,7 @@
  */
 package com.artipie.nuget.http.index;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -15,7 +16,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.AstoRepository;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.security.policy.Policy;
-import io.reactivex.Flowable;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -68,7 +68,7 @@ class NuGetServiceIndexTest {
         final Response response = this.nuget.response(
             new RequestLine(RqMethod.GET, "/index.json"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,
@@ -111,7 +111,7 @@ class NuGetServiceIndexTest {
         final Response response = this.nuget.response(
             new RequestLine(RqMethod.PUT, "/index.json"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
     }

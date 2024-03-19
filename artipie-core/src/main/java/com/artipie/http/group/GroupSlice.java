@@ -4,14 +4,13 @@
  */
 package com.artipie.http.group;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -58,7 +57,7 @@ public final class GroupSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         final Response rsp;
         if (GroupSlice.BROADCAST_METHODS.contains(line.method())) {
             rsp = new GroupResponse(

@@ -18,9 +18,7 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Enumeration;
@@ -49,7 +47,7 @@ class AuthScopeSliceTest {
                 public Response response(
                     final RequestLine line,
                     final Headers headers,
-                    final Publisher<ByteBuffer> body
+                    final Content body
                 ) {
                     return StandardRs.OK;
                 }

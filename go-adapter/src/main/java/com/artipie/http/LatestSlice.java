@@ -4,6 +4,7 @@
  */
 package com.artipie.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.async.AsyncResponse;
@@ -15,12 +16,10 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.KeyFromPath;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import org.reactivestreams.Publisher;
 
 /**
  * Go mod slice: this slice returns json-formatted metadata about go module as
@@ -41,7 +40,7 @@ public final class LatestSlice implements Slice {
     @Override
     public Response response(
         final RequestLine line, final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         return new AsyncResponse(
             CompletableFuture.supplyAsync(
                 () -> LatestSlice.normalized(line)

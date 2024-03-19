@@ -84,7 +84,7 @@ public final class BearerAuthenticator implements Authenticator {
         return new AuthClientSlice(new UriClientSlice(this.client, realm), this.auth).response(
             new RequestLine(RqMethod.GET, String.format("?%s", query)),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         ).send(
             (status, headers, body) -> new Content.From(body).asBytesFuture()
                 .thenApply(this.format::token)

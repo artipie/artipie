@@ -77,7 +77,7 @@ final class PushChartSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final Optional<String> upd = new RqParams(line.uri()).value("updateIndex");
         return new AsyncResponse(

@@ -15,12 +15,10 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.npm.PackageNameFromUrl;
 import org.apache.commons.lang3.StringUtils;
-import org.reactivestreams.Publisher;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonPatchBuilder;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -52,7 +50,7 @@ public final class DeprecateSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers iterable,
-        final Publisher<ByteBuffer> publisher
+        final Content publisher
     ) {
         final String pkg = new PackageNameFromUrl(line).value();
         final Key key = new Key.From(pkg, "meta.json");

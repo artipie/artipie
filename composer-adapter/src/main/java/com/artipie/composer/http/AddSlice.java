@@ -13,11 +13,10 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
+
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice for adding a package to the repository in JSON format.
@@ -49,7 +48,7 @@ final class AddSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final String path = line.uri().toString();
         final Matcher matcher = AddSlice.PATH_PATTERN.matcher(path);

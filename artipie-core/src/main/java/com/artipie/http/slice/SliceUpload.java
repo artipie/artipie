@@ -4,6 +4,7 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
@@ -15,9 +16,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.scheduling.RepositoryEvents;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -82,7 +81,7 @@ public final class SliceUpload implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         Key key = transform.apply(line.uri().getPath());
         CompletableFuture<Void> res = this.storage.save(key, new ContentWithSize(body, headers));
         if (this.events.isPresent()) {

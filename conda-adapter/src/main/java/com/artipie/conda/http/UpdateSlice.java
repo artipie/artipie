@@ -95,7 +95,7 @@ public final class UpdateSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         final Matcher matcher = UpdateSlice.PKG.matcher(line.uri().getPath());
         final Response res;
         if (matcher.matches()) {

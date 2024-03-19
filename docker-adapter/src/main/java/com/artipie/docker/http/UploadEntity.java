@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
@@ -25,13 +26,12 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.ContentWithSize;
-import java.nio.ByteBuffer;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Blob Upload entity in Docker HTTP API.
@@ -90,7 +90,7 @@ public final class UploadEntity {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName target = request.name();
@@ -179,7 +179,7 @@ public final class UploadEntity {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -232,7 +232,7 @@ public final class UploadEntity {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -286,7 +286,7 @@ public final class UploadEntity {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -498,7 +498,7 @@ public final class UploadEntity {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();

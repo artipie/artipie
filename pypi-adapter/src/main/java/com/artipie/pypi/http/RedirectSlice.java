@@ -4,6 +4,7 @@
  */
 package com.artipie.pypi.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -15,9 +16,6 @@ import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.pypi.NormalizedProjectName;
 import io.reactivex.Single;
-import org.reactivestreams.Publisher;
-
-import java.nio.ByteBuffer;
 
 /**
  * Slice to redirect to normalized url.
@@ -34,7 +32,7 @@ public final class RedirectSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final String rqline = line.uri().toString();
         final String last = rqline.split("/")[rqline.split("/").length - 1];

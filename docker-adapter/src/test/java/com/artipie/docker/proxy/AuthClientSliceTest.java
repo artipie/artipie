@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.proxy;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.client.auth.AuthClientSlice;
@@ -14,8 +15,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +37,7 @@ class AuthClientSliceTest {
                 return new RsFull(status, rsheaders, rsbody);
             },
             Authenticator.ANONYMOUS
-        ).response(line, Headers.from(header), Flowable.just(ByteBuffer.wrap(body)));
+        ).response(line, Headers.from(header), new Content.From(body));
         MatcherAssert.assertThat(
             response,
             new ResponseMatcher(status, body, header)

@@ -4,6 +4,7 @@
  */
 package com.artipie.conda.http;
 
+import com.artipie.asto.Content;
 import com.artipie.conda.http.auth.TokenAuthScheme;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -17,9 +18,7 @@ import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -45,7 +44,7 @@ final class DeleteTokenSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line,
-                             final Headers headers, final Publisher<ByteBuffer> body) {
+                             final Headers headers, final Content body) {
         return new AsyncResponse(
             CompletableFuture.supplyAsync(
                 () -> new RqHeaders(headers, Authorization.NAME)

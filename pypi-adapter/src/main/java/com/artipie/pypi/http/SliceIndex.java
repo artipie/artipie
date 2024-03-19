@@ -5,6 +5,7 @@
 
 package com.artipie.pypi.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
@@ -25,10 +26,8 @@ import com.artipie.http.slice.KeyFromPath;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
-import org.reactivestreams.Publisher;
+import java.nio.charset.StandardCharsets;
 
 /**
  * SliceIndex returns formatted html output with index of repository packages.
@@ -54,7 +53,7 @@ final class SliceIndex implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> publisher
+        final Content publisher
     ) {
         final Key rqkey = new KeyFromPath(line.uri().toString());
         final String prefix = new RequestLinePrefix(rqkey.string(), headers).get();

@@ -5,15 +5,14 @@
 package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -56,7 +55,7 @@ public class FilterSlice implements Slice {
 
     @Override
     public final Response response(
-        RequestLine line, Headers headers, Publisher<ByteBuffer> body
+        RequestLine line, Headers headers, Content body
     ) {
         if (this.filters.allowed(line, headers)) {
             return this.origin.response(line, headers, body);

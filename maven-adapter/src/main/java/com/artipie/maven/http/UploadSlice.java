@@ -4,6 +4,7 @@
  */
 package com.artipie.maven.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
@@ -15,9 +16,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.ContentWithSize;
 import com.artipie.http.slice.KeyFromPath;
-import java.nio.ByteBuffer;
-
-import org.reactivestreams.Publisher;
 
 /**
  * This slice accepts PUT requests with jars/poms etc (any files except for metadata and
@@ -49,7 +47,7 @@ public final class UploadSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         return new AsyncResponse(
             this.asto.save(

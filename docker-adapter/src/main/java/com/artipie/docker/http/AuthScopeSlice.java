@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -12,9 +13,6 @@ import com.artipie.http.auth.AuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.security.policy.Policy;
-import java.nio.ByteBuffer;
-
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that implements authorization for {@link ScopeSlice}.
@@ -67,7 +65,7 @@ final class AuthScopeSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         return new AuthzSlice(
             this.origin,

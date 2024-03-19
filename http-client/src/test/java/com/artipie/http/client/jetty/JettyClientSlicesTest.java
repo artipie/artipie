@@ -108,7 +108,7 @@ final class JettyClientSlicesTest {
                 client.http("artipie.com").response(
                     new RequestLine(RqMethod.GET, "/"),
                     Headers.EMPTY,
-                    Flowable.empty()
+                    Content.EMPTY
                 ),
                 new RsHasBody(response)
             );
@@ -135,7 +135,7 @@ final class JettyClientSlicesTest {
                 client.http("localhost", this.server.port()).response(
                     new RequestLine(RqMethod.GET, "/some/path"),
                     Headers.EMPTY,
-                    Flowable.empty()
+                    Content.EMPTY
                 ),
                 new RsHasStatus(status)
             );
@@ -169,7 +169,7 @@ final class JettyClientSlicesTest {
                 client.http("localhost", this.server.port()).response(
                     new RequestLine(RqMethod.GET, "/some/path"),
                     Headers.EMPTY,
-                    Flowable.empty()
+                    Content.EMPTY
                 ),
                 new RsHasStatus(RsStatus.OK)
             );
@@ -302,7 +302,7 @@ final class JettyClientSlicesTest {
                 client.https(url).response(
                     new RequestLine(RqMethod.GET, "/"),
                     Headers.EMPTY,
-                    Flowable.empty()
+                    Content.EMPTY
                 ),
                 new RsHasStatus(RsStatus.OK)
             );
@@ -328,16 +328,16 @@ final class JettyClientSlicesTest {
             final Response response = client.https(url).response(
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             );
             final Exception exception = Assertions.assertThrows(
                 CompletionException.class,
-                response
+                () -> response
                     .send(
                         (status, headers, publisher) ->
                             CompletableFuture.allOf()
                     )
-                    .toCompletableFuture()::join
+                    .toCompletableFuture().join()
             );
             MatcherAssert.assertThat(
                 exception,

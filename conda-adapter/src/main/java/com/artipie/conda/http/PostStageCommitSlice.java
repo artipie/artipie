@@ -4,6 +4,7 @@
  */
 package com.artipie.conda.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -11,11 +12,9 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.common.RsJson;
-import org.reactivestreams.Publisher;
 
 import javax.json.Json;
 import java.io.StringReader;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,7 +52,7 @@ public final class PostStageCommitSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         final Response res;
         final Matcher matcher = PostStageCommitSlice.PKG.matcher(
             line.uri().getPath()

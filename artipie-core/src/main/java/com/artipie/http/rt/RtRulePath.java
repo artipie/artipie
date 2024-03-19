@@ -4,13 +4,12 @@
  */
 package com.artipie.http.rt;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 
 /**
@@ -19,7 +18,6 @@ import java.util.Optional;
  * A path to slice with routing rule. If
  * {@link RtRule} passed, then the request will be redirected to
  * underlying {@link Slice}.
- * </p>
  */
 public final class RtRulePath implements RtPath {
 
@@ -44,11 +42,7 @@ public final class RtRulePath implements RtPath {
     }
 
     @Override
-    public Optional<Response> response(
-        RequestLine line,
-        Headers headers,
-        Publisher<ByteBuffer> body
-    ) {
+    public Optional<Response> response(RequestLine line, Headers headers, Content body) {
         if (this.rule.apply(line, headers)) {
             return Optional.of(this.slice.response(line, headers, body));
         }

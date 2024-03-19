@@ -5,6 +5,7 @@
 
 package com.artipie.npm.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
@@ -19,9 +20,7 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.Tarballs;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
-import org.reactivestreams.Publisher;
 
 /**
  * Download package endpoint. Return package metadata, all tarball links will be rewritten
@@ -55,7 +54,7 @@ public final class DownloadPackageSlice implements Slice {
     @Override
     public Response response(final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         final String pkg = new PackageNameFromUrl(line).value();
         final Key key = new Key.From(pkg, "meta.json");
         return new AsyncResponse(

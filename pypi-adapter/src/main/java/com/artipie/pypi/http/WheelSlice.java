@@ -75,7 +75,7 @@ final class WheelSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers iterable,
-        final Publisher<ByteBuffer> publisher
+        final Content publisher
     ) {
         final Key.From key = new Key.From(UUID.randomUUID().toString());
         return new AsyncResponse(

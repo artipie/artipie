@@ -4,6 +4,7 @@
  */
 package com.artipie.composer.http;
 
+import com.artipie.asto.Content;
 import com.artipie.composer.Name;
 import com.artipie.composer.Packages;
 import com.artipie.composer.Repository;
@@ -14,12 +15,11 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
-import java.nio.ByteBuffer;
+
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that serves package metadata.
@@ -59,7 +59,7 @@ public final class PackageMetadataSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         return new AsyncResponse(
             this.packages(line.uri().getPath())

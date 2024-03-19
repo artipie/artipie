@@ -15,9 +15,7 @@ import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
@@ -84,7 +82,7 @@ public final class SliceListing implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         final Key key = this.transform.apply(line.uri().getPath());
         return new AsyncResponse(
             this.storage.list(key)

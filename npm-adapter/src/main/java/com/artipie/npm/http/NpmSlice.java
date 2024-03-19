@@ -5,6 +5,7 @@
 
 package com.artipie.npm.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -28,11 +29,9 @@ import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import org.reactivestreams.Publisher;
 
 /**
  * NpmSlice is a http layer in npm adapter.
@@ -265,7 +264,7 @@ public final class NpmSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         return this.route.response(line, headers, body);
     }
 }

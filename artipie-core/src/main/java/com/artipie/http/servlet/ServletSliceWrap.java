@@ -5,6 +5,7 @@
 
 package com.artipie.http.servlet;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
@@ -88,7 +89,10 @@ public final class ServletSliceWrap {
             return this.target.response(
                 new RequestLine(RqMethod.valueOf(req.getMethod()), uri, req.getProtocol()),
                 ServletSliceWrap.headers(req),
-                new ReactiveInputStream(req.getInputStream()).read(Buffers.Standard.K8)
+                new Content.From(
+                    new ReactiveInputStream(req.getInputStream())
+                        .read(Buffers.Standard.K8)
+                )
             ).send(new ServletConnection(rsp));
         } catch (final IOException iex) {
             return ServletSliceWrap.failedStage("Servet IO error", iex);

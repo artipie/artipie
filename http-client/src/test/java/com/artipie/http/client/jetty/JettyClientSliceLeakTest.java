@@ -4,6 +4,7 @@
  */
 package com.artipie.http.client.jetty;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.client.HttpServer;
 import com.artipie.http.rq.RequestLine;
@@ -66,7 +67,7 @@ final class JettyClientSliceLeakTest {
             this.slice.response(
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ).send(
                 (status, headers, body) -> CompletableFuture.allOf()
             ).toCompletableFuture().get(1, TimeUnit.SECONDS);
@@ -80,7 +81,7 @@ final class JettyClientSliceLeakTest {
             final CompletionStage<Void> sent = this.slice.response(
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ).send(
                 (status, headers, body) -> {
                     final CompletableFuture<Void> future = new CompletableFuture<>();

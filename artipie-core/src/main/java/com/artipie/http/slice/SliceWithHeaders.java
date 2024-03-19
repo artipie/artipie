@@ -4,14 +4,12 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithHeaders;
-import java.nio.ByteBuffer;
-
-import org.reactivestreams.Publisher;
 
 /**
  * Decorator for {@link Slice} which adds headers to the origin.
@@ -39,7 +37,7 @@ public final class SliceWithHeaders implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers hdrs, Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers hdrs, Content body) {
         return new RsWithHeaders(
             this.origin.response(line, hdrs, body),
             this.headers

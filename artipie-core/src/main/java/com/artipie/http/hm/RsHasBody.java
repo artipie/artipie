@@ -5,6 +5,7 @@
 
 package com.artipie.http.hm;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -21,7 +22,6 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsEqual;
-import org.reactivestreams.Publisher;
 
 /**
  * Matcher to verify response body.
@@ -116,7 +116,7 @@ public final class RsHasBody extends TypeSafeMatcher<Response> {
         public CompletionStage<Void> accept(
             final RsStatus status,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             return CompletableFuture.supplyAsync(
                 () -> {

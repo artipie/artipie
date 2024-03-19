@@ -4,24 +4,22 @@
  */
 package com.artipie.http.group;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.rs.RsStatus;
-import java.nio.ByteBuffer;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 /**
  * Response result.
  * <p>
  * The result of {@link GroupResponse}, it's waiting in order for all previous responses
  * to be completed, and may be replied to connection or cancelled.
- * </p>
- * @since 0.11
  */
 final class GroupResult {
 
@@ -63,7 +61,7 @@ final class GroupResult {
     /**
      * Body publisher.
      */
-    private final Publisher<ByteBuffer> body;
+    private final Content body;
 
     /**
      * Completed flag.
@@ -76,8 +74,7 @@ final class GroupResult {
      * @param headers Response headers
      * @param body Body publisher
      */
-    GroupResult(final RsStatus status, final Headers headers,
-        final Publisher<ByteBuffer> body) {
+    GroupResult(RsStatus status, Headers headers, Content body) {
         this.status = status;
         this.headers = headers;
         this.body = body;

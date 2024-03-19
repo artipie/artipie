@@ -27,7 +27,7 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ArtifactEvent;
-import java.nio.ByteBuffer;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +36,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.reactivestreams.Publisher;
 
 /**
  * Debian update slice adds uploaded slice to the storage and updates Packages index.
@@ -79,7 +78,7 @@ public final class UpdateSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         return new AsyncResponse(
             this.asto.save(key, new Content.From(body))

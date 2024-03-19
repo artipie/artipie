@@ -22,9 +22,7 @@ import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.Publish;
 import com.artipie.scheduling.ArtifactEvent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
@@ -79,7 +77,7 @@ public final class UploadSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         final String pkg = new PackageNameFromUrl(line).value();
         final Key uploaded = new Key.From(
             String.format(

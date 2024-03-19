@@ -4,14 +4,13 @@
  */
 package com.artipie.http.client;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import org.reactivestreams.Publisher;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 
 /**
  * Slice that forwards all requests to origin slice prepending path with specified prefix.
@@ -45,7 +44,7 @@ public final class PathPrefixSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final URI original = line.uri();
         final String uri;

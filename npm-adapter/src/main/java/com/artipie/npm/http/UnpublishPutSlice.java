@@ -19,12 +19,10 @@ import com.artipie.npm.misc.DateTimeNowStr;
 import com.artipie.npm.misc.DescSortedVersions;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.common.collect.Sets;
-import org.reactivestreams.Publisher;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonPatchBuilder;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Queue;
@@ -77,7 +75,7 @@ final class UnpublishPutSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> publisher
+        final Content publisher
     ) {
         final String pkg = new PackageNameFromUrl(
             RequestLine.from(line.toString().replaceFirst("/-rev/[^\\s]+", ""))

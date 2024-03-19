@@ -108,7 +108,7 @@ public final class PutMetadataChecksumSlice implements Slice {
 
     @Override
     public Response response(RequestLine line, Headers headers,
-                             Publisher<ByteBuffer> body) {
+                             Content body) {
         final Matcher matcher = PutMetadataChecksumSlice.PTN.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final String alg = matcher.group("alg");

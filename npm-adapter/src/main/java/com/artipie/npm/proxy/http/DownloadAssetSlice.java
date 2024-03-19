@@ -19,9 +19,7 @@ import com.artipie.npm.misc.DateTimeNowStr;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Queue;
 
@@ -68,7 +66,7 @@ public final class DownloadAssetSlice implements Slice {
     @Override
     public Response response(final RequestLine line,
         final Headers rqheaders,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         final String tgz = this.path.value(line.uri().getPath());
         return new AsyncResponse(
             this.npm.getAsset(tgz).map(

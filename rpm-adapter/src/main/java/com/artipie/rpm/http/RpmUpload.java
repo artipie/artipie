@@ -20,9 +20,7 @@ import com.artipie.rpm.asto.AstoRepoAdd;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -78,7 +76,7 @@ public final class RpmUpload implements Slice {
     @Override
     public Response response(
         final RequestLine line, final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         final Request request = new Request(line);
         final Key key = request.file();
         final CompletionStage<Boolean> conflict;

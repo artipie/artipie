@@ -16,7 +16,7 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
+
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,7 +27,6 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
 
 /**
  * Tests to check JfrSlice.
@@ -142,7 +141,7 @@ public class JfrSliceTest {
         public Response response(
             final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body) {
+            final Content body) {
             Flowable.fromPublisher(body).blockingSubscribe();
             return this.res;
         }

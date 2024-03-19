@@ -4,6 +4,7 @@
  */
 package com.artipie.nuget.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -22,10 +23,8 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
-import org.reactivestreams.Publisher;
 
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Queue;
@@ -93,7 +92,7 @@ public final class NuGet implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final Response response;
         final String path = line.uri().getPath();

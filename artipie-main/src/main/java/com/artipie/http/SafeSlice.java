@@ -4,15 +4,15 @@
  */
 package com.artipie.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.jcabi.log.Logger;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice which handles all exceptions and respond with 500 error in that case.
@@ -36,7 +36,7 @@ final class SafeSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         try {
             return new RsSafe(this.origin.response(line, headers, body));
         } catch (final Exception err) {

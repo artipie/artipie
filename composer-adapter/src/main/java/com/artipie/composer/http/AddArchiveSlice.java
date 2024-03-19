@@ -16,9 +16,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.scheduling.ArtifactEvent;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -84,11 +82,7 @@ final class AddArchiveSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Publisher<ByteBuffer> body
-    ) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         final String uri = line.uri().getPath();
         final Matcher matcher = AddArchiveSlice.PATH.matcher(uri);
         final Response resp;

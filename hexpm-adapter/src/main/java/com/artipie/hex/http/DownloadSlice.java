@@ -5,6 +5,7 @@
 
 package com.artipie.hex.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
@@ -16,10 +17,9 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.StandardRs;
-import java.nio.ByteBuffer;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * This slice returns content as bytes by Key from request path.
@@ -66,7 +66,7 @@ public final class DownloadSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final Key.From key = new Key.From(
             line.uri().getPath().replaceFirst("/", "")

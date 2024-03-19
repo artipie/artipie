@@ -4,6 +4,7 @@
  */
 package com.artipie.gem.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.gem.Gem;
 import com.artipie.http.Headers;
@@ -14,12 +15,10 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.RsWithBody;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-
-import org.reactivestreams.Publisher;
 
 /**
  * Dependency API slice implementation.
@@ -42,7 +41,7 @@ final class DepsGemSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         return new AsyncResponse(
             new Gem(this.repo).dependencies(
                 Collections.unmodifiableSet(

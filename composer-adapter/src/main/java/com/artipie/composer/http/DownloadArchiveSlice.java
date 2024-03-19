@@ -4,6 +4,7 @@
  */
 package com.artipie.composer.http;
 
+import com.artipie.asto.Content;
 import com.artipie.composer.Repository;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -14,9 +15,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.KeyFromPath;
-import java.nio.ByteBuffer;
-
-import org.reactivestreams.Publisher;
 
 /**
  * Slice for uploading archive by key from storage.
@@ -40,7 +38,7 @@ final class DownloadArchiveSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final String path = line.uri().getPath();
         return new AsyncResponse(

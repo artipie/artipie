@@ -4,16 +4,12 @@
  */
 package com.artipie.http.hm;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -24,10 +20,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.llorllale.cactoos.matchers.Matches;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Tests for {@link RsHasBody}.
- *
- * @since 0.4
  */
 final class RsHasBodyTest {
 
@@ -36,10 +36,12 @@ final class RsHasBodyTest {
         final Response response = connection -> connection.accept(
             RsStatus.OK,
             Headers.EMPTY,
-            Flowable.fromArray(
-                ByteBuffer.wrap("he".getBytes()),
-                ByteBuffer.wrap("ll".getBytes()),
-                ByteBuffer.wrap("o".getBytes())
+            new Content.From(
+                Flowable.fromArray(
+                    ByteBuffer.wrap("he".getBytes()),
+                    ByteBuffer.wrap("ll".getBytes()),
+                    ByteBuffer.wrap("o".getBytes())
+                )
             )
         );
         MatcherAssert.assertThat(
@@ -54,7 +56,7 @@ final class RsHasBodyTest {
         final Response response = connection -> connection.accept(
             RsStatus.OK,
             Headers.EMPTY,
-            Flowable.fromArray(ByteBuffer.wrap("1".getBytes()))
+            new Content.From(Flowable.fromArray(ByteBuffer.wrap("1".getBytes())))
         );
         MatcherAssert.assertThat(
             "Matcher is expected not to match response with not equal body",

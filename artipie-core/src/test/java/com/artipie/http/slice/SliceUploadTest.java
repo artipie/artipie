@@ -4,6 +4,7 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
@@ -43,7 +44,9 @@ public final class SliceUploadTest {
                 Headers.from(
                     new MapEntry<>("Content-Size", Long.toString(data.length))
                 ),
-                Flowable.just(ByteBuffer.wrap(data))
+                new Content.From(
+                    Flowable.just(ByteBuffer.wrap(data))
+                )
             ),
             new RsHasStatus(RsStatus.CREATED)
         );
@@ -69,7 +72,7 @@ public final class SliceUploadTest {
                 .response(
                     new RequestLine("PUT", "uploads/file.txt", "HTTP/1.1"),
                     Headers.from("Content-Size", Long.toString(data.length)),
-                    Flowable.just(ByteBuffer.wrap(data))
+                    new Content.From(Flowable.just(ByteBuffer.wrap(data)))
                 ),
             new RsHasStatus(RsStatus.CREATED)
         );

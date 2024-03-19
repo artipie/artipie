@@ -4,17 +4,14 @@
  */
 package com.artipie.nuget.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
-import org.reactivestreams.Publisher;
 
 /**
  * Absent resource, sends HTTP 404 Not Found response to every request.
- *
- * @since 0.1
  */
 public final class Absent implements Resource {
 
@@ -24,9 +21,7 @@ public final class Absent implements Resource {
     }
 
     @Override
-    public Response put(
-        final Headers headers,
-        final Publisher<ByteBuffer> body) {
+    public Response put(Headers headers, Content body) {
         return new RsWithStatus(RsStatus.NOT_FOUND);
     }
 }

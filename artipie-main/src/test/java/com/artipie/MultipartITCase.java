@@ -23,7 +23,7 @@ import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.vertx.reactivex.core.Vertx;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,7 +41,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.reactivestreams.Publisher;
 
 /**
  * Integration tests for multipart feature.
@@ -253,7 +252,7 @@ final class MultipartITCase {
         @SuppressWarnings("PMD.OnlyOneReturn")
         public Response response(final RequestLine line,
             final Headers headers,
-            final Publisher<ByteBuffer> body) {
+            final Content body) {
             if (this.target == null) {
                 return new RsWithBody(
                     new RsWithStatus(RsStatus.UNAVAILABLE),

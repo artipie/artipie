@@ -152,7 +152,9 @@ public final class Http3Server {
                                             .map(field -> new Header(field.getName(), field.getValue()))
                                             .toList()
                                     ),
-                                    Flowable.fromArray(buffers.toArray(ByteBuffer[]::new))
+                                    new Content.From(
+                                        Flowable.fromArray(buffers.toArray(ByteBuffer[]::new))
+                                    )
                                 ).send(new Http3Connection(stream));
                             }
                         }

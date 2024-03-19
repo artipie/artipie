@@ -4,6 +4,7 @@
  */
 package com.artipie.adapters.docker;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.SubStorage;
 import com.artipie.docker.Docker;
 import com.artipie.docker.asto.AstoDocker;
@@ -27,9 +28,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.repo.RepoConfig;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
@@ -66,7 +65,7 @@ public final class DockerProxy implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         return this.delegate.response(line, headers, body);
     }

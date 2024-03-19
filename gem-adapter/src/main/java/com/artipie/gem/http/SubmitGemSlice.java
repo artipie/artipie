@@ -4,6 +4,7 @@
  */
 package com.artipie.gem.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
@@ -19,14 +20,13 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.ContentWithSize;
 import com.artipie.scheduling.ArtifactEvent;
-import java.nio.ByteBuffer;
+
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.apache.commons.lang3.tuple.Pair;
-import org.reactivestreams.Publisher;
 
 /**
  * A slice, which servers gem packages.
@@ -75,7 +75,7 @@ final class SubmitGemSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         final Key key = new Key.From(
             "gems", UUID.randomUUID().toString().replace("-", "").concat(".gem")
         );

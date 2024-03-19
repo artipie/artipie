@@ -10,16 +10,13 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.StandardRs;
-import java.nio.ByteBuffer;
+
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Response with body. Adds no headers as opposite to {@link com.artipie.http.rs.RsWithBody}.
  * Used because `nuget` command line utility for Linux
  * fails to read JSON responses when `Content-Length` header presents.
- *
- * @since 0.3
  */
 public final class RsWithBodyNoHeaders implements Response {
 
@@ -70,8 +67,6 @@ public final class RsWithBodyNoHeaders implements Response {
 
     /**
      * Connection with body publisher.
-     *
-     * @since 0.3
      */
     private static final class ConWithBody implements Connection {
 
@@ -83,15 +78,13 @@ public final class RsWithBodyNoHeaders implements Response {
         /**
          * Body publisher.
          */
-        private final Publisher<ByteBuffer> body;
+        private final Content body;
 
         /**
-         * Ctor.
-         *
          * @param origin Connection
          * @param body Publisher
          */
-        ConWithBody(final Connection origin, final Publisher<ByteBuffer> body) {
+        ConWithBody(Connection origin, Content body) {
             this.origin = origin;
             this.body = body;
         }
@@ -100,7 +93,7 @@ public final class RsWithBodyNoHeaders implements Response {
         public CompletionStage<Void> accept(
             final RsStatus status,
             final Headers headers,
-            final Publisher<ByteBuffer> none) {
+            final Content none) {
             return this.origin.accept(status, headers, this.body);
         }
     }

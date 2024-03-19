@@ -4,6 +4,7 @@
  */
 package com.artipie.vertx;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.rs.RsStatus;
@@ -14,7 +15,6 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Vertx connection accepts Artipie response and send it to {@link HttpServerResponse}.
@@ -39,7 +39,7 @@ final class VertxConnection implements Connection {
     public CompletionStage<Void> accept(
         final RsStatus status,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final int code = Integer.parseInt(status.code());
         this.rsp.setStatusCode(code);

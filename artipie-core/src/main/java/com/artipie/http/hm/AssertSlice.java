@@ -4,6 +4,7 @@
  */
 package com.artipie.http.hm;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -77,7 +78,7 @@ public final class AssertSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine lne, Headers headers, Publisher<ByteBuffer> publ) {
+    public Response response(RequestLine lne, Headers headers, Content publ) {
         MatcherAssert.assertThat(
             "Wrong request line", lne, this.line
         );

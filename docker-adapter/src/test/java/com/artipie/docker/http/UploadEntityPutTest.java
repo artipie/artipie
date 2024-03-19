@@ -20,30 +20,21 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 /**
  * Tests for {@link DockerSlice}.
  * Upload PUT endpoint.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UploadEntityPutTest {
 
-    /**
-     * Docker registry used in tests.
-     */
     private Docker docker;
 
-    /**
-     * Slice being tested.
-     */
     private DockerSlice slice;
 
     @BeforeEach
@@ -69,7 +60,7 @@ class UploadEntityPutTest {
         final Response response = this.slice.response(
             UploadEntityPutTest.requestLine(name, upload.uuid(), digest),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             "Returns 201 status and corresponding headers",
@@ -119,7 +110,7 @@ class UploadEntityPutTest {
         final Response response = this.slice.response(
             new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,

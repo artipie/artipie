@@ -4,14 +4,14 @@
  */
 package com.artipie.vertx;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.rs.RsStatus;
 import io.vertx.reactivex.core.http.HttpServerResponse;
-import java.nio.ByteBuffer;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Connection which supports {@code 100 Continue} status code responses.
@@ -44,7 +44,7 @@ final class ContinueConnection implements Connection {
 
     @Override
     public CompletionStage<Void> accept(final RsStatus status, final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         final CompletionStage<Void> res;
         if (status == RsStatus.CONTINUE) {
             this.response.writeContinue();

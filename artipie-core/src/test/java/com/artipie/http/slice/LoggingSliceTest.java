@@ -4,13 +4,13 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import io.reactivex.Flowable;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -42,7 +42,7 @@ class LoggingSliceTest {
                 new MapEntry<>("Content-Length", "0"),
                 new MapEntry<>("Content-Type", "whatever")
             ),
-            Flowable.empty()
+            Content.EMPTY
         ).send(
             (status, headers, body) -> CompletableFuture.allOf()
         ).toCompletableFuture().join();
@@ -103,7 +103,7 @@ class LoggingSliceTest {
         return new LoggingSlice(Level.INFO, slice).response(
             RequestLine.from("GET /hello/ HTTP/1.1"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         ).send((status, headers, body) -> CompletableFuture.allOf());
     }
 }

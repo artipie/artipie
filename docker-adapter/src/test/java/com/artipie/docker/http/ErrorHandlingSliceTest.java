@@ -62,13 +62,13 @@ class ErrorHandlingSliceTest {
                 );
                 MatcherAssert.assertThat(
                     "Body unmodified",
-                    new Content.From(rqbody).asBytes(),
+                    rqbody.asBytes(),
                     new IsEqual<>(body)
                 );
                 return StandardRs.OK;
             }
         ).response(
-            line, Headers.from(header), Flowable.just(ByteBuffer.wrap(body))
+            line, Headers.from(header), new Content.From(body)
         ).send(
             (status, rsheaders, rsbody) -> CompletableFuture.allOf()
         ).toCompletableFuture().join();
@@ -86,7 +86,7 @@ class ErrorHandlingSliceTest {
                 Flowable.just(ByteBuffer.wrap(body))
             ),
             Authenticator.ANONYMOUS
-        ).response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Flowable.empty());
+        ).response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY);
         MatcherAssert.assertThat(
             response,
             new ResponseMatcher(status, body, header)
@@ -103,8 +103,7 @@ class ErrorHandlingSliceTest {
                 (line, headers, body) -> connection -> new FailedCompletionStage<>(exception)
             ).response(
                 new RequestLine(RqMethod.GET, "/"),
-                Headers.EMPTY,
-                Flowable.empty()
+                Headers.EMPTY, Content.EMPTY
             ),
             new IsErrorsResponse(status, code)
         );

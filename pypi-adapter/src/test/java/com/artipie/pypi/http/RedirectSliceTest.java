@@ -4,13 +4,13 @@
  */
 package com.artipie.pypi.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.hm.IsHeader;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +25,7 @@ class RedirectSliceTest {
             new RedirectSlice().response(
                 new RequestLine(RqMethod.GET, "/one/two/three_four"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.MOVED_PERMANENTLY,
@@ -40,7 +40,7 @@ class RedirectSliceTest {
             new RedirectSlice().response(
                 new RequestLine(RqMethod.GET, "/one/two/three_four/"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.MOVED_PERMANENTLY,
@@ -55,7 +55,7 @@ class RedirectSliceTest {
             new RedirectSlice().response(
                 new RequestLine(RqMethod.GET, "/three/F.O.U.R"),
                 Headers.from("X-FullPath", "/one/two/three/F.O.U.R"),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.MOVED_PERMANENTLY,
@@ -70,7 +70,7 @@ class RedirectSliceTest {
             new RedirectSlice().response(
                 new RequestLine(RqMethod.GET, "/three/One_Two"),
                 Headers.from("X-FullPath", "/One_Two/three/One_Two"),
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.MOVED_PERMANENTLY,

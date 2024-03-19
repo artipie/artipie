@@ -16,9 +16,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.rs.common.RsJson;
 import com.artipie.npm.PackageNameFromUrl;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -44,7 +42,7 @@ public final class GetDistTagsSlice implements Slice {
     @Override
     public Response response(final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         final String pkg = new PackageNameFromUrl(
             line.toString().replace("/dist-tags", "").replace("/-/package", "")
         ).value();

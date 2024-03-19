@@ -4,13 +4,11 @@
  */
 package com.artipie.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 
@@ -35,16 +33,13 @@ public final class ContinueSlice implements Slice {
 
     @Override
     public Response response(RequestLine line, Headers headers,
-                             Publisher<ByteBuffer> body) {
-        final Response rsp;
+                             Content body) {
         if (expectsContinue(headers)) {
-            rsp = new ContinueResponse(
+            return new ContinueResponse(
                 new LazyResponse(() -> this.origin.response(line, headers, body))
             );
-        } else {
-            rsp = this.origin.response(line, headers, body);
         }
-        return rsp;
+        return this.origin.response(line, headers, body);
     }
 
     /**
@@ -60,7 +55,6 @@ public final class ContinueSlice implements Slice {
 
     /**
      * Response sends continue before origin response.
-     * @since 0.19
      */
     private static final class ContinueResponse implements Response {
 
@@ -79,14 +73,13 @@ public final class ContinueSlice implements Slice {
 
         @Override
         public CompletionStage<Void> send(final Connection connection) {
-            return connection.accept(RsStatus.CONTINUE, Headers.EMPTY, Flowable.empty())
+            return connection.accept(RsStatus.CONTINUE, Headers.EMPTY, Content.EMPTY)
                 .thenCompose(none -> this.origin.send(connection));
         }
     }
 
     /**
      * Lazy response loaded on demand.
-     * @since 0.19
      */
     private static final class LazyResponse implements Response {
 

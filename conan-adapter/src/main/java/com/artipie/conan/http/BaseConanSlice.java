@@ -4,6 +4,7 @@
  */
 package  com.artipie.conan.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
@@ -19,11 +20,9 @@ import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.StandardRs;
 import io.vavr.Tuple2;
-import org.reactivestreams.Publisher;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -74,7 +73,7 @@ abstract class BaseConanSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body
+        final Content body
     ) {
         final String hostname = new RqHeaders.Single(headers, "Host").asString();
         final Matcher matcher = this.pathwrap.getPattern().matcher(line.uri().getPath());

@@ -4,6 +4,7 @@
  */
 package com.artipie.nuget.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
@@ -14,13 +15,10 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Collections;
 
 /**
@@ -40,19 +38,19 @@ public class SliceFromResourceTest {
                     return new RsFull(
                         status,
                         headers,
-                        Flowable.just(ByteBuffer.wrap(body))
+                        new Content.From(body)
                     );
                 }
 
                 @Override
-                public Response put(final Headers headers, final Publisher<ByteBuffer> body) {
+                public Response put(Headers headers, Content body) {
                     throw new UnsupportedOperationException();
                 }
             }
         ).response(
             new RequestLine(RqMethod.GET, "/some/path"),
             Headers.from(Collections.singleton(header)),
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,
@@ -72,19 +70,19 @@ public class SliceFromResourceTest {
         final Response response = new SliceFromResource(
             new Resource() {
                 @Override
-                public Response get(final Headers headers) {
+                public Response get(Headers headers) {
                     throw new UnsupportedOperationException();
                 }
 
                 @Override
-                public Response put(final Headers headers, final Publisher<ByteBuffer> body) {
+                public Response put(Headers headers, Content body) {
                     return new RsFull(status, headers, body);
                 }
             }
         ).response(
             new RequestLine(RqMethod.PUT, "/some/other/path"),
             Headers.from(Collections.singleton(header)),
-            Flowable.just(ByteBuffer.wrap(content))
+            new Content.From(content)
         );
         MatcherAssert.assertThat(
             response,

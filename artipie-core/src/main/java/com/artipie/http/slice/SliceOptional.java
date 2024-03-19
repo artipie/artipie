@@ -4,15 +4,14 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -67,7 +66,7 @@ public final class SliceOptional<T> implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers head,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         final T target = this.source.get();
         if (this.predicate.test(target)) {
             return this.slice.apply(target).response(line, head, body);

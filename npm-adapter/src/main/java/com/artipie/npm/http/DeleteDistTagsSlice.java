@@ -15,10 +15,8 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
-import org.reactivestreams.Publisher;
 
 import javax.json.Json;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
@@ -50,7 +48,7 @@ public final class DeleteDistTagsSlice implements Slice {
     public Response response(
         final RequestLine line,
         final Headers iterable,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         final Matcher matcher = AddDistTagsSlice.PTRN.matcher(line.uri().getPath());
         final Response resp;
         if (matcher.matches()) {

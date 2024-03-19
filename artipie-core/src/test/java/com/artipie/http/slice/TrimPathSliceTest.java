@@ -4,6 +4,7 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.AssertSlice;
@@ -12,7 +13,6 @@ import com.artipie.http.hm.RqLineHasUri;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.StandardRs;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -48,7 +48,7 @@ final class TrimPathSliceTest {
         new TrimPathSlice((line, headers, body) -> StandardRs.EMPTY, "none").response(
             requestLine("http://www.w3.org"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         ).send(
             (status, headers, body) -> {
                 MatcherAssert.assertThat(
@@ -134,7 +134,7 @@ final class TrimPathSliceTest {
     }
 
     private static void verify(final Slice slice, final RequestLine line) throws Exception {
-        slice.response(line, Headers.EMPTY, Flowable.empty())
+        slice.response(line, Headers.EMPTY, Content.EMPTY)
             .send((status, headers, body) -> CompletableFuture.completedFuture(null))
             .toCompletableFuture()
             .get();

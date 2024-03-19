@@ -4,6 +4,7 @@
  */
 package com.artipie.conda.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -12,10 +13,9 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.common.RsJson;
 import com.artipie.http.slice.KeyFromPath;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
 import javax.json.Json;
-import org.reactivestreams.Publisher;
 
 /**
  * Package slice returns info about package, serves on `GET /package/{owner_login}/{package_name}`.
@@ -29,7 +29,7 @@ public final class GetPackageSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         return new RsJson(
             RsStatus.NOT_FOUND,
             () -> Json.createObjectBuilder().add(

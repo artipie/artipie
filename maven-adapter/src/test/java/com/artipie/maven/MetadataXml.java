@@ -15,7 +15,6 @@ import org.cactoos.list.ListOf;
 
 /**
  * Maven artifact metadata xml.
- * @since 0.5
  */
 public final class MetadataXml {
 
@@ -77,7 +76,6 @@ public final class MetadataXml {
 
     /**
      * Maven metadata tags with versions: latest, release, versions list.
-     * @since 0.5
      */
     public static final class VersionTags {
 

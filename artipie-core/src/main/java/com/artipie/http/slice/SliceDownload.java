@@ -4,6 +4,7 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
@@ -16,9 +17,7 @@ import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -63,7 +62,7 @@ public final class SliceDownload implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         final Key key = this.transform.apply(line.uri().getPath());
         return new AsyncResponse(
             this.storage.exists(key)

@@ -45,8 +45,7 @@ public final class DockerAuthSliceTest {
                 )
             ).response(
                 new RequestLine(RqMethod.GET, "/"),
-                Headers.EMPTY,
-                Flowable.empty()
+                Headers.EMPTY, Content.EMPTY
             ),
             new AllOf<>(
                 Arrays.asList(
@@ -104,8 +103,7 @@ public final class DockerAuthSliceTest {
                 )
             ).response(
                 new RequestLine(RqMethod.GET, "/some/path"),
-                Headers.EMPTY,
-                Flowable.empty()
+                Headers.EMPTY, Content.EMPTY
             ),
             new ResponseMatcher(
                 status, Collections.singleton(new Header("Content-Type", "text/plain")), body

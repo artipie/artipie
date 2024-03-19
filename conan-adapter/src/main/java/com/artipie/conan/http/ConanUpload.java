@@ -150,7 +150,7 @@ public final class ConanUpload {
 
         @Override
         public Response response(final RequestLine line,
-                                 final Headers headers, final Publisher<ByteBuffer> body) {
+                                 final Headers headers, final Content body) {
             final Matcher matcher = matchRequest(line);
             final String path = matcher.group(ConanUpload.URI_PATH);
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
@@ -243,7 +243,7 @@ public final class ConanUpload {
 
         @Override
         public Response response(final RequestLine line,
-                                 final Headers headers, final Publisher<ByteBuffer> body) {
+                                 final Headers headers, final Content body) {
             final String path = line.uri().getPath();
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
             final Optional<String> token = new RqParams(

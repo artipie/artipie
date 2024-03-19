@@ -17,9 +17,7 @@ import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.json.ClientContent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import org.apache.commons.lang3.StringUtils;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.stream.StreamSupport;
 
 /**
@@ -49,7 +47,7 @@ public final class DownloadPackageSlice implements Slice {
     @Override
     public Response response(final RequestLine line,
         final Headers headers,
-        final Publisher<ByteBuffer> body) {
+        final Content body) {
         return new AsyncResponse(
             this.npm.getPackage(this.path.value(line.uri().getPath()))
                 .map(

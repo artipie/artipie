@@ -13,7 +13,6 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +46,7 @@ class SliceListingTest {
     void responseTextType(final String path, final String body) {
         MatcherAssert.assertThat(
             new SliceListing(this.storage, "text/plain", ListingFormat.Standard.TEXT)
-                .response(rqLineFrom(path), Headers.EMPTY, Flowable.empty()),
+                .response(new RequestLine("GET", path), Headers.EMPTY, Content.EMPTY),
             new ResponseMatcher(
                 RsStatus.OK,
                 Arrays.asList(
@@ -69,7 +68,7 @@ class SliceListingTest {
         ).build().toString();
         MatcherAssert.assertThat(
             new SliceListing(this.storage, "application/json", ListingFormat.Standard.JSON)
-                .response(rqLineFrom("one/"), Headers.EMPTY, Flowable.empty()),
+                .response(new RequestLine("GET", "one/"), Headers.EMPTY, Content.EMPTY),
             new ResponseMatcher(
                 RsStatus.OK,
                 Arrays.asList(
@@ -98,7 +97,7 @@ class SliceListingTest {
         );
         MatcherAssert.assertThat(
             new SliceListing(this.storage, "text/html", ListingFormat.Standard.HTML)
-                .response(rqLineFrom("/one"), Headers.EMPTY, Flowable.empty()),
+                .response(new RequestLine("GET", "/one"), Headers.EMPTY, Content.EMPTY),
             new ResponseMatcher(
                 RsStatus.OK,
                 Arrays.asList(
@@ -111,9 +110,5 @@ class SliceListingTest {
                 body.getBytes(StandardCharsets.UTF_8)
             )
         );
-    }
-
-    private static RequestLine rqLineFrom(final String path) {
-        return new RequestLine("GET", path, "HTTP/1.1");
     }
 }

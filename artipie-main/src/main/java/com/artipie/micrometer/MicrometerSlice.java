@@ -4,6 +4,7 @@
  */
 package com.artipie.micrometer;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -15,13 +16,12 @@ import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import io.vertx.micrometer.backends.BackendRegistries;
-import java.nio.ByteBuffer;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import org.reactivestreams.Publisher;
 
 /**
  * Calculated uploaded and downloaded body size for all requests.
@@ -73,7 +73,7 @@ public final class MicrometerSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers head,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         final String method = line.method().value();
         final Counter.Builder cnt = Counter.builder("artipie.request.counter")
             .description("HTTP requests counter")
@@ -221,7 +221,7 @@ public final class MicrometerSlice implements Slice {
 
             @Override
             public CompletionStage<Void> accept(final RsStatus status, final Headers headers,
-                final Publisher<ByteBuffer> body) {
+                final Content body) {
                 this.counter.tag(MicrometerSlice.STATUS, status.name())
                     .register(MicrometerSlice.this.registry).increment();
                 final Timer.Sample timer = Timer.start(MicrometerSlice.this.registry);

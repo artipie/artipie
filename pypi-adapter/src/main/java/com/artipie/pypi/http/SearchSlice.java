@@ -49,7 +49,7 @@ public final class SearchSlice implements Slice {
 
     @Override
     public Response response(final RequestLine line, final Headers headers,
-                             final Publisher<ByteBuffer> body) {
+                             final Content body) {
         return new AsyncResponse(
             new NameFromXml(body).get().thenCompose(
                 name -> {

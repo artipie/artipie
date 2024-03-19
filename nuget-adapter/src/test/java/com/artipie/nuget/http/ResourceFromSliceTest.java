@@ -4,6 +4,7 @@
  */
 package com.artipie.nuget.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
@@ -67,7 +68,7 @@ final class ResourceFromSliceTest {
             )
         ).put(
             Headers.from(Collections.singleton(header)),
-            Flowable.just(ByteBuffer.wrap(content.getBytes()))
+            new Content.From(content.getBytes())
         );
         MatcherAssert.assertThat(
             response,
