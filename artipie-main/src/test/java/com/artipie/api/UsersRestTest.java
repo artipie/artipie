@@ -271,7 +271,7 @@ final class UsersRestTest extends RestApiServerBase {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: abc123",
-                "email: any@example.com",
+                "email: \"any@example.com\"",
                 "roles:",
                 "  - reader"
             ).getBytes(StandardCharsets.UTF_8)
@@ -337,7 +337,7 @@ final class UsersRestTest extends RestApiServerBase {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: abc123",
-                "email: any@example.com",
+                "email: \"any@example.com\"",
                 "enabled: false",
                 "roles:",
                 "  - reader"
@@ -387,7 +387,7 @@ final class UsersRestTest extends RestApiServerBase {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: abc123",
-                "email: any@example.com"
+                "email: \"any@example.com\""
             ).getBytes(StandardCharsets.UTF_8)
         );
         this.requestAndAssert(

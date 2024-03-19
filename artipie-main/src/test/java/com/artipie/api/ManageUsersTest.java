@@ -23,9 +23,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link ManageUsers}.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ManageUsersTest {
 
     /**
@@ -66,7 +64,7 @@ class ManageUsersTest {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: qwerty",
-                "email: bob@example.com",
+                "email: \"bob@example.com\"",
                 "roles:",
                 "  - admin"
             ).getBytes(StandardCharsets.UTF_8)
@@ -127,7 +125,7 @@ class ManageUsersTest {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: 025",
-                "email: abc@example.com",
+                "email: \"abc@example.com\"",
                 "roles:",
                 "  - java-dev"
             ).getBytes(StandardCharsets.UTF_8)
@@ -189,7 +187,7 @@ class ManageUsersTest {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: bdhdb",
-                "email: john@example.com",
+                "email: \"john@example.com\"",
                 "roles:",
                 "  - java-dev",
                 "permissions:",
@@ -256,7 +254,7 @@ class ManageUsersTest {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: bdhdb",
-                "email: john@example.com"
+                "email: \"john@example.com\""
             ).getBytes(StandardCharsets.UTF_8)
         );
         this.users.disable("John");
