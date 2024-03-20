@@ -6,7 +6,6 @@ package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.http.Headers;
-import com.artipie.http.rq.RequestLineFrom;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.IsNot;
@@ -15,10 +14,8 @@ import org.llorllale.cactoos.matchers.IsTrue;
 
 /**
  * Test for {@link RegexpFilter}.
- *
- * @since 1.2
  */
-@SuppressWarnings({"PMD.UseLocaleWithCaseConversions", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings("PMD.UseLocaleWithCaseConversions")
 class RegexpFilterTest {
     /**
      * Request path.
@@ -50,7 +47,7 @@ class RegexpFilterTest {
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(FiltersTestUtil.get(RegexpFilterTest.PATH)),
+                FiltersTestUtil.get(RegexpFilterTest.PATH),
                 Headers.EMPTY
             ),
             new IsTrue()
@@ -69,7 +66,7 @@ class RegexpFilterTest {
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(FiltersTestUtil.get(RegexpFilterTest.PATH)),
+                FiltersTestUtil.get(RegexpFilterTest.PATH),
                 Headers.EMPTY
             ),
             new IsTrue()
@@ -88,16 +85,14 @@ class RegexpFilterTest {
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(FiltersTestUtil.get(RegexpFilterTest.PATH)),
+                FiltersTestUtil.get(RegexpFilterTest.PATH),
                 Headers.EMPTY
             ),
             new IsTrue()
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(
-                    FiltersTestUtil.get(RegexpFilterTest.PATH.replace(".pom", ".zip"))
-                ),
+                FiltersTestUtil.get(RegexpFilterTest.PATH.replace(".pom", ".zip")),
                 Headers.EMPTY
             ),
             IsNot.not(new IsTrue())
@@ -120,16 +115,14 @@ class RegexpFilterTest {
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(FiltersTestUtil.get(RegexpFilterTest.PATH).toUpperCase()),
+                FiltersTestUtil.get(RegexpFilterTest.PATH),
                 Headers.EMPTY
             ),
             new IsTrue()
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(
-                    FiltersTestUtil.get(RegexpFilterTest.PATH.replace(".pom", ".zip").toUpperCase())
-                ),
+                FiltersTestUtil.get(RegexpFilterTest.PATH.replace(".pom", ".zip")),
                 Headers.EMPTY
             ),
             IsNot.not(new IsTrue())
@@ -152,10 +145,8 @@ class RegexpFilterTest {
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(
-                    FiltersTestUtil.get(
-                        String.format("%s?auth=true&user=Mike#dev", RegexpFilterTest.PATH)
-                    )
+                FiltersTestUtil.get(
+                    String.format("%s?auth=true&user=Mike#dev", RegexpFilterTest.PATH)
                 ),
                 Headers.EMPTY
             ),

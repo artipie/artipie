@@ -4,20 +4,20 @@
  */
 package com.artipie.conda.http;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.common.RsJson;
+
+import javax.json.Json;
 import java.io.StringReader;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.json.Json;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice to handle `POST /stage/{owner_login}/{package_name}/{version}/{basename}` and
@@ -28,7 +28,6 @@ import org.reactivestreams.Publisher;
  *  https://api.anaconda.org/docs#/ and github issue for any updates.
  *  https://github.com/Anaconda-Platform/anaconda-client/issues/580
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class PostStageCommitSlice implements Slice {
 
     /**
@@ -51,12 +50,12 @@ public final class PostStageCommitSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+        final RequestLine line,
+        final Headers headers,
+        final Content body) {
         final Response res;
         final Matcher matcher = PostStageCommitSlice.PKG.matcher(
-            new RequestLineFrom(line).uri().getPath()
+            line.uri().getPath()
         );
         if (matcher.matches()) {
             final String name = matcher.group(1);

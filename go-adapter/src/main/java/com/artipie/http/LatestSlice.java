@@ -4,10 +4,11 @@
  */
 package com.artipie.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
@@ -15,29 +16,21 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.KeyFromPath;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import org.reactivestreams.Publisher;
 
 /**
  * Go mod slice: this slice returns json-formatted metadata about go module as
  * described in "JSON-formatted metadata(.info file body) about the latest known version"
  * section of readme.
- * @since 0.3
  */
 public final class LatestSlice implements Slice {
 
-    /**
-     * Storage.
-     */
     private final Storage storage;
 
     /**
-     * Ctor.
      * @param storage Storage
      */
     public LatestSlice(final Storage storage) {
@@ -46,8 +39,8 @@ public final class LatestSlice implements Slice {
 
     @Override
     public Response response(
-        final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+        final RequestLine line, final Headers headers,
+        final Content body) {
         return new AsyncResponse(
             CompletableFuture.supplyAsync(
                 () -> LatestSlice.normalized(line)
@@ -62,8 +55,8 @@ public final class LatestSlice implements Slice {
      * @param line Received request line
      * @return A URI path with replaced latest.
      */
-    private static String normalized(final String line) {
-        final URI received = new RequestLineFrom(line).uri();
+    private static String normalized(final RequestLine line) {
+        final URI received = line.uri();
         String path = received.getPath();
         final String latest = "latest";
         if (path.endsWith(latest)) {

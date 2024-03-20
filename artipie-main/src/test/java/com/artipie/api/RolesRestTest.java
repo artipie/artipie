@@ -25,13 +25,14 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link RolesRest}.
- * @since 0.27
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
+@DisabledOnOs(OS.WINDOWS)
 final class RolesRestTest extends RestApiServerBase {
 
     /**

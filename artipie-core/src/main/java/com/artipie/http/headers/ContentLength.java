@@ -9,10 +9,8 @@ import com.artipie.http.rq.RqHeaders;
 
 /**
  * Content-Length header.
- *
- * @since 0.10
  */
-public final class ContentLength extends Header.Wrap {
+public final class ContentLength extends Header {
 
     /**
      * Header name.

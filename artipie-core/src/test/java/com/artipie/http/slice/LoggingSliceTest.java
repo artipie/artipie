@@ -4,26 +4,25 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import io.reactivex.Flowable;
-import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.logging.Level;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.logging.Level;
+
 /**
  * Tests for {@link LoggingSlice}.
- *
- * @since 0.8
  */
 class LoggingSliceTest {
 
@@ -38,12 +37,12 @@ class LoggingSliceTest {
                 )
             )
         ).response(
-            "GET /v2/ HTTP_1_1",
-            Arrays.asList(
+            RequestLine.from("GET /v2/ HTTP_1_1"),
+            Headers.from(
                 new MapEntry<>("Content-Length", "0"),
                 new MapEntry<>("Content-Type", "whatever")
             ),
-            Flowable.empty()
+            Content.EMPTY
         ).send(
             (status, headers, body) -> CompletableFuture.allOf()
         ).toCompletableFuture().join();
@@ -102,9 +101,9 @@ class LoggingSliceTest {
 
     private CompletionStage<Void> handle(final Slice slice) {
         return new LoggingSlice(Level.INFO, slice).response(
-            "GET /hello/ HTTP/1.1",
+            RequestLine.from("GET /hello/ HTTP/1.1"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         ).send((status, headers, body) -> CompletableFuture.allOf());
     }
 }

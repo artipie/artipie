@@ -12,15 +12,12 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import org.reactivestreams.Publisher;
 
 /**
  * This slice lists blobs contained in given path.
@@ -29,17 +26,9 @@ import org.reactivestreams.Publisher;
  * formatter.
  * It also converts URI path to storage {@link Key}
  * and use it to access storage.
- * </p>
- * @since 1.1.1
- * @todo #158:30min Implement HTML standard format.
- *  Currently we have standard enum implementations for simple text and json,
- *  we need implement enum item for HTML format.
  */
 public final class SliceListing implements Slice {
 
-    /**
-     * Storage.
-     */
     private final Storage storage;
 
     /**
@@ -50,7 +39,7 @@ public final class SliceListing implements Slice {
     /**
      * Mime type.
      */
-    private final String mtype;
+    private final String mime;
 
     /**
      * Collection of keys to string transformation.
@@ -61,15 +50,15 @@ public final class SliceListing implements Slice {
      * Slice by key from storage.
      *
      * @param storage Storage
-     * @param mtype Mime type
+     * @param mime Mime type
      * @param format Format of a key collection
      */
     public SliceListing(
         final Storage storage,
-        final String mtype,
+        final String mime,
         final ListingFormat format
     ) {
-        this(storage, KeyFromPath::new, mtype, format);
+        this(storage, KeyFromPath::new, mime, format);
     }
 
     /**
@@ -77,54 +66,46 @@ public final class SliceListing implements Slice {
      *
      * @param storage Storage
      * @param transform Transformation
-     * @param mtype Mime type
+     * @param mime Mime type
      * @param format Format of a key collection
      */
     public SliceListing(
         final Storage storage,
         final Function<String, Key> transform,
-        final String mtype,
+        final String mime,
         final ListingFormat format
     ) {
         this.storage = storage;
         this.transform = transform;
-        this.mtype = mtype;
+        this.mime = mime;
         this.format = format;
     }
 
     @Override
-    public Response response(final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
+        final Key key = this.transform.apply(line.uri().getPath());
         return new AsyncResponse(
-            CompletableFuture
-                .supplyAsync(new RequestLineFrom(line)::uri)
-                .thenCompose(
-                    uri -> {
-                        final Key key = this.transform.apply(uri.getPath());
-                        return this.storage.list(key)
-                            .thenApply(
-                                keys -> {
-                                    final String text = this.format.apply(keys);
-                                    return new RsFull(
-                                        RsStatus.OK,
-                                        new Headers.From(
-                                            new ContentType(
-                                                String.format(
-                                                    "%s; charset=%s",
-                                                    this.mtype,
-                                                    StandardCharsets.UTF_8
-                                                )
-                                            )
-                                        ),
-                                        new Content.From(
-                                            text.getBytes(
-                                                StandardCharsets.UTF_8
-                                            )
-                                        )
-                                    );
-                                }
-                            );
+            this.storage.list(key)
+                .thenApply(
+                    keys -> {
+                        final String text = this.format.apply(keys);
+                        return new RsFull(
+                            RsStatus.OK,
+                            Headers.from(
+                                new ContentType(
+                                    String.format(
+                                        "%s; charset=%s",
+                                        this.mime,
+                                        StandardCharsets.UTF_8
+                                    )
+                                )
+                            ),
+                            new Content.From(
+                                text.getBytes(
+                                    StandardCharsets.UTF_8
+                                )
+                            )
+                        );
                     }
                 )
         );

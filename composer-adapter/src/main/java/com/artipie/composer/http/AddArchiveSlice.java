@@ -12,23 +12,20 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.scheduling.ArtifactEvent;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice for adding a package to the repository in ZIP format.
  * See <a href="https://getcomposer.org/doc/05-repositories.md#artifact">Artifact repository</a>.
- * @since 0.4
  */
 @SuppressWarnings({"PMD.SingularField", "PMD.UnusedPrivateField"})
 final class AddArchiveSlice implements Slice {
@@ -85,13 +82,8 @@ final class AddArchiveSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
-    ) {
-        final RequestLineFrom rqline = new RequestLineFrom(line);
-        final String uri = rqline.uri().getPath();
+    public Response response(RequestLine line, Headers headers, Content body) {
+        final String uri = line.uri().getPath();
         final Matcher matcher = AddArchiveSlice.PATH.matcher(uri);
         final Response resp;
         if (matcher.matches()) {
@@ -102,12 +94,12 @@ final class AddArchiveSlice implements Slice {
             if (this.events.isPresent()) {
                 res = res.thenCompose(
                     nothing -> this.repository.storage().metadata(archive.name().artifact())
-                        .thenApply(meta -> meta.read(Meta.OP_SIZE).get())
+                        .thenApply(meta -> meta.read(Meta.OP_SIZE).orElseThrow())
                 ).thenAccept(
                     size -> this.events.get().add(
                         new ArtifactEvent(
                             AddArchiveSlice.REPO_TYPE, this.rname,
-                            new Login(new Headers.From(headers)).getValue(), archive.name().full(),
+                            new Login(headers).getValue(), archive.name().full(),
                             archive.name().version(), size
                         )
                     )

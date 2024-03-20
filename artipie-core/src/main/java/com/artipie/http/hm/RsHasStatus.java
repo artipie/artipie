@@ -5,18 +5,18 @@
 
 package com.artipie.http.hm;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.rs.RsStatus;
-import java.nio.ByteBuffer;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsEqual;
-import org.reactivestreams.Publisher;
 
 /**
  * Matcher to verify response status.
@@ -80,7 +80,7 @@ public final class RsHasStatus extends TypeSafeMatcher<Response> {
         public CompletableFuture<Void> accept(
             final RsStatus status,
             final Headers headers,
-            final Publisher<ByteBuffer> body) {
+            final Content body) {
             return CompletableFuture.supplyAsync(
                 () -> {
                     this.container.set(status);

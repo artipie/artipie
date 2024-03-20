@@ -34,7 +34,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -43,9 +42,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 final class FileProxySliceTest {
 
-    /**
-     * Test storage.
-     */
     private Storage storage;
 
     @BeforeEach
@@ -55,7 +51,7 @@ final class FileProxySliceTest {
 
     @Test
     void sendEmptyHeadersAndContent() throws Exception {
-        final AtomicReference<Iterable<Map.Entry<String, String>>> headers;
+        final AtomicReference<Iterable<Header>> headers;
         headers = new AtomicReference<>();
         final AtomicReference<byte[]> body = new AtomicReference<>();
         new FileProxySlice(
@@ -74,8 +70,8 @@ final class FileProxySliceTest {
             ),
             new URI("http://host/path")
         ).response(
-            new RequestLine(RqMethod.GET, "/").toString(),
-            new Headers.From("X-Name", "Value"),
+            new RequestLine(RqMethod.GET, "/"),
+            Headers.from("X-Name", "Value"),
             new Content.From("data".getBytes())
         ).send(
             (status, rsheaders, rsbody) -> CompletableFuture.allOf()
@@ -101,7 +97,7 @@ final class FileProxySliceTest {
             new FileProxySlice(
                 new SliceSimple(
                     new RsFull(
-                        RsStatus.OK, new Headers.From("header", "value"), new Content.From(body)
+                        RsStatus.OK, Headers.from("header", "value"), new Content.From(body)
                     )
                 ),
                 new FromRemoteCache(this.storage)

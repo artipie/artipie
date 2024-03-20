@@ -4,18 +4,18 @@
  */
 package com.artipie.http.hm;
 
-import com.artipie.http.rq.RequestLineFrom;
-import java.net.URI;
+import com.artipie.http.rq.RequestLine;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsEqual;
 
+import java.net.URI;
+
 /**
  * Request line URI matcher.
- * @since 0.10
  */
-public final class RqLineHasUri extends TypeSafeMatcher<RequestLineFrom> {
+public final class RqLineHasUri extends TypeSafeMatcher<RequestLine> {
 
     /**
      * Request line URI matcher.
@@ -31,7 +31,7 @@ public final class RqLineHasUri extends TypeSafeMatcher<RequestLineFrom> {
     }
 
     @Override
-    public boolean matchesSafely(final RequestLineFrom item) {
+    public boolean matchesSafely(final RequestLine item) {
         return this.target.matches(item.uri());
     }
 
@@ -41,7 +41,7 @@ public final class RqLineHasUri extends TypeSafeMatcher<RequestLineFrom> {
     }
 
     @Override
-    public void describeMismatchSafely(final RequestLineFrom item, final Description description) {
+    public void describeMismatchSafely(final RequestLine item, final Description description) {
         this.target.describeMismatch(item.uri(), description.appendText("URI was: "));
     }
 

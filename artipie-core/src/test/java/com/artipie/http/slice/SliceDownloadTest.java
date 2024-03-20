@@ -8,18 +8,18 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.Headers;
+import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Test case for {@link SliceDownload}.
@@ -36,7 +36,7 @@ public final class SliceDownloadTest {
         storage.save(new Key.From(path), new Content.From(data)).get();
         MatcherAssert.assertThat(
             new SliceDownload(storage).response(
-                rqLineFrom("/one/two/target.txt"), Collections.emptyList(), Flowable.empty()
+                rqLineFrom("/one/two/target.txt"), Headers.EMPTY, Content.EMPTY
             ),
             new RsHasBody(data)
         );
@@ -46,7 +46,7 @@ public final class SliceDownloadTest {
     void returnsNotFoundIfKeyDoesntExist() {
         MatcherAssert.assertThat(
             new SliceDownload(new InMemoryStorage()).response(
-                rqLineFrom("/not-exists"), Collections.emptyList(), Flowable.empty()
+                rqLineFrom("/not-exists"), Headers.EMPTY, Content.EMPTY
             ),
             new RsHasStatus(RsStatus.NOT_FOUND)
         );
@@ -60,7 +60,7 @@ public final class SliceDownloadTest {
         storage.save(new Key.From(path), new Content.From(body)).get();
         MatcherAssert.assertThat(
             new SliceDownload(storage).response(
-                rqLineFrom("/empty.txt"), Collections.emptyList(), Flowable.empty()
+                rqLineFrom("/empty.txt"), Headers.EMPTY, Content.EMPTY
             ),
             new ResponseMatcher(body)
         );
@@ -74,18 +74,16 @@ public final class SliceDownloadTest {
         storage.save(new Key.From(path), new Content.From(data)).get();
         MatcherAssert.assertThat(
             new SliceDownload(storage).response(
-                rqLineFrom(path),
-                Collections.emptyList(),
-                Flowable.empty()
+                rqLineFrom(path), Headers.EMPTY, Content.EMPTY
             ),
             new RsHasHeaders(
-                new MapEntry<>("Content-Length", "7"),
-                new MapEntry<>("Content-Disposition", "attachment; filename=\"target.txt\"")
+                new Header("Content-Length", "7"),
+                new Header("Content-Disposition", "attachment; filename=\"target.txt\"")
             )
         );
     }
 
-    private static String rqLineFrom(final String path) {
-        return new RequestLine("GET", path, "HTTP/1.1").toString();
+    private static RequestLine rqLineFrom(final String path) {
+        return new RequestLine("GET", path, "HTTP/1.1");
     }
 }

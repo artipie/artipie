@@ -121,8 +121,10 @@ public final class MavenSlice extends Slice.Wrap {
                     ),
                     new BasicAuthzSlice(
                         new PutMetadataChecksumSlice(
-                            storage, new AstoValidUpload(storage),
-                            new AstoMaven(storage), name, events
+                            storage,
+                            new AstoValidUpload(storage),
+                            new AstoMaven(storage),
+                            name, events
                         ),
                         users,
                         new OperationControl(

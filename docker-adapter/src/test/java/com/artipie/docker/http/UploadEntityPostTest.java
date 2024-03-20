@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Docker;
 import com.artipie.docker.RepoName;
@@ -18,7 +19,6 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNot;
@@ -29,10 +29,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link DockerSlice}.
  * Upload PUT endpoint.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UploadEntityPostTest {
 
     /**
@@ -54,9 +51,9 @@ class UploadEntityPostTest {
     @Test
     void shouldStartUpload() {
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.POST, "/v2/test/blobs/uploads/").toString(),
+            new RequestLine(RqMethod.POST, "/v2/test/blobs/uploads/"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(response, isUploadStarted());
     }

@@ -13,6 +13,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.common.RsError;
@@ -25,7 +26,6 @@ import org.reactivestreams.Publisher;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -48,8 +48,8 @@ public final class SearchSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Headers headers,
+                             final Content body) {
         return new AsyncResponse(
             new NameFromXml(body).get().thenCompose(
                 name -> {
@@ -82,7 +82,7 @@ public final class SearchSlice implements Slice {
                     final Response res;
                     if (throwable == null) {
                         res = new RsFull(
-                            RsStatus.OK, new Headers.From("content-type", "text/xml"), content
+                            RsStatus.OK, Headers.from("content-type", "text/xml"), content
                         );
                     } else {
                         res = new RsError(

@@ -30,7 +30,7 @@ public final class ContentDispositionTest {
     void shouldExtractFileName() {
         MatcherAssert.assertThat(
             new ContentDisposition(
-                new Headers.From(
+                Headers.from(
                     new Header("Content-Type", "application/octet-stream"),
                     new Header("content-disposition", "attachment; filename=\"filename.jpg\"")
                 )

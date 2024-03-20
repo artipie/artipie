@@ -15,7 +15,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -23,22 +23,20 @@ import com.artipie.http.slice.KeyFromPath;
 import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import io.reactivex.Flowable;
+
 import java.net.URI;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that proxies request with given request line and empty headers and body,
  * caches and returns response from remote.
- * @since 0.7
  */
 final class ProxySlice implements Slice {
 
@@ -85,8 +83,8 @@ final class ProxySlice implements Slice {
 
     @Override
     public Response response(
-        final String line, final Iterable<Map.Entry<String, String>> ignored,
-        final Publisher<ByteBuffer> pub
+        final RequestLine line, final Headers ignored,
+        final Content pub
     ) {
         final AtomicReference<Headers> headers = new AtomicReference<>();
         final Key key = ProxySlice.keyFromPath(line);
@@ -126,7 +124,7 @@ final class ProxySlice implements Slice {
                         result.complete(
                             new RsFull(
                                 RsStatus.OK,
-                                new Headers.From(ProxySlice.contentType(headers.get(), line)),
+                                Headers.from(ProxySlice.contentType(headers.get(), line)),
                                 content.get()
                             )
                         );
@@ -145,7 +143,7 @@ final class ProxySlice implements Slice {
      * @param line Request line
      * @return Cleaned up headers.
      */
-    private static Header contentType(final Headers headers, final String line) {
+    private static Header contentType(final Headers headers, final RequestLine line) {
         final String name = "content-type";
         return Optional.ofNullable(headers).flatMap(
             hdrs -> StreamSupport.stream(hdrs.spliterator(), false)
@@ -154,7 +152,7 @@ final class ProxySlice implements Slice {
             ).orElseGet(
                 () -> {
                     Header res = new Header(name, "text/html");
-                    final String ext = new RequestLineFrom(line).uri().toString();
+                    final String ext = line.uri().toString();
                     if (ext.matches(ProxySlice.FORMATS)) {
                         res = new Header(
                             name,
@@ -172,8 +170,8 @@ final class ProxySlice implements Slice {
      * @param line Request line
      * @return Instance of {@link Key}.
      */
-    private static Key keyFromPath(final String line) {
-        final URI uri = new RequestLineFrom(line).uri();
+    private static Key keyFromPath(final RequestLine line) {
+        final URI uri = line.uri();
         Key res = new KeyFromPath(uri.getPath());
         if (!uri.toString().matches(ProxySlice.FORMATS)) {
             final String last = new KeyLastPart(res).get();

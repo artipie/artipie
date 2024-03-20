@@ -7,13 +7,12 @@ package com.artipie.docker.http;
 import com.artipie.http.Headers;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
+
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Basic authentication for usage in tests aware of two users: Alice and Bob.
- *
- * @since 0.4
  */
 public final class TestAuthentication extends Authentication.Wrap {
 
@@ -27,10 +26,7 @@ public final class TestAuthentication extends Authentication.Wrap {
      */
     public static final User BOB = new User("Bob", "iamgod");
 
-    /**
-     * Ctor.
-     */
-    protected TestAuthentication() {
+    TestAuthentication() {
         super(
             new Authentication.Joined(
                 Stream.of(TestAuthentication.ALICE, TestAuthentication.BOB)
@@ -92,7 +88,7 @@ public final class TestAuthentication extends Authentication.Wrap {
          * @return Headers.
          */
         public Headers headers() {
-            return new Headers.From(
+            return Headers.from(
                 new Authorization.Basic(this.name(), this.password())
             );
         }

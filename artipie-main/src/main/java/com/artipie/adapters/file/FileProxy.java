@@ -4,20 +4,20 @@
  */
 package com.artipie.adapters.file;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.asto.cache.Cache;
 import com.artipie.asto.cache.FromStorageCache;
 import com.artipie.files.FileProxySlice;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.AuthClientSlice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.settings.repo.RepoConfig;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 
@@ -47,9 +47,9 @@ public final class FileProxy implements Slice {
 
     @Override
     public Response response(
-        String line,
-        Iterable<Map.Entry<String, String>> headers,
-        Publisher<ByteBuffer> body
+        RequestLine line,
+        Headers headers,
+        Content body
     ) {
         return slice.response(line, headers, body);
     }

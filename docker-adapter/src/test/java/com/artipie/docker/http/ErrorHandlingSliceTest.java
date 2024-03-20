@@ -45,7 +45,7 @@ class ErrorHandlingSliceTest {
 
     @Test
     void shouldPassRequestUnmodified() {
-        final String line = new RequestLine(RqMethod.GET, "/file.txt").toString();
+        final RequestLine line = new RequestLine(RqMethod.GET, "/file.txt");
         final Header header = new Header("x-name", "some value");
         final byte[] body = "text".getBytes();
         new ErrorHandlingSlice(
@@ -62,13 +62,13 @@ class ErrorHandlingSliceTest {
                 );
                 MatcherAssert.assertThat(
                     "Body unmodified",
-                    new Content.From(rqbody).asBytes(),
+                    rqbody.asBytes(),
                     new IsEqual<>(body)
                 );
                 return StandardRs.OK;
             }
         ).response(
-            line, new Headers.From(header), Flowable.just(ByteBuffer.wrap(body))
+            line, Headers.from(header), new Content.From(body)
         ).send(
             (status, rsheaders, rsbody) -> CompletableFuture.allOf()
         ).toCompletableFuture().join();
@@ -82,11 +82,11 @@ class ErrorHandlingSliceTest {
         final Response response = new AuthClientSlice(
             (rsline, rsheaders, rsbody) -> new RsFull(
                 status,
-                new Headers.From(header),
+                Headers.from(header),
                 Flowable.just(ByteBuffer.wrap(body))
             ),
             Authenticator.ANONYMOUS
-        ).response(new RequestLine(RqMethod.GET, "/").toString(), Headers.EMPTY, Flowable.empty());
+        ).response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY);
         MatcherAssert.assertThat(
             response,
             new ResponseMatcher(status, body, header)
@@ -102,9 +102,8 @@ class ErrorHandlingSliceTest {
             new ErrorHandlingSlice(
                 (line, headers, body) -> connection -> new FailedCompletionStage<>(exception)
             ).response(
-                new RequestLine(RqMethod.GET, "/").toString(),
-                Headers.EMPTY,
-                Flowable.empty()
+                new RequestLine(RqMethod.GET, "/"),
+                Headers.EMPTY, Content.EMPTY
             ),
             new IsErrorsResponse(status, code)
         );
@@ -121,7 +120,7 @@ class ErrorHandlingSliceTest {
                     throw exception;
                 }
             ).response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
             ),
@@ -140,7 +139,7 @@ class ErrorHandlingSliceTest {
                     throw exception;
                 }
             ).response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
             ),
@@ -159,7 +158,7 @@ class ErrorHandlingSliceTest {
         final Exception actual = Assertions.assertThrows(
             exception.getClass(),
             () -> slice.response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(
@@ -185,7 +184,7 @@ class ErrorHandlingSliceTest {
         final Exception actual = Assertions.assertThrows(
             exception.getClass(),
             () -> slice.response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(

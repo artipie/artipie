@@ -4,14 +4,13 @@
  */
 package com.artipie.http.client;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RequestLineFrom;
+
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that forwards all requests to origin slice prepending path with specified prefix.
@@ -43,12 +42,11 @@ public final class PathPrefixSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
-        final RequestLineFrom rqline = new RequestLineFrom(line);
-        final URI original = rqline.uri();
+        final URI original = line.uri();
         final String uri;
         if (original.getRawQuery() == null) {
             uri = String.format("%s%s", this.prefix, original.getRawPath());
@@ -61,7 +59,7 @@ public final class PathPrefixSlice implements Slice {
             );
         }
         return this.origin.response(
-            new RequestLine(rqline.method().value(), uri, rqline.version()).toString(),
+            new RequestLine(line.method().value(), uri, line.version()),
             headers,
             body
         );

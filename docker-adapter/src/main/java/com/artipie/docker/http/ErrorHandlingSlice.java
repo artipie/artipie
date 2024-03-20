@@ -4,20 +4,21 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.FailedCompletionStage;
 import com.artipie.docker.error.DockerError;
 import com.artipie.docker.error.UnsupportedError;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that handles exceptions in origin slice by sending well-formed error responses.
@@ -43,9 +44,9 @@ final class ErrorHandlingSlice implements Slice {
     @Override
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
         Response response;
         try {

@@ -20,7 +20,7 @@ class ManifestEntityRequestTest {
     @Test
     void shouldReadName() {
         final ManifestEntity.Request request = new ManifestEntity.Request(
-            new RequestLine(RqMethod.GET, "/v2/my-repo/manifests/3").toString()
+            new RequestLine(RqMethod.GET, "/v2/my-repo/manifests/3")
         );
         MatcherAssert.assertThat(request.name().value(), new IsEqual<>("my-repo"));
     }
@@ -28,7 +28,7 @@ class ManifestEntityRequestTest {
     @Test
     void shouldReadReference() {
         final ManifestEntity.Request request = new ManifestEntity.Request(
-            new RequestLine(RqMethod.GET, "/v2/my-repo/manifests/sha256:123abc").toString()
+            new RequestLine(RqMethod.GET, "/v2/my-repo/manifests/sha256:123abc")
         );
         MatcherAssert.assertThat(request.reference().reference(), new IsEqual<>("sha256:123abc"));
     }
@@ -40,7 +40,7 @@ class ManifestEntityRequestTest {
             new ManifestEntity.Request(
                 new RequestLine(
                     "HEAD", String.format("/v2/%s/manifests/sha256:234434df", name)
-                ).toString()
+                )
             ).name().value(),
             new IsEqual<>(name)
         );

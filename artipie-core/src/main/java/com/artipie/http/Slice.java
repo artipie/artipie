@@ -4,9 +4,8 @@
  */
 package com.artipie.http;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
-import org.reactivestreams.Publisher;
+import com.artipie.asto.Content;
+import com.artipie.http.rq.RequestLine;
 
 /**
  * Arti-pie slice.
@@ -15,8 +14,6 @@ import org.reactivestreams.Publisher;
  * Each Artipie adapter implements this interface to expose
  * repository HTTP API.
  * Artipie main module joins all slices together into solid web server.
- * </p>
- * @since 0.1
  */
 public interface Slice {
 
@@ -27,16 +24,10 @@ public interface Slice {
      * @param body The request body
      * @return The response.
      */
-    Response response(
-        String line,
-        Iterable<Map.Entry<String, String>> headers,
-        Publisher<ByteBuffer> body
-    );
+    Response response(RequestLine line, Headers headers, Content body);
 
     /**
      * SliceWrap is a simple decorative envelope for Slice.
-     *
-     * @since 0.7
      */
     abstract class Wrap implements Slice {
 
@@ -46,8 +37,6 @@ public interface Slice {
         private final Slice slice;
 
         /**
-         * Ctor.
-         *
          * @param slice Slice.
          */
         protected Wrap(final Slice slice) {
@@ -55,10 +44,7 @@ public interface Slice {
         }
 
         @Override
-        public final Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body) {
+        public final Response response(RequestLine line, Headers headers, Content body) {
             return this.slice.response(line, headers, body);
         }
     }

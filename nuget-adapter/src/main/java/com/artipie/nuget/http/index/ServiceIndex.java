@@ -4,6 +4,7 @@
  */
 package com.artipie.nuget.http.index;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.rs.RsStatus;
@@ -12,20 +13,17 @@ import com.artipie.nuget.http.Absent;
 import com.artipie.nuget.http.Resource;
 import com.artipie.nuget.http.Route;
 import com.artipie.nuget.http.RsWithBodyNoHeaders;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
+
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonWriter;
-import org.reactivestreams.Publisher;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * Service index route.
  * See <a href="https://docs.microsoft.com/en-us/nuget/api/service-index">Service Index</a>
- *
- * @since 0.1
  */
 public final class ServiceIndex implements Route {
 
@@ -94,9 +92,7 @@ public final class ServiceIndex implements Route {
         }
 
         @Override
-        public Response put(
-            final Headers headers,
-            final Publisher<ByteBuffer> body) {
+        public Response put(Headers headers, Content body) {
             return new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
         }
     }

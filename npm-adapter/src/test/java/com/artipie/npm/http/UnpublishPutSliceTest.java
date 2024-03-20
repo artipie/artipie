@@ -18,11 +18,6 @@ import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.npm.JsonFromMeta;
 import com.artipie.scheduling.ArtifactEvent;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -34,11 +29,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+
 /**
  * Test cases for {@link UnpublishPutSlice}.
- * @since 0.9
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class UnpublishPutSliceTest {
 
     /**
@@ -82,11 +81,11 @@ final class UnpublishPutSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
                 new RequestLine(RqMethod.PUT, "/some/project/-rev/undefined"),
-                new Headers.From("referer", "unpublish"),
+                Headers.from("referer", "unpublish"),
                 Content.EMPTY
             )
         );
-        MatcherAssert.assertThat("Events queue is empty", this.events.size() == 0);
+        MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
     }
 
     @ParameterizedTest
@@ -142,8 +141,8 @@ final class UnpublishPutSliceTest {
             () -> new UnpublishPutSlice(
                 this.storage, Optional.of(this.events), UnpublishPutSliceTest.REPO
             ).response(
-                "PUT /@hello%2fsimple-npm-project/-rev/undefined HTTP/1.1",
-                new Headers.From("referer", "unpublish"),
+                RequestLine.from("PUT /@hello%2fsimple-npm-project/-rev/undefined HTTP/1.1"),
+                Headers.from("referer", "unpublish"),
                 new Content.From(new TestResource("json/dist-tags.json").asBytes())
             ).send(
                 (status, headers, publisher) -> CompletableFuture.allOf()
@@ -171,7 +170,7 @@ final class UnpublishPutSliceTest {
             new RequestLine(
                 RqMethod.PUT, "/@hello%2fsimple-npm-project/-rev/undefined"
             ),
-            new Headers.From("referer", "unpublish"),
+            Headers.from("referer", "unpublish"),
             new Content.From(
                 new TestResource(
                     String.format("storage/%s/meta.json", UnpublishPutSliceTest.PROJ)

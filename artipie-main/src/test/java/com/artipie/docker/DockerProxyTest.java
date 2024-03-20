@@ -6,6 +6,7 @@ package com.artipie.docker;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.adapters.docker.DockerProxy;
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.cache.StoragesCache;
 import com.artipie.http.Headers;
@@ -19,11 +20,6 @@ import com.artipie.security.policy.Policy;
 import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.repo.RepoConfig;
 import com.artipie.test.TestStoragesCache;
-import io.reactivex.Flowable;
-import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 import org.hamcrest.CustomMatcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsNot;
@@ -31,6 +27,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 /**
  * Tests for {@link DockerProxy}.
@@ -50,9 +51,7 @@ class DockerProxyTest {
         final Slice slice = dockerProxy(this.cache, yaml);
         MatcherAssert.assertThat(
             slice.response(
-                new RequestLine(RqMethod.GET, "/").toString(),
-                Headers.EMPTY,
-                Flowable.empty()
+                new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY
             ),
             new RsHasStatus(
                 new IsNot<>(
@@ -73,9 +72,7 @@ class DockerProxyTest {
         Assertions.assertThrows(
             RuntimeException.class,
             () -> dockerProxy(this.cache, yaml).response(
-                new RequestLine(RqMethod.GET, "/").toString(),
-                Headers.EMPTY,
-                Flowable.empty()
+                new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY
             ).send(
                 (status, headers, body) -> CompletableFuture.allOf()
             ).toCompletableFuture().join()

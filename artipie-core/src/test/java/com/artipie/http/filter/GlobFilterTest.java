@@ -6,7 +6,6 @@ package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.http.Headers;
-import com.artipie.http.rq.RequestLineFrom;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.IsNot;
@@ -15,10 +14,7 @@ import org.llorllale.cactoos.matchers.IsTrue;
 
 /**
  * Test for {@link GlobFilter}.
- *
- * @since 1.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class GlobFilterTest {
     /**
      * Request path.
@@ -52,7 +48,7 @@ class GlobFilterTest {
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(FiltersTestUtil.get(GlobFilterTest.PATH)),
+                FiltersTestUtil.get(GlobFilterTest.PATH),
                 Headers.EMPTY
             ),
             new IsTrue()
@@ -68,7 +64,7 @@ class GlobFilterTest {
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(FiltersTestUtil.get(GlobFilterTest.PATH)),
+                FiltersTestUtil.get(GlobFilterTest.PATH),
                 Headers.EMPTY
             ),
             new IsTrue()
@@ -84,16 +80,14 @@ class GlobFilterTest {
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(FiltersTestUtil.get(GlobFilterTest.PATH)),
+                FiltersTestUtil.get(GlobFilterTest.PATH),
                 Headers.EMPTY
             ),
             new IsTrue()
         );
         MatcherAssert.assertThat(
             filter.check(
-                new RequestLineFrom(
-                    FiltersTestUtil.get(GlobFilterTest.PATH.replace(".pom", ".zip"))
-                ),
+                FiltersTestUtil.get(GlobFilterTest.PATH.replace(".pom", ".zip")),
                 Headers.EMPTY
             ),
             IsNot.not(new IsTrue())

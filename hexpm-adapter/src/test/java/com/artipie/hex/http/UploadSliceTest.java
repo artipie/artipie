@@ -45,9 +45,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Test for {@link UploadSlice}.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UploadSliceTest {
     /**
      * Tar archive as byte array.
@@ -92,7 +90,7 @@ class UploadSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine(RqMethod.POST, String.format("/publish?replace=%s", replace)),
-                new Headers.From(new ContentLength(UploadSliceTest.tar.length)),
+                Headers.from(new ContentLength(UploadSliceTest.tar.length)),
                 new Content.From(UploadSliceTest.tar)
             )
         );
@@ -129,7 +127,7 @@ class UploadSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine(RqMethod.POST, "/publish?replace=false"),
-                new Headers.From(new ContentLength(UploadSliceTest.tar.length)),
+                Headers.from(new ContentLength(UploadSliceTest.tar.length)),
                 new Content.From(UploadSliceTest.tar)
             )
         );
@@ -139,7 +137,7 @@ class UploadSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.INTERNAL_ERROR),
                 new RequestLine(RqMethod.POST, "/publish?replace=false"),
-                new Headers.From(new ContentLength(UploadSliceTest.tar.length)),
+                Headers.from(new ContentLength(UploadSliceTest.tar.length)),
                 new Content.From(UploadSliceTest.tar)
             )
         );
@@ -154,7 +152,7 @@ class UploadSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine(RqMethod.POST, "/publish?replace=false"),
-                new Headers.From(new ContentLength(UploadSliceTest.tar.length)),
+                Headers.from(new ContentLength(UploadSliceTest.tar.length)),
                 new Content.From(UploadSliceTest.tar)
             )
         );
@@ -167,7 +165,7 @@ class UploadSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine(RqMethod.POST, "/publish?replace=true"),
-                new Headers.From(new ContentLength(replacement.length)),
+                Headers.from(new ContentLength(replacement.length)),
                 new Content.From(replacement)
             )
         );

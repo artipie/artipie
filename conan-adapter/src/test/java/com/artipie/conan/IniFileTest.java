@@ -15,9 +15,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Tests for IniFile class.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class IniFileTest {
 
     @Test

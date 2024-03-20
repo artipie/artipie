@@ -10,20 +10,21 @@ import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.zip.GZIPOutputStream;
 import org.cqfn.rio.Buffers;
 import org.cqfn.rio.WriteGreed;
 import org.cqfn.rio.stream.ReactiveInputStream;
 import org.cqfn.rio.stream.ReactiveOutputStream;
 import org.reactivestreams.Publisher;
+
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Slice that gzips requested content.
@@ -45,8 +46,8 @@ final class GzipSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Headers headers,
+                             final Content body) {
         return connection -> this.origin.response(line, headers, body).send(
             (status, rsheaders, rsbody) -> GzipSlice.gzip(connection, status, rsbody, rsheaders)
         );
@@ -75,7 +76,7 @@ final class GzipSlice implements Slice {
             final PipedInputStream src = new PipedInputStream(resout);
             future = tmp.thenCompose(
                 nothing -> connection.accept(
-                    stat, new Headers.From(headers, "Content-encoding", "gzip"),
+                    stat, headers.copy().add("Content-encoding", "gzip"),
                     new Content.From(new ReactiveInputStream(src).read(Buffers.Standard.K8))
                 )
             );

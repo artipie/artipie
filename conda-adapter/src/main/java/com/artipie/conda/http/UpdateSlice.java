@@ -19,29 +19,28 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
+
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice to update the repository.
- * @since 0.4
  */
 public final class UpdateSlice implements Slice {
 
@@ -95,9 +94,9 @@ public final class UpdateSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
-        final Matcher matcher = UpdateSlice.PKG.matcher(new RequestLineFrom(line).uri().getPath());
+    public Response response(final RequestLine line, final Headers headers,
+                             final Content body) {
+        final Matcher matcher = UpdateSlice.PKG.matcher(line.uri().getPath());
         final Response res;
         if (matcher.matches()) {
             final Key temp = new Key.From(UpdateSlice.TMP, matcher.group(1));
@@ -110,7 +109,7 @@ public final class UpdateSlice implements Slice {
                     ).thenCompose(
                         exists -> this.asto.save(
                             temp,
-                            new Content.From(UpdateSlice.filePart(new Headers.From(headers), body))
+                            new Content.From(UpdateSlice.filePart(headers, body))
                         )
                         .thenCompose(empty -> this.infoJson(matcher.group(1), temp))
                         .thenCompose(json -> this.addChecksum(temp, Digests.MD5, json))
@@ -130,7 +129,7 @@ public final class UpdateSlice implements Slice {
                                         nothing -> this.events.get().add(
                                             new ArtifactEvent(
                                                 UpdateSlice.CONDA, this.rname,
-                                                new Login(new Headers.From(headers)).getValue(),
+                                                new Login(headers).getValue(),
                                                 String.join("_", json.getString("name", "<no name>"), json.getString("arch", "<no arch>")),
                                                 json.getString("version"),
                                                 json.getJsonNumber(UpdateSlice.SIZE).longValue()

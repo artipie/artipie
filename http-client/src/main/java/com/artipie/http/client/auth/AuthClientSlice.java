@@ -12,14 +12,11 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.RemoteConfig;
 import com.artipie.http.client.UriClientSlice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.google.common.collect.Iterables;
-import io.reactivex.Flowable;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Slice augmenting requests with authentication when needed.
@@ -51,30 +48,25 @@ public final class AuthClientSlice implements Slice {
     private final Authenticator auth;
 
     /**
-     * Ctor.
-     *
      * @param origin Origin slice.
      * @param auth Authenticator.
      */
-    public AuthClientSlice(final Slice origin, final Authenticator auth) {
+    public AuthClientSlice(Slice origin, Authenticator auth) {
         this.origin = origin;
         this.auth = auth;
     }
 
     @Override
-    public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         return new AsyncResponse(
-            new Content.From(body).asBytesFuture().thenApply(
-                array -> Flowable.fromArray(ByteBuffer.wrap(Arrays.copyOf(array, array.length)))
+            body.asBytesFuture().thenApply(
+                array -> new Content.From(Arrays.copyOf(array, array.length))
             ).thenApply(
                 copy -> connection -> this.auth.authenticate(Headers.EMPTY)
                     .thenCompose(
                         first -> this.origin.response(
                             line,
-                            new Headers.From(headers, first),
+                            headers.copy().addAll(first),
                             copy
                         ).send(
                             (rsstatus, rsheaders, rsbody) -> {
@@ -86,7 +78,7 @@ public final class AuthClientSlice implements Slice {
                                                     return connection.accept(rsstatus, rsheaders, rsbody);
                                                 }
                                                 return this.origin.response(
-                                                    line, new Headers.From(headers, authHeaders), copy
+                                                    line, headers.copy().addAll(authHeaders), copy
                                                 ).send(connection);
                                             }
                                         );

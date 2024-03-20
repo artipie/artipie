@@ -8,23 +8,22 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.misc.DateTimeNowStr;
 import com.artipie.npm.misc.DescSortedVersions;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.common.collect.Sets;
-import org.reactivestreams.Publisher;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonPatchBuilder;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -74,12 +73,12 @@ final class UnpublishPutSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> publisher
+        final RequestLine line,
+        final Headers headers,
+        final Content publisher
     ) {
         final String pkg = new PackageNameFromUrl(
-            line.replaceFirst("/-rev/[^\\s]+", "")
+            RequestLine.from(line.toString().replaceFirst("/-rev/[^\\s]+", ""))
         ).value();
         final Key key = new Key.From(pkg, "meta.json");
         return new AsyncResponse(

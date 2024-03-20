@@ -5,18 +5,17 @@
 
 package com.artipie.http.servlet;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.rs.RsStatus;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import org.cqfn.rio.WriteGreed;
 import org.cqfn.rio.stream.ReactiveOutputStream;
-import org.reactivestreams.Publisher;
 
 /**
  * Connection implementation with servlet response as a back-end.
@@ -40,7 +39,7 @@ final class ServletConnection implements Connection {
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
     public CompletionStage<Void> accept(final RsStatus status,
-        final Headers headers, final Publisher<ByteBuffer> body) {
+        final Headers headers, final Content body) {
         this.rsp.setStatus(Integer.parseInt(status.code()));
         headers.forEach(kv -> this.rsp.setHeader(kv.getKey(), kv.getValue()));
         try {

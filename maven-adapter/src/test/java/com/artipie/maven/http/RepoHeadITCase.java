@@ -4,12 +4,14 @@
  */
 package com.artipie.maven.http;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
@@ -19,8 +21,6 @@ import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +31,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.reactivestreams.Publisher;
 
 /**
  * Test for {@link RepoHead}.
@@ -128,13 +127,13 @@ class RepoHeadITCase {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
             return new AsyncResponse(
                 new RepoHead(this.client.https("repo.maven.apache.org"))
-                    .head(new RequestLineFrom(line).uri().toString())
+                    .head(line.uri().toString())
                     .handle(
                         (head, throwable) -> {
                             final CompletionStage<Response> res;

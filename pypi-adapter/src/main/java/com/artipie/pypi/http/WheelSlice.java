@@ -18,7 +18,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -32,35 +32,24 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.jcabi.log.Logger;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
+
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * WheelSlice save and manage whl and tgz entries.
- *
- * @since 0.2
  */
 final class WheelSlice implements Slice {
 
-    /**
-     * Repository type.
-     */
     private static final String TYPE = "pypi";
 
-    /**
-     * The Storage.
-     */
     private final Storage storage;
 
-    /**
-     * Events queue.
-     */
     private final Optional<Queue<ArtifactEvent>> events;
 
     /**
@@ -84,13 +73,13 @@ final class WheelSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> iterable,
-        final Publisher<ByteBuffer> publisher
+        final RequestLine line,
+        final Headers iterable,
+        final Content publisher
     ) {
         final Key.From key = new Key.From(UUID.randomUUID().toString());
         return new AsyncResponse(
-            this.filePart(new Headers.From(iterable), publisher, key).thenCompose(
+            this.filePart(iterable, publisher, key).thenCompose(
                 filename -> this.storage.value(key).thenCompose(
                     val -> new ContentAsStream<PackageInfo>(val).process(
                         input -> new Metadata.FromArchive(input, filename).read()
@@ -100,7 +89,7 @@ final class WheelSlice implements Slice {
                         final CompletionStage<RsStatus> res;
                         if (new ValidFilename(info, filename).valid()) {
                             final Key name = new Key.From(
-                                new KeyFromPath(new RequestLineFrom(line).uri().toString()),
+                                new KeyFromPath(line.uri().toString()),
                                 new NormalizedProjectName.Simple(info.name()).value(),
                                 filename
                             );
@@ -186,14 +175,14 @@ final class WheelSlice implements Slice {
      */
     private CompletionStage<Void> putArtifactToQueue(
         final Key key, final PackageInfo info, final String filename,
-        final Iterable<Map.Entry<String, String>> headers
+        Headers headers
     ) {
         return this.storage.metadata(key).thenApply(meta -> meta.read(Meta.OP_SIZE).get())
             .thenAccept(
                 size -> this.events.get().add(
                     new ArtifactEvent(
                         WheelSlice.TYPE, this.rname,
-                        new Login(new Headers.From(headers)).getValue(),
+                        new Login(headers).getValue(),
                         String.join("/", info.name(), filename),
                         info.version(), size
                     )

@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.docker.ExampleStorage;
@@ -15,7 +16,6 @@ import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +23,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link DockerSlice}.
  * Blob Get endpoint.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class BlobEntityGetTest {
 
     /**
@@ -50,9 +47,9 @@ class BlobEntityGetTest {
             new RequestLine(
                 RqMethod.GET,
                 String.format("/v2/test/blobs/%s", digest)
-            ).toString(),
+            ),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         final Key expected = new Key.From(
             "blobs", "sha256", "aa",
@@ -80,9 +77,9 @@ class BlobEntityGetTest {
                         "/v2/test/blobs/%s",
                         "sha256:0123456789012345678901234567890123456789012345678901234567890123"
                     )
-                ).toString(),
+                ),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new IsErrorsResponse(RsStatus.NOT_FOUND, "BLOB_UNKNOWN")
         );

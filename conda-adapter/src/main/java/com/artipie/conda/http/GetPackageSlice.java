@@ -4,18 +4,18 @@
  */
 package com.artipie.conda.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.ext.KeyLastPart;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.common.RsJson;
 import com.artipie.http.slice.KeyFromPath;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import javax.json.Json;
-import org.reactivestreams.Publisher;
 
 /**
  * Package slice returns info about package, serves on `GET /package/{owner_login}/{package_name}`.
@@ -28,16 +28,14 @@ import org.reactivestreams.Publisher;
 public final class GetPackageSlice implements Slice {
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Headers headers,
+                             final Content body) {
         return new RsJson(
             RsStatus.NOT_FOUND,
             () -> Json.createObjectBuilder().add(
                 "error", String.format(
                     "\"%s\" could not be found",
-                    new KeyLastPart(
-                        new KeyFromPath(new RequestLineFrom(line).uri().getPath())
-                    ).get()
+                    new KeyLastPart(new KeyFromPath(line.uri().getPath())).get()
                 )
             ).build(),
             StandardCharsets.UTF_8

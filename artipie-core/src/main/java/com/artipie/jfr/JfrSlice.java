@@ -4,36 +4,25 @@
  */
 package com.artipie.jfr;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Slice wrapper to generate JFR events for every the {@code response} method call.
- *
- * @since 0.28.0
  */
 public final class JfrSlice implements Slice {
 
-    /**
-     * Original slice.
-     */
     private final Slice original;
 
     /**
-     * Ctor.
-     *
      * @param original Original slice.
      */
     public JfrSlice(final Slice original) {
@@ -42,18 +31,15 @@ public final class JfrSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
-        final Response res;
         final SliceResponseEvent event = new SliceResponseEvent();
         if (event.isEnabled()) {
-            res = this.wrapResponse(line, headers, body, event);
-        } else {
-            res = this.original.response(line, headers, body);
+            return this.wrapResponse(line, headers, body, event);
         }
-        return res;
+        return this.original.response(line, headers, body);
     }
 
     /**
@@ -66,21 +52,23 @@ public final class JfrSlice implements Slice {
      * @return The response.
      */
     private Response wrapResponse(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body,
+        final RequestLine line,
+        final Headers headers,
+        final Content body,
         final SliceResponseEvent event
     ) {
         event.begin();
         final Response res = this.original.response(
             line,
             headers,
-            new ChunksAndSizeMetricsPublisher(
-                body,
-                (chunks, size) -> {
-                    event.requestChunks = chunks;
-                    event.requestSize = size;
-                }
+            new Content.From(
+                new ChunksAndSizeMetricsPublisher(
+                    body,
+                    (chunks, size) -> {
+                        event.requestChunks = chunks;
+                        event.requestSize = size;
+                    }
+                )
             )
         );
         return new JfrResponse(
@@ -88,10 +76,9 @@ public final class JfrSlice implements Slice {
             (chunks, size) -> {
                 event.end();
                 if (event.shouldCommit()) {
-                    final RequestLineFrom rqLine = new RequestLineFrom(line);
-                    event.method = rqLine.method().value();
-                    event.path = rqLine.uri().getPath();
-                    event.headers = JfrSlice.headersAsString(headers);
+                    event.method = line.method().value();
+                    event.path = line.uri().getPath();
+                    event.headers = headers.asString();
                     event.responseChunks = chunks;
                     event.responseSize = size;
                     event.commit();
@@ -101,21 +88,7 @@ public final class JfrSlice implements Slice {
     }
 
     /**
-     * Headers to String.
-     *
-     * @param headers Headers
-     * @return String
-     */
-    private static String headersAsString(final Iterable<Map.Entry<String, String>> headers) {
-        return StreamSupport.stream(headers.spliterator(), false)
-            .map(entry -> entry.getKey() + '=' + entry.getValue())
-            .collect(Collectors.joining(";"));
-    }
-
-    /**
      * Response JFR wrapper.
-     *
-     * @since 0.28.0
      */
     private static final class JfrResponse implements Response {
 
@@ -150,8 +123,6 @@ public final class JfrSlice implements Slice {
 
     /**
      * Connection JFR wrapper.
-     *
-     * @since 0.28.0
      */
     private static final class JfrConnection implements Connection {
 
@@ -166,8 +137,6 @@ public final class JfrSlice implements Slice {
         private final BiConsumer<Integer, Long> callback;
 
         /**
-         * Ctor.
-         *
          * @param original Original connection.
          * @param callback Callback consumer.
          */
@@ -183,12 +152,12 @@ public final class JfrSlice implements Slice {
         public CompletionStage<Void> accept(
             final RsStatus status,
             final Headers headers,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             return this.original.accept(
                 status,
                 headers,
-                new ChunksAndSizeMetricsPublisher(body, this.callback)
+                new Content.From(new ChunksAndSizeMetricsPublisher(body, this.callback))
             );
         }
     }

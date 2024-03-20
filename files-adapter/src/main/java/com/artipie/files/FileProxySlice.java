@@ -19,7 +19,7 @@ import com.artipie.http.client.UriClientSlice;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.headers.ContentLength;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
@@ -27,18 +27,16 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Flowable;
+
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import org.reactivestreams.Publisher;
 
 /**
  * Binary files proxy {@link Slice} implementation.
- * @since 0.4
  */
 public final class FileProxySlice implements Slice {
 
@@ -137,11 +135,11 @@ public final class FileProxySlice implements Slice {
 
     @Override
     public Response response(
-        final String line, final Iterable<Map.Entry<String, String>> ignored,
-        final Publisher<ByteBuffer> pub
+        final RequestLine line, final Headers ignored,
+        final Content pub
     ) {
         final AtomicReference<Headers> headers = new AtomicReference<>();
-        final KeyFromPath key = new KeyFromPath(new RequestLineFrom(line).uri().getPath());
+        final KeyFromPath key = new KeyFromPath(line.uri().getPath());
         return new AsyncResponse(
             this.cache.load(
                 key,
@@ -185,7 +183,7 @@ public final class FileProxySlice implements Slice {
                     final Response result;
                     if (throwable == null && content.isPresent()) {
                         result = new RsFull(
-                            RsStatus.OK, new Headers.From(headers.get()), content.get()
+                            RsStatus.OK, headers.get(), content.get()
                         );
                     } else {
                         result = new RsWithStatus(RsStatus.NOT_FOUND);

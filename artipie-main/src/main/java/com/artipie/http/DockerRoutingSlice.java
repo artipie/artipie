@@ -4,26 +4,23 @@
  */
 package com.artipie.http;
 
+import com.artipie.asto.Content;
 import com.artipie.docker.http.BaseEntity;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.perms.FreePermissions;
 import com.artipie.settings.Settings;
-import java.nio.ByteBuffer;
-import java.util.Map;
+import org.apache.http.client.utils.URIBuilder;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.http.client.utils.URIBuilder;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice decorator which redirects all Docker V2 API requests to Artipie format paths.
- * @since 0.9
  */
 public final class DockerRoutingSlice implements Slice {
 
@@ -59,10 +56,9 @@ public final class DockerRoutingSlice implements Slice {
 
     @Override
     @SuppressWarnings("PMD.NestedIfDepthCheck")
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
-        final RequestLineFrom req = new RequestLineFrom(line);
-        final String path = req.uri().getPath();
+    public Response response(final RequestLine line, final Headers headers,
+                             final Content body) {
+        final String path = line.uri().getPath();
         final Matcher matcher = PTN_PATH.matcher(path);
         final Response rsp;
         if (matcher.matches()) {
@@ -80,11 +76,11 @@ public final class DockerRoutingSlice implements Slice {
             } else {
                 rsp = this.origin.response(
                     new RequestLine(
-                        req.method().toString(),
-                        new URIBuilder(req.uri()).setPath(group).toString(),
-                        req.version()
-                    ).toString(),
-                    new Headers.From(headers, DockerRoutingSlice.HDR_REAL_PATH, path),
+                        line.method().toString(),
+                        new URIBuilder(line.uri()).setPath(group).toString(),
+                        line.version()
+                    ),
+                    headers.copy().add(DockerRoutingSlice.HDR_REAL_PATH, path),
                     body
                 );
             }
@@ -114,18 +110,17 @@ public final class DockerRoutingSlice implements Slice {
         }
 
         @Override
-        public Response response(final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body) {
-            final RequestLineFrom req = new RequestLineFrom(line);
+        public Response response(final RequestLine line,
+                                 final Headers headers,
+            final Content body) {
             return this.origin.response(
                 new RequestLine(
-                    req.method().toString(),
-                    new URIBuilder(req.uri())
-                        .setPath(String.format("/v2%s", req.uri().getPath()))
+                    line.method().toString(),
+                    new URIBuilder(line.uri())
+                        .setPath(String.format("/v2%s", line.uri().getPath()))
                         .toString(),
-                    req.version()
-                ).toString(),
+                    line.version()
+                ),
                 headers,
                 body
             );

@@ -9,7 +9,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
@@ -21,7 +21,6 @@ import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.io.Content;
 import org.eclipse.jetty.util.Callback;
-import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +30,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * ClientSlices implementation using Jetty HTTP client as back-end.
  * <a href="https://eclipse.dev/jetty/documentation/jetty-12/programming-guide/index.html#pg-client-http-non-blocking">Docs</a>
- * @since 0.1
  */
 final class JettyClientSlice implements Slice {
 
@@ -82,17 +79,13 @@ final class JettyClientSlice implements Slice {
         this.port = port;
     }
 
-    @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        RequestLine line, Headers headers, com.artipie.asto.Content body
     ) {
-        final RequestLineFrom req = new RequestLineFrom(line);
-        final Request request = this.buildRequest(headers, req);
+        final Request request = this.buildRequest(headers, line);
         final CompletableFuture<Response> res = new CompletableFuture<>();
         final List<Content.Chunk> buffers = new LinkedList<>();
-        if (req.method() != RqMethod.HEAD) {
+        if (line.method() != RqMethod.HEAD) {
             final AsyncRequestContent async = new AsyncRequestContent();
             Flowable.fromPublisher(body).doOnComplete(async::close).forEach(
                 buf -> async.write(buf, Callback.NOOP)
@@ -118,7 +111,7 @@ final class JettyClientSlice implements Slice {
                     if (result.getFailure() == null) {
                         Response response = new RsFull(
                                 new RsStatus.ByCode(result.getResponse().getStatus()).find(),
-                                new ResponseHeaders(result.getResponse().getHeaders()),
+                            from(result.getResponse().getHeaders()),
                                 Flowable.fromIterable(buffers).map(
                                         chunk -> {
                                             final ByteBuffer item = chunk.getByteBuffer();
@@ -141,16 +134,21 @@ final class JettyClientSlice implements Slice {
         return new AsyncResponse(res);
     }
 
+    private Headers from(HttpFields fields) {
+        return new Headers(
+            fields.stream()
+                .map(field -> new Header(field.getName(), field.getValue()))
+                .toList()
+        );
+    }
+
     /**
      * Builds jetty basic request from artipie request line and headers.
      * @param headers Headers
      * @param req Artipie request line
      * @return Jetty request
      */
-    private Request buildRequest(
-        final Iterable<Map.Entry<String, String>> headers,
-        final RequestLineFrom req
-    ) {
+    private Request buildRequest(Headers headers, RequestLine req) {
         final String scheme;
         if (this.secure) {
             scheme = "https";
@@ -171,29 +169,6 @@ final class JettyClientSlice implements Slice {
             request.headers(mutable -> mutable.add(header.getKey(), header.getValue()));
         }
         return request;
-    }
-
-    /**
-     * Headers from {@link HttpFields}.
-     *
-     * @since 0.1
-     */
-    private static class ResponseHeaders extends Headers.Wrap {
-
-        /**
-         * Ctor.
-         *
-         * @param response Response to extract headers from.
-         */
-        ResponseHeaders(final HttpFields response) {
-            super(
-                new Headers.From(
-                    response.stream()
-                        .map(header -> new Header(header.getName(), header.getValue()))
-                        .collect(Collectors.toList())
-                )
-            );
-        }
     }
 
     /**

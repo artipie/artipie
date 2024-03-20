@@ -4,6 +4,7 @@
  */
 package com.artipie.gem;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.gem.http.GemSlice;
@@ -23,30 +24,26 @@ import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.policy.Policy;
 import com.artipie.security.policy.PolicyByUsername;
-import io.reactivex.Flowable;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.security.PermissionCollection;
-import java.util.Arrays;
-import java.util.Optional;
 import org.cactoos.text.Base64Encoded;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.PermissionCollection;
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * A test for api key endpoint.
- *
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class AuthTest {
 
     @Test
     public void keyIsReturned() {
         final String token = "aGVsbG86d29ybGQ=";
-        final Headers headers = new Headers.From(
+        final Headers headers = Headers.from(
             new Authorization(String.format("Basic %s", token))
         );
         MatcherAssert.assertThat(
@@ -56,9 +53,9 @@ public class AuthTest {
                 (name, pwd) -> Optional.of(new AuthUser("user", "test")),
                 ""
             ).response(
-                new RequestLine("GET", "/api/v1/api_key").toString(),
+                new RequestLine("GET", "/api/v1/api_key"),
                 headers,
-                Flowable.empty()
+                Content.EMPTY
             ), new RsHasBody(token.getBytes(StandardCharsets.UTF_8))
         );
     }
@@ -72,9 +69,9 @@ public class AuthTest {
                 (username, password) -> Optional.of(AuthUser.ANONYMOUS),
                 ""
             ).response(
-                new RequestLine("GET", "/api/v1/api_key").toString(),
-                new Headers.From(),
-                Flowable.empty()
+                new RequestLine("GET", "/api/v1/api_key"),
+                Headers.EMPTY,
+                Content.EMPTY
             ), new RsHasStatus(RsStatus.UNAUTHORIZED)
         );
     }
@@ -103,9 +100,9 @@ public class AuthTest {
                 new Authentication.Single(lgn, pwd),
                 repo
             ).response(
-                new RequestLine("POST", "/api/v1/gems").toString(),
-                new Headers.From(new Authorization(token)),
-                Flowable.empty()
+                new RequestLine("POST", "/api/v1/gems"),
+                Headers.from(new Authorization(token)),
+                Content.EMPTY
             ), new RsHasStatus(RsStatus.FORBIDDEN)
         );
     }
@@ -122,9 +119,9 @@ public class AuthTest {
                 new Authentication.Single(lgn, pwd),
                 "test"
             ).response(
-                new RequestLine("GET", "specs.4.8").toString(),
-                new Headers.From(new Authorization(token)),
-                Flowable.empty()
+                new RequestLine("GET", "specs.4.8"),
+                Headers.from(new Authorization(token)),
+                Content.EMPTY
             ), new RsHasStatus(RsStatus.FORBIDDEN)
         );
     }
@@ -165,13 +162,9 @@ public class AuthTest {
             new Authentication.Single(user, pswd),
             "test"
         ).response(
-            new RequestLine("POST", "/api/v1/gems").toString(),
-            new Headers.From(
-                new Authorization(String.format("Basic %s", token))
-            ),
-            Flowable.just(
-                ByteBuffer.wrap(new TestResource("rails-6.0.2.2.gem").asBytes())
-            )
+            new RequestLine("POST", "/api/v1/gems"),
+            Headers.from(new Authorization("Basic " + token)),
+            new Content.From(new TestResource("rails-6.0.2.2.gem").asBytes())
         );
     }
 }

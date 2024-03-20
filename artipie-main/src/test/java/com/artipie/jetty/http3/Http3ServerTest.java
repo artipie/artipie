@@ -6,10 +6,11 @@ package com.artipie.jetty.http3;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
@@ -19,7 +20,6 @@ import com.artipie.nuget.RandomFreePort;
 import io.reactivex.Flowable;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -38,17 +38,15 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.reactivestreams.Publisher;
 
 /**
  * Test for {@link Http3Server}.
- * @since 0.31
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class Http3ServerTest {
 
     /**
@@ -66,24 +64,12 @@ class Http3ServerTest {
      */
     private static final int SIZE = 1024 * 1024;
 
-    /**
-     * Server.
-     */
     private Http3Server server;
 
-    /**
-     * Client.
-     */
     private HTTP3Client client;
 
-    /**
-     * Port.
-     */
     private int port;
 
-    /**
-     * Client session.
-     */
     private Session.Client session;
 
     @BeforeEach
@@ -176,7 +162,7 @@ class Http3ServerTest {
         ).get(5, TimeUnit.SECONDS);
         MatcherAssert.assertThat("Response was not received", rlatch.await(5, TimeUnit.SECONDS));
         MatcherAssert.assertThat("Data were not received", dlatch.await(5, TimeUnit.SECONDS));
-        MatcherAssert.assertThat(resp.array(), new IsEqual<byte[]>(Http3ServerTest.SMALL_DATA));
+        Assertions.assertArrayEquals(Http3ServerTest.SMALL_DATA, resp.array());
     }
 
     @Test
@@ -218,16 +204,16 @@ class Http3ServerTest {
     }
 
     @Test
-    void putWithRequestDataResponse() throws ExecutionException, InterruptedException,
-        TimeoutException {
+    void putWithRequestDataResponse()
+        throws ExecutionException, InterruptedException, TimeoutException {
         final int size = 964;
         final MetaData.Request request = new MetaData.Request(
             "PUT", HttpURI.from(String.format("http://localhost:%d/return_back", this.port)),
             HttpVersion.HTTP_3,
             HttpFields.build()
         );
-        final CountDownLatch rlatch = new CountDownLatch(1);
-        final CountDownLatch dlatch = new CountDownLatch(1);
+        final CountDownLatch responseLatch = new CountDownLatch(1);
+        final CountDownLatch dataAvailableLatch = new CountDownLatch(1);
         final byte[] data = new byte[size];
         final ByteBuffer resp = ByteBuffer.allocate(size * 2);
         new Random().nextBytes(data);
@@ -236,7 +222,7 @@ class Http3ServerTest {
             new Stream.Client.Listener() {
                 @Override
                 public void onResponse(final Stream.Client stream, final HeadersFrame frame) {
-                    rlatch.countDown();
+                    responseLatch.countDown();
                     stream.demand();
                 }
 
@@ -247,7 +233,7 @@ class Http3ServerTest {
                         resp.put(data.getByteBuffer());
                         data.release();
                         if (data.isLast()) {
-                            dlatch.countDown();
+                            dataAvailableLatch.countDown();
                         }
                     }
                     stream.demand();
@@ -256,36 +242,33 @@ class Http3ServerTest {
         ).thenCompose(cl -> cl.data(new DataFrame(ByteBuffer.wrap(data), false)))
             .thenCompose(cl -> cl.data(new DataFrame(ByteBuffer.wrap(data), true)))
             .get(5, TimeUnit.SECONDS);
-        MatcherAssert.assertThat("Response was not received", rlatch.await(10, TimeUnit.SECONDS));
-        MatcherAssert.assertThat("Data were not received", dlatch.await(60, TimeUnit.SECONDS));
+
+        MatcherAssert.assertThat("Response was not received", responseLatch.await(10, TimeUnit.SECONDS));
+        MatcherAssert.assertThat("Data were not received", dataAvailableLatch.await(60, TimeUnit.SECONDS));
         final ByteBuffer copy = ByteBuffer.allocate(size * 2);
         copy.put(data);
         copy.put(data);
-        MatcherAssert.assertThat(resp.array(), new IsEqual<>(copy.array()));
+        Assertions.assertArrayEquals(copy.array(), resp.array());
     }
 
     /**
      * Slice for tests.
-     * @since 0.31
      */
     static final class TestSlice implements Slice {
 
         @Override
-        public Response response(
-            final String line, final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
-        ) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             final Response res;
-            if (line.contains("no_data")) {
+            if (line.toString().contains("no_data")) {
                 res = new RsWithHeaders(
                     new RsWithStatus(RsStatus.OK),
                     new Header(
-                        Http3ServerTest.RQ_METHOD, new RequestLineFrom(line).method().value()
+                        Http3ServerTest.RQ_METHOD, line.method().value()
                     )
                 );
-            } else if (line.contains("small_data")) {
+            } else if (line.toString().contains("small_data")) {
                 res = new RsWithBody(new RsWithStatus(RsStatus.OK), Http3ServerTest.SMALL_DATA);
-            } else if (line.contains("random_chunks")) {
+            } else if (line.toString().contains("random_chunks")) {
                 final Random random = new Random();
                 final byte[] data = new byte[Http3ServerTest.SIZE];
                 random.nextBytes(data);
@@ -300,7 +283,7 @@ class Http3ServerTest {
                             .delay(random.nextInt(5_000), TimeUnit.MILLISECONDS)
                     )
                 );
-            } else if (line.contains("return_back")) {
+            } else if (line.toString().contains("return_back")) {
                 res = new RsWithBody(new RsWithStatus(RsStatus.OK), body);
             } else {
                 res = StandardRs.NOT_FOUND;
@@ -308,5 +291,4 @@ class Http3ServerTest {
             return res;
         }
     }
-
 }

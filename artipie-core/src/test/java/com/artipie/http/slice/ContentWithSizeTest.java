@@ -22,7 +22,7 @@ final class ContentWithSizeTest {
     void parsesHeaderValue() {
         final long length = 100L;
         MatcherAssert.assertThat(
-            new ContentWithSize(Content.EMPTY, new Headers.From(new ContentLength(length))).size()
+            new ContentWithSize(Content.EMPTY, Headers.from(new ContentLength(length))).size()
                 .orElse(0L),
             new IsEqual<>(length)
         );

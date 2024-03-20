@@ -113,7 +113,7 @@ public final class ConanSlice extends Slice.Wrap {
                     new SliceSimple(
                         new RsWithHeaders(
                             new RsWithStatus(RsStatus.ACCEPTED),
-                            new Headers.From(
+                            Headers.from(
                                 "X-Conan-Server-Capabilities",
                                 "complex_search,revisions,revisions"
                             )

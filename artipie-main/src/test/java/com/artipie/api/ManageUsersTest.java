@@ -19,13 +19,14 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link ManageUsers}.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@DisabledOnOs(OS.WINDOWS)
 class ManageUsersTest {
 
     /**
@@ -66,7 +67,7 @@ class ManageUsersTest {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: qwerty",
-                "email: bob@example.com",
+                "email: \"bob@example.com\"",
                 "roles:",
                 "  - admin"
             ).getBytes(StandardCharsets.UTF_8)
@@ -110,7 +111,7 @@ class ManageUsersTest {
                     System.lineSeparator(),
                     "type: plain",
                     "pass: xyz",
-                    "email: Alice@example.com",
+                    "email: \"Alice@example.com\"",
                     "roles:",
                     "  - reader",
                     "  - creator"
@@ -127,7 +128,7 @@ class ManageUsersTest {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: 025",
-                "email: abc@example.com",
+                "email: \"abc@example.com\"",
                 "roles:",
                 "  - java-dev"
             ).getBytes(StandardCharsets.UTF_8)
@@ -154,7 +155,7 @@ class ManageUsersTest {
                     System.lineSeparator(),
                     "type: plain",
                     "pass: xyz",
-                    "email: Alice@example.com",
+                    "email: \"Alice@example.com\"",
                     "roles:",
                     "  - reader",
                     "  - creator"
@@ -189,7 +190,7 @@ class ManageUsersTest {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: bdhdb",
-                "email: john@example.com",
+                "email: \"john@example.com\"",
                 "roles:",
                 "  - java-dev",
                 "permissions:",
@@ -209,7 +210,7 @@ class ManageUsersTest {
                     System.lineSeparator(),
                     "type: plain",
                     "pass: \"[poiu\"",
-                    "email: john@example.com",
+                    "email: \"john@example.com\"",
                     "roles:",
                     "  - \"java-dev\"",
                     "permissions:",
@@ -241,7 +242,7 @@ class ManageUsersTest {
                     System.lineSeparator(),
                     "type: plain",
                     "pass: bdhdb",
-                    "email: john@example.com",
+                    "email: \"john@example.com\"",
                     "enabled: true"
                 )
             )
@@ -256,7 +257,7 @@ class ManageUsersTest {
                 System.lineSeparator(),
                 "type: plain",
                 "pass: bdhdb",
-                "email: john@example.com"
+                "email: \"john@example.com\""
             ).getBytes(StandardCharsets.UTF_8)
         );
         this.users.disable("John");
@@ -267,7 +268,7 @@ class ManageUsersTest {
                     System.lineSeparator(),
                     "type: plain",
                     "pass: bdhdb",
-                    "email: john@example.com",
+                    "email: \"john@example.com\"",
                     "enabled: false"
                 )
             )

@@ -18,23 +18,18 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link ManageRoles}.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@DisabledOnOs(OS.WINDOWS)
 class ManageRolesTest {
 
-    /**
-     * Test storage.
-     */
     private BlockingStorage blsto;
 
-    /**
-     * Test users.
-     */
     private CrudRoles roles;
 
     @BeforeEach

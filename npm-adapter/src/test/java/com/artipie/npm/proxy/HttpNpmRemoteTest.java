@@ -10,7 +10,6 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rq.RequestLineFrom;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.npm.proxy.http.RsNotFound;
@@ -148,17 +147,17 @@ public final class HttpNpmRemoteTest {
     private Slice prepareClientSlice() {
         return (line, headers, body) -> {
             final Response res;
-            final String path = new RequestLineFrom(line).uri().getPath();
+            final String path = line.uri().getPath();
             if (path.equalsIgnoreCase("/asdas")) {
                 res = new RsFull(
                     RsStatus.OK,
-                    new Headers.From("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
+                    Headers.from("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
                     new Content.From(new TestResource("json/original.json").asBytes())
                 );
             } else if (path.equalsIgnoreCase("/asdas/-/asdas-1.0.0.tgz")) {
                 res = new RsFull(
                     RsStatus.OK,
-                    new Headers.From(
+                    Headers.from(
                         new Header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
                         new Header("Content-Type", HttpNpmRemoteTest.DEF_CONTENT_TYPE)
                     ),

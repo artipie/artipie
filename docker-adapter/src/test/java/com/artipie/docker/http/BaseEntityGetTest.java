@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
@@ -12,7 +13,6 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,14 +20,9 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link DockerSlice}.
  * Base GET endpoint.
- *
- * @since 0.1
  */
 class BaseEntityGetTest {
 
-    /**
-     * Slice being tested.
-     */
     private DockerSlice slice;
 
     @BeforeEach
@@ -38,9 +33,9 @@ class BaseEntityGetTest {
     @Test
     void shouldRespondOkToVersionCheck() {
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.GET, "/v2/").toString(),
+            new RequestLine(RqMethod.GET, "/v2/"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,

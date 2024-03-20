@@ -4,29 +4,27 @@
  */
 package com.artipie.micrometer;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import io.vertx.micrometer.backends.BackendRegistries;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import org.reactivestreams.Publisher;
 
 /**
  * Calculated uploaded and downloaded body size for all requests.
- * @since 0.28
  */
 public final class MicrometerSlice implements Slice {
 
@@ -74,9 +72,9 @@ public final class MicrometerSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> head,
-        final Publisher<ByteBuffer> body) {
-        final String method = new RequestLineFrom(line).method().value();
+    public Response response(final RequestLine line, final Headers head,
+                             final Content body) {
+        final String method = line.method().value();
         final Counter.Builder cnt = Counter.builder("artipie.request.counter")
             .description("HTTP requests counter")
             .tag(MicrometerSlice.METHOD, method);
@@ -223,7 +221,7 @@ public final class MicrometerSlice implements Slice {
 
             @Override
             public CompletionStage<Void> accept(final RsStatus status, final Headers headers,
-                final Publisher<ByteBuffer> body) {
+                final Content body) {
                 this.counter.tag(MicrometerSlice.STATUS, status.name())
                     .register(MicrometerSlice.this.registry).increment();
                 final Timer.Sample timer = Timer.start(MicrometerSlice.this.registry);

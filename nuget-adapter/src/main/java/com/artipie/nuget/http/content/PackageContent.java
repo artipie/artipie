@@ -4,6 +4,7 @@
  */
 package com.artipie.nuget.http.content;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -16,17 +17,14 @@ import com.artipie.nuget.http.Resource;
 import com.artipie.nuget.http.Route;
 import com.artipie.nuget.http.RsWithBodyNoHeaders;
 import com.artipie.nuget.http.metadata.ContentLocation;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.Optional;
-import org.reactivestreams.Publisher;
 
 /**
  * Package content route.
  * See <a href="https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource">Package Content</a>
- *
- * @since 0.1
  */
 @SuppressWarnings("deprecation")
 public final class PackageContent implements Route, ContentLocation {
@@ -122,9 +120,7 @@ public final class PackageContent implements Route, ContentLocation {
         }
 
         @Override
-        public Response put(
-            final Headers headers,
-            final Publisher<ByteBuffer> body) {
+        public Response put(Headers headers, Content body) {
             return new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
         }
 

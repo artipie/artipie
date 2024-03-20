@@ -4,6 +4,7 @@
  */
 package com.artipie.nuget.http.publish;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -19,33 +20,26 @@ import com.artipie.nuget.http.TestAuthentication;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.PolicyByUsername;
 import com.google.common.io.Resources;
-import io.reactivex.Flowable;
-import java.io.ByteArrayOutputStream;
-import java.net.URI;
-import java.net.URL;
-import java.nio.ByteBuffer;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.net.URI;
+import java.net.URL;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 /**
  * Tests for {@link NuGet}.
  * Package publish resource.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class NuGetPackagePublishTest {
 
-    /**
-     * Tested NuGet slice.
-     */
     private NuGet nuget;
 
     /**
@@ -102,9 +96,9 @@ class NuGetPackagePublishTest {
     @Test
     void shouldFailGetPackagePublish() {
         final Response response = this.nuget.response(
-            new RequestLine(RqMethod.GET, "/package").toString(),
-            new TestAuthentication.Headers(),
-            Flowable.empty()
+            new RequestLine(RqMethod.GET, "/package"),
+            TestAuthentication.HEADERS,
+            Content.EMPTY
         );
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
         MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
@@ -114,9 +108,9 @@ class NuGetPackagePublishTest {
     void shouldUnauthorizedPutPackageForAnonymousUser() {
         MatcherAssert.assertThat(
             this.nuget.response(
-                new RequestLine(RqMethod.PUT, "/package").toString(),
+                new RequestLine(RqMethod.PUT, "/package"),
                 Headers.EMPTY,
-                Flowable.fromArray(ByteBuffer.wrap("data".getBytes()))
+                new Content.From("data".getBytes())
             ),
             new ResponseMatcher(
                 RsStatus.UNAUTHORIZED, Headers.EMPTY
@@ -132,12 +126,12 @@ class NuGetPackagePublishTest {
         final ByteArrayOutputStream sink = new ByteArrayOutputStream();
         entity.writeTo(sink);
         return this.nuget.response(
-            new RequestLine(RqMethod.PUT, "/package").toString(),
-            new Headers.From(
-                new TestAuthentication.Header(),
+            new RequestLine(RqMethod.PUT, "/package"),
+            Headers.from(
+                TestAuthentication.HEADER,
                 new Header("Content-Type", entity.getContentType().getValue())
             ),
-            Flowable.fromArray(ByteBuffer.wrap(sink.toByteArray()))
+            new Content.From(sink.toByteArray())
         );
     }
 

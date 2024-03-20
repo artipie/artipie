@@ -12,8 +12,6 @@ import java.util.Map;
 
 /**
  * ContentType header for HexPm.
- *
- * @since 0.2
  */
 public class HexContentType {
     /**
@@ -24,14 +22,12 @@ public class HexContentType {
     /**
      * Request headers.
      */
-    private final Iterable<Map.Entry<String, String>> headers;
+    private final Headers headers;
 
     /**
-     * Ctor.
-     *
      * @param headers Request headers.
      */
-    public HexContentType(final Iterable<Map.Entry<String, String>> headers) {
+    public HexContentType(Headers headers) {
         this.headers = headers;
     }
 
@@ -47,6 +43,6 @@ public class HexContentType {
                 type = header.getValue();
             }
         }
-        return new Headers.From(this.headers, new ContentType(type));
+        return this.headers.copy().add(new ContentType(type));
     }
 }

@@ -7,17 +7,16 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.common.RsJson;
 import com.artipie.settings.Settings;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.json.Json;
-import org.reactivestreams.Publisher;
 
 /**
  * Health check slice.
@@ -44,8 +43,8 @@ public final class HealthSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line,
-        final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line,
+                             final Headers headers, final Content body) {
         return new AsyncResponse(
             this.storageStatus().thenApply(
                 ok ->

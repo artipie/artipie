@@ -5,12 +5,13 @@
 package com.artipie.http.headers;
 
 import com.artipie.http.Headers;
-import java.util.Iterator;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Iterator;
 
 /**
  * Test case for {@link WwwAuthenticate}.
@@ -41,7 +42,7 @@ public final class WwwAuthenticateTest {
     void shouldExtractValueFromHeaders() {
         final String value = "Basic realm=\"http://artipie.com/my-repo\"";
         final WwwAuthenticate header = new WwwAuthenticate(
-            new Headers.From(
+            Headers.from(
                 new Header("Content-Length", "11"),
                 new Header("www-authenticate", value),
                 new Header("X-Something", "Some Value")
@@ -63,7 +64,7 @@ public final class WwwAuthenticateTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new WwwAuthenticate(
-                new Headers.From("Content-Type", "text/plain")
+                Headers.from("Content-Type", "text/plain")
             ).getValue()
         );
     }
@@ -73,7 +74,7 @@ public final class WwwAuthenticateTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new WwwAuthenticate(
-                new Headers.From(
+                Headers.from(
                     new WwwAuthenticate("Basic realm=\"https://artipie.com\""),
                     new WwwAuthenticate("Bearer realm=\"https://artipie.com/token\"")
                 )

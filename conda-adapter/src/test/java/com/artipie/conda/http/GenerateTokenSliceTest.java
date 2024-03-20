@@ -24,9 +24,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link GenerateTokenSlice}.
- * @since 0.5
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class GenerateTokenSliceTest {
 
     /**
@@ -57,7 +55,7 @@ class GenerateTokenSliceTest {
                     )
                 ),
                 new RequestLine(RqMethod.POST, "/authentications"),
-                new Headers.From(new Authorization.Basic(name, pswd)),
+                Headers.from(new Authorization.Basic(name, pswd)),
                 Content.EMPTY
             )
         );
@@ -73,7 +71,7 @@ class GenerateTokenSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.UNAUTHORIZED),
                 new RequestLine(RqMethod.POST, "/any/line"),
-                new Headers.From(new Authorization.Basic("Jora", "0987")),
+                Headers.from(new Authorization.Basic("Jora", "0987")),
                 Content.EMPTY
             )
         );

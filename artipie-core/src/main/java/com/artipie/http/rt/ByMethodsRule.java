@@ -4,23 +4,22 @@
  */
 package com.artipie.http.rt;
 
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.Headers;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * Route by HTTP methods rule.
- * @since 0.16
  */
 public final class ByMethodsRule implements RtRule {
 
     /**
      * Standard method rules.
-     * @since 0.16
      */
     public enum Standard implements RtRule {
         /**
@@ -62,8 +61,7 @@ public final class ByMethodsRule implements RtRule {
         }
 
         @Override
-        public boolean apply(final String line,
-            final Iterable<Map.Entry<String, String>> headers) {
+        public boolean apply(RequestLine line, Headers headers) {
             return this.origin.apply(line, headers);
         }
     }
@@ -90,8 +88,7 @@ public final class ByMethodsRule implements RtRule {
     }
 
     @Override
-    public boolean apply(final String line,
-        final Iterable<Map.Entry<String, String>> headers) {
-        return this.methods.contains(new RequestLineFrom(line).method());
+    public boolean apply(RequestLine line, Headers headers) {
+        return this.methods.contains(line.method());
     }
 }

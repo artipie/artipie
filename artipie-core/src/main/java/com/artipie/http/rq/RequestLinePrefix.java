@@ -5,11 +5,9 @@
 package com.artipie.http.rq;
 
 import com.artipie.http.Headers;
-import java.util.Map;
 
 /**
  * Path prefix obtained from X-FullPath header and request line.
- * @since 0.16
  */
 public final class RequestLinePrefix {
 
@@ -36,15 +34,6 @@ public final class RequestLinePrefix {
     public RequestLinePrefix(final String line, final Headers headers) {
         this.line = line;
         this.headers = headers;
-    }
-
-    /**
-     * Ctor.
-     * @param line Request line
-     * @param headers Request headers
-     */
-    public RequestLinePrefix(final String line, final Iterable<Map.Entry<String, String>> headers) {
-        this(line, new Headers.From(headers));
     }
 
     /**

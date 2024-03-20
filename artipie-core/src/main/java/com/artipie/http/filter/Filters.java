@@ -6,25 +6,24 @@ package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlNode;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.Headers;
+import com.artipie.http.rq.RequestLine;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * Filters.
- *
+ *<p>
  * Yaml format:
  * <pre>
  *   include: yaml-sequence of including filters
  *   exclude: yaml-sequence of excluding filters
  * </pre>
-
- * @since 1.2
  */
 public final class Filters {
     /**
@@ -43,7 +42,6 @@ public final class Filters {
     private final List<Filter> excludes;
 
     /**
-     * Ctor.
      * @param yaml Yaml mapping to read filters from
      */
     public Filters(final YamlMapping yaml) {
@@ -57,13 +55,11 @@ public final class Filters {
      * @param headers Request headers.
      * @return True if is allowed to get access to repository content.
      */
-    public boolean allowed(final String line,
-        final Iterable<Map.Entry<String, String>> headers) {
-        final RequestLineFrom rqline = new RequestLineFrom(line);
+    public boolean allowed(RequestLine line, Headers headers) {
         final boolean included = this.includes.stream()
-            .anyMatch(filter -> filter.check(rqline, headers));
+            .anyMatch(filter -> filter.check(line, headers));
         final boolean excluded = this.excludes.stream()
-            .anyMatch(filter -> filter.check(rqline, headers));
+            .anyMatch(filter -> filter.check(line, headers));
         return included & !excluded;
     }
 

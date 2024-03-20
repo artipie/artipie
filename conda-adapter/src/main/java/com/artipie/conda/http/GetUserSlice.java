@@ -4,29 +4,26 @@
  */
 package com.artipie.conda.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.headers.WwwAuthenticate;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.common.RsJson;
 import java.io.StringReader;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonStructure;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice to handle `GET /user` request.
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class GetUserSlice implements Slice {
 
     /**
@@ -43,8 +40,8 @@ final class GetUserSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Headers headers,
+                             final Content body) {
         return new AsyncResponse(
             this.scheme.authenticate(headers, line).thenApply(
                 result -> {
@@ -56,7 +53,7 @@ final class GetUserSlice implements Slice {
                     }
                     return new RsWithHeaders(
                         new RsWithStatus(RsStatus.UNAUTHORIZED),
-                        new Headers.From(new WwwAuthenticate(result.challenge()))
+                        Headers.from(new WwwAuthenticate(result.challenge()))
                     );
                 }
             )

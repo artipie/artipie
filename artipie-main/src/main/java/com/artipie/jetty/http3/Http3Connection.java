@@ -4,6 +4,7 @@
  */
 package com.artipie.jetty.http3;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.rs.RsStatus;
@@ -20,7 +21,6 @@ import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.http3.api.Stream;
 import org.eclipse.jetty.http3.frames.DataFrame;
 import org.eclipse.jetty.http3.frames.HeadersFrame;
-import org.reactivestreams.Publisher;
 
 /**
  * Connections with {@link Stream.Server} under the hood.
@@ -43,7 +43,7 @@ public final class Http3Connection implements Connection {
 
     @Override
     public CompletionStage<Void> accept(
-        final RsStatus status, final Headers headers, final Publisher<ByteBuffer> body
+        final RsStatus status, final Headers headers, final Content body
     ) {
         final int stat = Integer.parseInt(status.code());
         final MetaData.Response response = new MetaData.Response(

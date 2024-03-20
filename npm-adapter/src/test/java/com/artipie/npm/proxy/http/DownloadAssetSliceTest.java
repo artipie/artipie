@@ -22,12 +22,6 @@ import com.artipie.scheduling.ProxyArtifactEvent;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.web.client.WebClient;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-import javax.json.Json;
-import javax.json.JsonObject;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterAll;
@@ -35,11 +29,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+
 /**
  * Test cases for {@link DownloadAssetSlice}.
- * @since 0.9
  */
-@SuppressWarnings({"PMD.AvoidUsingHardCodedIP", "PMD.AvoidDuplicateLiterals"})
 final class DownloadAssetSliceTest {
 
     /**
@@ -116,7 +115,7 @@ final class DownloadAssetSliceTest {
                         new SliceSimple(
                             new RsFull(
                                 RsStatus.OK,
-                                new Headers.From(new ContentType("tgz")),
+                                Headers.from(new ContentType("tgz")),
                                 new Content.From(
                                     new TestResource(
                                         String.format("storage/%s", DownloadAssetSliceTest.TGZ)

@@ -8,14 +8,11 @@ import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Response that caches origin response once it first sent and can replay it many times.
@@ -38,13 +35,13 @@ public final class CachedResponse implements Response {
      * Wraps response with stateful connection.
      * @param origin Origin response
      */
-    public CachedResponse(final Response origin) {
+    public CachedResponse(Response origin) {
         this.origin = origin;
         this.con = new StatefulConnection();
     }
 
     @Override
-    public CompletionStage<Void> send(final Connection connection) {
+    public CompletionStage<Void> send(Connection connection) {
         return this.con.load(this.origin).thenCompose(self -> self.replay(connection));
     }
 
@@ -79,7 +76,7 @@ public final class CachedResponse implements Response {
 
         @Override
         public CompletionStage<Void> accept(final RsStatus stts, final Headers hdrs,
-            final Publisher<ByteBuffer> body) {
+            final Content body) {
             this.status = stts;
             this.headers = hdrs;
             return new Content.From(body).asBytesFuture().thenAccept(
@@ -93,7 +90,7 @@ public final class CachedResponse implements Response {
                 "(%s: status=%s, headers=[%s], body=%s)",
                 this.getClass().getSimpleName(),
                 this.status,
-                StreamSupport.stream(this.headers.spliterator(), false)
+                this.headers.stream()
                     .map(
                         header -> String.format(
                             "\"%s\": \"%s\"",

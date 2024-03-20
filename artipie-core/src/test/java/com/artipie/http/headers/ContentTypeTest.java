@@ -37,7 +37,7 @@ public final class ContentTypeTest {
     void shouldExtractValueFromHeaders() {
         final String value = "application/octet-stream";
         final ContentType header = new ContentType(
-            new Headers.From(
+            Headers.from(
                 new Header("Content-Length", "11"),
                 new Header("content-type", value),
                 new Header("X-Something", "Some Value")
@@ -59,7 +59,7 @@ public final class ContentTypeTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new ContentType(
-                new Headers.From("Location", "http://artipie.com")
+                Headers.from("Location", "http://artipie.com")
             ).getValue()
         );
     }
@@ -69,7 +69,7 @@ public final class ContentTypeTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new ContentType(
-                new Headers.From(
+                Headers.from(
                     new ContentType("application/json"),
                     new ContentType("text/plain")
                 )

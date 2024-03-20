@@ -4,31 +4,28 @@
  */
 package com.artipie.pypi.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.hm.IsHeader;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import java.util.Collections;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link RedirectSlice}.
- * @since 0.6
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RedirectSliceTest {
 
     @Test
     void redirectsToNormalizedName() {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
-                new RequestLine(RqMethod.GET, "/one/two/three_four").toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine(RqMethod.GET, "/one/two/three_four"),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.MOVED_PERMANENTLY,
@@ -41,9 +38,9 @@ class RedirectSliceTest {
     void redirectsToNormalizedNameWithSlashAtTheEnd() {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
-                new RequestLine(RqMethod.GET, "/one/two/three_four/").toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine(RqMethod.GET, "/one/two/three_four/"),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.MOVED_PERMANENTLY,
@@ -56,9 +53,9 @@ class RedirectSliceTest {
     void redirectsToNormalizedNameWhenFillPathIsPresent() {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
-                new RequestLine(RqMethod.GET, "/three/F.O.U.R").toString(),
-                new Headers.From("X-FullPath", "/one/two/three/F.O.U.R"),
-                Flowable.empty()
+                new RequestLine(RqMethod.GET, "/three/F.O.U.R"),
+                Headers.from("X-FullPath", "/one/two/three/F.O.U.R"),
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.MOVED_PERMANENTLY,
@@ -71,9 +68,9 @@ class RedirectSliceTest {
     void normalizesOnlyLastPart() {
         MatcherAssert.assertThat(
             new RedirectSlice().response(
-                new RequestLine(RqMethod.GET, "/three/One_Two").toString(),
-                new Headers.From("X-FullPath", "/One_Two/three/One_Two"),
-                Flowable.empty()
+                new RequestLine(RqMethod.GET, "/three/One_Two"),
+                Headers.from("X-FullPath", "/One_Two/three/One_Two"),
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.MOVED_PERMANENTLY,

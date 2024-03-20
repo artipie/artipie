@@ -5,19 +5,19 @@
 package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.Objects;
 import java.util.Optional;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that filters content of repository.
- * @since 1.2
  */
 public class FilterSlice implements Slice {
     /**
@@ -31,7 +31,6 @@ public class FilterSlice implements Slice {
     private final Filters filters;
 
     /**
-     * Ctor.
      * @param origin Origin slice
      * @param yaml Yaml mapping to read filters from
      */
@@ -39,7 +38,7 @@ public class FilterSlice implements Slice {
         this(
             origin,
             Optional.of(yaml.yamlMapping("filters"))
-                .map(filters -> new Filters(filters))
+                .map(Filters::new)
                 .get()
         );
     }
@@ -56,15 +55,11 @@ public class FilterSlice implements Slice {
 
     @Override
     public final Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
-        final Response response;
+        RequestLine line, Headers headers, Content body
+    ) {
         if (this.filters.allowed(line, headers)) {
-            response = this.origin.response(line, headers, body);
-        } else {
-            response = new RsWithStatus(RsStatus.FORBIDDEN);
+            return this.origin.response(line, headers, body);
         }
-        return response;
+        return new RsWithStatus(RsStatus.FORBIDDEN);
     }
 }

@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Docker;
 import com.artipie.docker.RepoName;
@@ -16,8 +17,6 @@ import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,20 +24,11 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for {@link DockerSlice}.
  * Upload PATCH endpoint.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UploadEntityPatchTest {
 
-    /**
-     * Docker registry used in tests.
-     */
     private Docker docker;
 
-    /**
-     * Slice being tested.
-     */
     private DockerSlice slice;
 
     @BeforeEach
@@ -57,9 +47,9 @@ class UploadEntityPatchTest {
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, uuid);
         final byte[] data = "data".getBytes();
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.PATCH, String.format("%s", path)).toString(),
+            new RequestLine(RqMethod.PATCH, String.format("%s", path)),
             Headers.EMPTY,
-            Flowable.just(ByteBuffer.wrap(data))
+            new Content.From(data)
         );
         MatcherAssert.assertThat(
             response,
@@ -76,9 +66,9 @@ class UploadEntityPatchTest {
     @Test
     void shouldReturnNotFoundWhenUploadNotExists() {
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.PATCH, "/v2/test/blobs/uploads/12345").toString(),
+            new RequestLine(RqMethod.PATCH, "/v2/test/blobs/uploads/12345"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,

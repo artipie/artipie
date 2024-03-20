@@ -84,6 +84,8 @@ public final class VertxMain {
      * Servers.
      */
     private final List<VertxSliceServer> servers;
+    private QuartzService quartz;
+
 
     /**
      * Port and http3 server.
@@ -111,7 +113,7 @@ public final class VertxMain {
      * @throws IOException In case of error reading settings.
      */
     public int start(final int apiPort) throws IOException {
-        final QuartzService quartz = new QuartzService();
+        quartz = new QuartzService();
         final Settings settings = new SettingsFromPath(this.config).find(quartz);
         final Vertx vertx = VertxMain.vertx(settings.metrics());
         final JWTAuth jwt = JWTAuth.create(
@@ -135,11 +137,14 @@ public final class VertxMain {
         return main;
     }
 
-    public void stop(){
+    public void stop() {
         this.servers.forEach(s -> {
             s.stop();
             LOGGER.info("Artipie's server on port {} was stopped", s.port());
         });
+        if (quartz != null) {
+            quartz.stop();
+        }
     }
 
     /**

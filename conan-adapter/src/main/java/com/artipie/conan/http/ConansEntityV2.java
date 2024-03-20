@@ -7,7 +7,7 @@ package  com.artipie.conan.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import io.vavr.Tuple2;
 import java.io.StringReader;
 import java.net.URLConnection;
@@ -182,7 +182,7 @@ public final class ConansEntityV2 {
 
         @Override
         public CompletableFuture<RequestResult> getResult(
-            final RequestLineFrom request, final String hostname, final Matcher matcher
+            final RequestLine request, final String hostname, final Matcher matcher
         ) {
             final Key key = new Key.From(
                 String.format(
@@ -209,7 +209,7 @@ public final class ConansEntityV2 {
 
         @Override
         public CompletableFuture<RequestResult> getResult(
-            final RequestLineFrom request, final String hostname, final Matcher matcher
+            final RequestLine request, final String hostname, final Matcher matcher
         ) {
             final Key key = new Key.From(
                 String.format(
@@ -235,7 +235,7 @@ public final class ConansEntityV2 {
 
         @Override
         public CompletableFuture<RequestResult> getResult(
-            final RequestLineFrom request, final String hostname, final Matcher matcher
+            final RequestLine request, final String hostname, final Matcher matcher
         ) {
             final Key key = new Key.From(
                 String.format(
@@ -274,7 +274,7 @@ public final class ConansEntityV2 {
 
         @Override
         public CompletableFuture<RequestResult> getResult(
-            final RequestLineFrom request, final String hostname, final Matcher matcher
+            final RequestLine request, final String hostname, final Matcher matcher
         ) {
             return BaseConanSlice.generateJson(
                 ConansEntityV2.PKG_BIN_LIST, file -> {
@@ -306,7 +306,7 @@ public final class ConansEntityV2 {
 
         @Override
         public CompletableFuture<RequestResult> getResult(
-            final RequestLineFrom request, final String hostname, final Matcher matcher
+            final RequestLine request, final String hostname, final Matcher matcher
         ) {
             final Key key = new Key.From(
                 String.format(
@@ -345,7 +345,7 @@ public final class ConansEntityV2 {
 
         @Override
         public CompletableFuture<RequestResult> getResult(
-            final RequestLineFrom request, final String hostname, final Matcher matcher
+            final RequestLine request, final String hostname, final Matcher matcher
         ) {
             return BaseConanSlice.generateJson(
                 ConansEntityV2.PKG_SRC_LIST, file -> {

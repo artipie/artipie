@@ -4,18 +4,18 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasHeaders;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.StandardRs;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link SliceWithHeaders}.
- * @since 0.9
  */
 class SliceWithHeadersTest {
 
@@ -25,8 +25,8 @@ class SliceWithHeadersTest {
         final String value = "text/plain";
         MatcherAssert.assertThat(
             new SliceWithHeaders(
-                new SliceSimple(StandardRs.EMPTY), new Headers.From(header, value)
-            ).response("GET /some/text HTTP/1.1", Headers.EMPTY, Flowable.empty()),
+                new SliceSimple(StandardRs.EMPTY), Headers.from(header, value)
+            ).response(RequestLine.from("GET /some/text HTTP/1.1"), Headers.EMPTY, Content.EMPTY),
             new RsHasHeaders(new Header(header, value))
         );
     }
@@ -41,8 +41,8 @@ class SliceWithHeadersTest {
             new SliceWithHeaders(
                 new SliceSimple(
                     new RsWithHeaders(StandardRs.EMPTY, hone, vone)
-                ), new Headers.From(htwo, vtwo)
-            ).response("GET /any/text HTTP/1.1", Headers.EMPTY, Flowable.empty()),
+                ), Headers.from(htwo, vtwo)
+            ).response(RequestLine.from("GET /any/text HTTP/1.1"), Headers.EMPTY, Content.EMPTY),
             new RsHasHeaders(
                 new Header(hone, vone), new Header(htwo, vtwo)
             )

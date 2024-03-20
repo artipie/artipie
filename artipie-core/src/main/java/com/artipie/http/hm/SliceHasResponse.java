@@ -11,10 +11,11 @@ import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.CachedResponse;
 import io.reactivex.Flowable;
-import java.util.function.Function;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+
+import java.util.function.Function;
 
 /**
  * Matcher for {@link Slice} response.
@@ -65,10 +66,14 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
      * @param headers Headers
      * @param body Body
      */
-    public SliceHasResponse(final Matcher<? extends Response> rsp, final RequestLine line,
-        final Headers headers, final Content body) {
+    public SliceHasResponse(
+        Matcher<? extends Response> rsp,
+        RequestLine line,
+        Headers headers,
+        Content body
+    ) {
         this.rsp = rsp;
-        this.responser = slice -> slice.response(line.toString(), headers, body);
+        this.responser = slice -> slice.response(line, headers, body);
     }
 
     @Override

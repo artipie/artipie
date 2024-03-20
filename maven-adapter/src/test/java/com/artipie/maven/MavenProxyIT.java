@@ -37,10 +37,7 @@ import org.testcontainers.containers.GenericContainer;
 
 /**
  * Integration test for {@link com.artipie.maven.http.MavenProxySlice}.
- *
- * @since 0.11
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @EnabledOnOs({OS.LINUX, OS.MAC})
 final class MavenProxyIT {
 

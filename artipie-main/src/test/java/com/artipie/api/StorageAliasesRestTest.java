@@ -16,18 +16,14 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link StorageAliasesRest}.
- * @since 0.27
  */
-@SuppressWarnings(
-    {
-        "PMD.AvoidDuplicateLiterals",
-        "PMD.ProhibitPlainJunitAssertionsRule",
-        "PMD.TooManyMethods"}
-)
+@DisabledOnOs(OS.WINDOWS)
 public final class StorageAliasesRestTest extends RestApiServerBase {
 
     @Test

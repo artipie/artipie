@@ -20,30 +20,21 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 /**
  * Tests for {@link DockerSlice}.
  * Upload PUT endpoint.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class UploadEntityPutTest {
 
-    /**
-     * Docker registry used in tests.
-     */
     private Docker docker;
 
-    /**
-     * Slice being tested.
-     */
     private DockerSlice slice;
 
     @BeforeEach
@@ -67,9 +58,9 @@ class UploadEntityPutTest {
             "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7"
         );
         final Response response = this.slice.response(
-            UploadEntityPutTest.requestLine(name, upload.uuid(), digest).toString(),
+            UploadEntityPutTest.requestLine(name, upload.uuid(), digest),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             "Returns 201 status and corresponding headers",
@@ -117,9 +108,9 @@ class UploadEntityPutTest {
     @Test
     void shouldReturnNotFoundWhenUploadNotExists() {
         final Response response = this.slice.response(
-            new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345").toString(),
+            new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345"),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,

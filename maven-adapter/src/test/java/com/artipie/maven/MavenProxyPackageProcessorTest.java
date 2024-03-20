@@ -28,9 +28,7 @@ import org.quartz.impl.StdSchedulerFactory;
 
 /**
  * Test for {@link MavenProxyPackageProcessorTest}.
- * @since 0.10
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class MavenProxyPackageProcessorTest {
 
     /**

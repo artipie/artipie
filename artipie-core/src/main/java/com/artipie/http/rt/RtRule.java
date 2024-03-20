@@ -4,11 +4,12 @@
  */
 package com.artipie.http.rt;
 
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.Headers;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqMethod;
+
 import java.util.Arrays;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -17,8 +18,6 @@ import java.util.regex.Pattern;
  * A rule which is applied to the request metadata such as request line and
  * headers. If rule matched, then routing slice {@link SliceRoute} will
  * redirect request to target {@link com.artipie.http.Slice}.
- * </p>
- * @since 0.5
  */
 public interface RtRule {
 
@@ -33,7 +32,7 @@ public interface RtRule {
      * @param headers Request headers
      * @return True if rule passed
      */
-    boolean apply(String line, Iterable<Map.Entry<String, String>> headers);
+    boolean apply(RequestLine line, Headers headers);
 
     /**
      * This rule is matched only when all of the rules are matched.
@@ -45,7 +44,6 @@ public interface RtRule {
     final class Multiple extends All {
 
         /**
-         * Ctor.
          * @param rules Rules array
          */
         public Multiple(final RtRule... rules) {
@@ -53,7 +51,6 @@ public interface RtRule {
         }
 
         /**
-         * Ctor.
          * @param rules Rules
          */
         public Multiple(final Iterable<RtRule> rules) {
@@ -63,7 +60,6 @@ public interface RtRule {
 
     /**
      * This rule is matched only when all of the rules are matched.
-     * @since 0.10
      */
     class All implements RtRule {
 
@@ -89,8 +85,7 @@ public interface RtRule {
         }
 
         @Override
-        public boolean apply(final String line,
-            final Iterable<Map.Entry<String, String>> headers) {
+        public boolean apply(RequestLine line, Headers headers) {
             boolean match = true;
             for (final RtRule rule : this.rules) {
                 if (!rule.apply(line, headers)) {
@@ -104,7 +99,6 @@ public interface RtRule {
 
     /**
      * This rule is matched only when any of the rules is matched.
-     * @since 0.10
      */
     final class Any implements RtRule {
 
@@ -130,8 +124,7 @@ public interface RtRule {
         }
 
         @Override
-        public boolean apply(final String line,
-            final Iterable<Map.Entry<String, String>> headers) {
+        public boolean apply(RequestLine line, Headers headers) {
             boolean match = false;
             for (final RtRule rule : this.rules) {
                 if (rule.apply(line, headers)) {
@@ -188,11 +181,8 @@ public interface RtRule {
         }
 
         @Override
-        public boolean apply(final String line,
-            final Iterable<Map.Entry<String, String>> headers) {
-            return this.ptn.matcher(
-                new RequestLineFrom(line).uri().getPath()
-            ).matches();
+        public boolean apply(RequestLine line, Headers headers) {
+            return this.ptn.matcher(line.uri().getPath()).matches();
         }
     }
 
@@ -216,8 +206,7 @@ public interface RtRule {
         }
 
         @Override
-        public final boolean apply(final String line,
-            final Iterable<Map.Entry<String, String>> headers) {
+        public final boolean apply(RequestLine line, Headers headers) {
             return this.origin.apply(line, headers);
         }
     }
@@ -257,7 +246,7 @@ public interface RtRule {
         }
 
         @Override
-        public boolean apply(final String line, final Iterable<Map.Entry<String, String>> headers) {
+        public boolean apply(RequestLine line, Headers headers) {
             return new RqHeaders(headers, this.name).stream()
                 .anyMatch(val -> this.ptn.matcher(val).matches());
         }

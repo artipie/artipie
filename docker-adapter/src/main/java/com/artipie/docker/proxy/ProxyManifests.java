@@ -34,7 +34,7 @@ import java.util.concurrent.CompletionStage;
  */
 public final class ProxyManifests implements Manifests {
 
-    private static final Headers MANIFEST_ACCEPT_HEADERS = new Headers.From(
+    private static final Headers MANIFEST_ACCEPT_HEADERS = Headers.from(
             new Header("Accept", "application/json"),
             new Header("Accept", "application/vnd.oci.image.index.v1+json"),
             new Header("Accept", "application/vnd.oci.image.manifest.v1+json"),
@@ -83,7 +83,7 @@ public final class ProxyManifests implements Manifests {
     public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
         return new ResponseSink<>(
             this.remote.response(
-                new RequestLine(RqMethod.GET, new ManifestPath(this.name, ref).string()).toString(),
+                new RequestLine(RqMethod.GET, new ManifestPath(this.name, ref).string()),
                 MANIFEST_ACCEPT_HEADERS,
                 Content.EMPTY
             ),
@@ -111,7 +111,7 @@ public final class ProxyManifests implements Manifests {
             this.remote.response(
                 new RequestLine(
                     RqMethod.GET, uri(name.value(), limit, fromStr)
-                ).toString(),
+                ),
                 Headers.EMPTY,
                 Content.EMPTY
             ),

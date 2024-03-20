@@ -15,17 +15,16 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Test for {@link DeleteTokenSlice}.
- * @since 0.3
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DeleteTokenSliceTest {
 
     @Test
@@ -36,7 +35,7 @@ class DeleteTokenSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine(RqMethod.DELETE, "/authentications$"),
-                new Headers.From(new Authorization.Token("abc123")),
+                Headers.from(new Authorization.Token("abc123")),
                 Content.EMPTY
             )
         );
@@ -50,7 +49,7 @@ class DeleteTokenSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(RqMethod.DELETE, "/authentications$"),
-                new Headers.From(new Authorization.Token("any")),
+                Headers.from(new Authorization.Token("any")),
                 Content.EMPTY
             )
         );

@@ -38,7 +38,7 @@ public final class AuthorizationTest {
     void shouldExtractValueFromHeaders() {
         final String value = "Bearer abc";
         final Authorization header = new Authorization(
-            new Headers.From(
+            Headers.from(
                 new Header("Content-Length", "11"),
                 new Header("authorization", value),
                 new Header("X-Something", "Some Value")
@@ -92,7 +92,7 @@ public final class AuthorizationTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new Authorization(
-                new Headers.From("Content-Type", "text/plain")
+                Headers.from("Content-Type", "text/plain")
             ).getValue()
         );
     }
@@ -102,7 +102,7 @@ public final class AuthorizationTest {
         Assertions.assertThrows(
             IllegalStateException.class,
             () -> new Authorization(
-                new Headers.From(
+                Headers.from(
                     new Authorization("Bearer one"),
                     new Authorization("Bearer two")
                 )

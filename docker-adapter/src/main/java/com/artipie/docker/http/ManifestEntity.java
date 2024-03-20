@@ -6,6 +6,7 @@ package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Docker;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.error.ManifestError;
@@ -14,7 +15,6 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.docker.ManifestReference;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
@@ -26,6 +26,7 @@ import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Location;
 import com.artipie.http.headers.Login;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
@@ -33,11 +34,8 @@ import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
-import org.reactivestreams.Publisher;
 
-import java.nio.ByteBuffer;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.regex.Pattern;
@@ -45,8 +43,6 @@ import java.util.regex.Pattern;
 /**
  * Manifest entity in Docker HTTP API..
  * See <a href="https://docs.docker.com/registry/spec/api/#manifest">Manifest</a>.
- *
- * @since 0.2
  */
 final class ManifestEntity {
 
@@ -81,8 +77,6 @@ final class ManifestEntity {
         private final Docker docker;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          */
         Head(final Docker docker) {
@@ -90,7 +84,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Pull(new Request(line).name())
             );
@@ -98,9 +92,9 @@ final class ManifestEntity {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body) {
+            final RequestLine line,
+            final Headers headers,
+            final Content body) {
             final Request request = new Request(line);
             final ManifestReference ref = request.reference();
             return new AsyncResponse(
@@ -142,7 +136,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Pull(new Request(line).name())
             );
@@ -150,9 +144,9 @@ final class ManifestEntity {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -211,7 +205,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Push(new Request(line).name())
             );
@@ -219,9 +213,9 @@ final class ManifestEntity {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -233,7 +227,7 @@ final class ManifestEntity {
                             this.events.get().add(
                                 new ArtifactEvent(
                                     ManifestEntity.REPO_TYPE, this.rname,
-                                    new Login(new Headers.From(headers)).getValue(),
+                                    new Login(headers).getValue(),
                                     name.value(), ref.reference(),
                                     manifest.layers().stream().mapToLong(Layer::size).sum()
                                 )
@@ -304,8 +298,8 @@ final class ManifestEntity {
 
         @Override
         public Response response(
-            final String line, final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line, final Headers headers,
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -345,7 +339,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name,
                 new Scope.Repository.OverwriteTags(new Request(line).name())
@@ -370,7 +364,7 @@ final class ManifestEntity {
          *
          * @param line HTTP request line.
          */
-        Request(final String line) {
+        Request(final RequestLine line) {
             this.rqregex = new RqByRegex(line, ManifestEntity.PATH);
         }
 

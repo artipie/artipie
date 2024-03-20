@@ -5,10 +5,6 @@
 package com.artipie.maven.http;
 
 import com.artipie.asto.Key;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.cactoos.map.MapEntry;
 import org.cactoos.map.MapOf;
 import org.hamcrest.MatcherAssert;
@@ -17,10 +13,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * Test case for {@link ArtifactHeaders}.
- *
- * @since 1.0
  */
 public final class ArtifactHeadersTest {
 
@@ -30,16 +28,14 @@ public final class ArtifactHeadersTest {
         final String two = "two";
         final String three = "three";
         MatcherAssert.assertThat(
-            StreamSupport.stream(
-                new ArtifactHeaders(
-                    new Key.From("anything"),
-                    new MapOf<>(
-                        new MapEntry<>("sha1", one),
-                        new MapEntry<>("sha256", two),
-                        new MapEntry<>("sha512", three)
-                    )
-                ).spliterator(), false
-            ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+            ArtifactHeaders.from(
+                new Key.From("anything"),
+                new MapOf<>(
+                    new MapEntry<>("sha1", one),
+                    new MapEntry<>("sha256", two),
+                    new MapEntry<>("sha512", three)
+                )
+            ).stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
             Matchers.allOf(
                 Matchers.hasEntry("X-Checksum-sha1", one),
                 Matchers.hasEntry("X-Checksum-sha256", two),
@@ -52,12 +48,9 @@ public final class ArtifactHeadersTest {
     @Test
     void addsContentDispositionHeader() {
         MatcherAssert.assertThat(
-            StreamSupport.stream(
-                new ArtifactHeaders(
-                    new Key.From("artifact.jar"),
-                    Collections.emptyNavigableMap()
-                ).spliterator(), false
-            ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+            ArtifactHeaders.from(new Key.From("artifact.jar"), Collections.emptyNavigableMap())
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
             Matchers.hasEntry("Content-Disposition", "attachment; filename=\"artifact.jar\"")
         );
     }
@@ -71,11 +64,9 @@ public final class ArtifactHeadersTest {
     @ParameterizedTest
     void addsContentTypeHeaders(final String target, final String mime) {
         MatcherAssert.assertThat(
-            StreamSupport.stream(
-                new ArtifactHeaders(
-                    new Key.From(target), Collections.emptyNavigableMap()
-                ).spliterator(), false
-            ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+            ArtifactHeaders.from(new Key.From(target), Collections.emptyNavigableMap())
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
             Matchers.hasEntry("Content-Type", mime)
         );
     }

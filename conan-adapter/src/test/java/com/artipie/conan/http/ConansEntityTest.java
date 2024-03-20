@@ -17,21 +17,20 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
+import org.json.JSONException;
+import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+
+import javax.json.Json;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import javax.json.Json;
-import org.json.JSONException;
-import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link ConansEntity}.
- * @since 0.1
  */
 class ConansEntityTest {
 
@@ -136,8 +135,8 @@ class ConansEntityTest {
                 .saveTo(storage, new Key.From(file));
         }
         final Response response = factory.apply(storage).response(
-            new RequestLine(RqMethod.GET, request).toString(),
-            new Headers.From("Host", "localhost:9300"), Content.EMPTY
+            new RequestLine(RqMethod.GET, request),
+            Headers.from("Host", "localhost:9300"), Content.EMPTY
         );
         final String expected = Json.createReader(
             new TestResource(json).asInputStream()
@@ -170,7 +169,7 @@ class ConansEntityTest {
 
         @Override
         public CompletionStage<Void> accept(
-            final RsStatus status, final Headers headers, final Publisher<ByteBuffer> body
+            final RsStatus status, final Headers headers, final Content body
         ) {
             return CompletableFuture.supplyAsync(
                 () -> {

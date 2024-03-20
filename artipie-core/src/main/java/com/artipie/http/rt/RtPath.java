@@ -4,15 +4,16 @@
  */
 package com.artipie.http.rt;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.Optional;
-import org.reactivestreams.Publisher;
+
+import com.artipie.http.rq.RequestLine;
 
 /**
  * Route path.
- * @since 0.10
  */
 public interface RtPath {
     /**
@@ -22,9 +23,5 @@ public interface RtPath {
      * @param body Body
      * @return Response if passed routing rule
      */
-    Optional<Response> response(
-        String line,
-        Iterable<Map.Entry<String, String>> headers,
-        Publisher<ByteBuffer> body
-    );
+    Optional<Response> response(RequestLine line, Headers headers, Content body);
 }

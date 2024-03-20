@@ -26,7 +26,7 @@ class UploadEntityRequestTest {
     @Test
     void shouldReadName() {
         final UploadEntity.Request request = new UploadEntity.Request(
-            new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/").toString()
+            new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/")
         );
         MatcherAssert.assertThat(request.name().value(), new IsEqual<>("my-repo"));
     }
@@ -38,7 +38,7 @@ class UploadEntityRequestTest {
             new UploadEntity.Request(
                 new RequestLine(
                     RqMethod.POST, String.format("/v2/%s/blobs/uploads/", name)
-                ).toString()
+                )
             ).name().value(),
             new IsEqual<>(name)
         );
@@ -50,7 +50,7 @@ class UploadEntityRequestTest {
             new RequestLine(
                 RqMethod.PATCH,
                 "/v2/my-repo/blobs/uploads/a9e48d2a-c939-441d-bb53-b3ad9ab67709"
-            ).toString()
+            )
         );
         MatcherAssert.assertThat(
             request.uuid(),
@@ -61,7 +61,7 @@ class UploadEntityRequestTest {
     @Test
     void shouldReadEmptyUuid() {
         final UploadEntity.Request request = new UploadEntity.Request(
-            new RequestLine(RqMethod.PATCH, "/v2/my-repo/blobs/uploads//123").toString()
+            new RequestLine(RqMethod.PATCH, "/v2/my-repo/blobs/uploads//123")
         );
         MatcherAssert.assertThat(
             request.uuid(),
@@ -75,7 +75,7 @@ class UploadEntityRequestTest {
             new RequestLine(
                 RqMethod.PUT,
                 "/v2/my-repo/blobs/uploads/123-abc?digest=sha256:12345"
-            ).toString()
+            )
         );
         MatcherAssert.assertThat(request.digest().string(), new IsEqual<>("sha256:12345"));
     }
@@ -86,7 +86,7 @@ class UploadEntityRequestTest {
             Assertions.assertThrows(
                 IllegalArgumentException.class,
                 () -> new UploadEntity.Request(
-                    new RequestLine(RqMethod.PUT, "/one/two").toString()
+                    new RequestLine(RqMethod.PUT, "/one/two")
                 ).name()
             ).getMessage(),
             new StringContains(false, "Unexpected path")
@@ -102,7 +102,7 @@ class UploadEntityRequestTest {
                     new RequestLine(
                         RqMethod.PUT,
                         "/v2/my-repo/blobs/uploads/123-abc?what=nothing"
-                    ).toString()
+                    )
                 ).digest()
             ).getMessage(),
             new StringContains(false, "Unexpected query")
@@ -115,7 +115,7 @@ class UploadEntityRequestTest {
             new RequestLine(
                 RqMethod.POST,
                 "/v2/my-repo/blobs/uploads/?mount=sha256:12345&from=foo"
-            ).toString()
+            )
         );
         MatcherAssert.assertThat(
             request.mount().map(Digest::string),
@@ -126,7 +126,7 @@ class UploadEntityRequestTest {
     @Test
     void shouldReadMountWhenAbsent() {
         final UploadEntity.Request request = new UploadEntity.Request(
-            new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/").toString()
+            new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/")
         );
         MatcherAssert.assertThat(
             request.mount().isPresent(),
@@ -140,7 +140,7 @@ class UploadEntityRequestTest {
             new RequestLine(
                 RqMethod.POST,
                 "/v2/my-repo/blobs/uploads/?mount=sha256:12345&from=foo"
-            ).toString()
+            )
         );
         MatcherAssert.assertThat(
             request.from().map(RepoName::value),
@@ -151,7 +151,7 @@ class UploadEntityRequestTest {
     @Test
     void shouldReadFromWhenAbsent() {
         final UploadEntity.Request request = new UploadEntity.Request(
-            new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/").toString()
+            new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/")
         );
         MatcherAssert.assertThat(
             request.from().isPresent(),

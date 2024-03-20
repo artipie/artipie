@@ -4,31 +4,31 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.Headers;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.scheduling.RepositoryEvents;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Queue;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.Queue;
+
 /**
  * Test case for {@link SliceUpload}.
- * @since 0.6
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class SliceUploadTest {
 
     @Test
@@ -40,11 +40,13 @@ public final class SliceUploadTest {
         MatcherAssert.assertThat(
             "Wrong HTTP status returned",
             new SliceUpload(storage).response(
-                new RequestLine("PUT", path, "HTTP/1.1").toString(),
-                Collections.singleton(
+                new RequestLine("PUT", path, "HTTP/1.1"),
+                Headers.from(
                     new MapEntry<>("Content-Size", Long.toString(data.length))
                 ),
-                Flowable.just(ByteBuffer.wrap(data))
+                new Content.From(
+                    Flowable.just(ByteBuffer.wrap(data))
+                )
             ),
             new RsHasStatus(RsStatus.CREATED)
         );
@@ -68,11 +70,9 @@ public final class SliceUploadTest {
             "Wrong HTTP status returned",
             new SliceUpload(new InMemoryStorage(), new RepositoryEvents("files", "my-repo", queue))
                 .response(
-                    new RequestLine("PUT", "uploads/file.txt", "HTTP/1.1").toString(),
-                    Collections.singleton(
-                        new MapEntry<>("Content-Size", Long.toString(data.length))
-                    ),
-                    Flowable.just(ByteBuffer.wrap(data))
+                    new RequestLine("PUT", "uploads/file.txt", "HTTP/1.1"),
+                    Headers.from("Content-Size", Long.toString(data.length)),
+                    new Content.From(Flowable.just(ByteBuffer.wrap(data)))
                 ),
             new RsHasStatus(RsStatus.CREATED)
         );

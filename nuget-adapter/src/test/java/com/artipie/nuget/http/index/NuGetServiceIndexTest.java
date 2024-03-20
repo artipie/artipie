@@ -4,7 +4,9 @@
  */
 package com.artipie.nuget.http.index;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
@@ -14,7 +16,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.AstoRepository;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.security.policy.Policy;
-import io.reactivex.Flowable;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -34,7 +35,6 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -66,9 +66,9 @@ class NuGetServiceIndexTest {
     @Test
     void shouldGetIndex() {
         final Response response = this.nuget.response(
-            new RequestLine(RqMethod.GET, "/index.json").toString(),
-            Collections.emptyList(),
-            Flowable.empty()
+            new RequestLine(RqMethod.GET, "/index.json"),
+            Headers.EMPTY,
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,
@@ -109,9 +109,9 @@ class NuGetServiceIndexTest {
     @Test
     void shouldFailPutIndex() {
         final Response response = this.nuget.response(
-            new RequestLine(RqMethod.PUT, "/index.json").toString(),
-            Collections.emptyList(),
-            Flowable.empty()
+            new RequestLine(RqMethod.PUT, "/index.json"),
+            Headers.EMPTY,
+            Content.EMPTY
         );
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
     }

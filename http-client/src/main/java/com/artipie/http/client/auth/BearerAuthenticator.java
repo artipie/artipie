@@ -59,7 +59,8 @@ public final class BearerAuthenticator implements Authenticator {
 
     @Override
     public CompletionStage<Headers> authenticate(final Headers headers) {
-        return this.authenticate(new WwwAuthenticate(headers)).thenApply(Headers.From::new);
+        return this.authenticate(new WwwAuthenticate(headers))
+            .thenApply(Headers::from);
     }
 
     /**
@@ -81,9 +82,9 @@ public final class BearerAuthenticator implements Authenticator {
             .collect(Collectors.joining("&"));
         final CompletableFuture<String> promise = new CompletableFuture<>();
         return new AuthClientSlice(new UriClientSlice(this.client, realm), this.auth).response(
-            new RequestLine(RqMethod.GET, String.format("?%s", query)).toString(),
+            new RequestLine(RqMethod.GET, String.format("?%s", query)),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         ).send(
             (status, headers, body) -> new Content.From(body).asBytesFuture()
                 .thenApply(this.format::token)

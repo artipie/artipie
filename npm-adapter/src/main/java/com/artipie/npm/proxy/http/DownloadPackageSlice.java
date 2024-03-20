@@ -10,17 +10,15 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.json.ClientContent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.StringUtils;
-import org.reactivestreams.Publisher;
+
+import java.util.stream.StreamSupport;
 
 /**
  * HTTP slice for download package requests.
@@ -38,8 +36,6 @@ public final class DownloadPackageSlice implements Slice {
     private final PackagePath path;
 
     /**
-     * Ctor.
-     *
      * @param npm NPM Proxy facade
      * @param path Package path helper
      */
@@ -49,16 +45,15 @@ public final class DownloadPackageSlice implements Slice {
     }
 
     @Override
-    @SuppressWarnings("PMD.OnlyOneReturn")
-    public Response response(final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line,
+        final Headers headers,
+        final Content body) {
         return new AsyncResponse(
-            this.npm.getPackage(this.path.value(new RequestLineFrom(line).uri().getPath()))
+            this.npm.getPackage(this.path.value(line.uri().getPath()))
                 .map(
                     pkg -> (Response) new RsFull(
                         RsStatus.OK,
-                        new Headers.From(
+                        Headers.from(
                             new Header("Content-Type", "application/json"),
                             new Header("Last-Modified", pkg.meta().lastModified())
                         ),
@@ -78,7 +73,7 @@ public final class DownloadPackageSlice implements Slice {
      * @return External client package
      */
     private String clientFormat(final String data,
-        final Iterable<Map.Entry<String, String>> headers) {
+        final Iterable<Header> headers) {
         final String host = StreamSupport.stream(headers.spliterator(), false)
             .filter(e -> "Host".equalsIgnoreCase(e.getKey()))
             .findAny().orElseThrow(

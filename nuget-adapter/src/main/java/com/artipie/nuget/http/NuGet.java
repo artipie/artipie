@@ -4,12 +4,13 @@
  */
 package com.artipie.nuget.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.OperationControl;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -22,13 +23,11 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
+
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import org.reactivestreams.Publisher;
 
 /**
  * NuGet repository HTTP front end.
@@ -66,8 +65,6 @@ public final class NuGet implements Slice {
     private final Optional<Queue<ArtifactEvent>> events;
 
     /**
-     * Ctor.
-     *
      * @param url Base URL.
      * @param repository Storage for packages.
      * @param policy Access policy.
@@ -93,19 +90,18 @@ public final class NuGet implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
         final Response response;
-        final RequestLineFrom request = new RequestLineFrom(line);
-        final String path = request.uri().getPath();
+        final String path = line.uri().getPath();
         final Resource resource = this.resource(path);
-        final RqMethod method = request.method();
+        final RqMethod method = line.method();
         if (method.equals(RqMethod.GET)) {
-            response = resource.get(new Headers.From(headers));
+            response = resource.get(headers);
         } else if (method.equals(RqMethod.PUT)) {
-            response = resource.put(new Headers.From(headers), body);
+            response = resource.put(headers, body);
         } else {
             response = new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
         }

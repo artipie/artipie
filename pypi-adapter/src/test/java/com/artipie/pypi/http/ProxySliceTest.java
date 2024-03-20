@@ -12,6 +12,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.cache.FromStorageCache;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
+import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
@@ -23,10 +24,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.scheduling.ProxyArtifactEvent;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -35,11 +32,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+
 /**
  * Test for {@link ProxySlice}.
- * @since 0.7
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ProxySliceTest {
 
     /**
@@ -67,7 +66,7 @@ class ProxySliceTest {
             new ProxySlice(
                 new SliceSimple(
                     new RsFull(
-                        RsStatus.OK, new Headers.From("content-type", "smth"),
+                        RsStatus.OK, Headers.from("content-type", "smth"),
                         new Content.From(body)
                     )
                 ),
@@ -77,8 +76,8 @@ class ProxySliceTest {
                 Matchers.allOf(
                     new RsHasBody(body),
                     new RsHasHeaders(
-                        new MapEntry<>("content-type", "smth"),
-                        new MapEntry<>("Content-Length", "9")
+                        new Header("content-type", "smth"),
+                        new Header("Content-Length", "9")
                     )
                 ),
                 new RequestLine(RqMethod.GET, String.format("/%s", key))
@@ -112,8 +111,8 @@ class ProxySliceTest {
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK), new RsHasBody(body),
                     new RsHasHeaders(
-                        new MapEntry<>("content-type", header),
-                        new MapEntry<>("Content-Length", String.valueOf(body.length))
+                        new Header("content-type", header),
+                        new Header("Content-Length", String.valueOf(body.length))
                     )
                 ),
                 new RequestLine(RqMethod.GET, String.format("/%s", key))
@@ -162,7 +161,7 @@ class ProxySliceTest {
             new ProxySlice(
                 new SliceSimple(
                     new RsFull(
-                        RsStatus.OK, new Headers.From("content-type", "smth"),
+                        RsStatus.OK, Headers.from("content-type", "smth"),
                         new Content.From(body)
                     )
                 ),
@@ -172,8 +171,8 @@ class ProxySliceTest {
                 Matchers.allOf(
                     new RsHasBody(body),
                     new RsHasHeaders(
-                        new MapEntry<>("content-type", "smth"),
-                        new MapEntry<>("Content-Length", String.valueOf(body.length))
+                        new Header("content-type", "smth"),
+                        new Header("Content-Length", String.valueOf(body.length))
                     )
                 ),
                 new RequestLine(RqMethod.GET, String.format("/%s", line))

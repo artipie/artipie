@@ -4,22 +4,23 @@
  */
 package com.artipie.gem;
 
+import com.artipie.http.Headers;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.headers.Authorization;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
+import org.apache.commons.codec.binary.Base64;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * {@link AuthScheme} implementation for gem api key decoding.
- * @since 0.6
  */
 public final class GemApiKeyAuth implements AuthScheme {
 
@@ -38,8 +39,7 @@ public final class GemApiKeyAuth implements AuthScheme {
 
     @Override
     public CompletionStage<Result> authenticate(
-        final Iterable<Map.Entry<String, String>> headers,
-        final String header
+        Headers headers, RequestLine line
     ) {
         return new RqHeaders(headers, Authorization.NAME).stream()
             .findFirst()

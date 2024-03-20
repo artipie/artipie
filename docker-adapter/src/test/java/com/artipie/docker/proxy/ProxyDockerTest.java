@@ -8,6 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.Header;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
@@ -20,7 +21,6 @@ import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,12 +44,12 @@ final class ProxyDockerTest {
         final String name = "my-alpine";
         final int limit = 123;
         final AtomicReference<String> cline = new AtomicReference<>();
-        final AtomicReference<Iterable<Map.Entry<String, String>>> cheaders;
+        final AtomicReference<Iterable<Header>> cheaders;
         cheaders = new AtomicReference<>();
         final AtomicReference<byte[]> cbody = new AtomicReference<>();
         new ProxyDocker(
             (line, headers, body) -> {
-                cline.set(line);
+                cline.set(line.toString());
                 cheaders.set(headers);
                 return new AsyncResponse(
                     new Content.From(body).asBytesFuture().thenApply(

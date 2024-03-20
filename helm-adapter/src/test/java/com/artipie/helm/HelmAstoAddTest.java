@@ -12,6 +12,17 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.helm.metadata.IndexYaml;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.helm.test.ContentOfIndex;
+import org.cactoos.list.ListOf;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.StringContains;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,23 +31,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
-import org.cactoos.list.ListOf;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Test for {@link Helm.Asto#add(Collection, Key)}.
- * @since 0.3
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class HelmAstoAddTest {
     /**
      * Storage.

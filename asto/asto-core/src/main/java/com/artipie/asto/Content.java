@@ -143,8 +143,6 @@ public interface Content extends Publisher<ByteBuffer> {
         }
 
         /**
-         * Ctor.
-         *
          * @param publisher Content bytes.
          */
         public From(final Publisher<ByteBuffer> publisher) {
@@ -152,8 +150,6 @@ public interface Content extends Publisher<ByteBuffer> {
         }
 
         /**
-         * Ctor.
-         *
          * @param size Total content size in bytes.
          * @param publisher Content bytes.
          */
@@ -162,8 +158,6 @@ public interface Content extends Publisher<ByteBuffer> {
         }
 
         /**
-         * Ctor.
-         *
          * @param size Total content size in bytes, if known.
          * @param publisher Content bytes.
          */

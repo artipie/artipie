@@ -12,10 +12,8 @@ import com.artipie.http.rq.RqHeaders;
 /**
  * Docker-Content-Digest header.
  * See <a href="https://docs.docker.com/registry/spec/api/#blob-upload#content-digests">Content Digests</a>.
- *
- * @since 0.2
  */
-public final class DigestHeader extends Header.Wrap {
+public final class DigestHeader extends Header {
 
     /**
      * Header name.

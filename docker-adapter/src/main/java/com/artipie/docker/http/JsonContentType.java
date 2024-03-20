@@ -12,15 +12,10 @@ import java.util.Locale;
 
 /**
  * Content-Type header with "application/json; charset=..." value.
- *
- * @since 0.9
  */
-final class JsonContentType extends Header.Wrap {
+class JsonContentType extends Header {
 
-    /**
-     * Ctor.
-     */
-    protected JsonContentType() {
+    JsonContentType() {
         this(StandardCharsets.UTF_8);
     }
 
@@ -29,7 +24,7 @@ final class JsonContentType extends Header.Wrap {
      *
      * @param charset Charset.
      */
-    protected JsonContentType(final Charset charset) {
+    JsonContentType(final Charset charset) {
         super(
             new ContentType(
                 String.format(

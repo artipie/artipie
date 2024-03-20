@@ -46,9 +46,6 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Test for {@link JettyClientSlices} and http3.
  */
-@SuppressWarnings(
-    {"PMD.StaticAccessToStaticFields", "PMD.LongVariable"}
-)
 public final class JettyClientHttp3Test {
 
     /**
@@ -116,7 +113,7 @@ public final class JettyClientHttp3Test {
         this.client.http("localhost", this.port).response(
             new RequestLine(
                 RqMethod.GET.value(), String.format("/%s", GET_SOME_DATA), "HTTP/3"
-            ).toString(),
+            ),
             Headers.EMPTY, Content.EMPTY
         ).send(
             (status, headers, publisher) -> {
@@ -152,7 +149,7 @@ public final class JettyClientHttp3Test {
         this.client.http("localhost", this.port).response(
             new RequestLine(
                 RqMethod.GET.value(), String.format("/%s", GET_TWO_DATA_CHUNKS), "HTTP/3"
-            ).toString(),
+            ),
             Headers.EMPTY, Content.EMPTY
         ).send(
             (status, headers, publisher) -> {
@@ -179,7 +176,7 @@ public final class JettyClientHttp3Test {
         this.client.http("localhost", this.port).response(
             new RequestLine(
                 RqMethod.PUT.value(), "/any", "HTTP/3"
-            ).toString(),
+            ),
             Headers.EMPTY,
             new Content.From(
                 Flowable.fromArray(ByteBuffer.wrap(data)).flatMap(
@@ -201,9 +198,7 @@ public final class JettyClientHttp3Test {
 
     /**
      * Test listener.
-     * @since 0.3
      */
-    @SuppressWarnings("PMD.OnlyOneReturn")
     private static final class TestListener implements Session.Server.Listener {
 
         /**

@@ -5,14 +5,15 @@
 
 package com.artipie.hex.http;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * This slice returns content about user in erlang format.
@@ -27,9 +28,9 @@ public final class UserSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
         return new RsWithStatus(RsStatus.NO_CONTENT);
     }

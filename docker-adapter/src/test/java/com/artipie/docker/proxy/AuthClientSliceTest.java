@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.proxy;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.client.auth.AuthClientSlice;
@@ -14,21 +15,17 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link AuthClientSlice}.
- *
- * @since 0.3
  */
 class AuthClientSliceTest {
 
     @Test
     void shouldNotModifyRequestAndResponseIfNoAuthRequired() {
-        final String line = new RequestLine(RqMethod.GET, "/file.txt").toString();
+        final RequestLine line = new RequestLine(RqMethod.GET, "/file.txt");
         final Header header = new Header("x-name", "some value");
         final byte[] body = "text".getBytes();
         final RsStatus status = RsStatus.OK;
@@ -40,7 +37,7 @@ class AuthClientSliceTest {
                 return new RsFull(status, rsheaders, rsbody);
             },
             Authenticator.ANONYMOUS
-        ).response(line, new Headers.From(header), Flowable.just(ByteBuffer.wrap(body)));
+        ).response(line, Headers.from(header), new Content.From(body));
         MatcherAssert.assertThat(
             response,
             new ResponseMatcher(status, body, header)

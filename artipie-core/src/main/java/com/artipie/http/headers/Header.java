@@ -11,24 +11,13 @@ import java.util.Objects;
 /**
  * HTTP header.
  * Name of header is considered to be case-insensitive when compared to one another.
- *
- * @since 0.8
  */
-public final class Header implements Map.Entry<String, String> {
+public class Header implements Map.Entry<String, String> {
 
-    /**
-     * Name.
-     */
     private final String name;
-
-    /**
-     * Value.
-     */
     private final String value;
 
     /**
-     * Ctor.
-     *
      * @param entry Entry representing a header.
      */
     public Header(final Map.Entry<String, String> entry) {
@@ -36,8 +25,6 @@ public final class Header implements Map.Entry<String, String> {
     }
 
     /**
-     * Ctor.
-     *
      * @param name Name.
      * @param value Value.
      */
@@ -62,15 +49,13 @@ public final class Header implements Map.Entry<String, String> {
     }
 
     @Override
-    @SuppressWarnings("PMD.OnlyOneReturn")
     public boolean equals(final Object that) {
         if (this == that) {
             return true;
         }
-        if (that == null || getClass() != that.getClass()) {
+        if(!(that instanceof Header header)){
             return false;
         }
-        final Header header = (Header) that;
         return this.lowercaseName().equals(header.lowercaseName())
             && this.getValue().equals(header.getValue());
     }
@@ -92,65 +77,5 @@ public final class Header implements Map.Entry<String, String> {
      */
     private String lowercaseName() {
         return this.name.toLowerCase(Locale.US);
-    }
-
-    /**
-     * Abstract decorator for Header.
-     *
-     * @since 0.9
-     */
-    public abstract static class Wrap implements Map.Entry<String, String> {
-
-        /**
-         * Origin header.
-         */
-        private final Map.Entry<String, String> header;
-
-        /**
-         * Ctor.
-         *
-         * @param header Header.
-         */
-        protected Wrap(final Map.Entry<String, String> header) {
-            this.header = header;
-        }
-
-        @Override
-        public final String getKey() {
-            return this.header.getKey();
-        }
-
-        @Override
-        public final String getValue() {
-            return this.header.getValue();
-        }
-
-        @Override
-        public final String setValue(final String value) {
-            return this.header.setValue(value);
-        }
-
-        @Override
-        @SuppressWarnings("PMD.OnlyOneReturn")
-        public final boolean equals(final Object that) {
-            if (this == that) {
-                return true;
-            }
-            if (that == null || getClass() != that.getClass()) {
-                return false;
-            }
-            final Wrap wrap = (Wrap) that;
-            return Objects.equals(this.header, wrap.header);
-        }
-
-        @Override
-        public final int hashCode() {
-            return Objects.hash(this.header);
-        }
-
-        @Override
-        public final String toString() {
-            return this.header.toString();
-        }
     }
 }

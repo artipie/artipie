@@ -6,6 +6,7 @@ package com.artipie.http.headers;
 
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RqHeaders;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
  *
  * @since 0.12
  */
-public final class WwwAuthenticate extends Header.Wrap {
+public final class WwwAuthenticate extends Header {
 
     /**
      * Header name.

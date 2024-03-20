@@ -27,9 +27,7 @@ import org.quartz.impl.StdSchedulerFactory;
 
 /**
  * Test for {@link PyProxyPackageProcessor}.
- * @since 0.9
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class PyProxyPackageProcessorTest {
 
     /**

@@ -4,28 +4,27 @@
  */
 package com.artipie.http.rt;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import org.reactivestreams.Publisher;
 
 /**
  * Routing slice.
  * <p>
  * {@link Slice} implementation which redirect requests to {@link Slice}
  * in {@link Path} if {@link RtRule} matched.
- * </p>
  * <p>
  * Usage:
- * </p>
  * <pre><code>
  * new SliceRoute(
  *   new SliceRoute.Path(
@@ -36,7 +35,6 @@ import org.reactivestreams.Publisher;
  *   )
  * );
  * </code></pre>
- * @since 0.5
  */
 public final class SliceRoute implements Slice {
 
@@ -62,9 +60,9 @@ public final class SliceRoute implements Slice {
     }
 
     @Override
-    public Response response(final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line,
+        final Headers headers,
+        final Content body) {
         return this.routes.stream()
             .map(item -> item.response(line, headers, body))
             .filter(Optional::isPresent)
@@ -85,7 +83,6 @@ public final class SliceRoute implements Slice {
      * {@link RtRule} passed, then the request will be redirected to
      * underlying {@link Slice}.
      * </p>
-     * @since 0.5
      * @deprecated Use {@link RtRulePath} instead
      */
     @Deprecated
@@ -107,9 +104,9 @@ public final class SliceRoute implements Slice {
 
         @Override
         public Optional<Response> response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            RequestLine line,
+            Headers headers,
+            Content body
         ) {
             return this.wrapped.response(line, headers, body);
         }

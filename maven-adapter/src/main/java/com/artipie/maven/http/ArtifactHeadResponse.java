@@ -19,7 +19,6 @@ import com.artipie.maven.asto.RepositoryChecksums;
  * otherwise. Also, it contains artifact headers if it exits.
  * </p>
  * @see ArtifactHeaders
- * @since 0.5
  */
 public final class ArtifactHeadResponse extends Response.Wrap {
 
@@ -48,7 +47,6 @@ public final class ArtifactHeadResponse extends Response.Wrap {
 
     /**
      * Ok {@code 200} response for {@code HEAD} request.
-     * @since 0.5
      */
     private static final class OkResponse extends Response.Wrap {
 
@@ -62,7 +60,7 @@ public final class ArtifactHeadResponse extends Response.Wrap {
                 new AsyncResponse(
                     new RepositoryChecksums(storage).checksums(location).thenApply(
                         checksums -> new RsWithHeaders(
-                            StandardRs.OK, new ArtifactHeaders(location, checksums)
+                            StandardRs.OK, ArtifactHeaders.from(location, checksums)
                         )
                     )
                 )

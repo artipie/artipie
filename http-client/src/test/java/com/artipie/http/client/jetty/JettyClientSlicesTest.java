@@ -40,15 +40,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Tests for {@link JettyClientSlices}.
- *
- * @since 0.1
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 final class JettyClientSlicesTest {
 
-    /**
-     * Test server.
-     */
     private final HttpServer server = new HttpServer();
 
     @BeforeEach
@@ -112,9 +106,9 @@ final class JettyClientSlicesTest {
             client.start();
             MatcherAssert.assertThat(
                 client.http("artipie.com").response(
-                    new RequestLine(RqMethod.GET, "/").toString(),
+                    new RequestLine(RqMethod.GET, "/"),
                     Headers.EMPTY,
-                    Flowable.empty()
+                    Content.EMPTY
                 ),
                 new RsHasBody(response)
             );
@@ -124,7 +118,7 @@ final class JettyClientSlicesTest {
     }
 
     @Test
-    void shouldNotFollowRedirectIfDisabled() throws Exception {
+    void shouldNotFollowRedirectIfDisabled() {
         final RsStatus status = RsStatus.TEMPORARY_REDIRECT;
         this.server.update(
             (line, headers, body) -> new RsWithHeaders(
@@ -139,9 +133,9 @@ final class JettyClientSlicesTest {
             client.start();
             MatcherAssert.assertThat(
                 client.http("localhost", this.server.port()).response(
-                    new RequestLine(RqMethod.GET, "/some/path").toString(),
+                    new RequestLine(RqMethod.GET, "/some/path"),
                     Headers.EMPTY,
-                    Flowable.empty()
+                    Content.EMPTY
                 ),
                 new RsHasStatus(status)
             );
@@ -151,11 +145,11 @@ final class JettyClientSlicesTest {
     }
 
     @Test
-    void shouldFollowRedirectIfEnabled() throws Exception {
+    void shouldFollowRedirectIfEnabled() {
         this.server.update(
             (line, headers, body) -> {
                 final Response result;
-                if (line.contains("target")) {
+                if (line.toString().contains("target")) {
                     result = new RsWithStatus(RsStatus.OK);
                 } else {
                     result = new RsWithHeaders(
@@ -173,9 +167,9 @@ final class JettyClientSlicesTest {
             client.start();
             MatcherAssert.assertThat(
                 client.http("localhost", this.server.port()).response(
-                    new RequestLine(RqMethod.GET, "/some/path").toString(),
+                    new RequestLine(RqMethod.GET, "/some/path"),
                     Headers.EMPTY,
-                    Flowable.empty()
+                    Content.EMPTY
                 ),
                 new RsHasStatus(RsStatus.OK)
             );
@@ -186,7 +180,7 @@ final class JettyClientSlicesTest {
 
     @Test
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
-    void shouldTimeoutConnectionIfDisabled() throws Exception {
+    void shouldTimeoutConnectionIfDisabled() {
         final int timeout = 1;
         final JettyClientSlices client = new JettyClientSlices(
             new HttpClientSettings().setConnectTimeout(0)
@@ -195,7 +189,7 @@ final class JettyClientSlicesTest {
             client.start();
             final String nonroutable = "10.0.0.0";
             final CompletionStage<Void> received = client.http(nonroutable).response(
-                new RequestLine(RqMethod.GET, "/conn-timeout").toString(),
+                new RequestLine(RqMethod.GET, "/conn-timeout"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(
@@ -212,7 +206,7 @@ final class JettyClientSlicesTest {
 
     @Test
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
-    void shouldTimeoutConnectionIfEnabled() throws Exception {
+    void shouldTimeoutConnectionIfEnabled() {
         final int timeout = 5_000;
         final JettyClientSlices client = new JettyClientSlices(
             new HttpClientSettings().setConnectTimeout(timeout)
@@ -221,7 +215,7 @@ final class JettyClientSlicesTest {
             client.start();
             final String nonroutable = "10.0.0.0";
             final CompletionStage<Void> received = client.http(nonroutable).response(
-                new RequestLine(RqMethod.GET, "/conn-timeout").toString(),
+                new RequestLine(RqMethod.GET, "/conn-timeout"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(
@@ -249,7 +243,7 @@ final class JettyClientSlicesTest {
                 "localhost",
                 this.server.port()
             ).response(
-                new RequestLine(RqMethod.GET, "/idle-timeout").toString(),
+                new RequestLine(RqMethod.GET, "/idle-timeout"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(
@@ -276,7 +270,7 @@ final class JettyClientSlicesTest {
                 "localhost",
                 this.server.port()
             ).response(
-                new RequestLine(RqMethod.GET, "/idle-timeout").toString(),
+                new RequestLine(RqMethod.GET, "/idle-timeout"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(
@@ -306,9 +300,9 @@ final class JettyClientSlicesTest {
             client.start();
             MatcherAssert.assertThat(
                 client.https(url).response(
-                    new RequestLine(RqMethod.GET, "/").toString(),
+                    new RequestLine(RqMethod.GET, "/"),
                     Headers.EMPTY,
-                    Flowable.empty()
+                    Content.EMPTY
                 ),
                 new RsHasStatus(RsStatus.OK)
             );
@@ -332,18 +326,18 @@ final class JettyClientSlicesTest {
         try {
             client.start();
             final Response response = client.https(url).response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             );
             final Exception exception = Assertions.assertThrows(
                 CompletionException.class,
-                response
+                () -> response
                     .send(
                         (status, headers, publisher) ->
                             CompletableFuture.allOf()
                     )
-                    .toCompletableFuture()::join
+                    .toCompletableFuture().join()
             );
             MatcherAssert.assertThat(
                 exception,

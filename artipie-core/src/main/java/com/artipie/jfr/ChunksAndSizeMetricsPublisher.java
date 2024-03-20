@@ -4,6 +4,7 @@
  */
 package com.artipie.jfr;
 
+import com.artipie.asto.Content;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
@@ -12,13 +13,12 @@ import java.util.function.BiConsumer;
 
 /**
  * Content wrapper that allows to get byte buffers count and size of content’s data.
- * @since 0.28.0
  */
 public final class ChunksAndSizeMetricsPublisher implements Publisher<ByteBuffer> {
     /**
      * Original publisher.
      */
-    private final Publisher<ByteBuffer> original;
+    private final Content original;
 
     /**
      * Callback consumer.
@@ -27,16 +27,13 @@ public final class ChunksAndSizeMetricsPublisher implements Publisher<ByteBuffer
     private final BiConsumer<Integer, Long> callback;
 
     /**
-     * Ctor.
      * The first attribute of callback consumer is chunks count,
      * the second is size of received data.
      *
      * @param original Original publisher.
      * @param callback Callback consumer.
      */
-    public ChunksAndSizeMetricsPublisher(
-        final Publisher<ByteBuffer> original,
-        final BiConsumer<Integer, Long> callback) {
+    public ChunksAndSizeMetricsPublisher(Content original, BiConsumer<Integer, Long> callback) {
         this.original = original;
         this.callback = callback;
     }

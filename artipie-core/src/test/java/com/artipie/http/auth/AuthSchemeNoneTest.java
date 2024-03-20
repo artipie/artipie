@@ -18,7 +18,7 @@ final class AuthSchemeNoneTest {
     @Test
     void shouldAuthEmptyHeadersAsAnonymous() {
         Assertions.assertTrue(
-            AuthScheme.NONE.authenticate(Headers.EMPTY, "any")
+            AuthScheme.NONE.authenticate(Headers.EMPTY)
             .toCompletableFuture().join()
             .user().isAnonymous()
         );

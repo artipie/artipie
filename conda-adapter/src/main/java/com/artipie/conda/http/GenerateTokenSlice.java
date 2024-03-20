@@ -4,6 +4,7 @@
  */
 package com.artipie.conda.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -13,15 +14,14 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.headers.WwwAuthenticate;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.common.RsJson;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import javax.json.Json;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice for token authorization.
@@ -50,8 +50,8 @@ final class GenerateTokenSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line, final Headers headers,
+                             final Content body) {
         return new AsyncResponse(
             new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
                 result -> {
@@ -59,7 +59,7 @@ final class GenerateTokenSlice implements Slice {
                     if (result.status() == AuthScheme.AuthStatus.FAILED) {
                         res = new RsWithHeaders(
                             new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            new Headers.From(new WwwAuthenticate(result.challenge()))
+                            Headers.from(new WwwAuthenticate(result.challenge()))
                         );
                     } else {
                         res = new RsJson(

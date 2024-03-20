@@ -4,6 +4,8 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.AssertSlice;
 import com.artipie.http.hm.RqHasHeader;
@@ -11,15 +13,14 @@ import com.artipie.http.hm.RqLineHasUri;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.StandardRs;
-import io.reactivex.Flowable;
-import java.net.URI;
-import java.util.Collections;
-import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
+
+import java.net.URI;
+import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 /**
  * Test case for {@link TrimPathSlice}.
@@ -45,9 +46,9 @@ final class TrimPathSliceTest {
     @Test
     void failIfUriPathDoesntMatch() throws Exception {
         new TrimPathSlice((line, headers, body) -> StandardRs.EMPTY, "none").response(
-            requestLine("http://www.w3.org").toString(),
-            Collections.emptyList(),
-            Flowable.empty()
+            requestLine("http://www.w3.org"),
+            Headers.EMPTY,
+            Content.EMPTY
         ).send(
             (status, headers, body) -> {
                 MatcherAssert.assertThat(
@@ -133,7 +134,7 @@ final class TrimPathSliceTest {
     }
 
     private static void verify(final Slice slice, final RequestLine line) throws Exception {
-        slice.response(line.toString(), Collections.emptyList(), Flowable.empty())
+        slice.response(line, Headers.EMPTY, Content.EMPTY)
             .send((status, headers, body) -> CompletableFuture.completedFuture(null))
             .toCompletableFuture()
             .get();

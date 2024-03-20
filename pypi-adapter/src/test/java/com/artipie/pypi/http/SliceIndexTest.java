@@ -14,22 +14,19 @@ import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Test for {@link SliceIndex}.
- * @since 0.4
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods", "unchecked"})
 class SliceIndexTest {
 
     /**
@@ -37,9 +34,6 @@ class SliceIndexTest {
      */
     private static final String HDR_FULL_PATH = "X-FullPath";
 
-    /**
-     * Test storage.
-     */
     private Storage storage;
 
     @BeforeEach
@@ -54,9 +48,9 @@ class SliceIndexTest {
         this.storage.save(new Key.From(path), new Content.From(bytes)).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/").toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine("GET", "/"),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             new RsHasBody(SliceIndexTest.html(new MapEntry<>(path, bytes)))
         );
@@ -69,9 +63,9 @@ class SliceIndexTest {
             .join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/").toString(),
-                new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/pypi"),
-                Flowable.empty()
+                new RequestLine("GET", "/"),
+                Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi"),
+                Content.EMPTY
             ),
             new RsHasBody(
                 SliceIndexTest.html(new MapEntry<>("username/pypi/abc/abc-0.1.tar.gz", bytes))
@@ -90,9 +84,9 @@ class SliceIndexTest {
         ).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/def").toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine("GET", "/def"),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             new RsHasBody(
                 SliceIndexTest.html(
@@ -114,9 +108,9 @@ class SliceIndexTest {
         ).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/def").toString(),
-                new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/repo/def"),
-                Flowable.empty()
+                new RequestLine("GET", "/def"),
+                Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/repo/def"),
+                Content.EMPTY
             ),
             new RsHasBody(
                 SliceIndexTest.html(
@@ -142,9 +136,9 @@ class SliceIndexTest {
         ).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", String.format("/%s", rqline)).toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine("GET", String.format("/%s", rqline)),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             new RsHasBody(
                 SliceIndexTest.html(
@@ -170,9 +164,9 @@ class SliceIndexTest {
         ).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/abc").toString(),
-                new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/abc"),
-                Flowable.empty()
+                new RequestLine("GET", "/abc"),
+                Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/abc"),
+                Content.EMPTY
             ),
             new RsHasBody(
                 SliceIndexTest.html(
@@ -188,9 +182,9 @@ class SliceIndexTest {
     void returnsIndexListForEmptyStorage() {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/def").toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine("GET", "/def"),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             new RsHasBody("<!DOCTYPE html>\n<html>\n  </body>\n\n</body>\n</html>".getBytes())
         );
@@ -200,9 +194,9 @@ class SliceIndexTest {
     void returnsIndexListForEmptyStorageWithFullPath() {
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/def").toString(),
-                new Headers.From(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/def"),
-                Flowable.empty()
+                new RequestLine("GET", "/def"),
+                Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/def"),
+                Content.EMPTY
             ),
             new RsHasBody("<!DOCTYPE html>\n<html>\n  </body>\n\n</body>\n</html>".getBytes())
         );
@@ -216,9 +210,9 @@ class SliceIndexTest {
         ).join();
         MatcherAssert.assertThat(
             new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/").toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine("GET", "/"),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.OK,

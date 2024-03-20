@@ -9,10 +9,8 @@ import com.artipie.http.rq.RqHeaders;
 
 /**
  * Location header.
- *
- * @since 0.11
  */
-public final class Location extends Header.Wrap {
+public final class Location extends Header {
 
     /**
      * Header name.

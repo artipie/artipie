@@ -10,6 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.Headers;
+import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
@@ -18,7 +19,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.pypi.meta.Metadata;
-import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,9 +28,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Test for {@link SearchSlice}.
- * @since 0.7
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class SearchSliceTest {
 
     /**
@@ -51,8 +49,8 @@ class SearchSliceTest {
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
                     new RsHasHeaders(
-                        new MapEntry<>("content-type", "text/xml"),
-                        new MapEntry<>("content-length", "115")
+                        new Header("content-type", "text/xml"),
+                        new Header("content-length", "115")
                     ),
                     new RsHasBody(SearchSlice.empty())
                 ),
@@ -85,8 +83,8 @@ class SearchSliceTest {
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
                     new RsHasHeaders(
-                        new MapEntry<>("content-type", "text/xml"),
-                        new MapEntry<>("content-length", String.valueOf(body.length))
+                        new Header("content-type", "text/xml"),
+                        new Header("content-length", String.valueOf(body.length))
                     ),
                     new RsHasBody(body)
                 ),

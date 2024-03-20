@@ -33,7 +33,6 @@ import wtf.g4s8.mime.MimeType;
  * @implNote The implementation does not keep request part data in memory or storage,
  * it should process each chunk and send to proper downstream.
  * @implNote The body part will not be parsed until {@code parts()} method call.
- * @since 1.0
  */
 public final class RqMultipart {
 
@@ -258,7 +257,6 @@ public final class RqMultipart {
 
         /**
          * Check if part was accepted or rejected.
-         * @param err
          */
         private void check() {
             if (this.accepted != null) {

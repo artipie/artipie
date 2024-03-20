@@ -4,6 +4,8 @@
  */
 package  com.artipie.conan.http;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -11,16 +13,14 @@ import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.StandardRs;
 import com.google.common.base.Strings;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import org.reactivestreams.Publisher;
 
 /**
  * Conan /v1/users/* REST APIs. For now minimally implemented, just for package uploading support.
@@ -86,8 +86,8 @@ public final class UsersEntity {
         }
 
         @Override
-        public Response response(final String line,
-            final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+        public Response response(final RequestLine line,
+                                 final Headers headers, final Content body) {
             return new AsyncResponse(
                 new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
                     authResult -> {
@@ -98,7 +98,7 @@ public final class UsersEntity {
                             result = new RsWithBody(
                                 StandardRs.NOT_FOUND,
                                 String.format(
-                                    UsersEntity.URI_S_NOT_FOUND, new RequestLineFrom(line).uri()
+                                    UsersEntity.URI_S_NOT_FOUND, line.uri()
                                 ),
                                 StandardCharsets.UTF_8
                             );
@@ -124,10 +124,10 @@ public final class UsersEntity {
     public static final class CredsCheck implements Slice {
 
         @Override
-        public Response response(final String line,
-            final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+        public Response response(final RequestLine line,
+                                 final Headers headers, final Content body) {
             return new AsyncResponse(
-                CompletableFuture.supplyAsync(new RequestLineFrom(line)::uri).thenCompose(
+                CompletableFuture.supplyAsync(line::uri).thenCompose(
                     uri -> CredsCheck.credsCheck().thenApply(
                         content -> {
                             final Response result;

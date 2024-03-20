@@ -34,9 +34,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -97,7 +94,7 @@ class JettyClientSliceTest {
         "HEAD /my%20path?param=some%20value"
     })
     void shouldSendRequestLine(final String line) {
-        final AtomicReference<String> actual = new AtomicReference<>();
+        final AtomicReference<RequestLine> actual = new AtomicReference<>();
         this.server.update(
             (rqline, rqheaders, rqbody) -> {
                 actual.set(rqline);
@@ -105,32 +102,32 @@ class JettyClientSliceTest {
             }
         );
         this.slice.response(
-            String.format("%s HTTP/1.1", line),
+            RequestLine.from(String.format("%s HTTP/1.1", line)),
             Headers.EMPTY,
-            Flowable.empty()
+            Content.EMPTY
         ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();
         MatcherAssert.assertThat(
-            actual.get(),
+            actual.get().toString(),
             new StringStartsWith(String.format("%s HTTP", line))
         );
     }
 
     @Test
     void shouldSendHeaders() {
-        final AtomicReference<Iterable<Map.Entry<String, String>>> actual = new AtomicReference<>();
+        final AtomicReference<Headers> actual = new AtomicReference<>();
         this.server.update(
             (rqline, rqheaders, rqbody) -> {
-                actual.set(new Headers.From(rqheaders));
+                actual.set(rqheaders);
                 return StandardRs.EMPTY;
             }
         );
         this.slice.response(
-            new RequestLine(RqMethod.GET, "/something").toString(),
-            new Headers.From(
+            new RequestLine(RqMethod.GET, "/something"),
+            Headers.from(
                 new Header("My-Header", "MyValue"),
                 new Header("Another-Header", "AnotherValue")
             ),
-            Flowable.empty()
+            Content.EMPTY
         ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();
         MatcherAssert.assertThat(
             StreamSupport.stream(actual.get().spliterator(), false)
@@ -159,9 +156,9 @@ class JettyClientSliceTest {
             )
         );
         this.slice.response(
-            new RequestLine(RqMethod.PUT, "/package").toString(),
+            new RequestLine(RqMethod.PUT, "/package"),
             Headers.EMPTY,
-            Flowable.just(ByteBuffer.wrap(content))
+            new Content.From(content)
         ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();
         MatcherAssert.assertThat(
             actual.get(),
@@ -175,9 +172,9 @@ class JettyClientSliceTest {
         this.server.update((rqline, rqheaders, rqbody) -> new RsWithStatus(status));
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine(RqMethod.GET, "/a/b/c").toString(),
+                new RequestLine(RqMethod.GET, "/a/b/c"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasStatus(status)
         );
@@ -185,21 +182,20 @@ class JettyClientSliceTest {
 
     @Test
     void shouldReceiveHeaders() {
-        final List<Map.Entry<String, String>> headers = Arrays.asList(
+        Headers headers = Headers.from(
             new Header("Content-Type", "text/plain"),
             new Header("WWW-Authenticate", "Basic")
         );
         this.server.update(
             (rqline, rqheaders, rqbody) -> new RsWithHeaders(
-                StandardRs.EMPTY,
-                new Headers.From(headers)
+                StandardRs.EMPTY, headers
             )
         );
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine(RqMethod.HEAD, "/content").toString(),
+                new RequestLine(RqMethod.HEAD, "/content"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasHeaders(headers)
         );
@@ -213,9 +209,9 @@ class JettyClientSliceTest {
         );
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine(RqMethod.PATCH, "/file.txt").toString(),
+                new RequestLine(RqMethod.PATCH, "/file.txt"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new RsHasBody(data)
         );

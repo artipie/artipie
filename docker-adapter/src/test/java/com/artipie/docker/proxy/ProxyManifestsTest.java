@@ -7,12 +7,14 @@ package com.artipie.docker.proxy;
 import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Digest;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.http.DigestHeader;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ManifestReference;
 import com.artipie.http.Headers;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.Header;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
@@ -24,7 +26,6 @@ import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,12 +41,12 @@ class ProxyManifestsTest {
         final String digest = "sha256:123";
         final Optional<Manifest> found = new ProxyManifests(
             (line, headers, body) -> {
-                if (!line.startsWith("GET /v2/test/manifests/abc ")) {
+                if (!line.toString().startsWith("GET /v2/test/manifests/abc ")) {
                     throw new IllegalArgumentException();
                 }
                 return new RsFull(
                     RsStatus.OK,
-                    new Headers.From(new DigestHeader(new Digest.FromString(digest))),
+                    Headers.from(new DigestHeader(new Digest.FromString(digest))),
                     new Content.From(data)
                 );
             },
@@ -64,7 +65,7 @@ class ProxyManifestsTest {
     void shouldGetEmptyWhenNotFound() {
         final Optional<Manifest> found = new ProxyManifests(
             (line, headers, body) -> {
-                if (!line.startsWith("GET /v2/my-test/manifests/latest ")) {
+                if (!line.toString().startsWith("GET /v2/my-test/manifests/latest ")) {
                     throw new IllegalArgumentException();
                 }
                 return new RsWithStatus(RsStatus.NOT_FOUND);
@@ -78,8 +79,8 @@ class ProxyManifestsTest {
     void shouldSendRequestCatalogFromRemote() {
         final String name = "my-alpine";
         final int limit = 123;
-        final AtomicReference<String> cline = new AtomicReference<>();
-        final AtomicReference<Iterable<Map.Entry<String, String>>> cheaders;
+        final AtomicReference<RequestLine> cline = new AtomicReference<>();
+        final AtomicReference<Iterable<Header>> cheaders;
         cheaders = new AtomicReference<>();
         final AtomicReference<byte[]> cbody = new AtomicReference<>();
         new ProxyDocker(
@@ -98,7 +99,7 @@ class ProxyManifestsTest {
         ).catalog(Optional.of(new RepoName.Simple(name)), limit).toCompletableFuture().join();
         MatcherAssert.assertThat(
             "Sends expected line to remote",
-            cline.get(),
+            cline.get().toString(),
             new StringStartsWith(String.format("GET /v2/_catalog?n=%d&last=%s ", limit, name))
         );
         MatcherAssert.assertThat(

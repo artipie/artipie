@@ -23,9 +23,8 @@ import java.net.URI;
  * {@code Request-Line = Method SP Request-URI SP HTTP-Version CRLF}.
  * </p>
  * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html">RFC2616</a>
- * @since 0.1
  */
-public final class RequestLineFrom {
+final class RequestLineFrom {
 
     /**
      * HTTP request line.
@@ -36,7 +35,7 @@ public final class RequestLineFrom {
      * Primary ctor.
      * @param line HTTP request line
      */
-    public RequestLineFrom(final String line) {
+    RequestLineFrom(final String line) {
         this.line = line;
     }
 
@@ -45,14 +44,7 @@ public final class RequestLineFrom {
      * @return Method name
      */
     public RqMethod method() {
-        final String string = this.part(0);
-        return RqMethod.ALL
-            .stream()
-            .filter(method -> method.value().equals(string))
-            .findAny()
-            .orElseThrow(
-                () -> new IllegalStateException(String.format("Unknown method: '%s'", string))
-            );
+        return RqMethod.valueOf(this.part(0));
     }
 
     /**

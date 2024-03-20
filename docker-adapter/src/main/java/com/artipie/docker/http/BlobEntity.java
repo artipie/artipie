@@ -11,20 +11,20 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.error.BlobUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Blob entity in Docker HTTP API.
@@ -69,7 +69,7 @@ final class BlobEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Pull(new Request(line).name())
             );
@@ -77,9 +77,9 @@ final class BlobEntity {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
             final Request request = new Request(line);
             final Digest digest = request.digest();
@@ -129,7 +129,7 @@ final class BlobEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Pull(new Request(line).name())
             );
@@ -137,9 +137,9 @@ final class BlobEntity {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
             final Request request = new Request(line);
             final Digest digest = request.digest();
@@ -198,11 +198,9 @@ final class BlobEntity {
         private final RqByRegex rqregex;
 
         /**
-         * Ctor.
-         *
          * @param line HTTP request line.
          */
-        Request(final String line) {
+        Request(final RequestLine line) {
             this.rqregex = new RqByRegex(line, BlobEntity.PATH);
         }
 

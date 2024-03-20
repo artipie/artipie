@@ -5,56 +5,52 @@
 package com.artipie.http.rt;
 
 import com.artipie.http.Headers;
-import java.util.regex.Pattern;
+import com.artipie.http.rq.RequestLine;
 import org.cactoos.map.MapEntry;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.regex.Pattern;
 
 /**
  * Test for {@link RtRule.ByHeader}.
- * @since 0.17
  */
 class RtRuleByHeaderTest {
 
     @Test
     void trueIfHeaderIsPresent() {
         final String name = "some header";
-        MatcherAssert.assertThat(
+        Assertions.assertTrue(
             new RtRule.ByHeader(name).apply(
-                "what ever", new Headers.From(new MapEntry<>(name, "any value"))
-            ),
-            new IsEqual<>(true)
+                new RequestLine("GET", "/"), Headers.from(new MapEntry<>(name, "any value"))
+            )
         );
     }
 
     @Test
     void falseIfHeaderIsNotPresent() {
-        MatcherAssert.assertThat(
-            new RtRule.ByHeader("my header").apply("rq line", Headers.EMPTY),
-            new IsEqual<>(false)
+        Assertions.assertFalse(
+            new RtRule.ByHeader("my header").apply(null, Headers.EMPTY)
         );
     }
 
     @Test
     void trueIfHeaderIsPresentAndValueMatchesRegex() {
         final String name = "content-type";
-        MatcherAssert.assertThat(
+        Assertions.assertTrue(
             new RtRule.ByHeader(name, Pattern.compile("text/html.*")).apply(
-                "/some/path", new Headers.From(new MapEntry<>(name, "text/html; charset=utf-8"))
-            ),
-            new IsEqual<>(true)
+                new RequestLine("GET", "/some/path"), Headers.from(new MapEntry<>(name, "text/html; charset=utf-8"))
+            )
         );
     }
 
     @Test
     void falseIfHeaderIsPresentAndValueDoesNotMatchesRegex() {
         final String name = "Accept-Encoding";
-        MatcherAssert.assertThat(
+        Assertions.assertFalse(
             new RtRule.ByHeader(name, Pattern.compile("gzip.*")).apply(
-                "/another/path", new Headers.From(new MapEntry<>(name, "deflate"))
-            ),
-            new IsEqual<>(false)
+                new RequestLine("GET", "/another/path"), Headers.from(new MapEntry<>(name, "deflate"))
+            )
         );
     }
 

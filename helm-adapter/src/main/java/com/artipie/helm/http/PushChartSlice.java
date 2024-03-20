@@ -17,7 +17,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
@@ -26,20 +26,17 @@ import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
+import org.reactivestreams.Publisher;
+
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import org.reactivestreams.Publisher;
 
 /**
  * A Slice which accept archived charts, save them into a storage and trigger index.yml reindexing.
  * By default it updates index file after uploading.
- * @since 0.2
- * @todo #13:30min Create an integration test
- *  We need an integration test for this class with described logic of upload from client side
  */
 final class PushChartSlice implements Slice {
 
@@ -78,13 +75,11 @@ final class PushChartSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
-        final Optional<String> upd = new RqParams(
-            new RequestLineFrom(line).uri()
-        ).value("updateIndex");
+        final Optional<String> upd = new RqParams(line.uri()).value("updateIndex");
         return new AsyncResponse(
             memory(body).flatMapCompletable(
                 tgz -> new RxStorageWrapper(this.storage).save(
@@ -101,7 +96,7 @@ final class PushChartSlice implements Slice {
                                     queue -> queue.add(
                                         new ArtifactEvent(
                                             PushChartSlice.REPO_TYPE, this.rname,
-                                            new Login(new Headers.From(headers)).getValue(),
+                                            new Login(headers).getValue(),
                                             chart.name(), chart.version(), tgz.size()
                                         )
                                     )

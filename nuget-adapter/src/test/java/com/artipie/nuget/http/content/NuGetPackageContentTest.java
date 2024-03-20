@@ -4,6 +4,7 @@
  */
 package com.artipie.nuget.http.content;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
@@ -20,28 +21,22 @@ import com.artipie.nuget.AstoRepository;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.nuget.http.TestAuthentication;
 import com.artipie.security.policy.PolicyByUsername;
-import io.reactivex.Flowable;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Tests for {@link NuGet}.
  * Package Content resource.
- *
- * @since 0.1
  */
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 class NuGetPackageContentTest {
 
-    /**
-     * Storage used in tests.
-     */
     private Storage storage;
 
     /**
@@ -75,9 +70,9 @@ class NuGetPackageContentTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/content/package/1.0.0/content.nupkg"
-                ).toString(),
-                new TestAuthentication.Headers(),
-                Flowable.empty()
+                ),
+                TestAuthentication.HEADERS,
+                Content.EMPTY
             ),
             new AllOf<>(
                 Arrays.asList(
@@ -96,9 +91,9 @@ class NuGetPackageContentTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/content/package/1.0.0/logo.png"
-                ).toString(),
-                new TestAuthentication.Headers(),
-                Flowable.empty()
+                ),
+                TestAuthentication.HEADERS,
+                Content.EMPTY
             ),
             new RsHasStatus(RsStatus.NOT_FOUND)
         );
@@ -110,9 +105,9 @@ class NuGetPackageContentTest {
             new RequestLine(
                 RqMethod.PUT,
                 "/content/package/1.0.0/content.nupkg"
-            ).toString(),
-            new TestAuthentication.Headers(),
-            Flowable.empty()
+            ),
+            TestAuthentication.HEADERS,
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             "Package content cannot be put",
@@ -133,9 +128,9 @@ class NuGetPackageContentTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/content/package2/index.json"
-                ).toString(),
-                new TestAuthentication.Headers(),
-                Flowable.empty()
+                ),
+                TestAuthentication.HEADERS,
+                Content.EMPTY
             ),
             Matchers.allOf(
                 new RsHasStatus(RsStatus.OK),
@@ -151,9 +146,9 @@ class NuGetPackageContentTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/content/unknown-package/index.json"
-                ).toString(),
-                new TestAuthentication.Headers(),
-                Flowable.empty()
+                ),
+                TestAuthentication.HEADERS,
+                Content.EMPTY
             ),
             new RsHasStatus(RsStatus.NOT_FOUND)
         );
@@ -166,9 +161,9 @@ class NuGetPackageContentTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/content/package/2.0.0/content.nupkg"
-                ).toString(),
+                ),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(RsStatus.UNAUTHORIZED, Headers.EMPTY)
         );

@@ -4,24 +4,20 @@
  */
 package com.artipie.http.auth;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.WwwAuthenticate;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice with authorization.
- *
- * @since 1.2
  */
-@SuppressWarnings("PMD.OnlyOneReturn")
 public final class AuthzSlice implements Slice {
 
     /**
@@ -59,9 +55,9 @@ public final class AuthzSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
         return new AsyncResponse(
             this.auth.authenticate(headers, line).thenApply(
@@ -70,10 +66,7 @@ public final class AuthzSlice implements Slice {
                         if (this.control.allowed(result.user())) {
                             return this.origin.response(
                                 line,
-                                new Headers.From(
-                                    headers, AuthzSlice.LOGIN_HDR,
-                                    result.user().name()
-                                ),
+                                headers.copy().add(AuthzSlice.LOGIN_HDR, result.user().name()),
                                 body
                             );
                         }
@@ -84,16 +77,13 @@ public final class AuthzSlice implements Slice {
                         && this.control.allowed(result.user())) {
                         return this.origin.response(
                             line,
-                            new Headers.From(
-                                headers, AuthzSlice.LOGIN_HDR,
-                                result.user().name()
-                            ),
+                            headers.copy().add(AuthzSlice.LOGIN_HDR, result.user().name()),
                             body
                         );
                     }
                     return new RsWithHeaders(
                         new RsWithStatus(RsStatus.UNAUTHORIZED),
-                        new Headers.From(new WwwAuthenticate(result.challenge()))
+                        Headers.from(new WwwAuthenticate(result.challenge()))
                     );
                 }
             )

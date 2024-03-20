@@ -6,6 +6,8 @@ package com.artipie.http.filter;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.amihaiemil.eoyaml.YamlMapping;
+import com.artipie.http.rq.RequestLine;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
@@ -27,8 +29,8 @@ public final class FiltersTestUtil {
      * @param path Request path
      * @return Get request
      */
-    public static String get(final String path) {
-        return String.format("GET %s HTTP/1.1", path);
+    public static RequestLine get(final String path) {
+        return RequestLine.from(String.format("GET %s HTTP/1.1", path));
     }
 
     /**

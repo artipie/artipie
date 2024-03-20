@@ -6,16 +6,15 @@ package com.artipie.http;
 
 import com.artipie.RepositorySlices;
 import com.artipie.RqPath;
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice which finds repository by path.
@@ -40,13 +39,11 @@ final class SliceByPath implements Slice {
     @Override
     @SuppressWarnings("PMD.OnlyOneReturn")
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
-        final Optional<Key> key = SliceByPath.keyFromPath(
-            new RequestLineFrom(line).uri().getPath()
-        );
+        final Optional<Key> key = SliceByPath.keyFromPath(line.uri().getPath());
         if (key.isEmpty()) {
             return new RsWithBody(
                 new RsWithStatus(RsStatus.NOT_FOUND),
@@ -54,8 +51,7 @@ final class SliceByPath implements Slice {
                 StandardCharsets.UTF_8
             );
         }
-        return this.slices
-            .slice(key.get(), new RequestLineFrom(line).uri().getPort())
+        return this.slices.slice(key.get(), line.uri().getPort())
             .response(line, headers, body);
     }
 

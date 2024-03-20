@@ -17,7 +17,6 @@ import org.reactivestreams.Subscription;
 
 /**
  * Multipart request part.
- * @since 1.0
  */
 @SuppressWarnings("PMD.NullAssignment")
 final class MultiPart implements RqMultipart.Part, ByteBufferTokenizer.Receiver, Subscription {
@@ -51,7 +50,7 @@ final class MultiPart implements RqMultipart.Part, ByteBufferTokenizer.Receiver,
     /**
      * Multipart header.
      */
-    private final MultipartHeaders hdr;
+    private final MultipartHeaders mpartHeaders;
 
     /**
      * Downstream.
@@ -116,7 +115,7 @@ final class MultiPart implements RqMultipart.Part, ByteBufferTokenizer.Receiver,
         this.tokenizer = new ByteBufferTokenizer(
             this, MultiPart.DELIM.getBytes(), MultiPart.CAP_PART
         );
-        this.hdr = new MultipartHeaders(MultiPart.CAP_HEADER);
+        this.mpartHeaders = new MultipartHeaders(MultiPart.CAP_HEADER);
         this.tmpacc = new BufAccumulator(MultiPart.CAP_HEADER);
         this.lock = new Object();
         this.exec = exec;
@@ -124,7 +123,7 @@ final class MultiPart implements RqMultipart.Part, ByteBufferTokenizer.Receiver,
 
     @Override
     public Headers headers() {
-        return this.hdr;
+        return this.mpartHeaders.headers();
     }
 
     @Override
@@ -146,7 +145,7 @@ final class MultiPart implements RqMultipart.Part, ByteBufferTokenizer.Receiver,
             if (this.head) {
                 this.nextChunk(next);
             } else {
-                this.hdr.push(next);
+                this.mpartHeaders.push(next);
                 if (end) {
                     this.head = true;
                     this.ready.accept(this);

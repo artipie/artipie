@@ -5,15 +5,13 @@
 
 package com.artipie.http.rs;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
-import org.reactivestreams.Publisher;
 
 /**
  * Response with additional headers.
@@ -66,19 +64,9 @@ public final class RsWithHeaders implements Response {
      * @param origin Origin response.
      * @param headers Headers
      */
-    public RsWithHeaders(final Response origin, final Iterable<Map.Entry<String, String>> headers) {
-        this(origin, new Headers.From(headers));
-    }
-
-    /**
-     * Ctor.
-     *
-     * @param origin Origin response.
-     * @param headers Headers
-     */
     @SafeVarargs
     public RsWithHeaders(final Response origin, final Map.Entry<String, String>... headers) {
-        this(origin, new Headers.From(headers));
+        this(origin, Headers.from(headers));
     }
 
     /**
@@ -89,7 +77,7 @@ public final class RsWithHeaders implements Response {
      * @param value Value of header.
      */
     public RsWithHeaders(final Response origin, final String name, final String value) {
-        this(origin, new Headers.From(name, value));
+        this(origin, Headers.from(name, value));
     }
 
     @Override
@@ -111,7 +99,7 @@ public final class RsWithHeaders implements Response {
         /**
          * Additional headers.
          */
-        private final Iterable<Map.Entry<String, String>> headers;
+        private final Headers headers;
 
         /**
          * Should header value be replaced if already exist?
@@ -125,10 +113,7 @@ public final class RsWithHeaders implements Response {
          * @param headers Headers
          * @param override Should header value be replaced if already exist?
          */
-        private ConWithHeaders(
-            final Connection origin,
-            final Iterable<Map.Entry<String, String>> headers,
-            final boolean override) {
+        private ConWithHeaders(Connection origin, Headers headers, boolean override) {
             this.origin = origin;
             this.headers = headers;
             this.override = override;
@@ -138,23 +123,22 @@ public final class RsWithHeaders implements Response {
         public CompletionStage<Void> accept(
             final RsStatus status,
             final Headers hrs,
-            final Publisher<ByteBuffer> body
+            final Content body
         ) {
             final Headers res;
             if (this.override) {
-                final List<Map.Entry<String, String>> list = new ArrayList<>(10);
-                this.headers.forEach(list::add);
+                res = this.headers.copy();
                 hrs.forEach(
                     item -> {
-                        if (list.stream()
-                            .noneMatch(val -> val.getKey().equalsIgnoreCase(item.getKey()))) {
-                            list.add(item);
+                        if (res.stream()
+                            .noneMatch(val -> val.getKey().equalsIgnoreCase(item.getKey()))
+                        ) {
+                            res.add(item);
                         }
                     }
                 );
-                res = new Headers.From(list);
             } else {
-                res = new Headers.From(this.headers, hrs);
+                res = this.headers.copy().addAll(hrs);
             }
             return this.origin.accept(status, res, body);
         }

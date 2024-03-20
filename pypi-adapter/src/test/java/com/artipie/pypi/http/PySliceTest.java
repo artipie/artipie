@@ -19,7 +19,6 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.security.policy.Policy;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
@@ -28,12 +27,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.Collections;
 import java.util.Optional;
 
 /**
  * Test for {@link PySlice}.
- * @since 0.6
  */
 class PySliceTest {
 
@@ -64,9 +61,9 @@ class PySliceTest {
         this.storage.save(new Key.From(key), new Content.From(content)).join();
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine("GET", "/simple").toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine("GET", "/simple"),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             Matchers.allOf(
                 new RsHasBody(
@@ -88,9 +85,9 @@ class PySliceTest {
         this.storage.save(new Key.From(key), new Content.From(content)).join();
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine("GET", "/").toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine("GET", "/"),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             Matchers.allOf(
                 new RsHasBody(
@@ -109,9 +106,9 @@ class PySliceTest {
     void redirectsToNormalizedPath() {
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine("GET", "/one/Two_three").toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine("GET", "/one/Two_three"),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.MOVED_PERMANENTLY,
@@ -124,9 +121,9 @@ class PySliceTest {
     void returnsBadRequestOnEmptyPost() {
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine("POST", "/sample.tar").toString(),
-                new Headers.From("content-type", "multipart/form-data; boundary=\"abc123\""),
-                Flowable.empty()
+                new RequestLine("POST", "/sample.tar"),
+                Headers.from("content-type", "multipart/form-data; boundary=\"abc123\""),
+                Content.EMPTY
             ),
             new RsHasStatus(RsStatus.BAD_REQUEST)
         );
@@ -146,9 +143,9 @@ class PySliceTest {
         this.storage.save(new Key.From(key), new Content.From(content.getBytes())).join();
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine("GET", key).toString(),
-                Collections.emptyList(),
-                Flowable.empty()
+                new RequestLine("GET", key),
+                Headers.EMPTY,
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.OK,

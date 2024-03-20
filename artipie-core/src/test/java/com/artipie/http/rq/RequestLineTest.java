@@ -19,7 +19,7 @@ public class RequestLineTest {
     public void reqLineStringIsCorrect() {
         MatcherAssert.assertThat(
             new RequestLine("GET", "/pub/WWW/TheProject.html", "HTTP/1.1").toString(),
-            Matchers.equalTo("GET /pub/WWW/TheProject.html HTTP/1.1\r\n")
+            Matchers.equalTo("GET /pub/WWW/TheProject.html HTTP/1.1")
         );
     }
 
@@ -27,7 +27,7 @@ public class RequestLineTest {
     public void shouldHaveDefaultVersionWhenNoneSpecified() {
         MatcherAssert.assertThat(
             new RequestLine(RqMethod.PUT, "/file.txt").toString(),
-            Matchers.equalTo("PUT /file.txt HTTP/1.1\r\n")
+            Matchers.equalTo("PUT /file.txt HTTP/1.1")
         );
     }
 }

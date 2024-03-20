@@ -4,6 +4,7 @@
  */
 package com.artipie.conda.http;
 
+import com.artipie.asto.Content;
 import com.artipie.conda.http.auth.TokenAuthScheme;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -12,21 +13,19 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.WwwAuthenticate;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.concurrent.CompletableFuture;
-import org.reactivestreams.Publisher;
 
 /**
  * Delete token slice.
  * <a href="https://api.anaconda.org/docs#/authentication/delete_authentications">Documentation</a>.
  * This slice checks if the token is valid and returns 201 if yes. Token itself is not removed
  * from the Artipie.
- * @since 0.5
  */
 final class DeleteTokenSlice implements Slice {
 
@@ -44,8 +43,8 @@ final class DeleteTokenSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line,
-        final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+    public Response response(final RequestLine line,
+                             final Headers headers, final Content body) {
         return new AsyncResponse(
             CompletableFuture.supplyAsync(
                 () -> new RqHeaders(headers, Authorization.NAME)
@@ -68,7 +67,7 @@ final class DeleteTokenSlice implements Slice {
                     CompletableFuture.completedFuture(
                         new RsWithHeaders(
                             new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            new Headers.From(new WwwAuthenticate(TokenAuthScheme.NAME))
+                            Headers.from(new WwwAuthenticate(TokenAuthScheme.NAME))
                         )
                     )
                 )

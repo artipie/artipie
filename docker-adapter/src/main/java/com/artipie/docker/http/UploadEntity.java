@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
@@ -13,34 +14,30 @@ import com.artipie.docker.error.UploadUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Connection;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.Location;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.ContentWithSize;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Blob Upload entity in Docker HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/#initiate-blob-upload">Initiate Blob Upload</a>
  * and <a href="https://docs.docker.com/registry/spec/api/#blob-upload">Blob Upload</a>.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class UploadEntity {
 
     /**
@@ -83,7 +80,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Push(new Request(line).name())
             );
@@ -91,9 +88,9 @@ public final class UploadEntity {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName target = request.name();
@@ -172,7 +169,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Push(new Request(line).name())
             );
@@ -180,9 +177,9 @@ public final class UploadEntity {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -225,7 +222,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Push(new Request(line).name())
             );
@@ -233,9 +230,9 @@ public final class UploadEntity {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -279,7 +276,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Pull(new Request(line).name())
             );
@@ -287,9 +284,9 @@ public final class UploadEntity {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -325,14 +322,14 @@ public final class UploadEntity {
         /**
          * HTTP request line.
          */
-        private final String line;
+        private final RequestLine line;
 
         /**
          * Ctor.
          *
          * @param line HTTP request line.
          */
-        Request(final String line) {
+        Request(final RequestLine line) {
             this.line = line;
         }
 
@@ -391,7 +388,7 @@ public final class UploadEntity {
          * @return Request query parameters.
          */
         private RqParams params() {
-            return new RqParams(new RequestLineFrom(this.line).uri().getQuery());
+            return new RqParams(this.line.uri().getQuery());
         }
     }
 
@@ -491,7 +488,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Pull(new Request(line).name())
             );
@@ -499,9 +496,9 @@ public final class UploadEntity {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();

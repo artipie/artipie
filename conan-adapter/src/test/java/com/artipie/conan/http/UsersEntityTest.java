@@ -23,9 +23,7 @@ import org.junit.Test;
 
 /**
  * Test for {@link UsersEntity}.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class UsersEntityTest {
 
     @Test
@@ -46,7 +44,7 @@ public class UsersEntityTest {
                     new RsHasBody(String.format("%s", ConanSliceITCase.TOKEN).getBytes())
                 ),
                 new RequestLine(RqMethod.GET, "/v1/users/authenticate"),
-                new Headers.From(new Authorization.Basic(login, password)),
+                Headers.from(new Authorization.Basic(login, password)),
                 Content.EMPTY
             )
         );
@@ -57,8 +55,8 @@ public class UsersEntityTest {
         MatcherAssert.assertThat(
             "Response must match",
             new UsersEntity.CredsCheck().response(
-                new RequestLine(RqMethod.GET, "/v1/users/check_credentials").toString(),
-                new Headers.From("Host", "localhost"), Content.EMPTY
+                new RequestLine(RqMethod.GET, "/v1/users/check_credentials"),
+                Headers.from("Host", "localhost"), Content.EMPTY
             ), Matchers.allOf(
                 new RsHasBody(
                     new IsJson(new IsEqual<>(Json.createObjectBuilder().build()))

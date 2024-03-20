@@ -12,6 +12,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
@@ -22,11 +23,10 @@ import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.vertx.reactivex.core.Vertx;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -41,7 +41,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.reactivestreams.Publisher;
 
 /**
  * Integration tests for multipart feature.
@@ -79,7 +78,7 @@ final class MultipartITCase {
             (line, headers, body) -> new AsyncResponse(
                 new Content.From(
                     Flowable.fromPublisher(
-                        new RqMultipart(new Headers.From(headers), body).inspect(
+                        new RqMultipart(headers, body).inspect(
                             (part, sink) -> {
                                 final ContentDisposition cds =
                                     new ContentDisposition(part.headers());
@@ -127,7 +126,7 @@ final class MultipartITCase {
             (line, headers, body) -> new AsyncResponse(
                 new Content.From(
                     Flowable.fromPublisher(
-                        new RqMultipart(new Headers.From(headers), body).inspect(
+                        new RqMultipart(headers, body).inspect(
                             (part, sink) -> {
                                 final ContentDisposition cds =
                                     new ContentDisposition(part.headers());
@@ -176,7 +175,7 @@ final class MultipartITCase {
         this.container.deploy(
             (line, headers, body) -> new AsyncResponse(
                 Flowable.fromPublisher(
-                    new RqMultipart(new Headers.From(headers), body).inspect(
+                    new RqMultipart(headers, body).inspect(
                         (part, sink) -> {
                             final ContentDisposition cds =
                                 new ContentDisposition(part.headers());
@@ -251,9 +250,9 @@ final class MultipartITCase {
 
         @Override
         @SuppressWarnings("PMD.OnlyOneReturn")
-        public Response response(final String line,
-            final Iterable<Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body) {
+        public Response response(final RequestLine line,
+            final Headers headers,
+            final Content body) {
             if (this.target == null) {
                 return new RsWithBody(
                     new RsWithStatus(RsStatus.UNAVAILABLE),

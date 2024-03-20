@@ -4,15 +4,12 @@
  */
 package com.artipie.nuget.http;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import java.nio.ByteBuffer;
-import org.reactivestreams.Publisher;
 
 /**
  * Resource serving HTTP requests.
- *
- * @since 0.1
  */
 public interface Resource {
     /**
@@ -30,5 +27,5 @@ public interface Resource {
      * @param body Request body.
      * @return Response to request.
      */
-    Response put(Headers headers, Publisher<ByteBuffer> body);
+    Response put(Headers headers, Content body);
 }

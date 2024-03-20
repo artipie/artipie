@@ -4,26 +4,26 @@
  */
 package com.artipie.http.client.jetty;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.client.HttpServer;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsWithBody;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import org.eclipse.jetty.client.HttpClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Tests checking for leaks in {@link JettyClientSlice}.
- *
- * @since 0.1
  */
 final class JettyClientSliceLeakTest {
 
@@ -65,9 +65,9 @@ final class JettyClientSliceLeakTest {
         final int total = 1025;
         for (int count = 0; count < total; count += 1) {
             this.slice.response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ).send(
                 (status, headers, body) -> CompletableFuture.allOf()
             ).toCompletableFuture().get(1, TimeUnit.SECONDS);
@@ -79,9 +79,9 @@ final class JettyClientSliceLeakTest {
         final int total = 1025;
         for (int count = 0; count < total; count += 1) {
             final CompletionStage<Void> sent = this.slice.response(
-                new RequestLine(RqMethod.GET, "/").toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ).send(
                 (status, headers, body) -> {
                     final CompletableFuture<Void> future = new CompletableFuture<>();
@@ -91,7 +91,7 @@ final class JettyClientSliceLeakTest {
             );
             try {
                 sent.toCompletableFuture().get(2, TimeUnit.SECONDS);
-            } catch (final ExecutionException expected) {
+            } catch (ExecutionException expected) {
             }
         }
     }

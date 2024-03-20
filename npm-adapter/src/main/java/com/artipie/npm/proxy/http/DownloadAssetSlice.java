@@ -12,22 +12,19 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.npm.misc.DateTimeNowStr;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.Optional;
 import java.util.Queue;
-import org.reactivestreams.Publisher;
 
 /**
  * HTTP slice for download asset requests.
- * @since 0.1
  */
 public final class DownloadAssetSlice implements Slice {
     /**
@@ -67,10 +64,10 @@ public final class DownloadAssetSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line,
-        final Iterable<Map.Entry<String, String>> rqheaders,
-        final Publisher<ByteBuffer> body) {
-        final String tgz = this.path.value(new RequestLineFrom(line).uri().getPath());
+    public Response response(final RequestLine line,
+        final Headers rqheaders,
+        final Content body) {
+        final String tgz = this.path.value(line.uri().getPath());
         return new AsyncResponse(
             this.npm.getAsset(tgz).map(
                 asset -> {
@@ -78,7 +75,7 @@ public final class DownloadAssetSlice implements Slice {
                         queue -> queue.add(
                             new ProxyArtifactEvent(
                                 new Key.From(tgz), this.rname,
-                                new Login(new Headers.From(rqheaders)).getValue()
+                                new Login(rqheaders).getValue()
                             )
                         )
                     );
@@ -87,7 +84,7 @@ public final class DownloadAssetSlice implements Slice {
                 .map(
                     asset -> (Response) new RsFull(
                         RsStatus.OK,
-                        new Headers.From(
+                        Headers.from(
                             new Header(
                                 "Content-Type",
                                 Optional.ofNullable(

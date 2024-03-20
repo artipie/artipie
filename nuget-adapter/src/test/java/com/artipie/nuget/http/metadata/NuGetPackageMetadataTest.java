@@ -23,14 +23,6 @@ import com.artipie.nuget.http.TestAuthentication;
 import com.artipie.nuget.metadata.Nuspec;
 import com.artipie.nuget.metadata.Version;
 import com.artipie.security.policy.PolicyByUsername;
-import io.reactivex.Flowable;
-import java.io.ByteArrayInputStream;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Optional;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.TypeSafeMatcher;
@@ -38,23 +30,22 @@ import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Tests for {@link NuGet}.
  * Package metadata resource.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class NuGetPackageMetadataTest {
 
-    /**
-     * Tested NuGet slice.
-     */
     private NuGet nuget;
 
-    /**
-     * Storage used by repository.
-     */
     private InMemoryStorage storage;
 
     @BeforeEach
@@ -95,9 +86,9 @@ class NuGetPackageMetadataTest {
             new RequestLine(
                 RqMethod.GET,
                 "/registrations/newtonsoft.json/index.json"
-            ).toString(),
-            new TestAuthentication.Headers(),
-            Flowable.empty()
+            ),
+            TestAuthentication.HEADERS,
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,
@@ -116,9 +107,9 @@ class NuGetPackageMetadataTest {
             new RequestLine(
                 RqMethod.GET,
                 "/registrations/my.lib/index.json"
-            ).toString(),
-            new TestAuthentication.Headers(),
-            Flowable.empty()
+            ),
+            TestAuthentication.HEADERS,
+            Content.EMPTY
         );
         MatcherAssert.assertThat(
             response,
@@ -137,9 +128,9 @@ class NuGetPackageMetadataTest {
             new RequestLine(
                 RqMethod.PUT,
                 "/registrations/newtonsoft.json/index.json"
-            ).toString(),
-            new TestAuthentication.Headers(),
-            Flowable.empty()
+            ),
+            TestAuthentication.HEADERS,
+            Content.EMPTY
         );
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
     }
@@ -151,9 +142,9 @@ class NuGetPackageMetadataTest {
                 new RequestLine(
                     RqMethod.GET,
                     "/registrations/my-utils/index.json"
-                ).toString(),
+                ),
                 Headers.EMPTY,
-                Flowable.empty()
+                Content.EMPTY
             ),
             new ResponseMatcher(
                 RsStatus.UNAUTHORIZED, Headers.EMPTY

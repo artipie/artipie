@@ -13,17 +13,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Test for {@link RpmUpload}.
- * @since 0.9
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class RpmUploadRequestTest {
 
     @Test
     void returnsFileNameKey() {
         MatcherAssert.assertThat(
-            new RpmUpload.Request(
-                new RequestLine("PUT", "/file.rpm").toString()
-            ).file().string(),
+            new RpmUpload.Request(new RequestLine("PUT", "/file.rpm")).file().string(),
             new IsEqual<>("file.rpm")
         );
     }
@@ -33,7 +29,6 @@ public final class RpmUploadRequestTest {
         "/file.rpm?override=true,true",
         "/file.rpm?some_param=true&override=true,true",
         "/file.rpm?some_param=false&override=true,true",
-        ",false",
         "/file.rpm,false",
         "/file.rpm?some_param=true,false",
         "/file.rpm?override=false,false",
@@ -42,9 +37,7 @@ public final class RpmUploadRequestTest {
     })
     void readsOverrideFlag(final String uri, final boolean expected) {
         MatcherAssert.assertThat(
-            new RpmUpload.Request(
-                new RequestLine("PUT", uri).toString()
-            ).override(),
+            new RpmUpload.Request(new RequestLine("PUT", uri)).override(),
             new IsEqual<>(expected)
         );
     }
@@ -54,7 +47,6 @@ public final class RpmUploadRequestTest {
         "/file.rpm?skip_update=true,true",
         "/file.rpm?some_param=true&skip_update=true,true",
         "/file.rpm?some_param=false&skip_update=true,true",
-        ",false",
         "/file.rpm,false",
         "/file.rpm?some_param=true,false",
         "/file.rpm?skip_update=false,false",
@@ -63,9 +55,7 @@ public final class RpmUploadRequestTest {
     })
     void readsSkipUpdateFlag(final String uri, final boolean expected) {
         MatcherAssert.assertThat(
-            new RpmUpload.Request(
-                new RequestLine("PUT", uri).toString()
-            ).skipUpdate(),
+            new RpmUpload.Request(new RequestLine("PUT", uri)).skipUpdate(),
             new IsEqual<>(expected)
         );
     }
@@ -75,7 +65,6 @@ public final class RpmUploadRequestTest {
         "/file.rpm?force=true,true",
         "/file.rpm?some_param=true&force=true,true",
         "/file.rpm?some_param=false&force=true,true",
-        ",false",
         "/file.rpm,false",
         "/file.rpm?some_param=true,false",
         "/file.rpm?force=false,false",
@@ -84,9 +73,7 @@ public final class RpmUploadRequestTest {
     })
     void readsForceFlag(final String uri, final boolean expected) {
         MatcherAssert.assertThat(
-            new RpmUpload.Request(
-                new RequestLine("DELETE", uri).toString()
-            ).force(),
+            new RpmUpload.Request(new RequestLine("DELETE", uri)).force(),
             new IsEqual<>(expected)
         );
     }

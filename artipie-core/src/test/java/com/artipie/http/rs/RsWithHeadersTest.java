@@ -36,7 +36,7 @@ public class RsWithHeadersTest {
         final String two = "two";
         MatcherAssert.assertThat(
             new RsWithHeaders(
-                new RsFull(RsStatus.OK, new Headers.From(name, one), Content.EMPTY),
+                new RsFull(RsStatus.OK, Headers.from(name, one), Content.EMPTY),
                 new MapEntry<>(name, two)
             ),
             new RsHasHeaders(
@@ -52,8 +52,8 @@ public class RsWithHeadersTest {
         final String two = "two";
         MatcherAssert.assertThat(
             new RsWithHeaders(
-                new RsFull(RsStatus.OK, new Headers.From(name, one), Content.EMPTY),
-                new Headers.From(name, two), true
+                new RsFull(RsStatus.OK, Headers.from(name, one), Content.EMPTY),
+                Headers.from(name, two), true
             ),
             new RsHasHeaders(new Header(name, two), new Header("Content-Length", "0"))
         );

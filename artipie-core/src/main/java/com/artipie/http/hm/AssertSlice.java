@@ -4,13 +4,12 @@
  */
 package com.artipie.http.hm;
 
+import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.StandardRs;
-import java.nio.ByteBuffer;
-import java.util.Map;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -18,9 +17,10 @@ import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.reactivestreams.Publisher;
 
+import java.nio.ByteBuffer;
+
 /**
  * Slice implementation which assert request data against specified matchers.
- * @since 0.10
  */
 public final class AssertSlice implements Slice {
 
@@ -44,7 +44,7 @@ public final class AssertSlice implements Slice {
     /**
      * Request line matcher.
      */
-    private final Matcher<? super RequestLineFrom> line;
+    private final Matcher<? super RequestLine> line;
 
     /**
      * Request headers matcher.
@@ -60,7 +60,7 @@ public final class AssertSlice implements Slice {
      * Assert slice request line.
      * @param line Request line matcher
      */
-    public AssertSlice(final Matcher<? super RequestLineFrom> line) {
+    public AssertSlice(final Matcher<? super RequestLine> line) {
         this(line, Matchers.any(Headers.class), AssertSlice.STUB_BODY_MATCHER);
     }
 
@@ -70,7 +70,7 @@ public final class AssertSlice implements Slice {
      * @param head Request headers matcher
      * @param body Request body matcher
      */
-    public AssertSlice(final Matcher<? super RequestLineFrom> line,
+    public AssertSlice(final Matcher<? super RequestLine> line,
         final Matcher<? super Headers> head, final Matcher<? super Publisher<ByteBuffer>> body) {
         this.line = line;
         this.head = head;
@@ -78,13 +78,12 @@ public final class AssertSlice implements Slice {
     }
 
     @Override
-    public Response response(final String lne, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> publ) {
+    public Response response(RequestLine lne, Headers headers, Content publ) {
         MatcherAssert.assertThat(
-            "Wrong request line", new RequestLineFrom(lne), this.line
+            "Wrong request line", lne, this.line
         );
         MatcherAssert.assertThat(
-            "Wrong headers", new Headers.From(headers), this.head
+            "Wrong headers", headers, this.head
         );
         MatcherAssert.assertThat(
             "Wrong body", publ, this.body

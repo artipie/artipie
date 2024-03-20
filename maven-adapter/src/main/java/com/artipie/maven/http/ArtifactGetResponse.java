@@ -19,9 +19,7 @@ import com.artipie.maven.asto.RepositoryChecksums;
  * It includes a body of artifact requested if exists. The code is:
  * {@code 200} if exist and {@code 404} otherwise.
  * Also, it contains artifact headers if it exits.
- * </p>
  * @see ArtifactHeaders
- * @since 0.5
  */
 public final class ArtifactGetResponse extends Response.Wrap {
 
@@ -50,7 +48,6 @@ public final class ArtifactGetResponse extends Response.Wrap {
 
     /**
      * Ok {@code 200} response for {@code GET} request.
-     * @since 0.5
      */
     private static final class OkResponse extends Response.Wrap {
         /**
@@ -67,7 +64,7 @@ public final class ArtifactGetResponse extends Response.Wrap {
                             new RsWithBody(
                                 new RsWithHeaders(
                                     StandardRs.OK,
-                                    new ArtifactHeaders(location, checksums)
+                                    ArtifactHeaders.from(location, checksums)
                                 ),
                                 body
                             )

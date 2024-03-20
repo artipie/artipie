@@ -23,7 +23,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
@@ -32,12 +32,16 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.reactivestreams.Publisher;
+
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
@@ -46,14 +50,9 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.reactivestreams.Publisher;
 
 /**
  * This slice creates package meta-info from request body(tar-archive) and saves this tar-archive.
- * @since 0.1
  */
 @SuppressWarnings("PMD.ExcessiveMethodLength")
 public final class UploadSlice implements Slice {
@@ -102,11 +101,11 @@ public final class UploadSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
-        final URI uri = new RequestLineFrom(line).uri();
+        final URI uri = line.uri();
         final String path = Objects.nonNull(uri.getPath()) ? uri.getPath() : "";
         final Matcher pathmatcher = UploadSlice.PUBLISH.matcher(path);
         final String query = Objects.nonNull(uri.getQuery()) ? uri.getQuery() : "";
@@ -168,16 +167,14 @@ public final class UploadSlice implements Slice {
                         if (throwable == null) {
                             result = new RsFull(
                                 RsStatus.CREATED,
-                                new Headers.From(
-                                    new HexContentType(headers).fill()
-                                ),
+                                new HexContentType(headers).fill(),
                                 Content.EMPTY
                             );
                             this.events.ifPresent(
                                 queue -> queue.add(
                                     new ArtifactEvent(
                                         UploadSlice.REPO_TYPE, this.rname,
-                                        new Login(new Headers.From(headers)).getValue(),
+                                        new Login(headers).getValue(),
                                         name.get(), version.get(), tarcontent.get().length
                                     )
                                 )

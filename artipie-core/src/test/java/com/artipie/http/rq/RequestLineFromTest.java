@@ -5,12 +5,13 @@
 
 package com.artipie.http.rq;
 
-import java.net.URI;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.net.URI;
 
 /**
  * Test case for {@link RequestLine}.
@@ -70,14 +71,11 @@ final class RequestLineFromTest {
     @Test
     void throwsExceptionIfMethodIsUnknown() {
         final String method = "SURRENDER";
-        MatcherAssert.assertThat(
-            Assertions.assertThrows(
-                IllegalStateException.class,
-                () -> new RequestLineFrom(
-                    String.format("%s /wallet/or/life HTTP/1.1\n", method)
-                ).method()
-            ).getMessage(),
-            new IsEqual<>(String.format("Unknown method: '%s'", method))
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> new RequestLineFrom(
+                String.format("%s /wallet/or/life HTTP/1.1\n", method)
+            ).method()
         );
     }
 

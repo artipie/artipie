@@ -9,10 +9,11 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.conan.ItemTokenizer;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.RsStatus;
@@ -29,7 +30,6 @@ import javax.json.stream.JsonParser;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
@@ -96,9 +96,9 @@ public final class ConanUpload {
      * @param line Request line.
      * @return Corresponding matcher for the request.
      */
-    private static Matcher matchRequest(final String line) {
+    private static Matcher matchRequest(final RequestLine line) {
         final Matcher matcher = ConanUpload.UPLOAD_SRC_PATH.getPattern().matcher(
-            new RequestLineFrom(line).uri().getPath()
+            line.uri().getPath()
         );
         if (!matcher.matches()) {
             throw new ArtipieException("Request parameters doesn't match: " + line);
@@ -149,8 +149,8 @@ public final class ConanUpload {
         }
 
         @Override
-        public Response response(final String line,
-            final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
+        public Response response(final RequestLine line,
+                                 final Headers headers, final Content body) {
             final Matcher matcher = matchRequest(line);
             final String path = matcher.group(ConanUpload.URI_PATH);
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
@@ -242,12 +242,12 @@ public final class ConanUpload {
         }
 
         @Override
-        public Response response(final String line,
-            final Iterable<Map.Entry<String, String>> headers, final Publisher<ByteBuffer> body) {
-            final String path = new RequestLineFrom(line).uri().getPath();
+        public Response response(final RequestLine line,
+                                 final Headers headers, final Content body) {
+            final String path = line.uri().getPath();
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
             final Optional<String> token = new RqParams(
-                new RequestLineFrom(line).uri().getQuery()
+                line.uri().getQuery()
             ).value("signature");
             final Response response;
             if (token.isPresent()) {

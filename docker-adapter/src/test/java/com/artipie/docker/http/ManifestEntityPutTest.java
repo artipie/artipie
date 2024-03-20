@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Docker;
@@ -17,37 +18,24 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
-import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.util.LinkedList;
-import java.util.Queue;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 /**
  * Tests for {@link DockerSlice}.
  * Manifest PUT endpoint.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ManifestEntityPutTest {
 
-    /**
-     * Slice being tested.
-     */
     private DockerSlice slice;
 
-    /**
-     * Docker used in tests.
-     */
     private Docker docker;
 
-    /**
-     * Artifact events queue.
-     */
     private Queue<ArtifactEvent> events;
 
     @BeforeEach
@@ -62,9 +50,7 @@ class ManifestEntityPutTest {
         final String path = "/v2/my-alpine/manifests/1";
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine(RqMethod.PUT, String.format("%s", path)).toString(),
-                Headers.EMPTY,
-                this.manifest()
+                new RequestLine(RqMethod.PUT, path), Headers.EMPTY, this.manifest()
             ),
             new ResponseMatcher(
                 RsStatus.CREATED,
@@ -92,9 +78,7 @@ class ManifestEntityPutTest {
         final String path = String.format("/v2/my-alpine/manifests/%s", digest);
         MatcherAssert.assertThat(
             this.slice.response(
-                new RequestLine(RqMethod.PUT, String.format("%s", path)).toString(),
-                Headers.EMPTY,
-                this.manifest()
+                new RequestLine(RqMethod.PUT, path), Headers.EMPTY, this.manifest()
             ),
             new ResponseMatcher(
                 RsStatus.CREATED,
@@ -111,7 +95,7 @@ class ManifestEntityPutTest {
      *
      * @return Manifest content.
      */
-    private Flowable<ByteBuffer> manifest() {
+    private Content manifest() {
         final byte[] content = "config".getBytes();
         final Blob config = this.docker.repo(new RepoName.Valid("my-alpine")).layers()
             .put(new TrustedBlobSource(content))
@@ -120,6 +104,6 @@ class ManifestEntityPutTest {
             "{\"config\":{\"digest\":\"%s\"},\"layers\":[],\"mediaType\":\"my-type\"}",
             config.digest().string()
         ).getBytes();
-        return Flowable.just(ByteBuffer.wrap(data));
+        return new Content.From(data);
     }
 }

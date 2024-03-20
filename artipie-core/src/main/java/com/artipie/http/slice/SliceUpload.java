@@ -4,33 +4,29 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.scheduling.RepositoryEvents;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice to upload the resource to storage by key from path.
  * @see SliceDownload
- * @since 0.6
  */
 public final class SliceUpload implements Slice {
 
-    /**
-     * Storage.
-     */
     private final Storage storage;
 
     /**
@@ -85,29 +81,21 @@ public final class SliceUpload implements Slice {
     }
 
     @Override
-    public Response response(final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
+        Key key = transform.apply(line.uri().getPath());
+        CompletableFuture<Void> res = this.storage.save(key, new ContentWithSize(body, headers));
+        if (this.events.isPresent()) {
+            res = res.thenCompose(
+                nothing -> this.storage.metadata(key)
+                    .thenApply(meta -> meta.read(Meta.OP_SIZE).orElseThrow())
+                    .thenAccept(
+                        size -> this.events.get()
+                            .addUploadEventByKey(key, size, headers)
+                    )
+            );
+        }
         return new AsyncResponse(
-            CompletableFuture.supplyAsync(() -> new RequestLineFrom(line).uri().getPath())
-                .thenApply(this.transform)
-                .thenCompose(
-                    key -> {
-                        CompletableFuture<Void> res =
-                            this.storage.save(key, new ContentWithSize(body, headers));
-                        if (this.events.isPresent()) {
-                            res = res.thenCompose(
-                                nothing -> this.storage.metadata(key).thenApply(
-                                    meta -> meta.read(Meta.OP_SIZE).get()
-                                ).thenAccept(
-                                    size -> this.events.get()
-                                        .addUploadEventByKey(key, size, headers)
-                                )
-                            );
-                        }
-                        return res;
-                    }
-                ).thenApply(rsp -> new RsWithStatus(RsStatus.CREATED))
+            res.thenApply(rsp -> new RsWithStatus(RsStatus.CREATED))
         );
     }
 }

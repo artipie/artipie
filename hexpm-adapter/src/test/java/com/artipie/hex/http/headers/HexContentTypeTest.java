@@ -2,7 +2,6 @@
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
  * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
-
 package com.artipie.hex.http.headers;
 
 import com.artipie.http.Headers;
@@ -16,15 +15,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Test for {@link HexContentType}.
- *
- * @since 0.2
  */
 class HexContentTypeTest {
 
     @Test
     void shouldFillDefaultValue() {
         final String accept = HexContentType.DEFAULT_TYPE;
-        final Headers headers = new HexContentType(new Headers.From()).fill();
+        final Headers headers = new HexContentType(Headers.from()).fill();
         String result = "";
         for (final Map.Entry<String, String> header : headers) {
             if (ContentType.NAME.equals(header.getKey())) {
@@ -40,7 +37,7 @@ class HexContentTypeTest {
     @Test
     void shouldFillFromAcceptHeaderWhenNameInLowerCase() {
         final String accept = "application/vnd.hex+json";
-        final Headers rqheader = new Headers.From("accept", accept);
+        final Headers rqheader = Headers.from("accept", accept);
         final Headers headers = new HexContentType(rqheader).fill();
         String result = "";
         for (final Map.Entry<String, String> header : headers) {
@@ -61,7 +58,7 @@ class HexContentTypeTest {
         "application/json"
     })
     void shouldFillFromAcceptHeader(final String accept) {
-        final Headers rqheader = new Headers.From("Accept", accept);
+        final Headers rqheader = Headers.from("Accept", accept);
         final Headers headers = new HexContentType(rqheader).fill();
         String result = "";
         for (final Map.Entry<String, String> header : headers) {

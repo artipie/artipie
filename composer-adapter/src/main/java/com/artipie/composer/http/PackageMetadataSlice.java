@@ -4,22 +4,22 @@
  */
 package com.artipie.composer.http;
 
+import com.artipie.asto.Content;
 import com.artipie.composer.Name;
 import com.artipie.composer.Packages;
 import com.artipie.composer.Repository;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.StandardRs;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Slice that serves package metadata.
@@ -57,12 +57,12 @@ public final class PackageMetadataSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
         return new AsyncResponse(
-            this.packages(new RequestLineFrom(line).uri().getPath())
+            this.packages(line.uri().getPath())
                 .thenApply(
                     opt -> opt.<Response>map(
                         packages -> new AsyncResponse(packages.content()

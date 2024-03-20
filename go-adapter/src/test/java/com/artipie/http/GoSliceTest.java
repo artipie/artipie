@@ -34,9 +34,7 @@ import java.util.stream.Stream;
 
 /**
  * Test for {@link GoSlice}.
- * @since 0.3
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class GoSliceTest {
 
     /**
@@ -146,7 +144,7 @@ class GoSliceTest {
     }
 
     private Headers headers(final boolean anonymous) {
-        return anonymous ? Headers.EMPTY : new Headers.From(
+        return anonymous ? Headers.EMPTY : Headers.from(
             new Authorization.Basic(GoSliceTest.USER.getKey(), GoSliceTest.USER.getValue())
         );
     }

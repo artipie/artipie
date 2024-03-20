@@ -48,7 +48,7 @@ public final class ProxyDocker implements Docker {
     public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
         return new ResponseSink<>(
             this.remote.response(
-                new RequestLine(RqMethod.GET, new CatalogUri(from, limit).string()).toString(),
+                new RequestLine(RqMethod.GET, new CatalogUri(from, limit).string()),
                 Headers.EMPTY,
                 Content.EMPTY
             ),

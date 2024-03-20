@@ -95,7 +95,7 @@ final class FileProxySliceAuthIT {
     void shouldGet() {
         MatcherAssert.assertThat(
             this.proxy.response(
-                new RequestLine(RqMethod.GET, "/foo/bar").toString(), Headers.EMPTY, Content.EMPTY
+                new RequestLine(RqMethod.GET, "/foo/bar"), Headers.EMPTY, Content.EMPTY
             ),
             new RsHasStatus(RsStatus.OK)
         );

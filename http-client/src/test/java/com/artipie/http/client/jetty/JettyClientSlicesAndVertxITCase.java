@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.cactoos.text.TextOf;
 import org.hamcrest.MatcherAssert;
@@ -34,18 +33,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.reactivestreams.Publisher;
 
 /**
  * Tests for {@link JettyClientSlices} and vertx.
- *
- * @since 0.3
  */
 final class JettyClientSlicesAndVertxITCase {
 
-    /**
-     * Vertx instance.
-     */
     private static final Vertx VERTX = Vertx.vertx();
 
     /**
@@ -127,9 +120,9 @@ final class JettyClientSlicesAndVertxITCase {
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> pub
+            final RequestLine line,
+            final Headers headers,
+            final Content pub
         ) {
             final CompletableFuture<Response> promise = new CompletableFuture<>();
             final Slice origin = this.client.https("blog.artipie.com");
@@ -140,9 +133,7 @@ final class JettyClientSlicesAndVertxITCase {
                 slice = new AuthClientSlice(origin, Authenticator.ANONYMOUS);
             }
             slice.response(
-                new RequestLine(
-                    RqMethod.GET, "/"
-                ).toString(),
+                new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
             ).send(

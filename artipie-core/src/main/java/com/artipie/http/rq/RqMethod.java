@@ -61,11 +61,6 @@ public enum RqMethod {
     CONNECT("CONNECT");
 
     /**
-     * Set of all existing methods.
-     */
-    public static final Set<RqMethod> ALL = EnumSet.allOf(RqMethod.class);
-
-    /**
      * String value.
      */
     private final String string;

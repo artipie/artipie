@@ -4,6 +4,8 @@
  */
 package com.artipie.gem.http;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -11,15 +13,14 @@ import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.headers.Authorization;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
-import org.reactivestreams.Publisher;
 
 /**
  * Responses on api key requests.
@@ -44,9 +45,9 @@ final class ApiKeySlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
+        final RequestLine line,
+        final Headers headers,
+        final Content body) {
         return new AsyncResponse(
             new BasicAuthScheme(this.auth)
                 .authenticate(headers)

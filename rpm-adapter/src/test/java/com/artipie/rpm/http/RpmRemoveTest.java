@@ -19,13 +19,6 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.rpm.RepoConfig;
 import com.artipie.scheduling.ArtifactEvent;
 import com.jcabi.matchers.XhtmlMatchers;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.zip.GZIPInputStream;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -35,11 +28,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.zip.GZIPInputStream;
+
 /**
  * Test for {@link RpmRemove}.
- * @since 1.9
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RpmRemoveTest {
 
     /**
@@ -88,7 +87,7 @@ class RpmRemoveTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.ACCEPTED),
                 new RequestLine(RqMethod.DELETE, line),
-                new Headers.From("X-Checksum-sha-256", DigestUtils.sha256Hex(bytes)),
+                Headers.from("X-Checksum-sha-256", DigestUtils.sha256Hex(bytes)),
                 Content.EMPTY
             )
         );
@@ -96,7 +95,7 @@ class RpmRemoveTest {
             "Storage should have package",
             this.asto.exists(new Key.From(pckg)).join()
         );
-        MatcherAssert.assertThat("Events queue is empty", events.get().size() == 0);
+        MatcherAssert.assertThat("Events queue is empty", events.get().isEmpty());
     }
 
     @ParameterizedTest
@@ -157,7 +156,7 @@ class RpmRemoveTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(RqMethod.DELETE, "/any.rpm"),
-                new Headers.From("X-Checksum-sha-256", "abc123"),
+                Headers.from("X-Checksum-sha-256", "abc123"),
                 Content.EMPTY
             )
         );
@@ -195,7 +194,7 @@ class RpmRemoveTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.BAD_REQUEST),
                 new RequestLine(RqMethod.DELETE, "/my_package.rpm"),
-                new Headers.From("x-checksum-md5", "abc123"),
+                Headers.from("x-checksum-md5", "abc123"),
                 Content.EMPTY
             )
         );

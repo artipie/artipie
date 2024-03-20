@@ -5,16 +5,18 @@
 
 package com.artipie.pypi.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
 import com.artipie.asto.ext.KeyLastPart;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLinePrefix;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
@@ -24,10 +26,8 @@ import com.artipie.http.slice.KeyFromPath;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import java.nio.ByteBuffer;
+
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import org.reactivestreams.Publisher;
 
 /**
  * SliceIndex returns formatted html output with index of repository packages.
@@ -51,11 +51,11 @@ final class SliceIndex implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> publisher
+        final RequestLine line,
+        final Headers headers,
+        final Content publisher
     ) {
-        final Key rqkey = new KeyFromPath(new RequestLineFrom(line).uri().toString());
+        final Key rqkey = new KeyFromPath(line.uri().toString());
         final String prefix = new RequestLinePrefix(rqkey.string(), headers).get();
         return new AsyncResponse(
             SingleInterop.fromFuture(this.storage.list(rqkey))

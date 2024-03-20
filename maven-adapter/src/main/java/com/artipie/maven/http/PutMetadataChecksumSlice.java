@@ -17,7 +17,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.maven.Maven;
@@ -32,7 +32,6 @@ import org.reactivestreams.Publisher;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -108,10 +107,9 @@ public final class PutMetadataChecksumSlice implements Slice {
     }
 
     @Override
-    public Response response(final String line, final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body) {
-        final Matcher matcher = PutMetadataChecksumSlice.PTN
-            .matcher(new RequestLineFrom(line).uri().getPath());
+    public Response response(RequestLine line, Headers headers,
+                             Content body) {
+        final Matcher matcher = PutMetadataChecksumSlice.PTN.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final String alg = matcher.group("alg");
             final String pkg = matcher.group("pkg");
@@ -155,8 +153,8 @@ public final class PutMetadataChecksumSlice implements Slice {
      * @param headers Request headers
      * @return Response: BAD_REQUEST if not valid, CREATED otherwise
      */
-    private CompletionStage<Response> validateAndUpdate(final String pkg, final Key location,
-        final Iterable<Map.Entry<String, String>> headers) {
+    private CompletionStage<Response> validateAndUpdate(
+        String pkg, Key location, Headers headers) {
         return this.valid.validate(location, new Key.From(pkg)).thenCompose(
             correct -> {
                 final CompletionStage<Response> upd;
@@ -170,7 +168,7 @@ public final class PutMetadataChecksumSlice implements Slice {
                             size -> this.events.get().add(
                                 new ArtifactEvent(
                                     PutMetadataChecksumSlice.REPO_TYPE, this.rname,
-                                    new Login(new Headers.From(headers)).getValue(),
+                                    new Login(headers).getValue(),
                                     MavenSlice.EVENT_INFO.formatArtifactName(pkg), version, size
                                 )
                             )

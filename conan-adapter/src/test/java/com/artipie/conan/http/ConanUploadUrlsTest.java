@@ -4,24 +4,20 @@
  */
 package  com.artipie.conan.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.conan.ItemTokenizer;
 import com.artipie.conan.ItemTokenizer.ItemInfo;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.headers.Header;
 import com.artipie.http.hm.IsJson;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import io.vertx.core.Vertx;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import org.cactoos.map.MapEntry;
 import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -29,9 +25,12 @@ import org.hamcrest.TypeSafeMatcher;
 import org.junit.jupiter.api.Test;
 import wtf.g4s8.hamcrest.json.JsonHas;
 
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Test for {@link ConanUpload}.
- * @since 0.1
  */
 public class ConanUploadUrlsTest {
 
@@ -41,7 +40,7 @@ public class ConanUploadUrlsTest {
         final String host = "test_hostname.com";
         final ItemTokenizer tokenizer = new ItemTokenizer(Vertx.vertx());
         final String token = tokenizer.generateToken(path, host);
-        final ItemInfo item = tokenizer.authenticateToken(token).toCompletableFuture().join().get();
+        final ItemInfo item = tokenizer.authenticateToken(token).toCompletableFuture().join().orElseThrow();
         MatcherAssert.assertThat("Decoded path must match", item.getPath().equals(path));
         MatcherAssert.assertThat("Decoded host must match", item.getHostname().equals(host));
     }
@@ -55,14 +54,13 @@ public class ConanUploadUrlsTest {
         final Response response = new ConanUpload.UploadUrls(storage, new ItemTokenizer(Vertx.vertx())).response(
             new RequestLine(
                 "POST",
-                "/v1/conans/zmqpp/4.2.0/_/_/upload_urls",
-                "HTTP/1.1"
-            ).toString(),
-            Arrays.asList(
-                new MapEntry<>("Content-Size", Long.toString(data.length)),
-                new MapEntry<>("Host", "localhost")
+                "/v1/conans/zmqpp/4.2.0/_/_/upload_urls"
             ),
-            Flowable.just(ByteBuffer.wrap(data))
+            Headers.from(
+                new Header("Content-Size", Long.toString(data.length)),
+                new Header("Host", "localhost")
+            ),
+            new Content.From(data)
         );
         MatcherAssert.assertThat(
             "Response body must match",
@@ -124,11 +122,8 @@ public class ConanUploadUrlsTest {
 
         @Override
         protected boolean matchesSafely(final JsonValue item) {
-            boolean matches = false;
-            if (item.getValueType().equals(ValueType.STRING) && item.toString().startsWith(this.prefix, 1)) {
-                matches = true;
-            }
-            return matches;
+            return item.getValueType().equals(ValueType.STRING) &&
+                item.toString().startsWith(this.prefix, 1);
         }
     }
 }

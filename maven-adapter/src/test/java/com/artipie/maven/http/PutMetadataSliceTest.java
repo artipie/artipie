@@ -27,9 +27,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link PutMetadataSlice}.
- * @since 0.8
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class PutMetadataSliceTest {
 
     /**
@@ -59,7 +57,7 @@ class PutMetadataSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine(RqMethod.PUT, "/com/example/any/maven-metadata.xml"),
-                new Headers.From(new ContentLength(xml.length)),
+                Headers.from(new ContentLength(xml.length)),
                 new Content.OneTime(new Content.From(xml))
             )
         );
@@ -86,7 +84,7 @@ class PutMetadataSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine(RqMethod.PUT, "/com/example/abc/maven-metadata.xml"),
-                new Headers.From(new ContentLength(xml.length)),
+                Headers.from(new ContentLength(xml.length)),
                 new Content.OneTime(new Content.From(xml))
             )
         );
@@ -116,7 +114,7 @@ class PutMetadataSliceTest {
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.CREATED),
                 new RequestLine(RqMethod.PUT, "/com/example/any/maven-metadata.xml"),
-                new Headers.From(new ContentLength(xml.length)),
+                Headers.from(new ContentLength(xml.length)),
                 new Content.OneTime(new Content.From(xml))
             )
         );

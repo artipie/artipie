@@ -4,12 +4,13 @@
  */
 package com.artipie.http.client;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import org.reactivestreams.Publisher;
+
+import com.artipie.http.rq.RequestLine;
 
 /**
  * Client slice that sends requests to host and port using scheme specified in URI.
@@ -42,9 +43,9 @@ public final class UriClientSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
         final Slice slice;
         final String path = this.uri.getRawPath();

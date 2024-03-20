@@ -8,30 +8,26 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.Headers;
+import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import javax.json.Json;
-import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import javax.json.Json;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 /**
  * Test case for {@link SliceListingTest}.
- * @since 1.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class SliceListingTest {
-    /**
-     * Storage.
-     */
+
     private Storage storage;
 
     @BeforeEach
@@ -49,17 +45,16 @@ class SliceListingTest {
     })
     void responseTextType(final String path, final String body) {
         MatcherAssert.assertThat(
-            new SliceListing(this.storage, "text/plain", ListingFormat.Standard.TEXT).response(
-                rqLineFrom(path), Collections.emptyList(), Flowable.empty()
-            ),
+            new SliceListing(this.storage, "text/plain", ListingFormat.Standard.TEXT)
+                .response(new RequestLine("GET", path), Headers.EMPTY, Content.EMPTY),
             new ResponseMatcher(
                 RsStatus.OK,
                 Arrays.asList(
-                    new MapEntry<>(
+                    new Header(
                         "Content-Type",
                         String.format("text/plain; charset=%s", StandardCharsets.UTF_8)
                     ),
-                    new MapEntry<>("Content-Length", String.valueOf(body.length()))
+                    new Header("Content-Length", String.valueOf(body.length()))
                 ),
                 body.getBytes(StandardCharsets.UTF_8)
             )
@@ -73,15 +68,12 @@ class SliceListingTest {
         ).build().toString();
         MatcherAssert.assertThat(
             new SliceListing(this.storage, "application/json", ListingFormat.Standard.JSON)
-                .response(rqLineFrom("one/"), Collections.emptyList(), Flowable.empty()),
+                .response(new RequestLine("GET", "one/"), Headers.EMPTY, Content.EMPTY),
             new ResponseMatcher(
                 RsStatus.OK,
                 Arrays.asList(
-                    new MapEntry<>(
-                        "Content-Type",
-                        String.format("application/json; charset=%s", StandardCharsets.UTF_8)
-                    ),
-                    new MapEntry<>("Content-Length", String.valueOf(json.length()))
+                    new Header("Content-Type", "application/json; charset=" + StandardCharsets.UTF_8),
+                    new Header("Content-Length", String.valueOf(json.length()))
                 ),
                 json.getBytes(StandardCharsets.UTF_8)
             )
@@ -105,22 +97,18 @@ class SliceListingTest {
         );
         MatcherAssert.assertThat(
             new SliceListing(this.storage, "text/html", ListingFormat.Standard.HTML)
-                .response(rqLineFrom("/one"), Collections.emptyList(), Flowable.empty()),
+                .response(new RequestLine("GET", "/one"), Headers.EMPTY, Content.EMPTY),
             new ResponseMatcher(
                 RsStatus.OK,
                 Arrays.asList(
-                    new MapEntry<>(
+                    new Header(
                         "Content-Type",
                         String.format("text/html; charset=%s", StandardCharsets.UTF_8)
                     ),
-                    new MapEntry<>("Content-Length", String.valueOf(body.length()))
+                    new Header("Content-Length", String.valueOf(body.length()))
                 ),
                 body.getBytes(StandardCharsets.UTF_8)
             )
         );
-    }
-
-    private static String rqLineFrom(final String path) {
-        return new RequestLine("GET", path, "HTTP/1.1").toString();
     }
 }

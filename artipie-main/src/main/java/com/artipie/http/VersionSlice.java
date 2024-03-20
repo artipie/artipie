@@ -4,12 +4,12 @@
  */
 package com.artipie.http;
 
+import com.artipie.asto.Content;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.common.RsJson;
 import com.artipie.misc.ArtipieProperties;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import javax.json.Json;
-import org.reactivestreams.Publisher;
 
 /**
  * Returns JSON with information about version of application.
@@ -31,9 +31,9 @@ public final class VersionSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
         return new RsJson(
             Json.createArrayBuilder().add(

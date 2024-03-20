@@ -4,23 +4,23 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.asto.Content;
 import com.artipie.docker.Docker;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import java.nio.ByteBuffer;
-import java.util.Map;
+
 import java.util.regex.Pattern;
-import org.reactivestreams.Publisher;
 
 /**
  * Tags entity in Docker HTTP API.
@@ -63,17 +63,17 @@ final class TagsEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final String line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
             return new DockerRepositoryPermission(name, new Scope.Repository.Pull(name(line)));
         }
 
         @Override
         public Response response(
-            final String line,
-            final Iterable<Map.Entry<String, String>> headers,
-            final Publisher<ByteBuffer> body
+            final RequestLine line,
+            final Headers headers,
+            final Content body
         ) {
-            final RqParams params = new RqParams(new RequestLineFrom(line).uri().getQuery());
+            final RqParams params = new RqParams(line.uri().getQuery());
             return new AsyncResponse(
                 this.docker.repo(name(line)).manifests().tags(
                     params.value("last").map(Tag.Valid::new),
@@ -96,7 +96,7 @@ final class TagsEntity {
          * @param line Request line.
          * @return Repository name.
          */
-        private static RepoName.Valid name(final String line) {
+        private static RepoName.Valid name(final RequestLine line) {
             return new RepoName.Valid(new RqByRegex(line, TagsEntity.PATH).path().group("name"));
         }
     }

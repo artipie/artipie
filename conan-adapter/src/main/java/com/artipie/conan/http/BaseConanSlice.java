@@ -4,34 +4,34 @@
  */
 package  com.artipie.conan.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
 import com.artipie.conan.Completables;
+import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLineFrom;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.StandardRs;
 import io.vavr.Tuple2;
-import java.nio.ByteBuffer;
+
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import org.reactivestreams.Publisher;
 
 /**
  * Base slice class for Conan REST APIs.
@@ -71,16 +71,15 @@ abstract class BaseConanSlice implements Slice {
 
     @Override
     public Response response(
-        final String line,
-        final Iterable<Map.Entry<String, String>> headers,
-        final Publisher<ByteBuffer> body
+        final RequestLine line,
+        final Headers headers,
+        final Content body
     ) {
         final String hostname = new RqHeaders.Single(headers, "Host").asString();
-        final RequestLineFrom request = new RequestLineFrom(line);
-        final Matcher matcher = this.pathwrap.getPattern().matcher(request.uri().getPath());
+        final Matcher matcher = this.pathwrap.getPattern().matcher(line.uri().getPath());
         final CompletableFuture<RequestResult> content;
         if (matcher.matches()) {
-            content = this.getResult(request, hostname, matcher);
+            content = this.getResult(line, hostname, matcher);
         } else {
             content = CompletableFuture.completedFuture(new RequestResult());
         }
@@ -92,7 +91,7 @@ abstract class BaseConanSlice implements Slice {
                         result = new RsWithBody(
                             StandardRs.NOT_FOUND,
                             String.format(
-                                BaseConanSlice.URI_S_NOT_FOUND, request.uri(), this.getClass()
+                                BaseConanSlice.URI_S_NOT_FOUND, line.uri(), this.getClass()
                             ),
                             StandardCharsets.UTF_8
                         );
@@ -144,7 +143,7 @@ abstract class BaseConanSlice implements Slice {
      * @return Future object, providing request result data.
      */
     protected abstract CompletableFuture<RequestResult> getResult(
-        RequestLineFrom request, String hostname, Matcher matcher
+        RequestLine request, String hostname, Matcher matcher
     );
 
     /**
