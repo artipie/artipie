@@ -17,10 +17,8 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -29,8 +27,6 @@ import java.util.regex.Pattern;
 /**
  * Blob entity in Docker HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/#blob">Blob</a>.
- *
- * @since 0.2
  */
 final class BlobEntity {
 
@@ -41,16 +37,11 @@ final class BlobEntity {
         "^/v2/(?<name>.*)/blobs/(?<digest>(?!(uploads/)).*)$"
     );
 
-    /**
-     * Ctor.
-     */
     private BlobEntity() {
     }
 
     /**
      * Slice for GET method.
-     *
-     * @since 0.2
      */
     static final class Get implements ScopeSlice {
 
@@ -60,8 +51,6 @@ final class BlobEntity {
         private final Docker docker;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          */
         Get(final Docker docker) {
@@ -92,10 +81,10 @@ final class BlobEntity {
                                     .<CompletionStage<Long>>map(CompletableFuture::completedFuture)
                                     .orElseGet(blob::size)
                                     .thenApply(
-                                        size -> new RsWithBody(
-                                            new BaseResponse(digest),
-                                            new Content.From(size, content)
-                                        )
+                                        size -> BaseResponse.ok()
+                                            .header(new DigestHeader(digest))
+                                            .header(new ContentType("application/octet-stream"))
+                                            .body(new Content.From(size, content))
                                     )
                             )
                         )
@@ -109,8 +98,6 @@ final class BlobEntity {
 
     /**
      * Slice for HEAD method.
-     *
-     * @since 0.2
      */
     static final class Head implements ScopeSlice {
 
@@ -120,8 +107,6 @@ final class BlobEntity {
         private final Docker docker;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          */
         Head(final Docker docker) {
@@ -129,18 +114,14 @@ final class BlobEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
+        public DockerRepositoryPermission permission(RequestLine line, String name) {
             return new DockerRepositoryPermission(
                 name, new Scope.Repository.Pull(new Request(line).name())
             );
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body
-        ) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final Digest digest = request.digest();
             return new AsyncResponse(
@@ -148,10 +129,10 @@ final class BlobEntity {
                     found -> found.<Response>map(
                         blob -> new AsyncResponse(
                             blob.size().thenApply(
-                                size -> new RsWithHeaders(
-                                    new BaseResponse(blob.digest()),
-                                    new ContentLength(String.valueOf(size))
-                                )
+                                size -> BaseResponse.ok()
+                                    .header(new DigestHeader(blob.digest()))
+                                    .header(new ContentType("application/octet-stream"))
+                                    .header(new ContentLength(String.valueOf(size)))
                             )
                         )
                     ).orElseGet(
@@ -163,45 +144,20 @@ final class BlobEntity {
     }
 
     /**
-     * Blob base response.
-     *
-     * @since 0.2
-     */
-    private static class BaseResponse extends Response.Wrap {
-
-        /**
-         * Ctor.
-         *
-         * @param digest Blob digest.
-         */
-        BaseResponse(final Digest digest) {
-            super(
-                new RsWithHeaders(
-                    new RsWithStatus(RsStatus.OK),
-                    new DigestHeader(digest),
-                    new ContentType("application/octet-stream")
-                )
-            );
-        }
-    }
-
-    /**
      * HTTP request to blob entity.
-     *
-     * @since 0.2
      */
     static final class Request {
 
         /**
          * HTTP request line.
          */
-        private final RqByRegex rqregex;
+        private final RqByRegex reqRegex;
 
         /**
          * @param line HTTP request line.
          */
         Request(final RequestLine line) {
-            this.rqregex = new RqByRegex(line, BlobEntity.PATH);
+            this.reqRegex = new RqByRegex(line, BlobEntity.PATH);
         }
 
         /**
@@ -210,7 +166,7 @@ final class BlobEntity {
          * @return Repository name.
          */
         RepoName name() {
-            return new RepoName.Valid(this.rqregex.path().group("name"));
+            return new RepoName.Valid(this.reqRegex.path().group("name"));
         }
 
         /**
@@ -219,7 +175,7 @@ final class BlobEntity {
          * @return Digest.
          */
         Digest digest() {
-            return new Digest.FromString(this.rqregex.path().group("digest"));
+            return new Digest.FromString(this.reqRegex.path().group("digest"));
         }
 
     }

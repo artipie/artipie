@@ -7,15 +7,16 @@ package com.artipie.http;
 import com.artipie.ArtipieException;
 import com.artipie.http.rs.RsStatus;
 import com.google.common.collect.ImmutableMap;
+
+import java.io.Serial;
 import java.util.Map;
 
 /**
  * Base HTTP exception for Artipie endpoints.
- * @since 1.0
  */
-@SuppressWarnings("PMD.OnlyOneConstructorShouldDoInitialization")
 public final class ArtipieHttpException extends ArtipieException {
 
+    @Serial
     private static final long serialVersionUID = -16695752893817954L;
 
     /**

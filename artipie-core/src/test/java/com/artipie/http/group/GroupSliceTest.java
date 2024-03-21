@@ -4,7 +4,8 @@
  */
 package com.artipie.http.group;
 
-import com.artipie.asto.OneTimePublisher;
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.hm.RsHasBody;
@@ -12,19 +13,17 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
+import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.SliceSimple;
-import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Test case for {@link GroupSlice}.
@@ -92,16 +91,8 @@ final class GroupSliceTest {
     private static Slice slice(final RsStatus status, final String body, final Duration delay) {
         return new SliceWithDelay(
             new SliceSimple(
-                new RsWithBody(
-                    new RsWithStatus(status),
-                    new OneTimePublisher<>(
-                        Flowable.just(
-                            ByteBuffer.wrap(body.getBytes(StandardCharsets.UTF_8))
-                        )
-                    )
-                )
-            ),
-            delay
+                new RsFull(status, Headers.EMPTY, new Content.From(body.getBytes(StandardCharsets.UTF_8)))
+            ), delay
         );
     }
 

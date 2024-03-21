@@ -9,18 +9,17 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 /**
  * Test for {@link SliceOptional}.
- * @since 0.21
  */
 class SliceOptionalTest {
 
@@ -62,7 +61,7 @@ class SliceOptionalTest {
                 Optional.of(body),
                 Optional::isPresent,
                 hello -> new SliceSimple(
-                    new RsWithBody(new RsWithStatus(RsStatus.OK), hello.get().getBytes())
+                    BaseResponse.ok().body(hello.orElseThrow().getBytes())
                 )
             ),
             new SliceHasResponse(

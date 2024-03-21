@@ -26,9 +26,9 @@ class CachedResponseTest {
         final AtomicBoolean terminated = new AtomicBoolean();
         final Flowable<ByteBuffer> publisher = Flowable.<ByteBuffer>empty()
             .doOnTerminate(() -> terminated.set(true));
-        new CachedResponse(new RsWithBody(publisher)).send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        new CachedResponse(BaseResponse.ok().body(new Content.From(publisher)))
+            .send((status, headers, body) -> CompletableFuture.allOf())
+            .toCompletableFuture().join();
         MatcherAssert.assertThat(terminated.get(), new IsEqual<>(true));
     }
 
@@ -36,11 +36,10 @@ class CachedResponseTest {
     void shouldReplayBody() {
         final byte[] content = "content".getBytes();
         final CachedResponse cached = new CachedResponse(
-            new RsWithBody(new Content.OneTime(new Content.From(content)))
+            BaseResponse.ok().body(new Content.From(content))
         );
-        cached.send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        cached.send((status, headers, body) -> CompletableFuture.allOf())
+            .toCompletableFuture().join();
         final AtomicReference<byte[]> capture = new AtomicReference<>();
         cached.send(
             (status, headers, body) -> new Content.From(body).asBytesFuture().thenAccept(capture::set)

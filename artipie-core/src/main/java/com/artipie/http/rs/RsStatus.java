@@ -10,8 +10,6 @@ import javax.annotation.Nullable;
 /**
  * HTTP response status code.
  * See <a href="https://tools.ietf.org/html/rfc2616#section-6.1.1">RFC 2616 6.1.1 Status Code and Reason Phrase</a>
- *
- * @since 0.4
  */
 public enum RsStatus {
     /**
@@ -49,7 +47,6 @@ public enum RsStatus {
     /**
      * Temporary Redirect.
      */
-    @SuppressWarnings("PMD.LongVariable")
     TEMPORARY_REDIRECT("307"),
     /**
      * Bad Request.
@@ -124,8 +121,6 @@ public enum RsStatus {
     private final String string;
 
     /**
-     * Ctor.
-     *
      * @param string Code value.
      */
     RsStatus(final String string) {
@@ -144,7 +139,6 @@ public enum RsStatus {
     /**
      * Checks whether the RsStatus is an informational group (1xx).
      * @return True if the RsStatus is 1xx, otherwise - false.
-     * @since 0.16
      */
     public boolean information() {
         return this.firstSymbol('1');
@@ -153,7 +147,6 @@ public enum RsStatus {
     /**
      * Checks whether the RsStatus is a successful group (2xx).
      * @return True if the RsStatus is 2xx, otherwise - false.
-     * @since 0.16
      */
     public boolean success() {
         return this.firstSymbol('2');
@@ -162,7 +155,6 @@ public enum RsStatus {
     /**
      * Checks whether the RsStatus is a redirection.
      * @return True if the RsStatus is 3xx, otherwise - false.
-     * @since 0.16
      */
     public boolean redirection() {
         return this.firstSymbol('3');
@@ -171,7 +163,6 @@ public enum RsStatus {
     /**
      * Checks whether the RsStatus is a client error.
      * @return True if the RsStatus is 4xx, otherwise - false.
-     * @since 0.16
      */
     public boolean clientError() {
         return this.firstSymbol('4');
@@ -180,7 +171,6 @@ public enum RsStatus {
     /**
      * Checks whether the RsStatus is a server error.
      * @return True if the RsStatus is 5xx, otherwise - false.
-     * @since 0.16
      */
     public boolean serverError() {
         return this.firstSymbol('5');
@@ -189,7 +179,6 @@ public enum RsStatus {
     /**
      * Checks whether the RsStatus is an error.
      * @return True if the RsStatus is an error, otherwise - false.
-     * @since 0.16
      */
     public boolean error() {
         return this.clientError() || this.serverError();
@@ -199,7 +188,6 @@ public enum RsStatus {
      * Checks whether the first character matches the symbol.
      * @param symbol Symbol to check
      * @return True if the first character matches the symbol, otherwise - false.
-     * @since 0.16
      */
     private boolean firstSymbol(final char symbol) {
         return this.string.charAt(0) == symbol;
@@ -207,7 +195,6 @@ public enum RsStatus {
 
     /**
      * Searches {@link RsStatus} instance by response code.
-     * @since 0.11
      */
     public static class ByCode {
 
@@ -217,7 +204,6 @@ public enum RsStatus {
         private final String code;
 
         /**
-         * Ctor.
          * @param code Code
          */
         public ByCode(@Nullable final String code) {

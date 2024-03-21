@@ -51,13 +51,11 @@ final class ApiGetSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-        final Headers headers,
-        final Content body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = PATH_PATTERN.matcher(line.uri().toString());
         if (!matcher.find()) {
             throw new ArtipieHttpException(
-                RsStatus.BAD_REQUEST, String.format("Invalid URI: `%s`", matcher.toString())
+                RsStatus.BAD_REQUEST, String.format("Invalid URI: `%s`", matcher)
             );
         }
         return new AsyncResponse(

@@ -16,11 +16,9 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqParams;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceUpload;
 import org.reactivestreams.Publisher;
 
@@ -29,14 +27,12 @@ import javax.json.JsonObjectBuilder;
 import javax.json.stream.JsonParser;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
 /**
  * Slice for Conan package data uploading support.
- * @since 0.1
  */
 public final class ConanUpload {
 
@@ -113,17 +109,12 @@ public final class ConanUpload {
      */
     private static CompletableFuture<Response> generateError(final String filename) {
         return CompletableFuture.completedFuture(
-            new RsWithBody(
-                StandardRs.NOT_FOUND,
-                String.format(ConanUpload.URI_S_NOT_FOUND, filename),
-                StandardCharsets.UTF_8
-            )
+            BaseResponse.notFound().textBody(String.format(ConanUpload.URI_S_NOT_FOUND, filename))
         );
     }
 
     /**
      * Conan /v1/conans/{path}/upload_urls REST APIs.
-     * @since 0.1
      */
     public static final class UploadUrls implements Slice {
 
@@ -204,12 +195,9 @@ public final class ConanUpload {
                         );
                         result.add(key, url);
                     }
-                    return (Response) new RsWithHeaders(
-                        new RsWithBody(
-                            StandardRs.OK, result.build().toString(), StandardCharsets.UTF_8
-                        ),
-                        ConanUpload.CONTENT_TYPE, ConanUpload.JSON_TYPE
-                    );
+                    return (Response) BaseResponse.ok()
+                        .header(ConanUpload.CONTENT_TYPE, ConanUpload.JSON_TYPE)
+                        .jsonBody(result.build());
                 }
             ).toCompletableFuture();
         }

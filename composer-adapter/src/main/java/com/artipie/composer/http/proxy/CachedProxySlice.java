@@ -16,7 +16,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsWithBody;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.StandardRs;
 import com.jcabi.log.Logger;
 
@@ -27,52 +27,27 @@ import java.util.function.Function;
 
 /**
  * Composer proxy slice with cache support.
- * @since 0.4
  */
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 final class CachedProxySlice implements Slice {
-    /**
-     * Remote slice.
-     */
+
     private final Slice remote;
-
-    /**
-     * Cache.
-     */
     private final Cache cache;
-
-    /**
-     * Repository.
-     */
     private final Repository repo;
 
     /**
-     * Proxy slice without cache.
-     * @param remote Remote slice
-     * @param repo Repository
-     */
-    CachedProxySlice(final Slice remote, final Repository repo) {
-        this(remote, repo, Cache.NOP);
-    }
-
-    /**
-     * Ctor.
      * @param remote Remote slice
      * @param repo Repository
      * @param cache Cache
      */
-    CachedProxySlice(final Slice remote, final Repository repo, final Cache cache) {
+    CachedProxySlice(Slice remote, Repository repo, Cache cache) {
         this.remote = remote;
         this.cache = cache;
         this.repo = repo;
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         final String name = line
             .uri().getPath().replaceAll("^/p2?/", "")
             .replaceAll("~.*", "")
@@ -94,14 +69,11 @@ final class CachedProxySlice implements Slice {
                 new CacheTimeControl(this.repo.storage())
             ).handle(
                 (pkgs, throwable) -> {
-                    final Response res;
                     if (throwable == null && pkgs.isPresent()) {
-                        res = new RsWithBody(StandardRs.OK, pkgs.get());
-                    } else {
-                        Logger.warn(this, "Failed to read cached item: %[exception]s", throwable);
-                        res = StandardRs.NOT_FOUND;
+                        return BaseResponse.ok().body(pkgs.get());
                     }
-                    return res;
+                    Logger.warn(this, "Failed to read cached item: %[exception]s", throwable);
+                    return StandardRs.NOT_FOUND;
                 }
             )
         );

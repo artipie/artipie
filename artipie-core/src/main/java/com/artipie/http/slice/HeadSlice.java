@@ -15,12 +15,9 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.BaseResponse;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
@@ -31,9 +28,6 @@ import java.util.function.Function;
  */
 public final class HeadSlice implements Slice {
 
-    /**
-     * Storage.
-     */
     private final Storage storage;
 
     /**
@@ -44,21 +38,13 @@ public final class HeadSlice implements Slice {
     /**
      * Function to get response headers.
      */
-    private final BiFunction<RequestLine, Headers, CompletionStage<Headers>> resheaders;
+    private final BiFunction<RequestLine, Headers, CompletionStage<Headers>> resHeaders;
 
-    /**
-     * @param storage Storage
-     */
     public HeadSlice(final Storage storage) {
-        this(
-            storage,
-            KeyFromPath::new
-        );
+        this(storage, KeyFromPath::new);
     }
 
     /**
-     * Ctor.
-     *
      * @param storage Storage
      * @param transform Transformation
      */
@@ -84,59 +70,38 @@ public final class HeadSlice implements Slice {
     }
 
     /**
-     * Ctor.
-     *
      * @param storage Storage
      * @param transform Transformation
-     * @param resheaders Function to get response headers
+     * @param resHeaders Function to get response headers
      */
     public HeadSlice(
         final Storage storage,
         final Function<String, Key> transform,
-        final BiFunction<RequestLine, Headers, CompletionStage<Headers>> resheaders
+        final BiFunction<RequestLine, Headers, CompletionStage<Headers>> resHeaders
     ) {
         this.storage = storage;
         this.transform = transform;
-        this.resheaders = resheaders;
+        this.resHeaders = resHeaders;
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
-        return new AsyncResponse(
-            CompletableFuture
-                .supplyAsync(line::uri)
-                .thenCompose(
-                    uri -> {
-                        final Key key = this.transform.apply(uri.getPath());
-                        return this.storage.exists(key)
-                            .thenCompose(
-                                exist -> {
-                                    final CompletionStage<Response> result;
-                                    if (exist) {
-                                        result = this.resheaders
-                                            .apply(line, headers)
-                                                .thenApply(
-                                                    hdrs -> new RsWithHeaders(StandardRs.OK, hdrs)
-                                                );
-                                    } else {
-                                        result = CompletableFuture.completedFuture(
-                                            new RsWithBody(
-                                                StandardRs.NOT_FOUND,
-                                                String.format("Key %s not found", key.string()),
-                                                StandardCharsets.UTF_8
-                                            )
-                                        );
-                                    }
-                                    return result;
-                                }
-                            );
+    public Response response(RequestLine line, Headers headers, Content body) {
+        final Key key = this.transform.apply(line.uri().getPath());
+        CompletableFuture<Response> fut = this.storage.exists(key)
+            .thenCompose(
+                exist -> {
+                    if (exist) {
+                        return this.resHeaders
+                            .apply(line, headers)
+                            .thenApply(res -> BaseResponse.ok().headers(res));
                     }
-                )
-        );
+                    return CompletableFuture.completedFuture(
+                        BaseResponse.notFound()
+                            .textBody(String.format("Key %s not found", key.string()))
+                    );
+                }
+            );
+        return new AsyncResponse(fut);
     }
 
 }

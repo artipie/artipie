@@ -15,18 +15,14 @@ import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 /**
  * Tags entity in Docker HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/#tags">Tags</a>.
- *
- * @since 0.8
  */
 final class TagsEntity {
 
@@ -35,16 +31,11 @@ final class TagsEntity {
      */
     public static final Pattern PATH = Pattern.compile("^/v2/(?<name>.*)/tags/list$");
 
-    /**
-     * Ctor.
-     */
     private TagsEntity() {
     }
 
     /**
      * Slice for GET method, getting tags list.
-     *
-     * @since 0.8
      */
     public static class Get implements ScopeSlice {
 
@@ -54,8 +45,6 @@ final class TagsEntity {
         private final Docker docker;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          */
         Get(final Docker docker) {
@@ -68,24 +57,14 @@ final class TagsEntity {
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body
-        ) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             final RqParams params = new RqParams(line.uri().getQuery());
             return new AsyncResponse(
                 this.docker.repo(name(line)).manifests().tags(
                     params.value("last").map(Tag.Valid::new),
                     params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
                 ).thenApply(
-                    tags -> new RsWithBody(
-                        new RsWithHeaders(
-                            new RsWithStatus(RsStatus.OK),
-                            new JsonContentType()
-                        ),
-                        tags.json()
-                    )
+                    tags -> BaseResponse.ok().jsonBody(tags.json(), StandardCharsets.UTF_8)
                 )
             );
         }

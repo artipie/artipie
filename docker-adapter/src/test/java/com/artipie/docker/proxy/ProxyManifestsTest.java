@@ -11,15 +11,10 @@ import com.artipie.docker.ManifestReference;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.http.DigestHeader;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.http.Headers;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.BaseResponse;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyIterable;
 import org.hamcrest.core.StringStartsWith;
@@ -44,11 +39,9 @@ class ProxyManifestsTest {
                 if (!line.toString().startsWith("GET /v2/test/manifests/abc ")) {
                     throw new IllegalArgumentException();
                 }
-                return new RsFull(
-                    RsStatus.OK,
-                    Headers.from(new DigestHeader(new Digest.FromString(digest))),
-                    new Content.From(data)
-                );
+                return BaseResponse.ok()
+                    .header(new DigestHeader(new Digest.FromString(digest)))
+                    .body(data);
             },
             new RepoName.Valid("test")
         ).get(ManifestReference.from("abc")).toCompletableFuture().join();
@@ -68,7 +61,7 @@ class ProxyManifestsTest {
                 if (!line.toString().startsWith("GET /v2/my-test/manifests/latest ")) {
                     throw new IllegalArgumentException();
                 }
-                return new RsWithStatus(RsStatus.NOT_FOUND);
+                return BaseResponse.notFound();
             },
             new RepoName.Valid("my-test")
         ).get(ManifestReference.from("latest")).toCompletableFuture().join();
@@ -91,7 +84,7 @@ class ProxyManifestsTest {
                     new Content.From(body).asBytesFuture().thenApply(
                         bytes -> {
                             cbody.set(bytes);
-                            return StandardRs.EMPTY;
+                            return BaseResponse.ok();
                         }
                     )
                 );
@@ -116,7 +109,7 @@ class ProxyManifestsTest {
         Assertions.assertArrayEquals(
             bytes,
             new ProxyDocker(
-                (line, headers, body) -> new RsWithBody(new Content.From(bytes))
+                (line, headers, body) -> BaseResponse.ok().body(bytes)
             ).catalog(Optional.empty(), Integer.MAX_VALUE).thenCompose(
                 catalog -> catalog.json().asBytesFuture()
             ).toCompletableFuture().join()
@@ -126,7 +119,7 @@ class ProxyManifestsTest {
     @Test
     void shouldFailReturnCatalogWhenRemoteRespondsWithNotOk() {
         final CompletionStage<Catalog> stage = new ProxyDocker(
-            (line, headers, body) -> new RsWithStatus(RsStatus.NOT_FOUND)
+            (line, headers, body) -> BaseResponse.notFound()
         ).catalog(Optional.empty(), Integer.MAX_VALUE);
         Assertions.assertThrows(
             Exception.class,

@@ -11,7 +11,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.asto.streams.ContentAsStream;
-import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -20,9 +19,9 @@ import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.common.RsError;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.pypi.meta.Metadata;
@@ -109,14 +108,11 @@ final class WheelSlice implements Slice {
                     }
                 )
             ).handle(
-                (resp, throwable) -> {
-                    Response res = resp;
-                    if (throwable != null) {
-                        res = new RsError(
-                            new ArtipieHttpException(RsStatus.BAD_REQUEST, throwable)
-                        );
+                (response, throwable) -> {
+                    if(throwable != null){
+                        return BaseResponse.badRequest(throwable);
                     }
-                    return res;
+                    return response;
                 }
             )
         );

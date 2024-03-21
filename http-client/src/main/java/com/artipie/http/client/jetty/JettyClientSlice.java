@@ -28,7 +28,6 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -149,12 +148,7 @@ final class JettyClientSlice implements Slice {
      * @return Jetty request
      */
     private Request buildRequest(Headers headers, RequestLine req) {
-        final String scheme;
-        if (this.secure) {
-            scheme = "https";
-        } else {
-            scheme = "http";
-        }
+        final String scheme = this.secure ? "https" : "http";
         final URI uri = req.uri();
         final Request request = this.client.newRequest(
             new URIBuilder()
@@ -165,7 +159,7 @@ final class JettyClientSlice implements Slice {
                 .setCustomQuery(uri.getQuery())
                 .toString()
         ).method(req.method().value());
-        for (final Map.Entry<String, String> header : headers) {
+        for (Header header : headers) {
             request.headers(mutable -> mutable.add(header.getKey(), header.getValue()));
         }
         return request;

@@ -9,7 +9,7 @@ import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.common.RsJson;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -49,9 +49,8 @@ public final class SliceITCase {
             new ByMethodsRule(RqMethod.GET),
             new BasicAuthzSlice(
                 new SliceSimple(
-                    new RsJson(
-                        () -> Json.createObjectBuilder().add("any", "any").build()
-                    )
+                    () -> BaseResponse.ok()
+                        .jsonBody(Json.createObjectBuilder().add("any", "any").build())
                 ),
                 (username, password) -> Optional.empty(),
                 new OperationControl(Policy.FREE, new AdapterBasicPermission("test", Action.ALL))

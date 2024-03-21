@@ -15,17 +15,12 @@ import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.common.RsJson;
+import com.artipie.http.rs.BaseResponse;
 
-import java.nio.charset.StandardCharsets;
 import javax.json.Json;
 
 /**
  * Slice for token authorization.
- * @since 0.4
  */
 final class GenerateTokenSlice implements Slice {
 
@@ -40,7 +35,6 @@ final class GenerateTokenSlice implements Slice {
     private final Tokens tokens;
 
     /**
-     * Ctor.
      * @param auth Authentication
      * @param tokens Tokens
      */
@@ -50,25 +44,20 @@ final class GenerateTokenSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         return new AsyncResponse(
             new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
                 result -> {
-                    final Response res;
                     if (result.status() == AuthScheme.AuthStatus.FAILED) {
-                        res = new RsWithHeaders(
-                            new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            Headers.from(new WwwAuthenticate(result.challenge()))
-                        );
-                    } else {
-                        res = new RsJson(
-                            () -> Json.createObjectBuilder()
-                                .add("token", this.tokens.generate(result.user())).build(),
-                            StandardCharsets.UTF_8
-                        );
+                        return BaseResponse.unauthorized()
+                            .header(new WwwAuthenticate(result.challenge()));
                     }
-                    return res;
+                    return BaseResponse.ok()
+                        .jsonBody(
+                            Json.createObjectBuilder()
+                                .add("token", this.tokens.generate(result.user()))
+                                .build()
+                        );
                 }
             )
         );

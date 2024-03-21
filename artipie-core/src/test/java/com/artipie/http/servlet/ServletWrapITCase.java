@@ -4,18 +4,12 @@
  */
 package com.artipie.http.servlet;
 
-import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
-import com.artipie.http.rs.common.RsText;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.slice.SliceSimple;
 import jakarta.servlet.GenericServlet;
 import jakarta.servlet.ServletRequest;
@@ -61,7 +55,7 @@ final class ServletWrapITCase {
     void setUp() {
         final int port = RandomFreePort.get();
         this.server = new Server(port);
-        this.req = HttpRequest.newBuilder(URI.create(String.format("http://localhost:%d", port)));
+        this.req = HttpRequest.newBuilder(URI.create("http://localhost:" + port));
     }
 
     @AfterEach
@@ -72,7 +66,7 @@ final class ServletWrapITCase {
     @Test
     void simpleSliceTest() throws Exception {
         final String text = "Hello servlet";
-        this.start(new SliceSimple(new RsText(text)));
+        this.start(new SliceSimple(BaseResponse.ok().textBody(text)));
         final String body = HttpClient.newHttpClient().send(
             this.req.copy().GET().build(),
             HttpResponse.BodyHandlers.ofString()
@@ -82,7 +76,7 @@ final class ServletWrapITCase {
 
     @Test
     void echoSliceTest() throws Exception {
-        this.start((line, headers, body) -> new RsWithBody(body));
+        this.start((line, headers, body) -> BaseResponse.ok().body(body));
         final String test = "Ping";
         final String body = HttpClient.newHttpClient().send(
             this.req.copy().PUT(HttpRequest.BodyPublishers.ofString(test)).build(),
@@ -94,10 +88,8 @@ final class ServletWrapITCase {
     @Test
     void parsesHeaders() throws Exception {
         this.start(
-            (line, headers, body) -> new RsWithHeaders(
-                StandardRs.OK,
-                Headers.from("RsHeader", new RqHeaders(headers, "RqHeader").get(0))
-            )
+            (line, headers, body) -> BaseResponse.ok()
+                .headers(Headers.from("RsHeader", new RqHeaders(headers, "RqHeader").get(0)))
         );
         final String value = "some-header";
         final List<String> rsh = HttpClient.newHttpClient().send(
@@ -111,7 +103,7 @@ final class ServletWrapITCase {
 
     @Test
     void returnsStatusCode() throws Exception {
-        this.start(new SliceSimple(new RsWithStatus(RsStatus.NO_CONTENT)));
+        this.start(new SliceSimple(BaseResponse.noContent()));
         final int status = HttpClient.newHttpClient().send(
             this.req.copy().GET().build(), HttpResponse.BodyHandlers.discarding()
         ).statusCode();
@@ -120,7 +112,7 @@ final class ServletWrapITCase {
 
     @Test
     void echoNoContent() throws Exception {
-        this.start((line, headers, body) -> new RsWithBody(body));
+        this.start((line, headers, body) -> BaseResponse.ok().body(body));
         final byte[] body = HttpClient.newHttpClient().send(
             this.req.copy().PUT(HttpRequest.BodyPublishers.noBody()).build(),
             HttpResponse.BodyHandlers.ofByteArray()
@@ -148,12 +140,9 @@ final class ServletWrapITCase {
     @Test
     void echoQueryParams() throws Exception {
         this.start(
-            (line, header, body) -> new RsWithBody(
-                StandardRs.OK,
-                new Content.From(
+            (line, header, body) -> BaseResponse.ok().body(
                     new RqParams(line.uri().getQuery())
                         .value("foo").orElse("none").getBytes()
-                )
             )
         );
         final String param = "? my & param %";

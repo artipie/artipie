@@ -9,23 +9,17 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.common.RsJson;
+import com.artipie.http.rs.BaseResponse;
 
 import javax.json.Json;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Slice to serve on `/authentication-type`, returns stab json body.
- * @since 0.4
  */
 final class AuthTypeSlice implements Slice {
-
     @Override
-    public Response response(RequestLine line, Headers headers,
-                             Content body) {
-        return new RsJson(
-            () -> Json.createObjectBuilder().add("authentication_type", "password").build(),
-            StandardCharsets.UTF_8
-        );
+    public Response response(RequestLine line, Headers headers, Content body) {
+        return BaseResponse.ok()
+            .jsonBody(Json.createObjectBuilder().add("authentication_type", "password").build());
     }
 }

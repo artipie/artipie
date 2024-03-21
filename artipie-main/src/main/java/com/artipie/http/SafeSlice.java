@@ -6,19 +6,15 @@ package com.artipie.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.jcabi.log.Logger;
 
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Slice which handles all exceptions and respond with 500 error in that case.
- * @since 0.9
  */
-@SuppressWarnings({"PMD.OnlyOneReturn", "PMD.AvoidCatchingGenericException"})
+@SuppressWarnings("PMD.AvoidCatchingGenericException")
 final class SafeSlice implements Slice {
 
     /**
@@ -35,26 +31,18 @@ final class SafeSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         try {
             return new RsSafe(this.origin.response(line, headers, body));
         } catch (final Exception err) {
             Logger.error(this, "Failed to respond to request: %[exception]s", err);
-            return new RsWithBody(
-                new RsWithStatus(RsStatus.INTERNAL_ERROR),
-                String.format(
-                    "Failed to respond to request: %s",
-                    err.getMessage()
-                ),
-                StandardCharsets.UTF_8
-            );
+            return BaseResponse.internalError()
+                .textBody("Failed to respond to request: " + err.getMessage());
         }
     }
 
     /**
      * Safe response, catches exceptions from underlying reponse calls and respond with 500 error.
-     * @since 0.9
      */
     private static final class RsSafe implements Response {
 
@@ -77,14 +65,9 @@ final class SafeSlice implements Slice {
                 return this.origin.send(connection);
             } catch (final Exception err) {
                 Logger.error(this, "Failed to send request to connection: %[exception]s", err);
-                return new RsWithBody(
-                    new RsWithStatus(RsStatus.INTERNAL_ERROR),
-                    String.format(
-                        "Failed to send request to connection: %s",
-                        err.getMessage()
-                    ),
-                    StandardCharsets.UTF_8
-                ).send(connection);
+                return BaseResponse.internalError()
+                    .textBody("Failed to send request to connection: " + err.getMessage())
+                    .send(connection);
             }
         }
     }

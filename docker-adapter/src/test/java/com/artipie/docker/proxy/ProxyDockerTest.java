@@ -9,9 +9,7 @@ import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.StandardRs;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyIterable;
@@ -83,7 +81,7 @@ final class ProxyDockerTest {
         final byte[] bytes = "{\"repositories\":[\"one\",\"two\"]}".getBytes();
         MatcherAssert.assertThat(
             new ProxyDocker(
-                (line, headers, body) -> new RsWithBody(new Content.From(bytes))
+                (line, headers, body) -> BaseResponse.ok().body(bytes)
             ).catalog(Optional.empty(), Integer.MAX_VALUE).thenCompose(
                 catalog -> catalog.json().asBytesFuture()
             ).toCompletableFuture().join(),
@@ -94,7 +92,7 @@ final class ProxyDockerTest {
     @Test
     void shouldFailReturnCatalogWhenRemoteRespondsWithNotOk() {
         final CompletionStage<Catalog> stage = new ProxyDocker(
-            (line, headers, body) -> new RsWithStatus(RsStatus.NOT_FOUND)
+            (line, headers, body) -> BaseResponse.notFound()
         ).catalog(Optional.empty(), Integer.MAX_VALUE);
         Assertions.assertThrows(
             Exception.class,

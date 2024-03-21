@@ -16,9 +16,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.BaseResponse;
 import io.vavr.Tuple2;
 
 import javax.json.Json;
@@ -35,7 +33,6 @@ import java.util.stream.Stream;
 
 /**
  * Base slice class for Conan REST APIs.
- * @since 0.1
  */
 abstract class BaseConanSlice implements Slice {
 
@@ -86,22 +83,13 @@ abstract class BaseConanSlice implements Slice {
         return new AsyncResponse(
             content.thenApply(
                 data -> {
-                    final Response result;
                     if (data.isEmpty()) {
-                        result = new RsWithBody(
-                            StandardRs.NOT_FOUND,
-                            String.format(
-                                BaseConanSlice.URI_S_NOT_FOUND, line.uri(), this.getClass()
-                            ),
-                            StandardCharsets.UTF_8
-                        );
-                    } else {
-                        result = new RsWithHeaders(
-                            new RsWithBody(StandardRs.OK, data.getData()),
-                            BaseConanSlice.CONTENT_TYPE, data.getType()
-                        );
+                        return BaseResponse.notFound()
+                            .textBody(String.format(BaseConanSlice.URI_S_NOT_FOUND, line.uri(), this.getClass()));
                     }
-                    return result;
+                    return BaseResponse.ok()
+                        .header(BaseConanSlice.CONTENT_TYPE, data.getType())
+                        .body(data.getData());
                 }
             )
         );

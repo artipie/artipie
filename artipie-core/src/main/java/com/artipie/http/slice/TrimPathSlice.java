@@ -12,14 +12,11 @@ import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -77,11 +74,11 @@ public final class TrimPathSlice implements Slice {
         final URI uri = line.uri();
         final String full = uri.getPath();
         final Matcher matcher = this.ptn.matcher(full);
-        final Response response;
         final boolean recursion = !new RqHeaders(headers, TrimPathSlice.HDR_FULL_PATH).isEmpty();
         if (matcher.matches() && recursion) {
-            response = this.slice.response(line, headers, body);
-        } else if (matcher.matches() && !recursion) {
+            return this.slice.response(line, headers, body);
+        }
+        if (matcher.matches() && !recursion) {
             URI respUri;
             try {
                 respUri = new URIBuilder(uri)
@@ -90,23 +87,14 @@ public final class TrimPathSlice implements Slice {
             } catch (URISyntaxException e) {
                 throw new ArtipieException(e);
             }
-            response = this.slice.response(
+            return this.slice.response(
                 new RequestLine(line.method(), respUri, line.version()),
                 headers.copy().add(new Header(TrimPathSlice.HDR_FULL_PATH, full)),
                 body
             );
-        } else {
-            response = new RsWithStatus(
-                new RsWithBody(
-                    String.format(
-                        "Request path %s was not matched to %s", full, this.ptn
-                    ),
-                    StandardCharsets.UTF_8
-                ),
-                RsStatus.INTERNAL_ERROR
-            );
         }
-        return response;
+        return BaseResponse.internalError()
+            .textBody(String.format("Request path %s was not matched to %s", full, this.ptn));
     }
 
     /**

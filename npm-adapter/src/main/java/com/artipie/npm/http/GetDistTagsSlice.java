@@ -13,8 +13,8 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.StandardRs;
-import com.artipie.http.rs.common.RsJson;
 import com.artipie.npm.PackageNameFromUrl;
 
 import java.util.concurrent.CompletableFuture;
@@ -53,7 +53,8 @@ public final class GetDistTagsSlice implements Slice {
                     if (exists) {
                         return this.storage.value(key)
                             .thenCompose(Content::asJsonObjectFuture)
-                            .thenApply(json -> new RsJson(json.getJsonObject("dist-tags")));
+                            .thenApply(json -> BaseResponse.ok()
+                                .jsonBody(json.getJsonObject("dist-tags")));
                     }
                     return CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
                 }

@@ -12,8 +12,6 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 /**
  * Tests for {@link JettyClientSlice} with HTTPS server.
- *
- * @since 0.1
  */
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 public final class JettyClientSliceSecureTest extends JettyClientSliceTest {

@@ -10,11 +10,9 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.common.RsJson;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.slice.KeyFromPath;
 
-import java.nio.charset.StandardCharsets;
 import javax.json.Json;
 
 /**
@@ -30,15 +28,12 @@ public final class GetPackageSlice implements Slice {
     @Override
     public Response response(final RequestLine line, final Headers headers,
                              final Content body) {
-        return new RsJson(
-            RsStatus.NOT_FOUND,
-            () -> Json.createObjectBuilder().add(
+        return BaseResponse.notFound()
+            .jsonBody(Json.createObjectBuilder().add(
                 "error", String.format(
                     "\"%s\" could not be found",
                     new KeyLastPart(new KeyFromPath(line.uri().getPath())).get()
                 )
-            ).build(),
-            StandardCharsets.UTF_8
-        );
+            ).build());
     }
 }

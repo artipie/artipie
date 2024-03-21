@@ -4,6 +4,7 @@
  */
 package com.artipie.gem.http;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.Headers;
@@ -26,10 +27,7 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 
 /**
  * A test for gem submit operation.
- *
- * @since 0.7
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class ApiGetSliceTest {
     @Test
     void queryResultsInOkResponse(@TempDir final Path tmp) throws IOException {
@@ -40,7 +38,7 @@ final class ApiGetSliceTest {
                 new RsHasBody(new IsJson(new JsonHas("name", "gviz"))),
                 new RequestLine(RqMethod.GET, "/api/v1/gems/gviz.json"),
                 Headers.EMPTY,
-                com.artipie.asto.Content.EMPTY
+                Content.EMPTY
             )
         );
     }
@@ -54,7 +52,7 @@ final class ApiGetSliceTest {
                 Matchers.allOf(
                     new RsHasHeaders(
                         Matchers.equalTo(
-                            new Header("Content-Type", "text/x-yaml;charset=utf-8")
+                            new Header("Content-Type", "text/x-yaml; charset=utf-8")
                         ),
                         Matchers.anything()
                     ),
@@ -62,7 +60,7 @@ final class ApiGetSliceTest {
                 ),
                 new RequestLine(RqMethod.GET, "/api/v1/gems/gviz.yaml"),
                 Headers.EMPTY,
-                com.artipie.asto.Content.EMPTY
+                Content.EMPTY
             )
         );
     }

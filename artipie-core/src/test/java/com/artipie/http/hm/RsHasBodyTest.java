@@ -7,14 +7,15 @@ package com.artipie.http.hm;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
 import io.reactivex.Flowable;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -70,7 +71,7 @@ final class RsHasBodyTest {
     void shouldMatchResponseTwice(final String chunks) {
         final String[] elements = chunks.split(",");
         final byte[] data = String.join("", elements).getBytes();
-        final Response response = new RsWithBody(
+        final Response response = BaseResponse.ok().body(
             Flowable.fromIterable(
                 Stream.of(elements)
                     .map(String::getBytes)
@@ -79,23 +80,14 @@ final class RsHasBodyTest {
             )
         );
         new RsHasBody(data).matches(response);
-        MatcherAssert.assertThat(
-            new RsHasBody(data).matches(response),
-            new IsEqual<>(true)
-        );
+        Assertions.assertTrue(new RsHasBody(data).matches(response));
     }
 
     @Test
     void shouldWorkWithContainsMatcherMismatches() {
         MatcherAssert.assertThat(
             new RsHasBody("XXX"),
-            new IsNot<>(
-                new Matches<>(
-                    new RsWithBody(
-                        "xxx", StandardCharsets.UTF_8
-                    )
-                )
-            )
+            new IsNot<>(new Matches<>(BaseResponse.ok().textBody("xxx")))
         );
     }
 
@@ -108,18 +100,8 @@ final class RsHasBodyTest {
                 StandardCharsets.UTF_8
             ),
             Matchers.<Matcher<Response>>allOf(
-                new Matches<>(
-                    new RsWithBody(
-                        content,
-                        StandardCharsets.UTF_8
-                    )
-                ),
-                new Matches<>(
-                    new RsWithBody(
-                        content.toUpperCase(Locale.ROOT),
-                        StandardCharsets.UTF_8
-                    )
-                )
+                new Matches<>(BaseResponse.ok().textBody(content)),
+                new Matches<>(BaseResponse.ok().textBody(content.toUpperCase(Locale.ROOT)))
             )
         );
     }

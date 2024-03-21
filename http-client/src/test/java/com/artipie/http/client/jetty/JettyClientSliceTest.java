@@ -23,11 +23,10 @@ import io.reactivex.Flowable;
 import io.vertx.core.http.HttpServerOptions;
 import org.eclipse.jetty.client.HttpClient;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.StringContains;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,8 +35,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Tests for {@link JettyClientSlice} with HTTP server.
@@ -116,8 +113,9 @@ class JettyClientSliceTest {
     void shouldSendHeaders() {
         final AtomicReference<Headers> actual = new AtomicReference<>();
         this.server.update(
-            (rqline, rqheaders, rqbody) -> {
-                actual.set(rqheaders);
+            (line, headers, content) -> {
+                System.out.println("MY_DEBUG " + headers);
+                actual.set(headers);
                 return StandardRs.EMPTY;
             }
         );
@@ -129,16 +127,8 @@ class JettyClientSliceTest {
             ),
             Content.EMPTY
         ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            StreamSupport.stream(actual.get().spliterator(), false)
-                .map(Header::new)
-                .map(Header::toString)
-                .collect(Collectors.toList()),
-            Matchers.hasItems(
-                new StringContains("My-Header: MyValue"),
-                new StringContains("Another-Header: AnotherValue")
-            )
-        );
+        Assertions.assertEquals("MyValue", actual.get().values("My-Header").getFirst());
+        Assertions.assertEquals("AnotherValue", actual.get().values("Another-Header").getFirst());
     }
 
     @Test

@@ -9,9 +9,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.common.RsJson;
+import com.artipie.http.rs.BaseResponse;
 
 import javax.json.Json;
 import java.io.StringReader;
@@ -49,18 +47,14 @@ public final class PostStageCommitSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body) {
-        final Response res;
+    public Response response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = PostStageCommitSlice.PKG.matcher(
             line.uri().getPath()
         );
         if (matcher.matches()) {
             final String name = matcher.group(1);
-            res = new RsJson(
-                () -> Json.createReader(
+            return BaseResponse.ok()
+                .jsonBody(Json.createReader(
                     new StringReader(
                         String.join(
                             "\n",
@@ -101,9 +95,7 @@ public final class PostStageCommitSlice implements Slice {
                     )
                 ).read(), StandardCharsets.UTF_8
             );
-        } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
-        return res;
+        return BaseResponse.badRequest();
     }
 }

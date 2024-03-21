@@ -9,10 +9,8 @@ import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 
 /**
  * Response that caches origin response once it first sent and can replay it many times.
@@ -26,10 +24,7 @@ public final class CachedResponse implements Response {
      */
     private final Response origin;
 
-    /**
-     * Stateful connection.
-     */
-    private final StatefulConnection con;
+    private final StatefulConnection connection;
 
     /**
      * Wraps response with stateful connection.
@@ -37,21 +32,20 @@ public final class CachedResponse implements Response {
      */
     public CachedResponse(Response origin) {
         this.origin = origin;
-        this.con = new StatefulConnection();
+        this.connection = new StatefulConnection();
     }
 
     @Override
     public CompletionStage<Void> send(Connection connection) {
-        return this.con.load(this.origin).thenCompose(self -> self.replay(connection));
+        return this.connection.load(this.origin).thenCompose(self -> self.replay(connection));
     }
 
     @Override
     public String toString() {
-        return String.format(
-            "(%s: state=%s)",
-            this.getClass().getSimpleName(),
-            this.con
-        );
+        return "CachedResponse{" +
+            "origin=" + origin +
+            ", con=" + connection +
+            '}';
     }
 
     /**
@@ -79,27 +73,17 @@ public final class CachedResponse implements Response {
             final Content body) {
             this.status = stts;
             this.headers = hdrs;
-            return new Content.From(body).asBytesFuture().thenAccept(
-                bytes -> this.body = bytes
-            );
+            return new Content.From(body).asBytesFuture()
+                .thenAccept(bytes -> this.body = bytes);
         }
 
         @Override
         public String toString() {
-            return String.format(
-                "(%s: status=%s, headers=[%s], body=%s)",
-                this.getClass().getSimpleName(),
-                this.status,
-                this.headers.stream()
-                    .map(
-                        header -> String.format(
-                            "\"%s\": \"%s\"",
-                            header.getKey(),
-                            header.getValue()
-                        )
-                    ).collect(Collectors.joining(", ")),
-                Arrays.toString(this.body)
-            );
+            return "StatefulConnection{" +
+                "status=" + status +
+                ", headers=" + headers +
+                ", bodySize=" + body.length +
+                '}';
         }
 
         /**
@@ -108,13 +92,10 @@ public final class CachedResponse implements Response {
          * @return Self future
          */
         CompletionStage<StatefulConnection> load(final Response response) {
-            final CompletionStage<StatefulConnection> self;
             if (this.status == null && this.headers == null && this.body == null) {
-                self = response.send(this).thenApply(none -> this);
-            } else {
-                self = CompletableFuture.completedFuture(this);
+                return response.send(this).thenApply(none -> this);
             }
-            return self;
+            return CompletableFuture.completedFuture(this);
         }
 
         /**

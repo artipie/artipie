@@ -9,10 +9,10 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.common.RsJson;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
+import com.artipie.http.rs.BaseResponse;
+
 import javax.json.Json;
+import java.io.StringReader;
 
 /**
  * Slice to handle `POST /release/{owner_login}/{package_name}/{version}` and
@@ -23,16 +23,12 @@ import javax.json.Json;
  *  https://api.anaconda.org/docs#/ and github issue for any updates.
  *  https://github.com/Anaconda-Platform/anaconda-client/issues/580
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class PostPackageReleaseSlice implements Slice {
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body) {
-        return new RsJson(
-            () -> Json.createReader(
+    public Response response(RequestLine line, Headers headers, Content body) {
+        return BaseResponse.ok()
+            .jsonBody(Json.createReader(
                 new StringReader(
                     String.join(
                         "\n",
@@ -67,8 +63,7 @@ public final class PostPackageReleaseSlice implements Slice {
                         "}"
                     )
                 )
-            ).read(),
-            StandardCharsets.UTF_8
+            ).read()
         );
     }
 }

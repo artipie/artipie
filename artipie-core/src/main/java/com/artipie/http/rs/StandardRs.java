@@ -8,9 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import io.reactivex.Flowable;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -20,7 +18,7 @@ public enum StandardRs implements Response {
     /**
      * Empty response.
      */
-    EMPTY(con -> con.accept(RsStatus.OK, Headers.EMPTY, new Content.From(Flowable.empty()))),
+    EMPTY(con -> con.accept(RsStatus.OK, Headers.EMPTY, Content.EMPTY)),
     /**
      * OK 200 response.
      */
@@ -28,33 +26,24 @@ public enum StandardRs implements Response {
     /**
      * Success response without content.
      */
-    NO_CONTENT(new RsWithStatus(RsStatus.NO_CONTENT)),
+    NO_CONTENT(con -> con.accept(RsStatus.NO_CONTENT, Headers.EMPTY, Content.EMPTY)),
     /**
      * Not found response.
      */
-    NOT_FOUND(new RsWithStatus(RsStatus.NOT_FOUND)),
+    NOT_FOUND(con -> con.accept(RsStatus.NOT_FOUND, Headers.EMPTY, Content.EMPTY)),
     /**
      * Not found with json.
      */
     JSON_NOT_FOUND(
-        new RsWithBody(
-            new RsWithHeaders(
-                new RsWithStatus(RsStatus.NOT_FOUND),
-                Headers.from("Content-Type", "application/json")
-            ),
-            ByteBuffer.wrap("{\"error\" : \"not found\"}".getBytes())
+        con -> con.accept(
+            RsStatus.NOT_FOUND,
+            Headers.from("Content-Type", "application/json"),
+            new Content.From("{\"error\" : \"not found\"}".getBytes())
         )
     );
 
-    /**
-     * Origin response.
-     */
     private final Response origin;
 
-    /**
-     * Ctor.
-     * @param origin Origin response
-     */
     StandardRs(final Response origin) {
         this.origin = origin;
     }

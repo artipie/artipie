@@ -14,17 +14,13 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.BaseResponse;
 import com.google.common.base.Strings;
 
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Conan /v1/users/* REST APIs. For now minimally implemented, just for package uploading support.
- * @since 0.1
  */
 public final class UsersEntity {
 
@@ -53,15 +49,11 @@ public final class UsersEntity {
      */
     private static final String JSON_TYPE = "application/json";
 
-    /**
-     * Ctor.
-     */
     private UsersEntity() {
     }
 
     /**
      * Conan /authenticate REST APIs.
-     * @since 0.1
      */
     public static final class UserAuth implements Slice {
 
@@ -76,41 +68,27 @@ public final class UsersEntity {
         private final Tokens tokens;
 
         /**
-         * Ctor.
          * @param auth Login authentication for the user.
          * @param tokens Auth. token genrator for the user.
          */
-        public UserAuth(final Authentication auth, final Tokens tokens) {
+        public UserAuth(Authentication auth, Tokens tokens) {
             this.auth = auth;
             this.tokens = tokens;
         }
 
         @Override
-        public Response response(final RequestLine line,
-                                 final Headers headers, final Content body) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             return new AsyncResponse(
                 new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
                     authResult -> {
                         assert authResult.status() != AuthScheme.AuthStatus.FAILED;
                         final String token = this.tokens.generate(authResult.user());
-                        final Response result;
                         if (Strings.isNullOrEmpty(token)) {
-                            result = new RsWithBody(
-                                StandardRs.NOT_FOUND,
-                                String.format(
-                                    UsersEntity.URI_S_NOT_FOUND, line.uri()
-                                ),
-                                StandardCharsets.UTF_8
-                            );
-                        } else {
-                            result = new RsWithHeaders(
-                                new RsWithBody(
-                                    StandardRs.OK, token, StandardCharsets.UTF_8
-                                ),
-                                UsersEntity.CONTENT_TYPE, "text/plain"
-                            );
+                            return BaseResponse.notFound()
+                                .textBody(String.format(UsersEntity.URI_S_NOT_FOUND, line.uri()));
+
                         }
-                        return result;
+                        return BaseResponse.ok().textBody(token);
                     }
                 )
             );
@@ -124,28 +102,18 @@ public final class UsersEntity {
     public static final class CredsCheck implements Slice {
 
         @Override
-        public Response response(final RequestLine line,
-                                 final Headers headers, final Content body) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             return new AsyncResponse(
                 CompletableFuture.supplyAsync(line::uri).thenCompose(
                     uri -> CredsCheck.credsCheck().thenApply(
                         content -> {
-                            final Response result;
                             if (Strings.isNullOrEmpty(content)) {
-                                result = new RsWithBody(
-                                    StandardRs.NOT_FOUND,
-                                    String.format(UsersEntity.URI_S_NOT_FOUND, uri),
-                                    StandardCharsets.UTF_8
-                                );
-                            } else {
-                                result = new RsWithHeaders(
-                                    new RsWithBody(
-                                        StandardRs.OK, content, StandardCharsets.UTF_8
-                                    ),
-                                    UsersEntity.CONTENT_TYPE, UsersEntity.JSON_TYPE
-                                );
+                                return BaseResponse.notFound()
+                                    .textBody(String.format(UsersEntity.URI_S_NOT_FOUND, uri));
                             }
-                            return result;
+                            return BaseResponse.ok()
+                                .header(UsersEntity.CONTENT_TYPE, UsersEntity.JSON_TYPE)
+                                .textBody(content);
                         }
                     )
                 )
