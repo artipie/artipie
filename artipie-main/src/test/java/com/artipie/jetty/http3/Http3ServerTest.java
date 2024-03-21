@@ -133,36 +133,16 @@ class Http3ServerTest {
             "GET", HttpURI.from(String.format("http://localhost:%d/small_data", this.port)),
             HttpVersion.HTTP_3, HttpFields.from()
         );
-        final CountDownLatch rlatch = new CountDownLatch(1);
-        final CountDownLatch dlatch = new CountDownLatch(1);
-        final ByteBuffer resp = ByteBuffer.allocate(Http3ServerTest.SMALL_DATA.length);
-        this.session.newRequest(
-            new HeadersFrame(request, true),
-            new Stream.Client.Listener() {
-
-                @Override
-                public void onResponse(final Stream.Client stream, final HeadersFrame frame) {
-                    rlatch.countDown();
-                    stream.demand();
-                }
-
-                @Override
-                public void onDataAvailable(final Stream.Client stream) {
-                    final Stream.Data data = stream.readData();
-                    if (data != null) {
-                        resp.put(data.getByteBuffer());
-                        data.release();
-                        if (data.isLast()) {
-                            dlatch.countDown();
-                        }
-                    }
-                    stream.demand();
-                }
-            }
-        ).get(5, TimeUnit.SECONDS);
-        MatcherAssert.assertThat("Response was not received", rlatch.await(5, TimeUnit.SECONDS));
-        MatcherAssert.assertThat("Data were not received", dlatch.await(5, TimeUnit.SECONDS));
-        Assertions.assertArrayEquals(Http3ServerTest.SMALL_DATA, resp.array());
+        final StreamTestListener listener = new StreamTestListener(Http3ServerTest.SMALL_DATA.length);
+        this.session.newRequest(new HeadersFrame(request, true), listener)
+            .get(5, TimeUnit.SECONDS);
+        MatcherAssert.assertThat("Response was not received", listener.awaitResponse(5));
+        final boolean dataReceived = listener.awaitData(5);
+        MatcherAssert.assertThat(
+            "Error: response completion timeout. Currently received bytes: %s".formatted(listener.received()),
+            dataReceived
+        );
+        listener.assertDataMatch(Http3ServerTest.SMALL_DATA);
     }
 
     @Test
@@ -172,83 +152,44 @@ class Http3ServerTest {
             "GET", HttpURI.from(String.format("http://localhost:%d/random_chunks", this.port)),
             HttpVersion.HTTP_3, HttpFields.from()
         );
-        final CountDownLatch rlatch = new CountDownLatch(1);
-        final CountDownLatch dlatch = new CountDownLatch(1);
-        final ByteBuffer resp = ByteBuffer.allocate(Http3ServerTest.SIZE);
-        this.session.newRequest(
-            new HeadersFrame(request, true),
-            new Stream.Client.Listener() {
-                @Override
-                public void onResponse(final Stream.Client stream, final HeadersFrame frame) {
-                    rlatch.countDown();
-                    stream.demand();
-                }
-
-                @Override
-                public void onDataAvailable(final Stream.Client stream) {
-                    final Stream.Data data = stream.readData();
-                    if (data != null) {
-                        resp.put(data.getByteBuffer());
-                        data.release();
-                        if (data.isLast()) {
-                            dlatch.countDown();
-                        }
-                    }
-                    stream.demand();
-                }
-            }
-        ).get(5, TimeUnit.SECONDS);
-        MatcherAssert.assertThat("Response was not received", rlatch.await(5, TimeUnit.SECONDS));
-        MatcherAssert.assertThat("Data were not received", dlatch.await(60, TimeUnit.SECONDS));
-        MatcherAssert.assertThat(resp.position(), new IsEqual<>(Http3ServerTest.SIZE));
+        final StreamTestListener listener = new StreamTestListener(Http3ServerTest.SIZE);
+        this.session.newRequest(new HeadersFrame(request, true), listener)
+            .get(5, TimeUnit.SECONDS);
+        MatcherAssert.assertThat("Response was not received", listener.awaitResponse(5));
+        final boolean dataReceived = listener.awaitData(60);
+        MatcherAssert.assertThat(
+            "Error: response completion timeout. Currently received bytes: %s".formatted(listener.received()),
+            dataReceived
+        );
+        MatcherAssert.assertThat(listener.received(), new IsEqual<>(Http3ServerTest.SIZE));
     }
 
     @Test
-    void putWithRequestDataResponse()
-        throws ExecutionException, InterruptedException, TimeoutException {
+    void putWithRequestDataResponse() throws ExecutionException, InterruptedException,
+        TimeoutException {
         final int size = 964;
         final MetaData.Request request = new MetaData.Request(
             "PUT", HttpURI.from(String.format("http://localhost:%d/return_back", this.port)),
             HttpVersion.HTTP_3,
             HttpFields.build()
         );
-        final CountDownLatch responseLatch = new CountDownLatch(1);
-        final CountDownLatch dataAvailableLatch = new CountDownLatch(1);
+        final StreamTestListener listener = new StreamTestListener(size * 2);
         final byte[] data = new byte[size];
-        final ByteBuffer resp = ByteBuffer.allocate(size * 2);
         new Random().nextBytes(data);
-        this.session.newRequest(
-            new HeadersFrame(request, false),
-            new Stream.Client.Listener() {
-                @Override
-                public void onResponse(final Stream.Client stream, final HeadersFrame frame) {
-                    responseLatch.countDown();
-                    stream.demand();
-                }
-
-                @Override
-                public void onDataAvailable(final Stream.Client stream) {
-                    final Stream.Data data = stream.readData();
-                    if (data != null) {
-                        resp.put(data.getByteBuffer());
-                        data.release();
-                        if (data.isLast()) {
-                            dataAvailableLatch.countDown();
-                        }
-                    }
-                    stream.demand();
-                }
-            }
-        ).thenCompose(cl -> cl.data(new DataFrame(ByteBuffer.wrap(data), false)))
+        this.session.newRequest(new HeadersFrame(request, false), listener)
+            .thenCompose(cl -> cl.data(new DataFrame(ByteBuffer.wrap(data), false)))
             .thenCompose(cl -> cl.data(new DataFrame(ByteBuffer.wrap(data), true)))
             .get(5, TimeUnit.SECONDS);
-
-        MatcherAssert.assertThat("Response was not received", responseLatch.await(10, TimeUnit.SECONDS));
-        MatcherAssert.assertThat("Data were not received", dataAvailableLatch.await(60, TimeUnit.SECONDS));
+        MatcherAssert.assertThat("Response was not received", listener.awaitResponse(10));
+        final boolean dataReceived = listener.awaitData(10);
+        MatcherAssert.assertThat(
+            "Error: response completion timeout. Currently received bytes: %s".formatted(listener.received()),
+            dataReceived
+        );
         final ByteBuffer copy = ByteBuffer.allocate(size * 2);
         copy.put(data);
         copy.put(data);
-        Assertions.assertArrayEquals(copy.array(), resp.array());
+        listener.assertDataMatch(copy.array());
     }
 
     /**
@@ -289,6 +230,63 @@ class Http3ServerTest {
                 res = StandardRs.NOT_FOUND;
             }
             return res;
+        }
+    }
+
+    /**
+     * Client-side listener for testing http3 server responses.
+     */
+    private static final class StreamTestListener implements Stream.Client.Listener {
+
+        final CountDownLatch responseLatch;
+
+        final CountDownLatch dataAvailableLatch;
+
+        final ByteBuffer buffer;
+
+        StreamTestListener(final int length) {
+            this.responseLatch = new CountDownLatch(1);
+            this.dataAvailableLatch = new CountDownLatch(1);
+            this.buffer = ByteBuffer.allocate(length);
+        }
+
+        public boolean awaitResponse(final int seconds) throws InterruptedException {
+            return this.responseLatch.await(seconds, TimeUnit.SECONDS);
+        }
+
+        public boolean awaitData(final int seconds) throws InterruptedException {
+            return this.dataAvailableLatch.await(seconds, TimeUnit.SECONDS);
+        }
+
+        public int received() {
+            return this.buffer.position();
+        }
+
+        public void assertDataMatch(final byte[] copy) {
+            Assertions.assertArrayEquals(copy, this.buffer.array());
+        }
+
+        @Override
+        public void onResponse(final Stream.Client stream, final HeadersFrame frame) {
+            responseLatch.countDown();
+            stream.demand();
+        }
+
+        @Override
+        public void onDataAvailable(final Stream.Client stream) {
+            final Stream.Data data = stream.readData();
+            if (data == null)
+            {
+                stream.demand();
+            } else {
+                buffer.put(data.getByteBuffer());
+                data.release();
+                if (data.isLast()) {
+                    dataAvailableLatch.countDown();
+                } else {
+                    stream.demand();
+                }
+            }
         }
     }
 }
