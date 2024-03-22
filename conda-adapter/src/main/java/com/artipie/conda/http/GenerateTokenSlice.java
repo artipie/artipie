@@ -15,7 +15,7 @@ import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 
 import javax.json.Json;
 

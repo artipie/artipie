@@ -5,11 +5,11 @@
 package com.artipie.http.rt;
 
 import com.artipie.asto.Content;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.StandardRs;
 
 import java.util.Arrays;
 import java.util.List;
@@ -65,7 +65,7 @@ public final class SliceRoute implements Slice {
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst()
-            .orElse(StandardRs.NOT_FOUND);
+            .orElse(BaseResponse.notFound());
     }
 
     /**

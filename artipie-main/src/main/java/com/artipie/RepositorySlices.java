@@ -39,7 +39,7 @@ import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.filter.FilterSlice;
 import com.artipie.http.filter.Filters;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.http.MavenSlice;

@@ -10,7 +10,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import com.artipie.docker.proxy.ProxyDocker;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.BaseResponse;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ final class CacheDockerTest {
     @Test
     void createsCacheRepo() {
         final CacheDocker docker = new CacheDocker(
-            new ProxyDocker((line, headers, body) -> StandardRs.EMPTY),
+            new ProxyDocker((line, headers, body) -> BaseResponse.ok()),
             new AstoDocker(new InMemoryStorage()), Optional.empty(), "*"
         );
         MatcherAssert.assertThat(

@@ -6,12 +6,11 @@ package com.artipie.jetty.http3;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.nuget.RandomFreePort;
 import io.reactivex.Flowable;
 import org.eclipse.jetty.http.HttpFields;
@@ -281,7 +280,7 @@ class Http3ServerTest {
             if (line.toString().contains("return_back")) {
                 return BaseResponse.ok().body(body);
             }
-            return StandardRs.NOT_FOUND;
+            return BaseResponse.notFound();
         }
     }
 }

@@ -7,7 +7,6 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.BaseResponse;
 
 /**
  * Slice limiting requests size by `Content-Length` header.

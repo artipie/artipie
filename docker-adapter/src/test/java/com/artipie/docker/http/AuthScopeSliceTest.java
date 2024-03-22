@@ -7,12 +7,12 @@ package com.artipie.docker.http;
 import com.artipie.asto.Content;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.StandardRs;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -44,12 +44,8 @@ class AuthScopeSliceTest {
                 }
 
                 @Override
-                public Response response(
-                    final RequestLine line,
-                    final Headers headers,
-                    final Content body
-                ) {
-                    return StandardRs.OK;
+                public Response response(RequestLine line, Headers headers, Content body) {
+                    return BaseResponse.ok();
                 }
             },
             (headers, rline) -> CompletableFuture.completedFuture(

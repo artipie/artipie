@@ -9,7 +9,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.client.HttpServer;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import org.eclipse.jetty.client.HttpClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

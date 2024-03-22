@@ -6,7 +6,6 @@ package com.artipie.http;
 
 import com.artipie.RepositorySlices;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtPath;
 import com.artipie.http.rt.RtRule;

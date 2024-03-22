@@ -11,13 +11,12 @@ import com.artipie.asto.cache.Remote;
 import com.artipie.composer.JsonPackages;
 import com.artipie.composer.Packages;
 import com.artipie.composer.Repository;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
-import com.artipie.http.rs.StandardRs;
 import com.jcabi.log.Logger;
 
 import java.util.Optional;
@@ -73,7 +72,7 @@ final class CachedProxySlice implements Slice {
                         return BaseResponse.ok().body(pkgs.get());
                     }
                     Logger.warn(this, "Failed to read cached item: %[exception]s", throwable);
-                    return StandardRs.NOT_FOUND;
+                    return BaseResponse.notFound();
                 }
             )
         );

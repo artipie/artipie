@@ -6,7 +6,7 @@ package com.artipie.http.async;
 
 import com.artipie.http.Response;
 import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;

@@ -7,12 +7,12 @@ package com.artipie.npm.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.npm.PackageNameFromUrl;
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,7 +21,6 @@ import javax.json.JsonObject;
 import javax.json.JsonPatchBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.regex.Pattern;
 
 /**
@@ -47,19 +46,14 @@ public final class DeprecateSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers iterable,
-        final Content publisher
-    ) {
+    public Response response(RequestLine line, Headers iterable, Content publisher) {
         final String pkg = new PackageNameFromUrl(line).value();
         final Key key = new Key.From(pkg, "meta.json");
         return new AsyncResponse(
             this.storage.exists(key).thenCompose(
                 exists -> {
-                    final CompletionStage<Response> res;
                     if (exists) {
-                        res = new Content.From(publisher).asJsonObjectFuture()
+                        return new Content.From(publisher).asJsonObjectFuture()
                             .thenApply(json -> json.getJsonObject("versions"))
                             .thenCombine(
                                 this.storage.value(key)
@@ -70,13 +64,11 @@ public final class DeprecateSlice implements Slice {
                                     this.storage.save(
                                         key, new Content.From(str.getBytes(StandardCharsets.UTF_8))
                                     );
-                                    return StandardRs.OK;
+                                    return BaseResponse.ok();
                                 }
                             );
-                    } else {
-                        res = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
                     }
-                    return res;
+                    return CompletableFuture.completedFuture(BaseResponse.notFound());
                 }
             )
         );

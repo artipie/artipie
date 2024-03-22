@@ -12,7 +12,7 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.http.content.PackageContent;
 import com.artipie.nuget.http.index.ServiceIndex;

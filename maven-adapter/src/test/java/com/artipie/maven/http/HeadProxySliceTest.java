@@ -5,15 +5,14 @@
 package com.artipie.maven.http;
 
 import com.artipie.asto.Content;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -30,7 +29,7 @@ class HeadProxySliceTest {
 
     @Test
     void performsRequestWithEmptyHeaderAndBody() {
-        new HeadProxySlice(new SliceSimple(StandardRs.EMPTY)).response(
+        new HeadProxySlice(new SliceSimple(BaseResponse.ok())).response(
             RequestLine.from("HEAD /some/path HTTP/1.1"),
             Headers.from("some", "value"),
             new Content.From("000".getBytes())

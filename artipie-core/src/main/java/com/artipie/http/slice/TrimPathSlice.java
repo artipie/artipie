@@ -12,7 +12,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;

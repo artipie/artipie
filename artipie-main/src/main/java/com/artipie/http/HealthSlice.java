@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
 import com.artipie.settings.Settings;
 
 import javax.json.Json;

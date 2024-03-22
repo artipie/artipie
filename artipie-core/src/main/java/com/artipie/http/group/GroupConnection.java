@@ -47,7 +47,7 @@ final class GroupConnection implements Connection {
 
     @Override
     public CompletionStage<Void> accept(final RsStatus status, final Headers headers,
-        final Content body) {
+                                        final Content body) {
         synchronized (this.results) {
             return this.results.complete(
                 this.pos, new GroupResult(status, headers, body), this.origin

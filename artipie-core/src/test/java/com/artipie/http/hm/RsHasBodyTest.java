@@ -7,7 +7,7 @@ package com.artipie.http.hm;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import org.hamcrest.Matcher;

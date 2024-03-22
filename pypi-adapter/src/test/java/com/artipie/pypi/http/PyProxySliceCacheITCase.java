@@ -9,15 +9,13 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.pypi.PypiDeployment;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
-import java.io.IOException;
-import java.net.URI;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Test for {@link PyProxySlice}.
@@ -71,7 +72,7 @@ final class PyProxySliceCacheITCase {
         this.storage = new InMemoryStorage();
         this.bad = new VertxSliceServer(
             PyProxySliceCacheITCase.VERTX,
-            new SliceSimple(StandardRs.NOT_FOUND)
+            new SliceSimple(BaseResponse.notFound())
         );
         this.server = new VertxSliceServer(
             PyProxySliceCacheITCase.VERTX,

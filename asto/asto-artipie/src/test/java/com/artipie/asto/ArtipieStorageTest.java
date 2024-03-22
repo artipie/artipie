@@ -5,6 +5,7 @@
 package com.artipie.asto;
 
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -12,8 +13,6 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.BaseResponse;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -54,7 +53,7 @@ public final class ArtipieStorageTest {
                                 .thenApply(
                                     bytes -> {
                                         body.set(bytes);
-                                        return StandardRs.OK;
+                                        return BaseResponse.ok();
                                     }
                                 )
                         );
@@ -110,7 +109,7 @@ public final class ArtipieStorageTest {
                                 .thenApply(
                                     bytes -> {
                                         body.set(bytes);
-                                        return StandardRs.OK;
+                                        return BaseResponse.ok();
                                     }
                                 )
                         );

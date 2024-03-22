@@ -2,14 +2,13 @@
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
  * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
-package com.artipie.http.rs;
+package com.artipie.http;
 
 import com.artipie.asto.Content;
-import com.artipie.http.Connection;
-import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
+import com.artipie.http.rs.RsStatus;
 import org.reactivestreams.Publisher;
 
 import javax.json.JsonStructure;
@@ -208,5 +207,14 @@ public class BaseResponse implements com.artipie.http.Response {
     @Override
     public CompletionStage<Void> send(Connection connection) {
         return connection.accept(status, headers, body);
+    }
+
+    @Override
+    public String toString() {
+        return "BaseResponse{" +
+            "status=" + status +
+            ", headers=" + headers +
+            ", hasBody=" + (body != Content.EMPTY) +
+            '}';
     }
 }

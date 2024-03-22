@@ -13,7 +13,7 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
@@ -28,19 +28,18 @@ class AuthClientSliceTest {
         final RequestLine line = new RequestLine(RqMethod.GET, "/file.txt");
         final Header header = new Header("x-name", "some value");
         final byte[] body = "text".getBytes();
-        final RsStatus status = RsStatus.OK;
         final Response response = new AuthClientSlice(
             (rsline, rsheaders, rsbody) -> {
                 if (!rsline.equals(line)) {
                     throw new IllegalArgumentException(String.format("Line modified: %s", rsline));
                 }
-                return new RsFull(status, rsheaders, rsbody);
+                return BaseResponse.ok().headers(rsheaders).body(rsbody);
             },
             Authenticator.ANONYMOUS
         ).response(line, Headers.from(header), new Content.From(body));
         MatcherAssert.assertThat(
             response,
-            new ResponseMatcher(status, body, header)
+            new ResponseMatcher(RsStatus.OK, body, header)
         );
     }
 }

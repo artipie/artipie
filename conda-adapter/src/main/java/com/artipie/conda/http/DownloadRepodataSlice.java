@@ -14,7 +14,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 
 import javax.json.Json;
 import java.nio.charset.StandardCharsets;

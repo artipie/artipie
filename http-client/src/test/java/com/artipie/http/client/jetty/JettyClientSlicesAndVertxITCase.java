@@ -14,17 +14,12 @@ import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.vertx.VertxSliceServer;
 import io.reactivex.Flowable;
 import io.vertx.reactivex.core.Vertx;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
 import org.cactoos.text.TextOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -33,6 +28,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Tests for {@link JettyClientSlices} and vertx.
@@ -142,7 +143,7 @@ final class JettyClientSlicesAndVertxITCase {
                     final Flowable<ByteBuffer> termbody = Flowable.fromPublisher(body)
                         .doOnError(terminated::completeExceptionally)
                         .doOnTerminate(() -> terminated.complete(null));
-                    promise.complete(new RsFull(status, rsheaders, termbody));
+                    promise.complete(BaseResponse.from(status).headers(rsheaders).body(termbody));
                     return terminated;
                 }
             );

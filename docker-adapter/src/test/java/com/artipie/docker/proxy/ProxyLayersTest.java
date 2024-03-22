@@ -8,7 +8,7 @@ import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.RepoName;
 import com.artipie.http.headers.ContentLength;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;

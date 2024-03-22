@@ -5,16 +5,17 @@
 package com.artipie.http.client;
 
 import com.artipie.asto.Content;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.StandardRs;
-import java.net.URI;
-import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import java.net.URI;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Tests for {@link UriClientSlice}.
@@ -34,7 +35,7 @@ final class UriClientSliceTest {
     void shouldGetClientBySchemeHostPort(
         final String uri, final Boolean secure, final String host, final Integer port
     ) throws Exception {
-        final FakeClientSlices fake = new FakeClientSlices((line, headers, body) -> StandardRs.OK);
+        final FakeClientSlices fake = new FakeClientSlices((line, headers, body) -> BaseResponse.ok());
         new UriClientSlice(
             fake,
             new URI(uri)
@@ -83,7 +84,7 @@ final class UriClientSliceTest {
                         rsline.uri().getRawQuery(),
                         new IsEqual<>(query)
                     );
-                    return StandardRs.OK;
+                    return BaseResponse.ok();
                 }
             ),
             new URI(uri)

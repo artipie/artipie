@@ -14,7 +14,7 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import io.vertx.core.http.HttpServerOptions;
 import org.eclipse.jetty.client.HttpClient;

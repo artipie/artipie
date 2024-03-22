@@ -13,7 +13,7 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
@@ -30,21 +30,16 @@ final class ResourceFromSliceTest {
 
     @Test
     void shouldDelegateGetResponse() {
-        final RsStatus status = RsStatus.OK;
         final String path = "/some/path";
         final Header header = new Header("Name", "Value");
         final Response response = new ResourceFromSlice(
             path,
-            (line, hdrs, body) -> new RsFull(
-                status,
-                hdrs,
-                Flowable.just(ByteBuffer.wrap(line.toString().getBytes()))
-            )
+            (line, hdrs, body) -> BaseResponse.ok().headers(hdrs).body(line.toString().getBytes())
         ).get(Headers.from(Collections.singleton(header)));
         MatcherAssert.assertThat(
             response,
             Matchers.allOf(
-                new RsHasStatus(status),
+                new RsHasStatus(RsStatus.OK),
                 new RsHasHeaders(header),
                 new RsHasBody(
                     new RequestLine(RqMethod.GET, path).toString().getBytes()
@@ -61,11 +56,8 @@ final class ResourceFromSliceTest {
         final String content = "body";
         final Response response = new ResourceFromSlice(
             path,
-            (line, hdrs, body) -> new RsFull(
-                status,
-                hdrs,
-                Flowable.concat(Flowable.just(ByteBuffer.wrap(line.toString().getBytes())), body)
-            )
+            (line, hdrs, body) -> BaseResponse.ok().headers(hdrs)
+                .body(Flowable.concat(Flowable.just(ByteBuffer.wrap(line.toString().getBytes())), body))
         ).put(
             Headers.from(Collections.singleton(header)),
             new Content.From(content.getBytes())
@@ -76,11 +68,8 @@ final class ResourceFromSliceTest {
                 new RsHasStatus(status),
                 new RsHasHeaders(header),
                 new RsHasBody(
-                    String.join(
-                        "",
-                        new RequestLine(RqMethod.PUT, path).toString(),
-                        content
-                    ).getBytes()
+                    String.join("", new RequestLine(RqMethod.PUT, path).toString(), content)
+                        .getBytes()
                 )
             )
         );

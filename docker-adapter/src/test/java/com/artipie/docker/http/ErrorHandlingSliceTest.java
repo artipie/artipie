@@ -11,6 +11,7 @@ import com.artipie.docker.error.InvalidManifestException;
 import com.artipie.docker.error.InvalidRepoNameException;
 import com.artipie.docker.error.InvalidTagNameException;
 import com.artipie.docker.error.UnsupportedError;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.client.auth.AuthClientSlice;
@@ -19,10 +20,7 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.StandardRs;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -32,7 +30,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -65,7 +62,7 @@ class ErrorHandlingSliceTest {
                     rqbody.asBytes(),
                     new IsEqual<>(body)
                 );
-                return StandardRs.OK;
+                return BaseResponse.ok();
             }
         ).response(
             line, Headers.from(header), new Content.From(body)
@@ -78,18 +75,13 @@ class ErrorHandlingSliceTest {
     void shouldPassResponseUnmodified() {
         final Header header = new Header("x-name", "some value");
         final byte[] body = "text".getBytes();
-        final RsStatus status = RsStatus.OK;
         final Response response = new AuthClientSlice(
-            (rsline, rsheaders, rsbody) -> new RsFull(
-                status,
-                Headers.from(header),
-                Flowable.just(ByteBuffer.wrap(body))
-            ),
+            (rsline, rsheaders, rsbody) -> BaseResponse.ok().header(header).body(body),
             Authenticator.ANONYMOUS
         ).response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY);
         MatcherAssert.assertThat(
             response,
-            new ResponseMatcher(status, body, header)
+            new ResponseMatcher(RsStatus.OK, body, header)
         );
     }
 

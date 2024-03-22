@@ -6,7 +6,6 @@ package com.artipie.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
 import com.jcabi.log.Logger;
 
 import java.util.concurrent.CompletionStage;

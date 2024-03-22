@@ -4,14 +4,13 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.http.BaseResponse;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.StandardRs;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,7 @@ class SliceOptionalTest {
             new SliceOptional<>(
                 Optional.empty(),
                 Optional::isPresent,
-                ignored -> new SliceSimple(StandardRs.OK)
+                ignored -> new SliceSimple(BaseResponse.ok())
             ),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
@@ -44,7 +43,7 @@ class SliceOptionalTest {
             new SliceOptional<>(
                 Optional.of("abc"),
                 Optional::isPresent,
-                ignored -> new SliceSimple(StandardRs.NO_CONTENT)
+                ignored -> new SliceSimple(BaseResponse.noContent())
             ),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NO_CONTENT),

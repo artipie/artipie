@@ -10,14 +10,14 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.headers.Header;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.BaseResponse;
 import com.artipie.npm.misc.DateTimeNowStr;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.scheduling.ProxyArtifactEvent;
+import com.google.common.base.Strings;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 
 import java.util.Optional;
@@ -45,22 +45,20 @@ public final class DownloadAssetSlice implements Slice {
     /**
      * Repository name.
      */
-    private final String rname;
+    private final String repoName;
 
     /**
-     * Ctor.
-     *
      * @param npm NPM Proxy facade
      * @param path Asset path helper
      * @param packages Queue with proxy packages and owner
-     * @param rname Repository name
+     * @param repoName Repository name
      */
     public DownloadAssetSlice(final NpmProxy npm, final AssetPath path,
-        final Optional<Queue<ProxyArtifactEvent>> packages, final String rname) {
+        final Optional<Queue<ProxyArtifactEvent>> packages, final String repoName) {
         this.npm = npm;
         this.path = path;
         this.packages = packages;
-        this.rname = rname;
+        this.repoName = repoName;
     }
 
     @Override
@@ -74,7 +72,7 @@ public final class DownloadAssetSlice implements Slice {
                     this.packages.ifPresent(
                         queue -> queue.add(
                             new ProxyArtifactEvent(
-                                new Key.From(tgz), this.rname,
+                                new Key.From(tgz), this.repoName,
                                 new Login(rqheaders).getValue()
                             )
                         )
@@ -82,31 +80,22 @@ public final class DownloadAssetSlice implements Slice {
                     return asset;
                 })
                 .map(
-                    asset -> (Response) new RsFull(
-                        RsStatus.OK,
-                        Headers.from(
-                            new Header(
-                                "Content-Type",
-                                Optional.ofNullable(
-                                    asset.meta().contentType()
-                                ).orElseThrow(
-                                    () -> new IllegalStateException(
-                                        "Failed to get 'Content-Type'"
-                                    )
-                                )
-                            ),
-                            new Header(
-                                "Last-Modified", Optional.ofNullable(
-                                    asset.meta().lastModified()
-                                ).orElse(new DateTimeNowStr().value())
-                            )
-                        ),
-                        new Content.From(
-                            asset.dataPublisher()
-                        )
-                    )
+                    asset -> {
+                        String mime = asset.meta().contentType();
+                        if (Strings.isNullOrEmpty(mime)){
+                            throw new IllegalStateException("Failed to get 'Content-Type'");
+                        }
+                        String lastModified = asset.meta().lastModified();
+                        if(Strings.isNullOrEmpty(lastModified)){
+                            lastModified = new DateTimeNowStr().value();
+                        }
+                        return (Response) BaseResponse.ok()
+                            .header(ContentType.mime(mime))
+                            .header("Last-Modified", lastModified)
+                            .body(asset.dataPublisher());
+                    }
                 )
-                .toSingle(new RsNotFound())
+                .toSingle(BaseResponse.notFound())
                 .to(SingleInterop.get())
         );
     }

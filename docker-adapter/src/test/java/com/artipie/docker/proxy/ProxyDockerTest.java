@@ -7,10 +7,9 @@ package com.artipie.docker.proxy;
 import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rs.BaseResponse;
-import com.artipie.http.rs.StandardRs;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyIterable;
 import org.hamcrest.core.IsEqual;
@@ -30,7 +29,7 @@ final class ProxyDockerTest {
 
     @Test
     void createsProxyRepo() {
-        final ProxyDocker docker = new ProxyDocker((line, headers, body) -> StandardRs.EMPTY);
+        final ProxyDocker docker = new ProxyDocker((line, headers, body) -> BaseResponse.ok());
         MatcherAssert.assertThat(
             docker.repo(new RepoName.Simple("test")),
             new IsInstanceOf(ProxyRepo.class)
@@ -53,7 +52,7 @@ final class ProxyDockerTest {
                     new Content.From(body).asBytesFuture().thenApply(
                         bytes -> {
                             cbody.set(bytes);
-                            return StandardRs.EMPTY;
+                            return BaseResponse.ok();
                         }
                     )
                 );

@@ -4,24 +4,23 @@
  */
 package com.artipie.micrometer;
 
-import com.artipie.asto.Content;
-import com.artipie.http.Headers;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Test for {@link MicrometerSlice}.
@@ -45,13 +44,10 @@ class MicrometerSliceTest {
         MatcherAssert.assertThat(
             new MicrometerSlice(
                 new SliceSimple(
-                    new RsFull(
-                        RsStatus.OK, Headers.EMPTY,
-                        Flowable.fromArray(
-                            ByteBuffer.wrap("Hello ".getBytes(StandardCharsets.UTF_8)),
-                            ByteBuffer.wrap("world!".getBytes(StandardCharsets.UTF_8))
-                        )
-                    )
+                    BaseResponse.ok().body(Flowable.fromArray(
+                        ByteBuffer.wrap("Hello ".getBytes(StandardCharsets.UTF_8)),
+                        ByteBuffer.wrap("world!".getBytes(StandardCharsets.UTF_8))
+                    ))
                 ),
                 this.registry
             ),
@@ -63,10 +59,7 @@ class MicrometerSliceTest {
         MatcherAssert.assertThat(
             new MicrometerSlice(
                 new SliceSimple(
-                    new RsFull(
-                        RsStatus.OK, Headers.EMPTY,
-                        new Content.From("abc".getBytes(StandardCharsets.UTF_8))
-                    )
+                    BaseResponse.ok().body("abc".getBytes(StandardCharsets.UTF_8))
                 ),
                 this.registry
             ),
@@ -77,9 +70,7 @@ class MicrometerSliceTest {
         );
         MatcherAssert.assertThat(
             new MicrometerSlice(
-                new SliceSimple(
-                    new RsFull(RsStatus.CONTINUE, Headers.EMPTY, Content.EMPTY)
-                ),
+                new SliceSimple(BaseResponse.from(RsStatus.CONTINUE)),
                 this.registry
             ),
             new SliceHasResponse(

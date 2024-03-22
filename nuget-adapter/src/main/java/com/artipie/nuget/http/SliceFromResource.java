@@ -10,7 +10,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 
 /**
  * Slice created from {@link Resource}.

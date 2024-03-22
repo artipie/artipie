@@ -11,7 +11,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import org.apache.http.client.utils.URIBuilder;
@@ -108,22 +108,25 @@ final class JettyClientSlice implements Slice {
         request.send(
                 result -> {
                     if (result.getFailure() == null) {
-                        Response response = new RsFull(
-                                new RsStatus.ByCode(result.getResponse().getStatus()).find(),
-                            from(result.getResponse().getHeaders()),
-                                Flowable.fromIterable(buffers).map(
-                                        chunk -> {
-                                            final ByteBuffer item = chunk.getByteBuffer();
-                                            chunk.release();
-                                            return item;
-                                        }
-                                )
-                        );
+                        RsStatus status = new RsStatus
+                            .ByCode(result.getResponse().getStatus())
+                            .find();
+                        Flowable<ByteBuffer> content = Flowable.fromIterable(buffers)
+                            .map(chunk -> {
+                                    final ByteBuffer item = chunk.getByteBuffer();
+                                    chunk.release();
+                                    return item;
+                                }
+                            );
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("Got {}\n{}",
                                     result.getResponse(), result.getResponse().getHeaders().asString());
                         }
-                        res.complete(response);
+                        res.complete(
+                            BaseResponse.from(status)
+                                .headers(toHeaders(result.getResponse().getHeaders()))
+                                .body(content)
+                        );
                     } else {
                         LOGGER.error("Got failure", result.getFailure());
                         res.completeExceptionally(result.getFailure());
@@ -133,7 +136,7 @@ final class JettyClientSlice implements Slice {
         return new AsyncResponse(res);
     }
 
-    private Headers from(HttpFields fields) {
+    private Headers toHeaders(HttpFields fields) {
         return new Headers(
             fields.stream()
                 .map(field -> new Header(field.getName(), field.getValue()))

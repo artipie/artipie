@@ -5,6 +5,7 @@
 package com.artipie.http.rs;
 
 import com.artipie.asto.Content;
+import com.artipie.http.BaseResponse;
 import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;

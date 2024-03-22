@@ -6,7 +6,6 @@ package com.artipie.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
 import com.artipie.misc.ArtipieProperties;
 
 import javax.json.Json;

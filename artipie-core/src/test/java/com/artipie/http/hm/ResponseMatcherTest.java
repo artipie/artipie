@@ -7,7 +7,7 @@ package com.artipie.http.hm;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;

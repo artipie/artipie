@@ -5,12 +5,11 @@
 package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.StandardRs;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +24,7 @@ class SliceWithHeadersTest {
         final String value = "text/plain";
         MatcherAssert.assertThat(
             new SliceWithHeaders(
-                new SliceSimple(StandardRs.EMPTY), Headers.from(header, value)
+                new SliceSimple(BaseResponse.ok()), Headers.from(header, value)
             ).response(RequestLine.from("GET /some/text HTTP/1.1"), Headers.EMPTY, Content.EMPTY),
             new RsHasHeaders(new Header(header, value))
         );
@@ -40,7 +39,7 @@ class SliceWithHeadersTest {
         MatcherAssert.assertThat(
             new SliceWithHeaders(
                 new SliceSimple(
-                    new RsWithHeaders(StandardRs.EMPTY, hone, vone)
+                    BaseResponse.ok().header(hone, vone)
                 ), Headers.from(htwo, vtwo)
             ).response(RequestLine.from("GET /any/text HTTP/1.1"), Headers.EMPTY, Content.EMPTY),
             new RsHasHeaders(

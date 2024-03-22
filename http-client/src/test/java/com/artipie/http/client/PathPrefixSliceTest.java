@@ -5,10 +5,10 @@
 package com.artipie.http.client;
 
 import com.artipie.asto.Content;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.StandardRs;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -63,7 +63,7 @@ final class PathPrefixSliceTest {
                     new Content.From(rqbody).asBytesFuture().toCompletableFuture().join(),
                     new IsEqual<>(body)
                 );
-                return StandardRs.OK;
+                return BaseResponse.ok();
             },
             prefix
         ).response(

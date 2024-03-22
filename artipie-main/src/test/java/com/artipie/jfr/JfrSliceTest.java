@@ -13,13 +13,9 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
-
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingStream;
 import org.awaitility.Awaitility;
@@ -27,6 +23,10 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Tests to check JfrSlice.
@@ -49,11 +49,7 @@ public class JfrSliceTest {
             MatcherAssert.assertThat(
                 new JfrSlice(
                     new TestSlice(
-                        new RsFull(
-                            RsStatus.OK,
-                            Headers.EMPTY,
-                            JfrSliceTest.content(responseSize, responseChunks)
-                        )
+                        BaseResponse.ok().body(JfrSliceTest.content(responseSize, responseChunks))
                     )
                 ),
                 new SliceHasResponse(

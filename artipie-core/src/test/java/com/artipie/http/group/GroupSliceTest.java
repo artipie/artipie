@@ -4,8 +4,6 @@
  */
 package com.artipie.http.group;
 
-import com.artipie.asto.Content;
-import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncSlice;
 import com.artipie.http.hm.RsHasBody;
@@ -13,7 +11,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
@@ -88,11 +86,9 @@ final class GroupSliceTest {
         );
     }
 
-    private static Slice slice(final RsStatus status, final String body, final Duration delay) {
+    private static Slice slice(RsStatus status, String body, Duration delay) {
         return new SliceWithDelay(
-            new SliceSimple(
-                new RsFull(status, Headers.EMPTY, new Content.From(body.getBytes(StandardCharsets.UTF_8)))
-            ), delay
+            new SliceSimple(BaseResponse.from(status).textBody(body)), delay
         );
     }
 

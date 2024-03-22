@@ -9,7 +9,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.misc.RandomFreePort;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.slice.SliceSimple;
 import jakarta.servlet.GenericServlet;
 import jakarta.servlet.ServletRequest;

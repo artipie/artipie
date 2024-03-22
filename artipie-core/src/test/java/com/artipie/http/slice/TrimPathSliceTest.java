@@ -5,6 +5,7 @@
 package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.AssertSlice;
@@ -12,7 +13,6 @@ import com.artipie.http.hm.RqHasHeader;
 import com.artipie.http.hm.RqLineHasUri;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.StandardRs;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -45,7 +45,7 @@ final class TrimPathSliceTest {
 
     @Test
     void failIfUriPathDoesntMatch() throws Exception {
-        new TrimPathSlice((line, headers, body) -> StandardRs.EMPTY, "none").response(
+        new TrimPathSlice((line, headers, body) -> BaseResponse.ok(), "none").response(
             requestLine("http://www.w3.org"),
             Headers.EMPTY,
             Content.EMPTY

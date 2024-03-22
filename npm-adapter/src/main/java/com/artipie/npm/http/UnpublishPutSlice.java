@@ -8,12 +8,12 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.misc.DateTimeNowStr;
 import com.artipie.npm.misc.DescSortedVersions;
@@ -96,9 +96,9 @@ final class UnpublishPutSlice implements Slice {
                                         )
                                     )
                                 )
-                            ).thenApply(nothing -> StandardRs.OK);
+                            ).thenApply(nothing -> BaseResponse.ok());
                     } else {
-                        res = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
+                        res = CompletableFuture.completedFuture(BaseResponse.notFound());
                     }
                     return res;
                 }

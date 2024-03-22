@@ -9,10 +9,10 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.BaseResponse;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.json.ClientContent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
@@ -22,7 +22,6 @@ import java.util.stream.StreamSupport;
 
 /**
  * HTTP slice for download package requests.
- * @since 0.1
  */
 public final class DownloadPackageSlice implements Slice {
     /**
@@ -45,23 +44,15 @@ public final class DownloadPackageSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-        final Headers headers,
-        final Content body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         return new AsyncResponse(
             this.npm.getPackage(this.path.value(line.uri().getPath()))
                 .map(
-                    pkg -> (Response) new RsFull(
-                        RsStatus.OK,
-                        Headers.from(
-                            new Header("Content-Type", "application/json"),
-                            new Header("Last-Modified", pkg.meta().lastModified())
-                        ),
-                        new Content.From(
-                            this.clientFormat(pkg.content(), headers).getBytes()
-                        )
-                    )
-                ).toSingle(new RsNotFound())
+                    pkg -> (Response) BaseResponse.ok()
+                        .header(ContentType.json())
+                        .header("Last-Modified", pkg.meta().lastModified())
+                        .body(this.clientFormat(pkg.content(), headers).getBytes())
+                ).toSingle(BaseResponse.notFound())
                 .to(SingleInterop.get())
         );
     }

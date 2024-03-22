@@ -69,11 +69,11 @@ public final class CachedResponse implements Response {
         private volatile byte[] body;
 
         @Override
-        public CompletionStage<Void> accept(final RsStatus stts, final Headers hdrs,
-            final Content body) {
-            this.status = stts;
-            this.headers = hdrs;
-            return new Content.From(body).asBytesFuture()
+        public CompletionStage<Void> accept(RsStatus status, Headers headers, Content body) {
+            this.status = status;
+            this.headers = headers;
+            return new Content.From(body)
+                .asBytesFuture()
                 .thenAccept(bytes -> this.body = bytes);
         }
 

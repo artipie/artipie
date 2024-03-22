@@ -5,7 +5,7 @@
 package com.artipie.composer.http.proxy;
 
 import com.artipie.http.Slice;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.slice.SliceSimple;
 
 /**

@@ -11,12 +11,13 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import com.artipie.docker.proxy.ProxyDocker;
-import com.artipie.http.rs.StandardRs;
-import java.util.Optional;
+import com.artipie.http.BaseResponse;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 /**
  * Tests for {@link ReadWriteDocker}.
@@ -28,7 +29,7 @@ final class ReadWriteDockerTest {
     @Test
     void createsReadWriteRepo() {
         final ReadWriteDocker docker = new ReadWriteDocker(
-            new ProxyDocker((line, headers, body) -> StandardRs.EMPTY),
+            new ProxyDocker((line, headers, body) -> BaseResponse.ok()),
             new AstoDocker(new InMemoryStorage())
         );
         MatcherAssert.assertThat(

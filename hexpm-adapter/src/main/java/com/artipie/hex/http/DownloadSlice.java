@@ -8,14 +8,13 @@ package com.artipie.hex.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
-import com.artipie.http.rs.StandardRs;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -81,7 +80,7 @@ public final class DownloadSlice implements Slice {
                                 .body(value)
                         );
                     } else {
-                        res = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
+                        res = CompletableFuture.completedFuture(BaseResponse.notFound());
                     }
                     return res;
                 }

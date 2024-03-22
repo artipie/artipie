@@ -8,12 +8,13 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.proxy.ProxyRepo;
-import com.artipie.http.rs.StandardRs;
-import java.util.Optional;
+import com.artipie.http.BaseResponse;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 /**
  * Tests for {@link CacheRepo}.
@@ -32,7 +33,7 @@ final class CacheRepoTest {
         this.repo = new CacheRepo(
             new RepoName.Simple("test"),
             new ProxyRepo(
-                (line, headers, body) -> StandardRs.EMPTY,
+                (line, headers, body) -> BaseResponse.ok(),
                 new RepoName.Simple("test-origin")
             ),
             new AstoDocker(new InMemoryStorage())

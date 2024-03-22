@@ -5,7 +5,7 @@
 package com.artipie.docker.proxy;
 
 import com.artipie.docker.RepoName;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.BaseResponse;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ final class ProxyRepoTest {
     @Test
     void createsProxyLayers() {
         final ProxyRepo docker = new ProxyRepo(
-            (line, headers, body) -> StandardRs.EMPTY,
+            (line, headers, body) -> BaseResponse.ok(),
             new RepoName.Simple("test")
         );
         MatcherAssert.assertThat(
@@ -32,7 +32,7 @@ final class ProxyRepoTest {
     @Test
     void createsProxyManifests() {
         final ProxyRepo docker = new ProxyRepo(
-            (line, headers, body) -> StandardRs.EMPTY,
+            (line, headers, body) -> BaseResponse.ok(),
             new RepoName.Simple("my-repo")
         );
         MatcherAssert.assertThat(

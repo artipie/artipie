@@ -11,7 +11,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.cache.FromStorageCache;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.Headers;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
@@ -19,8 +19,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.BaseResponse;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.scheduling.ProxyArtifactEvent;
@@ -65,10 +64,7 @@ class ProxySliceTest {
             "Returns body from remote",
             new ProxySlice(
                 new SliceSimple(
-                    new RsFull(
-                        RsStatus.OK, Headers.from("content-type", "smth"),
-                        new Content.From(body)
-                    )
+                    BaseResponse.ok().header(ContentType.mime("smth")).body(body)
                 ),
                 new FromStorageCache(this.storage), Optional.of(this.events), "my-pypi-proxy"
             ),
@@ -76,7 +72,7 @@ class ProxySliceTest {
                 Matchers.allOf(
                     new RsHasBody(body),
                     new RsHasHeaders(
-                        new Header("content-type", "smth"),
+                        ContentType.mime("smth"),
                         new Header("Content-Length", "9")
                     )
                 ),
@@ -111,7 +107,7 @@ class ProxySliceTest {
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK), new RsHasBody(body),
                     new RsHasHeaders(
-                        new Header("content-type", header),
+                        ContentType.mime(header),
                         new Header("Content-Length", String.valueOf(body.length))
                     )
                 ),
@@ -160,10 +156,7 @@ class ProxySliceTest {
             "Returns body from remote",
             new ProxySlice(
                 new SliceSimple(
-                    new RsFull(
-                        RsStatus.OK, Headers.from("content-type", "smth"),
-                        new Content.From(body)
-                    )
+                    BaseResponse.ok().header(ContentType.mime("smth")).body(body)
                 ),
                 new FromStorageCache(this.storage), Optional.empty(), "my-pypi-proxy"
             ),
@@ -171,7 +164,7 @@ class ProxySliceTest {
                 Matchers.allOf(
                     new RsHasBody(body),
                     new RsHasHeaders(
-                        new Header("content-type", "smth"),
+                        ContentType.mime("smth"),
                         new Header("Content-Length", String.valueOf(body.length))
                     )
                 ),

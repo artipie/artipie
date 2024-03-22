@@ -14,7 +14,7 @@ import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;

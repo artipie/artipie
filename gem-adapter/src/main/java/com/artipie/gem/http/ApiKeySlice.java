@@ -15,7 +15,7 @@ import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;

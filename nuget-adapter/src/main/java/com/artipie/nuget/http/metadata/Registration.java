@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.nuget.PackageKeys;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.Versions;

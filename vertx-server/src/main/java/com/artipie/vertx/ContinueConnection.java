@@ -44,7 +44,7 @@ final class ContinueConnection implements Connection {
 
     @Override
     public CompletionStage<Void> accept(final RsStatus status, final Headers headers,
-        final Content body) {
+                                        final Content body) {
         final CompletionStage<Void> res;
         if (status == RsStatus.CONTINUE) {
             this.response.writeContinue();

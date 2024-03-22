@@ -95,7 +95,7 @@ public final class ArtipieHttpException extends ArtipieException {
      * @param cause Of the error
      */
     public ArtipieHttpException(final RsStatus status, final String message,
-        final Throwable cause) {
+                                final Throwable cause) {
         super(message, cause);
         this.code = status;
     }

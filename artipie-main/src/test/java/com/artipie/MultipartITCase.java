@@ -7,6 +7,7 @@ package com.artipie;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.fs.FileStorage;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -14,8 +15,6 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
-import com.artipie.http.rs.BaseResponse;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.vertx.VertxSliceServer;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
@@ -92,7 +91,7 @@ final class MultipartITCase {
                         )
                     ).flatMap(part -> part)
                 ).asStringFuture().thenAccept(result::set).thenApply(
-                    none -> StandardRs.OK
+                    none -> BaseResponse.ok()
                 )
             )
         );
@@ -140,7 +139,7 @@ final class MultipartITCase {
                         )
                     ).flatMap(part -> part)
                 ).asStringFuture().thenAccept(result::set).thenApply(
-                    none -> StandardRs.OK
+                    none -> BaseResponse.ok()
                 )
             )
         );
@@ -193,7 +192,7 @@ final class MultipartITCase {
                             new Content.From(part)
                         ).thenApply(none -> 0)
                     )
-                ).toList().to(SingleInterop.get()).thenApply(none -> StandardRs.OK)
+                ).toList().to(SingleInterop.get()).thenApply(none -> BaseResponse.ok())
             )
         );
         final byte[] buf = testData();

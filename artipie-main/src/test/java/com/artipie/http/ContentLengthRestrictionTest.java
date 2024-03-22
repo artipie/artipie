@@ -7,7 +7,6 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;

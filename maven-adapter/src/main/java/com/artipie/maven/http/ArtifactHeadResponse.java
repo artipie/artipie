@@ -6,10 +6,9 @@ package com.artipie.maven.http;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.maven.asto.RepositoryChecksums;
 
 /**
@@ -32,39 +31,20 @@ public final class ArtifactHeadResponse extends Response.Wrap {
             new AsyncResponse(
                 storage.exists(location).thenApply(
                     exists -> {
-                        final Response rsp;
                         if (exists) {
-                            rsp = new OkResponse(storage, location);
-                        } else {
-                            rsp = StandardRs.NOT_FOUND;
+                            return new AsyncResponse(
+                                new RepositoryChecksums(storage)
+                                    .checksums(location)
+                                    .thenApply(
+                                        checksums -> BaseResponse.ok()
+                                            .headers(ArtifactHeaders.from(location, checksums))
+                                    )
+                            );
                         }
-                        return rsp;
+                        return BaseResponse.notFound();
                     }
                 )
             )
         );
-    }
-
-    /**
-     * Ok {@code 200} response for {@code HEAD} request.
-     */
-    private static final class OkResponse extends Response.Wrap {
-
-        /**
-         * New response.
-         * @param storage Repository storage
-         * @param location Artifact location
-         */
-        OkResponse(final Storage storage, final Key location) {
-            super(
-                new AsyncResponse(
-                    new RepositoryChecksums(storage).checksums(location).thenApply(
-                        checksums -> new RsWithHeaders(
-                            StandardRs.OK, ArtifactHeaders.from(location, checksums)
-                        )
-                    )
-                )
-            );
-        }
     }
 }

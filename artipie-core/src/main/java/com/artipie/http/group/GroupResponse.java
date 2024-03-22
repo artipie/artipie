@@ -6,7 +6,7 @@ package com.artipie.http.group;
 
 import com.artipie.http.Connection;
 import com.artipie.http.Response;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

@@ -4,8 +4,9 @@
  */
 package com.artipie.http.group;
 
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Connection;
-import com.artipie.http.rs.StandardRs;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -84,6 +85,6 @@ final class GroupResults {
                 ).thenRun(() -> this.future.complete(null));
             }
         }
-        return StandardRs.NOT_FOUND.send(con).thenRun(() -> this.future.complete(null));
+        return BaseResponse.notFound().send(con).thenRun(() -> this.future.complete(null));
     }
 }

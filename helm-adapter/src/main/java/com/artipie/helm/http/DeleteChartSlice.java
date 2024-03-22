@@ -10,13 +10,12 @@ import com.artipie.asto.Storage;
 import com.artipie.helm.ChartYaml;
 import com.artipie.helm.TgzArchive;
 import com.artipie.helm.metadata.IndexYaml;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Single;
 
@@ -138,9 +137,9 @@ final class DeleteChartSlice implements Slice {
                                         )
                                     )
                                 );
-                                return StandardRs.OK;
+                                return BaseResponse.ok();
                             }
-                            return StandardRs.NOT_FOUND;
+                            return BaseResponse.notFound();
                         }
                     )
                 )

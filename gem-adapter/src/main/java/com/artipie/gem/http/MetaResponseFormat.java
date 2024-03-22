@@ -9,7 +9,7 @@ import com.artipie.gem.JsonMetaFormat;
 import com.artipie.gem.YamlMetaFormat;
 import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Response;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 
 import javax.json.Json;

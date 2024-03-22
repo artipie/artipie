@@ -5,11 +5,11 @@
 package com.artipie.http.hm;
 
 import com.artipie.asto.Content;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.StandardRs;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -88,6 +88,6 @@ public final class AssertSlice implements Slice {
         MatcherAssert.assertThat(
             "Wrong body", publ, this.body
         );
-        return StandardRs.EMPTY;
+        return BaseResponse.ok();
     }
 }

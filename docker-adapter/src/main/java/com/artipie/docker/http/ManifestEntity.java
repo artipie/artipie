@@ -26,7 +26,7 @@ import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Location;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.BaseResponse;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
