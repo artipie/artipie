@@ -16,31 +16,20 @@ import com.artipie.http.rs.RsWithHeaders;
  */
 public final class SliceWithHeaders implements Slice {
 
-    /**
-     * Origin slice.
-     */
     private final Slice origin;
-
-    /**
-     * Headers.
-     */
     private final Headers headers;
 
     /**
-     * Ctor.
      * @param origin Origin slice
      * @param headers Headers
      */
-    public SliceWithHeaders(final Slice origin, final Headers headers) {
+    public SliceWithHeaders(Slice origin, Headers headers) {
         this.origin = origin;
         this.headers = headers;
     }
 
     @Override
-    public Response response(RequestLine line, Headers hdrs, Content body) {
-        return new RsWithHeaders(
-            this.origin.response(line, hdrs, body),
-            this.headers
-        );
+    public Response response(RequestLine line, Headers headers, Content body) {
+        return new RsWithHeaders(origin.response(line, headers, body), this.headers);
     }
 }

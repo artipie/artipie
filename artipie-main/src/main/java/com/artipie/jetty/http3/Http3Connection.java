@@ -45,9 +45,8 @@ public final class Http3Connection implements Connection {
     public CompletionStage<Void> accept(
         final RsStatus status, final Headers headers, final Content body
     ) {
-        final int stat = Integer.parseInt(status.code());
         final MetaData.Response response = new MetaData.Response(
-            stat, HttpStatus.getMessage(stat),
+            status.code(), HttpStatus.getMessage(status.code()),
             HttpVersion.HTTP_3,
             HttpFields.from(
                 StreamSupport.stream(headers.spliterator(), false)

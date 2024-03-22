@@ -140,7 +140,7 @@ public final class DebianGpgSliceITCase {
         MatcherAssert.assertThat(
             "Response for upload is OK",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         con.disconnect();
         MatcherAssert.assertThat(

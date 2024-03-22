@@ -107,7 +107,7 @@ final class HelmDeleteIT {
         MatcherAssert.assertThat(
             "Response status is not 200",
             this.conn.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         MatcherAssert.assertThat(
             "Archive was not deleted",
