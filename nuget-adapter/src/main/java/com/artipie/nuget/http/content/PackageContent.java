@@ -14,7 +14,6 @@ import com.artipie.nuget.PackageIdentity;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.http.Resource;
 import com.artipie.nuget.http.Route;
-import com.artipie.nuget.http.RsWithBodyNoHeaders;
 import com.artipie.nuget.http.metadata.ContentLocation;
 
 import java.net.MalformedURLException;
@@ -111,7 +110,7 @@ public final class PackageContent implements Route, ContentLocation {
                 key -> new AsyncResponse(
                     this.repository.content(key).thenApply(
                         existing -> existing.<Response>map(
-                            data -> new RsWithBodyNoHeaders(BaseResponse.ok(), data)
+                            data -> BaseResponse.ok().body(data)
                         ).orElse(BaseResponse.notFound())
                     )
                 )

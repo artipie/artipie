@@ -39,9 +39,7 @@ public final class RsFull extends Response.Wrap {
         super(
             new RsWithStatus(
                 new RsWithHeaders(
-                    new RsWithBody(
-                        body
-                    ), headers
+                    BaseResponse.ok().body(body), headers
                 ), status
             )
         );
