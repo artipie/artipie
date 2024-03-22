@@ -4,8 +4,9 @@
  */
 package com.artipie.http.rs;
 
+import org.apache.http.HttpStatus;
+
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 
 /**
  * HTTP response status code.
@@ -15,116 +16,116 @@ public enum RsStatus {
     /**
      * Status <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/100">Continue</a>.
      */
-    CONTINUE("100"),
+    CONTINUE(HttpStatus.SC_CONTINUE),
     /**
      * OK.
      */
-    OK("200"),
+    OK(HttpStatus.SC_OK),
     /**
      * Created.
      */
-    CREATED("201"),
+    CREATED(HttpStatus.SC_CREATED),
     /**
      * Accepted.
      */
-    ACCEPTED("202"),
+    ACCEPTED(HttpStatus.SC_ACCEPTED),
     /**
      * No Content.
      */
-    NO_CONTENT("204"),
+    NO_CONTENT(HttpStatus.SC_NO_CONTENT),
     /**
      * Moved Permanently.
      */
-    MOVED_PERMANENTLY("301"),
+    MOVED_PERMANENTLY(HttpStatus.SC_MOVED_PERMANENTLY),
     /**
      * Found.
      */
-    FOUND("302"),
+    MOVED_TEMPORARILY(HttpStatus.SC_MOVED_TEMPORARILY),
     /**
      * Not Modified.
      */
-    NOT_MODIFIED("304"),
+    NOT_MODIFIED(HttpStatus.SC_NOT_MODIFIED),
     /**
      * Temporary Redirect.
      */
-    TEMPORARY_REDIRECT("307"),
+    TEMPORARY_REDIRECT(HttpStatus.SC_TEMPORARY_REDIRECT),
     /**
      * Bad Request.
      */
-    BAD_REQUEST("400"),
+    BAD_REQUEST(HttpStatus.SC_BAD_REQUEST),
     /**
      * Unauthorized.
      */
-    UNAUTHORIZED("401"),
+    UNAUTHORIZED(HttpStatus.SC_UNAUTHORIZED),
     /**
      * Forbidden.
      */
-    FORBIDDEN("403"),
+    FORBIDDEN(HttpStatus.SC_FORBIDDEN),
     /**
      * Not Found.
      */
-    NOT_FOUND("404"),
+    NOT_FOUND(HttpStatus.SC_NOT_FOUND),
     /**
      * Method Not Allowed.
      */
     @SuppressWarnings("PMD.LongVariable")
-    METHOD_NOT_ALLOWED("405"),
+    METHOD_NOT_ALLOWED(HttpStatus.SC_METHOD_NOT_ALLOWED),
     /**
      * Request Time-out.
      */
-    REQUEST_TIMEOUT("408"),
+    REQUEST_TIMEOUT(HttpStatus.SC_REQUEST_TIMEOUT),
     /**
      * Conflict.
      */
-    CONFLICT("409"),
+    CONFLICT(HttpStatus.SC_CONFLICT),
     /**
      * Length Required.
      */
-    LENGTH_REQUIRED("411"),
+    LENGTH_REQUIRED(HttpStatus.SC_LENGTH_REQUIRED),
     /**
      * Payload Too Large.
      */
-    PAYLOAD_TOO_LARGE("413"),
+    REQUEST_TOO_LONG(HttpStatus.SC_REQUEST_TOO_LONG),
     /**
      * Requested Range Not Satisfiable.
      */
-    BAD_RANGE("416"),
+    REQUESTED_RANGE_NOT_SATISFIABLE(HttpStatus.SC_REQUESTED_RANGE_NOT_SATISFIABLE),
     /**
      * Status <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/417">
      * Expectation Failed</a>.
      */
-    EXPECTATION_FAILED("417"),
-    /**
-     * Misdirected Request.
-     */
-    MISDIRECTED_REQUEST("421"),
+    EXPECTATION_FAILED(HttpStatus.SC_EXPECTATION_FAILED),
     /**
      * Too Many Requests.
      */
-    TOO_MANY_REQUESTS("429"),
+    TOO_MANY_REQUESTS(HttpStatus.SC_TOO_MANY_REQUESTS),
     /**
      * Internal Server Error.
      */
-    INTERNAL_ERROR("500"),
+    INTERNAL_ERROR(HttpStatus.SC_INTERNAL_SERVER_ERROR),
     /**
      * Not Implemented.
      */
-    NOT_IMPLEMENTED("501"),
+    NOT_IMPLEMENTED(HttpStatus.SC_NOT_IMPLEMENTED),
     /**
      * Service Unavailable.
      */
-    UNAVAILABLE("503");
+    SERVICE_UNAVAILABLE(HttpStatus.SC_SERVICE_UNAVAILABLE);
 
     /**
      * Code value.
      */
-    private final String string;
+    private final int code;
 
     /**
-     * @param string Code value.
+     * @param code Code value.
      */
-    RsStatus(final String string) {
-        this.string = string;
+    RsStatus(int code) {
+        this.code = code;
+    }
+
+    public int code(){
+        return code;
     }
 
     /**
@@ -132,8 +133,8 @@ public enum RsStatus {
      *
      * @return Code as 3-digit string.
      */
-    public String code() {
-        return this.string;
+    public String asString() {
+        return String.valueOf(this.code);
     }
 
     /**
@@ -190,48 +191,12 @@ public enum RsStatus {
      * @return True if the first character matches the symbol, otherwise - false.
      */
     private boolean firstSymbol(final char symbol) {
-        return this.string.charAt(0) == symbol;
+        return asString().charAt(0) == symbol;
     }
 
-    /**
-     * Searches {@link RsStatus} instance by response code.
-     */
-    public static class ByCode {
-
-        /**
-         * Status code.
-         */
-        private final String code;
-
-        /**
-         * @param code Code
-         */
-        public ByCode(@Nullable final String code) {
-            this.code = code;
-        }
-
-        /**
-         * Ctor.
-         * @param code Code
-         */
-        public ByCode(final int code) {
-            this(String.valueOf(code));
-        }
-
-        /**
-         * Searches RsStatus by code.
-         * @return RsStatus instance if found
-         * @throws IllegalArgumentException If RsStatus is not found
-         */
-        public RsStatus find() {
-            return Stream.of(RsStatus.values())
-                .filter(status -> status.code().equals(this.code))
-                .findAny()
-                .orElseThrow(
-                    () -> new IllegalArgumentException(
-                        String.format("Unknown status code: `%s`", this.code)
-                    )
-                );
-        }
+    public static RsStatus byCode(int code) {
+        return Stream.of(RsStatus.values())
+            .filter(s -> s.code == code).findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Unsupported status code: " + code));
     }
 }

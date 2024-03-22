@@ -113,7 +113,7 @@ public final class ArtipieHttpException extends ArtipieException {
      * @param status HTTP status code for error
      * @return Meaning string for this code
      */
-    private static String meaning(final RsStatus status) {
-        return ArtipieHttpException.MEANINGS.getOrDefault(status.code(), "Unknown");
+    private static String meaning(RsStatus status) {
+        return ArtipieHttpException.MEANINGS.getOrDefault(status.asString(), "Unknown");
     }
 }

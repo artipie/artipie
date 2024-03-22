@@ -37,10 +37,8 @@ final class ServletConnection implements Connection {
     }
 
     @Override
-    @SuppressWarnings("PMD.OnlyOneReturn")
-    public CompletionStage<Void> accept(final RsStatus status,
-        final Headers headers, final Content body) {
-        this.rsp.setStatus(Integer.parseInt(status.code()));
+    public CompletionStage<Void> accept(RsStatus status, Headers headers, Content body) {
+        this.rsp.setStatus(status.code());
         headers.forEach(kv -> this.rsp.setHeader(kv.getKey(), kv.getValue()));
         try {
             return new ReactiveOutputStream(this.rsp.getOutputStream())

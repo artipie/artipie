@@ -55,7 +55,7 @@ final class HealthSliceTest {
             new HealthSlice(new TestSettings(new FakeStorage())),
             new SliceHasResponse(
                 Matchers.allOf(
-                    new RsHasStatus(RsStatus.UNAVAILABLE),
+                    new RsHasStatus(RsStatus.SERVICE_UNAVAILABLE),
                     new RsHasBody("[{\"storage\":\"failure\"}]", StandardCharsets.UTF_8)
                 ),
                 HealthSliceTest.REQ_LINE

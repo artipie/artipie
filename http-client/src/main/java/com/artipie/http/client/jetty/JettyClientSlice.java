@@ -4,6 +4,7 @@
  */
 package com.artipie.http.client.jetty;
 
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -11,7 +12,6 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import org.apache.http.client.utils.URIBuilder;
@@ -108,9 +108,7 @@ final class JettyClientSlice implements Slice {
         request.send(
                 result -> {
                     if (result.getFailure() == null) {
-                        RsStatus status = new RsStatus
-                            .ByCode(result.getResponse().getStatus())
-                            .find();
+                        RsStatus status = RsStatus.byCode(result.getResponse().getStatus());
                         Flowable<ByteBuffer> content = Flowable.fromIterable(buffers)
                             .map(chunk -> {
                                     final ByteBuffer item = chunk.getByteBuffer();
@@ -224,7 +222,7 @@ final class JettyClientSlice implements Slice {
                         return;
                     } else {
                         // A transient failure such as a read timeout.
-                        if (new RsStatus.ByCode(this.response.getStatus()).find().success()) {
+                        if (RsStatus.byCode(this.response.getStatus()).success()) {
                             // Try to read again.
                             continue;
                         } else {

@@ -52,7 +52,7 @@ public class BaseResponse implements com.artipie.http.Response {
     }
 
     public static BaseResponse unavailable() {
-        return new BaseResponse(RsStatus.UNAVAILABLE);
+        return new BaseResponse(RsStatus.SERVICE_UNAVAILABLE);
     }
 
     public static BaseResponse unauthorized() {
@@ -77,7 +77,7 @@ public class BaseResponse implements com.artipie.http.Response {
     }
 
     public static BaseResponse payloadTooLarge() {
-        return new BaseResponse(RsStatus.PAYLOAD_TOO_LARGE);
+        return new BaseResponse(RsStatus.REQUEST_TOO_LONG);
     }
 
     public static BaseResponse internalError() {

@@ -38,12 +38,12 @@ class GzipSliceTest {
         MatcherAssert.assertThat(
             new GzipSlice(
                 new SliceSimple(
-                    BaseResponse.from(RsStatus.FOUND).header(hdr).body(data)
+                    BaseResponse.from(RsStatus.MOVED_TEMPORARILY).header(hdr).body(data)
                 )
             ),
             new SliceHasResponse(
                 Matchers.allOf(
-                    new RsHasStatus(RsStatus.FOUND),
+                    new RsHasStatus(RsStatus.MOVED_TEMPORARILY),
                     new RsHasHeaders(
                         Headers.from(
                             new Header("Content-encoding", "gzip"),

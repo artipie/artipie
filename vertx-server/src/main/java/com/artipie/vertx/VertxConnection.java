@@ -11,8 +11,8 @@ import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.core.http.HttpServerResponse;
+
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -36,17 +36,12 @@ final class VertxConnection implements Connection {
     }
 
     @Override
-    public CompletionStage<Void> accept(
-        final RsStatus status,
-        final Headers headers,
-        final Content body
-    ) {
-        final int code = Integer.parseInt(status.code());
-        this.rsp.setStatusCode(code);
-        for (final Map.Entry<String, String> header : headers) {
-            this.rsp.putHeader(header.getKey(), header.getValue());
-        }
-        final CompletableFuture<HttpServerResponse> promise = new CompletableFuture<>();
+    public CompletionStage<Void> accept(RsStatus status, Headers headers, Content body) {
+        this.rsp.setStatusCode(status.code());
+        headers.stream()
+            .forEach(h -> this.rsp.putHeader(h.getKey(), h.getValue()));
+
+        final CompletableFuture<Void> promise = new CompletableFuture<>();
         final Flowable<Buffer> vpb = Flowable.fromPublisher(body)
             .map(VertxConnection::mapBuffer)
             .doOnError(promise::completeExceptionally);
@@ -55,15 +50,15 @@ final class VertxConnection implements Connection {
             vpb.doOnComplete(
                 () -> {
                     this.rsp.end();
-                    promise.complete(this.rsp);
+                    promise.complete(null);
                 }
             ).forEach(this.rsp::write);
         } else {
             this.rsp.setChunked(true);
-            vpb.doOnComplete(() -> promise.complete(this.rsp))
+            vpb.doOnComplete(() -> promise.complete(null))
                 .subscribe(this.rsp.toSubscriber());
         }
-        return promise.thenCompose(ignored -> CompletableFuture.allOf());
+        return promise;
     }
 
     /**

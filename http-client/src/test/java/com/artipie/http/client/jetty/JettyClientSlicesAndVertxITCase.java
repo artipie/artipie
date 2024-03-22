@@ -5,6 +5,7 @@
 package com.artipie.http.client.jetty;
 
 import com.artipie.asto.Content;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -14,7 +15,6 @@ import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.vertx.VertxSliceServer;
@@ -75,7 +75,7 @@ final class JettyClientSlicesAndVertxITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         MatcherAssert.assertThat(
             "Response body is some html",

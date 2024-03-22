@@ -18,7 +18,7 @@ class RsStatusByCodeTest {
     @Test
     void findsStatus() {
         MatcherAssert.assertThat(
-            new RsStatus.ByCode("200").find(),
+            RsStatus.byCode(200),
             new IsEqual<>(RsStatus.OK)
         );
     }
@@ -27,7 +27,7 @@ class RsStatusByCodeTest {
     void throwsExceptionIfNotFound() {
         Assertions.assertThrows(
             IllegalArgumentException.class,
-            () -> new RsStatus.ByCode("000").find()
+            () -> RsStatus.byCode(555)
         );
     }
 

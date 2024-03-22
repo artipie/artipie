@@ -4,78 +4,50 @@
  */
 package com.artipie.http.rs;
 
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 /**
  * Test for {@link RsStatus}.
- *
- * @since 0.16
  */
 final class RsStatusTest {
     @Test
     void information() {
-        final RsStatus status = RsStatus.CONTINUE;
-        MatcherAssert.assertThat(
-            status.information(),
-            new IsEqual<>(true)
-        );
+        Assertions.assertTrue(RsStatus.CONTINUE.information());
     }
 
     @Test
     void success() {
-        final RsStatus status = RsStatus.ACCEPTED;
-        MatcherAssert.assertThat(
-            status.success(),
-            new IsEqual<>(true)
+        Assertions.assertTrue(RsStatus.ACCEPTED.success()
         );
     }
 
     @Test
     void redirection() {
-        final RsStatus status = RsStatus.FOUND;
-        MatcherAssert.assertThat(
-            status.redirection(),
-            new IsEqual<>(true)
-        );
+        Assertions.assertTrue(RsStatus.MOVED_TEMPORARILY.redirection());
     }
 
     @Test
     void clientError() {
-        final RsStatus status = RsStatus.BAD_REQUEST;
-        MatcherAssert.assertThat(
-            status.clientError(),
-            new IsEqual<>(true)
-        );
+        Assertions.assertTrue(RsStatus.BAD_REQUEST.clientError());
     }
 
     @Test
     void serverError() {
-        final RsStatus status = RsStatus.INTERNAL_ERROR;
-        MatcherAssert.assertThat(
-            status.serverError(),
-            new IsEqual<>(true)
-        );
+        Assertions.assertTrue(RsStatus.INTERNAL_ERROR.serverError());
     }
 
     @ParameterizedTest
     @EnumSource(value = RsStatus.class, names = {"FORBIDDEN", "INTERNAL_ERROR"})
     void error(final RsStatus status) {
-        MatcherAssert.assertThat(
-            status.error(),
-            new IsEqual<>(true)
-        );
+        Assertions.assertTrue(status.error());
     }
 
     @ParameterizedTest
-    @EnumSource(value = RsStatus.class, names = {"CONTINUE", "OK", "FOUND"})
-    void notError(final RsStatus status) {
-        MatcherAssert.assertThat(
-            status.error(),
-            new IsEqual<>(false)
-        );
+    @EnumSource(value = RsStatus.class, names = {"CONTINUE", "OK", "MOVED_TEMPORARILY"})
+    void notError(RsStatus status) {
+        Assertions.assertFalse(status.error());
     }
 }

@@ -24,7 +24,7 @@ class ContentLengthRestrictionTest {
             (line, headers, body) -> BaseResponse.ok(), 10
         );
         final Response response = slice.response(new RequestLine("GET", "/"), this.headers("11"), Content.EMPTY);
-        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.PAYLOAD_TOO_LARGE));
+        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.REQUEST_TOO_LONG));
     }
 
     @ParameterizedTest
