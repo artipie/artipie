@@ -18,45 +18,48 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Vertx connection accepts Artipie response and send it to {@link HttpServerResponse}.
- * @since 0.2
  */
 final class VertxConnection implements Connection {
 
     /**
      * Vertx server response output.
      */
-    private final HttpServerResponse rsp;
+    private final HttpServerResponse response;
 
     /**
      * New connection for response.
-     * @param rsp Response output
+     * @param response Response output
      */
-    VertxConnection(final HttpServerResponse rsp) {
-        this.rsp = rsp;
+    VertxConnection(final HttpServerResponse response) {
+        this.response = response;
     }
 
     @Override
     public CompletionStage<Void> accept(RsStatus status, Headers headers, Content body) {
-        this.rsp.setStatusCode(status.code());
-        headers.stream()
-            .forEach(h -> this.rsp.putHeader(h.getKey(), h.getValue()));
-
         final CompletableFuture<Void> promise = new CompletableFuture<>();
+        if(status == RsStatus.CONTINUE){
+            this.response.writeContinue();
+            return CompletableFuture.completedFuture(null);
+        }
+
+        this.response.setStatusCode(status.code());
+        headers.stream().forEach(h -> this.response.putHeader(h.getKey(), h.getValue()));
+
         final Flowable<Buffer> vpb = Flowable.fromPublisher(body)
             .map(VertxConnection::mapBuffer)
             .doOnError(promise::completeExceptionally);
-        if (this.rsp.headers().contains("Content-Length")) {
-            this.rsp.setChunked(false);
+        if (this.response.headers().contains("Content-Length")) {
+            this.response.setChunked(false);
             vpb.doOnComplete(
                 () -> {
-                    this.rsp.end();
+                    this.response.end();
                     promise.complete(null);
                 }
-            ).forEach(this.rsp::write);
+            ).forEach(this.response::write);
         } else {
-            this.rsp.setChunked(true);
+            this.response.setChunked(true);
             vpb.doOnComplete(() -> promise.complete(null))
-                .subscribe(this.rsp.toSubscriber());
+                .subscribe(this.response.toSubscriber());
         }
         return promise;
     }

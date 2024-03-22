@@ -13,6 +13,7 @@ import com.artipie.docker.Upload;
 import com.artipie.docker.error.UploadUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
@@ -21,8 +22,6 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.headers.Location;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.BaseResponse;
-import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.ContentWithSize;
 
 import java.util.Optional;
@@ -177,7 +176,7 @@ public final class UploadEntity {
                             )
                         )
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new UploadUnknownError(uuid))
+                        () -> BaseResponse.notFound().jsonBody(new UploadUnknownError(uuid).json())
                     )
                 )
             );
@@ -231,7 +230,7 @@ public final class UploadEntity {
                             )
                         )
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new UploadUnknownError(uuid))
+                        () -> BaseResponse.notFound().jsonBody(new UploadUnknownError(uuid).json())
                     )
                 )
             );
@@ -283,7 +282,7 @@ public final class UploadEntity {
                             )
                         )
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new UploadUnknownError(uuid))
+                        () -> BaseResponse.notFound().jsonBody(new UploadUnknownError(uuid).json())
                     )
                 )
             );
@@ -421,7 +420,8 @@ public final class UploadEntity {
                             )
                     ).orElse(
                         CompletableFuture.completedFuture(
-                            new ErrorsResponse(RsStatus.NOT_FOUND, new UploadUnknownError(uuid))
+                            BaseResponse.notFound()
+                                .jsonBody(new UploadUnknownError(uuid).json())
                         )
                     )
                 )

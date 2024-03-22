@@ -112,7 +112,7 @@ final class PyProxySliceITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         final ListOf<String> expected = new ListOf<>(
             "<!DOCTYPE html>", "Links for a2utils",
@@ -140,7 +140,7 @@ final class PyProxySliceITCase {
         MatcherAssert.assertThat(
             "Response status is 404",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.NOT_FOUND.code()))
+            new IsEqual<>(RsStatus.NOT_FOUND.code())
         );
         MatcherAssert.assertThat(
             "Nothing was added to storage",
@@ -158,7 +158,7 @@ final class PyProxySliceITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         MatcherAssert.assertThat(
             "Alarm time index page was added to storage",

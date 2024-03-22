@@ -99,10 +99,7 @@ public final class GoSlice implements Slice {
         String name
     ) {
         return new BasicAuthzSlice(
-            new SliceWithHeaders(
-                new SliceDownload(storage),
-                Headers.from(contentType)
-            ),
+            new SliceWithHeaders(new SliceDownload(storage), Headers.from(contentType)),
             users,
             new OperationControl(policy, new AdapterBasicPermission(name, Action.Standard.READ))
         );

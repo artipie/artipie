@@ -15,6 +15,7 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
@@ -26,8 +27,6 @@ import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Location;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
-import com.artipie.http.rs.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
 
@@ -89,7 +88,8 @@ final class ManifestEntity {
                     manifest -> manifest.<Response>map(
                         found -> baseResponse(found).header(new ContentLength(found.size()))
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new ManifestError(ref))
+                        () -> BaseResponse.notFound()
+                            .jsonBody(new ManifestError(ref).json())
                     )
                 )
             );
@@ -130,7 +130,8 @@ final class ManifestEntity {
                     manifest -> manifest.<Response>map(
                         found -> baseResponse(found).body(found.content())
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new ManifestError(ref))
+                        () -> BaseResponse.notFound()
+                            .jsonBody(new ManifestError(ref).json())
                     )
                 )
             );

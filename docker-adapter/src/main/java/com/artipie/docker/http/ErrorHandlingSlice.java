@@ -8,11 +8,11 @@ import com.artipie.asto.Content;
 import com.artipie.asto.FailedCompletionStage;
 import com.artipie.docker.error.DockerError;
 import com.artipie.docker.error.UnsupportedError;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -84,16 +84,13 @@ final class ErrorHandlingSlice implements Slice {
      * @param throwable Throwable to translate.
      * @return Result response, empty that throwable cannot be handled.
      */
-    @SuppressWarnings("PMD.OnlyOneReturn")
     private static Optional<Response> handle(final Throwable throwable) {
-        if (throwable instanceof DockerError) {
-            return Optional.of(
-                new ErrorsResponse(RsStatus.BAD_REQUEST, (DockerError) throwable)
-            );
+        if (throwable instanceof DockerError error) {
+            return Optional.of(BaseResponse.badRequest().jsonBody(error.json()));
         }
         if (throwable instanceof UnsupportedOperationException) {
             return Optional.of(
-                new ErrorsResponse(RsStatus.METHOD_NOT_ALLOWED, new UnsupportedError())
+                BaseResponse.methodNotAllowed().jsonBody(new UnsupportedError().json())
             );
         }
         if (throwable instanceof CompletionException) {

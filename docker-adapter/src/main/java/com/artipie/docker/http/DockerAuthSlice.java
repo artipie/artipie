@@ -7,14 +7,12 @@ package com.artipie.docker.http;
 import com.artipie.asto.Content;
 import com.artipie.docker.error.DeniedError;
 import com.artipie.docker.error.UnauthorizedError;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-
-import java.util.concurrent.CompletionStage;
 
 /**
  * Slice that wraps origin Slice replacing body with errors JSON in Docker API format
@@ -46,21 +44,19 @@ final class DockerAuthSlice implements Slice {
         final Response response = this.origin.response(rqline, rqheaders, rqbody);
         return connection -> response.send(
             (rsstatus, rsheaders, rsbody) -> {
-                final CompletionStage<Void> sent;
                 if (rsstatus == RsStatus.UNAUTHORIZED) {
-                    sent = new RsWithHeaders(
-                        new ErrorsResponse(rsstatus, new UnauthorizedError()),
-                        rsheaders
-                    ).send(connection);
-                } else if (rsstatus == RsStatus.FORBIDDEN) {
-                    sent = new RsWithHeaders(
-                        new ErrorsResponse(rsstatus, new DeniedError()),
-                        rsheaders
-                    ).send(connection);
-                } else {
-                    sent = connection.accept(rsstatus, rsheaders, rsbody);
+                    return BaseResponse.unauthorized()
+                        .headers(rsheaders)
+                        .jsonBody(new UnauthorizedError().json())
+                        .send(connection);
                 }
-                return sent;
+                if (rsstatus == RsStatus.FORBIDDEN) {
+                    return BaseResponse.forbidden()
+                        .headers(rsheaders)
+                        .jsonBody(new DeniedError().json())
+                        .send(connection);
+                }
+                return connection.accept(rsstatus, rsheaders, rsbody);
             }
         );
     }

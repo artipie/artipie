@@ -11,14 +11,13 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.error.BlobUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
-import com.artipie.http.rs.RsStatus;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -89,7 +88,8 @@ final class BlobEntity {
                             )
                         )
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new BlobUnknownError(digest))
+                        () -> BaseResponse.notFound()
+                            .jsonBody(new BlobUnknownError(digest).json())
                     )
                 )
             );
@@ -136,7 +136,8 @@ final class BlobEntity {
                             )
                         )
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new BlobUnknownError(digest))
+                        () -> BaseResponse.notFound()
+                            .jsonBody(new BlobUnknownError(digest).json())
                     )
                 )
             );

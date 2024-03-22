@@ -37,11 +37,9 @@ import javax.json.Json;
  *  is passed. It is necessary to find out why it happens and add
  *  empty prefix to params of method DownloadPackageSliceTest#downloadMetaWorks.
  */
-@SuppressWarnings({"PMD.AvoidUsingHardCodedIP", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings("PMD.AvoidUsingHardCodedIP")
 final class DownloadPackageSliceTest {
-    /**
-     * Vertx.
-     */
+
     private static final Vertx VERTX = Vertx.vertx();
 
     /**
@@ -108,20 +106,15 @@ final class DownloadPackageSliceTest {
         }
     }
 
-    private void pereformRequestAndChecks(
-        final String pathprefix, final VertxSliceServer server
-    ) {
+    private void pereformRequestAndChecks(String pathPrefix, VertxSliceServer server) {
         server.start();
-        final String url = String.format(
-            "http://127.0.0.1:%d%s/@hello/simple-npm-project",
-            this.port,
-            pathprefix
-        );
+        final String url = String.format("http://127.0.0.1:%d%s/@hello/simple-npm-project",
+            this.port, pathPrefix);
         final WebClient client = WebClient.create(DownloadPackageSliceTest.VERTX);
         final HttpResponse<Buffer> resp = client.getAbs(url).rxSend().blockingGet();
         MatcherAssert.assertThat(
             "Status code should be 200 OK",
-            String.valueOf(resp.statusCode()),
+            resp.statusCode(),
             new IsEqual<>(RsStatus.OK.code())
         );
         final JsonObject json = resp.body().toJsonObject();
