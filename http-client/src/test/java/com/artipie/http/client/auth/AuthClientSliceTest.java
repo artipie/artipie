@@ -11,10 +11,7 @@ import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.BaseResponse;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -43,8 +40,7 @@ final class AuthClientSliceTest {
     void shouldAuthenticateFirstRequestWithEmptyHeadersFirst() {
         final FakeAuthenticator fake = new FakeAuthenticator(Headers.EMPTY);
         new AuthClientSlice(
-            (line, headers, body) -> StandardRs.EMPTY,
-            fake
+            (line, headers, body) -> BaseResponse.ok(), fake
         ).response(
             new RequestLine(RqMethod.GET, "/"),
             Headers.from("X-Header", "The Value"),
@@ -67,7 +63,7 @@ final class AuthClientSliceTest {
             (line, headers, body) -> {
                 Headers aa = headers.copy();
                 capture.set(aa);
-                return StandardRs.EMPTY;
+                return BaseResponse.ok();
             },
             new FakeAuthenticator(Headers.from(auth))
         ).response(
@@ -89,11 +85,7 @@ final class AuthClientSliceTest {
         final Header rsheader = new Header("Abc", "Def");
         final FakeAuthenticator fake = new FakeAuthenticator(Headers.EMPTY, Headers.EMPTY);
         new AuthClientSlice(
-            (line, headers, body) -> new RsWithHeaders(
-                new RsWithStatus(RsStatus.UNAUTHORIZED),
-                Headers.from(rsheader)
-            ),
-            fake
+            (line, headers, body) -> BaseResponse.unauthorized().header(rsheader), fake
         ).response(
             new RequestLine(RqMethod.GET, "/foo/bar"),
             Headers.EMPTY,
@@ -113,7 +105,7 @@ final class AuthClientSliceTest {
         new AuthClientSlice(
             (line, headers, body) -> {
                 capture.incrementAndGet();
-                return new RsWithStatus(RsStatus.UNAUTHORIZED);
+                return BaseResponse.unauthorized();
             },
             Authenticator.ANONYMOUS
         ).response(
@@ -137,7 +129,7 @@ final class AuthClientSliceTest {
         new AuthClientSlice(
             (line, headers, body) -> {
                 capture.set(headers);
-                return new RsWithStatus(RsStatus.UNAUTHORIZED);
+                return BaseResponse.unauthorized();
             },
             new FakeAuthenticator(Headers.EMPTY, Headers.from(auth))
         ).response(
@@ -158,7 +150,7 @@ final class AuthClientSliceTest {
         final AtomicReference<CompletionStage<Void>> capture = new AtomicReference<>();
         new AuthClientSlice(
             (line, headers, body) -> connection -> {
-                final CompletionStage<Void> sent = StandardRs.EMPTY.send(connection);
+                final CompletionStage<Void> sent = BaseResponse.ok().send(connection);
                 capture.set(sent);
                 return sent;
             },
@@ -189,7 +181,7 @@ final class AuthClientSliceTest {
                 new Content.From(body).asBytesFuture().thenApply(
                     bytes -> {
                         capture.get().add(bytes);
-                        return new RsWithStatus(RsStatus.UNAUTHORIZED);
+                        return BaseResponse.unauthorized();
                     }
                 )
             ),

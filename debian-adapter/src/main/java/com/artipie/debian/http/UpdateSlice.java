@@ -22,9 +22,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ArtifactEvent;
 
@@ -95,7 +93,7 @@ public final class UpdateSlice implements Slice {
                         final CompletionStage<Response> res;
                         if (common.isEmpty()) {
                             res = this.asto.delete(key).thenApply(
-                                nothing -> new RsWithStatus(RsStatus.BAD_REQUEST)
+                                nothing -> BaseResponse.badRequest()
                             );
                         } else {
                             CompletionStage<Void> upd = this.generateIndexes(key, control, common);
@@ -104,7 +102,7 @@ public final class UpdateSlice implements Slice {
                                     nothing -> this.logEvents(key, control, common, headers)
                                 );
                             }
-                            res = upd.thenApply(nothing -> StandardRs.OK);
+                            res = upd.thenApply(nothing -> BaseResponse.ok());
                         }
                         return res;
                     }
@@ -112,10 +110,10 @@ public final class UpdateSlice implements Slice {
                     (resp, throwable) -> {
                         final CompletionStage<Response> res;
                         if (throwable == null) {
-                            res = CompletableFuture.completedFuture(resp);
+                            return CompletableFuture.completedFuture(resp);
                         } else {
                             res = this.asto.delete(key)
-                                .thenApply(nothing -> new RsWithStatus(RsStatus.INTERNAL_ERROR));
+                                .thenApply(nothing -> BaseResponse.internalError());
                         }
                         return res;
                     }

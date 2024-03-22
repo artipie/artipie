@@ -12,8 +12,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.maven.metadata.DeployMetadata;
 
@@ -89,9 +88,9 @@ public final class PutMetadataSlice implements Slice {
                             new Content.From(xml.getBytes(StandardCharsets.US_ASCII))
                         );
                     }
-                ).thenApply(nothing -> new RsWithStatus(RsStatus.CREATED))
+                ).thenApply(nothing -> BaseResponse.created())
             );
         }
-        return new RsWithStatus(RsStatus.BAD_REQUEST);
+        return BaseResponse.badRequest();
     }
 }

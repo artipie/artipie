@@ -11,9 +11,8 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
@@ -54,14 +53,13 @@ class HeadProxySliceTest {
 
     @Test
     void passesStatusAndHeadersFromResponse() {
-        final RsStatus status = RsStatus.CREATED;
         final Headers headers = Headers.from("abc", "123");
         MatcherAssert.assertThat(
             new HeadProxySlice(
-                new SliceSimple(new RsWithHeaders(new RsWithStatus(status), headers))
+                new SliceSimple(BaseResponse.created().header("abc", "123"))
             ),
             new SliceHasResponse(
-                Matchers.allOf(new RsHasStatus(status), new RsHasHeaders(headers)),
+                Matchers.allOf(new RsHasStatus(RsStatus.CREATED), new RsHasHeaders(headers)),
                 new RequestLine(RqMethod.HEAD, "/")
             )
         );

@@ -12,8 +12,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.slice.ContentWithSize;
 import com.artipie.http.slice.KeyFromPath;
 
@@ -56,7 +55,7 @@ public final class UploadSlice implements Slice {
                     new KeyFromPath(line.uri().getPath())
                 ),
                 new ContentWithSize(body, headers)
-            ).thenApply(nothing -> new RsWithStatus(RsStatus.CREATED))
+            ).thenApply(nothing -> BaseResponse.created())
         );
     }
 }

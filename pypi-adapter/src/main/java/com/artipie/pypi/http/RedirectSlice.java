@@ -11,9 +11,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.pypi.NormalizedProjectName;
 import io.reactivex.Single;
 
@@ -45,10 +43,7 @@ public final class RedirectSlice implements Slice {
                     .orElse(rqline).replaceAll(String.format("(%s\\/?)$", last), normalized)
                 )
                 .map(
-                    url -> new RsWithHeaders(
-                        new RsWithStatus(RsStatus.MOVED_PERMANENTLY),
-                        Headers.from("Location", url)
-                    )
+                    url -> BaseResponse.movedPermanently().header("Location", url)
                 )
         );
     }

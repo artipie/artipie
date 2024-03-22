@@ -7,12 +7,8 @@ package com.artipie.docker.proxy;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.RepoName;
-import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import io.reactivex.Flowable;
+import com.artipie.http.rs.BaseResponse;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -33,11 +29,7 @@ class ProxyLayersTest {
                 if (!line.toString().startsWith(String.format("HEAD /v2/test/blobs/%s ", digest))) {
                     throw new IllegalArgumentException();
                 }
-                return new RsFull(
-                    RsStatus.OK,
-                    Headers.from(new ContentLength(String.valueOf(size))),
-                    Flowable.empty()
-                );
+                return BaseResponse.ok().header(new ContentLength(String.valueOf(size)));
             },
             new RepoName.Valid("test")
         ).get(new Digest.FromString(digest)).toCompletableFuture().join();
@@ -61,7 +53,7 @@ class ProxyLayersTest {
                 if (!line.toString().startsWith(String.format("HEAD /v2/%s/blobs/%s ", repo, digest))) {
                     throw new IllegalArgumentException();
                 }
-                return new RsWithStatus(RsStatus.NOT_FOUND);
+                return BaseResponse.notFound();
             },
             new RepoName.Valid(repo)
         ).get(new Digest.FromString(digest)).toCompletableFuture().join();

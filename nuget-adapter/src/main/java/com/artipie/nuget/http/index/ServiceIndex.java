@@ -7,6 +7,7 @@ package com.artipie.nuget.http.index;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.nuget.http.Absent;
@@ -93,7 +94,7 @@ public final class ServiceIndex implements Route {
 
         @Override
         public Response put(Headers headers, Content body) {
-            return new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
+            return BaseResponse.methodNotAllowed();
         }
     }
 }

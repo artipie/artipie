@@ -8,6 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.nuget.PackageKeys;
@@ -93,7 +94,7 @@ class Registration implements Resource {
 
     @Override
     public Response put(Headers headers, Content body) {
-        return new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
+        return BaseResponse.methodNotAllowed();
     }
 
     /**
@@ -105,15 +106,12 @@ class Registration implements Resource {
         return this.repository.versions(new PackageKeys(this.id)).thenApply(Versions::all)
             .thenApply(
                 versions -> {
-                    final List<RegistrationPage> pages;
                     if (versions.isEmpty()) {
-                        pages = Collections.emptyList();
-                    } else {
-                        pages = Collections.singletonList(
-                            new RegistrationPage(this.repository, this.content, this.id, versions)
-                        );
+                        return Collections.emptyList();
                     }
-                    return pages;
+                    return Collections.singletonList(
+                        new RegistrationPage(this.repository, this.content, this.id, versions)
+                    );
                 }
             );
     }

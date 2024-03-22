@@ -10,8 +10,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -40,7 +39,7 @@ final class HeadProxySlice implements Slice {
         final CompletableFuture<Response> promise = new CompletableFuture<>();
         this.client.response(line, Headers.EMPTY, Content.EMPTY).send(
             (status, rsheaders, rsbody) -> {
-                promise.complete(new RsWithHeaders(new RsWithStatus(status), rsheaders));
+                promise.complete(BaseResponse.from(status).headers(rsheaders));
                 return CompletableFuture.allOf();
             }
         );

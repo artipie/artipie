@@ -10,8 +10,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -60,6 +59,6 @@ public class FilterSlice implements Slice {
         if (this.filters.allowed(line, headers)) {
             return this.origin.response(line, headers, body);
         }
-        return new RsWithStatus(RsStatus.FORBIDDEN);
+        return BaseResponse.forbidden();
     }
 }

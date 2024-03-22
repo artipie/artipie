@@ -9,9 +9,8 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.npm.RandomFreePort;
 import com.artipie.npm.proxy.NpmProxy;
@@ -21,13 +20,14 @@ import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.web.client.HttpResponse;
 import io.vertx.reactivex.ext.web.client.WebClient;
-import javax.json.Json;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import javax.json.Json;
 
 /**
  * Test cases for {@link DownloadPackageSlice}.
@@ -71,7 +71,7 @@ final class DownloadPackageSliceTest {
                 new DownloadPackageSlice(
                     new NpmProxy(
                         storage,
-                        new SliceSimple(StandardRs.NOT_FOUND)
+                        new SliceSimple(BaseResponse.notFound())
                     ),
                     path
                 ),
@@ -93,8 +93,7 @@ final class DownloadPackageSliceTest {
                     new NpmProxy(
                         new InMemoryStorage(),
                         new SliceSimple(
-                            new RsWithBody(
-                                StandardRs.OK,
+                            BaseResponse.ok().body(
                                 new TestResource("storage/@hello/simple-npm-project/meta.json")
                                     .asBytes()
                             )

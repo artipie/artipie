@@ -21,8 +21,7 @@ import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Flowable;
 import org.reactivestreams.Publisher;
@@ -94,21 +93,18 @@ public final class UpdateSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = UpdateSlice.PKG.matcher(line.uri().getPath());
-        final Response res;
         if (matcher.matches()) {
             final Key temp = new Key.From(UpdateSlice.TMP, matcher.group(1));
             final Key main = new Key.From(matcher.group(1));
-            res = new AsyncResponse(
+            return new AsyncResponse(
                 this.asto.exclusively(
                     main,
                     target -> target.exists(main).thenCompose(
                         repo -> this.asto.exists(temp).thenApply(upl -> repo || upl)
                     ).thenCompose(
-                        exists -> this.asto.save(
-                            temp,
+                        exists -> this.asto.save(temp,
                             new Content.From(UpdateSlice.filePart(headers, body))
                         )
                         .thenCompose(empty -> this.infoJson(matcher.group(1), temp))
@@ -140,15 +136,13 @@ public final class UpdateSlice implements Slice {
                                 return action;
                             }
                         ).thenApply(
-                            ignored -> new RsWithStatus(RsStatus.CREATED)
+                            ignored -> BaseResponse.created()
                         )
                     )
                 )
             );
-        } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
-        return res;
+        return BaseResponse.badRequest();
     }
 
     /**

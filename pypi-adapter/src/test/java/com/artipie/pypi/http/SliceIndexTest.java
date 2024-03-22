@@ -216,7 +216,7 @@ class SliceIndexTest {
             ),
             new ResponseMatcher(
                 RsStatus.OK,
-                new IsHeader("Content-Type", "text/html"),
+                new IsHeader("Content-Type", "text/html; charset=utf-8"),
                 new IsHeader("Content-Length", "179")
             )
         );

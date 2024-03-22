@@ -83,7 +83,7 @@ final class BlobEntity {
                                     .thenApply(
                                         size -> BaseResponse.ok()
                                             .header(new DigestHeader(digest))
-                                            .header(new ContentType("application/octet-stream"))
+                                            .header(ContentType.mime("application/octet-stream"))
                                             .body(new Content.From(size, content))
                                     )
                             )
@@ -131,8 +131,8 @@ final class BlobEntity {
                             blob.size().thenApply(
                                 size -> BaseResponse.ok()
                                     .header(new DigestHeader(blob.digest()))
-                                    .header(new ContentType("application/octet-stream"))
-                                    .header(new ContentLength(String.valueOf(size)))
+                                    .header(ContentType.mime("application/octet-stream"))
+                                    .header(new ContentLength(size))
                             )
                         )
                     ).orElseGet(

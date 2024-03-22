@@ -6,26 +6,23 @@ package com.artipie.http.async;
 
 import com.artipie.http.Response;
 import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Tests for {@link AsyncResponse}.
- *
- * @since 0.8
  */
 class AsyncResponseTest {
 
     @Test
     void shouldSend() {
         MatcherAssert.assertThat(
-            new AsyncResponse(
-                CompletableFuture.completedFuture(new RsWithStatus(RsStatus.OK))
-            ),
+            new AsyncResponse(CompletableFuture.completedFuture(BaseResponse.ok())),
             new RsHasStatus(RsStatus.OK)
         );
     }
@@ -34,12 +31,11 @@ class AsyncResponseTest {
     void shouldPropagateFailure() {
         final CompletableFuture<Response> future = new CompletableFuture<>();
         future.completeExceptionally(new IllegalStateException());
-        MatcherAssert.assertThat(
+        Assertions.assertTrue(
             new AsyncResponse(future)
                 .send((status, headers, body) -> CompletableFuture.allOf())
                 .toCompletableFuture()
-                .isCompletedExceptionally(),
-            new IsEqual<>(true)
+                .isCompletedExceptionally()
         );
     }
 }

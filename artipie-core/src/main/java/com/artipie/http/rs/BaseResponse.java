@@ -20,6 +20,10 @@ import java.util.concurrent.CompletionStage;
 
 public class BaseResponse implements com.artipie.http.Response {
 
+    public static BaseResponse from(RsStatus status) {
+        return new BaseResponse(status);
+    }
+
     public static BaseResponse ok() {
         return new BaseResponse(RsStatus.OK);
     }
@@ -30,6 +34,14 @@ public class BaseResponse implements com.artipie.http.Response {
 
     public static BaseResponse accepted() {
         return new BaseResponse(RsStatus.ACCEPTED);
+    }
+
+    public static BaseResponse temporaryRedirect() {
+        return new BaseResponse(RsStatus.TEMPORARY_REDIRECT);
+    }
+
+    public static BaseResponse movedPermanently() {
+        return new BaseResponse(RsStatus.MOVED_PERMANENTLY);
     }
 
     public static BaseResponse notFound() {
@@ -52,6 +64,10 @@ public class BaseResponse implements com.artipie.http.Response {
         return new BaseResponse(RsStatus.FORBIDDEN);
     }
 
+    public static BaseResponse methodNotAllowed() {
+        return new BaseResponse(RsStatus.METHOD_NOT_ALLOWED);
+    }
+
     public static BaseResponse badRequest() {
         return new BaseResponse(RsStatus.BAD_REQUEST);
     }
@@ -59,6 +75,10 @@ public class BaseResponse implements com.artipie.http.Response {
     public static BaseResponse badRequest(Throwable error) {
         return new BaseResponse(RsStatus.BAD_REQUEST)
             .body(errorBody(error));
+    }
+
+    public static BaseResponse payloadTooLarge() {
+        return new BaseResponse(RsStatus.PAYLOAD_TOO_LARGE);
     }
 
     public static BaseResponse internalError() {
@@ -136,7 +156,7 @@ public class BaseResponse implements com.artipie.http.Response {
     public BaseResponse textBody(String text, Charset charset) {
         this.body = new Content.From(text.getBytes(charset));
         this.headers = Headers.from(
-            new ContentType("text/plain; charset=" + charset.displayName().toLowerCase()),
+            ContentType.text(charset),
             new ContentLength(body.size().orElseThrow())
         );
         return this;
@@ -155,13 +175,9 @@ public class BaseResponse implements com.artipie.http.Response {
     }
 
     public BaseResponse jsonBody(String json, Charset charset) {
-        return jsonBody(new Content.From(json.getBytes(charset)), charset);
-    }
-
-    public BaseResponse jsonBody(Content json, Charset charset) {
-        this.body = json;
+        this.body = new Content.From(json.getBytes(charset));
         this.headers = Headers.from(
-            new ContentType("application/json; charset=" + charset.displayName().toLowerCase()),
+            ContentType.json(charset),
             new ContentLength(body.size().orElseThrow())
         );
         return this;
@@ -174,7 +190,16 @@ public class BaseResponse implements com.artipie.http.Response {
     public BaseResponse yamlBody(String yaml, Charset charset) {
         this.body = new Content.From(yaml.getBytes(charset));
         this.headers = Headers.from(
-            new ContentType("text/x-yaml; charset=" + charset.displayName().toLowerCase()),
+            ContentType.yaml(charset),
+            new ContentLength(body.size().orElseThrow())
+        );
+        return this;
+    }
+
+    public BaseResponse htmlBody(String html, Charset charset) {
+        this.body = new Content.From(html.getBytes(charset));
+        this.headers = Headers.from(
+            ContentType.html(charset),
             new ContentLength(body.size().orElseThrow())
         );
         return this;

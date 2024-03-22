@@ -10,8 +10,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
 import java.util.regex.Pattern;
 
@@ -25,11 +24,7 @@ public final class DocsSlice implements Slice {
     static final Pattern DOCS_PTRN = Pattern.compile("^/(.*)/docs$");
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
-        return new RsWithStatus(RsStatus.OK);
+    public Response response(RequestLine line, Headers headers, Content body) {
+        return BaseResponse.ok();
     }
 }

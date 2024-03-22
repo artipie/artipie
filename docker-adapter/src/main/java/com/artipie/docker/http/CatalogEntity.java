@@ -12,11 +12,11 @@ import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.BaseResponse;
 
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 /**
@@ -63,7 +63,9 @@ final class CatalogEntity {
                     params.value("last").map(RepoName.Simple::new),
                     params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
                 ).thenApply(
-                    catalog -> BaseResponse.ok().jsonBody(catalog.json(), StandardCharsets.UTF_8)
+                    catalog -> BaseResponse.ok()
+                        .header(ContentType.json())
+                        .body(catalog.json())
                 )
             );
         }

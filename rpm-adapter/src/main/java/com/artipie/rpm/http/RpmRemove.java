@@ -14,8 +14,8 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.rpm.RepoConfig;
 import com.artipie.rpm.asto.AstoRepoRemove;
 import com.artipie.rpm.meta.PackageInfo;
@@ -115,7 +115,7 @@ public final class RpmRemove implements Slice {
                                     res = this.asto.delete(temp)
                                         .thenApply(nothing -> RsStatus.BAD_REQUEST);
                                 }
-                                return res.thenApply(RsWithStatus::new);
+                                return res.thenApply(BaseResponse::from);
                             }
                         )
                 )

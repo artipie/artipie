@@ -12,8 +12,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.StandardRs;
 
 import javax.json.Json;
@@ -50,17 +49,12 @@ final class AddDistTagsSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = AddDistTagsSlice.PTRN.matcher(line.uri().getPath());
-        final Response resp;
         if (matcher.matches()) {
             final Key meta = new Key.From(matcher.group("pkg"), "meta.json");
             final String tag = matcher.group("tag");
-            resp = new AsyncResponse(
+            return new AsyncResponse(
                 this.storage.exists(meta).thenCompose(
                     exists -> {
                         if (exists) {
@@ -89,9 +83,7 @@ final class AddDistTagsSlice implements Slice {
                     }
                 )
             );
-        } else {
-            resp = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
-        return resp;
+        return BaseResponse.badRequest();
     }
 }

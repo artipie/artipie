@@ -9,8 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.nuget.PackageIdentity;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.http.Resource;
@@ -112,16 +111,16 @@ public final class PackageContent implements Route, ContentLocation {
                 key -> new AsyncResponse(
                     this.repository.content(key).thenApply(
                         existing -> existing.<Response>map(
-                            data -> new RsWithBodyNoHeaders(new RsWithStatus(RsStatus.OK), data)
-                        ).orElse(new RsWithStatus(RsStatus.NOT_FOUND))
+                            data -> new RsWithBodyNoHeaders(BaseResponse.ok(), data)
+                        ).orElse(BaseResponse.notFound())
                     )
                 )
-            ).orElse(new RsWithStatus(RsStatus.NOT_FOUND));
+            ).orElse(BaseResponse.notFound());
         }
 
         @Override
         public Response put(Headers headers, Content body) {
-            return new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
+            return BaseResponse.methodNotAllowed();
         }
 
         /**
@@ -131,13 +130,10 @@ public final class PackageContent implements Route, ContentLocation {
          */
         private Optional<Key> key() {
             final String prefix = String.format("%s/", path());
-            final Optional<Key> parsed;
             if (this.path.startsWith(prefix)) {
-                parsed = Optional.of(new Key.From(this.path.substring(prefix.length())));
-            } else {
-                parsed = Optional.empty();
+                return Optional.of(new Key.From(this.path.substring(prefix.length())));
             }
-            return parsed;
+            return Optional.empty();
         }
     }
 }

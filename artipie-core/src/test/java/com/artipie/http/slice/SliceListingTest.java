@@ -9,6 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
@@ -50,10 +51,7 @@ class SliceListingTest {
             new ResponseMatcher(
                 RsStatus.OK,
                 Arrays.asList(
-                    new Header(
-                        "Content-Type",
-                        String.format("text/plain; charset=%s", StandardCharsets.UTF_8)
-                    ),
+                    ContentType.text(),
                     new Header("Content-Length", String.valueOf(body.length()))
                 ),
                 body.getBytes(StandardCharsets.UTF_8)
@@ -72,7 +70,7 @@ class SliceListingTest {
             new ResponseMatcher(
                 RsStatus.OK,
                 Arrays.asList(
-                    new Header("Content-Type", "application/json; charset=" + StandardCharsets.UTF_8),
+                    ContentType.json(),
                     new Header("Content-Length", String.valueOf(json.length()))
                 ),
                 json.getBytes(StandardCharsets.UTF_8)
@@ -101,10 +99,7 @@ class SliceListingTest {
             new ResponseMatcher(
                 RsStatus.OK,
                 Arrays.asList(
-                    new Header(
-                        "Content-Type",
-                        String.format("text/html; charset=%s", StandardCharsets.UTF_8)
-                    ),
+                    ContentType.html(),
                     new Header("Content-Length", String.valueOf(body.length()))
                 ),
                 body.getBytes(StandardCharsets.UTF_8)

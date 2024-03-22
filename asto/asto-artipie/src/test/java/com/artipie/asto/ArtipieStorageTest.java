@@ -13,8 +13,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.BaseResponse;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
@@ -89,9 +87,7 @@ public final class ArtipieStorageTest {
     void shouldThrowExceptionWhenSavingIsFailed() {
         ArtipieStorageTest.assertThrowException(
             () -> new ArtipieStorage(
-                new SliceSimple(
-                    new RsWithStatus(RsStatus.INTERNAL_ERROR)
-                )
+                new SliceSimple(BaseResponse.internalError())
             ).save(new Key.From("1"), Content.EMPTY)
         );
     }
@@ -140,9 +136,7 @@ public final class ArtipieStorageTest {
     void shouldThrowExceptionWhenDeleteIsFailed() {
         ArtipieStorageTest.assertThrowException(
             () -> new ArtipieStorage(
-                new SliceSimple(
-                    new RsWithStatus(RsStatus.INTERNAL_ERROR)
-                )
+                new SliceSimple(BaseResponse.internalError())
             ).delete(new Key.From("a"))
         );
     }

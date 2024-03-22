@@ -63,7 +63,7 @@ class DownloadSliceTest {
                 new RsHasStatus(RsStatus.OK),
                 new RequestLine(RqMethod.GET, String.format("/%s", path)),
                 Headers.from(
-                    new ContentType("application/octet-stream"),
+                    ContentType.mime("application/octet-stream"),
                     new ContentLength(bytes.length)
                 ),
                 new Content.From(bytes)

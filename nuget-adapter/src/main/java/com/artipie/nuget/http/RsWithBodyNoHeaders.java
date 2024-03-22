@@ -8,13 +8,13 @@ import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.StandardRs;
 
 import java.util.concurrent.CompletionStage;
 
 /**
- * Response with body. Adds no headers as opposite to {@link com.artipie.http.rs.RsWithBody}.
+ * Response with body.
  * Used because `nuget` command line utility for Linux
  * fails to read JSON responses when `Content-Length` header presents.
  */
@@ -36,7 +36,7 @@ public final class RsWithBodyNoHeaders implements Response {
      * @param bytes Body bytes
      */
     public RsWithBodyNoHeaders(final byte[] bytes) {
-        this(StandardRs.EMPTY, bytes);
+        this(BaseResponse.ok(), bytes);
     }
 
     /**
@@ -90,10 +90,7 @@ public final class RsWithBodyNoHeaders implements Response {
         }
 
         @Override
-        public CompletionStage<Void> accept(
-            final RsStatus status,
-            final Headers headers,
-            final Content none) {
+        public CompletionStage<Void> accept(RsStatus status, Headers headers, Content none) {
             return this.origin.accept(status, headers, this.body);
         }
     }

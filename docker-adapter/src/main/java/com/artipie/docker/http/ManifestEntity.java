@@ -333,7 +333,7 @@ final class ManifestEntity {
 
     private static BaseResponse baseResponse(Manifest manifest) {
         return BaseResponse.ok()
-            .header(new ContentType(manifest.mediaType()))
+            .header(ContentType.mime(manifest.mediaType()))
             .header(new DigestHeader(manifest.digest()));
     }
 }

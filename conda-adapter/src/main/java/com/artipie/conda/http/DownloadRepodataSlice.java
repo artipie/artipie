@@ -14,14 +14,11 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
 import javax.json.Json;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,41 +55,30 @@ public final class DownloadRepodataSlice implements Slice {
                 .thenCompose(
                     path -> {
                         final Matcher matcher = DownloadRepodataSlice.RQ_PATH.matcher(path);
-                        final CompletionStage<Response> res;
                         if (matcher.matches()) {
                             final Key key = new Key.From(matcher.group(1));
-                            res = this.asto.exists(key).thenCompose(
+                            return this.asto.exists(key).thenCompose(
                                 exist -> {
-                                    final CompletionStage<Content> content;
                                     if (exist) {
-                                        content = this.asto.value(key);
-                                    } else {
-                                        content = CompletableFuture.completedFuture(
-                                            new Content.From(
-                                                Json.createObjectBuilder().add(
+                                        return this.asto.value(key);
+                                    }
+                                    return CompletableFuture.completedFuture(
+                                        new Content.From(
+                                            Json.createObjectBuilder().add(
                                                     "info", Json.createObjectBuilder()
                                                         .add("subdir", matcher.group(2))
                                                 ).build().toString()
-                                                    .getBytes(StandardCharsets.US_ASCII)
-                                            )
-                                        );
-                                    }
-                                    return content;
+                                                .getBytes(StandardCharsets.US_ASCII)
+                                        )
+                                    );
                                 }
                             ).thenApply(
-                                content -> new RsFull(
-                                    RsStatus.OK,
-                                    Headers.from(
-                                        new ContentFileName(new KeyLastPart(key).get())
-                                    ),
-                                    content
-                                )
+                                content -> BaseResponse.ok()
+                                    .header(new ContentFileName(new KeyLastPart(key).get()))
+                                    .body(content)
                             );
-                        } else {
-                            res = CompletableFuture
-                                .completedFuture(new RsWithStatus(RsStatus.BAD_REQUEST));
                         }
-                        return res;
+                        return CompletableFuture.completedFuture(BaseResponse.badRequest());
                     }
                 )
         );

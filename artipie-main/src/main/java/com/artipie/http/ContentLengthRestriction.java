@@ -7,15 +7,12 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
 /**
  * Slice limiting requests size by `Content-Length` header.
  * Checks `Content-Length` header to be within limit and responds with error if it is not.
  * Forwards request to delegate {@link Slice} otherwise.
- *
- * @since 0.2
  */
 public final class ContentLengthRestriction implements Slice {
 
@@ -30,8 +27,6 @@ public final class ContentLengthRestriction implements Slice {
     private final long limit;
 
     /**
-     * Ctor.
-     *
      * @param delegate Delegate slice.
      * @param limit Max allowed value.
      */
@@ -41,18 +36,11 @@ public final class ContentLengthRestriction implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
-        final Response response;
+    public Response response(RequestLine line, Headers headers, Content body) {
         if (new RqHeaders(headers, "Content-Length").stream().allMatch(this::withinLimit)) {
-            response = this.delegate.response(line, headers, body);
-        } else {
-            response = new RsWithStatus(RsStatus.PAYLOAD_TOO_LARGE);
+            return this.delegate.response(line, headers, body);
         }
-        return response;
+        return BaseResponse.payloadTooLarge();
     }
 
     /**

@@ -7,8 +7,7 @@ package com.artipie.nuget.http;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
 /**
  * Absent resource, sends HTTP 404 Not Found response to every request.
@@ -17,11 +16,11 @@ public final class Absent implements Resource {
 
     @Override
     public Response get(final Headers headers) {
-        return new RsWithStatus(RsStatus.NOT_FOUND);
+        return BaseResponse.notFound();
     }
 
     @Override
     public Response put(Headers headers, Content body) {
-        return new RsWithStatus(RsStatus.NOT_FOUND);
+        return BaseResponse.notFound();
     }
 }

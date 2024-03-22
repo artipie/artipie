@@ -16,11 +16,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.slice.KeyFromPath;
 
 import java.util.function.Supplier;
@@ -51,24 +47,18 @@ final class LocalMavenSlice implements Slice {
      *
      * @param storage Repository storage
      */
-    LocalMavenSlice(final Storage storage) {
+    LocalMavenSlice(Storage storage) {
         this.storage = storage;
     }
 
     @Override
-    public Response response(
-        final RequestLine line, final Headers headers,
-        final Content body
-    ) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         final Matcher match = LocalMavenSlice.PTN_ARTIFACT.matcher(new KeyLastPart(key).get());
-        final Response response;
         if (match.matches()) {
-            response = this.artifactResponse(line.method(), key);
-        } else {
-            response = this.plainResponse(line.method(), key);
+            return this.artifactResponse(line.method(), key);
         }
-        return response;
+        return this.plainResponse(line.method(), key);
     }
 
     /**
@@ -78,19 +68,11 @@ final class LocalMavenSlice implements Slice {
      * @return Response
      */
     private Response artifactResponse(final RqMethod method, final Key artifact) {
-        final Response response;
-        switch (method) {
-            case GET:
-                response = new ArtifactGetResponse(this.storage, artifact);
-                break;
-            case HEAD:
-                response = new ArtifactHeadResponse(this.storage, artifact);
-                break;
-            default:
-                response = new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
-                break;
-        }
-        return response;
+        return switch (method) {
+            case GET -> new ArtifactGetResponse(this.storage, artifact);
+            case HEAD -> new ArtifactHeadResponse(this.storage, artifact);
+            default -> BaseResponse.methodNotAllowed();
+        };
     }
 
     /**
@@ -100,62 +82,30 @@ final class LocalMavenSlice implements Slice {
      * @return Response
      */
     private Response plainResponse(final RqMethod method, final Key key) {
-        final Response response;
-        switch (method) {
-            case GET:
-                response = new PlainResponse(
-                    this.storage, key,
-                    () -> new AsyncResponse(this.storage.value(key).thenApply(RsWithBody::new))
-                );
-                break;
-            case HEAD:
-                response = new PlainResponse(
-                    this.storage, key,
-                    () -> new AsyncResponse(
-                        this.storage.metadata(key).thenApply(
-                            meta -> new RsWithHeaders(
-                                StandardRs.OK, new ContentLength(meta.read(Meta.OP_SIZE).get())
-                            )
-                        )
-                    )
-                );
-                break;
-            default:
-                response = new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
-                break;
-        }
-        return response;
-    }
-
-    /**
-     * Plain non-artifact response for key.
-     * @since 0.10
-     */
-    private static final class PlainResponse extends Response.Wrap {
-
-        /**
-         * New plain response.
-         * @param storage Storage
-         * @param key Location
-         * @param actual Actual response with body or not
-         */
-        PlainResponse(final Storage storage, final Key key,
-            final Supplier<? extends Response> actual) {
-            super(
-                new AsyncResponse(
-                    storage.exists(key).thenApply(
-                        exists -> {
-                            final Response res;
-                            if (exists) {
-                                res = actual.get();
-                            } else {
-                                res = StandardRs.NOT_FOUND;
-                            }
-                            return res;
-                        }
-                    )
+        return switch (method) {
+            case GET -> plainResponse(this.storage, key,
+                () -> new AsyncResponse(
+                    this.storage.value(key).thenApply(val -> BaseResponse.ok().body(val))
                 )
             );
-        }
+            case HEAD -> plainResponse(this.storage, key,
+                () -> new AsyncResponse(
+                    this.storage.metadata(key)
+                        .thenApply(
+                            meta -> BaseResponse.ok().header(new ContentLength(meta.read(Meta.OP_SIZE).orElseThrow()))
+                        )
+                )
+            );
+            default -> BaseResponse.methodNotAllowed();
+        };
+    }
+
+    private static Response plainResponse(
+        Storage storage, Key key, Supplier<? extends Response> actual
+    ) {
+        return new AsyncResponse(
+            storage.exists(key)
+                .thenApply(exists -> exists ? actual.get() : BaseResponse.notFound())
+        );
     }
 }

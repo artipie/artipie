@@ -9,14 +9,12 @@ import com.artipie.http.Headers;
 import com.artipie.http.client.HttpServer;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsWithBody;
-import io.reactivex.Flowable;
+import com.artipie.http.rs.BaseResponse;
 import org.eclipse.jetty.client.HttpClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
@@ -45,9 +43,7 @@ final class JettyClientSliceLeakTest {
     @BeforeEach
     void setUp() throws Exception {
         this.server.update(
-            (line, headers, body) -> new RsWithBody(
-                Flowable.just(ByteBuffer.wrap("data".getBytes()))
-            )
+            (line, headers, body) -> BaseResponse.ok().textBody("data")
         );
         final int port = this.server.start();
         this.client.start();

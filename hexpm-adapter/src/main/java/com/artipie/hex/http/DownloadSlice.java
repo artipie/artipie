@@ -14,8 +14,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.StandardRs;
 
 import java.util.concurrent.CompletableFuture;
@@ -77,14 +76,9 @@ public final class DownloadSlice implements Slice {
                     final CompletableFuture<Response> res;
                     if (exist) {
                         res = this.storage.value(key).thenApply(
-                            value ->
-                                new RsFull(
-                                    RsStatus.OK,
-                                    Headers.from(
-                                        new ContentType("application/octet-stream")
-                                    ),
-                                    value
-                                )
+                            value -> BaseResponse.ok()
+                                .header(ContentType.mime("application/octet-stream"))
+                                .body(value)
                         );
                     } else {
                         res = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);

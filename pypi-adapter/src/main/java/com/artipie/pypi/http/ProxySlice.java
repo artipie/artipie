@@ -16,9 +16,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.scheduling.ProxyArtifactEvent;
@@ -122,14 +120,12 @@ final class ProxySlice implements Slice {
                     final CompletableFuture<Response> result = new CompletableFuture<>();
                     if (throwable == null && content.isPresent()) {
                         result.complete(
-                            new RsFull(
-                                RsStatus.OK,
-                                Headers.from(ProxySlice.contentType(headers.get(), line)),
-                                content.get()
-                            )
+                            BaseResponse.ok()
+                                .headers(Headers.from(ProxySlice.contentType(headers.get(), line)))
+                                .body(content.get())
                         );
                     } else {
-                        result.complete(new RsWithStatus(RsStatus.NOT_FOUND));
+                        result.complete(BaseResponse.notFound());
                     }
                     return result;
                 }

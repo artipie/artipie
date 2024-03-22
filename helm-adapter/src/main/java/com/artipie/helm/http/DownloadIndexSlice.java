@@ -15,10 +15,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.slice.KeyFromPath;
 
 import java.net.MalformedURLException;
@@ -73,10 +70,9 @@ final class DownloadIndexSlice implements Slice {
     ) {
         final String uri = line.uri().getPath();
         final Matcher matcher = DownloadIndexSlice.PTRN.matcher(uri);
-        final Response resp;
         if (matcher.matches()) {
             final Key path = new KeyFromPath(uri);
-            resp = new AsyncResponse(
+            return new AsyncResponse(
                 this.storage.exists(path).thenCompose(
                     exists -> {
                         final CompletionStage<Response> rsp;
@@ -85,19 +81,17 @@ final class DownloadIndexSlice implements Slice {
                                 .thenCompose(
                                     content -> new UpdateIndexUrls(content, this.base).value()
                                 ).thenApply(
-                                    content -> new RsFull(RsStatus.OK, Headers.EMPTY, content)
+                                    content -> BaseResponse.ok().body(content)
                                 );
                         } else {
-                            rsp = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
+                            rsp = CompletableFuture.completedFuture(BaseResponse.notFound());
                         }
                         return rsp;
                     }
                 )
             );
-        } else {
-            resp = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
-        return resp;
+        return BaseResponse.badRequest();
     }
 
     /**

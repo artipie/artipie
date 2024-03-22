@@ -10,8 +10,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
 /**
  * Slice created from {@link Resource}.
@@ -24,8 +23,6 @@ final class SliceFromResource implements Slice {
     private final Resource origin;
 
     /**
-     * Ctor.
-     *
      * @param origin Origin resource.
      */
     SliceFromResource(final Resource origin) {
@@ -33,20 +30,14 @@ final class SliceFromResource implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
-        final Response response;
+    public Response response(RequestLine line, Headers headers, Content body) {
         final RqMethod method = line.method();
         if (method.equals(RqMethod.GET)) {
-            response = this.origin.get(headers);
-        } else if (method.equals(RqMethod.PUT)) {
-            response = this.origin.put(headers, body);
-        } else {
-            response = new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
+            return this.origin.get(headers);
         }
-        return response;
+        if (method.equals(RqMethod.PUT)) {
+            return this.origin.put(headers, body);
+        }
+        return BaseResponse.methodNotAllowed();
     }
 }

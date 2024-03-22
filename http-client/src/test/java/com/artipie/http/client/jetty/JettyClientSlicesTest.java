@@ -14,19 +14,8 @@ import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import io.reactivex.Flowable;
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import javax.net.ssl.SSLException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsInstanceOf;
@@ -37,6 +26,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import javax.net.ssl.SSLException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Tests for {@link JettyClientSlices}.
@@ -93,9 +90,7 @@ final class JettyClientSlicesTest {
     void shouldSupportProxy() throws Exception {
         final byte[] response = "response from proxy".getBytes();
         this.server.update(
-            (line, headers, body) -> new RsWithBody(
-                Flowable.just(ByteBuffer.wrap(response))
-            )
+            (line, headers, body) -> BaseResponse.ok().body(response)
         );
         final JettyClientSlices client = new JettyClientSlices(
             new HttpClientSettings().addProxy(
@@ -121,10 +116,8 @@ final class JettyClientSlicesTest {
     void shouldNotFollowRedirectIfDisabled() {
         final RsStatus status = RsStatus.TEMPORARY_REDIRECT;
         this.server.update(
-            (line, headers, body) -> new RsWithHeaders(
-                new RsWithStatus(status),
-                "Location", "/other/path"
-            )
+            (line, headers, body) -> BaseResponse.temporaryRedirect()
+                .header("Location", "/other/path")
         );
         final JettyClientSlices client = new JettyClientSlices(
             new HttpClientSettings().setFollowRedirects(false)
@@ -148,16 +141,11 @@ final class JettyClientSlicesTest {
     void shouldFollowRedirectIfEnabled() {
         this.server.update(
             (line, headers, body) -> {
-                final Response result;
                 if (line.toString().contains("target")) {
-                    result = new RsWithStatus(RsStatus.OK);
-                } else {
-                    result = new RsWithHeaders(
-                        new RsWithStatus(RsStatus.TEMPORARY_REDIRECT),
-                        "Location", "/target"
-                    );
+                    return BaseResponse.ok();
                 }
-                return result;
+                return BaseResponse.temporaryRedirect()
+                    .header("Location", "/target");
             }
         );
         final JettyClientSlices client = new JettyClientSlices(

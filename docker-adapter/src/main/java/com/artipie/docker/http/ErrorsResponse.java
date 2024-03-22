@@ -6,17 +6,16 @@ package com.artipie.docker.http;
 
 import com.artipie.docker.error.DockerError;
 import com.artipie.http.Response;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
 
 /**
  * Docker errors response.
@@ -47,16 +46,7 @@ final class ErrorsResponse extends Response.Wrap {
      * @param errors Errors.
      */
     protected ErrorsResponse(final RsStatus status, final Collection<DockerError> errors) {
-        super(
-            new RsWithBody(
-                new RsWithHeaders(
-                    new RsWithStatus(status),
-                    new JsonContentType(ErrorsResponse.CHARSET)
-                ),
-                json(errors),
-                ErrorsResponse.CHARSET
-            )
-        );
+        super(BaseResponse.from(status).jsonBody(json(errors), ErrorsResponse.CHARSET));
     }
 
     /**

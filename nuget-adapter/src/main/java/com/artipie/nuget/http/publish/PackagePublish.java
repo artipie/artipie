@@ -10,6 +10,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithStatus;
 import com.artipie.nuget.InvalidPackageException;
@@ -18,11 +19,10 @@ import com.artipie.nuget.Repository;
 import com.artipie.nuget.http.Resource;
 import com.artipie.nuget.http.Route;
 import com.artipie.scheduling.ArtifactEvent;
-import java.nio.ByteBuffer;
+
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import org.reactivestreams.Publisher;
 
 /**
  * Package publish service, used to pushing new packages and deleting existing ones.
@@ -111,7 +111,7 @@ public final class PackagePublish implements Route {
 
         @Override
         public Response get(final Headers headers) {
-            return new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
+            return BaseResponse.methodNotAllowed();
         }
 
         @Override
@@ -121,7 +121,6 @@ public final class PackagePublish implements Route {
                     () -> new Multipart(headers, body).first()
                 ).thenCompose(this.repository::add).handle(
                     (info, throwable) -> {
-                        final RsStatus res;
                         if (throwable == null) {
                             this.events.ifPresent(
                                 queue -> queue.add(
@@ -132,13 +131,11 @@ public final class PackagePublish implements Route {
                                     )
                                 )
                             );
-                            res = RsStatus.CREATED;
-                        } else {
-                            res = toStatus(throwable.getCause());
+                            return RsStatus.CREATED;
                         }
-                        return res;
+                        return toStatus(throwable.getCause());
                     }
-                ).thenApply(RsWithStatus::new)
+                ).thenApply(BaseResponse::from)
             );
         }
 

@@ -6,7 +6,6 @@ package  com.artipie.conan.http;
 
 import com.artipie.asto.Storage;
 import com.artipie.conan.ItemTokenizer;
-import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
@@ -15,9 +14,7 @@ import com.artipie.http.auth.OperationControl;
 import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -111,13 +108,9 @@ public final class ConanSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.ByPath("^/v1/ping$"),
                     new SliceSimple(
-                        new RsWithHeaders(
-                            new RsWithStatus(RsStatus.ACCEPTED),
-                            Headers.from(
-                                "X-Conan-Server-Capabilities",
-                                "complex_search,revisions,revisions"
-                            )
-                        )
+                        BaseResponse.accepted()
+                            .header("X-Conan-Server-Capabilities",
+                                "complex_search,revisions,revisions")
                     )
                 ),
                 new RtRulePath(

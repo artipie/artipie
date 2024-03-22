@@ -15,13 +15,9 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLinePrefix;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.slice.KeyFromPath;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
@@ -31,8 +27,6 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * SliceIndex returns formatted html output with index of repository packages.
- *
- * @since 0.2
  */
 final class SliceIndex implements Slice {
 
@@ -42,7 +36,6 @@ final class SliceIndex implements Slice {
     private final Storage storage;
 
     /**
-     * Ctor.
      * @param storage Storage
      */
     SliceIndex(final Storage storage) {
@@ -50,11 +43,7 @@ final class SliceIndex implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content publisher
-    ) {
+    public Response response(RequestLine line, Headers headers, Content publisher) {
         final Key rqkey = new KeyFromPath(line.uri().toString());
         final String prefix = new RequestLinePrefix(rqkey.string(), headers).get();
         return new AsyncResponse(
@@ -76,17 +65,11 @@ final class SliceIndex implements Slice {
                 )
                 .collect(StringBuilder::new, StringBuilder::append)
                 .<Response>map(
-                    resp -> new RsWithBody(
-                        new RsWithHeaders(
-                            new RsWithStatus(RsStatus.OK),
-                            new ContentType("text/html")
-                        ),
-                        String.format(
-                            "<!DOCTYPE html>\n<html>\n  </body>\n%s\n</body>\n</html>",
-                            resp.toString()
-                        ),
-                        StandardCharsets.UTF_8
-                    )
+                    resp -> BaseResponse.ok()
+                        .htmlBody(
+                            String.format(
+                                "<!DOCTYPE html>\n<html>\n  </body>\n%s\n</body>\n</html>", resp.toString()
+                            ), StandardCharsets.UTF_8)
                 )
         );
     }

@@ -13,8 +13,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.scheduling.ArtifactEvent;
 
 import java.util.Optional;
@@ -85,7 +84,6 @@ final class AddArchiveSlice implements Slice {
     public Response response(RequestLine line, Headers headers, Content body) {
         final String uri = line.uri().getPath();
         final Matcher matcher = AddArchiveSlice.PATH.matcher(uri);
-        final Response resp;
         if (matcher.matches()) {
             final Archive.Zip archive =
                 new Archive.Zip(new Archive.Name(matcher.group("full"), matcher.group("version")));
@@ -105,10 +103,8 @@ final class AddArchiveSlice implements Slice {
                     )
                 );
             }
-            resp = new AsyncResponse(res.thenApply(nothing -> new RsWithStatus(RsStatus.CREATED)));
-        } else {
-            resp = new RsWithStatus(RsStatus.BAD_REQUEST);
+            return new AsyncResponse(res.thenApply(nothing -> BaseResponse.created()));
         }
-        return resp;
+        return BaseResponse.badRequest();
     }
 }

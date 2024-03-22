@@ -11,8 +11,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -52,16 +51,13 @@ final class AddSlice implements Slice {
     ) {
         final String path = line.uri().toString();
         final Matcher matcher = AddSlice.PATH_PATTERN.matcher(path);
-        final Response resp;
         if (matcher.matches()) {
-            resp = new AsyncResponse(
+            return new AsyncResponse(
                 this.repository.addJson(
                     new Content.From(body), Optional.ofNullable(matcher.group("version"))
-                ).thenApply(nothing -> new RsWithStatus(RsStatus.CREATED))
+                ).thenApply(nothing -> BaseResponse.created())
             );
-        } else {
-            resp = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
-        return resp;
+        return BaseResponse.badRequest();
     }
 }

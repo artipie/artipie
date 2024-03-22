@@ -24,10 +24,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -84,19 +81,19 @@ public final class UploadSlice implements Slice {
     /**
      * Repository name.
      */
-    private final String rname;
+    private final String repoName;
 
     /**
      * Ctor.
      * @param storage Repository storage.
      * @param events Artifact events
-     * @param rname Repository name
+     * @param repoName Repository name
      */
     public UploadSlice(final Storage storage, final Optional<Queue<ArtifactEvent>> events,
-        final String rname) {
+        final String repoName) {
         this.storage = storage;
         this.events = events;
-        this.rname = rname;
+        this.repoName = repoName;
     }
 
     @Override
@@ -165,32 +162,25 @@ public final class UploadSlice implements Slice {
                     (content, throwable) -> {
                         final Response result;
                         if (throwable == null) {
-                            result = new RsFull(
-                                RsStatus.CREATED,
-                                new HexContentType(headers).fill(),
-                                Content.EMPTY
-                            );
+                            result = BaseResponse.created().headers(new HexContentType(headers).fill());
                             this.events.ifPresent(
                                 queue -> queue.add(
                                     new ArtifactEvent(
-                                        UploadSlice.REPO_TYPE, this.rname,
+                                        UploadSlice.REPO_TYPE, this.repoName,
                                         new Login(headers).getValue(),
                                         name.get(), version.get(), tarcontent.get().length
                                     )
                                 )
                             );
                         } else {
-                            result = new RsWithBody(
-                                new RsWithStatus(RsStatus.INTERNAL_ERROR),
-                                throwable.getMessage().getBytes()
-                            );
+                            result = BaseResponse.internalError(throwable);
                         }
                         return result;
                     }
                 )
             );
         } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+            res = BaseResponse.badRequest();
         }
         return res;
     }

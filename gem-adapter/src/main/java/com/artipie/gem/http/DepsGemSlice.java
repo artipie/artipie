@@ -13,7 +13,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.rs.RsWithBody;
+import com.artipie.http.rs.BaseResponse;
 import io.reactivex.Flowable;
 
 import java.util.Arrays;
@@ -22,7 +22,6 @@ import java.util.HashSet;
 
 /**
  * Dependency API slice implementation.
- * @since 1.3
  */
 final class DepsGemSlice implements Slice {
 
@@ -52,7 +51,7 @@ final class DepsGemSlice implements Slice {
                     )
                 )
             ).thenApply(
-                data -> new RsWithBody(Flowable.just(data))
+                data -> BaseResponse.ok().body(Flowable.just(data))
             )
         );
     }

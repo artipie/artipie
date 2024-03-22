@@ -18,8 +18,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.maven.Maven;
 import com.artipie.maven.ValidUpload;
 import com.artipie.scheduling.ArtifactEvent;
@@ -57,11 +56,6 @@ public final class PutMetadataChecksumSlice implements Slice {
      * Repository type.
      */
     private static final String REPO_TYPE = "maven";
-
-    /**
-     * Response with status BAD_REQUEST.
-     */
-    private static final Response BAD_REQUEST = new RsWithStatus(RsStatus.BAD_REQUEST);
 
     /**
      * Abstract storage.
@@ -127,7 +121,7 @@ public final class PutMetadataChecksumSlice implements Slice {
                                         action = this.validateAndUpdate(pkg, location, headers);
                                     } else {
                                         action = CompletableFuture.completedFuture(
-                                            new RsWithStatus(RsStatus.CREATED)
+                                            BaseResponse.created()
                                         );
                                     }
                                     return action;
@@ -135,7 +129,7 @@ public final class PutMetadataChecksumSlice implements Slice {
                             );
                         } else {
                             resp = CompletableFuture.completedFuture(
-                                PutMetadataChecksumSlice.BAD_REQUEST
+                                BaseResponse.badRequest()
                             );
                         }
                         return resp;
@@ -143,7 +137,7 @@ public final class PutMetadataChecksumSlice implements Slice {
                 )
             );
         }
-        return new RsWithStatus(RsStatus.BAD_REQUEST);
+        return BaseResponse.badRequest();
     }
 
     /**
@@ -174,9 +168,11 @@ public final class PutMetadataChecksumSlice implements Slice {
                             )
                         );
                     }
-                    upd = res.thenApply(ignored -> new RsWithStatus(RsStatus.CREATED));
+                    upd = res.thenApply(ignored -> BaseResponse.created());
                 } else {
-                    upd = CompletableFuture.completedFuture(PutMetadataChecksumSlice.BAD_REQUEST);
+                    upd = CompletableFuture.completedFuture(
+                        BaseResponse.badRequest()
+                    );
                 }
                 return upd;
             }

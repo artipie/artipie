@@ -12,9 +12,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.scheduling.ArtifactEvent;
 
@@ -72,7 +70,6 @@ final class UnpublishForceSlice implements Slice {
     ) {
         final String uri = line.uri().getPath();
         final Matcher matcher = UnpublishForceSlice.PTRN.matcher(uri);
-        final Response resp;
         if (matcher.matches()) {
             final String pkg = new PackageNameFromUrl(
                 String.format(
@@ -91,10 +88,8 @@ final class UnpublishForceSlice implements Slice {
                     )
                 );
             }
-            resp = new AsyncResponse(res.thenApply(nothing -> StandardRs.OK));
-        } else {
-            resp = new RsWithStatus(RsStatus.BAD_REQUEST);
+            return new AsyncResponse(res.thenApply(nothing -> BaseResponse.ok()));
         }
-        return resp;
+        return BaseResponse.badRequest();
     }
 }

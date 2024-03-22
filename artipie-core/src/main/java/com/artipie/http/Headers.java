@@ -98,6 +98,23 @@ public class Headers implements Iterable<Header> {
             .toList();
     }
 
+    public List<Header> find(String name) {
+        return headers.stream()
+            .filter(h -> h.getKey().equalsIgnoreCase(name))
+            .toList();
+    }
+
+    public Header single(String name) {
+        List<Header> res = find(name);
+        if (res.isEmpty()) {
+            throw new IllegalStateException("Header '" + name + "' is not found");
+        }
+        if (res.size() > 1) {
+            throw new IllegalStateException("Too many headers '" + name + "' are found");
+        }
+        return res.getFirst();
+    }
+
     @Override
     public Iterator<Header> iterator() {
         return headers.iterator();

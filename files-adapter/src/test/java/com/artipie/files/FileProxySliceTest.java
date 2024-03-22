@@ -21,9 +21,9 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
@@ -129,7 +129,7 @@ final class FileProxySliceTest {
         MatcherAssert.assertThat(
             "Does not return body from cache",
             new FileProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.INTERNAL_ERROR)),
+                new SliceSimple(BaseResponse.internalError()),
                 new FromRemoteCache(this.storage)
             ),
             new SliceHasResponse(
@@ -154,7 +154,7 @@ final class FileProxySliceTest {
         MatcherAssert.assertThat(
             "Incorrect status, 404 is expected",
             new FileProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.BAD_REQUEST)),
+                new SliceSimple(BaseResponse.badRequest()),
                 new FromRemoteCache(this.storage)
             ),
             new SliceHasResponse(

@@ -6,8 +6,8 @@ package com.artipie.http.group;
 
 import com.artipie.http.Connection;
 import com.artipie.http.Response;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -45,7 +45,7 @@ final class GroupResponse implements Response {
                 .send(connection)
                 .<CompletionStage<Void>>thenApply(CompletableFuture::completedFuture)
                 .exceptionally(
-                    throwable -> new RsWithStatus(RsStatus.INTERNAL_ERROR).send(connection)
+                    throwable -> BaseResponse.internalError().send(connection)
                 );
         }
         return future;

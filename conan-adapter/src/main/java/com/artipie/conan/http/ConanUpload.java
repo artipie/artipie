@@ -17,8 +17,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.BaseResponse;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.SliceUpload;
 import org.reactivestreams.Publisher;
 
@@ -129,8 +127,6 @@ public final class ConanUpload {
         private final ItemTokenizer tokenizer;
 
         /**
-         * Ctor.
-         *
          * @param storage Current Artipie storage instance.
          * @param tokenizer Tokenizer for repository items.
          */
@@ -140,22 +136,14 @@ public final class ConanUpload {
         }
 
         @Override
-        public Response response(final RequestLine line,
-                                 final Headers headers, final Content body) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             final Matcher matcher = matchRequest(line);
             final String path = matcher.group(ConanUpload.URI_PATH);
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
             return new AsyncResponse(
-                this.storage.exists(new Key.From(path)).thenCompose(
-                    exist -> {
-                        final CompletableFuture<Response> result;
-                        if (exist) {
-                            result = generateError(path);
-                        } else {
-                            result = this.generateUrls(body, path, hostname);
-                        }
-                        return result;
-                    }
+                this.storage.exists(new Key.From(path))
+                    .thenCompose(
+                        exist -> exist ? generateError(path) : generateUrls(body, path, hostname)
                 )
             );
         }
@@ -205,7 +193,6 @@ public final class ConanUpload {
 
     /**
      * Conan HTTP PUT /{path/to/file}?signature={signature} REST API.
-     * @since 0.1
      */
     public static final class PutFile implements Slice {
 
@@ -230,33 +217,24 @@ public final class ConanUpload {
         }
 
         @Override
-        public Response response(final RequestLine line,
-                                 final Headers headers, final Content body) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             final String path = line.uri().getPath();
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
-            final Optional<String> token = new RqParams(
-                line.uri().getQuery()
-            ).value("signature");
-            final Response response;
+            final Optional<String> token = new RqParams(line.uri().getQuery()).value("signature");
             if (token.isPresent()) {
-                response = new AsyncResponse(
+                return new AsyncResponse(
                     this.tokenizer.authenticateToken(token.get()).thenApply(
                         item -> {
-                            final Response resp;
                             if (item.isPresent() && item.get().getHostname().equals(hostname)
                                 && item.get().getPath().equals(path)) {
-                                resp = new SliceUpload(this.storage).response(line, headers, body);
-                            } else {
-                                resp = new RsWithStatus(RsStatus.UNAUTHORIZED);
+                                return new SliceUpload(this.storage).response(line, headers, body);
                             }
-                            return resp;
+                            return BaseResponse.unauthorized();
                         }
                     )
                 );
-            } else {
-                response = new RsWithStatus(RsStatus.UNAUTHORIZED);
             }
-            return response;
+            return BaseResponse.unauthorized();
         }
     }
 }

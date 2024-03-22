@@ -15,19 +15,14 @@ import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
  * Responses on api key requests.
- *
- * @since 0.3
  */
-@SuppressWarnings("PMD.OnlyOneReturn")
 final class ApiKeySlice implements Slice {
 
     /**
@@ -36,7 +31,6 @@ final class ApiKeySlice implements Slice {
     private final Authentication auth;
 
     /**
-     * The Ctor.
      * @param auth Auth.
      */
     ApiKeySlice(final Authentication auth) {
@@ -44,10 +38,7 @@ final class ApiKeySlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         return new AsyncResponse(
             new BasicAuthScheme(this.auth)
                 .authenticate(headers)
@@ -60,10 +51,11 @@ final class ApiKeySlice implements Slice {
                                 .map(val -> val.substring(BasicAuthScheme.NAME.length() + 1))
                                 .findFirst();
                             if (key.isPresent()) {
-                                return new RsWithBody(key.get(), StandardCharsets.US_ASCII);
+                                return BaseResponse.ok()
+                                    .textBody(key.get(), StandardCharsets.US_ASCII);
                             }
                         }
-                        return new RsWithStatus(RsStatus.UNAUTHORIZED);
+                        return BaseResponse.unauthorized();
                     }
                 )
         );

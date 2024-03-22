@@ -50,7 +50,7 @@ class TagsEntityGetTest {
                     RsStatus.OK,
                     Headers.from(
                         new ContentLength(tags.length),
-                        new ContentType("application/json; charset=utf-8")
+                        ContentType.json()
                     ),
                     tags
                 ),

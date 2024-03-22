@@ -19,9 +19,9 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import org.hamcrest.MatcherAssert;
@@ -104,7 +104,7 @@ class ProxySliceTest {
         MatcherAssert.assertThat(
             "Returns body from cache",
             new ProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.INTERNAL_ERROR)),
+                new SliceSimple(BaseResponse.internalError()),
                 new FromStorageCache(this.storage), Optional.of(this.events), "my-pypi-proxy"
             ),
             new SliceHasResponse(
@@ -131,7 +131,7 @@ class ProxySliceTest {
         MatcherAssert.assertThat(
             "Status 400 returned",
             new ProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.BAD_REQUEST)),
+                new SliceSimple(BaseResponse.badRequest()),
                 new FromStorageCache(this.storage), Optional.of(this.events), "my-pypi-proxy"
             ),
             new SliceHasResponse(
@@ -190,7 +190,7 @@ class ProxySliceTest {
         MatcherAssert.assertThat(
             "Status 400 returned",
             new ProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.BAD_REQUEST)),
+                new SliceSimple(BaseResponse.badRequest()),
                 (key, remote, cache) ->
                     new FailedCompletionStage<>(
                         new IllegalStateException("Failed to obtain item from cache")

@@ -14,12 +14,8 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
-import io.reactivex.Flowable;
 import io.vertx.core.http.HttpServerOptions;
 import org.eclipse.jetty.client.HttpClient;
 import org.hamcrest.MatcherAssert;
@@ -32,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -95,7 +90,7 @@ class JettyClientSliceTest {
         this.server.update(
             (rqline, rqheaders, rqbody) -> {
                 actual.set(rqline);
-                return StandardRs.EMPTY;
+                return BaseResponse.ok();
             }
         );
         this.slice.response(
@@ -116,7 +111,7 @@ class JettyClientSliceTest {
             (line, headers, content) -> {
                 System.out.println("MY_DEBUG " + headers);
                 actual.set(headers);
-                return StandardRs.EMPTY;
+                return BaseResponse.ok();
             }
         );
         this.slice.response(
@@ -140,7 +135,7 @@ class JettyClientSliceTest {
                 new Content.From(rqbody).asBytesFuture().thenApply(
                     bytes -> {
                         actual.set(bytes);
-                        return StandardRs.EMPTY;
+                        return BaseResponse.ok();
                     }
                 )
             )
@@ -158,15 +153,14 @@ class JettyClientSliceTest {
 
     @Test
     void shouldReceiveStatus() {
-        final RsStatus status = RsStatus.NOT_FOUND;
-        this.server.update((rqline, rqheaders, rqbody) -> new RsWithStatus(status));
+        this.server.update((rqline, rqheaders, rqbody) -> BaseResponse.notFound());
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine(RqMethod.GET, "/a/b/c"),
                 Headers.EMPTY,
                 Content.EMPTY
             ),
-            new RsHasStatus(status)
+            new RsHasStatus(RsStatus.NOT_FOUND)
         );
     }
 
@@ -177,9 +171,7 @@ class JettyClientSliceTest {
             new Header("WWW-Authenticate", "Basic")
         );
         this.server.update(
-            (rqline, rqheaders, rqbody) -> new RsWithHeaders(
-                StandardRs.EMPTY, headers
-            )
+            (rqline, rqheaders, rqbody) -> BaseResponse.ok().headers(headers)
         );
         MatcherAssert.assertThat(
             this.slice.response(
@@ -195,7 +187,7 @@ class JettyClientSliceTest {
     void shouldReceiveBody() {
         final byte[] data = "data".getBytes();
         this.server.update(
-            (rqline, rqheaders, rqbody) -> new RsWithBody(Flowable.just(ByteBuffer.wrap(data)))
+            (rqline, rqheaders, rqbody) -> BaseResponse.ok().body(data)
         );
         MatcherAssert.assertThat(
             this.slice.response(

@@ -95,7 +95,7 @@ public final class ListBlobsSlice implements Slice {
                         final String text = this.format.apply(keys);
                         return new RsFull(
                             RsStatus.OK,
-                            Headers.from(new ContentType(this.mtype)),
+                            Headers.from(ContentType.mime(this.mtype)),
                             new Content.From(text.getBytes(StandardCharsets.UTF_8))
                         );
                     }

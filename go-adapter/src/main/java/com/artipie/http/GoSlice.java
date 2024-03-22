@@ -9,10 +9,11 @@ import com.artipie.asto.Storage;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
+import com.artipie.http.headers.ContentType;
+import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -32,18 +33,9 @@ import java.util.regex.Pattern;
  */
 public final class GoSlice implements Slice {
 
-    /**
-     * Text header.
-     */
-    private static final String TEXT_PLAIN = "text/plain";
-
-    /**
-     * Origin.
-     */
     private final Slice origin;
 
     /**
-     * Ctor.
      * @param storage Storage
      * @param policy Security policy
      * @param users Users
@@ -54,18 +46,18 @@ public final class GoSlice implements Slice {
         this.origin = new SliceRoute(
             GoSlice.pathGet(
                 ".+/@v/v.*\\.info",
-                GoSlice.createSlice(storage, "application/json", policy, users, name)
+                GoSlice.createSlice(storage, ContentType.json(), policy, users, name)
             ),
             GoSlice.pathGet(
                 ".+/@v/v.*\\.mod",
-                GoSlice.createSlice(storage, GoSlice.TEXT_PLAIN, policy, users, name)
+                GoSlice.createSlice(storage, ContentType.text(), policy, users, name)
             ),
             GoSlice.pathGet(
                 ".+/@v/v.*\\.zip",
-                GoSlice.createSlice(storage, "application/zip", policy, users, name)
+                GoSlice.createSlice(storage, ContentType.mime("application/zip"), policy, users, name)
             ),
             GoSlice.pathGet(
-                ".+/@v/list", GoSlice.createSlice(storage, GoSlice.TEXT_PLAIN, policy, users, name)
+                ".+/@v/list", GoSlice.createSlice(storage, ContentType.text(), policy, users, name)
             ),
             GoSlice.pathGet(
                 ".+/@latest",
@@ -79,9 +71,7 @@ public final class GoSlice implements Slice {
             ),
             new RtRulePath(
                 RtRule.FALLBACK,
-                new SliceSimple(
-                    new RsWithStatus(RsStatus.NOT_FOUND)
-                )
+                new SliceSimple(BaseResponse.notFound())
             )
         );
     }
@@ -96,18 +86,23 @@ public final class GoSlice implements Slice {
     /**
      * Creates slice instance.
      * @param storage Storage
-     * @param type Content-type
+     * @param contentType Content-type
      * @param policy Security policy
      * @param users Users
      * @param name Repository name
      * @return Slice
      */
-    private static Slice createSlice(final Storage storage, final String type,
-        final Policy<?> policy, final Authentication users, final String name) {
+    private static Slice createSlice(
+        Storage storage,
+        Header contentType,
+        Policy<?> policy,
+        Authentication users,
+        String name
+    ) {
         return new BasicAuthzSlice(
             new SliceWithHeaders(
                 new SliceDownload(storage),
-                Headers.from("content-type", type)
+                Headers.from(contentType)
             ),
             users,
             new OperationControl(policy, new AdapterBasicPermission(name, Action.Standard.READ))

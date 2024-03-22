@@ -21,7 +21,6 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
 import com.artipie.http.rs.BaseResponse;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.pypi.meta.Metadata;
@@ -104,7 +103,7 @@ final class WheelSlice implements Slice {
                             res = this.storage.delete(key)
                                 .thenApply(nothing -> RsStatus.BAD_REQUEST);
                         }
-                        return res.thenApply(RsWithStatus::new);
+                        return res.thenApply(BaseResponse::from);
                     }
                 )
             ).handle(

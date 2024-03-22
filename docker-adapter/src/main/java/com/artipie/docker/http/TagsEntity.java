@@ -13,11 +13,11 @@ import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.artipie.http.rs.BaseResponse;
 
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 /**
@@ -64,7 +64,9 @@ final class TagsEntity {
                     params.value("last").map(Tag.Valid::new),
                     params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
                 ).thenApply(
-                    tags -> BaseResponse.ok().jsonBody(tags.json(), StandardCharsets.UTF_8)
+                    tags -> BaseResponse.ok()
+                        .header(ContentType.json())
+                        .body(tags.json())
                 )
             );
         }

@@ -71,7 +71,7 @@ class PySliceTest {
                 ),
                 new RsHasStatus(RsStatus.OK),
                 new RsHasHeaders(
-                    new Header("Content-type", "text/html"),
+                    new Header("Content-type", "text/html; charset=utf-8"),
                     new Header("Content-Length", "217")
                 )
             )
@@ -95,7 +95,7 @@ class PySliceTest {
                 ),
                 new RsHasStatus(RsStatus.OK),
                 new RsHasHeaders(
-                    new Header("Content-type", "text/html"),
+                    new Header("Content-type", "text/html; charset=utf-8"),
                     new Header("Content-Length", "193")
                 )
             )

@@ -9,8 +9,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.rs.BaseResponse;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -65,12 +64,11 @@ public final class SliceOptional<T> implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers head,
-                             final Content body) {
+    public Response response(RequestLine line, Headers head, Content body) {
         final T target = this.source.get();
         if (this.predicate.test(target)) {
             return this.slice.apply(target).response(line, head, body);
         }
-        return new RsWithStatus(RsStatus.NOT_FOUND);
+        return BaseResponse.notFound();
     }
 }
