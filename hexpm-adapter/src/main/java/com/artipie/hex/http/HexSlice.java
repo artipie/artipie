@@ -26,14 +26,10 @@ import java.util.Queue;
 
 /**
  * Artipie {@link Slice} for HexPm repository HTTP API.
- *
- * @since 0.1
  */
 public final class HexSlice extends Slice.Wrap {
 
     /**
-     * Ctor.
-     *
      * @param storage The storage for package.
      * @param policy Access policy.
      * @param users Concrete identities.

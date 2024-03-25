@@ -84,13 +84,13 @@ public final class UploadSlice implements Slice {
     private final String repoName;
 
     /**
-     * Ctor.
      * @param storage Repository storage.
      * @param events Artifact events
      * @param repoName Repository name
      */
-    public UploadSlice(final Storage storage, final Optional<Queue<ArtifactEvent>> events,
-        final String repoName) {
+    public UploadSlice(Storage storage,
+                       Optional<Queue<ArtifactEvent>> events,
+                       String repoName) {
         this.storage = storage;
         this.events = events;
         this.repoName = repoName;
@@ -163,7 +163,8 @@ public final class UploadSlice implements Slice {
                         final Response result;
                         if (throwable == null) {
                             result = ResponseBuilder.created()
-                                .headers(new HexContentType(headers).fill()).build();
+                                .headers(new HexContentType(headers).fill())
+                                .build();
                             this.events.ifPresent(
                                 queue -> queue.add(
                                     new ArtifactEvent(
@@ -174,7 +175,9 @@ public final class UploadSlice implements Slice {
                                 )
                             );
                         } else {
-                            result = ResponseBuilder.internalError(throwable).build();
+                            result = ResponseBuilder.internalError()
+                                .body(throwable.getMessage().getBytes())
+                                .build();
                         }
                         return result;
                     }
