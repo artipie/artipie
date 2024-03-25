@@ -37,67 +37,67 @@ public final class HexSlice extends Slice.Wrap {
      * @param name Repository name
      */
     public HexSlice(final Storage storage, final Policy<?> policy, final Authentication users,
-        final Optional<Queue<ArtifactEvent>> events, final String name) {
+                    final Optional<Queue<ArtifactEvent>> events, final String name) {
         super(new SliceRoute(
-            new RtRulePath(
-                new RtRule.All(
-                    new ByMethodsRule(RqMethod.GET),
-                    new RtRule.Any(
-                        new RtRule.ByPath(DownloadSlice.PACKAGES_PTRN),
-                        new RtRule.ByPath(DownloadSlice.TARBALLS_PTRN)
+                new RtRulePath(
+                    new RtRule.All(
+                        new ByMethodsRule(RqMethod.GET),
+                        new RtRule.Any(
+                            new RtRule.ByPath(DownloadSlice.PACKAGES_PTRN),
+                            new RtRule.ByPath(DownloadSlice.TARBALLS_PTRN)
+                        )
+                    ),
+                    new BasicAuthzSlice(
+                        new DownloadSlice(storage),
+                        users,
+                        new OperationControl(
+                            policy, new AdapterBasicPermission(name, Action.Standard.READ)
+                        )
                     )
                 ),
-                new BasicAuthzSlice(
-                    new DownloadSlice(storage),
-                    users,
-                    new OperationControl(
-                        policy, new AdapterBasicPermission(name, Action.Standard.READ)
+                new RtRulePath(
+                    new RtRule.All(
+                        new ByMethodsRule(RqMethod.GET),
+                        new RtRule.ByPath(UserSlice.USERS)
+                    ),
+                    new BasicAuthzSlice(
+                        new UserSlice(),
+                        users,
+                        new OperationControl(
+                            policy, new AdapterBasicPermission(name, Action.Standard.READ)
+                        )
                     )
-                )
-            ),
-            new RtRulePath(
-                new RtRule.All(
-                    new ByMethodsRule(RqMethod.GET),
-                    new RtRule.ByPath(UserSlice.USERS)
                 ),
-                new BasicAuthzSlice(
-                    new UserSlice(),
-                    users,
-                    new OperationControl(
-                        policy, new AdapterBasicPermission(name, Action.Standard.READ)
+                new RtRulePath(
+                    new RtRule.All(
+                        new ByMethodsRule(RqMethod.POST),
+                        new RtRule.ByPath(UploadSlice.PUBLISH)
+                    ),
+                    new BasicAuthzSlice(
+                        new UploadSlice(storage, events, name),
+                        users,
+                        new OperationControl(
+                            policy, new AdapterBasicPermission(name, Action.Standard.WRITE)
+                        )
                     )
-                )
-            ),
-            new RtRulePath(
-                new RtRule.All(
-                    new ByMethodsRule(RqMethod.POST),
-                    new RtRule.ByPath(UploadSlice.PUBLISH)
                 ),
-                new BasicAuthzSlice(
-                    new UploadSlice(storage, events, name),
-                    users,
-                    new OperationControl(
-                        policy, new AdapterBasicPermission(name, Action.Standard.WRITE)
+                new RtRulePath(
+                    new RtRule.All(
+                        new ByMethodsRule(RqMethod.POST),
+                        new RtRule.ByPath(DocsSlice.DOCS_PTRN)
+                    ),
+                    new BasicAuthzSlice(
+                        new DocsSlice(),
+                        users,
+                        new OperationControl(
+                            policy, new AdapterBasicPermission(name, Action.Standard.READ)
+                        )
                     )
-                )
-            ),
-            new RtRulePath(
-                new RtRule.All(
-                    new ByMethodsRule(RqMethod.POST),
-                    new RtRule.ByPath(DocsSlice.DOCS_PTRN)
                 ),
-                new BasicAuthzSlice(
-                    new DocsSlice(),
-                    users,
-                    new OperationControl(
-                        policy, new AdapterBasicPermission(name, Action.Standard.READ)
-                    )
+                new RtRulePath(
+                    RtRule.FALLBACK, new SliceSimple(ResponseBuilder.notFound().build())
                 )
-            ),
-            new RtRulePath(
-                RtRule.FALLBACK, new SliceSimple(ResponseBuilder.notFound().build())
             )
-        )
         );
     }
 }

@@ -81,19 +81,19 @@ public final class UploadSlice implements Slice {
     /**
      * Repository name.
      */
-    private final String repoName;
+    private final String rname;
 
     /**
+     * Ctor.
      * @param storage Repository storage.
      * @param events Artifact events
-     * @param repoName Repository name
+     * @param rname Repository name
      */
-    public UploadSlice(Storage storage,
-                       Optional<Queue<ArtifactEvent>> events,
-                       String repoName) {
+    public UploadSlice(final Storage storage, final Optional<Queue<ArtifactEvent>> events,
+                       final String rname) {
         this.storage = storage;
         this.events = events;
-        this.repoName = repoName;
+        this.rname = rname;
     }
 
     @Override
@@ -168,7 +168,7 @@ public final class UploadSlice implements Slice {
                             this.events.ifPresent(
                                 queue -> queue.add(
                                     new ArtifactEvent(
-                                        UploadSlice.REPO_TYPE, this.repoName,
+                                        UploadSlice.REPO_TYPE, this.rname,
                                         new Login(headers).getValue(),
                                         name.get(), version.get(), tarcontent.get().length
                                     )

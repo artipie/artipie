@@ -8,7 +8,8 @@ package com.artipie.hex.http.headers;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Accept;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.headers.Header;
+
+import java.util.Map;
 
 /**
  * ContentType header for HexPm.
@@ -38,7 +39,7 @@ public class HexContentType {
      */
     public Headers fill() {
         String type = HexContentType.DEFAULT_TYPE;
-        for (Header header : this.headers) {
+        for (final Map.Entry<String, String> header : this.headers) {
             if (Accept.NAME.equalsIgnoreCase(header.getKey()) && !header.getValue().isEmpty()) {
                 type = header.getValue();
             }
