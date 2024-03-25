@@ -154,10 +154,8 @@ public class BaseResponse implements com.artipie.http.Response {
 
     public BaseResponse textBody(String text, Charset charset) {
         this.body = new Content.From(text.getBytes(charset));
-        this.headers = Headers.from(
-            ContentType.text(charset),
-            new ContentLength(body.size().orElseThrow())
-        );
+        this.headers.add(ContentType.text(charset))
+            .add(new ContentLength(body.size().orElseThrow()));
         return this;
     }
 
@@ -175,9 +173,8 @@ public class BaseResponse implements com.artipie.http.Response {
 
     public BaseResponse jsonBody(String json, Charset charset) {
         this.body = new Content.From(json.getBytes(charset));
-        this.headers = Headers.from(
-            ContentType.json(charset),
-            new ContentLength(body.size().orElseThrow())
+        headers.add(ContentType.json(charset))
+            .add(new ContentLength(body.size().orElseThrow())
         );
         return this;
     }
@@ -188,19 +185,15 @@ public class BaseResponse implements com.artipie.http.Response {
 
     public BaseResponse yamlBody(String yaml, Charset charset) {
         this.body = new Content.From(yaml.getBytes(charset));
-        this.headers = Headers.from(
-            ContentType.yaml(charset),
-            new ContentLength(body.size().orElseThrow())
-        );
+        this.headers.add(ContentType.yaml(charset))
+            .add(new ContentLength(body.size().orElseThrow()));
         return this;
     }
 
     public BaseResponse htmlBody(String html, Charset charset) {
         this.body = new Content.From(html.getBytes(charset));
-        this.headers = Headers.from(
-            ContentType.html(charset),
-            new ContentLength(body.size().orElseThrow())
-        );
+        this.headers.add(ContentType.html(charset))
+            .add(new ContentLength(body.size().orElseThrow()));
         return this;
     }
 

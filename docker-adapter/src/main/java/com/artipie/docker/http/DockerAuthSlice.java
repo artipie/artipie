@@ -17,8 +17,6 @@ import com.artipie.http.rs.RsStatus;
 /**
  * Slice that wraps origin Slice replacing body with errors JSON in Docker API format
  * for 403 Unauthorized response status.
- *
- * @since 0.5
  */
 final class DockerAuthSlice implements Slice {
 
@@ -28,8 +26,6 @@ final class DockerAuthSlice implements Slice {
     private final Slice origin;
 
     /**
-     * Ctor.
-     *
      * @param origin Origin slice.
      */
     DockerAuthSlice(final Slice origin) {
@@ -37,10 +33,7 @@ final class DockerAuthSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine rqline,
-        final Headers rqheaders,
-        final Content rqbody) {
+    public Response response(RequestLine rqline, Headers rqheaders, Content rqbody) {
         final Response response = this.origin.response(rqline, rqheaders, rqbody);
         return connection -> response.send(
             (rsstatus, rsheaders, rsbody) -> {

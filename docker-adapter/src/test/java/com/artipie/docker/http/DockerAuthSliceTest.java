@@ -5,6 +5,7 @@
 package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
+import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
@@ -14,7 +15,6 @@ import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
@@ -36,7 +36,7 @@ public final class DockerAuthSliceTest {
         );
         MatcherAssert.assertThat(
             new DockerAuthSlice(
-                (rqline, rqheaders, rqbody) -> BaseResponse.unauthorized().headers(headers.copy())
+                (rqline, rqheaders, rqbody) -> BaseResponse.unauthorized().headers(headers)
             ).response(
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY, Content.EMPTY
@@ -45,9 +45,12 @@ public final class DockerAuthSliceTest {
                 Arrays.asList(
                     new IsUnauthorizedResponse(),
                     new RsHasHeaders(
-                        headers.copy()
-                            .add(ContentType.json())
-                            .add(new ContentLength("72"))
+                        Headers.from(
+                            new WwwAuthenticate("Basic"),
+                            new Header("X-Something", "Value"),
+                            ContentType.json(),
+                            new ContentLength("72")
+                        )
                     )
                 )
             )
@@ -88,14 +91,14 @@ public final class DockerAuthSliceTest {
         MatcherAssert.assertThat(
             new DockerAuthSlice(
                 (rqline, rqheaders, rqbody) -> BaseResponse.ok()
-                    .header(new Header("Content-Type", "text/plain"))
+                    .header(ContentType.text())
                     .body(body)
             ).response(
                 new RequestLine(RqMethod.GET, "/some/path"),
                 Headers.EMPTY, Content.EMPTY
             ),
             new ResponseMatcher(
-                status, Collections.singleton(new Header("Content-Type", "text/plain")), body
+                status, Collections.singleton(ContentType.text()), body
             )
         );
     }
