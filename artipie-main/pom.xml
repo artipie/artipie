@@ -283,14 +283,13 @@ SOFTWARE.
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
-        <!--       // adapters      -->
-        <!--  Test scope  -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
             <version>${httpclient.version}</version>
-            <scope>test</scope>
         </dependency>
+        <!--       // adapters      -->
+        <!--  Test scope  -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5-fluent</artifactId>
