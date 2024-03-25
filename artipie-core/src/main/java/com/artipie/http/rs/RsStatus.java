@@ -4,7 +4,8 @@
  */
 package com.artipie.http.rs;
 
-import org.apache.http.HttpStatus;
+
+import org.apache.hc.core5.http.HttpStatus;
 
 import java.util.stream.Stream;
 
