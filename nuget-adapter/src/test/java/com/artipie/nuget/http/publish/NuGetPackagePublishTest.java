@@ -20,8 +20,8 @@ import com.artipie.nuget.http.TestAuthentication;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.PolicyByUsername;
 import com.google.common.io.Resources;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.core5.http.HttpEntity;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -129,7 +129,7 @@ class NuGetPackagePublishTest {
             new RequestLine(RqMethod.PUT, "/package"),
             Headers.from(
                 TestAuthentication.HEADER,
-                new Header("Content-Type", entity.getContentType().getValue())
+                new Header("Content-Type", entity.getContentType())
             ),
             new Content.From(sink.toByteArray())
         );

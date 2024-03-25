@@ -15,7 +15,7 @@ import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.hc.core5.net.URIBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
