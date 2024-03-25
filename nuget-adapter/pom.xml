@@ -84,12 +84,6 @@ SOFTWARE.
     </dependency>
     <!-- Test scope -->
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpmime</artifactId>
-      <version>4.5.13</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>com.artipie</groupId>
       <artifactId>vertx-server</artifactId>
       <version>1.0-SNAPSHOT</version>

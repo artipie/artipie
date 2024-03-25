@@ -6,10 +6,11 @@ package com.artipie.http.client;
 
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.google.common.base.Strings;
+import org.apache.hc.core5.net.URIBuilder;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
-import org.apache.http.client.utils.URIBuilder;
 
 /**
  * Proxy settings.
