@@ -14,6 +14,8 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.rs.RsWithBody;
 import com.artipie.http.rs.RsWithStatus;
 import com.google.common.collect.Iterables;
+import org.apache.hc.core5.net.URIBuilder;
+
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.http.client.utils.URIBuilder;
 import org.reactivestreams.Publisher;
 
 /**

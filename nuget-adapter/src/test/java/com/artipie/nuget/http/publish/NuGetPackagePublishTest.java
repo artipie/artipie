@@ -19,6 +19,12 @@ import com.artipie.nuget.http.TestAuthentication;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.PolicyByUsername;
 import com.google.common.io.Resources;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.core5.http.HttpEntity;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import io.reactivex.Flowable;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
@@ -28,11 +34,6 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link NuGet}.
@@ -135,7 +136,7 @@ class NuGetPackagePublishTest {
             new RequestLine(RqMethod.PUT, "/package").toString(),
             new Headers.From(
                 new TestAuthentication.Header(),
-                new Header("Content-Type", entity.getContentType().getValue())
+                new Header("Content-Type", entity.getContentType())
             ),
             Flowable.fromArray(ByteBuffer.wrap(sink.toByteArray()))
         );

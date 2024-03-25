@@ -34,7 +34,6 @@ SOFTWARE.
   <name>pypi-adapter</name>
   <url>https://github.com/artipie/pypi-adapter</url>
   <properties>
-    <apache.httpcomponents.version>4.5.14</apache.httpcomponents.version>
     <header.license>${project.basedir}/../LICENSE.header</header.license>
   </properties>
   <dependencies>
@@ -69,15 +68,9 @@ SOFTWARE.
     </dependency>
     <!-- Test -->
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpmime</artifactId>
-      <version>${apache.httpcomponents.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>${apache.httpcomponents.version}</version>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+      <version>${httpclient.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -84,6 +84,7 @@ SOFTWARE.
     <javax.json.version>1.1.4</javax.json.version>
     <maven.compiler.release>17</maven.compiler.release>
     <header.license>LICENSE.header</header.license>
+    <httpclient.version>5.3.1</httpclient.version>
   </properties>
   <distributionManagement>
     <repository>
