@@ -21,7 +21,7 @@ import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Flowable;
 import org.reactivestreams.Publisher;
@@ -136,13 +136,13 @@ public final class UpdateSlice implements Slice {
                                 return action;
                             }
                         ).thenApply(
-                            ignored -> BaseResponse.created()
+                            ignored -> ResponseBuilder.created().build()
                         )
                     )
                 )
             );
         }
-        return BaseResponse.badRequest();
+        return ResponseBuilder.badRequest().build();
     }
 
     /**

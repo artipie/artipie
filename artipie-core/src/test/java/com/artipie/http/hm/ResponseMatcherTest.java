@@ -7,7 +7,7 @@ package com.artipie.http.hm;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -30,7 +30,7 @@ class ResponseMatcherTest {
         final Header header = new Header("Mood", "sunny");
         Assertions.assertTrue(
             new ResponseMatcher(RsStatus.CREATED, header)
-                .matches(BaseResponse.created().header(header))
+                .matches(ResponseBuilder.created().header(header).build())
         );
     }
 
@@ -39,7 +39,7 @@ class ResponseMatcherTest {
         Headers headers = Headers.from("X-Name", "value");
         Assertions.assertTrue(
             new ResponseMatcher(RsStatus.OK, headers)
-                .matches(BaseResponse.ok().headers(headers))
+                .matches(ResponseBuilder.ok().headers(headers).build())
         );
     }
 
@@ -48,7 +48,7 @@ class ResponseMatcherTest {
         final Header header = new Header("Type", "string");
         Assertions.assertTrue(
             new ResponseMatcher(header)
-                .matches(BaseResponse.ok().header(header))
+                .matches(ResponseBuilder.ok().header(header).build())
         );
     }
 
@@ -57,7 +57,7 @@ class ResponseMatcherTest {
         Headers headers = Headers.from("aaa", "bbb");
         Assertions.assertTrue(
             new ResponseMatcher(headers)
-                .matches(BaseResponse.ok().headers(headers))
+                .matches(ResponseBuilder.ok().headers(headers).build())
         );
     }
 
@@ -66,7 +66,7 @@ class ResponseMatcherTest {
         final String body = "111";
         Assertions.assertTrue(
             new ResponseMatcher(body.getBytes())
-                .matches(BaseResponse.ok().textBody(body))
+                .matches(ResponseBuilder.ok().textBody(body).build())
         );
     }
 
@@ -75,7 +75,7 @@ class ResponseMatcherTest {
         final String body = "000";
         Assertions.assertTrue(
             new ResponseMatcher(body, StandardCharsets.UTF_8)
-                .matches(BaseResponse.ok().textBody(body))
+                .matches(ResponseBuilder.ok().textBody(body).build())
         );
     }
 
@@ -84,7 +84,7 @@ class ResponseMatcherTest {
         final String body = "def";
         Assertions.assertTrue(
             new ResponseMatcher(RsStatus.NOT_FOUND, body, StandardCharsets.UTF_8)
-                .matches(BaseResponse.notFound().textBody(body))
+                .matches(ResponseBuilder.notFound().textBody(body).build())
         );
     }
 
@@ -93,7 +93,7 @@ class ResponseMatcherTest {
         final String body = "abc";
         Assertions.assertTrue(
             new ResponseMatcher(RsStatus.OK, body.getBytes())
-                .matches(BaseResponse.ok().textBody(body))
+                .matches(ResponseBuilder.ok().textBody(body).build())
         );
     }
 
@@ -102,9 +102,10 @@ class ResponseMatcherTest {
         final String body = "123";
         Assertions.assertTrue(
             new ResponseMatcher(RsStatus.OK, body.getBytes())
-                .matches(BaseResponse.ok()
+                .matches(ResponseBuilder.ok()
                     .header(new Header("Content-Length", "3"))
-                    .textBody(body))
+                    .textBody(body)
+                    .build())
         );
     }
 
@@ -114,7 +115,8 @@ class ResponseMatcherTest {
         final byte[] body = "1234".getBytes();
         Assertions.assertTrue(
             new ResponseMatcher(RsStatus.FORBIDDEN, headers, body).matches(
-                BaseResponse.forbidden().headers(headers).body(body)
+                ResponseBuilder.forbidden().headers(headers)
+                    .body(body).build()
             )
         );
     }
@@ -126,7 +128,8 @@ class ResponseMatcherTest {
         final Matcher<? super Map.Entry<String, String>> matcher = new IsHeader(header, value);
         Assertions.assertTrue(
             new ResponseMatcher(RsStatus.ACCEPTED, matcher)
-                .matches(BaseResponse.accepted().header(header, value))
+                .matches(ResponseBuilder.accepted()
+                    .header(header, value).build())
         );
     }
 
@@ -138,7 +141,7 @@ class ResponseMatcherTest {
                 Matchers.containsString("404"),
                 StandardCharsets.UTF_8
             ),
-            new IsNot<>(new Matches<>(BaseResponse.notFound().textBody("hello")))
+            new IsNot<>(new Matches<>(ResponseBuilder.notFound().textBody("hello").build()))
         );
     }
 
@@ -146,7 +149,7 @@ class ResponseMatcherTest {
     void matchersBodyMismatches() {
         MatcherAssert.assertThat(
             new ResponseMatcher("yyy"),
-            new IsNot<>(new Matches<>(BaseResponse.ok().textBody("YYY")))
+            new IsNot<>(new Matches<>(ResponseBuilder.ok().textBody("YYY").build()))
         );
     }
 
@@ -154,7 +157,7 @@ class ResponseMatcherTest {
     void matchersBodyIgnoringCase() {
         MatcherAssert.assertThat(
             new ResponseMatcher(Matchers.equalToIgnoringCase("xxx")),
-            new Matches<>(BaseResponse.ok().textBody("XXX"))
+            new Matches<>(ResponseBuilder.ok().textBody("XXX").build())
         );
     }
 }

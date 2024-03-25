@@ -12,7 +12,7 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.http.content.PackageContent;
 import com.artipie.nuget.http.index.ServiceIndex;
@@ -98,7 +98,7 @@ public final class NuGet implements Slice {
         if (method.equals(RqMethod.PUT)) {
             return resource.put(headers, body);
         }
-        return BaseResponse.methodNotAllowed();
+        return ResponseBuilder.methodNotAllowed().build();
     }
 
     /**

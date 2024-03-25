@@ -10,7 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.cache.FromRemoteCache;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -60,7 +60,7 @@ final class FileProxySliceTest {
                         new Content.From(rqbody).asBytesFuture().thenApply(
                             bytes -> {
                                 body.set(bytes);
-                                return BaseResponse.ok();
+                                return ResponseBuilder.ok().build();
                             }
                         )
                     );
@@ -94,7 +94,9 @@ final class FileProxySliceTest {
             "Should returns body from remote",
             new FileProxySlice(
                 new SliceSimple(
-                    BaseResponse.ok().header("header", "value").body(body)
+                    ResponseBuilder.ok().header("header", "value")
+                        .body(body)
+                        .build()
                 ),
                 new FromRemoteCache(this.storage)
             ),
@@ -125,7 +127,7 @@ final class FileProxySliceTest {
         MatcherAssert.assertThat(
             "Does not return body from cache",
             new FileProxySlice(
-                new SliceSimple(BaseResponse.internalError()),
+                new SliceSimple(ResponseBuilder.internalError().build()),
                 new FromRemoteCache(this.storage)
             ),
             new SliceHasResponse(
@@ -150,7 +152,7 @@ final class FileProxySliceTest {
         MatcherAssert.assertThat(
             "Incorrect status, 404 is expected",
             new FileProxySlice(
-                new SliceSimple(BaseResponse.badRequest()),
+                new SliceSimple(ResponseBuilder.badRequest().build()),
                 new FromRemoteCache(this.storage)
             ),
             new SliceHasResponse(

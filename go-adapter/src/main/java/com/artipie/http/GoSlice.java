@@ -70,7 +70,7 @@ public final class GoSlice implements Slice {
             ),
             new RtRulePath(
                 RtRule.FALLBACK,
-                new SliceSimple(BaseResponse.notFound())
+                new SliceSimple(ResponseBuilder.notFound().build())
             )
         );
     }

@@ -11,7 +11,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -55,9 +55,9 @@ final class AddSlice implements Slice {
             return new AsyncResponse(
                 this.repository.addJson(
                     new Content.From(body), Optional.ofNullable(matcher.group("version"))
-                ).thenApply(nothing -> BaseResponse.created())
+                ).thenApply(nothing -> ResponseBuilder.created().build())
             );
         }
-        return BaseResponse.badRequest();
+        return ResponseBuilder.badRequest().build();
     }
 }

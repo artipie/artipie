@@ -13,7 +13,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import jdk.jfr.consumer.RecordedEvent;
@@ -49,7 +49,9 @@ public class JfrSliceTest {
             MatcherAssert.assertThat(
                 new JfrSlice(
                     new TestSlice(
-                        BaseResponse.ok().body(JfrSliceTest.content(responseSize, responseChunks))
+                        ResponseBuilder.ok()
+                            .body(JfrSliceTest.content(responseSize, responseChunks))
+                            .build()
                     )
                 ),
                 new SliceHasResponse(

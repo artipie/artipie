@@ -4,7 +4,7 @@
  */
 package com.artipie.http.client.jetty;
 
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -121,9 +121,10 @@ final class JettyClientSlice implements Slice {
                                     result.getResponse(), result.getResponse().getHeaders().asString());
                         }
                         res.complete(
-                            BaseResponse.from(status)
+                            ResponseBuilder.from(status)
                                 .headers(toHeaders(result.getResponse().getHeaders()))
                                 .body(content)
+                                .build()
                         );
                     } else {
                         LOGGER.error("Got failure", result.getFailure());

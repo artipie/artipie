@@ -10,7 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.npm.TgzArchive;
 import com.artipie.npm.misc.NextSafeAvailablePort;
@@ -43,9 +43,6 @@ final class DownloadAssetSliceTest {
      */
     private static final String RNAME = "my-npm";
 
-    /**
-     * Vertx.
-     */
     private static final Vertx VERTX = Vertx.vertx();
 
     /**
@@ -87,7 +84,7 @@ final class DownloadAssetSliceTest {
                 new DownloadAssetSlice(
                     new NpmProxy(
                         storage,
-                        new SliceSimple(BaseResponse.notFound())
+                        new SliceSimple(ResponseBuilder.notFound().build())
                     ),
                     path, Optional.of(this.packages),
                     DownloadAssetSliceTest.RNAME
@@ -110,11 +107,12 @@ final class DownloadAssetSliceTest {
                     new NpmProxy(
                         new InMemoryStorage(),
                         new SliceSimple(
-                            BaseResponse.ok()
+                            ResponseBuilder.ok()
                                 .header(ContentType.mime("tgz"))
                                 .body(new TestResource(
                                     String.format("storage/%s", DownloadAssetSliceTest.TGZ)
                                 ).asBytes())
+                                .build()
                         )
                     ),
                     path,

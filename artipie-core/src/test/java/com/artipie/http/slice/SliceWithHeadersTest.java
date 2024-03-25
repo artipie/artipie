@@ -5,7 +5,7 @@
 package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasHeaders;
@@ -24,7 +24,7 @@ class SliceWithHeadersTest {
         final String value = "text/plain";
         MatcherAssert.assertThat(
             new SliceWithHeaders(
-                new SliceSimple(BaseResponse.ok()), Headers.from(header, value)
+                new SliceSimple(ResponseBuilder.ok().build()), Headers.from(header, value)
             ).response(RequestLine.from("GET /some/text HTTP/1.1"), Headers.EMPTY, Content.EMPTY),
             new RsHasHeaders(new Header(header, value))
         );
@@ -39,7 +39,7 @@ class SliceWithHeadersTest {
         MatcherAssert.assertThat(
             new SliceWithHeaders(
                 new SliceSimple(
-                    BaseResponse.ok().header(hone, vone)
+                    ResponseBuilder.ok().header(hone, vone).build()
                 ), Headers.from(htwo, vtwo)
             ).response(RequestLine.from("GET /any/text HTTP/1.1"), Headers.EMPTY, Content.EMPTY),
             new RsHasHeaders(

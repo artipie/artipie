@@ -14,7 +14,7 @@ import com.artipie.http.auth.OperationControl;
 import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -108,9 +108,10 @@ public final class ConanSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.ByPath("^/v1/ping$"),
                     new SliceSimple(
-                        BaseResponse.accepted()
+                        ResponseBuilder.accepted()
                             .header("X-Conan-Server-Capabilities",
                                 "complex_search,revisions,revisions")
+                            .build()
                     )
                 ),
                 new RtRulePath(

@@ -16,7 +16,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.scheduling.ProxyArtifactEvent;
@@ -120,12 +120,13 @@ final class ProxySlice implements Slice {
                     final CompletableFuture<Response> result = new CompletableFuture<>();
                     if (throwable == null && content.isPresent()) {
                         result.complete(
-                            BaseResponse.ok()
+                            ResponseBuilder.ok()
                                 .headers(Headers.from(ProxySlice.contentType(headers.get(), line)))
                                 .body(content.get())
+                                .build()
                         );
                     } else {
-                        result.complete(BaseResponse.notFound());
+                        result.complete(ResponseBuilder.notFound().build());
                     }
                     return result;
                 }

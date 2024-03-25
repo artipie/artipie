@@ -74,8 +74,11 @@ public final class LatestSlice implements Slice {
             .max(Comparator.naturalOrder());
         if (info.isPresent()) {
             return this.storage.value(new KeyFromPath(info.get()))
-                .thenApply(c -> BaseResponse.ok().header(ContentType.json()).body(c));
+                .thenApply(c -> ResponseBuilder.ok()
+                    .header(ContentType.json())
+                    .body(c)
+                    .build());
         }
-        return CompletableFuture.completedFuture(BaseResponse.notFound());
+        return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
     }
 }

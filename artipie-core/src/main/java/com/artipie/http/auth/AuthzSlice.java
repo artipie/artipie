@@ -11,7 +11,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 /**
  * Slice with authorization.
@@ -68,7 +68,7 @@ public final class AuthzSlice implements Slice {
                                 body
                             );
                         }
-                        return BaseResponse.forbidden();
+                        return ResponseBuilder.forbidden().build();
                     }
                     // The case of anonymous user
                     if (result.status() == AuthScheme.AuthStatus.NO_CREDENTIALS
@@ -79,8 +79,9 @@ public final class AuthzSlice implements Slice {
                             body
                         );
                     }
-                    return BaseResponse.unauthorized()
-                        .header(new WwwAuthenticate(result.challenge()));
+                    return ResponseBuilder.unauthorized()
+                        .header(new WwwAuthenticate(result.challenge()))
+                        .build();
                 }
             )
         );

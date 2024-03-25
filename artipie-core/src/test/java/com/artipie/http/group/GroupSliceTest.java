@@ -11,7 +11,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
@@ -88,7 +88,7 @@ final class GroupSliceTest {
 
     private static Slice slice(RsStatus status, String body, Duration delay) {
         return new SliceWithDelay(
-            new SliceSimple(BaseResponse.from(status).textBody(body)), delay
+            new SliceSimple(ResponseBuilder.from(status).textBody(body).build()), delay
         );
     }
 

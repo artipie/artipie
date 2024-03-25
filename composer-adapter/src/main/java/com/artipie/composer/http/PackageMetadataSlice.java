@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.composer.Name;
 import com.artipie.composer.Packages;
 import com.artipie.composer.Repository;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -55,9 +55,9 @@ public final class PackageMetadataSlice implements Slice {
                     opt -> opt.<Response>map(
                         packages -> new AsyncResponse(
                             packages.content()
-                                .thenApply(cnt -> BaseResponse.ok().body(cnt))
+                                .thenApply(cnt -> ResponseBuilder.ok().body(cnt).build())
                         )
-                    ).orElse(BaseResponse.notFound())
+                    ).orElse(ResponseBuilder.notFound().build())
                 )
         );
     }

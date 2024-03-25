@@ -6,7 +6,7 @@ package com.artipie.debian.http;
 
 import com.artipie.asto.Storage;
 import com.artipie.debian.Config;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
@@ -73,7 +73,7 @@ public final class DebianSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
-                    RtRule.FALLBACK, new SliceSimple(BaseResponse.notFound())
+                    RtRule.FALLBACK, new SliceSimple(ResponseBuilder.notFound().build())
                 )
             )
         );

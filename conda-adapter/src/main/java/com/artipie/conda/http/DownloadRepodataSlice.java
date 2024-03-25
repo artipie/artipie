@@ -14,7 +14,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import javax.json.Json;
 import java.nio.charset.StandardCharsets;
@@ -73,12 +73,13 @@ public final class DownloadRepodataSlice implements Slice {
                                     );
                                 }
                             ).thenApply(
-                                content -> BaseResponse.ok()
+                                content -> ResponseBuilder.ok()
                                     .header(new ContentFileName(new KeyLastPart(key).get()))
                                     .body(content)
+                                    .build()
                             );
                         }
-                        return CompletableFuture.completedFuture(BaseResponse.badRequest());
+                        return CompletableFuture.completedFuture(ResponseBuilder.badRequest().build());
                     }
                 )
         );

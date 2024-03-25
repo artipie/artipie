@@ -5,7 +5,7 @@
 package com.artipie.http.rs;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -27,7 +27,7 @@ class CachedResponseTest {
         final AtomicBoolean terminated = new AtomicBoolean();
         final Flowable<ByteBuffer> publisher = Flowable.<ByteBuffer>empty()
             .doOnTerminate(() -> terminated.set(true));
-        new CachedResponse(BaseResponse.ok().body(new Content.From(publisher)))
+        new CachedResponse(ResponseBuilder.ok().body(new Content.From(publisher)).build())
             .send((status, headers, body) -> CompletableFuture.allOf())
             .toCompletableFuture().join();
         MatcherAssert.assertThat(terminated.get(), new IsEqual<>(true));
@@ -37,7 +37,7 @@ class CachedResponseTest {
     void shouldReplayBody() {
         final byte[] content = "content".getBytes();
         final CachedResponse cached = new CachedResponse(
-            BaseResponse.ok().body(new Content.From(content))
+            ResponseBuilder.ok().body(new Content.From(content)).build()
         );
         cached.send((status, headers, body) -> CompletableFuture.allOf())
             .toCompletableFuture().join();

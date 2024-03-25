@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -29,7 +29,7 @@ class LoggingSliceTest {
         new LoggingSlice(
             Level.INFO,
             new SliceSimple(
-                BaseResponse.ok().header("Request-Header", "some; value")
+                ResponseBuilder.ok().header("Request-Header", "some; value").build()
             )
         ).response(
             RequestLine.from("GET /v2/ HTTP_1_1"),

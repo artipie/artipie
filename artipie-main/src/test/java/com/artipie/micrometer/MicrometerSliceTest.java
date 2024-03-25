@@ -8,7 +8,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -44,10 +44,10 @@ class MicrometerSliceTest {
         MatcherAssert.assertThat(
             new MicrometerSlice(
                 new SliceSimple(
-                    BaseResponse.ok().body(Flowable.fromArray(
+                    ResponseBuilder.ok().body(Flowable.fromArray(
                         ByteBuffer.wrap("Hello ".getBytes(StandardCharsets.UTF_8)),
                         ByteBuffer.wrap("world!".getBytes(StandardCharsets.UTF_8))
-                    ))
+                    )).build()
                 ),
                 this.registry
             ),
@@ -59,7 +59,7 @@ class MicrometerSliceTest {
         MatcherAssert.assertThat(
             new MicrometerSlice(
                 new SliceSimple(
-                    BaseResponse.ok().body("abc".getBytes(StandardCharsets.UTF_8))
+                    ResponseBuilder.ok().body("abc".getBytes(StandardCharsets.UTF_8)).build()
                 ),
                 this.registry
             ),
@@ -70,7 +70,7 @@ class MicrometerSliceTest {
         );
         MatcherAssert.assertThat(
             new MicrometerSlice(
-                new SliceSimple(BaseResponse.from(RsStatus.CONTINUE)),
+                new SliceSimple(ResponseBuilder.from(RsStatus.CONTINUE).build()),
                 this.registry
             ),
             new SliceHasResponse(

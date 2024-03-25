@@ -5,7 +5,7 @@
 package com.artipie.maven.http;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -33,14 +33,9 @@ import java.util.function.Function;
 
 /**
  * Test for {@link RepoHead}.
- * @since 0.6
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RepoHeadITCase {
 
-    /**
-     * Vertx instance.
-     */
     private static final Vertx VERTX = Vertx.vertx();
 
     /**
@@ -139,11 +134,11 @@ class RepoHeadITCase {
                             if (throwable == null) {
                                 if (head.isPresent()) {
                                     res = CompletableFuture.completedFuture(
-                                        BaseResponse.ok().headers(head.get())
+                                        ResponseBuilder.ok().headers(head.get()).build()
                                     );
                                 } else {
                                     res = CompletableFuture.completedFuture(
-                                        BaseResponse.notFound()
+                                        ResponseBuilder.notFound().build()
                                     );
                                 }
                             } else {

@@ -11,7 +11,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import com.artipie.docker.proxy.ProxyDocker;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
@@ -29,7 +29,7 @@ final class ReadWriteDockerTest {
     @Test
     void createsReadWriteRepo() {
         final ReadWriteDocker docker = new ReadWriteDocker(
-            new ProxyDocker((line, headers, body) -> BaseResponse.ok()),
+            new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().build()),
             new AstoDocker(new InMemoryStorage())
         );
         MatcherAssert.assertThat(

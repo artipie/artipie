@@ -14,7 +14,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.Tarballs;
 
@@ -53,13 +53,14 @@ public final class DownloadPackageSlice implements Slice {
                         return this.storage.value(key)
                             .thenApply(content -> new Tarballs(content, this.base).value())
                             .thenApply(
-                                content -> BaseResponse.ok()
+                                content -> ResponseBuilder.ok()
                                     .header(new Header("Content-Type", "application/json"))
                                     .body(content)
+                                    .build()
                             );
                     } else {
                         return CompletableFuture.completedFuture(
-                            BaseResponse.notFound()
+                            ResponseBuilder.notFound().build()
                         );
                     }
                 }

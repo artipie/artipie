@@ -5,7 +5,7 @@
 package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
@@ -36,7 +36,7 @@ public final class DockerAuthSliceTest {
         );
         MatcherAssert.assertThat(
             new DockerAuthSlice(
-                (rqline, rqheaders, rqbody) -> BaseResponse.unauthorized().headers(headers)
+                (rqline, rqheaders, rqbody) -> ResponseBuilder.unauthorized().headers(headers).build()
             ).response(
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY, Content.EMPTY
@@ -65,7 +65,7 @@ public final class DockerAuthSliceTest {
         );
         MatcherAssert.assertThat(
             new DockerAuthSlice(
-                (rqline, rqheaders, rqbody) -> BaseResponse.forbidden().headers(headers.copy())
+                (rqline, rqheaders, rqbody) -> ResponseBuilder.forbidden().headers(headers.copy()).build()
             ).response(
                 new RequestLine(RqMethod.GET, "/file.txt"),
                 Headers.EMPTY,
@@ -90,9 +90,10 @@ public final class DockerAuthSliceTest {
         final byte[] body = "data".getBytes();
         MatcherAssert.assertThat(
             new DockerAuthSlice(
-                (rqline, rqheaders, rqbody) -> BaseResponse.ok()
+                (rqline, rqheaders, rqbody) -> ResponseBuilder.ok()
                     .header(ContentType.text())
                     .body(body)
+                    .build()
             ).response(
                 new RequestLine(RqMethod.GET, "/some/path"),
                 Headers.EMPTY, Content.EMPTY

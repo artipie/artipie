@@ -9,7 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.npm.RandomFreePort;
@@ -31,7 +31,6 @@ import javax.json.Json;
 
 /**
  * Test cases for {@link DownloadPackageSlice}.
- * @since 0.9
  * @todo #239:30min Fix download meta for empty prefix.
  *  Test for downloading meta hangs for some reason when empty prefix
  *  is passed. It is necessary to find out why it happens and add
@@ -69,7 +68,7 @@ final class DownloadPackageSliceTest {
                 new DownloadPackageSlice(
                     new NpmProxy(
                         storage,
-                        new SliceSimple(BaseResponse.notFound())
+                        new SliceSimple(ResponseBuilder.notFound().build())
                     ),
                     path
                 ),
@@ -91,10 +90,10 @@ final class DownloadPackageSliceTest {
                     new NpmProxy(
                         new InMemoryStorage(),
                         new SliceSimple(
-                            BaseResponse.ok().body(
-                                new TestResource("storage/@hello/simple-npm-project/meta.json")
-                                    .asBytes()
-                            )
+                            ResponseBuilder.ok()
+                                .body(new TestResource("storage/@hello/simple-npm-project/meta.json")
+                                    .asBytes())
+                                .build()
                         )
                     ),
                     path

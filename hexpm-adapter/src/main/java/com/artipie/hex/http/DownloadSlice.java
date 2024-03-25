@@ -8,7 +8,7 @@ package com.artipie.hex.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -75,12 +75,13 @@ public final class DownloadSlice implements Slice {
                     final CompletableFuture<Response> res;
                     if (exist) {
                         res = this.storage.value(key).thenApply(
-                            value -> BaseResponse.ok()
+                            value -> ResponseBuilder.ok()
                                 .header(ContentType.mime("application/octet-stream"))
                                 .body(value)
+                                .build()
                         );
                     } else {
-                        res = CompletableFuture.completedFuture(BaseResponse.notFound());
+                        res = CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
                     }
                     return res;
                 }

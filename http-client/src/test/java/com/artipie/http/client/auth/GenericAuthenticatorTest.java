@@ -8,7 +8,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.client.FakeClientSlices;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.WwwAuthenticate;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -27,7 +27,7 @@ class GenericAuthenticatorTest {
     void shouldProduceNothingWhenNoAuthRequested() {
         MatcherAssert.assertThat(
             new GenericAuthenticator(
-                new FakeClientSlices((line, headers, body) -> BaseResponse.ok()),
+                new FakeClientSlices((line, headers, body) -> ResponseBuilder.ok().build()),
                 "alice",
                 "qwerty"
             ).authenticate(Headers.EMPTY).toCompletableFuture().join(),
@@ -40,7 +40,7 @@ class GenericAuthenticatorTest {
         MatcherAssert.assertThat(
             StreamSupport.stream(
                 new GenericAuthenticator(
-                    new FakeClientSlices((line, headers, body) -> BaseResponse.ok()),
+                    new FakeClientSlices((line, headers, body) -> ResponseBuilder.ok().build()),
                     "Aladdin",
                     "open sesame"
                 ).authenticate(
@@ -58,7 +58,9 @@ class GenericAuthenticatorTest {
             StreamSupport.stream(
                 new GenericAuthenticator(
                     new FakeClientSlices(
-                        (line, headers, body) -> BaseResponse.ok().jsonBody("{\"access_token\":\"mF_9.B5f-4.1JqM\"}")
+                        (line, headers, body) -> ResponseBuilder.ok()
+                            .jsonBody("{\"access_token\":\"mF_9.B5f-4.1JqM\"}")
+                            .build()
                     ),
                     "bob",
                     "12345"

@@ -14,7 +14,7 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyIterable;
 import org.hamcrest.core.StringStartsWith;
@@ -39,9 +39,10 @@ class ProxyManifestsTest {
                 if (!line.toString().startsWith("GET /v2/test/manifests/abc ")) {
                     throw new IllegalArgumentException();
                 }
-                return BaseResponse.ok()
+                return ResponseBuilder.ok()
                     .header(new DigestHeader(new Digest.FromString(digest)))
-                    .body(data);
+                    .body(data)
+                    .build();
             },
             new RepoName.Valid("test")
         ).get(ManifestReference.from("abc")).toCompletableFuture().join();
@@ -61,7 +62,7 @@ class ProxyManifestsTest {
                 if (!line.toString().startsWith("GET /v2/my-test/manifests/latest ")) {
                     throw new IllegalArgumentException();
                 }
-                return BaseResponse.notFound();
+                return ResponseBuilder.notFound().build();
             },
             new RepoName.Valid("my-test")
         ).get(ManifestReference.from("latest")).toCompletableFuture().join();
@@ -84,7 +85,7 @@ class ProxyManifestsTest {
                     new Content.From(body).asBytesFuture().thenApply(
                         bytes -> {
                             cbody.set(bytes);
-                            return BaseResponse.ok();
+                            return ResponseBuilder.ok().build();
                         }
                     )
                 );
@@ -109,7 +110,7 @@ class ProxyManifestsTest {
         Assertions.assertArrayEquals(
             bytes,
             new ProxyDocker(
-                (line, headers, body) -> BaseResponse.ok().body(bytes)
+                (line, headers, body) -> ResponseBuilder.ok().body(bytes).build()
             ).catalog(Optional.empty(), Integer.MAX_VALUE).thenCompose(
                 catalog -> catalog.json().asBytesFuture()
             ).toCompletableFuture().join()
@@ -119,7 +120,7 @@ class ProxyManifestsTest {
     @Test
     void shouldFailReturnCatalogWhenRemoteRespondsWithNotOk() {
         final CompletionStage<Catalog> stage = new ProxyDocker(
-            (line, headers, body) -> BaseResponse.notFound()
+            (line, headers, body) -> ResponseBuilder.notFound().build()
         ).catalog(Optional.empty(), Integer.MAX_VALUE);
         Assertions.assertThrows(
             Exception.class,

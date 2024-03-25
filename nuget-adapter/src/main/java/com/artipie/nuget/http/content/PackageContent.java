@@ -9,7 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.nuget.PackageIdentity;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.http.Resource;
@@ -110,16 +110,16 @@ public final class PackageContent implements Route, ContentLocation {
                 key -> new AsyncResponse(
                     this.repository.content(key).thenApply(
                         existing -> existing.<Response>map(
-                            data -> BaseResponse.ok().body(data)
-                        ).orElse(BaseResponse.notFound())
+                            data -> ResponseBuilder.ok().body(data).build()
+                        ).orElse(ResponseBuilder.notFound().build())
                     )
                 )
-            ).orElse(BaseResponse.notFound());
+            ).orElse(ResponseBuilder.notFound().build());
         }
 
         @Override
         public Response put(Headers headers, Content body) {
-            return BaseResponse.methodNotAllowed();
+            return ResponseBuilder.methodNotAllowed().build();
         }
 
         /**

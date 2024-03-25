@@ -8,7 +8,7 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -96,9 +96,9 @@ final class UnpublishPutSlice implements Slice {
                                         )
                                     )
                                 )
-                            ).thenApply(nothing -> BaseResponse.ok());
+                            ).thenApply(nothing -> ResponseBuilder.ok().build());
                     } else {
-                        res = CompletableFuture.completedFuture(BaseResponse.notFound());
+                        res = CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
                     }
                     return res;
                 }

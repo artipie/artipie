@@ -11,7 +11,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.scheduling.ProxyArtifactEvent;
@@ -47,7 +47,7 @@ final class CachedProxySliceTest {
         final byte[] data = "cache".getBytes();
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                (line, headers, body) -> BaseResponse.ok().textBody("123"),
+                (line, headers, body) -> ResponseBuilder.ok().textBody("123").build(),
                 (key, supplier, control) -> CompletableFuture.supplyAsync(
                     () -> Optional.of(new Content.From(data))
                 ),
@@ -68,7 +68,7 @@ final class CachedProxySliceTest {
     void returnsNotFoundOnRemoteError() {
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                new SliceSimple(BaseResponse.internalError()),
+                new SliceSimple(ResponseBuilder.internalError().build()),
                 (key, supplier, control) -> supplier.get(), Optional.of(this.events), "*"
             ),
             new SliceHasResponse(
@@ -83,7 +83,7 @@ final class CachedProxySliceTest {
     void returnsNotFoundOnRemoteAndCacheError() {
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                new SliceSimple(BaseResponse.internalError()),
+                new SliceSimple(ResponseBuilder.internalError().build()),
                 (key, supplier, control)
                     -> new FailedCompletionStage<>(new RuntimeException("Any error")),
                 Optional.of(this.events), "*"
@@ -107,7 +107,7 @@ final class CachedProxySliceTest {
         final byte[] data = "remote".getBytes();
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                (line, headers, body) -> BaseResponse.ok().body(data),
+                (line, headers, body) -> ResponseBuilder.ok().body(data).build(),
                 (key, supplier, control) -> supplier.get(), Optional.of(this.events), "*"
             ),
             new SliceHasResponse(
@@ -132,7 +132,7 @@ final class CachedProxySliceTest {
         final byte[] data = "remote".getBytes();
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                (line, headers, body) -> BaseResponse.ok().body(data),
+                (line, headers, body) -> ResponseBuilder.ok().body(data).build(),
                 (key, supplier, control) -> supplier.get(), Optional.of(this.events), "*"
             ),
             new SliceHasResponse(

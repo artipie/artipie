@@ -10,7 +10,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 /**
  * Slice created from {@link Resource}.
@@ -38,6 +38,6 @@ final class SliceFromResource implements Slice {
         if (method.equals(RqMethod.PUT)) {
             return this.origin.put(headers, body);
         }
-        return BaseResponse.methodNotAllowed();
+        return ResponseBuilder.methodNotAllowed().build();
     }
 }

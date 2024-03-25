@@ -22,7 +22,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ArtifactEvent;
 
@@ -93,7 +93,7 @@ public final class UpdateSlice implements Slice {
                         final CompletionStage<Response> res;
                         if (common.isEmpty()) {
                             res = this.asto.delete(key).thenApply(
-                                nothing -> BaseResponse.badRequest()
+                                nothing -> ResponseBuilder.badRequest().build()
                             );
                         } else {
                             CompletionStage<Void> upd = this.generateIndexes(key, control, common);
@@ -102,7 +102,7 @@ public final class UpdateSlice implements Slice {
                                     nothing -> this.logEvents(key, control, common, headers)
                                 );
                             }
-                            res = upd.thenApply(nothing -> BaseResponse.ok());
+                            res = upd.thenApply(nothing -> ResponseBuilder.ok().build());
                         }
                         return res;
                     }
@@ -113,7 +113,7 @@ public final class UpdateSlice implements Slice {
                             return CompletableFuture.completedFuture(resp);
                         } else {
                             res = this.asto.delete(key)
-                                .thenApply(nothing -> BaseResponse.internalError());
+                                .thenApply(nothing -> ResponseBuilder.internalError().build());
                         }
                         return res;
                     }

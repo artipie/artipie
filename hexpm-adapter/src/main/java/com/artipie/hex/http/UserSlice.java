@@ -10,7 +10,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import java.util.regex.Pattern;
 
@@ -25,6 +25,6 @@ public final class UserSlice implements Slice {
 
     @Override
     public Response response(RequestLine line, Headers headers, Content body) {
-        return BaseResponse.noContent();
+        return ResponseBuilder.noContent().build();
     }
 }

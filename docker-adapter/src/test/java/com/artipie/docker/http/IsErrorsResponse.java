@@ -31,8 +31,6 @@ import java.util.Arrays;
 
 /**
  * Matcher for errors response.
- *
- * @since 0.5
  */
 public final class IsErrorsResponse extends BaseMatcher<Response> {
 
@@ -125,8 +123,6 @@ public final class IsErrorsResponse extends BaseMatcher<Response> {
         private final Matcher<JsonObject> delegate;
 
         /**
-         * Ctor.
-         *
          * @param code Expected error code.
          */
         IsError(final String code) {

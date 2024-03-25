@@ -6,7 +6,7 @@ package com.artipie.http.async;
 
 import com.artipie.http.Response;
 import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Assertions;
@@ -22,7 +22,7 @@ class AsyncResponseTest {
     @Test
     void shouldSend() {
         MatcherAssert.assertThat(
-            new AsyncResponse(CompletableFuture.completedFuture(BaseResponse.ok())),
+            new AsyncResponse(CompletableFuture.completedFuture(ResponseBuilder.ok().build())),
             new RsHasStatus(RsStatus.OK)
         );
     }

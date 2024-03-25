@@ -5,7 +5,7 @@
 package com.artipie.maven.http;
 
 import com.artipie.asto.Storage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
@@ -144,7 +144,7 @@ public final class MavenSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
-                    RtRule.FALLBACK, new SliceSimple(BaseResponse.notFound())
+                    RtRule.FALLBACK, new SliceSimple(ResponseBuilder.notFound().build())
                 )
             )
         );

@@ -7,7 +7,7 @@ package com.artipie.http.hm;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import org.hamcrest.Matcher;
@@ -71,14 +71,14 @@ final class RsHasBodyTest {
     void shouldMatchResponseTwice(final String chunks) {
         final String[] elements = chunks.split(",");
         final byte[] data = String.join("", elements).getBytes();
-        final Response response = BaseResponse.ok().body(
+        final Response response = ResponseBuilder.ok().body(
             Flowable.fromIterable(
                 Stream.of(elements)
                     .map(String::getBytes)
                     .map(ByteBuffer::wrap)
                     .collect(Collectors.toList())
             )
-        );
+        ).build();
         new RsHasBody(data).matches(response);
         Assertions.assertTrue(new RsHasBody(data).matches(response));
     }
@@ -87,7 +87,7 @@ final class RsHasBodyTest {
     void shouldWorkWithContainsMatcherMismatches() {
         MatcherAssert.assertThat(
             new RsHasBody("XXX"),
-            new IsNot<>(new Matches<>(BaseResponse.ok().textBody("xxx")))
+            new IsNot<>(new Matches<>(ResponseBuilder.ok().textBody("xxx").build()))
         );
     }
 
@@ -100,8 +100,8 @@ final class RsHasBodyTest {
                 StandardCharsets.UTF_8
             ),
             Matchers.<Matcher<Response>>allOf(
-                new Matches<>(BaseResponse.ok().textBody(content)),
-                new Matches<>(BaseResponse.ok().textBody(content.toUpperCase(Locale.ROOT)))
+                new Matches<>(ResponseBuilder.ok().textBody(content).build()),
+                new Matches<>(ResponseBuilder.ok().textBody(content.toUpperCase(Locale.ROOT)).build())
             )
         );
     }

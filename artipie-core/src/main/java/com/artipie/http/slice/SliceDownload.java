@@ -13,7 +13,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -65,14 +65,16 @@ public final class SliceDownload implements Slice {
                     exist -> {
                         if (exist) {
                             return this.storage.value(key).thenApply(
-                                content -> BaseResponse.ok()
+                                content -> ResponseBuilder.ok()
                                     .header(new ContentFileName(line.uri()))
                                     .body(content)
+                                    .build()
                             );
                         }
                         return CompletableFuture.completedFuture(
-                            BaseResponse.notFound()
+                            ResponseBuilder.notFound()
                                 .textBody(String.format("Key %s not found", key.string()))
+                                .build()
                         );
                     }
                 )

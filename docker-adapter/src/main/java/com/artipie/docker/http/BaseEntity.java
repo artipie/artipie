@@ -10,7 +10,7 @@ import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import java.util.regex.Pattern;
 
@@ -32,7 +32,8 @@ public final class BaseEntity implements ScopeSlice {
 
     @Override
     public Response response(RequestLine line, Headers headers, Content body) {
-        return BaseResponse.ok()
-            .header("Docker-Distribution-API-Version", "registry/2.0");
+        return ResponseBuilder.ok()
+            .header("Docker-Distribution-API-Version", "registry/2.0")
+            .build();
     }
 }

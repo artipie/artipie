@@ -21,7 +21,7 @@ import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Flowable;
@@ -179,11 +179,12 @@ public final class FileProxySlice implements Slice {
             ).handle(
                 (content, throwable) -> {
                     if (throwable == null && content.isPresent()) {
-                        return BaseResponse.ok()
+                        return ResponseBuilder.ok()
                             .headers(headers.get())
-                            .body(content.get());
+                            .body(content.get())
+                            .build();
                     }
-                    return BaseResponse.notFound();
+                    return ResponseBuilder.notFound().build();
                 }
             )
         );

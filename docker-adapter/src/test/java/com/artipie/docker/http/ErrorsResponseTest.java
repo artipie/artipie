@@ -6,7 +6,7 @@ package com.artipie.docker.http;
 
 import com.artipie.docker.Digest;
 import com.artipie.docker.error.BlobUnknownError;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.hm.RsHasBody;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
@@ -18,8 +18,9 @@ public final class ErrorsResponseTest {
     @Test
     void shouldHaveExpectedBody() {
         MatcherAssert.assertThat(
-            BaseResponse.notFound()
-                .jsonBody(new BlobUnknownError(new Digest.Sha256("123")).json()),
+            ResponseBuilder.notFound()
+                .jsonBody(new BlobUnknownError(new Digest.Sha256("123")).json())
+                .build(),
             new RsHasBody(
                 "{\"errors\":[{\"code\":\"BLOB_UNKNOWN\",\"message\":\"blob unknown to registry\",\"detail\":\"sha256:123\"}]}".getBytes()
             )

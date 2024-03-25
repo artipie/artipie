@@ -14,7 +14,7 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.google.common.base.Strings;
 
 import java.util.concurrent.CompletableFuture;
@@ -84,11 +84,12 @@ public final class UsersEntity {
                         assert authResult.status() != AuthScheme.AuthStatus.FAILED;
                         final String token = this.tokens.generate(authResult.user());
                         if (Strings.isNullOrEmpty(token)) {
-                            return BaseResponse.notFound()
-                                .textBody(String.format(UsersEntity.URI_S_NOT_FOUND, line.uri()));
+                            return ResponseBuilder.notFound()
+                                .textBody(String.format(UsersEntity.URI_S_NOT_FOUND, line.uri()))
+                                .build();
 
                         }
-                        return BaseResponse.ok().textBody(token);
+                        return ResponseBuilder.ok().textBody(token).build();
                     }
                 )
             );
@@ -108,12 +109,14 @@ public final class UsersEntity {
                     uri -> CredsCheck.credsCheck().thenApply(
                         content -> {
                             if (Strings.isNullOrEmpty(content)) {
-                                return BaseResponse.notFound()
-                                    .textBody(String.format(UsersEntity.URI_S_NOT_FOUND, uri));
+                                return ResponseBuilder.notFound()
+                                    .textBody(String.format(UsersEntity.URI_S_NOT_FOUND, uri))
+                                    .build();
                             }
-                            return BaseResponse.ok()
+                            return ResponseBuilder.ok()
                                 .header(UsersEntity.CONTENT_TYPE, UsersEntity.JSON_TYPE)
-                                .textBody(content);
+                                .textBody(content)
+                                .build();
                         }
                     )
                 )

@@ -8,7 +8,7 @@ import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.RepoName;
 import com.artipie.http.headers.ContentLength;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,9 @@ class ProxyLayersTest {
                 if (!line.toString().startsWith(String.format("HEAD /v2/test/blobs/%s ", digest))) {
                     throw new IllegalArgumentException();
                 }
-                return BaseResponse.ok().header(new ContentLength(String.valueOf(size)));
+                return ResponseBuilder.ok()
+                    .header(new ContentLength(String.valueOf(size)))
+                    .build();
             },
             new RepoName.Valid("test")
         ).get(new Digest.FromString(digest)).toCompletableFuture().join();
@@ -53,7 +55,7 @@ class ProxyLayersTest {
                 if (!line.toString().startsWith(String.format("HEAD /v2/%s/blobs/%s ", repo, digest))) {
                     throw new IllegalArgumentException();
                 }
-                return BaseResponse.notFound();
+                return ResponseBuilder.notFound().build();
             },
             new RepoName.Valid(repo)
         ).get(new Digest.FromString(digest)).toCompletableFuture().join();

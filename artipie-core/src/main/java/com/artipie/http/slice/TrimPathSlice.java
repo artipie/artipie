@@ -12,7 +12,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import org.apache.http.client.utils.URIBuilder;
 
 import java.net.URI;
@@ -93,8 +93,9 @@ public final class TrimPathSlice implements Slice {
                 body
             );
         }
-        return BaseResponse.internalError()
-            .textBody(String.format("Request path %s was not matched to %s", full, this.ptn));
+        return ResponseBuilder.internalError()
+            .textBody(String.format("Request path %s was not matched to %s", full, this.ptn))
+            .build();
     }
 
     /**

@@ -6,7 +6,7 @@ package com.artipie.http.group;
 
 import com.artipie.http.Connection;
 import com.artipie.http.Response;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -45,7 +45,9 @@ final class GroupResponse implements Response {
                 .send(connection)
                 .<CompletionStage<Void>>thenApply(CompletableFuture::completedFuture)
                 .exceptionally(
-                    throwable -> BaseResponse.internalError().send(connection)
+                    throwable -> ResponseBuilder.internalError()
+                        .build()
+                        .send(connection)
                 );
         }
         return future;

@@ -5,7 +5,7 @@
 package com.artipie.maven.http;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
@@ -29,7 +29,7 @@ class HeadProxySliceTest {
 
     @Test
     void performsRequestWithEmptyHeaderAndBody() {
-        new HeadProxySlice(new SliceSimple(BaseResponse.ok())).response(
+        new HeadProxySlice(new SliceSimple(ResponseBuilder.ok().build())).response(
             RequestLine.from("HEAD /some/path HTTP/1.1"),
             Headers.from("some", "value"),
             new Content.From("000".getBytes())
@@ -55,7 +55,7 @@ class HeadProxySliceTest {
         final Headers headers = Headers.from("abc", "123");
         MatcherAssert.assertThat(
             new HeadProxySlice(
-                new SliceSimple(BaseResponse.created().header("abc", "123"))
+                new SliceSimple(ResponseBuilder.created().header("abc", "123").build())
             ),
             new SliceHasResponse(
                 Matchers.allOf(new RsHasStatus(RsStatus.CREATED), new RsHasHeaders(headers)),

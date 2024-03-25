@@ -13,7 +13,7 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
@@ -34,7 +34,8 @@ final class ResourceFromSliceTest {
         final Header header = new Header("Name", "Value");
         final Response response = new ResourceFromSlice(
             path,
-            (line, hdrs, body) -> BaseResponse.ok().headers(hdrs).body(line.toString().getBytes())
+            (line, hdrs, body) -> ResponseBuilder.ok().headers(hdrs)
+                .body(line.toString().getBytes()).build()
         ).get(Headers.from(Collections.singleton(header)));
         MatcherAssert.assertThat(
             response,
@@ -56,8 +57,9 @@ final class ResourceFromSliceTest {
         final String content = "body";
         final Response response = new ResourceFromSlice(
             path,
-            (line, hdrs, body) -> BaseResponse.ok().headers(hdrs)
+            (line, hdrs, body) -> ResponseBuilder.ok().headers(hdrs)
                 .body(Flowable.concat(Flowable.just(ByteBuffer.wrap(line.toString().getBytes())), body))
+                .build()
         ).put(
             Headers.from(Collections.singleton(header)),
             new Content.From(content.getBytes())

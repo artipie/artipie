@@ -5,7 +5,7 @@
 package com.artipie.http.rt;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -65,7 +65,7 @@ public final class SliceRoute implements Slice {
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst()
-            .orElse(BaseResponse.notFound());
+            .orElse(ResponseBuilder.notFound().build());
     }
 
     /**

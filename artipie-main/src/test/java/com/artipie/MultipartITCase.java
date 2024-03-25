@@ -7,7 +7,7 @@ package com.artipie;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.fs.FileStorage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -91,7 +91,7 @@ final class MultipartITCase {
                         )
                     ).flatMap(part -> part)
                 ).asStringFuture().thenAccept(result::set).thenApply(
-                    none -> BaseResponse.ok()
+                    none -> ResponseBuilder.ok().build()
                 )
             )
         );
@@ -139,7 +139,7 @@ final class MultipartITCase {
                         )
                     ).flatMap(part -> part)
                 ).asStringFuture().thenAccept(result::set).thenApply(
-                    none -> BaseResponse.ok()
+                    none -> ResponseBuilder.ok().build()
                 )
             )
         );
@@ -192,7 +192,7 @@ final class MultipartITCase {
                             new Content.From(part)
                         ).thenApply(none -> 0)
                     )
-                ).toList().to(SingleInterop.get()).thenApply(none -> BaseResponse.ok())
+                ).toList().to(SingleInterop.get()).thenApply(none -> ResponseBuilder.ok().build())
             )
         );
         final byte[] buf = testData();
@@ -246,7 +246,7 @@ final class MultipartITCase {
         @Override
         public Response response(RequestLine line, Headers headers, Content body) {
             return target != null ? target.response(line, headers, body)
-                : BaseResponse.unavailable().textBody("target is not set");
+                : ResponseBuilder.unavailable().textBody("target is not set").build();
 
         }
 

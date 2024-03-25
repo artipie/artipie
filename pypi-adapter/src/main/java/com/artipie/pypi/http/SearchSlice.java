@@ -13,7 +13,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.pypi.meta.Metadata;
 import com.artipie.pypi.meta.PackageInfo;
@@ -69,11 +69,12 @@ public final class SearchSlice implements Slice {
             ).handle(
                 (content, throwable) -> {
                     if (throwable == null) {
-                        return BaseResponse.ok()
+                        return ResponseBuilder.ok()
                             .header("content-type", "text/xml")
-                            .body(content);
+                            .body(content)
+                            .build();
                     }
-                    return BaseResponse.internalError(throwable);
+                    return ResponseBuilder.internalError(throwable).build();
                 }
             )
         );

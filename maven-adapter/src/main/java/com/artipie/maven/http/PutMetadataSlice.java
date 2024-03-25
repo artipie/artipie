@@ -12,7 +12,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.maven.metadata.DeployMetadata;
 
@@ -88,9 +88,9 @@ public final class PutMetadataSlice implements Slice {
                             new Content.From(xml.getBytes(StandardCharsets.US_ASCII))
                         );
                     }
-                ).thenApply(nothing -> BaseResponse.created())
+                ).thenApply(nothing -> ResponseBuilder.created().build())
             );
         }
-        return BaseResponse.badRequest();
+        return ResponseBuilder.badRequest().build();
     }
 }

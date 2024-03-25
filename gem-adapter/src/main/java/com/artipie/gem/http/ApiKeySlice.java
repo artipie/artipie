@@ -15,7 +15,7 @@ import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -51,11 +51,12 @@ final class ApiKeySlice implements Slice {
                                 .map(val -> val.substring(BasicAuthScheme.NAME.length() + 1))
                                 .findFirst();
                             if (key.isPresent()) {
-                                return BaseResponse.ok()
-                                    .textBody(key.get(), StandardCharsets.US_ASCII);
+                                return ResponseBuilder.ok()
+                                    .textBody(key.get(), StandardCharsets.US_ASCII)
+                                    .build();
                             }
                         }
-                        return BaseResponse.unauthorized();
+                        return ResponseBuilder.unauthorized().build();
                     }
                 )
         );

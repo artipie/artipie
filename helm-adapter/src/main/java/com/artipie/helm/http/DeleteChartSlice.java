@@ -10,7 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.helm.ChartYaml;
 import com.artipie.helm.TgzArchive;
 import com.artipie.helm.metadata.IndexYaml;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -83,7 +83,7 @@ final class DeleteChartSlice implements Slice {
                     .andThen(this.deleteArchives(chart, Optional.of(vers)))
             );
         }
-        return BaseResponse.badRequest();
+        return ResponseBuilder.badRequest().build();
     }
 
     /**
@@ -137,9 +137,9 @@ final class DeleteChartSlice implements Slice {
                                         )
                                     )
                                 );
-                                return BaseResponse.ok();
+                                return ResponseBuilder.ok().build();
                             }
-                            return BaseResponse.notFound();
+                            return ResponseBuilder.notFound().build();
                         }
                     )
                 )

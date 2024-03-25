@@ -9,7 +9,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -69,6 +69,6 @@ public final class SliceOptional<T> implements Slice {
         if (this.predicate.test(target)) {
             return this.slice.apply(target).response(line, head, body);
         }
-        return BaseResponse.notFound();
+        return ResponseBuilder.notFound().build();
     }
 }

@@ -7,7 +7,7 @@ package com.artipie.nuget.http.index;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.nuget.http.Absent;
 import com.artipie.nuget.http.Resource;
 import com.artipie.nuget.http.Route;
@@ -80,8 +80,9 @@ public final class ServiceIndex implements Route {
                 JsonWriter writer = Json.createWriter(out)) {
                 writer.writeObject(json);
                 out.flush();
-                return BaseResponse.ok()
-                    .body(out.toByteArray());
+                return ResponseBuilder.ok()
+                    .body(out.toByteArray())
+                    .build();
             } catch (final IOException ex) {
                 throw new IllegalStateException("Failed to serialize JSON to bytes", ex);
             }
@@ -89,7 +90,7 @@ public final class ServiceIndex implements Route {
 
         @Override
         public Response put(Headers headers, Content body) {
-            return BaseResponse.methodNotAllowed();
+            return ResponseBuilder.methodNotAllowed().build();
         }
     }
 }

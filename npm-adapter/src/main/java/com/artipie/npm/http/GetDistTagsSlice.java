@@ -8,7 +8,7 @@ package com.artipie.npm.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -52,10 +52,11 @@ public final class GetDistTagsSlice implements Slice {
                     if (exists) {
                         return this.storage.value(key)
                             .thenCompose(Content::asJsonObjectFuture)
-                            .thenApply(json -> BaseResponse.ok()
-                                .jsonBody(json.getJsonObject("dist-tags")));
+                            .thenApply(json -> ResponseBuilder.ok()
+                                .jsonBody(json.getJsonObject("dist-tags"))
+                                .build());
                     }
-                    return CompletableFuture.completedFuture(BaseResponse.notFound());
+                    return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
                 }
             )
         );

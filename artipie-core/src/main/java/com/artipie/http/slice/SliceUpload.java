@@ -13,7 +13,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.scheduling.RepositoryEvents;
 
 import java.util.Optional;
@@ -94,7 +94,7 @@ public final class SliceUpload implements Slice {
             );
         }
         return new AsyncResponse(
-            res.thenApply(rsp -> BaseResponse.created())
+            res.thenApply(rsp -> ResponseBuilder.created().build())
         );
     }
 }

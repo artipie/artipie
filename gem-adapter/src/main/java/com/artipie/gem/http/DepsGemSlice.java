@@ -13,7 +13,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import io.reactivex.Flowable;
 
 import java.util.Arrays;
@@ -51,7 +51,9 @@ final class DepsGemSlice implements Slice {
                     )
                 )
             ).thenApply(
-                data -> BaseResponse.ok().body(Flowable.just(data))
+                data -> ResponseBuilder.ok()
+                    .body(Flowable.just(data))
+                    .build()
             )
         );
     }

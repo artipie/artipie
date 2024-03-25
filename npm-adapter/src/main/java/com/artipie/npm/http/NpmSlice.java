@@ -16,7 +16,7 @@ import com.artipie.http.auth.OperationControl;
 import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -111,7 +111,7 @@ public final class NpmSlice implements Slice {
                     new RtRule.ByPath("/npm")
                 ),
                 new BearerAuthzSlice(
-                    new SliceSimple(BaseResponse.ok()),
+                    new SliceSimple(ResponseBuilder.ok().build()),
                     auth,
                     new OperationControl(
                         policy, new AdapterBasicPermission(name, Action.Standard.READ)

@@ -12,7 +12,7 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.security.perms.Action;
@@ -37,7 +37,7 @@ class BasicAuthzSliceTest {
         final String user = "test_user";
         MatcherAssert.assertThat(
             new BasicAuthzSlice(
-                (rqline, headers, body) -> BaseResponse.ok().headers(headers),
+                (rqline, headers, body) -> ResponseBuilder.ok().headers(headers).build(),
                 (usr, pwd) -> Optional.of(new AuthUser(user, "test")),
                 new OperationControl(
                     Policy.FREE,
@@ -62,7 +62,7 @@ class BasicAuthzSliceTest {
     void returnsUnauthorizedErrorIfCredentialsAreWrong() {
         MatcherAssert.assertThat(
             new BasicAuthzSlice(
-                new SliceSimple(BaseResponse.ok()),
+                new SliceSimple(ResponseBuilder.ok().build()),
                 (user, pswd) -> Optional.empty(),
                 new OperationControl(
                     user -> EmptyPermissions.INSTANCE,
@@ -85,7 +85,7 @@ class BasicAuthzSliceTest {
         final String name = "john";
         MatcherAssert.assertThat(
             new BasicAuthzSlice(
-                new SliceSimple(BaseResponse.ok()),
+                new SliceSimple(ResponseBuilder.ok().build()),
                 (user, pswd) -> Optional.of(new AuthUser(name)),
                 new OperationControl(
                     user -> EmptyPermissions.INSTANCE,
@@ -105,7 +105,7 @@ class BasicAuthzSliceTest {
     void returnsUnauthorizedForAnonymousUser() {
         MatcherAssert.assertThat(
             new BasicAuthzSlice(
-                new SliceSimple(BaseResponse.ok()),
+                new SliceSimple(ResponseBuilder.ok().build()),
                 (user, pswd) -> Assertions.fail("Shouldn't be called"),
                 new OperationControl(
                     user -> {
@@ -133,7 +133,7 @@ class BasicAuthzSliceTest {
         final String pswd = "open sesame";
         MatcherAssert.assertThat(
             new BasicAuthzSlice(
-                (rqline, headers, body) -> BaseResponse.ok().headers(headers),
+                (rqline, headers, body) -> ResponseBuilder.ok().headers(headers).build(),
                 new Authentication.Single(aladdin, pswd),
                 new OperationControl(
                     new PolicyByUsername(aladdin),

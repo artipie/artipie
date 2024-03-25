@@ -39,7 +39,7 @@ import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.filter.FilterSlice;
 import com.artipie.http.filter.Filters;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.http.MavenSlice;
@@ -142,8 +142,9 @@ public class RepositorySlices {
         }
         return new SliceValue(
             new SliceSimple(
-                () -> BaseResponse.notFound()
+                () -> ResponseBuilder.notFound()
                     .textBody(String.format("Repository '%s' not found", name.string()))
+                    .build()
             ),
             Optional.empty()
         );

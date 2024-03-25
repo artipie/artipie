@@ -15,7 +15,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import java.util.regex.Pattern;
 
@@ -63,9 +63,10 @@ final class CatalogEntity {
                     params.value("last").map(RepoName.Simple::new),
                     params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
                 ).thenApply(
-                    catalog -> BaseResponse.ok()
+                    catalog -> ResponseBuilder.ok()
                         .header(ContentType.json())
                         .body(catalog.json())
+                        .build()
                 )
             );
         }

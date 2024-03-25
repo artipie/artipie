@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.FailedCompletionStage;
 import com.artipie.docker.error.DockerError;
 import com.artipie.docker.error.UnsupportedError;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -86,11 +86,11 @@ final class ErrorHandlingSlice implements Slice {
      */
     private static Optional<Response> handle(final Throwable throwable) {
         if (throwable instanceof DockerError error) {
-            return Optional.of(BaseResponse.badRequest().jsonBody(error.json()));
+            return Optional.of(ResponseBuilder.badRequest().jsonBody(error.json()).build());
         }
         if (throwable instanceof UnsupportedOperationException) {
             return Optional.of(
-                BaseResponse.methodNotAllowed().jsonBody(new UnsupportedError().json())
+                ResponseBuilder.methodNotAllowed().jsonBody(new UnsupportedError().json()).build()
             );
         }
         if (throwable instanceof CompletionException) {

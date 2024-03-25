@@ -6,7 +6,7 @@ package com.artipie.maven.http;
 
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.maven.asto.RepositoryChecksums;
@@ -36,12 +36,13 @@ public final class ArtifactHeadResponse extends Response.Wrap {
                                 new RepositoryChecksums(storage)
                                     .checksums(location)
                                     .thenApply(
-                                        checksums -> BaseResponse.ok()
+                                        checksums -> ResponseBuilder.ok()
                                             .headers(ArtifactHeaders.from(location, checksums))
+                                            .build()
                                     )
                             );
                         }
-                        return BaseResponse.notFound();
+                        return ResponseBuilder.notFound().build();
                     }
                 )
             )

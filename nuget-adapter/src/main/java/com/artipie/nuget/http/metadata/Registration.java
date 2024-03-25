@@ -7,8 +7,8 @@ package com.artipie.nuget.http.metadata;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.BaseResponse;
 import com.artipie.nuget.PackageKeys;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.Versions;
@@ -77,8 +77,9 @@ class Registration implements Resource {
                         JsonWriter writer = Json.createWriter(out)) {
                         writer.writeObject(json);
                         out.flush();
-                        return BaseResponse.ok()
-                            .body(out.toByteArray());
+                        return ResponseBuilder.ok()
+                            .body(out.toByteArray())
+                            .build();
                     } catch (final IOException ex) {
                         throw new UncheckedIOException(ex);
                     }
@@ -89,7 +90,7 @@ class Registration implements Resource {
 
     @Override
     public Response put(Headers headers, Content body) {
-        return BaseResponse.methodNotAllowed();
+        return ResponseBuilder.methodNotAllowed().build();
     }
 
     /**

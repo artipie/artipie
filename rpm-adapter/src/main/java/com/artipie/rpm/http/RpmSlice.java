@@ -5,7 +5,7 @@
 package com.artipie.rpm.http;
 
 import com.artipie.asto.Storage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
@@ -95,7 +95,7 @@ public final class RpmSlice extends Slice.Wrap {
                         )
                     )
                 ),
-                new RtRulePath(RtRule.FALLBACK, new SliceSimple(BaseResponse.notFound()))
+                new RtRulePath(RtRule.FALLBACK, new SliceSimple(ResponseBuilder.notFound().build()))
             )
         );
     }

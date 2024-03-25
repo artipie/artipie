@@ -15,7 +15,7 @@ import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import javax.json.Json;
 
@@ -49,15 +49,17 @@ final class GenerateTokenSlice implements Slice {
             new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
                 result -> {
                     if (result.status() == AuthScheme.AuthStatus.FAILED) {
-                        return BaseResponse.unauthorized()
-                            .header(new WwwAuthenticate(result.challenge()));
+                        return ResponseBuilder.unauthorized()
+                            .header(new WwwAuthenticate(result.challenge()))
+                            .build();
                     }
-                    return BaseResponse.ok()
+                    return ResponseBuilder.ok()
                         .jsonBody(
                             Json.createObjectBuilder()
                                 .add("token", this.tokens.generate(result.user()))
                                 .build()
-                        );
+                        )
+                        .build();
                 }
             )
         );

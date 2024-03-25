@@ -13,7 +13,7 @@ import com.artipie.http.client.UriClientSlice;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -84,7 +84,7 @@ public class ComposerProxySlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new SliceSimple(BaseResponse.methodNotAllowed())
+                    new SliceSimple(ResponseBuilder.methodNotAllowed().build())
                 )
             )
         );

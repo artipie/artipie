@@ -9,7 +9,7 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.npm.proxy.model.NpmAsset;
 import com.artipie.npm.proxy.model.NpmPackage;
 import org.apache.commons.io.IOUtils;
@@ -145,17 +145,19 @@ public final class HttpNpmRemoteTest {
         return (line, headers, body) -> {
             final String path = line.uri().getPath();
             if (path.equalsIgnoreCase("/asdas")) {
-                return BaseResponse.ok()
+                return ResponseBuilder.ok()
                     .header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED)
-                    .body(new TestResource("json/original.json").asBytes());
+                    .body(new TestResource("json/original.json").asBytes())
+                    .build();
             }
             if (path.equalsIgnoreCase("/asdas/-/asdas-1.0.0.tgz")) {
-                return BaseResponse.ok()
+                return ResponseBuilder.ok()
                     .header(new Header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED))
                     .header(ContentType.mime(HttpNpmRemoteTest.DEF_CONTENT_TYPE))
-                    .body(HttpNpmRemoteTest.DEF_CONTENT.getBytes(StandardCharsets.UTF_8));
+                    .body(HttpNpmRemoteTest.DEF_CONTENT.getBytes(StandardCharsets.UTF_8))
+                    .build();
             }
-            return BaseResponse.notFound();
+            return ResponseBuilder.notFound().build();
         };
     }
 }

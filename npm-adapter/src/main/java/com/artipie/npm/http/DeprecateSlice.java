@@ -7,7 +7,7 @@ package com.artipie.npm.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -64,11 +64,11 @@ public final class DeprecateSlice implements Slice {
                                     this.storage.save(
                                         key, new Content.From(str.getBytes(StandardCharsets.UTF_8))
                                     );
-                                    return BaseResponse.ok();
+                                    return ResponseBuilder.ok().build();
                                 }
                             );
                     }
-                    return CompletableFuture.completedFuture(BaseResponse.notFound());
+                    return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
                 }
             )
         );

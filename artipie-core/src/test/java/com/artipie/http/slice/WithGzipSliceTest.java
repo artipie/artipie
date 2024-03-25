@@ -14,7 +14,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -31,7 +31,8 @@ class WithGzipSliceTest {
     @Test
     void returnsGzipedResponseIfAcceptEncodingIsPassed() throws IOException {
         MatcherAssert.assertThat(
-            new WithGzipSlice(new SliceSimple(BaseResponse.ok().textBody("some content to gzip"))),
+            new WithGzipSlice(new SliceSimple(ResponseBuilder.ok()
+                .textBody("some content to gzip").build())),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
@@ -52,9 +53,10 @@ class WithGzipSliceTest {
         MatcherAssert.assertThat(
             new WithGzipSlice(
                 new SliceSimple(
-                    BaseResponse.created()
+                    ResponseBuilder.created()
                         .header(hdr)
                         .body(data)
+                        .build()
                 )
             ),
             new SliceHasResponse(

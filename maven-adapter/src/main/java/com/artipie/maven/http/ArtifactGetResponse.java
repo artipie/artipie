@@ -8,7 +8,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.maven.asto.RepositoryChecksums;
 
 /**
@@ -37,13 +37,14 @@ public final class ArtifactGetResponse extends Response.Wrap {
                                     .thenCombine(
                                         new RepositoryChecksums(storage).checksums(location),
                                         (body, checksums) ->
-                                            BaseResponse.ok()
+                                            ResponseBuilder.ok()
                                                 .headers(ArtifactHeaders.from(location, checksums))
                                                 .body(body)
+                                                .build()
                                     )
                             );
                         }
-                        return BaseResponse.notFound();
+                        return ResponseBuilder.notFound().build();
                     }
                 )
             )

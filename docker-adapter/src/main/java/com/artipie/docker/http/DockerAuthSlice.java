@@ -7,7 +7,7 @@ package com.artipie.docker.http;
 import com.artipie.asto.Content;
 import com.artipie.docker.error.DeniedError;
 import com.artipie.docker.error.UnauthorizedError;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -38,15 +38,17 @@ final class DockerAuthSlice implements Slice {
         return connection -> response.send(
             (rsstatus, rsheaders, rsbody) -> {
                 if (rsstatus == RsStatus.UNAUTHORIZED) {
-                    return BaseResponse.unauthorized()
+                    return ResponseBuilder.unauthorized()
                         .headers(rsheaders)
                         .jsonBody(new UnauthorizedError().json())
+                        .build()
                         .send(connection);
                 }
                 if (rsstatus == RsStatus.FORBIDDEN) {
-                    return BaseResponse.forbidden()
+                    return ResponseBuilder.forbidden()
                         .headers(rsheaders)
                         .jsonBody(new DeniedError().json())
+                        .build()
                         .send(connection);
                 }
                 return connection.accept(rsstatus, rsheaders, rsbody);

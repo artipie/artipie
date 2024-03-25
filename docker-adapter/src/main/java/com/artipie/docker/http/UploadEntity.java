@@ -13,9 +13,9 @@ import com.artipie.docker.Upload;
 import com.artipie.docker.error.UploadUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.http.BaseResponse;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
@@ -176,7 +176,9 @@ public final class UploadEntity {
                             )
                         )
                     ).orElseGet(
-                        () -> BaseResponse.notFound().jsonBody(new UploadUnknownError(uuid).json())
+                        () -> ResponseBuilder.notFound()
+                            .jsonBody(new UploadUnknownError(uuid).json())
+                            .build()
                     )
                 )
             );
@@ -230,7 +232,9 @@ public final class UploadEntity {
                             )
                         )
                     ).orElseGet(
-                        () -> BaseResponse.notFound().jsonBody(new UploadUnknownError(uuid).json())
+                        () -> ResponseBuilder.notFound()
+                            .jsonBody(new UploadUnknownError(uuid).json())
+                            .build()
                     )
                 )
             );
@@ -275,14 +279,18 @@ public final class UploadEntity {
                     found -> found.<Response>map(
                         upload -> new AsyncResponse(
                             upload.offset().thenApply(
-                                offset -> BaseResponse.noContent()
+                                offset -> ResponseBuilder.noContent()
                                     .header(new ContentLength("0"))
                                     .header(new Header("Range", String.format("0-%d", offset)))
                                     .header(new Header(UploadEntity.UPLOAD_UUID, uuid))
+                                    .build()
                             )
                         )
                     ).orElseGet(
-                        () -> BaseResponse.notFound().jsonBody(new UploadUnknownError(uuid).json())
+                        () -> ResponseBuilder.notFound()
+                            .jsonBody(new UploadUnknownError(uuid).json())
+                            .build()
+
                     )
                 )
             );
@@ -365,19 +373,21 @@ public final class UploadEntity {
         }
     }
 
-    private static BaseResponse acceptedResponse(RepoName name, String uuid, long offset){
-        return BaseResponse.accepted()
+    private static Response acceptedResponse(RepoName name, String uuid, long offset){
+        return ResponseBuilder.accepted()
             .header(new Location(String.format("/v2/%s/blobs/uploads/%s", name.value(), uuid)))
             .header(new Header("Range", String.format("0-%d", offset)))
             .header(new ContentLength("0"))
-            .header(new Header(UploadEntity.UPLOAD_UUID, uuid));
+            .header(new Header(UploadEntity.UPLOAD_UUID, uuid))
+            .build();
     }
 
-    private static BaseResponse createdResponse(RepoName name, Digest digest) {
-        return BaseResponse.created()
+    private static Response createdResponse(RepoName name, Digest digest) {
+        return ResponseBuilder.created()
             .header(new Location(String.format("/v2/%s/blobs/%s", name.value(), digest.string())))
             .header(new ContentLength("0"))
-            .header(new DigestHeader(digest));
+            .header(new DigestHeader(digest))
+            .build();
     }
 
     /**
@@ -416,12 +426,15 @@ public final class UploadEntity {
                     x -> x.map(
                         (Function<Upload, CompletionStage<? extends Response>>) upload ->
                             upload.cancel().thenApply(
-                                offset -> BaseResponse.ok().header(UploadEntity.UPLOAD_UUID, uuid)
+                                offset -> ResponseBuilder.ok()
+                                    .header(UploadEntity.UPLOAD_UUID, uuid)
+                                    .build()
                             )
                     ).orElse(
                         CompletableFuture.completedFuture(
-                            BaseResponse.notFound()
+                            ResponseBuilder.notFound()
                                 .jsonBody(new UploadUnknownError(uuid).json())
+                                .build()
                         )
                     )
                 )

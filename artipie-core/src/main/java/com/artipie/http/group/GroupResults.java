@@ -4,7 +4,7 @@
  */
 package com.artipie.http.group;
 
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Connection;
 
 import java.util.ArrayList;
@@ -17,7 +17,6 @@ import java.util.concurrent.CompletionStage;
 /**
  * Group response results aggregator.
  * @implNote This class is not thread safe and should be synchronized
- * @since 0.11
  */
 final class GroupResults {
 
@@ -85,6 +84,8 @@ final class GroupResults {
                 ).thenRun(() -> this.future.complete(null));
             }
         }
-        return BaseResponse.notFound().send(con).thenRun(() -> this.future.complete(null));
+        return ResponseBuilder.notFound()
+            .build()
+            .send(con).thenRun(() -> this.future.complete(null));
     }
 }

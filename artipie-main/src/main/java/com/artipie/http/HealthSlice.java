@@ -44,16 +44,18 @@ public final class HealthSlice implements Slice {
                 .thenApply(
                     ok -> {
                         if (ok) {
-                            return BaseResponse.ok()
+                            return ResponseBuilder.ok()
                                 .jsonBody(Json.createArrayBuilder()
                                     .add(Json.createObjectBuilder().add("storage", "ok"))
                                     .build()
-                                );
+                                )
+                                .build();
                         }
-                        return BaseResponse.unavailable()
+                        return ResponseBuilder.unavailable()
                             .jsonBody(Json.createArrayBuilder().add(
                                 Json.createObjectBuilder().add("storage", "failure")
-                            ).build());
+                            ).build())
+                            .build();
                     }
             )
         );

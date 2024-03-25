@@ -9,7 +9,7 @@ import com.artipie.asto.Storage;
 import com.artipie.conda.http.auth.TokenAuth;
 import com.artipie.conda.http.auth.TokenAuthScheme;
 import com.artipie.conda.http.auth.TokenAuthSlice;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
@@ -162,7 +162,7 @@ public final class CondaSlice extends Slice.Wrap {
                     ),
                     new UpdateSlice(storage, events, repo)
                 ),
-                new RtRulePath(new ByMethodsRule(RqMethod.HEAD), new SliceSimple(BaseResponse.ok())),
+                new RtRulePath(new ByMethodsRule(RqMethod.HEAD), new SliceSimple(ResponseBuilder.ok().build())),
                 new RtRulePath(
                     new RtRule.All(new RtRule.ByPath(".*user$"), new ByMethodsRule(RqMethod.GET)),
                     new TokenAuthSlice(
@@ -202,7 +202,7 @@ public final class CondaSlice extends Slice.Wrap {
                         )
                     )
                 ),
-                new RtRulePath(RtRule.FALLBACK, new SliceSimple(BaseResponse.notFound()))
+                new RtRulePath(RtRule.FALLBACK, new SliceSimple(ResponseBuilder.notFound().build()))
             )
         );
     }

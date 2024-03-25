@@ -8,7 +8,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.client.FakeClientSlices;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.WwwAuthenticate;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -36,7 +36,7 @@ class BearerAuthenticatorTest {
                 final URI uri = rsline.uri();
                 pathcapture.set(uri.getRawPath());
                 querycapture.set(uri.getRawQuery());
-                return BaseResponse.ok();
+                return ResponseBuilder.ok().build();
             }
         );
         final String host = "artipie.com";
@@ -91,7 +91,7 @@ class BearerAuthenticatorTest {
         final FakeClientSlices fake = new FakeClientSlices(
             (rsline, rqheaders, rqbody) -> {
                 capture.set(rqheaders);
-                return BaseResponse.ok();
+                return ResponseBuilder.ok().build();
             }
         );
         new BearerAuthenticator(
@@ -116,7 +116,7 @@ class BearerAuthenticatorTest {
         final AtomicReference<byte[]> captured = new AtomicReference<>();
         final Headers headers = new BearerAuthenticator(
             new FakeClientSlices(
-                (rqline, rqheaders, rqbody) -> BaseResponse.ok().body(response)
+                (rqline, rqheaders, rqbody) -> ResponseBuilder.ok().body(response).build()
             ),
             bytes -> {
                 captured.set(bytes);

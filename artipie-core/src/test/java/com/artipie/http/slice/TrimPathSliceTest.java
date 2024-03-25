@@ -5,7 +5,7 @@
 package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.AssertSlice;
@@ -45,7 +45,7 @@ final class TrimPathSliceTest {
 
     @Test
     void failIfUriPathDoesntMatch() throws Exception {
-        new TrimPathSlice((line, headers, body) -> BaseResponse.ok(), "none").response(
+        new TrimPathSlice((line, headers, body) -> ResponseBuilder.ok().build(), "none").response(
             requestLine("http://www.w3.org"),
             Headers.EMPTY,
             Content.EMPTY

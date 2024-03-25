@@ -13,7 +13,7 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,10 @@ class AuthClientSliceTest {
                 if (!rsline.equals(line)) {
                     throw new IllegalArgumentException(String.format("Line modified: %s", rsline));
                 }
-                return BaseResponse.ok().headers(rsheaders).body(rsbody);
+                return ResponseBuilder.ok()
+                    .headers(rsheaders)
+                    .body(rsbody)
+                    .build();
             },
             Authenticator.ANONYMOUS
         ).response(line, Headers.from(header), new Content.From(body));

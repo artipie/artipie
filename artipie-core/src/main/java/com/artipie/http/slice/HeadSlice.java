@@ -15,7 +15,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
@@ -93,11 +93,12 @@ public final class HeadSlice implements Slice {
                     if (exist) {
                         return this.resHeaders
                             .apply(line, headers)
-                            .thenApply(res -> BaseResponse.ok().headers(res));
+                            .thenApply(res -> ResponseBuilder.ok().headers(res).build());
                     }
                     return CompletableFuture.completedFuture(
-                        BaseResponse.notFound()
+                        ResponseBuilder.notFound()
                             .textBody(String.format("Key %s not found", key.string()))
+                            .build()
                     );
                 }
             );

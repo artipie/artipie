@@ -18,7 +18,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.maven.Maven;
 import com.artipie.maven.ValidUpload;
 import com.artipie.scheduling.ArtifactEvent;
@@ -121,7 +121,7 @@ public final class PutMetadataChecksumSlice implements Slice {
                                         action = this.validateAndUpdate(pkg, location, headers);
                                     } else {
                                         action = CompletableFuture.completedFuture(
-                                            BaseResponse.created()
+                                            ResponseBuilder.created().build()
                                         );
                                     }
                                     return action;
@@ -129,7 +129,7 @@ public final class PutMetadataChecksumSlice implements Slice {
                             );
                         } else {
                             resp = CompletableFuture.completedFuture(
-                                BaseResponse.badRequest()
+                                ResponseBuilder.badRequest().build()
                             );
                         }
                         return resp;
@@ -137,7 +137,7 @@ public final class PutMetadataChecksumSlice implements Slice {
                 )
             );
         }
-        return BaseResponse.badRequest();
+        return ResponseBuilder.badRequest().build();
     }
 
     /**
@@ -168,10 +168,10 @@ public final class PutMetadataChecksumSlice implements Slice {
                             )
                         );
                     }
-                    upd = res.thenApply(ignored -> BaseResponse.created());
+                    upd = res.thenApply(ignored -> ResponseBuilder.created().build());
                 } else {
                     upd = CompletableFuture.completedFuture(
-                        BaseResponse.badRequest()
+                        ResponseBuilder.badRequest().build()
                     );
                 }
                 return upd;

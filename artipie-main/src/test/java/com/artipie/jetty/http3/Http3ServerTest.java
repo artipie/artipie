@@ -6,7 +6,7 @@ package com.artipie.jetty.http3;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -196,17 +196,20 @@ class Http3ServerTest {
         @Override
         public Response response(RequestLine line, Headers headers, Content body) {
             if (line.toString().contains("no_data")) {
-                return BaseResponse.ok()
-                    .header( Http3ServerTest.RQ_METHOD, line.method().value());
+                return ResponseBuilder.ok()
+                    .header( Http3ServerTest.RQ_METHOD, line.method().value())
+                    .build();
             }
             if (line.toString().contains("small_data")) {
-                return BaseResponse.ok().body(Http3ServerTest.SMALL_DATA);
+                return ResponseBuilder.ok()
+                    .body(Http3ServerTest.SMALL_DATA)
+                    .build();
             }
             if (line.toString().contains("random_chunks")) {
                 final Random random = new Random();
                 final byte[] data = new byte[Http3ServerTest.SIZE];
                 random.nextBytes(data);
-                return BaseResponse.ok().body(
+                return ResponseBuilder.ok().body(
                     new Content.From(
                         Flowable.fromArray(ByteBuffer.wrap(data))
                             .flatMap(
@@ -216,12 +219,12 @@ class Http3ServerTest {
                             )
                             .delay(random.nextInt(5_000), TimeUnit.MILLISECONDS)
                     )
-                );
+                ).build();
             }
             if (line.toString().contains("return_back")) {
-                return BaseResponse.ok().body(body);
+                return ResponseBuilder.ok().body(body).build();
             }
-            return BaseResponse.notFound();
+            return ResponseBuilder.notFound().build();
         }
     }
 

@@ -16,7 +16,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import io.vavr.Tuple2;
 
 import javax.json.Json;
@@ -84,12 +84,14 @@ abstract class BaseConanSlice implements Slice {
             content.thenApply(
                 data -> {
                     if (data.isEmpty()) {
-                        return BaseResponse.notFound()
-                            .textBody(String.format(BaseConanSlice.URI_S_NOT_FOUND, line.uri(), this.getClass()));
+                        return ResponseBuilder.notFound()
+                            .textBody(String.format(BaseConanSlice.URI_S_NOT_FOUND, line.uri(), this.getClass()))
+                            .build();
                     }
-                    return BaseResponse.ok()
+                    return ResponseBuilder.ok()
                         .header(BaseConanSlice.CONTENT_TYPE, data.getType())
-                        .body(data.getData());
+                        .body(data.getData())
+                        .build();
                 }
             )
         );

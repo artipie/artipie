@@ -13,7 +13,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.scheduling.ArtifactEvent;
 
 import java.util.Optional;
@@ -103,8 +103,8 @@ final class AddArchiveSlice implements Slice {
                     )
                 );
             }
-            return new AsyncResponse(res.thenApply(nothing -> BaseResponse.created()));
+            return new AsyncResponse(res.thenApply(nothing -> ResponseBuilder.created().build()));
         }
-        return BaseResponse.badRequest();
+        return ResponseBuilder.badRequest().build();
     }
 }

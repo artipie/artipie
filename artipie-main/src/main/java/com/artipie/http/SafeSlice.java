@@ -35,8 +35,9 @@ final class SafeSlice implements Slice {
             return new RsSafe(this.origin.response(line, headers, body));
         } catch (final Exception err) {
             Logger.error(this, "Failed to respond to request: %[exception]s", err);
-            return BaseResponse.internalError()
-                .textBody("Failed to respond to request: " + err.getMessage());
+            return ResponseBuilder.internalError()
+                .textBody("Failed to respond to request: " + err.getMessage())
+                .build();
         }
     }
 
@@ -64,8 +65,9 @@ final class SafeSlice implements Slice {
                 return this.origin.send(connection);
             } catch (final Exception err) {
                 Logger.error(this, "Failed to send request to connection: %[exception]s", err);
-                return BaseResponse.internalError()
+                return ResponseBuilder.internalError()
                     .textBody("Failed to send request to connection: " + err.getMessage())
+                    .build()
                     .send(connection);
             }
         }

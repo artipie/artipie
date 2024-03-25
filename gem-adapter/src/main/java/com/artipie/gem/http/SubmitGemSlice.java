@@ -16,7 +16,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.ContentWithSize;
 import com.artipie.scheduling.ArtifactEvent;
 import org.apache.commons.lang3.tuple.Pair;
@@ -107,7 +107,7 @@ final class SubmitGemSlice implements Slice {
                 }
             )
                 .thenCompose(none -> this.storage.delete(key))
-                .thenApply(none -> BaseResponse.created())
+                .thenApply(none -> ResponseBuilder.created().build())
         );
     }
 }

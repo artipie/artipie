@@ -12,7 +12,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.json.ClientContent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
@@ -48,11 +48,12 @@ public final class DownloadPackageSlice implements Slice {
         return new AsyncResponse(
             this.npm.getPackage(this.path.value(line.uri().getPath()))
                 .map(
-                    pkg -> (Response) BaseResponse.ok()
+                    pkg -> (Response) ResponseBuilder.ok()
                         .header(ContentType.json())
                         .header("Last-Modified", pkg.meta().lastModified())
                         .body(this.clientFormat(pkg.content(), headers).getBytes())
-                ).toSingle(BaseResponse.notFound())
+                        .build()
+                ).toSingle(ResponseBuilder.notFound().build())
                 .to(SingleInterop.get())
         );
     }

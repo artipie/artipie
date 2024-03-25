@@ -13,7 +13,7 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -34,7 +34,8 @@ public class SliceFromResourceTest {
             new Resource() {
                 @Override
                 public Response get(final Headers headers) {
-                    return BaseResponse.ok().headers(headers).body(body);
+                    return ResponseBuilder.ok().headers(headers)
+                        .body(body).build();
                 }
 
                 @Override
@@ -70,7 +71,8 @@ public class SliceFromResourceTest {
 
                 @Override
                 public Response put(Headers headers, Content body) {
-                    return BaseResponse.ok().headers(headers).body(body);
+                    return ResponseBuilder.ok().headers(headers)
+                        .body(body).build();
                 }
             }
         ).response(

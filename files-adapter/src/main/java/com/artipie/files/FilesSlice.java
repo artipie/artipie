@@ -6,7 +6,7 @@ package com.artipie.files;
 
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthUser;
@@ -188,7 +188,7 @@ public final class FilesSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new SliceSimple(BaseResponse.methodNotAllowed())
+                    new SliceSimple(ResponseBuilder.methodNotAllowed().build())
                 )
             )
         );

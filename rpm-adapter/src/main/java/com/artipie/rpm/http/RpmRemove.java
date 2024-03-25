@@ -11,10 +11,10 @@ import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.rpm.RepoConfig;
 import com.artipie.rpm.asto.AstoRepoRemove;
@@ -115,7 +115,7 @@ public final class RpmRemove implements Slice {
                                     res = this.asto.delete(temp)
                                         .thenApply(nothing -> RsStatus.BAD_REQUEST);
                                 }
-                                return res.thenApply(BaseResponse::from);
+                                return res.thenApply(s -> ResponseBuilder.from(s).build());
                             }
                         )
                 )

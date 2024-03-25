@@ -11,7 +11,7 @@ import com.artipie.asto.cache.Remote;
 import com.artipie.composer.JsonPackages;
 import com.artipie.composer.Packages;
 import com.artipie.composer.Repository;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -69,10 +69,10 @@ final class CachedProxySlice implements Slice {
             ).handle(
                 (pkgs, throwable) -> {
                     if (throwable == null && pkgs.isPresent()) {
-                        return BaseResponse.ok().body(pkgs.get());
+                        return ResponseBuilder.ok().body(pkgs.get()).build();
                     }
                     Logger.warn(this, "Failed to read cached item: %[exception]s", throwable);
-                    return BaseResponse.notFound();
+                    return ResponseBuilder.notFound().build();
                 }
             )
         );

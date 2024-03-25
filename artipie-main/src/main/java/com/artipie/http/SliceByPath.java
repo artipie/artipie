@@ -35,7 +35,9 @@ final class SliceByPath implements Slice {
     public Response response(RequestLine line, Headers headers, Content body) {
         final Optional<Key> key = SliceByPath.keyFromPath(line.uri().getPath());
         if (key.isEmpty()) {
-            return BaseResponse.notFound().textBody("Failed to find a repository");
+            return ResponseBuilder.notFound()
+                .textBody("Failed to find a repository")
+                .build();
         }
         return this.slices.slice(key.get(), line.uri().getPort())
             .response(line, headers, body);

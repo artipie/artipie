@@ -11,7 +11,7 @@ import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 
 /**
@@ -33,7 +33,7 @@ final class DownloadArchiveSlice implements Slice {
     public Response response(RequestLine line, Headers headers, Content body) {
         return new AsyncResponse(
             this.repos.value(new KeyFromPath(line.uri().getPath()))
-                .thenApply(content -> BaseResponse.ok().body(content))
+                .thenApply(content -> ResponseBuilder.ok().body(content).build())
         );
     }
 }

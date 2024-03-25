@@ -21,7 +21,7 @@ class ContentLengthRestrictionTest {
     @Test
     public void shouldNotPassRequestsAboveLimit() {
         final Slice slice = new ContentLengthRestriction(
-            (line, headers, body) -> BaseResponse.ok(), 10
+            (line, headers, body) -> ResponseBuilder.ok().build(), 10
         );
         final Response response = slice.response(new RequestLine("GET", "/"), this.headers("11"), Content.EMPTY);
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.REQUEST_TOO_LONG));
@@ -31,7 +31,7 @@ class ContentLengthRestrictionTest {
     @CsvSource({"10,0", "10,not number", "10,1", "10,10"})
     public void shouldPassRequestsWithinLimit(int limit, String value) {
         final Slice slice = new ContentLengthRestriction(
-            (line, headers, body) -> BaseResponse.ok(), limit
+            (line, headers, body) -> ResponseBuilder.ok().build(), limit
         );
         final Response response = slice.response(new RequestLine("GET", "/"), this.headers(value), Content.EMPTY);
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.OK));
@@ -40,7 +40,7 @@ class ContentLengthRestrictionTest {
     @Test
     public void shouldPassRequestsWithoutContentLength() {
         final Slice slice = new ContentLengthRestriction(
-            (line, headers, body) -> BaseResponse.ok(), 10
+            (line, headers, body) -> ResponseBuilder.ok().build(), 10
         );
         final Response response = slice.response(new RequestLine("GET", "/"), Headers.EMPTY, Content.EMPTY);
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.OK));

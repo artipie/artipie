@@ -20,11 +20,11 @@ import com.artipie.hex.tarball.TarReader;
 import com.artipie.hex.utils.Gzip;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -162,7 +162,8 @@ public final class UploadSlice implements Slice {
                     (content, throwable) -> {
                         final Response result;
                         if (throwable == null) {
-                            result = BaseResponse.created().headers(new HexContentType(headers).fill());
+                            result = ResponseBuilder.created()
+                                .headers(new HexContentType(headers).fill()).build();
                             this.events.ifPresent(
                                 queue -> queue.add(
                                     new ArtifactEvent(
@@ -173,14 +174,14 @@ public final class UploadSlice implements Slice {
                                 )
                             );
                         } else {
-                            result = BaseResponse.internalError(throwable);
+                            result = ResponseBuilder.internalError(throwable).build();
                         }
                         return result;
                     }
                 )
             );
         } else {
-            res = BaseResponse.badRequest();
+            res = ResponseBuilder.badRequest().build();
         }
         return res;
     }

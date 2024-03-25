@@ -7,7 +7,7 @@ package com.artipie.npm.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -74,17 +74,17 @@ final class AddDistTagsSlice implements Slice {
                                     json -> {
                                         byte[] bytes = json.toString().getBytes(StandardCharsets.UTF_8);
                                         this.storage.save(meta, new Content.From(bytes));
-                                        return BaseResponse.ok();
+                                        return ResponseBuilder.ok().build();
                                     }
                                 );
                         }
                         return CompletableFuture.completedFuture(
-                            BaseResponse.notFound()
+                            ResponseBuilder.notFound().build()
                         );
                     }
                 )
             );
         }
-        return BaseResponse.badRequest();
+        return ResponseBuilder.badRequest().build();
     }
 }

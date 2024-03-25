@@ -23,10 +23,11 @@ public final class VersionSlice implements Slice {
 
     @Override
     public Response response(RequestLine line, Headers headers, Content body) {
-        return BaseResponse.ok()
+        return ResponseBuilder.ok()
             .jsonBody(Json.createArrayBuilder()
                 .add(Json.createObjectBuilder().add("version", this.properties.version()))
                 .build()
-            );
+            )
+            .build();
     }
 }

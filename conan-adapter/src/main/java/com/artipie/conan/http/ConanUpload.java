@@ -16,7 +16,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.SliceUpload;
 import org.reactivestreams.Publisher;
 
@@ -107,7 +107,9 @@ public final class ConanUpload {
      */
     private static CompletableFuture<Response> generateError(final String filename) {
         return CompletableFuture.completedFuture(
-            BaseResponse.notFound().textBody(String.format(ConanUpload.URI_S_NOT_FOUND, filename))
+            ResponseBuilder.notFound()
+                .textBody(String.format(ConanUpload.URI_S_NOT_FOUND, filename))
+                .build()
         );
     }
 
@@ -183,9 +185,10 @@ public final class ConanUpload {
                         );
                         result.add(key, url);
                     }
-                    return (Response) BaseResponse.ok()
+                    return (Response) ResponseBuilder.ok()
                         .header(ConanUpload.CONTENT_TYPE, ConanUpload.JSON_TYPE)
-                        .jsonBody(result.build());
+                        .jsonBody(result.build())
+                        .build();
                 }
             ).toCompletableFuture();
         }
@@ -229,12 +232,12 @@ public final class ConanUpload {
                                 && item.get().getPath().equals(path)) {
                                 return new SliceUpload(this.storage).response(line, headers, body);
                             }
-                            return BaseResponse.unauthorized();
+                            return ResponseBuilder.unauthorized().build();
                         }
                     )
                 );
             }
-            return BaseResponse.unauthorized();
+            return ResponseBuilder.unauthorized().build();
         }
     }
 }

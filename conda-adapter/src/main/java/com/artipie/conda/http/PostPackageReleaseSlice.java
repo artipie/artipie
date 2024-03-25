@@ -9,7 +9,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import javax.json.Json;
 import java.io.StringReader;
@@ -17,7 +17,6 @@ import java.io.StringReader;
 /**
  * Slice to handle `POST /release/{owner_login}/{package_name}/{version}` and
  * `POST /package/{owner_login}/{package_name}`.
- * @since 0.4
  * @todo #32:30min Implement this slice properly, it should handle post requests to create package
  *  and release. For now link for full documentation is not found, check swagger
  *  https://api.anaconda.org/docs#/ and github issue for any updates.
@@ -27,7 +26,7 @@ public final class PostPackageReleaseSlice implements Slice {
 
     @Override
     public Response response(RequestLine line, Headers headers, Content body) {
-        return BaseResponse.ok()
+        return ResponseBuilder.ok()
             .jsonBody(Json.createReader(
                 new StringReader(
                     String.join(
@@ -64,6 +63,6 @@ public final class PostPackageReleaseSlice implements Slice {
                     )
                 )
             ).read()
-        );
+        ).build();
     }
 }

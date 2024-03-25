@@ -13,7 +13,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.npm.misc.DateTimeNowStr;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.scheduling.ProxyArtifactEvent;
@@ -89,13 +89,14 @@ public final class DownloadAssetSlice implements Slice {
                         if(Strings.isNullOrEmpty(lastModified)){
                             lastModified = new DateTimeNowStr().value();
                         }
-                        return (Response) BaseResponse.ok()
+                        return (Response) ResponseBuilder.ok()
                             .header(ContentType.mime(mime))
                             .header("Last-Modified", lastModified)
-                            .body(asset.dataPublisher());
+                            .body(asset.dataPublisher())
+                            .build();
                     }
                 )
-                .toSingle(BaseResponse.notFound())
+                .toSingle(ResponseBuilder.notFound().build())
                 .to(SingleInterop.get())
         );
     }

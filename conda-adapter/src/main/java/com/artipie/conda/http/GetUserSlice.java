@@ -12,7 +12,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
@@ -43,11 +43,13 @@ final class GetUserSlice implements Slice {
             this.scheme.authenticate(headers, line).thenApply(
                 result -> {
                     if (result.status() != AuthScheme.AuthStatus.FAILED) {
-                        return BaseResponse.ok()
-                            .jsonBody(GetUserSlice.json(result.user().name()));
+                        return ResponseBuilder.ok()
+                            .jsonBody(GetUserSlice.json(result.user().name()))
+                            .build();
                     }
-                    return BaseResponse.unauthorized()
-                        .header(new WwwAuthenticate(result.challenge()));
+                    return ResponseBuilder.unauthorized()
+                        .header(new WwwAuthenticate(result.challenge()))
+                        .build();
                 }
             )
         );

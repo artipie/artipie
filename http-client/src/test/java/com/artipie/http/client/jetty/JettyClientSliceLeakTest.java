@@ -9,7 +9,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.client.HttpServer;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import org.eclipse.jetty.client.HttpClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ final class JettyClientSliceLeakTest {
     @BeforeEach
     void setUp() throws Exception {
         this.server.update(
-            (line, headers, body) -> BaseResponse.ok().textBody("data")
+            (line, headers, body) -> ResponseBuilder.ok().textBody("data").build()
         );
         final int port = this.server.start();
         this.client.start();

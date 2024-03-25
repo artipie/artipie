@@ -11,7 +11,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.error.BlobUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
@@ -80,16 +80,18 @@ final class BlobEntity {
                                     .<CompletionStage<Long>>map(CompletableFuture::completedFuture)
                                     .orElseGet(blob::size)
                                     .thenApply(
-                                        size -> BaseResponse.ok()
+                                        size -> ResponseBuilder.ok()
                                             .header(new DigestHeader(digest))
                                             .header(ContentType.mime("application/octet-stream"))
                                             .body(new Content.From(size, content))
+                                            .build()
                                     )
                             )
                         )
                     ).orElseGet(
-                        () -> BaseResponse.notFound()
+                        () -> ResponseBuilder.notFound()
                             .jsonBody(new BlobUnknownError(digest).json())
+                            .build()
                     )
                 )
             );
@@ -129,15 +131,17 @@ final class BlobEntity {
                     found -> found.<Response>map(
                         blob -> new AsyncResponse(
                             blob.size().thenApply(
-                                size -> BaseResponse.ok()
+                                size -> ResponseBuilder.ok()
                                     .header(new DigestHeader(blob.digest()))
                                     .header(ContentType.mime("application/octet-stream"))
                                     .header(new ContentLength(size))
+                                    .build()
                             )
                         )
                     ).orElseGet(
-                        () -> BaseResponse.notFound()
+                        () -> ResponseBuilder.notFound()
                             .jsonBody(new BlobUnknownError(digest).json())
+                            .build()
                     )
                 )
             );

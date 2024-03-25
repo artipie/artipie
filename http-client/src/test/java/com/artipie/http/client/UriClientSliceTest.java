@@ -5,7 +5,7 @@
 package com.artipie.http.client;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
@@ -35,7 +35,7 @@ final class UriClientSliceTest {
     void shouldGetClientBySchemeHostPort(
         final String uri, final Boolean secure, final String host, final Integer port
     ) throws Exception {
-        final FakeClientSlices fake = new FakeClientSlices((line, headers, body) -> BaseResponse.ok());
+        final FakeClientSlices fake = new FakeClientSlices((line, headers, body) -> ResponseBuilder.ok().build());
         new UriClientSlice(
             fake,
             new URI(uri)
@@ -84,7 +84,7 @@ final class UriClientSliceTest {
                         rsline.uri().getRawQuery(),
                         new IsEqual<>(query)
                     );
-                    return BaseResponse.ok();
+                    return ResponseBuilder.ok().build();
                 }
             ),
             new URI(uri)

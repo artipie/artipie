@@ -16,7 +16,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 
 import java.util.function.Supplier;
@@ -71,7 +71,7 @@ final class LocalMavenSlice implements Slice {
         return switch (method) {
             case GET -> new ArtifactGetResponse(this.storage, artifact);
             case HEAD -> new ArtifactHeadResponse(this.storage, artifact);
-            default -> BaseResponse.methodNotAllowed();
+            default -> ResponseBuilder.methodNotAllowed().build();
         };
     }
 
@@ -85,18 +85,20 @@ final class LocalMavenSlice implements Slice {
         return switch (method) {
             case GET -> plainResponse(this.storage, key,
                 () -> new AsyncResponse(
-                    this.storage.value(key).thenApply(val -> BaseResponse.ok().body(val))
+                    this.storage.value(key).thenApply(val -> ResponseBuilder.ok().body(val).build())
                 )
             );
             case HEAD -> plainResponse(this.storage, key,
                 () -> new AsyncResponse(
                     this.storage.metadata(key)
                         .thenApply(
-                            meta -> BaseResponse.ok().header(new ContentLength(meta.read(Meta.OP_SIZE).orElseThrow()))
+                            meta -> ResponseBuilder.ok()
+                                .header(new ContentLength(meta.read(Meta.OP_SIZE).orElseThrow()))
+                                .build()
                         )
                 )
             );
-            default -> BaseResponse.methodNotAllowed();
+            default -> ResponseBuilder.methodNotAllowed().build();
         };
     }
 
@@ -105,7 +107,7 @@ final class LocalMavenSlice implements Slice {
     ) {
         return new AsyncResponse(
             storage.exists(key)
-                .thenApply(exists -> exists ? actual.get() : BaseResponse.notFound())
+                .thenApply(exists -> exists ? actual.get() : ResponseBuilder.notFound().build())
         );
     }
 }

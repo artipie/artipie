@@ -14,7 +14,7 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import io.vertx.core.http.HttpServerOptions;
 import org.eclipse.jetty.client.HttpClient;
@@ -90,7 +90,7 @@ class JettyClientSliceTest {
         this.server.update(
             (rqline, rqheaders, rqbody) -> {
                 actual.set(rqline);
-                return BaseResponse.ok();
+                return ResponseBuilder.ok().build();
             }
         );
         this.slice.response(
@@ -111,7 +111,7 @@ class JettyClientSliceTest {
             (line, headers, content) -> {
                 System.out.println("MY_DEBUG " + headers);
                 actual.set(headers);
-                return BaseResponse.ok();
+                return ResponseBuilder.ok().build();
             }
         );
         this.slice.response(
@@ -135,7 +135,7 @@ class JettyClientSliceTest {
                 new Content.From(rqbody).asBytesFuture().thenApply(
                     bytes -> {
                         actual.set(bytes);
-                        return BaseResponse.ok();
+                        return ResponseBuilder.ok().build();
                     }
                 )
             )
@@ -153,7 +153,7 @@ class JettyClientSliceTest {
 
     @Test
     void shouldReceiveStatus() {
-        this.server.update((rqline, rqheaders, rqbody) -> BaseResponse.notFound());
+        this.server.update((rqline, rqheaders, rqbody) -> ResponseBuilder.notFound().build());
         MatcherAssert.assertThat(
             this.slice.response(
                 new RequestLine(RqMethod.GET, "/a/b/c"),
@@ -171,7 +171,9 @@ class JettyClientSliceTest {
             new Header("WWW-Authenticate", "Basic")
         );
         this.server.update(
-            (rqline, rqheaders, rqbody) -> BaseResponse.ok().headers(headers)
+            (rqline, rqheaders, rqbody) -> ResponseBuilder.ok()
+                .headers(headers)
+                .build()
         );
         MatcherAssert.assertThat(
             this.slice.response(
@@ -187,7 +189,8 @@ class JettyClientSliceTest {
     void shouldReceiveBody() {
         final byte[] data = "data".getBytes();
         this.server.update(
-            (rqline, rqheaders, rqbody) -> BaseResponse.ok().body(data)
+            (rqline, rqheaders, rqbody) -> ResponseBuilder.ok()
+                .body(data).build()
         );
         MatcherAssert.assertThat(
             this.slice.response(

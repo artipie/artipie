@@ -11,7 +11,7 @@ import com.artipie.docker.error.InvalidManifestException;
 import com.artipie.docker.error.InvalidRepoNameException;
 import com.artipie.docker.error.InvalidTagNameException;
 import com.artipie.docker.error.UnsupportedError;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.client.auth.AuthClientSlice;
@@ -62,7 +62,7 @@ class ErrorHandlingSliceTest {
                     rqbody.asBytes(),
                     new IsEqual<>(body)
                 );
-                return BaseResponse.ok();
+                return ResponseBuilder.ok().build();
             }
         ).response(
             line, Headers.from(header), new Content.From(body)
@@ -76,7 +76,8 @@ class ErrorHandlingSliceTest {
         final Header header = new Header("x-name", "some value");
         final byte[] body = "text".getBytes();
         final Response response = new AuthClientSlice(
-            (rsline, rsheaders, rsbody) -> BaseResponse.ok().header(header).body(body),
+            (rsline, rsheaders, rsbody) -> ResponseBuilder.ok()
+                .header(header).body(body).build(),
             Authenticator.ANONYMOUS
         ).response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY);
         MatcherAssert.assertThat(

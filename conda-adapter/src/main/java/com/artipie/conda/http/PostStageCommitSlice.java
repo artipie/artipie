@@ -9,7 +9,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import javax.json.Json;
 import java.io.StringReader;
@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
 /**
  * Slice to handle `POST /stage/{owner_login}/{package_name}/{version}/{basename}` and
  * `POST /commit/{owner_login}/{package_name}/{version}/{basename}` requests.
- * @since 0.4
  * @todo #32:30min Implement this slice properly, it should handle post requests to create stage
  *  and commit package. For now link for full documentation is not found, check swagger
  *  https://api.anaconda.org/docs#/ and github issue for any updates.
@@ -53,7 +52,7 @@ public final class PostStageCommitSlice implements Slice {
         );
         if (matcher.matches()) {
             final String name = matcher.group(1);
-            return BaseResponse.ok()
+            return ResponseBuilder.ok()
                 .jsonBody(Json.createReader(
                     new StringReader(
                         String.join(
@@ -94,8 +93,8 @@ public final class PostStageCommitSlice implements Slice {
                         )
                     )
                 ).read(), StandardCharsets.UTF_8
-            );
+            ).build();
         }
-        return BaseResponse.badRequest();
+        return ResponseBuilder.badRequest().build();
     }
 }

@@ -17,7 +17,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLinePrefix;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
@@ -65,11 +65,12 @@ final class SliceIndex implements Slice {
                 )
                 .collect(StringBuilder::new, StringBuilder::append)
                 .<Response>map(
-                    resp -> BaseResponse.ok()
+                    resp -> ResponseBuilder.ok()
                         .htmlBody(
                             String.format(
                                 "<!DOCTYPE html>\n<html>\n  </body>\n%s\n</body>\n</html>", resp.toString()
                             ), StandardCharsets.UTF_8)
+                        .build()
                 )
         );
     }

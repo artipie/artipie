@@ -6,7 +6,7 @@ package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -63,9 +63,9 @@ public final class SliceDelete implements Slice {
                     if (exists) {
                         rsp = this.storage.delete(key).thenAccept(
                             nothing -> this.events.ifPresent(item -> item.addDeleteEventByKey(key))
-                        ).thenApply(none -> BaseResponse.noContent());
+                        ).thenApply(none -> ResponseBuilder.noContent().build());
                     } else {
-                        rsp = CompletableFuture.completedFuture(BaseResponse.notFound());
+                        rsp = CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
                     }
                     return rsp;
                 }

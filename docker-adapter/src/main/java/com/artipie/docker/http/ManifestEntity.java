@@ -15,7 +15,7 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.async.AsyncResponse;
@@ -86,10 +86,13 @@ final class ManifestEntity {
             return new AsyncResponse(
                 this.docker.repo(request.name()).manifests().get(ref).thenApply(
                     manifest -> manifest.<Response>map(
-                        found -> baseResponse(found).header(new ContentLength(found.size()))
+                        found -> baseResponse(found)
+                            .header(new ContentLength(found.size()))
+                            .build()
                     ).orElseGet(
-                        () -> BaseResponse.notFound()
+                        () -> ResponseBuilder.notFound()
                             .jsonBody(new ManifestError(ref).json())
+                            .build()
                     )
                 )
             );
@@ -128,10 +131,13 @@ final class ManifestEntity {
             return new AsyncResponse(
                 this.docker.repo(name).manifests().get(ref).thenApply(
                     manifest -> manifest.<Response>map(
-                        found -> baseResponse(found).body(found.content())
+                        found -> baseResponse(found)
+                            .body(found.content())
+                            .build()
                     ).orElseGet(
-                        () -> BaseResponse.notFound()
+                        () -> ResponseBuilder.notFound()
                             .jsonBody(new ManifestError(ref).json())
+                            .build()
                     )
                 )
             );
@@ -197,10 +203,11 @@ final class ManifestEntity {
                                 )
                             );
                         }
-                        return BaseResponse.created()
+                        return ResponseBuilder.created()
                             .header(new Location(String.format("/v2/%s/manifests/%s", name.value(), ref.reference())))
                             .header(new ContentLength("0"))
-                            .header(new DigestHeader(manifest.digest()));
+                            .header(new DigestHeader(manifest.digest()))
+                            .build();
                     }
                 )
             );
@@ -332,8 +339,8 @@ final class ManifestEntity {
 
     }
 
-    private static BaseResponse baseResponse(Manifest manifest) {
-        return BaseResponse.ok()
+    private static ResponseBuilder baseResponse(Manifest manifest) {
+        return ResponseBuilder.ok()
             .header(ContentType.mime(manifest.mediaType()))
             .header(new DigestHeader(manifest.digest()));
     }

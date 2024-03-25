@@ -31,7 +31,7 @@ public final class MainSlice extends Slice.Wrap {
         final String path = line.uri().getPath();
         if (path.equals("*") || path.equals("/")
             || path.replaceAll("^/+", "").split("/").length == 0) {
-            return Optional.of(BaseResponse.noContent());
+            return Optional.of(ResponseBuilder.noContent().build());
         }
         return Optional.empty();
     };

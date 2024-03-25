@@ -5,7 +5,7 @@
 package com.artipie.http.client.jetty;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -143,7 +143,8 @@ final class JettyClientSlicesAndVertxITCase {
                     final Flowable<ByteBuffer> termbody = Flowable.fromPublisher(body)
                         .doOnError(terminated::completeExceptionally)
                         .doOnTerminate(() -> terminated.complete(null));
-                    promise.complete(BaseResponse.from(status).headers(rsheaders).body(termbody));
+                    promise.complete(ResponseBuilder.from(status).headers(rsheaders)
+                        .body(termbody).build());
                     return terminated;
                 }
             );

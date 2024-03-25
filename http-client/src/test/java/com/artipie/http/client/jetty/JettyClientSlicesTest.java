@@ -14,7 +14,7 @@ import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -90,7 +90,7 @@ final class JettyClientSlicesTest {
     void shouldSupportProxy() throws Exception {
         final byte[] response = "response from proxy".getBytes();
         this.server.update(
-            (line, headers, body) -> BaseResponse.ok().body(response)
+            (line, headers, body) -> ResponseBuilder.ok().body(response).build()
         );
         final JettyClientSlices client = new JettyClientSlices(
             new HttpClientSettings().addProxy(
@@ -116,8 +116,9 @@ final class JettyClientSlicesTest {
     void shouldNotFollowRedirectIfDisabled() {
         final RsStatus status = RsStatus.TEMPORARY_REDIRECT;
         this.server.update(
-            (line, headers, body) -> BaseResponse.temporaryRedirect()
+            (line, headers, body) -> ResponseBuilder.temporaryRedirect()
                 .header("Location", "/other/path")
+                .build()
         );
         final JettyClientSlices client = new JettyClientSlices(
             new HttpClientSettings().setFollowRedirects(false)
@@ -142,10 +143,11 @@ final class JettyClientSlicesTest {
         this.server.update(
             (line, headers, body) -> {
                 if (line.toString().contains("target")) {
-                    return BaseResponse.ok();
+                    return ResponseBuilder.ok().build();
                 }
-                return BaseResponse.temporaryRedirect()
-                    .header("Location", "/target");
+                return ResponseBuilder.temporaryRedirect()
+                    .header("Location", "/target")
+                    .build();
             }
         );
         final JettyClientSlices client = new JettyClientSlices(

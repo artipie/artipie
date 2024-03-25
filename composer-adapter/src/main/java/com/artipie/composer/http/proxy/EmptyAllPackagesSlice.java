@@ -5,7 +5,7 @@
 package com.artipie.composer.http.proxy;
 
 import com.artipie.http.Slice;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.SliceSimple;
 
 /**
@@ -15,8 +15,9 @@ final class EmptyAllPackagesSlice extends Slice.Wrap {
     EmptyAllPackagesSlice() {
         super(
             new SliceSimple(
-                () -> BaseResponse.ok()
+                () -> ResponseBuilder.ok()
                     .jsonBody("{\"packages\":{}, \"metadata-url\":\"/p2/%package%.json\"}")
+                    .build()
             )
         );
     }

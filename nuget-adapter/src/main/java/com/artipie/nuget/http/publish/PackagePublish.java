@@ -8,9 +8,9 @@ package com.artipie.nuget.http.publish;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
-import com.artipie.http.BaseResponse;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.InvalidPackageException;
 import com.artipie.nuget.PackageVersionAlreadyExistsException;
@@ -110,7 +110,7 @@ public final class PackagePublish implements Route {
 
         @Override
         public Response get(final Headers headers) {
-            return BaseResponse.methodNotAllowed();
+            return ResponseBuilder.methodNotAllowed().build();
         }
 
         @Override
@@ -134,7 +134,7 @@ public final class PackagePublish implements Route {
                         }
                         return toStatus(throwable.getCause());
                     }
-                ).thenApply(BaseResponse::from)
+                ).thenApply(s -> ResponseBuilder.from(s).build())
             );
         }
 

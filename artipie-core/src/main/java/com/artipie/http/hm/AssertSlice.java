@@ -5,7 +5,7 @@
 package com.artipie.http.hm;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -88,6 +88,6 @@ public final class AssertSlice implements Slice {
         MatcherAssert.assertThat(
             "Wrong body", publ, this.body
         );
-        return BaseResponse.ok();
+        return ResponseBuilder.ok().build();
     }
 }

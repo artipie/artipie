@@ -16,7 +16,7 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 
 import java.util.regex.Pattern;
 
@@ -64,9 +64,10 @@ final class TagsEntity {
                     params.value("last").map(Tag.Valid::new),
                     params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
                 ).thenApply(
-                    tags -> BaseResponse.ok()
+                    tags -> ResponseBuilder.ok()
                         .header(ContentType.json())
                         .body(tags.json())
+                        .build()
                 )
             );
         }

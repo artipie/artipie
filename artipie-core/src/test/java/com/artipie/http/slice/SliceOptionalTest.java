@@ -4,7 +4,7 @@
  */
 package com.artipie.http.slice;
 
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
@@ -28,7 +28,7 @@ class SliceOptionalTest {
             new SliceOptional<>(
                 Optional.empty(),
                 Optional::isPresent,
-                ignored -> new SliceSimple(BaseResponse.ok())
+                ignored -> new SliceSimple(ResponseBuilder.ok().build())
             ),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
@@ -43,7 +43,7 @@ class SliceOptionalTest {
             new SliceOptional<>(
                 Optional.of("abc"),
                 Optional::isPresent,
-                ignored -> new SliceSimple(BaseResponse.noContent())
+                ignored -> new SliceSimple(ResponseBuilder.noContent().build())
             ),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NO_CONTENT),
@@ -60,7 +60,7 @@ class SliceOptionalTest {
                 Optional.of(body),
                 Optional::isPresent,
                 hello -> new SliceSimple(
-                    BaseResponse.ok().body(hello.orElseThrow().getBytes())
+                    ResponseBuilder.ok().body(hello.orElseThrow().getBytes()).build()
                 )
             ),
             new SliceHasResponse(

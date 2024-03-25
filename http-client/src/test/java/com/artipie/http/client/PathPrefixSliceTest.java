@@ -5,7 +5,7 @@
 package com.artipie.http.client;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
@@ -63,7 +63,7 @@ final class PathPrefixSliceTest {
                     new Content.From(rqbody).asBytesFuture().toCompletableFuture().join(),
                     new IsEqual<>(body)
                 );
-                return BaseResponse.ok();
+                return ResponseBuilder.ok().build();
             },
             prefix
         ).response(

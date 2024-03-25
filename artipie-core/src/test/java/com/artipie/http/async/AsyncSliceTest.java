@@ -9,7 +9,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
@@ -30,7 +30,7 @@ class AsyncSliceTest {
         MatcherAssert.assertThat(
             new AsyncSlice(
                 CompletableFuture.completedFuture(
-                    new SliceSimple(BaseResponse.ok())
+                    new SliceSimple(ResponseBuilder.ok().build())
                 )
             ).response(new RequestLine("GET", "/"), Headers.EMPTY, Content.EMPTY),
             new RsHasStatus(RsStatus.OK)

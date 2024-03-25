@@ -5,7 +5,7 @@
 package com.artipie.http.filter;
 
 import com.artipie.asto.Content;
-import com.artipie.http.BaseResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
@@ -33,7 +33,7 @@ public class FilterSliceTest {
         Assertions.assertThrows(
             NullPointerException.class,
             () -> new FilterSlice(
-                (line, headers, body) -> BaseResponse.ok(),
+                (line, headers, body) -> ResponseBuilder.ok().build(),
                 FiltersTestUtil.yaml("filters:")
             )
         );
@@ -43,7 +43,7 @@ public class FilterSliceTest {
     @Disabled("Response should implement 'equals' method")
     void shouldAllow() {
         final FilterSlice slice = new FilterSlice(
-            (line, headers, body) -> BaseResponse.ok(),
+            (line, headers, body) -> ResponseBuilder.ok().build(),
             FiltersTestUtil.yaml(
                 String.join(
                     System.lineSeparator(),
@@ -56,7 +56,7 @@ public class FilterSliceTest {
             )
         );
         Assertions.assertEquals(
-            BaseResponse.ok(),
+            ResponseBuilder.ok().build(),
             slice.response(
                 FiltersTestUtil.get(FilterSliceTest.PATH),
                 Headers.EMPTY,
@@ -69,7 +69,7 @@ public class FilterSliceTest {
     void shouldForbidden() {
         final AtomicReference<RsStatus> res = new AtomicReference<>();
         final FilterSlice slice = new FilterSlice(
-            (line, headers, body) -> BaseResponse.ok(),
+            (line, headers, body) -> ResponseBuilder.ok().build(),
             FiltersTestUtil.yaml(
                 String.join(
                     System.lineSeparator(),
