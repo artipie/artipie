@@ -49,7 +49,7 @@ import java.util.regex.Pattern;
 /**
  * This slice creates package meta-info from request body(tar-archive) and saves this tar-archive.
  */
-@SuppressWarnings("PMD.ExcessiveMethodLength")
+@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.SingularField"})
 public final class UploadSlice implements Slice {
     /**
      * Path to publish.
