@@ -24,8 +24,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.net.URIBuilder;
 import org.cqfn.rio.Buffers;
 import org.cqfn.rio.stream.ReactiveInputStream;
 

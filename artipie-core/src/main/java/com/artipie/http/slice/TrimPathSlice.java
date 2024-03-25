@@ -13,7 +13,7 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.ResponseBuilder;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.hc.core5.net.URIBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -11,7 +11,8 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
 import com.google.common.base.Strings;
 import io.vavr.Tuple2;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.net.URIBuilder;
 import org.ini4j.Wini;
 
 import javax.json.Json;
@@ -19,6 +20,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -132,9 +134,13 @@ public final class ConansEntity {
                     if (tuple._2()) {
                         final URIBuilder builder = new URIBuilder();
                         builder.setScheme(ConansEntity.PROTOCOL);
-                        builder.setHost(hostname);
-                        builder.setPath(tuple._1());
-                        result = Optional.of(builder.toString());
+                        try {
+                            builder.setHttpHost(HttpHost.create(hostname));
+                            builder.setPath(tuple._1());
+                            result = Optional.of(builder.toString());
+                        } catch (URISyntaxException ex) {
+                            throw new ArtipieIOException(ex);
+                        }
                     }
                     return result;
                 }, builder -> builder.build().toString()
@@ -172,9 +178,13 @@ public final class ConansEntity {
                     if (tuple._2()) {
                         final URIBuilder builder = new URIBuilder();
                         builder.setScheme(ConansEntity.PROTOCOL);
-                        builder.setHost(hostname);
-                        builder.setPath(tuple._1());
-                        result = Optional.of(builder.toString());
+                        try {
+                            builder.setHttpHost(HttpHost.create(hostname));
+                            builder.setPath(tuple._1());
+                            result = Optional.of(builder.toString());
+                        } catch (URISyntaxException ex) {
+                            throw new ArtipieIOException(ex);
+                        }
                     }
                     return result;
                 }, builder -> builder.build().toString()
@@ -411,12 +421,16 @@ public final class ConansEntity {
                     if (exist) {
                         final URIBuilder builder = new URIBuilder();
                         builder.setScheme(ConansEntity.PROTOCOL);
-                        builder.setHost(hostname);
-                        builder.setPath(key.string());
-                        result = String.format(
-                            "{ \"%1$s\": \"%2$s\"}", ConansEntity.CONAN_MANIFEST,
-                            builder.toString()
-                        );
+                        try {
+                            builder.setHttpHost(HttpHost.create(hostname));
+                            builder.setPath(key.string());
+                            result = String.format(
+                                "{ \"%1$s\": \"%2$s\"}", ConansEntity.CONAN_MANIFEST,
+                                builder.build()
+                            );
+                        } catch (URISyntaxException ex) {
+                            throw new ArtipieIOException(ex);
+                        }
                     } else {
                         result = "";
                     }
@@ -465,12 +479,16 @@ public final class ConansEntity {
                     if (exist) {
                         final URIBuilder builder = new URIBuilder();
                         builder.setScheme(ConansEntity.PROTOCOL);
-                        builder.setHost(hostname);
-                        builder.setPath(key.string());
-                        result = String.format(
-                            "{\"%1$s\": \"%2$s\"}", ConansEntity.CONAN_MANIFEST,
-                            builder.toString()
-                        );
+                        try {
+                            builder.setHttpHost(HttpHost.create(hostname));
+                            builder.setPath(key.string());
+                            result = String.format(
+                                "{\"%1$s\": \"%2$s\"}", ConansEntity.CONAN_MANIFEST,
+                                builder.build()
+                            );
+                        } catch (URISyntaxException ex) {
+                            throw new ArtipieIOException(ex);
+                        }
                     } else {
                         result = "";
                     }

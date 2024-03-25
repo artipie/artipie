@@ -14,7 +14,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.hc.core5.net.URIBuilder;
 import org.eclipse.jetty.client.AsyncRequestContent;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
