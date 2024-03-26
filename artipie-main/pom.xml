@@ -36,19 +36,6 @@ SOFTWARE.
         <docker.ubuntu.image.name>artipie/artipie-ubuntu</docker.ubuntu.image.name>
         <header.license>${project.basedir}/../LICENSE.header</header.license>
     </properties>
-    <developers>
-        <!-- Required for publishing to central -->
-        <developer>
-            <id>github.com/dgarus</id>
-            <name>Denis Garus</name>
-            <email>g4s8.public@gmail.com</email>
-            <organization>Artipie</organization>
-            <organizationUrl>https://www.artipie.com</organizationUrl>
-            <roles>
-                <role>maintainer</role>
-            </roles>
-        </developer>
-    </developers>
     <dependencies>
         <dependency>
             <groupId>com.artipie</groupId>
