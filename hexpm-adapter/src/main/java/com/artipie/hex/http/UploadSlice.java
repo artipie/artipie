@@ -12,6 +12,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.OneTimePublisher;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
+import com.artipie.hex.http.headers.HexContentType;
 import com.artipie.hex.proto.generated.PackageOuterClass;
 import com.artipie.hex.proto.generated.SignedOuterClass;
 import com.artipie.hex.tarball.MetadataConfig;
@@ -22,6 +23,7 @@ import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.protobuf.ByteString;
@@ -158,7 +160,7 @@ public final class UploadSlice implements Slice {
                     )
                 ).handle(
                     (content, throwable) -> {
-                        /*final Response result;
+                        final Response result;
                         if (throwable == null) {
                             result = ResponseBuilder.created()
                                 .headers(new HexContentType(headers).fill())
@@ -176,9 +178,8 @@ public final class UploadSlice implements Slice {
                             result = ResponseBuilder.internalError()
                                 .body(throwable.getMessage().getBytes())
                                 .build();
-                        }*/
-                        return ResponseBuilder.internalError()
-                            .body("go to hui!".getBytes()).build();
+                        }
+                        return result;
                     }
                 )
             );
