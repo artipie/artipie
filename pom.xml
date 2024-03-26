@@ -87,6 +87,19 @@ SOFTWARE.
     <bouncycastle-lts.version>2.73.5</bouncycastle-lts.version>
     <httpclient.version>5.3.1</httpclient.version>
   </properties>
+  <developers>
+    <!-- Required for publishing to central -->
+    <developer>
+      <id>github.com/dgarus</id>
+      <name>Denis Garus</name>
+      <email>g4s8.public@gmail.com</email>
+      <organization>Artipie</organization>
+      <organizationUrl>https://www.artipie.com</organizationUrl>
+      <roles>
+        <role>maintainer</role>
+      </roles>
+    </developer>
+  </developers>
   <distributionManagement>
     <repository>
       <id>oss.sonatype.org</id>
