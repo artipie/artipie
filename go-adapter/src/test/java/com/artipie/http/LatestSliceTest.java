@@ -7,7 +7,7 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.headers.Header;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
@@ -56,7 +56,7 @@ public class LatestSliceTest {
             ),
             Matchers.allOf(
                 new RsHasBody(info.getBytes()),
-                new RsHasHeaders(new Header("content-type", "application/json"))
+                new RsHasHeaders(ContentType.json())
             )
         );
     }

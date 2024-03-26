@@ -4,7 +4,6 @@
  */
 package com.artipie.http.slice;
 
-import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
@@ -14,7 +13,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -39,12 +38,13 @@ class GzipSliceTest {
         MatcherAssert.assertThat(
             new GzipSlice(
                 new SliceSimple(
-                    new RsFull(RsStatus.FOUND, Headers.from(hdr), new Content.From(data))
+                    ResponseBuilder.from(RsStatus.MOVED_TEMPORARILY)
+                        .header(hdr).body(data).build()
                 )
             ),
             new SliceHasResponse(
                 Matchers.allOf(
-                    new RsHasStatus(RsStatus.FOUND),
+                    new RsHasStatus(RsStatus.MOVED_TEMPORARILY),
                     new RsHasHeaders(
                         Headers.from(
                             new Header("Content-encoding", "gzip"),

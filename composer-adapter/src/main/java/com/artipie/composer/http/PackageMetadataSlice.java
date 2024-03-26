@@ -8,13 +8,12 @@ import com.artipie.asto.Content;
 import com.artipie.composer.Name;
 import com.artipie.composer.Packages;
 import com.artipie.composer.Repository;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.StandardRs;
 
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
@@ -23,8 +22,6 @@ import java.util.regex.Pattern;
 
 /**
  * Slice that serves package metadata.
- *
- * @since 0.3
  */
 public final class PackageMetadataSlice implements Slice {
 
@@ -41,14 +38,9 @@ public final class PackageMetadataSlice implements Slice {
      */
     public static final Pattern ALL_PACKAGES = Pattern.compile("^/packages.json$");
 
-    /**
-     * Repository.
-     */
     private final Repository repository;
 
     /**
-     * Ctor.
-     *
      * @param repository Repository.
      */
     PackageMetadataSlice(final Repository repository) {
@@ -56,19 +48,16 @@ public final class PackageMetadataSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
+    public Response response(RequestLine line, Headers headers, Content body) {
         return new AsyncResponse(
             this.packages(line.uri().getPath())
                 .thenApply(
                     opt -> opt.<Response>map(
-                        packages -> new AsyncResponse(packages.content()
-                            .thenApply(RsWithBody::new)
+                        packages -> new AsyncResponse(
+                            packages.content()
+                                .thenApply(cnt -> ResponseBuilder.ok().body(cnt).build())
                         )
-                    ).orElse(StandardRs.NOT_FOUND)
+                    ).orElse(ResponseBuilder.notFound().build())
                 )
         );
     }
@@ -80,19 +69,15 @@ public final class PackageMetadataSlice implements Slice {
      * @return Key to storage value.
      */
     private CompletionStage<Optional<Packages>> packages(final String path) {
-        final CompletionStage<Optional<Packages>> result;
         final Matcher matcher = PACKAGE.matcher(path);
         if (matcher.find()) {
-            result = this.repository.packages(
-                new Name(
-                    String.format("%s/%s", matcher.group("vendor"), matcher.group("package"))
-                )
+            return this.repository.packages(
+                new Name(matcher.group("vendor") +'/' + matcher.group("package"))
             );
-        } else if (ALL_PACKAGES.matcher(path).matches()) {
-            result = this.repository.packages();
-        } else {
-            throw new IllegalStateException(String.format("Unexpected path: %s", path));
         }
-        return result;
+        if (ALL_PACKAGES.matcher(path).matches()) {
+            return this.repository.packages();
+        }
+        throw new IllegalStateException("Unexpected path: "+path);
     }
 }

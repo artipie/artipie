@@ -5,24 +5,21 @@
 package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.Test;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -39,10 +36,7 @@ public final class DockerAuthSliceTest {
         );
         MatcherAssert.assertThat(
             new DockerAuthSlice(
-                (rqline, rqheaders, rqbody) -> new RsWithHeaders(
-                    new RsWithStatus(RsStatus.UNAUTHORIZED),
-                    headers.copy()
-                )
+                (rqline, rqheaders, rqbody) -> ResponseBuilder.unauthorized().headers(headers).build()
             ).response(
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY, Content.EMPTY
@@ -51,9 +45,12 @@ public final class DockerAuthSliceTest {
                 Arrays.asList(
                     new IsUnauthorizedResponse(),
                     new RsHasHeaders(
-                        headers.copy()
-                            .add(new JsonContentType())
-                            .add(new ContentLength("72"))
+                        Headers.from(
+                            new WwwAuthenticate("Basic"),
+                            new Header("X-Something", "Value"),
+                            ContentType.json(),
+                            new ContentLength("72")
+                        )
                     )
                 )
             )
@@ -68,10 +65,7 @@ public final class DockerAuthSliceTest {
         );
         MatcherAssert.assertThat(
             new DockerAuthSlice(
-                (rqline, rqheaders, rqbody) -> new RsWithHeaders(
-                    new RsWithStatus(RsStatus.FORBIDDEN),
-                    headers.copy()
-                )
+                (rqline, rqheaders, rqbody) -> ResponseBuilder.forbidden().headers(headers.copy()).build()
             ).response(
                 new RequestLine(RqMethod.GET, "/file.txt"),
                 Headers.EMPTY,
@@ -82,7 +76,7 @@ public final class DockerAuthSliceTest {
                     new IsDeniedResponse(),
                     new RsHasHeaders(
                         headers.copy()
-                            .add(new JsonContentType())
+                            .add(ContentType.json())
                             .add(new ContentLength("85"))
                     )
                 )
@@ -96,17 +90,16 @@ public final class DockerAuthSliceTest {
         final byte[] body = "data".getBytes();
         MatcherAssert.assertThat(
             new DockerAuthSlice(
-                (rqline, rqheaders, rqbody) -> new RsFull(
-                    status,
-                    Headers.from(new Header("Content-Type", "text/plain")),
-                    Flowable.just(ByteBuffer.wrap(body))
-                )
+                (rqline, rqheaders, rqbody) -> ResponseBuilder.ok()
+                    .header(ContentType.text())
+                    .body(body)
+                    .build()
             ).response(
                 new RequestLine(RqMethod.GET, "/some/path"),
                 Headers.EMPTY, Content.EMPTY
             ),
             new ResponseMatcher(
-                status, Collections.singleton(new Header("Content-Type", "text/plain")), body
+                status, Collections.singleton(ContentType.text()), body
             )
         );
     }

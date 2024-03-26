@@ -5,6 +5,7 @@
 package com.artipie.maven.http;
 
 import com.artipie.asto.Content;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
@@ -13,18 +14,9 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterEach;
@@ -32,16 +24,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 /**
  * Test for {@link RepoHead}.
- * @since 0.6
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class RepoHeadITCase {
 
-    /**
-     * Vertx instance.
-     */
     private static final Vertx VERTX = Vertx.vertx();
 
     /**
@@ -85,7 +79,7 @@ class RepoHeadITCase {
         con.setRequestMethod("GET");
         MatcherAssert.assertThat(
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         con.disconnect();
     }
@@ -101,7 +95,7 @@ class RepoHeadITCase {
         con.setRequestMethod("GET");
         MatcherAssert.assertThat(
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.NOT_FOUND.code()))
+            new IsEqual<>(RsStatus.NOT_FOUND.code())
         );
         con.disconnect();
     }
@@ -140,11 +134,11 @@ class RepoHeadITCase {
                             if (throwable == null) {
                                 if (head.isPresent()) {
                                     res = CompletableFuture.completedFuture(
-                                        new RsWithHeaders(StandardRs.OK, head.get())
+                                        ResponseBuilder.ok().headers(head.get()).build()
                                     );
                                 } else {
                                     res = CompletableFuture.completedFuture(
-                                        new RsWithStatus(RsStatus.NOT_FOUND)
+                                        ResponseBuilder.notFound().build()
                                     );
                                 }
                             } else {

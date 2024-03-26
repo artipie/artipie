@@ -43,7 +43,7 @@ class UpdateSliceTest {
      * Test headers.
      */
     private static final Headers HEADERS = Headers.from(
-        new ContentType("multipart/form-data; boundary=\"simple boundary\"")
+        ContentType.mime("multipart/form-data; boundary=\"simple boundary\"")
     );
 
     /**

@@ -166,7 +166,7 @@ public final class VertxSliceServer implements Closeable {
             new Content.From(
                 req.toFlowable().map(buffer -> ByteBuffer.wrap(buffer.getBytes()))
             )
-        ).send(new ContinueConnection(response, new VertxConnection(response)));
+        ).send(new VertxConnection(response));
     }
 
     /**

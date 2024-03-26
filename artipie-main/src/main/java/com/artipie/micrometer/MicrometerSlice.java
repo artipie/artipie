@@ -221,7 +221,7 @@ public final class MicrometerSlice implements Slice {
 
             @Override
             public CompletionStage<Void> accept(final RsStatus status, final Headers headers,
-                final Content body) {
+                                                final Content body) {
                 this.counter.tag(MicrometerSlice.STATUS, status.name())
                     .register(MicrometerSlice.this.registry).increment();
                 final Timer.Sample timer = Timer.start(MicrometerSlice.this.registry);

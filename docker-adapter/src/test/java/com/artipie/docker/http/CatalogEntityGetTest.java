@@ -42,7 +42,7 @@ class CatalogEntityGetTest {
                     RsStatus.OK,
                     Headers.from(
                         new ContentLength(catalog.length),
-                        new ContentType("application/json; charset=utf-8")
+                        ContentType.json()
                     ),
                     catalog
                 ),

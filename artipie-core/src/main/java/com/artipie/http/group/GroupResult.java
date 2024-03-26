@@ -101,8 +101,7 @@ final class GroupResult {
      * @return True if success
      */
     public boolean success() {
-        final int code = Integer.parseInt(this.status.code());
-        return code >= 200 && code < 300;
+        return status.code() >= 200 && status.code() < 300;
     }
 
     /**

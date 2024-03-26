@@ -12,14 +12,11 @@ import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.common.RsJson;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
+import com.artipie.http.ResponseBuilder;
+
 import javax.json.Json;
 import javax.json.JsonStructure;
+import java.io.StringReader;
 
 /**
  * Slice to handle `GET /user` request.
@@ -46,15 +43,13 @@ final class GetUserSlice implements Slice {
             this.scheme.authenticate(headers, line).thenApply(
                 result -> {
                     if (result.status() != AuthScheme.AuthStatus.FAILED) {
-                        return new RsJson(
-                            () -> GetUserSlice.json(result.user().name()),
-                            StandardCharsets.UTF_8
-                        );
+                        return ResponseBuilder.ok()
+                            .jsonBody(GetUserSlice.json(result.user().name()))
+                            .build();
                     }
-                    return new RsWithHeaders(
-                        new RsWithStatus(RsStatus.UNAUTHORIZED),
-                        Headers.from(new WwwAuthenticate(result.challenge()))
-                    );
+                    return ResponseBuilder.unauthorized()
+                        .header(new WwwAuthenticate(result.challenge()))
+                        .build();
                 }
             )
         );

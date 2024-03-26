@@ -15,9 +15,7 @@ import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.ResponseBuilder;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -53,22 +51,15 @@ final class DeleteTokenSlice implements Slice {
             ).thenCompose(
                 tkn -> tkn.map(
                     item -> this.tokens.auth().user(item).<Response>thenApply(
-                        user -> {
-                            final RsStatus status;
-                            if (user.isPresent()) {
-                                status = RsStatus.CREATED;
-                            } else {
-                                status = RsStatus.BAD_REQUEST;
-                            }
-                            return new RsWithStatus(status);
-                        }
+                        user -> user.isPresent()
+                            ? ResponseBuilder.created().build()
+                            : ResponseBuilder.badRequest().build()
                     )
                 ).orElse(
                     CompletableFuture.completedFuture(
-                        new RsWithHeaders(
-                            new RsWithStatus(RsStatus.UNAUTHORIZED),
-                            Headers.from(new WwwAuthenticate(TokenAuthScheme.NAME))
-                        )
+                        ResponseBuilder.unauthorized()
+                            .header(new WwwAuthenticate(TokenAuthScheme.NAME))
+                            .build()
                     )
                 )
             )

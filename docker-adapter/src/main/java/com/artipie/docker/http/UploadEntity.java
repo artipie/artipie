@@ -13,18 +13,15 @@ import com.artipie.docker.Upload;
 import com.artipie.docker.error.UploadUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.Location;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.slice.ContentWithSize;
 
 import java.util.Optional;
@@ -52,16 +49,11 @@ public final class UploadEntity {
      */
     private static final String UPLOAD_UUID = "Docker-Upload-UUID";
 
-    /**
-     * Ctor.
-     */
     private UploadEntity() {
     }
 
     /**
      * Slice for POST method.
-     *
-     * @since 0.2
      */
     public static final class Post implements ScopeSlice {
 
@@ -71,8 +63,6 @@ public final class UploadEntity {
         private final Docker docker;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          */
         Post(final Docker docker) {
@@ -87,22 +77,15 @@ public final class UploadEntity {
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body
-        ) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName target = request.name();
             final Optional<Digest> mount = request.mount();
             final Optional<RepoName> from = request.from();
-            final Response response;
             if (mount.isPresent() && from.isPresent()) {
-                response = this.mount(mount.get(), from.get(), target);
-            } else {
-                response = this.startUpload(target);
+                return this.mount(mount.get(), from.get(), target);
             }
-            return response;
+            return this.startUpload(target);
         }
 
         /**
@@ -123,7 +106,7 @@ public final class UploadEntity {
                     opt -> opt.map(
                         src -> this.docker.repo(target).layers().mount(src)
                             .<Response>thenApply(
-                                blob -> new BlobCreatedResponse(target, blob.digest())
+                                blob -> createdResponse(target, blob.digest())
                             )
                     ).orElseGet(
                         () -> CompletableFuture.completedFuture(this.startUpload(target))
@@ -141,7 +124,7 @@ public final class UploadEntity {
         private Response startUpload(final RepoName name) {
             return new AsyncResponse(
                 this.docker.repo(name).uploads().start().thenApply(
-                    upload -> new StatusResponse(name, upload.uuid(), 0)
+                    upload -> acceptedResponse(name, upload.uuid(), 0)
                 )
             );
         }
@@ -189,11 +172,13 @@ public final class UploadEntity {
                     found -> found.<Response>map(
                         upload -> new AsyncResponse(
                             upload.append(new ContentWithSize(body, headers)).thenApply(
-                                offset -> new StatusResponse(name, uuid, offset)
+                                offset -> acceptedResponse(name, uuid, offset)
                             )
                         )
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new UploadUnknownError(uuid))
+                        () -> ResponseBuilder.notFound()
+                            .jsonBody(new UploadUnknownError(uuid).json())
+                            .build()
                     )
                 )
             );
@@ -243,11 +228,13 @@ public final class UploadEntity {
                     found -> found.<Response>map(
                         upload -> new AsyncResponse(
                             upload.putTo(repo.layers(), request.digest()).thenApply(
-                                any -> new BlobCreatedResponse(name, request.digest())
+                                any -> createdResponse(name, request.digest())
                             )
                         )
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new UploadUnknownError(uuid))
+                        () -> ResponseBuilder.notFound()
+                            .jsonBody(new UploadUnknownError(uuid).json())
+                            .build()
                     )
                 )
             );
@@ -283,11 +270,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body
-        ) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final String uuid = request.uuid();
@@ -296,16 +279,18 @@ public final class UploadEntity {
                     found -> found.<Response>map(
                         upload -> new AsyncResponse(
                             upload.offset().thenApply(
-                                offset -> new RsWithHeaders(
-                                    new RsWithStatus(RsStatus.NO_CONTENT),
-                                    new ContentLength("0"),
-                                    new Header("Range", String.format("0-%d", offset)),
-                                    new Header(UploadEntity.UPLOAD_UUID, uuid)
-                                )
+                                offset -> ResponseBuilder.noContent()
+                                    .header(new ContentLength("0"))
+                                    .header(new Header("Range", String.format("0-%d", offset)))
+                                    .header(new Header(UploadEntity.UPLOAD_UUID, uuid))
+                                    .build()
                             )
                         )
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new UploadUnknownError(uuid))
+                        () -> ResponseBuilder.notFound()
+                            .jsonBody(new UploadUnknownError(uuid).json())
+                            .build()
+
                     )
                 )
             );
@@ -314,8 +299,6 @@ public final class UploadEntity {
 
     /**
      * HTTP request to upload blob entity.
-     *
-     * @since 0.2
      */
     static final class Request {
 
@@ -325,8 +308,6 @@ public final class UploadEntity {
         private final RequestLine line;
 
         /**
-         * Ctor.
-         *
          * @param line HTTP request line.
          */
         Request(final RequestLine line) {
@@ -392,84 +373,25 @@ public final class UploadEntity {
         }
     }
 
-    /**
-     * Upload blob status HTTP response.
-     *
-     * @since 0.2
-     */
-    private static class StatusResponse implements Response {
-
-        /**
-         * Repository name.
-         */
-        private final RepoName name;
-
-        /**
-         * Upload UUID.
-         */
-        private final String uuid;
-
-        /**
-         * Current upload offset.
-         */
-        private final long offset;
-
-        /**
-         * Ctor.
-         *
-         * @param name Repository name.
-         * @param uuid Upload UUID.
-         * @param offset Current upload offset.
-         */
-        StatusResponse(final RepoName name, final String uuid, final long offset) {
-            this.name = name;
-            this.uuid = uuid;
-            this.offset = offset;
-        }
-
-        @Override
-        public CompletionStage<Void> send(final Connection connection) {
-            return new RsWithHeaders(
-                new RsWithStatus(RsStatus.ACCEPTED),
-                new Location(
-                    String.format("/v2/%s/blobs/uploads/%s", this.name.value(), this.uuid)
-                ),
-                new Header("Range", String.format("0-%d", this.offset)),
-                new ContentLength("0"),
-                new Header(UploadEntity.UPLOAD_UUID, this.uuid)
-            ).send(connection);
-        }
+    private static Response acceptedResponse(RepoName name, String uuid, long offset){
+        return ResponseBuilder.accepted()
+            .header(new Location(String.format("/v2/%s/blobs/uploads/%s", name.value(), uuid)))
+            .header(new Header("Range", String.format("0-%d", offset)))
+            .header(new ContentLength("0"))
+            .header(new Header(UploadEntity.UPLOAD_UUID, uuid))
+            .build();
     }
 
-    /**
-     * Blob created response.
-     *
-     * @since 0.9
-     */
-    private static final class BlobCreatedResponse extends Response.Wrap {
-
-        /**
-         * Ctor.
-         *
-         * @param name Repository name.
-         * @param digest Blob digest.
-         */
-        private BlobCreatedResponse(final RepoName name, final Digest digest) {
-            super(
-                new RsWithHeaders(
-                    new RsWithStatus(RsStatus.CREATED),
-                    new Location(String.format("/v2/%s/blobs/%s", name.value(), digest.string())),
-                    new ContentLength("0"),
-                    new DigestHeader(digest)
-                )
-            );
-        }
+    private static Response createdResponse(RepoName name, Digest digest) {
+        return ResponseBuilder.created()
+            .header(new Location(String.format("/v2/%s/blobs/%s", name.value(), digest.string())))
+            .header(new ContentLength("0"))
+            .header(new DigestHeader(digest))
+            .build();
     }
 
     /**
      * Slice for DELETE method.
-     *
-     * @since 0.16
      */
     public static final class Delete implements ScopeSlice {
 
@@ -495,11 +417,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body
-        ) {
+        public Response response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final String uuid = request.uuid();
@@ -508,14 +426,15 @@ public final class UploadEntity {
                     x -> x.map(
                         (Function<Upload, CompletionStage<? extends Response>>) upload ->
                             upload.cancel().thenApply(
-                                offset -> new RsWithHeaders(
-                                    new RsWithStatus(RsStatus.OK),
-                                    new Header(UploadEntity.UPLOAD_UUID, uuid)
-                                )
+                                offset -> ResponseBuilder.ok()
+                                    .header(UploadEntity.UPLOAD_UUID, uuid)
+                                    .build()
                             )
                     ).orElse(
                         CompletableFuture.completedFuture(
-                            new ErrorsResponse(RsStatus.NOT_FOUND, new UploadUnknownError(uuid))
+                            ResponseBuilder.notFound()
+                                .jsonBody(new UploadUnknownError(uuid).json())
+                                .build()
                         )
                     )
                 )

@@ -75,9 +75,7 @@ public final class FileMetaSlice implements Slice {
                             if (exist) {
                                 result = this.storage.metadata(key)
                                     .thenApply(
-                                        mtd -> new RsWithHeaders(
-                                            raw, from(mtd)
-                                        )
+                                        mtd -> new RsWithHeaders(raw, from(mtd))
                                     );
                             } else {
                                 result = CompletableFuture.completedFuture(raw);

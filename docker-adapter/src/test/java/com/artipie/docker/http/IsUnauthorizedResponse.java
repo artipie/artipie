@@ -12,19 +12,11 @@ import org.hamcrest.Matcher;
 
 /**
  * Matcher for unauthorized error response.
- *
- * @since 0.5
  */
 public final class IsUnauthorizedResponse extends BaseMatcher<Response> {
 
-    /**
-     * Delegate matcher.
-     */
     private final Matcher<Response> delegate;
 
-    /**
-     * Ctor.
-     */
     public IsUnauthorizedResponse() {
         this.delegate = new IsErrorsResponse(RsStatus.UNAUTHORIZED, "UNAUTHORIZED");
     }

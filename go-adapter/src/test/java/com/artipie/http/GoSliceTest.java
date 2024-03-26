@@ -10,6 +10,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
@@ -50,7 +51,7 @@ class GoSliceTest {
         MatcherAssert.assertThat(
             this.slice(GoSliceTest.storage(path, body), anonymous),
             new SliceHasResponse(
-                matchers(body, "application/json"), GoSliceTest.line(path),
+                matchers(body, ContentType.json()), GoSliceTest.line(path),
                 this.headers(anonymous), Content.EMPTY
             )
         );
@@ -64,7 +65,7 @@ class GoSliceTest {
         MatcherAssert.assertThat(
             this.slice(GoSliceTest.storage(path, body), anonymous),
             new SliceHasResponse(
-                matchers(body, "text/plain"), GoSliceTest.line(path),
+                matchers(body, ContentType.text()), GoSliceTest.line(path),
                 this.headers(anonymous), Content.EMPTY
             )
         );
@@ -78,7 +79,7 @@ class GoSliceTest {
         MatcherAssert.assertThat(
             this.slice(GoSliceTest.storage(path, body), anonymous),
             new SliceHasResponse(
-                matchers(body, "application/zip"), GoSliceTest.line(path),
+                matchers(body, ContentType.mime("application/zip")), GoSliceTest.line(path),
                 this.headers(anonymous), Content.EMPTY
             )
         );
@@ -92,7 +93,7 @@ class GoSliceTest {
         MatcherAssert.assertThat(
             this.slice(GoSliceTest.storage(path, body), anonymous),
             new SliceHasResponse(
-                matchers(body, "text/plain"), GoSliceTest.line(path),
+                matchers(body, ContentType.text()), GoSliceTest.line(path),
                 this.headers(anonymous), Content.EMPTY
             )
         );
@@ -106,8 +107,8 @@ class GoSliceTest {
         MatcherAssert.assertThat(
             this.slice(GoSliceTest.storage(path, body), anonymous),
             new SliceHasResponse(
-                new RsHasStatus(RsStatus.NOT_FOUND), GoSliceTest.line(path),
-                this.headers(anonymous), Content.EMPTY
+                new RsHasStatus(RsStatus.NOT_FOUND),
+                GoSliceTest.line(path), this.headers(anonymous), Content.EMPTY
             )
         );
     }
@@ -119,7 +120,7 @@ class GoSliceTest {
         MatcherAssert.assertThat(
             this.slice(GoSliceTest.storage("example.com/latest/bar/@v/v1.1.info", body), anonymous),
             new SliceHasResponse(
-                matchers(body, "application/json"),
+                matchers(body, ContentType.json()),
                 GoSliceTest.line("example.com/latest/bar/@latest"),
                 this.headers(anonymous), Content.EMPTY
             )
@@ -152,15 +153,14 @@ class GoSliceTest {
     /**
      * Composes matchers.
      * @param body Body
-     * @param type Content-type
+     * @param header Content-type
      * @return List of matchers
      */
-    private static AllOf<Response> matchers(final String body,
-        final String type) {
+    private static AllOf<Response> matchers(String body, Header header) {
         return new AllOf<>(
             Stream.of(
                 new RsHasBody(body.getBytes()),
-                new RsHasHeaders(new Header("content-type", type))
+                new RsHasHeaders(header)
             ).collect(Collectors.toList())
         );
     }

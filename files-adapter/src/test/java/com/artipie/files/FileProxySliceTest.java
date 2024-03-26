@@ -10,6 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.cache.FromRemoteCache;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -21,10 +22,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -62,7 +60,7 @@ final class FileProxySliceTest {
                         new Content.From(rqbody).asBytesFuture().thenApply(
                             bytes -> {
                                 body.set(bytes);
-                                return StandardRs.OK;
+                                return ResponseBuilder.ok().build();
                             }
                         )
                     );
@@ -96,9 +94,9 @@ final class FileProxySliceTest {
             "Should returns body from remote",
             new FileProxySlice(
                 new SliceSimple(
-                    new RsFull(
-                        RsStatus.OK, Headers.from("header", "value"), new Content.From(body)
-                    )
+                    ResponseBuilder.ok().header("header", "value")
+                        .body(body)
+                        .build()
                 ),
                 new FromRemoteCache(this.storage)
             ),
@@ -129,7 +127,7 @@ final class FileProxySliceTest {
         MatcherAssert.assertThat(
             "Does not return body from cache",
             new FileProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.INTERNAL_ERROR)),
+                new SliceSimple(ResponseBuilder.internalError().build()),
                 new FromRemoteCache(this.storage)
             ),
             new SliceHasResponse(
@@ -154,7 +152,7 @@ final class FileProxySliceTest {
         MatcherAssert.assertThat(
             "Incorrect status, 404 is expected",
             new FileProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.BAD_REQUEST)),
+                new SliceSimple(ResponseBuilder.badRequest().build()),
                 new FromRemoteCache(this.storage)
             ),
             new SliceHasResponse(

@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,17 +21,17 @@ class ContentLengthRestrictionTest {
     @Test
     public void shouldNotPassRequestsAboveLimit() {
         final Slice slice = new ContentLengthRestriction(
-            (line, headers, body) -> new RsWithStatus(RsStatus.OK), 10
+            (line, headers, body) -> ResponseBuilder.ok().build(), 10
         );
         final Response response = slice.response(new RequestLine("GET", "/"), this.headers("11"), Content.EMPTY);
-        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.PAYLOAD_TOO_LARGE));
+        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.REQUEST_TOO_LONG));
     }
 
     @ParameterizedTest
     @CsvSource({"10,0", "10,not number", "10,1", "10,10"})
     public void shouldPassRequestsWithinLimit(int limit, String value) {
         final Slice slice = new ContentLengthRestriction(
-            (line, headers, body) -> new RsWithStatus(RsStatus.OK), limit
+            (line, headers, body) -> ResponseBuilder.ok().build(), limit
         );
         final Response response = slice.response(new RequestLine("GET", "/"), this.headers(value), Content.EMPTY);
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.OK));
@@ -41,7 +40,7 @@ class ContentLengthRestrictionTest {
     @Test
     public void shouldPassRequestsWithoutContentLength() {
         final Slice slice = new ContentLengthRestriction(
-            (line, headers, body) -> new RsWithStatus(RsStatus.OK), 10
+            (line, headers, body) -> ResponseBuilder.ok().build(), 10
         );
         final Response response = slice.response(new RequestLine("GET", "/"), Headers.EMPTY, Content.EMPTY);
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.OK));

@@ -4,6 +4,9 @@
  */
 package com.artipie.docker.error;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import java.util.Optional;
 
 /**
@@ -36,4 +39,19 @@ public interface DockerError {
      * @return Unstructured details, might be absent.
      */
     Optional<String> detail();
+
+    /**
+     * Json representation of this error.
+     *
+     * @return Json
+     */
+    default String json() {
+        final JsonArrayBuilder array = Json.createArrayBuilder();
+        final JsonObjectBuilder obj = Json.createObjectBuilder()
+            .add("code", code())
+            .add("message", message());
+        detail().ifPresent(detail -> obj.add("detail", detail));
+        array.add(obj);
+        return Json.createObjectBuilder().add("errors", array).build().toString();
+    }
 }

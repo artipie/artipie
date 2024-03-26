@@ -44,10 +44,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Tests for {@link S3Storage}.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.TooManyMethods")
 @DisabledOnOs(OS.WINDOWS)
 class S3StorageTest {
     /**

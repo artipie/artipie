@@ -13,7 +13,7 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -28,18 +28,14 @@ public class SliceFromResourceTest {
 
     @Test
     void shouldDelegateGetResponse() {
-        final RsStatus status = RsStatus.OK;
         final Header header = new Header("Name", "Value");
         final byte[] body = "body".getBytes();
         final Response response = new SliceFromResource(
             new Resource() {
                 @Override
                 public Response get(final Headers headers) {
-                    return new RsFull(
-                        status,
-                        headers,
-                        new Content.From(body)
-                    );
+                    return ResponseBuilder.ok().headers(headers)
+                        .body(body).build();
                 }
 
                 @Override
@@ -55,7 +51,7 @@ public class SliceFromResourceTest {
         MatcherAssert.assertThat(
             response,
             Matchers.allOf(
-                new RsHasStatus(status),
+                new RsHasStatus(RsStatus.OK),
                 new RsHasHeaders(header),
                 new RsHasBody(body)
             )
@@ -64,7 +60,6 @@ public class SliceFromResourceTest {
 
     @Test
     void shouldDelegatePutResponse() {
-        final RsStatus status = RsStatus.OK;
         final Header header = new Header("X-Name", "Something");
         final byte[] content = "content".getBytes();
         final Response response = new SliceFromResource(
@@ -76,7 +71,8 @@ public class SliceFromResourceTest {
 
                 @Override
                 public Response put(Headers headers, Content body) {
-                    return new RsFull(status, headers, body);
+                    return ResponseBuilder.ok().headers(headers)
+                        .body(body).build();
                 }
             }
         ).response(
@@ -87,7 +83,7 @@ public class SliceFromResourceTest {
         MatcherAssert.assertThat(
             response,
             Matchers.allOf(
-                new RsHasStatus(status),
+                new RsHasStatus(RsStatus.OK),
                 new RsHasHeaders(header),
                 new RsHasBody(content)
             )

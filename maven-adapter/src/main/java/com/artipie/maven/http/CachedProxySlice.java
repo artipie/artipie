@@ -17,9 +17,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import com.jcabi.log.Logger;
@@ -140,19 +138,16 @@ final class CachedProxySlice implements Slice {
                         )
                     ).handle(
                         (content, throwable) -> {
-                            final Response result;
                             if (throwable == null && content.isPresent()) {
-                                result = new RsWithBody(
-                                    new RsWithHeaders(StandardRs.OK, rshdr.get()),
-                                    new Content.From(content.get())
-                                );
-                            } else {
-                                result = StandardRs.NOT_FOUND;
-                                if (throwable != null) {
-                                    Logger.error(this, throwable.getMessage());
-                                }
+                                return ResponseBuilder.ok()
+                                    .headers(rshdr.get())
+                                    .body(content.get())
+                                    .build();
                             }
-                            return result;
+                            if (throwable != null) {
+                                Logger.error(this, throwable.getMessage());
+                            }
+                            return ResponseBuilder.notFound().build();
                         }
                     )
             )

@@ -20,14 +20,12 @@ import com.artipie.hex.tarball.TarReader;
 import com.artipie.hex.utils.Gzip;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -54,7 +52,7 @@ import java.util.regex.Pattern;
 /**
  * This slice creates package meta-info from request body(tar-archive) and saves this tar-archive.
  */
-@SuppressWarnings("PMD.ExcessiveMethodLength")
+@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.SingularField"})
 public final class UploadSlice implements Slice {
     /**
      * Path to publish.
@@ -93,7 +91,7 @@ public final class UploadSlice implements Slice {
      * @param rname Repository name
      */
     public UploadSlice(final Storage storage, final Optional<Queue<ArtifactEvent>> events,
-        final String rname) {
+                       final String rname) {
         this.storage = storage;
         this.events = events;
         this.rname = rname;
@@ -165,11 +163,11 @@ public final class UploadSlice implements Slice {
                     (content, throwable) -> {
                         final Response result;
                         if (throwable == null) {
-                            result = new RsFull(
-                                RsStatus.CREATED,
-                                new HexContentType(headers).fill(),
-                                Content.EMPTY
-                            );
+                            result = ResponseBuilder.created()
+                                .headers(new HexContentType(headers).fill())
+                                // todo https://github.com/artipie/artipie/issues/1435
+                                .header(new ContentLength(0))
+                                .build();
                             this.events.ifPresent(
                                 queue -> queue.add(
                                     new ArtifactEvent(
@@ -180,17 +178,16 @@ public final class UploadSlice implements Slice {
                                 )
                             );
                         } else {
-                            result = new RsWithBody(
-                                new RsWithStatus(RsStatus.INTERNAL_ERROR),
-                                throwable.getMessage().getBytes()
-                            );
+                            result = ResponseBuilder.internalError()
+                                .body(throwable.getMessage().getBytes())
+                                .build();
                         }
                         return result;
                     }
                 )
             );
         } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+            res = ResponseBuilder.badRequest().build();
         }
         return res;
     }

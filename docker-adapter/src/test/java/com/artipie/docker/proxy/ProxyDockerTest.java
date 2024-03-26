@@ -7,12 +7,9 @@ package com.artipie.docker.proxy;
 import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyIterable;
 import org.hamcrest.core.IsEqual;
@@ -32,7 +29,7 @@ final class ProxyDockerTest {
 
     @Test
     void createsProxyRepo() {
-        final ProxyDocker docker = new ProxyDocker((line, headers, body) -> StandardRs.EMPTY);
+        final ProxyDocker docker = new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().build());
         MatcherAssert.assertThat(
             docker.repo(new RepoName.Simple("test")),
             new IsInstanceOf(ProxyRepo.class)
@@ -55,7 +52,7 @@ final class ProxyDockerTest {
                     new Content.From(body).asBytesFuture().thenApply(
                         bytes -> {
                             cbody.set(bytes);
-                            return StandardRs.EMPTY;
+                            return ResponseBuilder.ok().build();
                         }
                     )
                 );
@@ -83,7 +80,7 @@ final class ProxyDockerTest {
         final byte[] bytes = "{\"repositories\":[\"one\",\"two\"]}".getBytes();
         MatcherAssert.assertThat(
             new ProxyDocker(
-                (line, headers, body) -> new RsWithBody(new Content.From(bytes))
+                (line, headers, body) -> ResponseBuilder.ok().body(bytes).build()
             ).catalog(Optional.empty(), Integer.MAX_VALUE).thenCompose(
                 catalog -> catalog.json().asBytesFuture()
             ).toCompletableFuture().join(),
@@ -94,7 +91,7 @@ final class ProxyDockerTest {
     @Test
     void shouldFailReturnCatalogWhenRemoteRespondsWithNotOk() {
         final CompletionStage<Catalog> stage = new ProxyDocker(
-            (line, headers, body) -> new RsWithStatus(RsStatus.NOT_FOUND)
+            (line, headers, body) -> ResponseBuilder.notFound().build()
         ).catalog(Optional.empty(), Integer.MAX_VALUE);
         Assertions.assertThrows(
             Exception.class,

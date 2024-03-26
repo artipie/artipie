@@ -5,6 +5,7 @@
 package com.artipie.asto;
 
 import com.artipie.asto.blocking.BlockingStorage;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
@@ -12,10 +13,6 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -56,7 +53,7 @@ public final class ArtipieStorageTest {
                                 .thenApply(
                                     bytes -> {
                                         body.set(bytes);
-                                        return StandardRs.OK;
+                                        return ResponseBuilder.ok().build();
                                     }
                                 )
                         );
@@ -89,9 +86,7 @@ public final class ArtipieStorageTest {
     void shouldThrowExceptionWhenSavingIsFailed() {
         ArtipieStorageTest.assertThrowException(
             () -> new ArtipieStorage(
-                new SliceSimple(
-                    new RsWithStatus(RsStatus.INTERNAL_ERROR)
-                )
+                new SliceSimple(ResponseBuilder.internalError().build())
             ).save(new Key.From("1"), Content.EMPTY)
         );
     }
@@ -114,7 +109,7 @@ public final class ArtipieStorageTest {
                                 .thenApply(
                                     bytes -> {
                                         body.set(bytes);
-                                        return StandardRs.OK;
+                                        return ResponseBuilder.ok().build();
                                     }
                                 )
                         );
@@ -140,9 +135,7 @@ public final class ArtipieStorageTest {
     void shouldThrowExceptionWhenDeleteIsFailed() {
         ArtipieStorageTest.assertThrowException(
             () -> new ArtipieStorage(
-                new SliceSimple(
-                    new RsWithStatus(RsStatus.INTERNAL_ERROR)
-                )
+                new SliceSimple(ResponseBuilder.internalError().build())
             ).delete(new Key.From("a"))
         );
     }
@@ -152,12 +145,9 @@ public final class ArtipieStorageTest {
         final Collection<Key> res = new BlockingStorage(
             new ArtipieStorage(
                 new SliceSimple(
-                    new RsWithBody(
-                        new Content.From(
-                            "[\"a/b/file1.txt\", \"a/file2.txt\"]"
-                                .getBytes(StandardCharsets.UTF_8)
-                        )
-                    )
+                    ResponseBuilder.ok()
+                        .textBody("[\"a/b/file1.txt\", \"a/file2.txt\"]")
+                        .build()
                 )
             )
         ).list(new Key.From("prefix"));
@@ -174,9 +164,7 @@ public final class ArtipieStorageTest {
     void shouldThrowExceptionWhenListIsFailed() {
         ArtipieStorageTest.assertThrowException(
             () -> new ArtipieStorage(
-                new SliceSimple(
-                    new RsWithStatus(RsStatus.INTERNAL_ERROR)
-                )
+                new SliceSimple(ResponseBuilder.internalError().build())
             ).list(new Key.From("b"))
         );
     }
@@ -187,30 +175,19 @@ public final class ArtipieStorageTest {
         final String res = new String(
             new BlockingStorage(
                 new ArtipieStorage(
-                    new SliceSimple(
-                        new RsWithBody(
-                            new Content.From(
-                                data.getBytes(StandardCharsets.UTF_8)
-                            )
-                        )
-                    )
+                    new SliceSimple(ResponseBuilder.ok().textBody(data).build())
                 )
             ).value(new Key.From("c")),
             StandardCharsets.UTF_8
         );
-        MatcherAssert.assertThat(
-            res,
-            new IsEqual<>(data)
-        );
+        Assertions.assertEquals(data, res);
     }
 
     @Test
     void shouldThrowExceptionWhenValueIsFailed() {
         ArtipieStorageTest.assertThrowException(
             () -> new ArtipieStorage(
-                new SliceSimple(
-                    new RsWithStatus(RsStatus.INTERNAL_ERROR)
-                )
+                new SliceSimple(ResponseBuilder.internalError().build())
             ).value(new Key.From("key"))
         );
     }

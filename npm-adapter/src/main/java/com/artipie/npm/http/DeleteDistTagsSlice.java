@@ -7,14 +7,12 @@ package com.artipie.npm.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 
 import javax.json.Json;
 import java.nio.charset.StandardCharsets;
@@ -31,13 +29,9 @@ public final class DeleteDistTagsSlice implements Slice {
      */
     private static final String FIELD = "dist-tags";
 
-    /**
-     * Abstract storage.
-     */
     private final Storage storage;
 
     /**
-     * Ctor.
      * @param storage Abstract storage
      */
     public DeleteDistTagsSlice(final Storage storage) {
@@ -45,16 +39,12 @@ public final class DeleteDistTagsSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers iterable,
-        final Content body) {
+    public Response response(RequestLine line, Headers iterable, Content body) {
         final Matcher matcher = AddDistTagsSlice.PTRN.matcher(line.uri().getPath());
-        final Response resp;
         if (matcher.matches()) {
             final Key meta = new Key.From(matcher.group("pkg"), "meta.json");
             final String tag = matcher.group("tag");
-            resp = new AsyncResponse(
+            return new AsyncResponse(
                 this.storage.exists(meta).thenCompose(
                     exists -> {
                         if (exists) {
@@ -75,17 +65,17 @@ public final class DeleteDistTagsSlice implements Slice {
                                 ).thenApply(
                                     bytes -> {
                                         this.storage.save(meta, new Content.From(bytes));
-                                        return StandardRs.OK;
+                                        return ResponseBuilder.ok().build();
                                     }
                                 );
                         }
-                        return CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
+                        return CompletableFuture.completedFuture(
+                            ResponseBuilder.notFound().build()
+                        );
                     }
                 )
             );
-        } else {
-            resp = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
-        return resp;
+        return ResponseBuilder.badRequest().build();
     }
 }

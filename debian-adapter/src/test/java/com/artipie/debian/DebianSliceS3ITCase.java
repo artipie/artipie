@@ -220,7 +220,7 @@ public final class DebianSliceS3ITCase {
         MatcherAssert.assertThat(
             "Response for upload is OK",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         MatcherAssert.assertThat("Event was added to queue", this.events.size() == 1);
         this.exec("apt-get", "update");

@@ -9,12 +9,12 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.rpm.RepoConfig;
 import com.artipie.rpm.asto.AstoRepoAdd;
 import com.artipie.scheduling.ArtifactEvent;
@@ -124,7 +124,7 @@ public final class RpmUpload implements Slice {
                     }
                     return status;
                 }
-            ).thenApply(RsWithStatus::new)
+            ).thenApply(s -> ResponseBuilder.from(s).build())
         );
     }
 

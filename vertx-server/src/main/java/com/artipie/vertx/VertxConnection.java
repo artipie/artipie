@@ -11,59 +11,57 @@ import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.core.http.HttpServerResponse;
+
 import java.nio.ByteBuffer;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
  * Vertx connection accepts Artipie response and send it to {@link HttpServerResponse}.
- * @since 0.2
  */
 final class VertxConnection implements Connection {
 
     /**
      * Vertx server response output.
      */
-    private final HttpServerResponse rsp;
+    private final HttpServerResponse response;
 
     /**
      * New connection for response.
-     * @param rsp Response output
+     * @param response Response output
      */
-    VertxConnection(final HttpServerResponse rsp) {
-        this.rsp = rsp;
+    VertxConnection(final HttpServerResponse response) {
+        this.response = response;
     }
 
     @Override
-    public CompletionStage<Void> accept(
-        final RsStatus status,
-        final Headers headers,
-        final Content body
-    ) {
-        final int code = Integer.parseInt(status.code());
-        this.rsp.setStatusCode(code);
-        for (final Map.Entry<String, String> header : headers) {
-            this.rsp.putHeader(header.getKey(), header.getValue());
+    public CompletionStage<Void> accept(RsStatus status, Headers headers, Content body) {
+        final CompletableFuture<Void> promise = new CompletableFuture<>();
+        if(status == RsStatus.CONTINUE){
+            this.response.writeContinue();
+            return CompletableFuture.completedFuture(null);
         }
-        final CompletableFuture<HttpServerResponse> promise = new CompletableFuture<>();
+
+        this.response.setStatusCode(status.code());
+        headers.stream().forEach(h -> this.response.putHeader(h.getKey(), h.getValue()));
+
         final Flowable<Buffer> vpb = Flowable.fromPublisher(body)
             .map(VertxConnection::mapBuffer)
             .doOnError(promise::completeExceptionally);
-        if (this.rsp.headers().contains("Content-Length")) {
-            this.rsp.setChunked(false);
+        if (this.response.headers().contains("Content-Length")) {
+            this.response.setChunked(false);
             vpb.doOnComplete(
                 () -> {
-                    this.rsp.end();
-                    promise.complete(this.rsp);
+                    this.response.end();
+                    promise.complete(null);
                 }
-            ).forEach(this.rsp::write);
+            ).forEach(this.response::write);
         } else {
-            this.rsp.setChunked(true);
-            vpb.doOnComplete(() -> promise.complete(this.rsp))
-                .subscribe(this.rsp.toSubscriber());
+            this.response.setChunked(true);
+            vpb.doOnComplete(() -> promise.complete(null))
+                .subscribe(this.response.toSubscriber());
         }
-        return promise.thenCompose(ignored -> CompletableFuture.allOf());
+        return promise;
     }
 
     /**

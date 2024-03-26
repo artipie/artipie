@@ -9,9 +9,8 @@ import com.artipie.docker.Digest;
 import com.artipie.docker.RepoName;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
-import com.artipie.http.rs.RsFull;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.common.RsError;
 import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -37,11 +36,7 @@ class ProxyBlobTest {
                 if (!line.toString().startsWith("GET /v2/test/blobs/sha256:123 ")) {
                     throw new IllegalArgumentException();
                 }
-                return new RsFull(
-                    RsStatus.OK,
-                    Headers.EMPTY,
-                    new Content.From(data)
-                );
+                return ResponseBuilder.ok().body(data).build();
             },
             new RepoName.Valid("test"),
             new Digest.FromString("sha256:123"),
@@ -97,7 +92,7 @@ class ProxyBlobTest {
     void shouldHandleStatus() {
         final byte[] data = "content".getBytes();
         final CompletableFuture<Content> content = new ProxyBlob(
-            (line, headers, body) -> new RsError(new IllegalArgumentException()),
+            (line, headers, body) -> ResponseBuilder.internalError(new IllegalArgumentException()).build(),
             new RepoName.Valid("test-2"),
             new Digest.FromString("sha256:567"),
             data.length

@@ -67,7 +67,10 @@ public class Header implements Map.Entry<String, String> {
 
     @Override
     public String toString() {
-        return String.format("%s: %s", this.name, this.getValue());
+        return "Header{" +
+            "name='" + name + '\'' +
+            ", value='" + value + '\'' +
+            '}';
     }
 
     /**

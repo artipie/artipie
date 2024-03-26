@@ -6,6 +6,7 @@ package com.artipie.files;
 
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthUser;
@@ -15,8 +16,6 @@ import com.artipie.http.auth.OperationControl;
 import com.artipie.http.headers.Accept;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -93,11 +92,8 @@ public final class FilesSlice extends Slice.Wrap {
                     new ByMethodsRule(RqMethod.HEAD),
                     new BasicAuthzSlice(
                         new SliceWithHeaders(
-                            new FileMetaSlice(
-                                new HeadSlice(storage),
-                                storage
-                            ),
-                            Headers.from(new ContentType(FilesSlice.OCTET_STREAM))
+                            new FileMetaSlice(new HeadSlice(storage), storage),
+                            Headers.from(ContentType.mime(FilesSlice.OCTET_STREAM))
                         ),
                         auth,
                         new OperationControl(
@@ -149,7 +145,7 @@ public final class FilesSlice extends Slice.Wrap {
                                         new SliceDownload(storage),
                                         storage
                                     ),
-                                    Headers.from(new ContentType(FilesSlice.OCTET_STREAM))
+                                    Headers.from(ContentType.mime(FilesSlice.OCTET_STREAM))
                                 )
                             )
                         ),
@@ -192,7 +188,7 @@ public final class FilesSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new SliceSimple(new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED))
+                    new SliceSimple(ResponseBuilder.methodNotAllowed().build())
                 )
             )
         );

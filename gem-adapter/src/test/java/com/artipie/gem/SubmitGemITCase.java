@@ -55,7 +55,7 @@ public class SubmitGemITCase {
                         .rxSendBuffer(Buffer.buffer(gem))
                         .blockingGet()
                         .statusCode();
-                    Assertions.assertEquals(Integer.parseInt(RsStatus.CREATED.code()), code);
+                    Assertions.assertEquals(RsStatus.CREATED.code(), code);
                     Assertions.assertEquals(1, events.size());
                 } finally {
                     web.close();

@@ -61,6 +61,14 @@ public class Headers implements Iterable<Header> {
         return this;
     }
 
+    public Headers add(Header header, boolean overwrite) {
+        if (overwrite) {
+            headers.removeIf(h -> h.getKey().equals(header.getKey()));
+        }
+        headers.add(header);
+        return this;
+    }
+
     public Headers add(Header header) {
         headers.add(header);
         return this;
@@ -90,6 +98,23 @@ public class Headers implements Iterable<Header> {
             .toList();
     }
 
+    public List<Header> find(String name) {
+        return headers.stream()
+            .filter(h -> h.getKey().equalsIgnoreCase(name))
+            .toList();
+    }
+
+    public Header single(String name) {
+        List<Header> res = find(name);
+        if (res.isEmpty()) {
+            throw new IllegalStateException("Header '" + name + "' is not found");
+        }
+        if (res.size() > 1) {
+            throw new IllegalStateException("Too many headers '" + name + "' are found");
+        }
+        return res.getFirst();
+    }
+
     @Override
     public Iterator<Header> iterator() {
         return headers.iterator();
@@ -107,5 +132,12 @@ public class Headers implements Iterable<Header> {
         return headers.stream()
             .map(h -> h.getKey() + '=' + h.getValue())
             .collect(Collectors.joining(";"));
+    }
+
+    @Override
+    public String toString() {
+        return "Headers{" +
+            "headers=" + headers +
+            '}';
     }
 }

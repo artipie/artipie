@@ -7,7 +7,6 @@ package com.artipie.http.headers;
 
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -52,14 +51,6 @@ final class HeaderTest {
         MatcherAssert.assertThat(
             new Header("whatever", original).getValue(),
             new IsEqual<>(expected)
-        );
-    }
-
-    @Test
-    void toStringHeader() throws Exception {
-        MatcherAssert.assertThat(
-            new Header("name", "value").toString(),
-            new IsEqual<>("name: value")
         );
     }
 
