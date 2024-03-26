@@ -23,6 +23,7 @@ import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.scheduling.ArtifactEvent;
@@ -164,6 +165,8 @@ public final class UploadSlice implements Slice {
                         if (throwable == null) {
                             result = ResponseBuilder.created()
                                 .headers(new HexContentType(headers).fill())
+                                // todo https://github.com/artipie/artipie/issues/1435
+                                .header(new ContentLength(0))
                                 .build();
                             this.events.ifPresent(
                                 queue -> queue.add(
