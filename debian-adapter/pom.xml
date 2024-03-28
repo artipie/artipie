@@ -50,7 +50,7 @@ SOFTWARE.
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <org.bouncycastle.version>1.70</org.bouncycastle.version>
+    <org.bouncycastle.version>2.73.5</org.bouncycastle.version>
     <jmh.version>1.29</jmh.version>
   </properties>
   <dependencies>
@@ -78,12 +78,12 @@ SOFTWARE.
     <!-- Dependency for PGP and GPG Encryption-Decryption -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcmail-jdk15on</artifactId>
+      <artifactId>bcmail-lts8on</artifactId>
       <version>${org.bouncycastle.version}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpg-jdk15on</artifactId>
+      <artifactId>bcpg-lts8on</artifactId>
       <version>${org.bouncycastle.version}</version>
     </dependency>
     <dependency>

@@ -110,6 +110,7 @@ public final class GpgClearsign {
      * @throws ArtipieIOException On IO errors
      * @throws ArtipieException On problems with GPG
      */
+    @SuppressWarnings("deprecation")
     public byte[] signature(final byte[] key, final String pass) {
         try {
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
