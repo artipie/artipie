@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import io.reactivex.Flowable;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerOptions;

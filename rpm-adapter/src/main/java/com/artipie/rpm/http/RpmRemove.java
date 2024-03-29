@@ -14,7 +14,7 @@ import com.artipie.http.ResponseBuilder;
 import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.rpm.RepoConfig;
 import com.artipie.rpm.asto.AstoRepoRemove;
 import com.artipie.rpm.meta.PackageInfo;

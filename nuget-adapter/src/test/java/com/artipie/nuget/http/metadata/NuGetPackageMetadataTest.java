@@ -12,7 +12,7 @@ import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.nuget.AstoRepository;
 import com.artipie.nuget.PackageIdentity;
 import com.artipie.nuget.PackageKeys;

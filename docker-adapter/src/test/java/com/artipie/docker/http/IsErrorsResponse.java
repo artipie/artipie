@@ -4,12 +4,12 @@
  */
 package com.artipie.docker.http;
 
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.rs.RsStatus;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -32,12 +32,12 @@ import java.util.Arrays;
 /**
  * Matcher for errors response.
  */
-public final class IsErrorsResponse extends BaseMatcher<Response> {
+public final class IsErrorsResponse extends BaseMatcher<ResponseImpl> {
 
     /**
      * Delegate matcher.
      */
-    private final Matcher<Response> delegate;
+    private final Matcher<ResponseImpl> delegate;
 
     /**
      * @param status Expected response status code.

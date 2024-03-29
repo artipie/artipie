@@ -13,7 +13,7 @@ import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.security.policy.Policy;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.StringContains;

@@ -7,12 +7,12 @@ package com.artipie.nuget.http.index;
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.RsStatus;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.AstoRepository;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.security.policy.Policy;
@@ -65,7 +65,7 @@ class NuGetServiceIndexTest {
 
     @Test
     void shouldGetIndex() {
-        final Response response = this.nuget.response(
+        final ResponseImpl response = this.nuget.response(
             new RequestLine(RqMethod.GET, "/index.json"),
             Headers.EMPTY,
             Content.EMPTY
@@ -108,7 +108,7 @@ class NuGetServiceIndexTest {
 
     @Test
     void shouldFailPutIndex() {
-        final Response response = this.nuget.response(
+        final ResponseImpl response = this.nuget.response(
             new RequestLine(RqMethod.PUT, "/index.json"),
             Headers.EMPTY,
             Content.EMPTY

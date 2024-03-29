@@ -4,9 +4,9 @@
  */
 package com.artipie.http.hm;
 
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rs.RsStatus;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.AllOf;
@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Response matcher.
  */
-public final class ResponseMatcher extends AllOf<Response> {
+public final class ResponseMatcher extends AllOf<ResponseImpl> {
 
     /**
      * @param status Expected status
@@ -146,10 +146,7 @@ public final class ResponseMatcher extends AllOf<Response> {
      * @param headers Expected headers
      */
     public ResponseMatcher(Iterable<? extends Header> headers) {
-        this(
-            RsStatus.OK,
-            new RsHasHeaders(headers)
-        );
+        this(RsStatus.OK, new RsHasHeaders(headers));
     }
 
     /**
@@ -188,7 +185,7 @@ public final class ResponseMatcher extends AllOf<Response> {
      * @param status Expected status
      * @param headers Matchers for expected headers
      */
-    public ResponseMatcher(RsStatus status, Matcher<Response> headers) {
+    public ResponseMatcher(RsStatus status, Matcher<ResponseImpl> headers) {
         super(new RsHasStatus(status), headers);
     }
 }

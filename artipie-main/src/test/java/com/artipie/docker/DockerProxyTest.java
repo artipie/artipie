@@ -15,7 +15,7 @@ import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.security.policy.Policy;
 import com.artipie.settings.StorageByAlias;
 import com.artipie.settings.repo.RepoConfig;

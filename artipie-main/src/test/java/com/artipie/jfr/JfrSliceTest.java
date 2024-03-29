@@ -10,11 +10,9 @@ import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.hm.SliceHasResponse;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingStream;
@@ -47,21 +45,19 @@ public class JfrSliceTest {
             final AtomicReference<RecordedEvent> ref = new AtomicReference<>();
             rs.onEvent("artipie.SliceResponse", ref::set);
             rs.startAsync();
-            MatcherAssert.assertThat(
-                new JfrSlice(
-                    new TestSlice(
-                        ResponseBuilder.ok()
-                            .body(JfrSliceTest.content(responseSize, responseChunks))
-                            .build()
-                    )
-                ),
-                new SliceHasResponse(
-                    new RsHasStatus(RsStatus.OK),
-                    new RequestLine(RqMethod.GET, path),
-                    Headers.EMPTY,
-                    JfrSliceTest.content(requestSize, requestChunks)
+
+            ResponseImpl res = new JfrSlice(
+                new TestSlice(
+                    ResponseBuilder.ok()
+                        .body(JfrSliceTest.content(responseSize, responseChunks))
+                        .build()
                 )
-            );
+            ).response(new RequestLine(RqMethod.GET, path), Headers.EMPTY,
+                JfrSliceTest.content(requestSize, requestChunks)).join();
+
+            ResponseAssert.checkOk(res);
+            Assertions.assertTrue(res.body().asBytes().length > 0);
+
             Awaitility.waitAtMost(3, TimeUnit.SECONDS)
                 .until(() -> ref.get() != null);
             final RecordedEvent evt = ref.get();

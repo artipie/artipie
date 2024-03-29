@@ -12,7 +12,7 @@ import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import io.vertx.core.http.HttpServerOptions;
 import org.eclipse.jetty.client.HttpClient;
 import org.hamcrest.MatcherAssert;

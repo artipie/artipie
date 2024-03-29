@@ -15,7 +15,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.npm.JsonFromMeta;
 import com.artipie.scheduling.ArtifactEvent;
 import org.hamcrest.MatcherAssert;

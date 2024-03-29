@@ -5,10 +5,9 @@
 package com.artipie.http.hm;
 
 import com.artipie.asto.Content;
-import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.ResponseImpl;
 import io.reactivex.Flowable;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
@@ -34,17 +33,15 @@ final class RsHasBodyTest {
 
     @Test
     void shouldMatchEqualBody() {
-        final Response response = connection -> connection.accept(
-            RsStatus.OK,
-            Headers.EMPTY,
-            new Content.From(
+        final ResponseImpl response = ResponseBuilder.ok()
+            .body(new Content.From(
                 Flowable.fromArray(
                     ByteBuffer.wrap("he".getBytes()),
                     ByteBuffer.wrap("ll".getBytes()),
                     ByteBuffer.wrap("o".getBytes())
                 )
-            )
-        );
+            ))
+            .build();
         MatcherAssert.assertThat(
             "Matcher is expected to match response with equal body",
             new RsHasBody("hello".getBytes()).matches(response),
@@ -54,11 +51,9 @@ final class RsHasBodyTest {
 
     @Test
     void shouldNotMatchNotEqualBody() {
-        final Response response = connection -> connection.accept(
-            RsStatus.OK,
-            Headers.EMPTY,
-            new Content.From(Flowable.fromArray(ByteBuffer.wrap("1".getBytes())))
-        );
+        final Response response = ResponseBuilder.ok()
+            .body(new Content.From(Flowable.fromArray(ByteBuffer.wrap("1".getBytes()))))
+            .build();
         MatcherAssert.assertThat(
             "Matcher is expected not to match response with not equal body",
             new RsHasBody("2".getBytes()).matches(response),
@@ -99,7 +94,7 @@ final class RsHasBodyTest {
                 Matchers.equalToIgnoringCase(content),
                 StandardCharsets.UTF_8
             ),
-            Matchers.<Matcher<Response>>allOf(
+            Matchers.<Matcher<ResponseImpl>>allOf(
                 new Matches<>(ResponseBuilder.ok().textBody(content).build()),
                 new Matches<>(ResponseBuilder.ok().textBody(content.toUpperCase(Locale.ROOT)).build())
             )

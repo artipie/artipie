@@ -13,7 +13,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;

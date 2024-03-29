@@ -10,7 +10,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Login;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.nuget.InvalidPackageException;
 import com.artipie.nuget.PackageVersionAlreadyExistsException;
 import com.artipie.nuget.Repository;

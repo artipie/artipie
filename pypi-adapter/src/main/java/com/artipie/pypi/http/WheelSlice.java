@@ -19,7 +19,7 @@ import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.pypi.meta.Metadata;

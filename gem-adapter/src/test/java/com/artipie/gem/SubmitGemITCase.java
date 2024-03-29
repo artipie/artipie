@@ -6,7 +6,7 @@ package com.artipie.gem;
 
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.gem.http.GemSlice;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
 import com.artipie.vertx.VertxSliceServer;

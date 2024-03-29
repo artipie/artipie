@@ -12,7 +12,7 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.RemoteConfig;
 import com.artipie.http.client.UriClientSlice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;

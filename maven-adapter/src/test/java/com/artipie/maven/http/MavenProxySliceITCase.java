@@ -11,7 +11,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import com.artipie.vertx.VertxSliceServer;

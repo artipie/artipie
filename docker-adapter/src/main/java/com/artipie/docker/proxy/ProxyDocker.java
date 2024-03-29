@@ -13,7 +13,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

@@ -20,7 +20,7 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;

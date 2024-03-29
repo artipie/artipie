@@ -9,16 +9,14 @@ import com.artipie.asto.Key;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import org.cactoos.list.ListOf;
-import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,29 +123,25 @@ class ManifestEntityGetTest {
 
     /**
      * Response matcher.
-     * @since 0.3
      */
-    private static final class ResponseMatcher extends AllOf<Response> {
+    private static final class ResponseMatcher extends AllOf<ResponseImpl> {
 
         /**
-         * Ctor.
          * @param digest Digest
          * @param content Content
          */
         ResponseMatcher(final String digest, final byte[] content) {
             super(
-                new ListOf<Matcher<? super Response>>(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasHeaders(
-                        new Header("Content-Length", String.valueOf(content.length)),
-                        new Header(
-                            "Content-Type",
-                            "application/vnd.docker.distribution.manifest.v2+json"
-                        ),
-                        new Header("Docker-Content-Digest", digest)
+                new RsHasStatus(RsStatus.OK),
+                new RsHasHeaders(
+                    new Header("Content-Length", String.valueOf(content.length)),
+                    new Header(
+                        "Content-Type",
+                        "application/vnd.docker.distribution.manifest.v2+json"
                     ),
-                    new RsHasBody(content)
-                )
+                    new Header("Docker-Content-Digest", digest)
+                ),
+                new RsHasBody(content)
             );
         }
     }

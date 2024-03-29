@@ -5,17 +5,16 @@
 package com.artipie.http.filter;
 
 import com.artipie.asto.Content;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Tests for {@link FilterSlice}.
@@ -38,10 +37,9 @@ public class FilterSliceTest {
     }
 
     @Test
-    @Disabled("Response should implement 'equals' method")
     void shouldAllow() {
         final FilterSlice slice = new FilterSlice(
-            (line, headers, body) -> CompletableFuture.completedFuture(ResponseBuilder.ok().build()),
+            (line, headers, body) -> ResponseBuilder.ok().completedFuture(),
             FiltersTestUtil.yaml(
                 String.join(
                     System.lineSeparator(),
@@ -54,20 +52,19 @@ public class FilterSliceTest {
             )
         );
         Assertions.assertEquals(
-            ResponseBuilder.ok().build(),
+            RsStatus.OK,
             slice.response(
                 FiltersTestUtil.get(FilterSliceTest.PATH),
                 Headers.EMPTY,
                 Content.EMPTY
-            )
+            ).join().status()
         );
     }
 
     @Test
     void shouldForbidden() {
-        final AtomicReference<RsStatus> res = new AtomicReference<>();
-        final FilterSlice slice = new FilterSlice(
-            (line, headers, body) -> CompletableFuture.completedFuture(ResponseBuilder.ok().build()),
+        ResponseImpl res = new FilterSlice(
+            (line, headers, body) -> ResponseBuilder.ok().completedFuture(),
             FiltersTestUtil.yaml(
                 String.join(
                     System.lineSeparator(),
@@ -76,21 +73,11 @@ public class FilterSliceTest {
                     "  exclude:"
                 )
             )
-        );
-        slice.response(
-                FiltersTestUtil.get(FilterSliceTest.PATH),
-                Headers.EMPTY,
-                Content.EMPTY
-            ).join()
-            .send(
-                (status, headers, body) -> {
-                    res.set(status);
-                    return null;
-                }
-            );
+        ).response(FiltersTestUtil.get(FilterSliceTest.PATH), Headers.EMPTY, Content.EMPTY)
+            .join();
         MatcherAssert.assertThat(
-            res.get(),
-            new IsEqual<>(RsStatus.FORBIDDEN)
+            res.status(),
+            Matchers.is(RsStatus.FORBIDDEN)
         );
     }
 }

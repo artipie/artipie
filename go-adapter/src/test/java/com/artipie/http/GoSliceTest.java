@@ -17,7 +17,6 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.security.policy.Policy;
 import com.artipie.security.policy.PolicyByUsername;
@@ -30,8 +29,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Test for {@link GoSlice}.
@@ -156,12 +153,10 @@ class GoSliceTest {
      * @param header Content-type
      * @return List of matchers
      */
-    private static AllOf<Response> matchers(String body, Header header) {
+    private static AllOf<ResponseImpl> matchers(String body, Header header) {
         return new AllOf<>(
-            Stream.of(
-                new RsHasBody(body.getBytes()),
-                new RsHasHeaders(header)
-            ).collect(Collectors.toList())
+            new RsHasBody(body.getBytes()),
+            new RsHasHeaders(header)
         );
     }
 

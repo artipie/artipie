@@ -15,7 +15,6 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
 /**
@@ -37,9 +36,7 @@ class LoggingSliceTest {
                 new MapEntry<>("Content-Type", "whatever")
             ),
             Content.EMPTY
-        ).join().send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        ).join();
     }
 
     @Test
@@ -74,11 +71,9 @@ class LoggingSliceTest {
         );
     }
 
-    private void handle(final Slice slice) {
-        new LoggingSlice(Level.INFO, slice).response(
-            RequestLine.from("GET /hello/ HTTP/1.1"),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).join().send((status, headers, body) -> CompletableFuture.allOf());
+    private void handle(Slice slice) {
+        new LoggingSlice(Level.INFO, slice)
+            .response(RequestLine.from("GET /hello/ HTTP/1.1"), Headers.EMPTY, Content.EMPTY)
+            .join();
     }
 }

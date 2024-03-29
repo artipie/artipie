@@ -15,7 +15,7 @@ import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -55,7 +55,7 @@ final class ResourceFromSliceTest {
         final String path = "/some/other/path";
         final Header header = new Header("X-Name", "Something");
         final String content = "body";
-        final Response response = new ResourceFromSlice(
+        final ResponseImpl response = new ResourceFromSlice(
             path,
             (line, hdrs, body) -> ResponseBuilder.ok().headers(hdrs)
                 .body(Flowable.concat(Flowable.just(ByteBuffer.wrap(line.toString().getBytes())), body))

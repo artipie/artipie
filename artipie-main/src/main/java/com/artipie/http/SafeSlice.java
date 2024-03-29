@@ -42,36 +42,4 @@ final class SafeSlice implements Slice {
             );
         }
     }
-
-    /**
-     * Safe response, catches exceptions from underlying reponse calls and respond with 500 error.
-     */
-    private static final class RsSafe implements Response {
-
-        /**
-         * Origin response.
-         */
-        private final Response origin;
-
-        /**
-         * Wraps response with safe decorator.
-         * @param origin Origin response
-         */
-        RsSafe(final Response origin) {
-            this.origin = origin;
-        }
-
-        @Override
-        public CompletionStage<Void> send(final Connection connection) {
-            try {
-                return this.origin.send(connection);
-            } catch (final Exception err) {
-                Logger.error(this, "Failed to send request to connection: %[exception]s", err);
-                return ResponseBuilder.internalError()
-                    .textBody("Failed to send request to connection: " + err.getMessage())
-                    .build()
-                    .send(connection);
-            }
-        }
-    }
 }

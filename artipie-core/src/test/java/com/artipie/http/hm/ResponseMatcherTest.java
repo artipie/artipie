@@ -8,7 +8,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;

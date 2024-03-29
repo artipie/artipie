@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rs.RsStatus;
 import org.reactivestreams.Publisher;
 
 import javax.json.JsonStructure;

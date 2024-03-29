@@ -8,7 +8,7 @@ package com.artipie.http.servlet;
 import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;

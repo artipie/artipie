@@ -10,7 +10,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.pypi.PypiDeployment;
 import com.artipie.vertx.VertxSliceServer;

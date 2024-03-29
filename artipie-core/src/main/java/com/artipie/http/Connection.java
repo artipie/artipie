@@ -5,7 +5,6 @@
 package com.artipie.http;
 
 import com.artipie.asto.Content;
-import com.artipie.http.rs.RsStatus;
 
 import java.util.concurrent.CompletionStage;
 

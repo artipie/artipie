@@ -19,31 +19,4 @@ public interface Response {
      * @return Completion stage for sending response to the connection.
      */
     CompletionStage<Void> send(Connection connection);
-
-    /**
-     * Abstract decorator for Response.
-     *
-     * @since 0.9
-     */
-    abstract class Wrap implements Response {
-
-        /**
-         * Origin response.
-         */
-        private final Response response;
-
-        /**
-         * Ctor.
-         *
-         * @param response Response.
-         */
-        protected Wrap(final Response response) {
-            this.response = response;
-        }
-
-        @Override
-        public final CompletionStage<Void> send(final Connection connection) {
-            return this.response.send(connection);
-        }
-    }
 }

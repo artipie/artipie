@@ -4,12 +4,15 @@
  */
 package com.artipie.micrometer;
 
+import com.artipie.asto.Content;
+import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.hm.SliceHasResponse;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.RsStatus;
+import com.artipie.http.Slice;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.reactivex.Flowable;
@@ -37,42 +40,23 @@ class MicrometerSliceTest {
     @Test
     void addsSummaryToRegistry() {
         final String path = "/same/path";
-        MatcherAssert.assertThat(
-            new MicrometerSlice(
-                new SliceSimple(
-                    ResponseBuilder.ok().body(Flowable.fromArray(
-                        ByteBuffer.wrap("Hello ".getBytes(StandardCharsets.UTF_8)),
-                        ByteBuffer.wrap("world!".getBytes(StandardCharsets.UTF_8))
-                    )).build()
-                ),
-                this.registry
-            ),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.OK),
-                new RequestLine(RqMethod.GET, path)
-            )
+        assertResponse(
+            ResponseBuilder.ok().body(Flowable.fromArray(
+                ByteBuffer.wrap("Hello ".getBytes(StandardCharsets.UTF_8)),
+                ByteBuffer.wrap("world!".getBytes(StandardCharsets.UTF_8))
+            )).build(),
+            new RequestLine(RqMethod.GET, path),
+            RsStatus.OK
         );
-        MatcherAssert.assertThat(
-            new MicrometerSlice(
-                new SliceSimple(
-                    ResponseBuilder.ok().body("abc".getBytes(StandardCharsets.UTF_8)).build()
-                ),
-                this.registry
-            ),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.OK),
-                new RequestLine(RqMethod.GET, path)
-            )
+        assertResponse(
+            ResponseBuilder.ok().body("abc".getBytes(StandardCharsets.UTF_8)).build(),
+            new RequestLine(RqMethod.GET, path),
+            RsStatus.OK
         );
-        MatcherAssert.assertThat(
-            new MicrometerSlice(
-                new SliceSimple(ResponseBuilder.from(RsStatus.CONTINUE).build()),
-                this.registry
-            ),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.CONTINUE),
-                new RequestLine(RqMethod.POST, "/a/b/c")
-            )
+        assertResponse(
+            ResponseBuilder.from(RsStatus.CONTINUE).build(),
+            new RequestLine(RqMethod.POST, "/a/b/c"),
+            RsStatus.CONTINUE
         );
         String actual = registry.getMetersAsString();
 
@@ -93,4 +77,10 @@ class MicrometerSliceTest {
         ).forEach(m -> MatcherAssert.assertThat(actual, m));
     }
 
+    private void assertResponse(ResponseImpl res, RequestLine line, RsStatus expected) {
+        Slice slice = new MicrometerSlice(new SliceSimple(res), this.registry);
+        ResponseImpl actual = slice.response(line, Headers.EMPTY, Content.EMPTY).join();
+        ResponseAssert.check(actual, expected);
+        actual.body().asString();
+    }
 }

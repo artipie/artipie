@@ -14,7 +14,7 @@ import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cactoos.map.MapEntry;
 import org.junit.jupiter.api.BeforeEach;

@@ -10,7 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.npm.RandomFreePort;
 import com.artipie.npm.proxy.NpmProxy;

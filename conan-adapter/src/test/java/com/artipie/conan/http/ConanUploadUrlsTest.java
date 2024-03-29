@@ -16,7 +16,7 @@ import com.artipie.http.hm.IsJson;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import io.vertx.core.Vertx;
 import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;

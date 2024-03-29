@@ -7,6 +7,7 @@ package com.artipie.docker.http;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
@@ -15,12 +16,9 @@ import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
 
 /**
  * Test case for {@link DockerAuthSlice}.
@@ -41,16 +39,12 @@ public final class DockerAuthSliceTest {
                 Headers.EMPTY, Content.EMPTY
             ).join(),
             new AllOf<>(
-                Arrays.asList(
-                    new IsUnauthorizedResponse(),
-                    new RsHasHeaders(
-                        Headers.from(
-                            new WwwAuthenticate("Basic"),
-                            new Header("X-Something", "Value"),
-                            ContentType.json(),
-                            new ContentLength("72")
-                        )
-                    )
+                new IsErrorsResponse(RsStatus.UNAUTHORIZED, "UNAUTHORIZED"),
+                new RsHasHeaders(
+                    new WwwAuthenticate("Basic"),
+                    new Header("X-Something", "Value"),
+                    ContentType.json(),
+                    new ContentLength("72")
                 )
             )
         );
@@ -71,13 +65,11 @@ public final class DockerAuthSliceTest {
                 Content.EMPTY
             ).join(),
             new AllOf<>(
-                Arrays.asList(
-                    new IsErrorsResponse(RsStatus.FORBIDDEN, "DENIED"),
-                    new RsHasHeaders(
-                        headers.copy()
-                            .add(ContentType.json())
-                            .add(new ContentLength("85"))
-                    )
+                new IsErrorsResponse(RsStatus.FORBIDDEN, "DENIED"),
+                new RsHasHeaders(
+                    headers.copy()
+                        .add(ContentType.json())
+                        .add(new ContentLength("85"))
                 )
             )
         );

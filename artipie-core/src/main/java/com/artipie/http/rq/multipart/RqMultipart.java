@@ -9,7 +9,7 @@ import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;

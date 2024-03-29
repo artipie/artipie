@@ -11,7 +11,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.rpm.RepoConfig;
 import com.artipie.rpm.TestRpm;
 import com.artipie.scheduling.ArtifactEvent;

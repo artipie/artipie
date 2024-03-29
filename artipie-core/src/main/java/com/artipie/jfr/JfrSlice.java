@@ -29,9 +29,7 @@ public final class JfrSlice implements Slice {
 
     @Override
     public CompletableFuture<ResponseImpl> response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
+        RequestLine line, Headers headers, Content body
     ) {
         final SliceResponseEvent event = new SliceResponseEvent();
         if (event.isEnabled()) {
@@ -50,15 +48,14 @@ public final class JfrSlice implements Slice {
      * @return The response.
      */
     private CompletableFuture<ResponseImpl> wrapResponse(
-        final RequestLine line,
-        final Headers headers,
-        final Content body,
-        final SliceResponseEvent event
+        RequestLine line,
+        Headers headers,
+        Content body,
+        SliceResponseEvent event
     ) {
         event.begin();
         return this.original.response(
-            line,
-            headers,
+            line, headers,
             new Content.From(
                 new ChunksAndSizeMetricsPublisher(
                     body,

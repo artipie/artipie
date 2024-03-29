@@ -16,7 +16,7 @@ import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;

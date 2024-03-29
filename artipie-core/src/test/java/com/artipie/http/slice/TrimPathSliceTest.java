@@ -7,13 +7,13 @@ package com.artipie.http.slice;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.AssertSlice;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.hm.RqHasHeader;
 import com.artipie.http.hm.RqLineHasUri;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -45,23 +45,17 @@ final class TrimPathSliceTest {
 
     @Test
     void failIfUriPathDoesntMatch() throws Exception {
-        new TrimPathSlice((line, headers, body) ->
-            CompletableFuture.completedFuture(ResponseBuilder.ok().build()), "none")
-            .response(requestLine("http://www.w3.org"), Headers.EMPTY, Content.EMPTY)
-            .join().send(
-            (status, headers, body) -> {
-                MatcherAssert.assertThat(
-                    "Not failed",
-                    status,
-                    IsEqual.equalTo(RsStatus.INTERNAL_ERROR)
-                );
-                return CompletableFuture.allOf();
-            }
-        ).toCompletableFuture().get();
+        ResponseAssert.check(
+            new TrimPathSlice((line, headers, body) ->
+                CompletableFuture.completedFuture(ResponseBuilder.ok().build()), "none")
+                .response(requestLine("http://www.w3.org"), Headers.EMPTY, Content.EMPTY)
+                .join(),
+            RsStatus.INTERNAL_ERROR
+        );
     }
 
     @Test
-    void replacesFirstPartOfAbsoluteUriPath() throws Exception {
+    void replacesFirstPartOfAbsoluteUriPath() {
         verify(
             new TrimPathSlice(
                 new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/three"))),
@@ -72,7 +66,7 @@ final class TrimPathSliceTest {
     }
 
     @Test
-    void replaceFullUriPath() throws Exception {
+    void replaceFullUriPath() {
         final String path = "/foo/bar";
         verify(
             new TrimPathSlice(
@@ -84,7 +78,7 @@ final class TrimPathSliceTest {
     }
 
     @Test
-    void appendsFullPathHeaderToRequest() throws Exception {
+    void appendsFullPathHeaderToRequest() {
         final String path = "/a/b/c";
         verify(
             new TrimPathSlice(
@@ -100,7 +94,7 @@ final class TrimPathSliceTest {
     }
 
     @Test
-    void trimPathByPattern() throws Exception {
+    void trimPathByPattern() {
         final String path = "/repo/version/artifact";
         verify(
             new TrimPathSlice(
@@ -112,7 +106,7 @@ final class TrimPathSliceTest {
     }
 
     @Test
-    void dontTrimTwice() throws Exception {
+    void dontTrimTwice() {
         final String prefix = "/one";
         verify(
             new TrimPathSlice(
@@ -132,11 +126,7 @@ final class TrimPathSliceTest {
         return new RequestLine("GET", path, "HTTP/1.1");
     }
 
-    private static void verify(final Slice slice, final RequestLine line) throws Exception {
-        slice.response(line, Headers.EMPTY, Content.EMPTY)
-            .join()
-            .send((status, headers, body) -> CompletableFuture.completedFuture(null))
-            .toCompletableFuture()
-            .get();
+    private static void verify(final Slice slice, final RequestLine line) {
+        slice.response(line, Headers.EMPTY, Content.EMPTY).join();
     }
 }

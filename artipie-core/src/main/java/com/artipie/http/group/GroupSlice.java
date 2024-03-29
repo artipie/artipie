@@ -10,7 +10,7 @@ import com.artipie.http.ResponseBuilder;
 import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

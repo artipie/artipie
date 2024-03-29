@@ -9,7 +9,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;

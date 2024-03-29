@@ -5,7 +5,6 @@
 package com.artipie.http;
 
 import com.artipie.ArtipieException;
-import com.artipie.http.rs.RsStatus;
 import com.google.common.collect.ImmutableMap;
 
 import java.io.Serial;
