@@ -6,7 +6,9 @@ package com.artipie.nuget.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Resource serving HTTP requests.
@@ -18,14 +20,14 @@ public interface Resource {
      * @param headers Request headers.
      * @return Response to request.
      */
-    Response get(Headers headers);
+    CompletableFuture<ResponseImpl> get(Headers headers);
 
     /**
      * Serve PUT method.
      *
      * @param headers Request headers.
-     * @param body Request body.
+     * @param body    Request body.
      * @return Response to request.
      */
-    Response put(Headers headers, Content body);
+    CompletableFuture<ResponseImpl> put(Headers headers, Content body);
 }

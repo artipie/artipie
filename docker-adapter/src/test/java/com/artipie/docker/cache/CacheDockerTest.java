@@ -31,7 +31,7 @@ final class CacheDockerTest {
     @Test
     void createsCacheRepo() {
         final CacheDocker docker = new CacheDocker(
-            new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().build()),
+            new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().completedFuture()),
             new AstoDocker(new InMemoryStorage()), Optional.empty(), "*"
         );
         MatcherAssert.assertThat(

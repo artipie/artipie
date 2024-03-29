@@ -99,7 +99,7 @@ class NuGetPackagePublishTest {
             new RequestLine(RqMethod.GET, "/package"),
             TestAuthentication.HEADERS,
             Content.EMPTY
-        );
+        ).join();
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
         MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
     }
@@ -111,7 +111,7 @@ class NuGetPackagePublishTest {
                 new RequestLine(RqMethod.PUT, "/package"),
                 Headers.EMPTY,
                 new Content.From("data".getBytes())
-            ),
+            ).join(),
             new ResponseMatcher(
                 RsStatus.UNAUTHORIZED, Headers.EMPTY
             )
@@ -132,7 +132,7 @@ class NuGetPackagePublishTest {
                 new Header("Content-Type", entity.getContentType())
             ),
             new Content.From(sink.toByteArray())
-        );
+        ).join();
     }
 
     private static byte[] nupkg() throws Exception {

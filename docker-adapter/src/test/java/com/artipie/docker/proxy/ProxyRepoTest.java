@@ -20,7 +20,7 @@ final class ProxyRepoTest {
     @Test
     void createsProxyLayers() {
         final ProxyRepo docker = new ProxyRepo(
-            (line, headers, body) -> ResponseBuilder.ok().build(),
+            (line, headers, body) -> ResponseBuilder.ok().completedFuture(),
             new RepoName.Simple("test")
         );
         MatcherAssert.assertThat(
@@ -32,7 +32,7 @@ final class ProxyRepoTest {
     @Test
     void createsProxyManifests() {
         final ProxyRepo docker = new ProxyRepo(
-            (line, headers, body) -> ResponseBuilder.ok().build(),
+            (line, headers, body) -> ResponseBuilder.ok().completedFuture(),
             new RepoName.Simple("my-repo")
         );
         MatcherAssert.assertThat(

@@ -8,12 +8,12 @@ import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.ResponseMatcher;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import org.hamcrest.MatcherAssert;
+import com.artipie.http.rs.RsStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,16 +32,10 @@ class BaseEntityGetTest {
 
     @Test
     void shouldRespondOkToVersionCheck() {
-        final Response response = this.slice.response(
-            new RequestLine(RqMethod.GET, "/v2/"),
-            Headers.EMPTY,
-            Content.EMPTY
-        );
-        MatcherAssert.assertThat(
-            response,
-            new ResponseMatcher(
-                new Header("Docker-Distribution-API-Version", "registry/2.0")
-            )
-        );
+        final ResponseImpl response = this.slice
+            .response(new RequestLine(RqMethod.GET, "/v2/"), Headers.EMPTY, Content.EMPTY)
+            .join();
+        ResponseAssert.check(response, RsStatus.OK,
+            new Header("Docker-Distribution-API-Version", "registry/2.0"));
     }
 }

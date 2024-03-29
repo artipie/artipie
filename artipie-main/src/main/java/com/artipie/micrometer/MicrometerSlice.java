@@ -8,6 +8,8 @@ import com.artipie.asto.Content;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
@@ -72,27 +74,40 @@ public final class MicrometerSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers head,
-                             final Content body) {
+    public CompletableFuture<ResponseImpl> response(final RequestLine line, final Headers head,
+                                                    final Content body) {
         final String method = line.method().value();
-        final Counter.Builder cnt = Counter.builder("artipie.request.counter")
+        final Counter.Builder requestCounter = Counter.builder("artipie.request.counter")
             .description("HTTP requests counter")
             .tag(MicrometerSlice.METHOD, method);
-        final DistributionSummary rqbody = DistributionSummary.builder("artipie.request.body.size")
+        final DistributionSummary requestBody = DistributionSummary.builder("artipie.request.body.size")
             .description("Request body size and chunks")
             .baseUnit(MicrometerSlice.BYTES)
             .tag(MicrometerSlice.METHOD, method)
             .register(this.registry);
-        final DistributionSummary rsbody = DistributionSummary.builder("artipie.response.body.size")
+        final DistributionSummary responseBody = DistributionSummary.builder("artipie.response.body.size")
             .baseUnit(MicrometerSlice.BYTES)
             .description("Response body size and chunks")
             .tag(MicrometerSlice.METHOD, method)
             .register(this.registry);
-        final Timer.Sample timer = Timer.start(this.registry);
-        return new MicrometerResponse(
-            this.origin.response(line, head, new MicrometerPublisher(body, rqbody)),
-            rsbody, cnt, timer
-        );
+//        final Timer.Sample timer = Timer.start(this.registry);
+
+        return this.origin.response(line, head, new MicrometerPublisher(body, requestBody))
+            .thenCompose(response -> {
+                requestCounter.tag(MicrometerSlice.STATUS, response.status().name())
+                    .register(MicrometerSlice.this.registry).increment();
+                return ResponseBuilder.from(response.status())
+                    .headers(response.headers())
+                    .body(new MicrometerPublisher(response.body(), responseBody))
+                    .completedFuture();
+            });
+        // todo MY_TODO реализовать два замера времени
+        //  "artipie.connection.accept" - время отправки ответа
+        //  "artipie.slice.response" - общее время обработки запроса.
+        /*return new MicrometerResponse(
+            this.origin.response(line, head, new MicrometerPublisher(body, requestBody)),
+            responseBody, requestCounter, timer
+        );*/
     }
 
     /**
@@ -103,7 +118,7 @@ public final class MicrometerSlice implements Slice {
      * @return Completable action
      */
     private BiFunction<Void, Throwable, CompletionStage<Void>> handleWithTimer(
-        final String name, final Timer.Sample timer, final Optional<String> status
+        String name, Timer.Sample timer, Optional<String> status
     ) {
         return (ignored, err) -> {
             CompletionStage<Void> res = CompletableFuture.allOf();
@@ -224,6 +239,7 @@ public final class MicrometerSlice implements Slice {
                                                 final Content body) {
                 this.counter.tag(MicrometerSlice.STATUS, status.name())
                     .register(MicrometerSlice.this.registry).increment();
+
                 final Timer.Sample timer = Timer.start(MicrometerSlice.this.registry);
                 return this.origin.accept(
                     status, headers, new MicrometerPublisher(body, this.summary)

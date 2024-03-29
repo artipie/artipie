@@ -31,7 +31,7 @@ class ProxyLayersTest {
                 }
                 return ResponseBuilder.ok()
                     .header(new ContentLength(String.valueOf(size)))
-                    .build();
+                    .completedFuture();
             },
             new RepoName.Valid("test")
         ).get(new Digest.FromString(digest)).toCompletableFuture().join();
@@ -55,7 +55,7 @@ class ProxyLayersTest {
                 if (!line.toString().startsWith(String.format("HEAD /v2/%s/blobs/%s ", repo, digest))) {
                     throw new IllegalArgumentException();
                 }
-                return ResponseBuilder.notFound().build();
+                return ResponseBuilder.notFound().completedFuture();
             },
             new RepoName.Valid(repo)
         ).get(new Digest.FromString(digest)).toCompletableFuture().join();

@@ -9,12 +9,11 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.Tarballs;
 
@@ -27,9 +26,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class DownloadPackageSlice implements Slice {
 
-    /**
-     * Base URL.
-     */
     private final URL base;
     private final Storage storage;
 
@@ -43,28 +39,26 @@ public final class DownloadPackageSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final String pkg = new PackageNameFromUrl(line).value();
         final Key key = new Key.From(pkg, "meta.json");
-        return new AsyncResponse(
-            this.storage.exists(key).thenCompose(
-                exists -> {
-                    if (exists) {
-                        return this.storage.value(key)
-                            .thenApply(content -> new Tarballs(content, this.base).value())
-                            .thenApply(
-                                content -> ResponseBuilder.ok()
-                                    .header(new Header("Content-Type", "application/json"))
-                                    .body(content)
-                                    .build()
-                            );
-                    } else {
-                        return CompletableFuture.completedFuture(
-                            ResponseBuilder.notFound().build()
+        return this.storage.exists(key).thenCompose(
+            exists -> {
+                if (exists) {
+                    return this.storage.value(key)
+                        .thenApply(content -> new Tarballs(content, this.base).value())
+                        .thenApply(
+                            content -> ResponseBuilder.ok()
+                                .header(new Header("Content-Type", "application/json"))
+                                .body(content)
+                                .build()
                         );
-                    }
+                } else {
+                    return CompletableFuture.completedFuture(
+                        ResponseBuilder.notFound().build()
+                    );
                 }
-            )
+            }
         );
     }
 }

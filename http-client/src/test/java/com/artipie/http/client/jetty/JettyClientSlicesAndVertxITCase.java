@@ -5,11 +5,10 @@
 package com.artipie.http.client.jetty;
 
 import com.artipie.asto.Content;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
@@ -120,12 +119,12 @@ final class JettyClientSlicesAndVertxITCase {
         }
 
         @Override
-        public Response response(
+        public CompletableFuture<ResponseImpl> response(
             final RequestLine line,
             final Headers headers,
             final Content pub
         ) {
-            final CompletableFuture<Response> promise = new CompletableFuture<>();
+            final CompletableFuture<ResponseImpl> promise = new CompletableFuture<>();
             final Slice origin = this.client.https("blog.artipie.com");
             final Slice slice;
             if (this.anonymous) {
@@ -137,18 +136,17 @@ final class JettyClientSlicesAndVertxITCase {
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ).send(
-                (status, rsheaders, body) -> {
-                    final CompletableFuture<Void> terminated = new CompletableFuture<>();
-                    final Flowable<ByteBuffer> termbody = Flowable.fromPublisher(body)
-                        .doOnError(terminated::completeExceptionally)
-                        .doOnTerminate(() -> terminated.complete(null));
-                    promise.complete(ResponseBuilder.from(status).headers(rsheaders)
-                        .body(termbody).build());
-                    return terminated;
-                }
-            );
-            return new AsyncResponse(promise);
+            ).thenAccept(resp -> {
+                final CompletableFuture<Void> terminated = new CompletableFuture<>();
+                final Flowable<ByteBuffer> termbody = Flowable.fromPublisher(resp.body())
+                    .doOnError(terminated::completeExceptionally)
+                    .doOnTerminate(() -> terminated.complete(null));
+                promise.complete(ResponseBuilder.from(resp.status())
+                    .headers(resp.headers())
+                    .body(termbody)
+                    .build());
+            });
+            return promise;
         }
     }
 }

@@ -14,14 +14,13 @@ import com.artipie.asto.streams.ContentAsStream;
 import com.artipie.conda.asto.AstoMergedJson;
 import com.artipie.conda.meta.InfoIndex;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Flowable;
 import org.reactivestreams.Publisher;
@@ -76,37 +75,31 @@ public final class UpdateSlice implements Slice {
     /**
      * Repository name.
      */
-    private final String rname;
+    private final String repoName;
 
     /**
-     * Ctor.
-     *
      * @param asto Abstract storage
      * @param events Artifact events
-     * @param rname Repository name
+     * @param repoName Repository name
      */
-    public UpdateSlice(final Storage asto, final Optional<Queue<ArtifactEvent>> events,
-        final String rname) {
+    public UpdateSlice(Storage asto, Optional<Queue<ArtifactEvent>> events, String repoName) {
         this.asto = asto;
         this.events = events;
-        this.rname = rname;
+        this.repoName = repoName;
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = UpdateSlice.PKG.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final Key temp = new Key.From(UpdateSlice.TMP, matcher.group(1));
             final Key main = new Key.From(matcher.group(1));
-            return new AsyncResponse(
-                this.asto.exclusively(
-                    main,
-                    target -> target.exists(main).thenCompose(
-                        repo -> this.asto.exists(temp).thenApply(upl -> repo || upl)
-                    ).thenCompose(
-                        exists -> this.asto.save(temp,
-                            new Content.From(UpdateSlice.filePart(headers, body))
-                        )
+            return this.asto.exclusively(
+                main,
+                target -> target.exists(main)
+                    .thenCompose(repo -> this.asto.exists(temp).thenApply(upl -> repo || upl))
+                    .thenCompose(
+                        exists -> this.asto.save(temp, new Content.From(UpdateSlice.filePart(headers, body)))
                         .thenCompose(empty -> this.infoJson(matcher.group(1), temp))
                         .thenCompose(json -> this.addChecksum(temp, Digests.MD5, json))
                         .thenCompose(json -> this.addChecksum(temp, Digests.SHA256, json))
@@ -124,7 +117,7 @@ public final class UpdateSlice implements Slice {
                                     action = action.thenAccept(
                                         nothing -> this.events.get().add(
                                             new ArtifactEvent(
-                                                UpdateSlice.CONDA, this.rname,
+                                                UpdateSlice.CONDA, this.repoName,
                                                 new Login(headers).getValue(),
                                                 String.join("_", json.getString("name", "<no name>"), json.getString("arch", "<no arch>")),
                                                 json.getString("version"),
@@ -138,11 +131,10 @@ public final class UpdateSlice implements Slice {
                         ).thenApply(
                             ignored -> ResponseBuilder.created().build()
                         )
-                    )
                 )
-            );
+            ).toCompletableFuture();
         }
-        return ResponseBuilder.badRequest().build();
+        return ResponseBuilder.badRequest().completedFuture();
     }
 
     /**

@@ -12,19 +12,19 @@ import com.artipie.docker.RepoName;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.hm.ResponseMatcher;
-import com.artipie.http.hm.SliceHasResponse;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Test;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link DockerSlice}.
@@ -35,19 +35,14 @@ class CatalogEntityGetTest {
     @Test
     void shouldReturnCatalog() {
         final byte[] catalog = "{...}".getBytes();
-        MatcherAssert.assertThat(
-            new DockerSlice(new FakeDocker(() -> new Content.From(catalog))),
-            new SliceHasResponse(
-                new ResponseMatcher(
-                    RsStatus.OK,
-                    Headers.from(
-                        new ContentLength(catalog.length),
-                        ContentType.json()
-                    ),
-                    catalog
-                ),
-                new RequestLine(RqMethod.GET, "/v2/_catalog")
-            )
+        ResponseAssert.check(
+            new DockerSlice(new FakeDocker(() -> new Content.From(catalog)))
+                .response(new RequestLine(RqMethod.GET, "/v2/_catalog"), Headers.EMPTY, Content.EMPTY)
+                .join(),
+            RsStatus.OK,
+            catalog,
+            new ContentLength(catalog.length),
+            ContentType.json()
         );
     }
 
@@ -63,7 +58,7 @@ class CatalogEntityGetTest {
             ),
             Headers.EMPTY,
             Content.EMPTY
-        ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();
+        ).join();
         MatcherAssert.assertThat(
             "Parses from",
             docker.from.get().map(RepoName::value),

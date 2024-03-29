@@ -13,19 +13,15 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.composer.AllPackages;
 import com.artipie.composer.AstoRepository;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.security.policy.Policy;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.AllOf;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -67,83 +63,57 @@ class PhpComposerTest {
             new Key.From("vendor", "package.json"),
             data
         );
-        final Response response = this.php.response(
+        final ResponseImpl response = this.php.response(
             new RequestLine(RqMethod.GET, "/p/vendor/package.json"),
             Headers.EMPTY,
             Content.EMPTY
-        );
-        MatcherAssert.assertThat(
-            "Package metadata should be returned in response",
-            response,
-            new AllOf<>(
-                Arrays.asList(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasBody(data)
-                )
-            )
-        );
+        ).join();
+        Assertions.assertEquals(RsStatus.OK, response.status());
+        Assertions.assertArrayEquals(data, response.body().asBytes());
     }
 
     @Test
     void shouldFailGetPackageMetadataWhenNotExists() {
-        final Response response = this.php.response(
+        final ResponseImpl response = this.php.response(
             new RequestLine(RqMethod.GET, "/p/vendor/unknown-package.json"),
             Headers.EMPTY,
             Content.EMPTY
-        );
-        MatcherAssert.assertThat(
-            "Not existing metadata should not be found",
-            response,
-            new RsHasStatus(RsStatus.NOT_FOUND)
-        );
+        ).join();
+        Assertions.assertEquals(RsStatus.NOT_FOUND, response.status());
     }
 
     @Test
     void shouldGetAllPackages() throws Exception {
         final byte[] data = "all packages".getBytes();
         new BlockingStorage(this.storage).save(new AllPackages(), data);
-        final Response response = this.php.response(
+        final ResponseImpl response = this.php.response(
             PhpComposerTest.GET_PACKAGES,
             Headers.EMPTY,
             Content.EMPTY
-        );
-        MatcherAssert.assertThat(
-            response,
-            new AllOf<>(
-                Arrays.asList(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasBody(data)
-                )
-            )
-        );
+        ).join();
+        Assertions.assertEquals(RsStatus.OK, response.status());
+        Assertions.assertEquals("all packages", response.body().asString());
     }
 
     @Test
     void shouldFailGetAllPackagesWhenNotExists() {
-        final Response response = this.php.response(
+        final ResponseImpl response = this.php.response(
             PhpComposerTest.GET_PACKAGES,
             Headers.EMPTY,
             Content.EMPTY
-        );
-        MatcherAssert.assertThat(
-            response,
-            new RsHasStatus(RsStatus.NOT_FOUND)
-        );
+        ).join();
+        Assertions.assertEquals(RsStatus.NOT_FOUND, response.status());
     }
 
     @Test
     void shouldPutRoot() {
-        final Response response = this.php.response(
+        final ResponseImpl response = this.php.response(
             new RequestLine(RqMethod.PUT, "/"),
             Headers.EMPTY,
             new Content.From(
                 new TestResource("minimal-package.json").asBytes()
             )
-        );
-        MatcherAssert.assertThat(
-            "Package should be created by put",
-            response,
-            new RsHasStatus(RsStatus.CREATED)
-        );
+        ).join();
+        Assertions.assertEquals(RsStatus.CREATED, response.status());
     }
 }

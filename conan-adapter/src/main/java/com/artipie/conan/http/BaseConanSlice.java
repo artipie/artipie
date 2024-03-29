@@ -11,12 +11,11 @@ import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
 import com.artipie.conan.Completables;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.ResponseBuilder;
 import io.vavr.Tuple2;
 
 import javax.json.Json;
@@ -67,7 +66,7 @@ abstract class BaseConanSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers headers,
         final Content body
@@ -80,20 +79,18 @@ abstract class BaseConanSlice implements Slice {
         } else {
             content = CompletableFuture.completedFuture(new RequestResult());
         }
-        return new AsyncResponse(
-            content.thenApply(
-                data -> {
-                    if (data.isEmpty()) {
-                        return ResponseBuilder.notFound()
-                            .textBody(String.format(BaseConanSlice.URI_S_NOT_FOUND, line.uri(), this.getClass()))
-                            .build();
-                    }
-                    return ResponseBuilder.ok()
-                        .header(BaseConanSlice.CONTENT_TYPE, data.getType())
-                        .body(data.getData())
+        return content.thenApply(
+            data -> {
+                if (data.isEmpty()) {
+                    return ResponseBuilder.notFound()
+                        .textBody(String.format(BaseConanSlice.URI_S_NOT_FOUND, line.uri(), this.getClass()))
                         .build();
                 }
-            )
+                return ResponseBuilder.ok()
+                    .header(BaseConanSlice.CONTENT_TYPE, data.getType())
+                    .body(data.getData())
+                    .build();
+            }
         );
     }
 

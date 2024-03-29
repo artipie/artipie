@@ -6,9 +6,8 @@ package com.artipie.nuget.http.metadata;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.ResponseImpl;
 import com.artipie.nuget.PackageKeys;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.Versions;
@@ -24,6 +23,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -59,9 +59,9 @@ class Registration implements Resource {
     }
 
     @Override
-    public Response get(final Headers headers) {
-        return new AsyncResponse(
-            this.pages().thenCompose(
+    public CompletableFuture<ResponseImpl> get(final Headers headers) {
+        return this.pages()
+            .thenCompose(
                 pages -> new CompletionStages<>(pages.stream().map(RegistrationPage::json)).all()
             ).thenApply(
                 pages -> {
@@ -74,7 +74,7 @@ class Registration implements Resource {
                         .add("items", items)
                         .build();
                     try (ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        JsonWriter writer = Json.createWriter(out)) {
+                         JsonWriter writer = Json.createWriter(out)) {
                         writer.writeObject(json);
                         out.flush();
                         return ResponseBuilder.ok()
@@ -84,13 +84,12 @@ class Registration implements Resource {
                         throw new UncheckedIOException(ex);
                     }
                 }
-            )
-        );
+            ).toCompletableFuture();
     }
 
     @Override
-    public Response put(Headers headers, Content body) {
-        return ResponseBuilder.methodNotAllowed().build();
+    public CompletableFuture<ResponseImpl> put(Headers headers, Content body) {
+        return ResponseBuilder.methodNotAllowed().completedFuture();
     }
 
     /**

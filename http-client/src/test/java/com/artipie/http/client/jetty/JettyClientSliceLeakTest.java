@@ -6,18 +6,16 @@ package com.artipie.http.client.jetty;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.client.HttpServer;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
 import org.eclipse.jetty.client.HttpClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -43,7 +41,7 @@ final class JettyClientSliceLeakTest {
     @BeforeEach
     void setUp() throws Exception {
         this.server.update(
-            (line, headers, body) -> ResponseBuilder.ok().textBody("data").build()
+            (line, headers, body) -> CompletableFuture.completedFuture(ResponseBuilder.ok().textBody("data").build())
         );
         final int port = this.server.start();
         this.client.start();
@@ -64,31 +62,7 @@ final class JettyClientSliceLeakTest {
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ).send(
-                (status, headers, body) -> CompletableFuture.allOf()
-            ).toCompletableFuture().get(1, TimeUnit.SECONDS);
-        }
-    }
-
-    @Test
-    void shouldNotLeakConnectionsIfSendFails() throws Exception {
-        final int total = 1025;
-        for (int count = 0; count < total; count += 1) {
-            final CompletionStage<Void> sent = this.slice.response(
-                new RequestLine(RqMethod.GET, "/"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ).send(
-                (status, headers, body) -> {
-                    final CompletableFuture<Void> future = new CompletableFuture<>();
-                    future.completeExceptionally(new IllegalStateException());
-                    return future;
-                }
-            );
-            try {
-                sent.toCompletableFuture().get(2, TimeUnit.SECONDS);
-            } catch (ExecutionException expected) {
-            }
+            ).get(1, TimeUnit.SECONDS);
         }
     }
 }

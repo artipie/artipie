@@ -8,16 +8,16 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.maven.metadata.DeployMetadata;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,7 +58,7 @@ public final class PutMetadataSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers headers,
         final Content body
@@ -66,31 +66,29 @@ public final class PutMetadataSlice implements Slice {
         final Matcher matcher = PutMetadataSlice.PTN_META.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final Key pkg = new KeyFromPath(matcher.group("pkg"));
-            return new AsyncResponse(
-                new Content.From(body).asStringFuture().thenCombine(
-                    this.asto.list(new Key.From(UploadSlice.TEMP, pkg)),
-                    (xml, list) -> {
-                        final Optional<String> snapshot = new DeployMetadata(xml).snapshots()
-                            .stream().filter(
-                                item -> list.stream().anyMatch(key -> key.string().contains(item))
-                            ).findFirst();
-                        final Key key;
-                        key = snapshot.map(s -> new Key.From(
-                            UploadSlice.TEMP, pkg.string(), s,
-                            PutMetadataSlice.SUB_META, PutMetadataSlice.MAVEN_METADATA
-                        )).orElseGet(() -> new Key.From(
-                            UploadSlice.TEMP, pkg.string(),
-                            new DeployMetadata(xml).release(), PutMetadataSlice.SUB_META,
-                            PutMetadataSlice.MAVEN_METADATA
-                        ));
-                        return this.asto.save(
-                            key,
-                            new Content.From(xml.getBytes(StandardCharsets.US_ASCII))
-                        );
-                    }
-                ).thenApply(nothing -> ResponseBuilder.created().build())
-            );
+            return new Content.From(body).asStringFuture().thenCombine(
+                this.asto.list(new Key.From(UploadSlice.TEMP, pkg)),
+                (xml, list) -> {
+                    final Optional<String> snapshot = new DeployMetadata(xml).snapshots()
+                        .stream().filter(
+                            item -> list.stream().anyMatch(key -> key.string().contains(item))
+                        ).findFirst();
+                    final Key key;
+                    key = snapshot.map(s -> new Key.From(
+                        UploadSlice.TEMP, pkg.string(), s,
+                        PutMetadataSlice.SUB_META, PutMetadataSlice.MAVEN_METADATA
+                    )).orElseGet(() -> new Key.From(
+                        UploadSlice.TEMP, pkg.string(),
+                        new DeployMetadata(xml).release(), PutMetadataSlice.SUB_META,
+                        PutMetadataSlice.MAVEN_METADATA
+                    ));
+                    return this.asto.save(
+                        key,
+                        new Content.From(xml.getBytes(StandardCharsets.US_ASCII))
+                    );
+                }
+            ).thenApply(nothing -> ResponseBuilder.created().build());
         }
-        return ResponseBuilder.badRequest().build();
+        return CompletableFuture.completedFuture(ResponseBuilder.badRequest().build());
     }
 }

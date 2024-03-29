@@ -33,7 +33,7 @@ final class MultiReadDockerTest {
     void createsMultiReadRepo() {
         final MultiReadDocker docker = new MultiReadDocker(
             Arrays.asList(
-                new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().build()),
+                new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().completedFuture()),
                 new AstoDocker(new InMemoryStorage())
             )
         );

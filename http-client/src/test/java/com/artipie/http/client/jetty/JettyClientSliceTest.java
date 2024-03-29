@@ -6,19 +6,17 @@ package com.artipie.http.client.jetty;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.client.HttpServer;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasHeaders;
-import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import io.vertx.core.http.HttpServerOptions;
 import org.eclipse.jetty.client.HttpClient;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.AfterEach;
@@ -90,14 +88,14 @@ class JettyClientSliceTest {
         this.server.update(
             (rqline, rqheaders, rqbody) -> {
                 actual.set(rqline);
-                return ResponseBuilder.ok().build();
+                return CompletableFuture.completedFuture(ResponseBuilder.ok().build());
             }
         );
         this.slice.response(
             RequestLine.from(String.format("%s HTTP/1.1", line)),
             Headers.EMPTY,
             Content.EMPTY
-        ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();
+        ).join();
         MatcherAssert.assertThat(
             actual.get().toString(),
             new StringStartsWith(String.format("%s HTTP", line))
@@ -111,7 +109,7 @@ class JettyClientSliceTest {
             (line, headers, content) -> {
                 System.out.println("MY_DEBUG " + headers);
                 actual.set(headers);
-                return ResponseBuilder.ok().build();
+                return CompletableFuture.completedFuture(ResponseBuilder.ok().build());
             }
         );
         this.slice.response(
@@ -121,7 +119,7 @@ class JettyClientSliceTest {
                 new Header("Another-Header", "AnotherValue")
             ),
             Content.EMPTY
-        ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();
+        ).join();
         Assertions.assertEquals("MyValue", actual.get().values("My-Header").getFirst());
         Assertions.assertEquals("AnotherValue", actual.get().values("Another-Header").getFirst());
     }
@@ -131,20 +129,19 @@ class JettyClientSliceTest {
         final byte[] content = "some content".getBytes();
         final AtomicReference<byte[]> actual = new AtomicReference<>();
         this.server.update(
-            (rqline, rqheaders, rqbody) -> new AsyncResponse(
+            (rqline, rqheaders, rqbody) ->
                 new Content.From(rqbody).asBytesFuture().thenApply(
                     bytes -> {
                         actual.set(bytes);
                         return ResponseBuilder.ok().build();
                     }
-                )
             )
         );
         this.slice.response(
             new RequestLine(RqMethod.PUT, "/package"),
             Headers.EMPTY,
             new Content.From(content)
-        ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();
+        ).join();
         MatcherAssert.assertThat(
             actual.get(),
             new IsEqual<>(content)
@@ -153,52 +150,53 @@ class JettyClientSliceTest {
 
     @Test
     void shouldReceiveStatus() {
-        this.server.update((rqline, rqheaders, rqbody) -> ResponseBuilder.notFound().build());
-        MatcherAssert.assertThat(
+        this.server.update((rqline, rqheaders, rqbody) -> CompletableFuture.completedFuture(
+            ResponseBuilder.notFound().build())
+        );
+        Assertions.assertEquals(
+            RsStatus.NOT_FOUND,
             this.slice.response(
                 new RequestLine(RqMethod.GET, "/a/b/c"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new RsHasStatus(RsStatus.NOT_FOUND)
+                    Headers.EMPTY, Content.EMPTY)
+                .join().status()
         );
     }
 
     @Test
     void shouldReceiveHeaders() {
-        Headers headers = Headers.from(
-            new Header("Content-Type", "text/plain"),
-            new Header("WWW-Authenticate", "Basic")
-        );
         this.server.update(
-            (rqline, rqheaders, rqbody) -> ResponseBuilder.ok()
-                .headers(headers)
-                .build()
+            (rqline, rqheaders, rqbody) ->
+                CompletableFuture.completedFuture(
+                    ResponseBuilder.ok()
+                        .header(ContentType.text())
+                        .header(new Header("WWW-Authenticate", "Basic"))
+                        .build()
+                )
         );
         MatcherAssert.assertThat(
-            this.slice.response(
-                new RequestLine(RqMethod.HEAD, "/content"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new RsHasHeaders(headers)
+            this.slice.response(new RequestLine(RqMethod.HEAD, "/content"),
+                Headers.EMPTY, Content.EMPTY).join().headers(),
+            Matchers.containsInAnyOrder(
+                ContentType.text(),
+                new Header("WWW-Authenticate", "Basic")
+            )
         );
     }
 
     @Test
     void shouldReceiveBody() {
-        final byte[] data = "data".getBytes();
         this.server.update(
-            (rqline, rqheaders, rqbody) -> ResponseBuilder.ok()
-                .body(data).build()
+            (rqline, rqheaders, rqbody) ->
+                CompletableFuture.completedFuture(
+                    ResponseBuilder.ok().textBody("data").build()
+                )
         );
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(
+            "data",
             this.slice.response(
                 new RequestLine(RqMethod.PATCH, "/file.txt"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new RsHasBody(data)
+                Headers.EMPTY, Content.EMPTY
+            ).join().body().asString()
         );
     }
 }

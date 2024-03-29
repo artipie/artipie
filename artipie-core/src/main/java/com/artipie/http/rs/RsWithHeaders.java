@@ -15,6 +15,7 @@ import java.util.concurrent.CompletionStage;
 /**
  * Response with additional headers.
  */
+@Deprecated
 public final class RsWithHeaders implements Response {
 
     private final Response origin;

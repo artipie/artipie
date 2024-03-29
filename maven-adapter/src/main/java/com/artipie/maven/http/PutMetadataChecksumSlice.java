@@ -13,12 +13,11 @@ import com.artipie.asto.ext.Digests;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.maven.Maven;
 import com.artipie.maven.ValidUpload;
 import com.artipie.scheduling.ArtifactEvent;
@@ -101,32 +100,30 @@ public final class PutMetadataChecksumSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers,
-                             Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers,
+                                                    Content body) {
         final Matcher matcher = PutMetadataChecksumSlice.PTN.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final String alg = matcher.group("alg");
             final String pkg = matcher.group("pkg");
-            return new AsyncResponse(
-                this.findAndSave(body, alg, pkg).thenCompose(
+            return this.findAndSave(body, alg, pkg)
+                .thenCompose(
                     key -> {
-                        final CompletionStage<Response> resp;
+                        final CompletionStage<ResponseImpl> resp;
                         if (key.isPresent() && key.get().parent().isPresent()
                             && key.get().parent().get().parent().isPresent()) {
                             final Key location = key.get().parent().get().parent().get();
-                            resp = this.valid.ready(location).thenCompose(
-                                ready -> {
-                                    final CompletionStage<Response> action;
-                                    if (ready) {
-                                        action = this.validateAndUpdate(pkg, location, headers);
-                                    } else {
-                                        action = CompletableFuture.completedFuture(
+                            resp = this.valid.ready(location)
+                                .thenCompose(
+                                    ready -> {
+                                        if (ready) {
+                                            return this.validateAndUpdate(pkg, location, headers);
+                                        }
+                                        return CompletableFuture.completedFuture(
                                             ResponseBuilder.created().build()
                                         );
                                     }
-                                    return action;
-                                }
-                            );
+                                );
                         } else {
                             resp = CompletableFuture.completedFuture(
                                 ResponseBuilder.badRequest().build()
@@ -134,10 +131,11 @@ public final class PutMetadataChecksumSlice implements Slice {
                         }
                         return resp;
                     }
-                )
-            );
+            ).toCompletableFuture();
         }
-        return ResponseBuilder.badRequest().build();
+        return CompletableFuture.completedFuture(
+            ResponseBuilder.badRequest().build()
+        );
     }
 
     /**
@@ -147,36 +145,38 @@ public final class PutMetadataChecksumSlice implements Slice {
      * @param headers Request headers
      * @return Response: BAD_REQUEST if not valid, CREATED otherwise
      */
-    private CompletionStage<Response> validateAndUpdate(
+    private CompletableFuture<ResponseImpl> validateAndUpdate(
         String pkg, Key location, Headers headers) {
-        return this.valid.validate(location, new Key.From(pkg)).thenCompose(
-            correct -> {
-                final CompletionStage<Response> upd;
-                if (correct) {
-                    CompletionStage<Void> res = this.mvn.update(location, new Key.From(pkg));
-                    if (this.events.isPresent()) {
-                        final String version = new KeyLastPart(location).get();
-                        res = res.thenCompose(
-                            ignored -> this.artifactSize(new Key.From(pkg, version))
-                        ).thenAccept(
-                            size -> this.events.get().add(
-                                new ArtifactEvent(
-                                    PutMetadataChecksumSlice.REPO_TYPE, this.rname,
-                                    new Login(headers).getValue(),
-                                    MavenSlice.EVENT_INFO.formatArtifactName(pkg), version, size
+        return this.valid.validate(location, new Key.From(pkg))
+            .thenCompose(
+                correct -> {
+                    final CompletableFuture<ResponseImpl> upd;
+                    if (correct) {
+                        CompletionStage<Void> res = this.mvn.update(location, new Key.From(pkg));
+                        if (this.events.isPresent()) {
+                            final String version = new KeyLastPart(location).get();
+                            res = res.thenCompose(
+                                ignored -> this.artifactSize(new Key.From(pkg, version))
+                            ).thenAccept(
+                                size -> this.events.get().add(
+                                    new ArtifactEvent(
+                                        PutMetadataChecksumSlice.REPO_TYPE, this.rname,
+                                        new Login(headers).getValue(),
+                                        MavenSlice.EVENT_INFO.formatArtifactName(pkg), version, size
+                                    )
                                 )
-                            )
+                            );
+                        }
+                        upd = res.toCompletableFuture()
+                            .thenApply(ignored -> ResponseBuilder.created().build());
+                    } else {
+                        upd = CompletableFuture.completedFuture(
+                            ResponseBuilder.badRequest().build()
                         );
                     }
-                    upd = res.thenApply(ignored -> ResponseBuilder.created().build());
-                } else {
-                    upd = CompletableFuture.completedFuture(
-                        ResponseBuilder.badRequest().build()
-                    );
+                    return upd;
                 }
-                return upd;
-            }
-        );
+            ).toCompletableFuture();
     }
 
     /**

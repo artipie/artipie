@@ -15,6 +15,7 @@ import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.Settings;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
@@ -31,7 +32,9 @@ public final class MainSlice extends Slice.Wrap {
         final String path = line.uri().getPath();
         if (path.equals("*") || path.equals("/")
             || path.replaceAll("^/+", "").split("/").length == 0) {
-            return Optional.of(ResponseBuilder.noContent().build());
+            return Optional.of(CompletableFuture.completedFuture(
+                ResponseBuilder.noContent().build()
+            ));
         }
         return Optional.empty();
     };

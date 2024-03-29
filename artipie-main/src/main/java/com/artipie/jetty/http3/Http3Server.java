@@ -7,13 +7,20 @@ package com.artipie.jetty.http3;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
+import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
+import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.http.HttpFields;
+import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.http3.api.Session;
 import org.eclipse.jetty.http3.api.Stream;
+import org.eclipse.jetty.http3.frames.DataFrame;
 import org.eclipse.jetty.http3.frames.HeadersFrame;
 import org.eclipse.jetty.http3.server.HTTP3ServerConnector;
 import org.eclipse.jetty.http3.server.RawHTTP3ServerConnectionFactory;
@@ -24,40 +31,21 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Http3 server.
  */
 public final class Http3Server {
 
-    /**
-     * Protocol version.
-     */
     private static final String HTTP_3 = "HTTP/3";
-
-    /**
-     * Artipie slice.
-     */
     private final Slice slice;
-
-    /**
-     * Http3 server.
-     */
     private final Server server;
-
-    /**
-     * Port.
-     */
     private final int port;
-
-    /**
-     * SSL factory.
-     */
     private final SslContextFactory.Server ssl;
 
     /**
-     * Ctor.
-     *
      * @param slice Artipie slice
      * @param port POrt to start server on
      * @param ssl SSL factory
@@ -102,16 +90,12 @@ public final class Http3Server {
 
     /**
      * Implementation of {@link Session.Server.Listener} which passes data to slice and sends
-     * response to {@link Stream.Server} via {@link  Http3Connection}.
-     * @since 0.31
+     * response to {@link Stream.Server}.
      */
-    @SuppressWarnings("PMD.OnlyOneReturn")
     private final class SliceListener implements Session.Server.Listener {
 
         @Override
-        public Stream.Server.Listener onRequest(
-            final Stream.Server stream, final HeadersFrame frame
-        ) {
+        public Stream.Server.Listener onRequest(Stream.Server stream, HeadersFrame frame) {
             final MetaData.Request request = (MetaData.Request) frame.getMetaData();
             if (frame.isLast()) {
                 Http3Server.this.slice.response(
@@ -125,7 +109,7 @@ public final class Http3Server {
                             .toList()
                     ),
                     Content.EMPTY
-                ).send(new Http3Connection(stream));
+                ).thenApply(resp -> send(stream, resp));
                 return null;
             } else {
                 stream.demand();
@@ -155,7 +139,7 @@ public final class Http3Server {
                                     new Content.From(
                                         Flowable.fromArray(buffers.toArray(ByteBuffer[]::new))
                                     )
-                                ).send(new Http3Connection(stream));
+                                ).thenApply(resp -> send(stream, resp));
                             }
                         }
                         stream.demand();
@@ -163,6 +147,26 @@ public final class Http3Server {
                 };
             }
         }
+    }
+
+    private static CompletionStage<Void> send(Stream.Server stream, ResponseImpl artipieRes) {
+        RsStatus status = artipieRes.status();
+        final MetaData.Response response = new MetaData.Response(
+            status.code(), HttpStatus.getMessage(status.code()),
+            HttpVersion.HTTP_3,
+            HttpFields.from(
+                artipieRes.headers().stream()
+                    .map(item -> new HttpField(item.getKey(), item.getValue()))
+                    .toArray(HttpField[]::new)
+            )
+        );
+        final CompletableFuture<Stream> respond = stream.respond(new HeadersFrame(response, false));
+        Flowable.fromPublisher(artipieRes.body())
+            .doOnComplete(
+                () -> stream.data(new DataFrame(ByteBuffer.wrap(new byte[]{}), true))
+            ).forEach(buffer -> stream.data(new DataFrame(buffer, false)));
+        //return respond.thenAccept(r -> {        });
+        return CompletableFuture.allOf(respond);
     }
 
 }

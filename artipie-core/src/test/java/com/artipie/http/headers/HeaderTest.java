@@ -7,6 +7,7 @@ package com.artipie.http.headers;
 
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -23,21 +24,22 @@ final class HeaderTest {
         "abc:xyz,ABC:xyz,true",
         "ABC:xyz,abc:xyz,true",
         "abc:xyz,abc: xyz,true",
-        "abc:xyz,foo:bar,false",
-        "abc:xyz,abc:bar,false",
-        "abc:xyz,abc:XYZ,false",
-        "abc:xyz,foo:xyz,false",
+        "abc:xyz,abc:XYZ,true",
         "abc:xyz,abc:xyz ,true"
     })
-    void shouldBeEqual(final String one, final String another, final boolean equal) {
-        MatcherAssert.assertThat(
-            fromString(one).equals(fromString(another)),
-            new IsEqual<>(equal)
-        );
-        MatcherAssert.assertThat(
-            fromString(one).hashCode() == fromString(another).hashCode(),
-            new IsEqual<>(equal)
-        );
+    void shouldBeEqual(final String one, final String another) {
+        Assertions.assertEquals(fromString(one), fromString(another));
+        Assertions.assertEquals(fromString(one).hashCode(), fromString(another).hashCode());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "abc:xyz,foo:bar",
+        "abc:xyz,abc:bar",
+        "abc:xyz,foo:xyz",
+    })
+    void shouldNotBeEqual(final String one, final String another) {
+        Assertions.assertNotEquals(fromString(one), fromString(another));
     }
 
     @ParameterizedTest

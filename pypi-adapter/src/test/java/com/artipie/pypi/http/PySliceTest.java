@@ -9,18 +9,13 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.IsHeader;
-import com.artipie.http.hm.IsString;
-import com.artipie.http.hm.ResponseMatcher;
-import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasHeaders;
-import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.security.policy.Policy;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,22 +54,18 @@ class PySliceTest {
         final byte[] content = "python package".getBytes();
         final String key = "simple/simple-0.1-py3-cp33m-linux_x86.whl";
         this.storage.save(new Key.From(key), new Content.From(content)).join();
+        ResponseImpl resp = this.slice.response(
+            new RequestLine("GET", "/simple"),
+            Headers.EMPTY,
+            Content.EMPTY
+        ).join();
+        ResponseAssert.check(resp, RsStatus.OK,
+            new Header("Content-type", "text/html; charset=utf-8"),
+            new Header("Content-Length", "217")
+        );
         MatcherAssert.assertThat(
-            this.slice.response(
-                new RequestLine("GET", "/simple"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            Matchers.allOf(
-                new RsHasBody(
-                    new IsString(new StringContains("simple-0.1-py3-cp33m-linux_x86.whl"))
-                ),
-                new RsHasStatus(RsStatus.OK),
-                new RsHasHeaders(
-                    new Header("Content-type", "text/html; charset=utf-8"),
-                    new Header("Content-Length", "217")
-                )
-            )
+            resp.body().asString(),
+            new StringContains("simple-0.1-py3-cp33m-linux_x86.whl")
         );
     }
 
@@ -83,49 +74,43 @@ class PySliceTest {
         final byte[] content = "python package".getBytes();
         final String key = "simple/alarmtime-0.1.5.tar.gz";
         this.storage.save(new Key.From(key), new Content.From(content)).join();
+        ResponseImpl resp = this.slice.response(
+            new RequestLine("GET", "/"),
+            Headers.EMPTY,
+            Content.EMPTY
+        ).join();
+        ResponseAssert.check(resp, RsStatus.OK,
+            new Header("Content-type", "text/html; charset=utf-8"),
+            new Header("Content-Length", "193")
+        );
         MatcherAssert.assertThat(
-            this.slice.response(
-                new RequestLine("GET", "/"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            Matchers.allOf(
-                new RsHasBody(
-                    new IsString(new StringContains("alarmtime-0.1.5.tar.gz"))
-                ),
-                new RsHasStatus(RsStatus.OK),
-                new RsHasHeaders(
-                    new Header("Content-type", "text/html; charset=utf-8"),
-                    new Header("Content-Length", "193")
-                )
-            )
+            resp.body().asString(),
+            new StringContains("alarmtime-0.1.5.tar.gz")
         );
     }
 
     @Test
     void redirectsToNormalizedPath() {
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             this.slice.response(
                 new RequestLine("GET", "/one/Two_three"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ),
-            new ResponseMatcher(
-                RsStatus.MOVED_PERMANENTLY,
-                new IsHeader("Location", "/one/two-three")
-            )
+            ).join(),
+            RsStatus.MOVED_PERMANENTLY,
+            new Header("Location", "/one/two-three")
         );
     }
 
     @Test
     void returnsBadRequestOnEmptyPost() {
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             this.slice.response(
                 new RequestLine("POST", "/sample.tar"),
                 Headers.from("content-type", "multipart/form-data; boundary=\"abc123\""),
                 Content.EMPTY
-            ),
-            new RsHasStatus(RsStatus.BAD_REQUEST)
+            ).join(),
+            RsStatus.BAD_REQUEST
         );
     }
 
@@ -141,16 +126,14 @@ class PySliceTest {
     })
     void downloadsVariousArchives(final String content, final String key) {
         this.storage.save(new Key.From(key), new Content.From(content.getBytes())).join();
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             this.slice.response(
                 new RequestLine("GET", key),
                 Headers.EMPTY,
                 Content.EMPTY
-            ),
-            new ResponseMatcher(
-                RsStatus.OK,
-                content.getBytes()
-            )
+            ).join(),
+            RsStatus.OK,
+            content.getBytes()
         );
     }
 

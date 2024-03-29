@@ -29,7 +29,7 @@ final class ReadWriteDockerTest {
     @Test
     void createsReadWriteRepo() {
         final ReadWriteDocker docker = new ReadWriteDocker(
-            new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().build()),
+            new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().completedFuture()),
             new AstoDocker(new InMemoryStorage())
         );
         MatcherAssert.assertThat(

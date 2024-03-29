@@ -148,16 +148,16 @@ public final class HttpNpmRemoteTest {
                 return ResponseBuilder.ok()
                     .header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED)
                     .body(new TestResource("json/original.json").asBytes())
-                    .build();
+                    .completedFuture();
             }
             if (path.equalsIgnoreCase("/asdas/-/asdas-1.0.0.tgz")) {
                 return ResponseBuilder.ok()
                     .header(new Header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED))
                     .header(ContentType.mime(HttpNpmRemoteTest.DEF_CONTENT_TYPE))
                     .body(HttpNpmRemoteTest.DEF_CONTENT.getBytes(StandardCharsets.UTF_8))
-                    .build();
+                    .completedFuture();
             }
-            return ResponseBuilder.notFound().build();
+            return ResponseBuilder.notFound().completedFuture();
         };
     }
 }

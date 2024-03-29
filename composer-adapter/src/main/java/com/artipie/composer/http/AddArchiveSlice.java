@@ -8,12 +8,11 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Meta;
 import com.artipie.composer.Repository;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.scheduling.ArtifactEvent;
 
 import java.util.Optional;
@@ -81,7 +80,7 @@ final class AddArchiveSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final String uri = line.uri().getPath();
         final Matcher matcher = AddArchiveSlice.PATH.matcher(uri);
         if (matcher.matches()) {
@@ -103,8 +102,8 @@ final class AddArchiveSlice implements Slice {
                     )
                 );
             }
-            return new AsyncResponse(res.thenApply(nothing -> ResponseBuilder.created().build()));
+            return res.thenApply(nothing -> ResponseBuilder.created().build());
         }
-        return ResponseBuilder.badRequest().build();
+        return ResponseBuilder.badRequest().completedFuture();
     }
 }

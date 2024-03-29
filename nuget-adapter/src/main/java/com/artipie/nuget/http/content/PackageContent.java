@@ -7,9 +7,8 @@ package com.artipie.nuget.http.content;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.nuget.PackageIdentity;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.http.Resource;
@@ -19,6 +18,7 @@ import com.artipie.nuget.http.metadata.ContentLocation;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Package content route.
@@ -105,21 +105,20 @@ public final class PackageContent implements Route, ContentLocation {
         }
 
         @Override
-        public Response get(final Headers headers) {
-            return this.key().<Response>map(
-                key -> new AsyncResponse(
-                    this.repository.content(key).thenApply(
-                        existing -> existing.<Response>map(
+        public CompletableFuture<ResponseImpl> get(final Headers headers) {
+            return this.key().<CompletableFuture<ResponseImpl>>map(
+                key -> this.repository.content(key)
+                    .thenApply(
+                        existing -> existing.map(
                             data -> ResponseBuilder.ok().body(data).build()
                         ).orElse(ResponseBuilder.notFound().build())
-                    )
-                )
-            ).orElse(ResponseBuilder.notFound().build());
+                    ).toCompletableFuture()
+            ).orElse(ResponseBuilder.notFound().completedFuture());
         }
 
         @Override
-        public Response put(Headers headers, Content body) {
-            return ResponseBuilder.methodNotAllowed().build();
+        public CompletableFuture<ResponseImpl> put(Headers headers, Content body) {
+            return ResponseBuilder.methodNotAllowed().completedFuture();
         }
 
         /**

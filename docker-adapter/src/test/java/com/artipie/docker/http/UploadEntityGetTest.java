@@ -11,9 +11,9 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.Upload;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.ResponseMatcher;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
@@ -45,18 +45,16 @@ public final class UploadEntityGetTest {
             .start()
             .toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
-        final Response response = this.slice.response(
+        final ResponseImpl response = this.slice.response(
             new RequestLine(RqMethod.GET, path),
             Headers.EMPTY, Content.EMPTY
-        );
-        MatcherAssert.assertThat(
+        ).join();
+        ResponseAssert.check(
             response,
-            new ResponseMatcher(
-                RsStatus.NO_CONTENT,
-                new Header("Range", "0-0"),
-                new Header("Content-Length", "0"),
-                new Header("Docker-Upload-UUID", upload.uuid())
-            )
+            RsStatus.NO_CONTENT,
+            new Header("Range", "0-0"),
+            new Header("Content-Length", "0"),
+            new Header("Docker-Upload-UUID", upload.uuid())
         );
     }
 
@@ -69,17 +67,15 @@ public final class UploadEntityGetTest {
             .toCompletableFuture().join();
         upload.append(new Content.From(new byte[1])).toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
-        final Response response = this.slice.response(
+        final ResponseImpl response = this.slice.response(
             new RequestLine(RqMethod.GET, path), Headers.EMPTY, Content.EMPTY
-        );
-        MatcherAssert.assertThat(
+        ).join();
+        ResponseAssert.check(
             response,
-            new ResponseMatcher(
-                RsStatus.NO_CONTENT,
-                new Header("Range", "0-0"),
-                new Header("Content-Length", "0"),
-                new Header("Docker-Upload-UUID", upload.uuid())
-            )
+            RsStatus.NO_CONTENT,
+            new Header("Range", "0-0"),
+            new Header("Content-Length", "0"),
+            new Header("Docker-Upload-UUID", upload.uuid())
         );
     }
 
@@ -92,26 +88,24 @@ public final class UploadEntityGetTest {
             .toCompletableFuture().join();
         upload.append(new Content.From(new byte[128])).toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
-        final Response get = this.slice.response(
+        final ResponseImpl get = this.slice.response(
             new RequestLine(RqMethod.GET, path), Headers.EMPTY, Content.EMPTY
-        );
-        MatcherAssert.assertThat(
+        ).join();
+        ResponseAssert.check(
             get,
-            new ResponseMatcher(
-                RsStatus.NO_CONTENT,
-                new Header("Range", "0-127"),
-                new Header("Content-Length", "0"),
-                new Header("Docker-Upload-UUID", upload.uuid())
-            )
+            RsStatus.NO_CONTENT,
+            new Header("Range", "0-127"),
+            new Header("Content-Length", "0"),
+            new Header("Docker-Upload-UUID", upload.uuid())
         );
     }
 
     @Test
     void shouldReturnNotFoundWhenUploadNotExists() {
-        final Response response = this.slice.response(
+        final ResponseImpl response = this.slice.response(
             new RequestLine(RqMethod.GET, "/v2/test/blobs/uploads/12345"),
             Headers.EMPTY, Content.EMPTY
-        );
+        ).join();
         MatcherAssert.assertThat(
             response,
             new IsErrorsResponse(RsStatus.NOT_FOUND, "BLOB_UPLOAD_UNKNOWN")

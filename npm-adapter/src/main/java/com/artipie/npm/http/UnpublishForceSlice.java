@@ -8,17 +8,16 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.scheduling.ArtifactEvent;
 
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,7 +62,7 @@ final class UnpublishForceSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers headers,
         final Content body
@@ -78,7 +77,7 @@ final class UnpublishForceSlice implements Slice {
                     line.version()
                 )
             ).value();
-            CompletionStage<Void> res = this.storage.deleteAll(new Key.From(pkg));
+            CompletableFuture<Void> res = this.storage.deleteAll(new Key.From(pkg));
             if (this.events.isPresent()) {
                 res = res.thenRun(
                     () -> this.events.map(
@@ -88,8 +87,8 @@ final class UnpublishForceSlice implements Slice {
                     )
                 );
             }
-            return new AsyncResponse(res.thenApply(nothing -> ResponseBuilder.ok().build()));
+            return res.thenApply(nothing -> ResponseBuilder.ok().build());
         }
-        return ResponseBuilder.badRequest().build();
+        return ResponseBuilder.badRequest().completedFuture();
     }
 }

@@ -7,9 +7,8 @@ package com.artipie.nuget.http.publish;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.InvalidPackageException;
@@ -109,33 +108,31 @@ public final class PackagePublish implements Route {
         }
 
         @Override
-        public Response get(final Headers headers) {
-            return ResponseBuilder.methodNotAllowed().build();
+        public CompletableFuture<ResponseImpl> get(final Headers headers) {
+            return ResponseBuilder.methodNotAllowed().completedFuture();
         }
 
         @Override
-        public Response put(Headers headers, Content body) {
-            return new AsyncResponse(
-                CompletableFuture.supplyAsync(
-                    () -> new Multipart(headers, body).first()
-                ).thenCompose(this.repository::add).handle(
-                    (info, throwable) -> {
-                        if (throwable == null) {
-                            this.events.ifPresent(
-                                queue -> queue.add(
-                                    new ArtifactEvent(
-                                        PackagePublish.REPO_TYPE, this.name,
-                                        new Login(headers).getValue(), info.packageName(),
-                                        info.packageVersion(), info.zipSize()
-                                    )
+        public CompletableFuture<ResponseImpl> put(Headers headers, Content body) {
+            return CompletableFuture.supplyAsync(
+                () -> new Multipart(headers, body).first()
+            ).thenCompose(this.repository::add).handle(
+                (info, throwable) -> {
+                    if (throwable == null) {
+                        this.events.ifPresent(
+                            queue -> queue.add(
+                                new ArtifactEvent(
+                                    PackagePublish.REPO_TYPE, this.name,
+                                    new Login(headers).getValue(), info.packageName(),
+                                    info.packageVersion(), info.zipSize()
                                 )
-                            );
-                            return RsStatus.CREATED;
-                        }
-                        return toStatus(throwable.getCause());
+                            )
+                        );
+                        return RsStatus.CREATED;
                     }
-                ).thenApply(s -> ResponseBuilder.from(s).build())
-            );
+                    return toStatus(throwable.getCause());
+                }
+            ).thenApply(s -> ResponseBuilder.from(s).build());
         }
 
         /**

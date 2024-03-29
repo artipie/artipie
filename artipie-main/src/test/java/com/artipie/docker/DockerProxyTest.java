@@ -30,7 +30,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 /**
@@ -52,7 +51,7 @@ class DockerProxyTest {
         MatcherAssert.assertThat(
             slice.response(
                 new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY
-            ),
+            ).join(),
             new RsHasStatus(
                 new IsNot<>(
                     new CustomMatcher<>("is server error") {
@@ -73,9 +72,7 @@ class DockerProxyTest {
             RuntimeException.class,
             () -> dockerProxy(this.cache, yaml).response(
                 new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY
-            ).send(
-                (status, headers, body) -> CompletableFuture.allOf()
-            ).toCompletableFuture().join()
+            ).join()
         );
     }
 

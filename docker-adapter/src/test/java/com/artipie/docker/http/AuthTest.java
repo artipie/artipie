@@ -16,14 +16,14 @@ import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.BearerAuthScheme;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.ResponseMatcher;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
@@ -34,6 +34,7 @@ import com.artipie.security.policy.Policy;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsNot;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -70,28 +71,24 @@ public final class AuthTest {
     @ParameterizedTest
     @MethodSource("setups")
     void shouldUnauthorizedForAnonymousUser(final Method method, final RequestLine line) {
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             method.slice(
                 new TestPolicy(
                     new DockerRepositoryPermission("*", "whatever", DockerActions.PULL.mask())
                 )
-            ).response(line, Headers.EMPTY, Content.EMPTY),
-            new IsUnauthorizedResponse()
+            ).response(line, Headers.EMPTY, Content.EMPTY).join(),
+            RsStatus.UNAUTHORIZED
         );
     }
 
     @ParameterizedTest
     @MethodSource("setups")
     void shouldReturnUnauthorizedWhenUserIsUnknown(final Method method, final RequestLine line) {
-        MatcherAssert.assertThat(
-            method.slice(
-                new DockerRepositoryPermission("*", "whatever", DockerActions.PULL.mask())
-            ).response(
-                line,
-                method.headers(new TestAuthentication.User("chuck", "letmein")),
-                Content.EMPTY
-            ),
-            new IsUnauthorizedResponse()
+        ResponseAssert.check(
+            method.slice(new DockerRepositoryPermission("*", "whatever", DockerActions.PULL.mask()))
+                .response(line, method.headers(new TestAuthentication.User("chuck", "letmein")), Content.EMPTY)
+                .join(),
+            RsStatus.UNAUTHORIZED
         );
     }
 
@@ -102,13 +99,11 @@ public final class AuthTest {
         final RequestLine line,
         final Permission permission
     ) {
-        MatcherAssert.assertThat(
-            method.slice(permission).response(
-                line,
-                method.headers(TestAuthentication.BOB),
-                Content.EMPTY
-            ),
-            new IsDeniedResponse()
+        ResponseAssert.check(
+            method.slice(permission)
+                .response(line, method.headers(TestAuthentication.BOB), Content.EMPTY)
+                .join(),
+            RsStatus.FORBIDDEN
         );
     }
 
@@ -159,39 +154,28 @@ public final class AuthTest {
         final RequestLine line = new RequestLine(RqMethod.PUT, path);
         final DockerRepositoryPermission permission =
             new DockerRepositoryPermission("*", "my-alpine", DockerActions.OVERWRITE.mask());
-        Content manifest = this.manifest();
-        MatcherAssert.assertThat(
-            "Manifest was created for the first time",
-            basic.slice(permission).response(
-                line,
-                basic.headers(TestAuthentication.ALICE),
-                manifest
-            ),
-            new ResponseMatcher(
-                RsStatus.CREATED,
-                new Header("Location", path),
-                new Header("Content-Length", "0"),
-                new Header(
-                    "Docker-Content-Digest",
-                    "sha256:ef0ff2adcc3c944a63f7cafb386abc9a1d95528966085685ae9fab2a1c0bedbf"
-                )
+        ResponseAssert.check(
+            basic.slice(permission)
+                .response(line, basic.headers(TestAuthentication.ALICE), manifest())
+                .join(),
+            RsStatus.CREATED,
+            new Header("Location", path),
+            new Header("Content-Length", "0"),
+            new Header(
+                "Docker-Content-Digest",
+                "sha256:ef0ff2adcc3c944a63f7cafb386abc9a1d95528966085685ae9fab2a1c0bedbf"
             )
         );
-        MatcherAssert.assertThat(
-            "Manifest was overwritten",
-            basic.slice(permission).response(
-                line,
-                basic.headers(TestAuthentication.ALICE),
-                manifest
-            ),
-            new ResponseMatcher(
-                RsStatus.CREATED,
-                new Header("Location", path),
-                new Header("Content-Length", "0"),
-                new Header(
-                    "Docker-Content-Digest",
-                    "sha256:ef0ff2adcc3c944a63f7cafb386abc9a1d95528966085685ae9fab2a1c0bedbf"
-                )
+        ResponseAssert.check(
+            basic.slice(permission)
+                .response(line, basic.headers(TestAuthentication.ALICE), manifest())
+                .join(),
+            RsStatus.CREATED,
+            new Header("Location", path),
+            new Header("Content-Length", "0"),
+            new Header(
+                "Docker-Content-Digest",
+                "sha256:ef0ff2adcc3c944a63f7cafb386abc9a1d95528966085685ae9fab2a1c0bedbf"
             )
         );
     }
@@ -199,24 +183,13 @@ public final class AuthTest {
     @ParameterizedTest
     @MethodSource("setups")
     void shouldNotReturnUnauthorizedOrForbiddenWhenUserHasPermissions(
-        final Method method,
-        final RequestLine line,
-        final Permission permission
+        Method method, RequestLine line, Permission permission
     ) {
-        final Response response = method.slice(permission).response(
-            line,
-            method.headers(TestAuthentication.ALICE),
-            Content.EMPTY
-        );
-        MatcherAssert.assertThat(
-            response,
-            new AllOf<>(
-                Arrays.asList(
-                    new IsNot<>(new RsHasStatus(RsStatus.FORBIDDEN)),
-                    new IsNot<>(new RsHasStatus(RsStatus.UNAUTHORIZED))
-                )
-            )
-        );
+        final ResponseImpl response = method.slice(permission).response(
+            line, method.headers(TestAuthentication.ALICE), Content.EMPTY
+        ).join();
+        Assertions.assertNotEquals(RsStatus.FORBIDDEN, response.status());
+        Assertions.assertNotEquals(RsStatus.UNAUTHORIZED, response.status());
     }
 
     @ParameterizedTest
@@ -226,8 +199,8 @@ public final class AuthTest {
         final RequestLine line,
         final Permission permission
     ) {
-        final Response response = method.slice(new TestPolicy(permission, "anonymous", "Alice"))
-            .response(line, Headers.EMPTY, Content.EMPTY);
+        final ResponseImpl response = method.slice(new TestPolicy(permission, "anonymous", "Alice"))
+            .response(line, Headers.EMPTY, Content.EMPTY).join();
         MatcherAssert.assertThat(
             response,
             new AllOf<>(
@@ -333,8 +306,6 @@ public final class AuthTest {
 
     /**
      * Authentication method.
-     *
-     * @since 0.8
      */
     private interface Method {
 
@@ -431,18 +402,9 @@ public final class AuthTest {
         }
     }
 
-    /**
-     * Policy for test.
-     *
-     * @since 0.18
-     */
     static final class TestPolicy implements Policy<PermissionCollection> {
 
-        /**
-         * Permission.
-         */
         private final Permission perm;
-
         private final Set<String> users;
 
         TestPolicy(final Permission perm) {

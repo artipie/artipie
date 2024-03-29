@@ -6,8 +6,8 @@ package com.artipie.nuget.http.index;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.nuget.http.Absent;
 import com.artipie.nuget.http.Resource;
 import com.artipie.nuget.http.Route;
@@ -18,6 +18,7 @@ import javax.json.JsonObject;
 import javax.json.JsonWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Service index route.
@@ -63,7 +64,7 @@ public final class ServiceIndex implements Route {
     private final class Index implements Resource {
 
         @Override
-        public Response get(final Headers headers) {
+        public CompletableFuture<ResponseImpl> get(final Headers headers) {
             final JsonArrayBuilder resources = Json.createArrayBuilder();
             for (final Service service : ServiceIndex.this.services) {
                 resources.add(
@@ -82,15 +83,15 @@ public final class ServiceIndex implements Route {
                 out.flush();
                 return ResponseBuilder.ok()
                     .body(out.toByteArray())
-                    .build();
+                    .completedFuture();
             } catch (final IOException ex) {
                 throw new IllegalStateException("Failed to serialize JSON to bytes", ex);
             }
         }
 
         @Override
-        public Response put(Headers headers, Content body) {
-            return ResponseBuilder.methodNotAllowed().build();
+        public CompletableFuture<ResponseImpl> put(Headers headers, Content body) {
+            return ResponseBuilder.methodNotAllowed().completedFuture();
         }
     }
 }

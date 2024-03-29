@@ -37,7 +37,7 @@ public final class SliceDownloadTest {
         MatcherAssert.assertThat(
             new SliceDownload(storage).response(
                 rqLineFrom("/one/two/target.txt"), Headers.EMPTY, Content.EMPTY
-            ),
+            ).join(),
             new RsHasBody(data)
         );
     }
@@ -47,7 +47,7 @@ public final class SliceDownloadTest {
         MatcherAssert.assertThat(
             new SliceDownload(new InMemoryStorage()).response(
                 rqLineFrom("/not-exists"), Headers.EMPTY, Content.EMPTY
-            ),
+            ).join(),
             new RsHasStatus(RsStatus.NOT_FOUND)
         );
     }
@@ -61,7 +61,7 @@ public final class SliceDownloadTest {
         MatcherAssert.assertThat(
             new SliceDownload(storage).response(
                 rqLineFrom("/empty.txt"), Headers.EMPTY, Content.EMPTY
-            ),
+            ).join(),
             new ResponseMatcher(body)
         );
     }
@@ -75,7 +75,7 @@ public final class SliceDownloadTest {
         MatcherAssert.assertThat(
             new SliceDownload(storage).response(
                 rqLineFrom(path), Headers.EMPTY, Content.EMPTY
-            ),
+            ).join(),
             new RsHasHeaders(
                 new Header("Content-Length", "7"),
                 new Header("Content-Disposition", "attachment; filename=\"target.txt\"")

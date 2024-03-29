@@ -9,6 +9,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rs.RsStatus;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 
@@ -32,13 +33,13 @@ public final class ContinueSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers,
-                             Content body) {
-        if (expectsContinue(headers)) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers,
+                                                    Content body) {
+        /*if (expectsContinue(headers)) {
             return new ContinueResponse(
                 new LazyResponse(() -> this.origin.response(line, headers, body))
             );
-        }
+        }*/
         return this.origin.response(line, headers, body);
     }
 
@@ -73,6 +74,9 @@ public final class ContinueSlice implements Slice {
 
         @Override
         public CompletionStage<Void> send(final Connection connection) {
+            // todo прочитать что значит в протоколе RsStatus.CONTINUE ??
+            //  добавить обработку в вертыкс сервер.
+
             return connection.accept(RsStatus.CONTINUE, Headers.EMPTY, Content.EMPTY)
                 .thenCompose(none -> this.origin.send(connection));
         }

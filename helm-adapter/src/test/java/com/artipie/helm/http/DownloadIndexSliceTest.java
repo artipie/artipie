@@ -13,6 +13,8 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.helm.ChartYaml;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
@@ -48,30 +50,19 @@ final class DownloadIndexSliceTest {
     @ParameterizedTest
     @ValueSource(strings = {"http://central.artipie.com/", "http://central.artipie.com"})
     void returnsOkAndUpdateEntriesUrlsForBaseWithOrWithoutTrailingSlash(final String base) {
-        final AtomicReference<String> cbody = new AtomicReference<>();
-        final AtomicReference<RsStatus> cstatus = new AtomicReference<>();
+//        final AtomicReference<String> cbody = new AtomicReference<>();
+//        final AtomicReference<RsStatus> cstatus = new AtomicReference<>();
         new TestResource("index.yaml").saveTo(this.storage);
-        new DownloadIndexSlice(base, this.storage)
-            .response(
-                new RequestLine(RqMethod.GET, "/index.yaml"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ).send(
-                (status, headers, body) -> {
-                    cbody.set(body.asString());
-                    cstatus.set(status);
-                    return CompletableFuture.allOf();
-                }
-            ).toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            "Returned OK",
-            cstatus.get(),
-            new IsEqual<>(RsStatus.OK)
-        );
+
+        ResponseImpl resp = new DownloadIndexSlice(base, this.storage)
+            .response(new RequestLine(RqMethod.GET, "/index.yaml"),
+                Headers.EMPTY, Content.EMPTY)
+            .join();
+        ResponseAssert.checkOk(resp);
         MatcherAssert.assertThat(
             "Uri was corrected modified",
             new ChartYaml(
-                new IndexYamlMapping(cbody.get())
+                new IndexYamlMapping(resp.body().asString())
                     .byChart("tomcat").get(0)
             ).urls().get(0),
             new IsEqual<>(String.format("%s/tomcat-0.4.1.tgz", base.replaceAll("/$", "")))
@@ -124,13 +115,12 @@ final class DownloadIndexSliceTest {
                 new RequestLine(RqMethod.GET, "/index.yaml"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ).send((status, headers, body) -> CompletableFuture.completedFuture(null))
-            .handle(
+            ).handle(
                 (res, thr) -> {
                     exc.set(thr);
                     return CompletableFuture.allOf();
                 }
-            ).toCompletableFuture().join();
+            ).join();
         MatcherAssert.assertThat(
             Throwables.getRootCause(exc.get()),
             new IsInstanceOf(URISyntaxException.class)

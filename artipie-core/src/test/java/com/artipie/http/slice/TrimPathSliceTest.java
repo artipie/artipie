@@ -5,8 +5,8 @@
 package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.AssertSlice;
 import com.artipie.http.hm.RqHasHeader;
@@ -45,11 +45,10 @@ final class TrimPathSliceTest {
 
     @Test
     void failIfUriPathDoesntMatch() throws Exception {
-        new TrimPathSlice((line, headers, body) -> ResponseBuilder.ok().build(), "none").response(
-            requestLine("http://www.w3.org"),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).send(
+        new TrimPathSlice((line, headers, body) ->
+            CompletableFuture.completedFuture(ResponseBuilder.ok().build()), "none")
+            .response(requestLine("http://www.w3.org"), Headers.EMPTY, Content.EMPTY)
+            .join().send(
             (status, headers, body) -> {
                 MatcherAssert.assertThat(
                     "Not failed",
@@ -135,6 +134,7 @@ final class TrimPathSliceTest {
 
     private static void verify(final Slice slice, final RequestLine line) throws Exception {
         slice.response(line, Headers.EMPTY, Content.EMPTY)
+            .join()
             .send((status, headers, body) -> CompletableFuture.completedFuture(null))
             .toCompletableFuture()
             .get();

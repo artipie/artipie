@@ -12,8 +12,9 @@ import com.artipie.docker.Upload;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.ResponseMatcher;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
@@ -50,18 +51,13 @@ final class UploadEntityDeleteTest {
             .start()
             .toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
-        final Response get = this.slice.response(
+        final ResponseImpl get = this.slice.response(
             new RequestLine(RqMethod.DELETE, String.format("%s", path)),
             Headers.EMPTY,
             Content.EMPTY
-        );
-        MatcherAssert.assertThat(
-            get,
-            new ResponseMatcher(
-                RsStatus.OK,
-                new Header("Docker-Upload-UUID", upload.uuid())
-            )
-        );
+        ).join();
+        ResponseAssert.check(get,
+            RsStatus.OK, new Header("Docker-Upload-UUID", upload.uuid()));
     }
 
     @Test
@@ -73,13 +69,12 @@ final class UploadEntityDeleteTest {
             .toCompletableFuture().join();
         upload.cancel().toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
-        final Response get = this.slice.response(
+        final ResponseImpl get = this.slice.response(
             new RequestLine(RqMethod.DELETE, String.format("%s", path)),
             Headers.EMPTY,
             Content.EMPTY
-        );
-        MatcherAssert.assertThat(
-            get,
+        ).join();
+        MatcherAssert.assertThat(get,
             new IsErrorsResponse(RsStatus.NOT_FOUND, "BLOB_UPLOAD_UNKNOWN")
         );
     }

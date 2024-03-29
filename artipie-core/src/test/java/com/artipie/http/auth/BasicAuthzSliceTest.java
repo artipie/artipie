@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Test for {@link BasicAuthzSlice}.
@@ -37,7 +38,8 @@ class BasicAuthzSliceTest {
         final String user = "test_user";
         MatcherAssert.assertThat(
             new BasicAuthzSlice(
-                (rqline, headers, body) -> ResponseBuilder.ok().headers(headers).build(),
+                (rqline, headers, body) -> CompletableFuture.completedFuture(
+                    ResponseBuilder.ok().headers(headers).build()),
                 (usr, pwd) -> Optional.of(new AuthUser(user, "test")),
                 new OperationControl(
                     Policy.FREE,
@@ -133,7 +135,8 @@ class BasicAuthzSliceTest {
         final String pswd = "open sesame";
         MatcherAssert.assertThat(
             new BasicAuthzSlice(
-                (rqline, headers, body) -> ResponseBuilder.ok().headers(headers).build(),
+                (rqline, headers, body) -> CompletableFuture.completedFuture(
+                    ResponseBuilder.ok().headers(headers).build()),
                 new Authentication.Single(aladdin, pswd),
                 new OperationControl(
                     new PolicyByUsername(aladdin),

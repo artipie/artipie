@@ -10,10 +10,8 @@ import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import com.jcabi.log.Logger;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -40,27 +38,8 @@ final class RepoHead {
      * @return Artifact headers
      */
     CompletionStage<Optional<Headers>> head(final String path) {
-        final CompletableFuture<Optional<Headers>> promise = new CompletableFuture<>();
         return this.client.response(
             new RequestLine(RqMethod.HEAD, path), Headers.EMPTY, Content.EMPTY
-        ).send(
-            (status, rsheaders, body) -> {
-                final CompletionStage<Optional<Headers>> res;
-                if (status == RsStatus.OK) {
-                    res = CompletableFuture.completedFuture(Optional.of(rsheaders));
-                } else {
-                    res = CompletableFuture.completedFuture(Optional.empty());
-                }
-                return res.thenAccept(promise::complete).toCompletableFuture();
-            }
-        ).handle(
-            (nothing, throwable) -> {
-                if (throwable != null) {
-                    Logger.error(this, throwable.getMessage());
-                    promise.completeExceptionally(throwable);
-                }
-                return null;
-            }
-        ).thenCompose(nothing -> promise);
+        ).thenApply(resp -> resp.status() == RsStatus.OK ? Optional.of(resp.headers()) : Optional.empty());
     }
 }

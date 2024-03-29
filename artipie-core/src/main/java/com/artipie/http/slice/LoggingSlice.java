@@ -5,24 +5,19 @@
 package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
-import com.artipie.http.Connection;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
 import com.jcabi.log.Logger;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Function;
 import java.util.logging.Level;
 
 /**
  * Slice that logs incoming requests and outgoing responses.
  */
-@SuppressWarnings("PMD.AvoidCatchingGenericException")
 public final class LoggingSlice implements Slice {
 
     /**
@@ -36,8 +31,6 @@ public final class LoggingSlice implements Slice {
     private final Slice slice;
 
     /**
-     * Ctor.
-     *
      * @param slice Slice.
      */
     public LoggingSlice(final Slice slice) {
@@ -45,8 +38,6 @@ public final class LoggingSlice implements Slice {
     }
 
     /**
-     * Ctor.
-     *
      * @param level Logging level.
      * @param slice Slice.
      */
@@ -56,45 +47,19 @@ public final class LoggingSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
+    public CompletableFuture<ResponseImpl> response(
+        RequestLine line, Headers headers, Content body
     ) {
         final StringBuilder msg = new StringBuilder(">> ").append(line);
         LoggingSlice.append(msg, headers);
         Logger.log(this.level, this.slice, msg.toString());
-        return connection -> {
-            try {
-                return this.slice.response(line, headers, body)
-                    .send(new LoggingConnection(connection))
-                    .handle(
-                        (value, throwable) -> {
-                            final CompletableFuture<Void> result = new CompletableFuture<>();
-                            if (throwable == null) {
-                                result.complete(value);
-                            } else {
-                                this.log(throwable);
-                                result.completeExceptionally(throwable);
-                            }
-                            return result;
-                        }
-                    )
-                    .thenCompose(Function.identity());
-            } catch (final Exception ex) {
-                this.log(ex);
-                throw ex;
-            }
-        };
-    }
-
-    /**
-     * Writes throwable to logger.
-     *
-     * @param throwable Throwable to be logged.
-     */
-    private void log(final Throwable throwable) {
-        Logger.log(this.level, this.slice, "Failure: %[exception]s", throwable);
+        return slice.response(line, headers, body)
+            .thenApply(res -> {
+                final StringBuilder sb = new StringBuilder("<< ").append(res.status());
+                LoggingSlice.append(sb, res.headers());
+                Logger.log(LoggingSlice.this.level, LoggingSlice.this.slice, sb.toString());
+                return res;
+            });
     }
 
     /**
@@ -106,40 +71,6 @@ public final class LoggingSlice implements Slice {
     private static void append(StringBuilder builder, Headers headers) {
         for (Header header : headers) {
             builder.append('\n').append(header.getKey()).append(": ").append(header.getValue());
-        }
-    }
-
-    /**
-     * Connection logging response prior to sending.
-     *
-     * @since 0.8
-     */
-    private final class LoggingConnection implements Connection {
-
-        /**
-         * Delegate connection.
-         */
-        private final Connection connection;
-
-        /**
-         * Ctor.
-         *
-         * @param connection Delegate connection.
-         */
-        private LoggingConnection(final Connection connection) {
-            this.connection = connection;
-        }
-
-        @Override
-        public CompletionStage<Void> accept(
-            final RsStatus status,
-            final Headers headers,
-            final Content body
-        ) {
-            final StringBuilder msg = new StringBuilder("<< ").append(status);
-            LoggingSlice.append(msg, headers);
-            Logger.log(LoggingSlice.this.level, LoggingSlice.this.slice, msg.toString());
-            return this.connection.accept(status, headers, body);
         }
     }
 }

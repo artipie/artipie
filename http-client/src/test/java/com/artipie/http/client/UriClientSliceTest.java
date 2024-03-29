@@ -5,12 +5,11 @@
 package com.artipie.http.client;
 
 import com.artipie.asto.Content;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -19,8 +18,6 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Tests for {@link UriClientSlice}.
- *
- * @since 0.3
  */
 @SuppressWarnings("PMD.UseObjectForClearerAPI")
 final class UriClientSliceTest {
@@ -33,34 +30,15 @@ final class UriClientSliceTest {
         "http://localhost:8080,false,localhost,8080"
     })
     void shouldGetClientBySchemeHostPort(
-        final String uri, final Boolean secure, final String host, final Integer port
+        String uri, Boolean secure, String host, Integer port
     ) throws Exception {
-        final FakeClientSlices fake = new FakeClientSlices((line, headers, body) -> ResponseBuilder.ok().build());
-        new UriClientSlice(
-            fake,
-            new URI(uri)
-        ).response(
-            new RequestLine(RqMethod.GET, "/"),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).send(
-            (status, rsheaders, rsbody) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            "Scheme is correct",
-            fake.capturedSecure(),
-            new IsEqual<>(secure)
-        );
-        MatcherAssert.assertThat(
-            "Host is correct",
-            fake.capturedHost(),
-            new IsEqual<>(host)
-        );
-        MatcherAssert.assertThat(
-            "Port is correct",
-            fake.capturedPort(),
-            new IsEqual<>(port)
-        );
+        final FakeClientSlices fake = new FakeClientSlices(ResponseBuilder.ok().build());
+        new UriClientSlice(fake, new URI(uri))
+            .response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY)
+            .join();
+        Assertions.assertEquals(secure, fake.capturedSecure());
+        Assertions.assertEquals(host, fake.capturedHost());
+        Assertions.assertEquals(port, fake.capturedPort());
     }
 
     @ParameterizedTest
@@ -69,31 +47,18 @@ final class UriClientSliceTest {
         "http://hostname/aaa/bbb,/%26/file.txt?p=%20%20,/aaa/bbb/%26/file.txt,p=%20%20"
     })
     void shouldAddPrefixToPathAndPreserveQuery(
-        final String uri, final String line, final String path, final String query
+        String uri, String line, String path, String query
     ) throws Exception {
         new UriClientSlice(
             new FakeClientSlices(
                 (rsline, rqheaders, rqbody) -> {
-                    MatcherAssert.assertThat(
-                        "Path is modified",
-                        rsline.uri().getRawPath(),
-                        new IsEqual<>(path)
-                    );
-                    MatcherAssert.assertThat(
-                        "Query is preserved",
-                        rsline.uri().getRawQuery(),
-                        new IsEqual<>(query)
-                    );
-                    return ResponseBuilder.ok().build();
+                    Assertions.assertEquals(path, rsline.uri().getRawPath());
+                    Assertions.assertEquals(query, rsline.uri().getRawQuery());
+                    return CompletableFuture.completedFuture(ResponseBuilder.ok().build());
                 }
             ),
             new URI(uri)
-        ).response(
-            new RequestLine(RqMethod.GET, line),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).send(
-            (status, rsheaders, rsbody) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        ).response(new RequestLine(RqMethod.GET, line), Headers.EMPTY, Content.EMPTY)
+            .join();
     }
 }

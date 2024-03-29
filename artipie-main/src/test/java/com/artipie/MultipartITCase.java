@@ -7,11 +7,10 @@ package com.artipie;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.fs.FileStorage;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
@@ -72,7 +71,7 @@ final class MultipartITCase {
     void parseMultiparRequest() throws Exception {
         final AtomicReference<String> result = new AtomicReference<>();
         this.container.deploy(
-            (line, headers, body) -> new AsyncResponse(
+            (line, headers, body) ->
                 new Content.From(
                     Flowable.fromPublisher(
                         new RqMultipart(headers, body).inspect(
@@ -93,7 +92,6 @@ final class MultipartITCase {
                 ).asStringFuture().thenAccept(result::set).thenApply(
                     none -> ResponseBuilder.ok().build()
                 )
-            )
         );
         final String data = "hello-multipart";
         try (CloseableHttpClient cli = HttpClients.createDefault()) {
@@ -120,7 +118,7 @@ final class MultipartITCase {
     void parseBigMultiparRequest() throws Exception {
         final AtomicReference<String> result = new AtomicReference<>();
         this.container.deploy(
-            (line, headers, body) -> new AsyncResponse(
+            (line, headers, body) ->
                 new Content.From(
                     Flowable.fromPublisher(
                         new RqMultipart(headers, body).inspect(
@@ -141,7 +139,6 @@ final class MultipartITCase {
                 ).asStringFuture().thenAccept(result::set).thenApply(
                     none -> ResponseBuilder.ok().build()
                 )
-            )
         );
         final byte[] buf = testData();
         try (CloseableHttpClient cli = HttpClients.createDefault()) {
@@ -169,7 +166,7 @@ final class MultipartITCase {
     @Test
     void saveMultipartToFile(@TempDir final Path path) throws Exception {
         this.container.deploy(
-            (line, headers, body) -> new AsyncResponse(
+            (line, headers, body) ->
                 Flowable.fromPublisher(
                     new RqMultipart(headers, body).inspect(
                         (part, sink) -> {
@@ -180,9 +177,7 @@ final class MultipartITCase {
                             } else {
                                 sink.ignore(part);
                             }
-                            final CompletableFuture<Void> res = new CompletableFuture<>();
-                            res.complete(null);
-                            return res;
+                            return CompletableFuture.completedFuture(null);
                         }
                     )
                 ).flatMapSingle(
@@ -192,8 +187,10 @@ final class MultipartITCase {
                             new Content.From(part)
                         ).thenApply(none -> 0)
                     )
-                ).toList().to(SingleInterop.get()).thenApply(none -> ResponseBuilder.ok().build())
-            )
+                    ).toList()
+                    .to(SingleInterop.get())
+                    .toCompletableFuture()
+                    .thenApply(none -> ResponseBuilder.ok().build())
         );
         final byte[] buf = testData();
         final String filename = "data.bin";
@@ -244,9 +241,10 @@ final class MultipartITCase {
         private volatile Slice target;
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             return target != null ? target.response(line, headers, body)
-                : ResponseBuilder.unavailable().textBody("target is not set").build();
+                : CompletableFuture.completedFuture(ResponseBuilder.unavailable()
+                .textBody("target is not set").build());
 
         }
 

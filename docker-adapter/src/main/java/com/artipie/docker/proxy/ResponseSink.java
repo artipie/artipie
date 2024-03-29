@@ -4,12 +4,8 @@
  */
 package com.artipie.docker.proxy;
 
-import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.rs.RsStatus;
-import org.reactivestreams.Publisher;
+import com.artipie.http.ResponseImpl;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -24,7 +20,7 @@ final class ResponseSink<T> {
     /**
      * Response.
      */
-    private final Response response;
+    private final CompletableFuture<ResponseImpl> fut;
 
     /**
      * Response transformation.
@@ -32,13 +28,11 @@ final class ResponseSink<T> {
     private final Transformation<T> transform;
 
     /**
-     * Ctor.
-     *
-     * @param response Response.
+     * @param fut Response future.
      * @param transform Response transformation.
      */
-    ResponseSink(final Response response, final Transformation<T> transform) {
-        this.response = response;
+    ResponseSink(CompletableFuture<ResponseImpl> fut, final Transformation<T> transform) {
+        this.fut = fut;
         this.transform = transform;
     }
 
@@ -48,35 +42,21 @@ final class ResponseSink<T> {
      * @return Result object.
      */
     public CompletionStage<T> result() {
-        final CompletableFuture<T> promise = new CompletableFuture<>();
-        this.response.send(
-            (status, headers, body) -> this.transform.transform(status, headers, body)
-                .thenAccept(promise::complete)
-        ).handle((res, error) -> {
-            if (error != null) {
-                promise.completeExceptionally(error);
-            }
-            return null;
-        });
-        return promise;
+        return fut.thenCompose(this.transform::transform);
     }
 
     /**
      * Transformation that transforms response into result object.
      *
      * @param <T> Result object type.
-     * @since 0.10
      */
     interface Transformation<T> {
 
         /**
          * Transform response into an object.
          *
-         * @param status Response status.
-         * @param headers Response headers.
-         * @param body Response body.
-         * @return Completion stage for transformation.
+         * @param response Response.
          */
-        CompletionStage<T> transform(RsStatus status, Headers headers, Publisher<ByteBuffer> body);
+        CompletionStage<T> transform(ResponseImpl response);
     }
 }

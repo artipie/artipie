@@ -7,11 +7,10 @@ package com.artipie.npm.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 
 import javax.json.Json;
@@ -48,43 +47,41 @@ final class AddDistTagsSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = AddDistTagsSlice.PTRN.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final Key meta = new Key.From(matcher.group("pkg"), "meta.json");
             final String tag = matcher.group("tag");
-            return new AsyncResponse(
-                this.storage.exists(meta).thenCompose(
-                    exists -> {
-                        if (exists) {
-                            return this.storage.value(meta)
-                                .thenCompose(Content::asJsonObjectFuture)
-                                .thenCombine(
-                                    new Content.From(body).asStringFuture(),
-                                    (json, val) -> Json.createObjectBuilder(json).add(
-                                        AddDistTagsSlice.DIST_TAGS,
-                                        Json.createObjectBuilder()
-                                            .addAll(
-                                                Json.createObjectBuilder(
-                                                    json.getJsonObject(AddDistTagsSlice.DIST_TAGS)
-                                                )
-                                            ).add(tag, val.replaceAll("\"", ""))
-                                    ).build()
-                                ).thenApply(
-                                    json -> {
-                                        byte[] bytes = json.toString().getBytes(StandardCharsets.UTF_8);
-                                        this.storage.save(meta, new Content.From(bytes));
-                                        return ResponseBuilder.ok().build();
-                                    }
-                                );
-                        }
-                        return CompletableFuture.completedFuture(
-                            ResponseBuilder.notFound().build()
-                        );
+            return this.storage.exists(meta).thenCompose(
+                exists -> {
+                    if (exists) {
+                        return this.storage.value(meta)
+                            .thenCompose(Content::asJsonObjectFuture)
+                            .thenCombine(
+                                new Content.From(body).asStringFuture(),
+                                (json, val) -> Json.createObjectBuilder(json).add(
+                                    AddDistTagsSlice.DIST_TAGS,
+                                    Json.createObjectBuilder()
+                                        .addAll(
+                                            Json.createObjectBuilder(
+                                                json.getJsonObject(AddDistTagsSlice.DIST_TAGS)
+                                            )
+                                        ).add(tag, val.replaceAll("\"", ""))
+                                ).build()
+                            ).thenApply(
+                                json -> {
+                                    byte[] bytes = json.toString().getBytes(StandardCharsets.UTF_8);
+                                    this.storage.save(meta, new Content.From(bytes));
+                                    return ResponseBuilder.ok().build();
+                                }
+                            );
                     }
-                )
+                    return CompletableFuture.completedFuture(
+                        ResponseBuilder.notFound().build()
+                    );
+                }
             );
         }
-        return ResponseBuilder.badRequest().build();
+        return ResponseBuilder.badRequest().completedFuture();
     }
 }

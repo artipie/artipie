@@ -8,6 +8,8 @@ import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Slice limiting requests size by `Content-Length` header.
  * Checks `Content-Length` header to be within limit and responds with error if it is not.
@@ -35,11 +37,11 @@ public final class ContentLengthRestriction implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         if (new RqHeaders(headers, "Content-Length").stream().allMatch(this::withinLimit)) {
             return this.delegate.response(line, headers, body);
         }
-        return ResponseBuilder.payloadTooLarge().build();
+        return CompletableFuture.completedFuture(ResponseBuilder.payloadTooLarge().build());
     }
 
     /**

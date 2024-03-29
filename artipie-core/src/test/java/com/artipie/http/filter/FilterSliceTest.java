@@ -14,14 +14,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Tests for {@link FilterSlice}.
- *
- * @since 1.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class FilterSliceTest {
     /**
      * Request path.
@@ -33,7 +31,7 @@ public class FilterSliceTest {
         Assertions.assertThrows(
             NullPointerException.class,
             () -> new FilterSlice(
-                (line, headers, body) -> ResponseBuilder.ok().build(),
+                (line, headers, body) -> CompletableFuture.completedFuture(ResponseBuilder.ok().build()),
                 FiltersTestUtil.yaml("filters:")
             )
         );
@@ -43,7 +41,7 @@ public class FilterSliceTest {
     @Disabled("Response should implement 'equals' method")
     void shouldAllow() {
         final FilterSlice slice = new FilterSlice(
-            (line, headers, body) -> ResponseBuilder.ok().build(),
+            (line, headers, body) -> CompletableFuture.completedFuture(ResponseBuilder.ok().build()),
             FiltersTestUtil.yaml(
                 String.join(
                     System.lineSeparator(),
@@ -69,7 +67,7 @@ public class FilterSliceTest {
     void shouldForbidden() {
         final AtomicReference<RsStatus> res = new AtomicReference<>();
         final FilterSlice slice = new FilterSlice(
-            (line, headers, body) -> ResponseBuilder.ok().build(),
+            (line, headers, body) -> CompletableFuture.completedFuture(ResponseBuilder.ok().build()),
             FiltersTestUtil.yaml(
                 String.join(
                     System.lineSeparator(),
@@ -83,7 +81,7 @@ public class FilterSliceTest {
                 FiltersTestUtil.get(FilterSliceTest.PATH),
                 Headers.EMPTY,
                 Content.EMPTY
-            )
+            ).join()
             .send(
                 (status, headers, body) -> {
                     res.set(status);

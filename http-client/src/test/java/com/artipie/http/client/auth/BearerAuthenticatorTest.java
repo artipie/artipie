@@ -36,7 +36,7 @@ class BearerAuthenticatorTest {
                 final URI uri = rsline.uri();
                 pathcapture.set(uri.getRawPath());
                 querycapture.set(uri.getRawQuery());
-                return ResponseBuilder.ok().build();
+                return CompletableFuture.completedFuture(ResponseBuilder.ok().build());
             }
         );
         final String host = "artipie.com";
@@ -91,7 +91,7 @@ class BearerAuthenticatorTest {
         final FakeClientSlices fake = new FakeClientSlices(
             (rsline, rqheaders, rqbody) -> {
                 capture.set(rqheaders);
-                return ResponseBuilder.ok().build();
+                return CompletableFuture.completedFuture(ResponseBuilder.ok().build());
             }
         );
         new BearerAuthenticator(
@@ -116,7 +116,8 @@ class BearerAuthenticatorTest {
         final AtomicReference<byte[]> captured = new AtomicReference<>();
         final Headers headers = new BearerAuthenticator(
             new FakeClientSlices(
-                (rqline, rqheaders, rqbody) -> ResponseBuilder.ok().body(response).build()
+                (rqline, rqheaders, rqbody) -> CompletableFuture.completedFuture(
+                    ResponseBuilder.ok().body(response).build())
             ),
             bytes -> {
                 captured.set(bytes);

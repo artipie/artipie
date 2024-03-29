@@ -10,7 +10,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.conan.ItemTokenizer;
 import com.artipie.conan.ItemTokenizer.ItemInfo;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.IsJson;
 import com.artipie.http.hm.RsHasBody;
@@ -51,17 +51,17 @@ public class ConanUploadUrlsTest {
         final String payload =
             "{\"conan_export.tgz\": \"\", \"conanfile.py\":\"\", \"conanmanifest.txt\": \"\"}";
         final byte[] data = payload.getBytes(StandardCharsets.UTF_8);
-        final Response response = new ConanUpload.UploadUrls(storage, new ItemTokenizer(Vertx.vertx())).response(
+        final ResponseImpl response = new ConanUpload.UploadUrls(storage, new ItemTokenizer(Vertx.vertx()))
+            .response(
             new RequestLine(
-                "POST",
-                "/v1/conans/zmqpp/4.2.0/_/_/upload_urls"
+                "POST", "/v1/conans/zmqpp/4.2.0/_/_/upload_urls"
             ),
             Headers.from(
                 new Header("Content-Size", Long.toString(data.length)),
                 new Header("Host", "localhost")
             ),
             new Content.From(data)
-        );
+            ).join();
         MatcherAssert.assertThat(
             "Response body must match",
             response,

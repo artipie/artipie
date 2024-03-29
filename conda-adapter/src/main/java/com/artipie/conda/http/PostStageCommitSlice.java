@@ -6,14 +6,15 @@ package com.artipie.conda.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 
 import javax.json.Json;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,7 +39,6 @@ public final class PostStageCommitSlice implements Slice {
     private final String url;
 
     /**
-     * Ctor.
      * @param url Url to upload
      */
     public PostStageCommitSlice(final String url) {
@@ -46,7 +46,7 @@ public final class PostStageCommitSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = PostStageCommitSlice.PKG.matcher(
             line.uri().getPath()
         );
@@ -93,8 +93,8 @@ public final class PostStageCommitSlice implements Slice {
                         )
                     )
                 ).read(), StandardCharsets.UTF_8
-            ).build();
+            ).completedFuture();
         }
-        return ResponseBuilder.badRequest().build();
+        return ResponseBuilder.badRequest().completedFuture();
     }
 }

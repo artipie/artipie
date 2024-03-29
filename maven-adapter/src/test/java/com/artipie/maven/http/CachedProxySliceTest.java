@@ -47,7 +47,7 @@ final class CachedProxySliceTest {
         final byte[] data = "cache".getBytes();
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                (line, headers, body) -> ResponseBuilder.ok().textBody("123").build(),
+                (line, headers, body) -> ResponseBuilder.ok().textBody("123").completedFuture(),
                 (key, supplier, control) -> CompletableFuture.supplyAsync(
                     () -> Optional.of(new Content.From(data))
                 ),
@@ -107,7 +107,7 @@ final class CachedProxySliceTest {
         final byte[] data = "remote".getBytes();
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                (line, headers, body) -> ResponseBuilder.ok().body(data).build(),
+                (line, headers, body) -> ResponseBuilder.ok().body(data).completedFuture(),
                 (key, supplier, control) -> supplier.get(), Optional.of(this.events), "*"
             ),
             new SliceHasResponse(
@@ -132,7 +132,7 @@ final class CachedProxySliceTest {
         final byte[] data = "remote".getBytes();
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                (line, headers, body) -> ResponseBuilder.ok().body(data).build(),
+                (line, headers, body) -> ResponseBuilder.ok().body(data).completedFuture(),
                 (key, supplier, control) -> supplier.get(), Optional.of(this.events), "*"
             ),
             new SliceHasResponse(

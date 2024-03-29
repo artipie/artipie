@@ -6,9 +6,9 @@ package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.logging.Level;
 
 /**
@@ -38,7 +37,7 @@ class LoggingSliceTest {
                 new MapEntry<>("Content-Type", "whatever")
             ),
             Content.EMPTY
-        ).send(
+        ).join().send(
             (status, headers, body) -> CompletableFuture.allOf()
         ).toCompletableFuture().join();
     }
@@ -66,7 +65,7 @@ class LoggingSliceTest {
             Assertions.assertThrows(
                 Throwable.class,
                 () -> this.handle(
-                    (line, headers, body) -> conn -> {
+                    (line, headers, body) -> {
                         throw error;
                     }
                 )
@@ -75,30 +74,11 @@ class LoggingSliceTest {
         );
     }
 
-    @Test
-    void shouldLogAndPreserveAsyncExceptionInResponse() {
-        final IllegalStateException error = new IllegalStateException("Error in response async");
-        final CompletionStage<Void> result = this.handle(
-            (line, headers, body) -> conn -> {
-                final CompletableFuture<Void> future = new CompletableFuture<>();
-                future.completeExceptionally(error);
-                return future;
-            }
-        );
-        MatcherAssert.assertThat(
-            Assertions.assertThrows(
-                Throwable.class,
-                () -> result.toCompletableFuture().join()
-            ).getCause(),
-            new IsEqual<>(error)
-        );
-    }
-
-    private CompletionStage<Void> handle(final Slice slice) {
-        return new LoggingSlice(Level.INFO, slice).response(
+    private void handle(final Slice slice) {
+        new LoggingSlice(Level.INFO, slice).response(
             RequestLine.from("GET /hello/ HTTP/1.1"),
             Headers.EMPTY,
             Content.EMPTY
-        ).send((status, headers, body) -> CompletableFuture.allOf());
+        ).join().send((status, headers, body) -> CompletableFuture.allOf());
     }
 }

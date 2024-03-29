@@ -11,7 +11,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.TrustedBlobSource;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.IsHeader;
 import com.artipie.http.hm.ResponseMatcher;
@@ -50,11 +50,11 @@ class UploadEntityPostTest {
 
     @Test
     void shouldStartUpload() {
-        final Response response = this.slice.response(
+        final ResponseImpl response = this.slice.response(
             new RequestLine(RqMethod.POST, "/v2/test/blobs/uploads/"),
             Headers.EMPTY,
             Content.EMPTY
-        );
+        ).join();
         MatcherAssert.assertThat(response, isUploadStarted());
     }
 

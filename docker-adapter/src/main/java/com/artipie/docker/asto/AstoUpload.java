@@ -135,7 +135,7 @@ public final class AstoUpload implements Upload {
     }
 
     @Override
-    public CompletionStage<Blob> putTo(final Layers layers, final Digest digest) {
+    public CompletionStage<Blob> putTo(Layers layers, Digest digest) {
         final Key source = this.chunk(digest);
         return this.storage.exists(source).thenCompose(
             exists -> {

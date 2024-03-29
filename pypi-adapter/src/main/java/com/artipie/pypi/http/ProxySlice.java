@@ -11,20 +11,17 @@ import com.artipie.asto.cache.CacheControl;
 import com.artipie.asto.cache.Remote;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.scheduling.ProxyArtifactEvent;
-import io.reactivex.Flowable;
 
 import java.net.URI;
 import java.net.URLConnection;
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -80,58 +77,39 @@ final class ProxySlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line, final Headers ignored,
-        final Content pub
+    public CompletableFuture<ResponseImpl> response(
+        RequestLine line, Headers ignored, Content pub
     ) {
         final AtomicReference<Headers> headers = new AtomicReference<>();
         final Key key = ProxySlice.keyFromPath(line);
-        return new AsyncResponse(
-            this.cache.load(
-                key,
-                new Remote.WithErrorHandling(
-                    () -> {
-                        final CompletableFuture<Optional<? extends Content>> promise =
-                            new CompletableFuture<>();
-                        this.origin.response(line, Headers.EMPTY, Content.EMPTY).send(
-                            (rsstatus, rsheaders, rsbody) -> {
-                                final CompletableFuture<Void> term = new CompletableFuture<>();
-                                headers.set(rsheaders);
-                                if (rsstatus.success()) {
-                                    final Flowable<ByteBuffer> body = Flowable.fromPublisher(rsbody)
-                                        .doOnError(term::completeExceptionally)
-                                        .doOnTerminate(() -> term.complete(null));
-                                    promise.complete(Optional.of(new Content.From(body)));
-                                    this.events.ifPresent(
-                                        queue -> queue.add(new ProxyArtifactEvent(key, this.rname))
-                                    );
-                                } else {
-                                    promise.complete(Optional.empty());
-                                }
-                                return term;
-                            }
-                        );
-                        return promise;
-                    }
-                ),
-                CacheControl.Standard.ALWAYS
-            ).handle(
-                (content, throwable) -> {
-                    final CompletableFuture<Response> result = new CompletableFuture<>();
-                    if (throwable == null && content.isPresent()) {
-                        result.complete(
-                            ResponseBuilder.ok()
-                                .headers(Headers.from(ProxySlice.contentType(headers.get(), line)))
-                                .body(content.get())
-                                .build()
-                        );
-                    } else {
-                        result.complete(ResponseBuilder.notFound().build());
-                    }
-                    return result;
+        return this.cache.load(
+            key,
+            new Remote.WithErrorHandling(
+                () -> this.origin
+                    .response(line, Headers.EMPTY, Content.EMPTY)
+                    .thenApply(response -> {
+                        headers.set(response.headers());
+                        if (response.status().success()) {
+                            this.events.ifPresent(
+                                queue -> queue.add(new ProxyArtifactEvent(key, this.rname))
+                            );
+                            return Optional.of(response.body());
+                        }
+                        return Optional.empty();
+                    })
+            ),
+            CacheControl.Standard.ALWAYS
+        ).handle(
+            (content, throwable) -> {
+                if (throwable == null && content.isPresent()) {
+                    return ResponseBuilder.ok()
+                        .headers(Headers.from(ProxySlice.contentType(headers.get(), line)))
+                        .body(content.get())
+                        .completedFuture();
                 }
-            ).thenCompose(Function.identity())
-        );
+                return ResponseBuilder.notFound().completedFuture();
+            }
+        ).thenCompose(Function.identity()).toCompletableFuture();
     }
 
     /**

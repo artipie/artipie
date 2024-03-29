@@ -11,9 +11,9 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.Upload;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.ResponseMatcher;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
@@ -46,30 +46,28 @@ class UploadEntityPatchTest {
         final String uuid = upload.uuid();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, uuid);
         final byte[] data = "data".getBytes();
-        final Response response = this.slice.response(
+        final ResponseImpl response = this.slice.response(
             new RequestLine(RqMethod.PATCH, String.format("%s", path)),
             Headers.EMPTY,
             new Content.From(data)
-        );
-        MatcherAssert.assertThat(
+        ).join();
+        ResponseAssert.check(
             response,
-            new ResponseMatcher(
-                RsStatus.ACCEPTED,
-                new Header("Location", path),
-                new Header("Range", String.format("0-%d", data.length - 1)),
-                new Header("Content-Length", "0"),
-                new Header("Docker-Upload-UUID", uuid)
-            )
+            RsStatus.ACCEPTED,
+            new Header("Location", path),
+            new Header("Range", String.format("0-%d", data.length - 1)),
+            new Header("Content-Length", "0"),
+            new Header("Docker-Upload-UUID", uuid)
         );
     }
 
     @Test
     void shouldReturnNotFoundWhenUploadNotExists() {
-        final Response response = this.slice.response(
+        final ResponseImpl response = this.slice.response(
             new RequestLine(RqMethod.PATCH, "/v2/test/blobs/uploads/12345"),
             Headers.EMPTY,
             Content.EMPTY
-        );
+        ).join();
         MatcherAssert.assertThat(
             response,
             new IsErrorsResponse(RsStatus.NOT_FOUND, "BLOB_UPLOAD_UNKNOWN")

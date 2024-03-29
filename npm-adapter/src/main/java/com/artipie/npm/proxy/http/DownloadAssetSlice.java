@@ -7,13 +7,12 @@ package com.artipie.npm.proxy.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.npm.misc.DateTimeNowStr;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.scheduling.ProxyArtifactEvent;
@@ -22,6 +21,7 @@ import hu.akarnokd.rxjava2.interop.SingleInterop;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * HTTP slice for download asset requests.
@@ -62,12 +62,11 @@ public final class DownloadAssetSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-        final Headers rqheaders,
-        final Content body) {
+    public CompletableFuture<ResponseImpl> response(final RequestLine line,
+                                                    final Headers rqheaders,
+                                                    final Content body) {
         final String tgz = this.path.value(line.uri().getPath());
-        return new AsyncResponse(
-            this.npm.getAsset(tgz).map(
+        return this.npm.getAsset(tgz).map(
                 asset -> {
                     this.packages.ifPresent(
                         queue -> queue.add(
@@ -79,25 +78,25 @@ public final class DownloadAssetSlice implements Slice {
                     );
                     return asset;
                 })
-                .map(
-                    asset -> {
-                        String mime = asset.meta().contentType();
-                        if (Strings.isNullOrEmpty(mime)){
-                            throw new IllegalStateException("Failed to get 'Content-Type'");
-                        }
-                        String lastModified = asset.meta().lastModified();
-                        if(Strings.isNullOrEmpty(lastModified)){
-                            lastModified = new DateTimeNowStr().value();
-                        }
-                        return (Response) ResponseBuilder.ok()
-                            .header(ContentType.mime(mime))
-                            .header("Last-Modified", lastModified)
-                            .body(asset.dataPublisher())
-                            .build();
+            .map(
+                asset -> {
+                    String mime = asset.meta().contentType();
+                    if (Strings.isNullOrEmpty(mime)){
+                        throw new IllegalStateException("Failed to get 'Content-Type'");
                     }
-                )
-                .toSingle(ResponseBuilder.notFound().build())
-                .to(SingleInterop.get())
-        );
+                    String lastModified = asset.meta().lastModified();
+                    if(Strings.isNullOrEmpty(lastModified)){
+                        lastModified = new DateTimeNowStr().value();
+                    }
+                    return ResponseBuilder.ok()
+                        .header(ContentType.mime(mime))
+                        .header("Last-Modified", lastModified)
+                        .body(asset.dataPublisher())
+                        .build();
+                }
+            )
+            .toSingle(ResponseBuilder.notFound().build())
+            .to(SingleInterop.get())
+            .toCompletableFuture();
     }
 }

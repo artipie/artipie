@@ -9,14 +9,12 @@ import com.artipie.docker.Digest;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.Upload;
 import com.artipie.docker.error.UploadUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.Location;
@@ -26,7 +24,6 @@ import com.artipie.http.slice.ContentWithSize;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -77,7 +74,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName target = request.name();
             final Optional<Digest> mount = request.mount();
@@ -96,21 +93,19 @@ public final class UploadEntity {
          * @param target Target repository name.
          * @return HTTP response.
          */
-        private Response mount(
-            final Digest digest,
-            final RepoName source,
-            final RepoName target
+        private CompletableFuture<ResponseImpl> mount(
+            Digest digest, RepoName source, RepoName target
         ) {
-            return new AsyncResponse(
-                this.docker.repo(source).layers().get(digest).thenCompose(
+            return this.docker.repo(source).layers().get(digest)
+                .toCompletableFuture()
+                .thenCompose(
                     opt -> opt.map(
-                        src -> this.docker.repo(target).layers().mount(src)
-                            .<Response>thenApply(
-                                blob -> createdResponse(target, blob.digest())
-                            )
+                        src -> this.docker.repo(target).layers()
+                            .mount(src)
+                            .toCompletableFuture()
+                            .thenCompose(blob -> createdResponse(target, blob.digest()))
                     ).orElseGet(
-                        () -> CompletableFuture.completedFuture(this.startUpload(target))
-                    )
+                        () -> this.startUpload(target)
                 )
             );
         }
@@ -121,12 +116,10 @@ public final class UploadEntity {
          * @param name Repository name.
          * @return HTTP response.
          */
-        private Response startUpload(final RepoName name) {
-            return new AsyncResponse(
-                this.docker.repo(name).uploads().start().thenApply(
-                    upload -> acceptedResponse(name, upload.uuid(), 0)
-                )
-            );
+        private CompletableFuture<ResponseImpl> startUpload(final RepoName name) {
+            return this.docker.repo(name).uploads().start()
+                .thenCompose(upload -> acceptedResponse(name, upload.uuid(), 0))
+                .toCompletableFuture();
         }
     }
 
@@ -159,7 +152,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public Response response(
+        public CompletableFuture<ResponseImpl> response(
             final RequestLine line,
             final Headers headers,
             final Content body
@@ -167,19 +160,16 @@ public final class UploadEntity {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final String uuid = request.uuid();
-            return new AsyncResponse(
-                this.docker.repo(name).uploads().get(uuid).thenApply(
-                    found -> found.<Response>map(
-                        upload -> new AsyncResponse(
-                            upload.append(new ContentWithSize(body, headers)).thenApply(
-                                offset -> acceptedResponse(name, uuid, offset)
-                            )
-                        )
+            return this.docker.repo(name).uploads().get(uuid)
+                .toCompletableFuture()
+                .thenCompose(
+                    found -> found.map(
+                        upload -> upload.append(new ContentWithSize(body, headers))
+                            .thenCompose(offset -> acceptedResponse(name, uuid, offset))
                     ).orElseGet(
                         () -> ResponseBuilder.notFound()
                             .jsonBody(new UploadUnknownError(uuid).json())
-                            .build()
-                    )
+                            .completedFuture()
                 )
             );
         }
@@ -214,7 +204,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public Response response(
+        public CompletableFuture<ResponseImpl> response(
             final RequestLine line,
             final Headers headers,
             final Content body
@@ -223,19 +213,16 @@ public final class UploadEntity {
             final RepoName name = request.name();
             final String uuid = request.uuid();
             final Repo repo = this.docker.repo(name);
-            return new AsyncResponse(
-                repo.uploads().get(uuid).thenApply(
-                    found -> found.<Response>map(
-                        upload -> new AsyncResponse(
-                            upload.putTo(repo.layers(), request.digest()).thenApply(
-                                any -> createdResponse(name, request.digest())
-                            )
-                        )
+            return repo.uploads().get(uuid)
+                .toCompletableFuture()
+                .thenCompose(
+                    found -> found
+                        .map(upload -> upload.putTo(repo.layers(), request.digest())
+                            .thenCompose(any -> createdResponse(name, request.digest()))
                     ).orElseGet(
                         () -> ResponseBuilder.notFound()
                             .jsonBody(new UploadUnknownError(uuid).json())
-                            .build()
-                    )
+                            .completedFuture()
                 )
             );
         }
@@ -270,30 +257,27 @@ public final class UploadEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final String uuid = request.uuid();
-            return new AsyncResponse(
-                this.docker.repo(name).uploads().get(uuid).thenApply(
-                    found -> found.<Response>map(
-                        upload -> new AsyncResponse(
-                            upload.offset().thenApply(
-                                offset -> ResponseBuilder.noContent()
-                                    .header(new ContentLength("0"))
-                                    .header(new Header("Range", String.format("0-%d", offset)))
-                                    .header(new Header(UploadEntity.UPLOAD_UUID, uuid))
-                                    .build()
-                            )
+            return this.docker.repo(name).uploads().get(uuid)
+                .thenApply(
+                    found -> found.map(
+                        upload -> upload.offset().thenApply(
+                            offset -> ResponseBuilder.noContent()
+                                .header(new ContentLength("0"))
+                                .header(new Header("Range", String.format("0-%d", offset)))
+                                .header(new Header(UploadEntity.UPLOAD_UUID, uuid))
+                                .build()
                         )
                     ).orElseGet(
                         () -> ResponseBuilder.notFound()
                             .jsonBody(new UploadUnknownError(uuid).json())
-                            .build()
-
-                    )
+                            .completedFuture()
                 )
-            );
+                ).thenCompose(Function.identity())
+                .toCompletableFuture();
         }
     }
 
@@ -373,21 +357,21 @@ public final class UploadEntity {
         }
     }
 
-    private static Response acceptedResponse(RepoName name, String uuid, long offset){
+    private static CompletableFuture<ResponseImpl> acceptedResponse(RepoName name, String uuid, long offset) {
         return ResponseBuilder.accepted()
             .header(new Location(String.format("/v2/%s/blobs/uploads/%s", name.value(), uuid)))
             .header(new Header("Range", String.format("0-%d", offset)))
             .header(new ContentLength("0"))
             .header(new Header(UploadEntity.UPLOAD_UUID, uuid))
-            .build();
+            .completedFuture();
     }
 
-    private static Response createdResponse(RepoName name, Digest digest) {
+    private static CompletableFuture<ResponseImpl> createdResponse(RepoName name, Digest digest) {
         return ResponseBuilder.created()
             .header(new Location(String.format("/v2/%s/blobs/%s", name.value(), digest.string())))
             .header(new ContentLength("0"))
             .header(new DigestHeader(digest))
-            .build();
+            .completedFuture();
     }
 
     /**
@@ -417,26 +401,23 @@ public final class UploadEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final String uuid = request.uuid();
-            return new AsyncResponse(
-                this.docker.repo(name).uploads().get(uuid).thenCompose(
+            return (CompletableFuture<ResponseImpl>) this.docker.repo(name).uploads().get(uuid)
+                .thenCompose(
                     x -> x.map(
-                        (Function<Upload, CompletionStage<? extends Response>>) upload ->
-                            upload.cancel().thenApply(
+                        upload -> upload.cancel().toCompletableFuture()
+                            .thenApply(
                                 offset -> ResponseBuilder.ok()
                                     .header(UploadEntity.UPLOAD_UUID, uuid)
                                     .build()
                             )
                     ).orElse(
-                        CompletableFuture.completedFuture(
-                            ResponseBuilder.notFound()
-                                .jsonBody(new UploadUnknownError(uuid).json())
-                                .build()
-                        )
-                    )
+                        ResponseBuilder.notFound()
+                            .jsonBody(new UploadUnknownError(uuid).json())
+                            .completedFuture()
                 )
             );
         }

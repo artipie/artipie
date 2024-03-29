@@ -93,7 +93,7 @@ public final class ServletSliceWrap {
                     new ReactiveInputStream(req.getInputStream())
                         .read(Buffers.Standard.K8)
                 )
-            ).send(new ServletConnection(rsp));
+            ).thenCompose(response -> response.send(new ServletConnection(rsp)));
         } catch (final IOException iex) {
             return ServletSliceWrap.failedStage("Servet IO error", iex);
         } catch (final URISyntaxException err) {

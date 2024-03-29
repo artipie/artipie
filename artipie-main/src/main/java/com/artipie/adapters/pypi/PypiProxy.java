@@ -6,7 +6,7 @@ package com.artipie.adapters.pypi;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.RemoteConfig;
@@ -18,6 +18,7 @@ import com.artipie.settings.repo.RepoConfig;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Pypi proxy slice.
@@ -47,7 +48,7 @@ public final class PypiProxy implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers headers,
         final Content body

@@ -10,13 +10,13 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.ResponseBuilder;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
@@ -31,6 +31,7 @@ final class CatalogEntity {
     public static final Pattern PATH = Pattern.compile("^/v2/_catalog$");
 
     private CatalogEntity() {
+        // No-op.
     }
 
     /**
@@ -56,19 +57,17 @@ final class CatalogEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             final RqParams params = new RqParams(line.uri().getQuery());
-            return new AsyncResponse(
-                this.docker.catalog(
-                    params.value("last").map(RepoName.Simple::new),
-                    params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
-                ).thenApply(
-                    catalog -> ResponseBuilder.ok()
-                        .header(ContentType.json())
-                        .body(catalog.json())
-                        .build()
-                )
-            );
+            return this.docker.catalog(
+                params.value("last").map(RepoName.Simple::new),
+                params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
+            ).thenApply(
+                catalog -> ResponseBuilder.ok()
+                    .header(ContentType.json())
+                    .body(catalog.json())
+                    .build()
+            ).toCompletableFuture();
         }
     }
 }

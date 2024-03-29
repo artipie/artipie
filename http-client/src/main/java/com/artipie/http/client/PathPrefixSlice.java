@@ -6,11 +6,12 @@ package com.artipie.http.client;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 
 import java.net.URI;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice that forwards all requests to origin slice prepending path with specified prefix.
@@ -41,7 +42,7 @@ public final class PathPrefixSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers headers,
         final Content body

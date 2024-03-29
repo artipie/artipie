@@ -5,10 +5,9 @@
 package com.artipie.asto;
 
 import com.artipie.asto.blocking.BlockingStorage;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
@@ -48,15 +47,13 @@ public final class ArtipieStorageTest {
                     (rqline, rqheaders, rqbody) -> {
                         line.set(rqline);
                         headers.set(rqheaders);
-                        return new AsyncResponse(
-                            new Content.From(rqbody).asBytesFuture()
-                                .thenApply(
-                                    bytes -> {
-                                        body.set(bytes);
-                                        return ResponseBuilder.ok().build();
-                                    }
-                                )
-                        );
+                        return new Content.From(rqbody).asBytesFuture()
+                            .thenApply(
+                                bytes -> {
+                                    body.set(bytes);
+                                    return ResponseBuilder.ok().build();
+                                }
+                            );
                     }
                 ), new URI("http://host/path1")
             )
@@ -104,15 +101,13 @@ public final class ArtipieStorageTest {
                     (rqline, rqheaders, rqbody) -> {
                         line.set(rqline);
                         headers.set(rqheaders);
-                        return new AsyncResponse(
-                            new Content.From(rqbody).asBytesFuture()
-                                .thenApply(
-                                    bytes -> {
-                                        body.set(bytes);
-                                        return ResponseBuilder.ok().build();
-                                    }
-                                )
-                        );
+                        return new Content.From(rqbody).asBytesFuture()
+                            .thenApply(
+                                bytes -> {
+                                    body.set(bytes);
+                                    return ResponseBuilder.ok().build();
+                                }
+                            );
                     }
                 ), new URI("http://host/path2")
             )

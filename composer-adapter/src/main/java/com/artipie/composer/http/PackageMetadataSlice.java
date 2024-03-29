@@ -8,15 +8,16 @@ import com.artipie.asto.Content;
 import com.artipie.composer.Name;
 import com.artipie.composer.Packages;
 import com.artipie.composer.Repository;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,18 +49,19 @@ public final class PackageMetadataSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
-        return new AsyncResponse(
-            this.packages(line.uri().getPath())
-                .thenApply(
-                    opt -> opt.<Response>map(
-                        packages -> new AsyncResponse(
-                            packages.content()
-                                .thenApply(cnt -> ResponseBuilder.ok().body(cnt).build())
-                        )
-                    ).orElse(ResponseBuilder.notFound().build())
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        return this.packages(line.uri().getPath())
+            .toCompletableFuture()
+            .thenApply(
+                opt -> opt.map(
+                    packages -> packages.content()
+                        .thenApply(cnt -> ResponseBuilder.ok().body(cnt).build())
+                ).orElse(
+                    CompletableFuture.completedFuture(
+                        ResponseBuilder.notFound().build()
+                    )
                 )
-        );
+            ).thenCompose(Function.identity());
     }
 
     /**

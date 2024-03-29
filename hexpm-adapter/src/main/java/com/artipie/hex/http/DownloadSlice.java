@@ -9,10 +9,9 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 
@@ -58,13 +57,12 @@ public final class DownloadSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final Key.From key = new Key.From(
             line.uri().getPath().replaceFirst("/", "")
         );
-        return new AsyncResponse(
-            this.storage.exists(key)
-                .thenCompose(exist -> {
+        return this.storage.exists(key)
+            .thenCompose(exist -> {
                     if (exist) {
                         return this.storage.value(key)
                             .thenApply(
@@ -76,7 +74,6 @@ public final class DownloadSlice implements Slice {
                     }
                     return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
                 }
-            )
-        );
+            );
     }
 }

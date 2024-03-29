@@ -17,12 +17,11 @@ import com.artipie.debian.metadata.PackagesItem;
 import com.artipie.debian.metadata.Release;
 import com.artipie.debian.metadata.UniquePackage;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ArtifactEvent;
 
@@ -75,50 +74,49 @@ public final class UpdateSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
+    public CompletableFuture<ResponseImpl> response(final RequestLine line, final Headers headers,
+                                                    final Content body) {
         final Key key = new KeyFromPath(line.uri().getPath());
-        return new AsyncResponse(
-            this.asto.save(key, new Content.From(body))
-                .thenCompose(nothing -> this.asto.value(key))
-                .thenCompose(
-                    content -> new ContentAsStream<String>(content)
-                        .process(input -> new Control.FromInputStream(input).asString())
-                )
-                .thenCompose(
-                    control -> {
-                        final List<String> common = new ControlField.Architecture().value(control)
-                            .stream().filter(item -> this.config.archs().contains(item))
-                            .collect(Collectors.toList());
-                        final CompletionStage<Response> res;
-                        if (common.isEmpty()) {
-                            res = this.asto.delete(key).thenApply(
-                                nothing -> ResponseBuilder.badRequest().build()
+        return this.asto.save(key, new Content.From(body))
+            .thenCompose(nothing -> this.asto.value(key))
+            .thenCompose(
+                content -> new ContentAsStream<String>(content)
+                    .process(input -> new Control.FromInputStream(input).asString())
+            )
+            .thenCompose(
+                control -> {
+                    final List<String> common = new ControlField.Architecture().value(control)
+                        .stream().filter(item -> this.config.archs().contains(item))
+                        .collect(Collectors.toList());
+                    final CompletableFuture<ResponseImpl> res;
+                    if (common.isEmpty()) {
+                        res = this.asto.delete(key).thenApply(
+                            nothing -> ResponseBuilder.badRequest().build()
+                        );
+                    } else {
+                        CompletionStage<Void> upd = this.generateIndexes(key, control, common);
+                        if (this.events.isPresent()) {
+                            upd = upd.thenCompose(
+                                nothing -> this.logEvents(key, control, common, headers)
                             );
-                        } else {
-                            CompletionStage<Void> upd = this.generateIndexes(key, control, common);
-                            if (this.events.isPresent()) {
-                                upd = upd.thenCompose(
-                                    nothing -> this.logEvents(key, control, common, headers)
-                                );
-                            }
-                            res = upd.thenApply(nothing -> ResponseBuilder.ok().build());
                         }
-                        return res;
+                        res = upd.thenApply(nothing -> ResponseBuilder.ok().build())
+                            .toCompletableFuture();
                     }
-                ).handle(
-                    (resp, throwable) -> {
-                        final CompletionStage<Response> res;
-                        if (throwable == null) {
-                            return CompletableFuture.completedFuture(resp);
-                        } else {
-                            res = this.asto.delete(key)
-                                .thenApply(nothing -> ResponseBuilder.internalError().build());
-                        }
-                        return res;
+                    return res;
+                }
+            ).handle(
+                (resp, throwable) -> {
+                    final CompletableFuture<ResponseImpl> res;
+                    if (throwable == null) {
+                        return CompletableFuture.completedFuture(resp);
+                    } else {
+                        res = this.asto.delete(key)
+                            .thenApply(nothing -> ResponseBuilder.internalError().build());
                     }
-            ).thenCompose(Function.identity())
-        );
+                    return res;
+                }
+            ).thenCompose(Function.identity());
     }
 
     /**

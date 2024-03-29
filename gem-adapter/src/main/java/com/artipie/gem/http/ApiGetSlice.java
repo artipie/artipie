@@ -9,12 +9,12 @@ import com.artipie.asto.Storage;
 import com.artipie.gem.Gem;
 import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,16 +51,15 @@ final class ApiGetSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = PATH_PATTERN.matcher(line.uri().toString());
         if (!matcher.find()) {
             throw new ArtipieHttpException(
                 RsStatus.BAD_REQUEST, String.format("Invalid URI: `%s`", matcher)
             );
         }
-        return new AsyncResponse(
-            this.sdk.info(matcher.group("name"))
-                .thenApply(MetaResponseFormat.byName(matcher.group("fmt")))
-        );
+        return this.sdk.info(matcher.group("name"))
+            .thenApply(MetaResponseFormat.byName(matcher.group("fmt")))
+            .toCompletableFuture();
     }
 }

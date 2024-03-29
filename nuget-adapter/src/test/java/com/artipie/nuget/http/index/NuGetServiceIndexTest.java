@@ -69,7 +69,7 @@ class NuGetServiceIndexTest {
             new RequestLine(RqMethod.GET, "/index.json"),
             Headers.EMPTY,
             Content.EMPTY
-        );
+        ).join();
         MatcherAssert.assertThat(
             response,
             new AllOf<>(
@@ -112,7 +112,7 @@ class NuGetServiceIndexTest {
             new RequestLine(RqMethod.PUT, "/index.json"),
             Headers.EMPTY,
             Content.EMPTY
-        );
+        ).join();
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
     }
 

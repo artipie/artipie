@@ -10,13 +10,12 @@ import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.gem.Gem;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.ContentWithSize;
 import com.artipie.scheduling.ArtifactEvent;
 import org.apache.commons.lang3.tuple.Pair;
@@ -73,13 +72,12 @@ final class SubmitGemSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
+    public CompletableFuture<ResponseImpl> response(final RequestLine line, final Headers headers,
+                                                    final Content body) {
         final Key key = new Key.From(
             "gems", UUID.randomUUID().toString().replace("-", "").concat(".gem")
         );
-        return new AsyncResponse(
-            this.storage.save(
+        return this.storage.save(
                 key, new ContentWithSize(body, headers)
             ).thenCompose(
                 none -> {
@@ -106,8 +104,7 @@ final class SubmitGemSlice implements Slice {
                     }
                 }
             )
-                .thenCompose(none -> this.storage.delete(key))
-                .thenApply(none -> ResponseBuilder.created().build())
-        );
+            .thenCompose(none -> this.storage.delete(key))
+            .thenApply(none -> ResponseBuilder.created().build());
     }
 }

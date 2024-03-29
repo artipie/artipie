@@ -8,6 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
 import com.jcabi.log.Logger;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -30,14 +31,15 @@ final class SafeSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         try {
-            return new RsSafe(this.origin.response(line, headers, body));
+            return this.origin.response(line, headers, body);
         } catch (final Exception err) {
             Logger.error(this, "Failed to respond to request: %[exception]s", err);
-            return ResponseBuilder.internalError()
+            return CompletableFuture.completedFuture(ResponseBuilder.internalError()
                 .textBody("Failed to respond to request: " + err.getMessage())
-                .build();
+                .build()
+            );
         }
     }
 

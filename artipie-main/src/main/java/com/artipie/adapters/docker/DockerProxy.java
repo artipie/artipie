@@ -17,7 +17,7 @@ import com.artipie.docker.http.TrimmedDocker;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
@@ -31,6 +31,7 @@ import com.artipie.settings.repo.RepoConfig;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -62,7 +63,7 @@ public final class DockerProxy implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers headers,
         final Content body

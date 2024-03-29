@@ -7,13 +7,13 @@ package com.artipie.jfr;
 import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import jdk.jfr.consumer.RecordedEvent;
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -116,32 +117,19 @@ public class JfrSliceTest {
 
     /**
      * Simple decorator for Slice.
-     *
-     * @since 0.28
      */
     private static final class TestSlice implements Slice {
 
-        /**
-         * Response.
-         */
-        private final Response res;
+        private final ResponseImpl res;
 
-        /**
-         * Response.
-         *
-         * @param response Response.
-         */
-        TestSlice(final Response response) {
+        TestSlice(final ResponseImpl response) {
             this.res = response;
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             Flowable.fromPublisher(body).blockingSubscribe();
-            return this.res;
+            return CompletableFuture.completedFuture(this.res);
         }
     }
 }

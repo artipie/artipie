@@ -8,11 +8,10 @@ package com.artipie.npm.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.npm.PackageNameFromUrl;
 
@@ -30,8 +29,6 @@ public final class GetDistTagsSlice implements Slice {
     private final Storage storage;
 
     /**
-     * Ctor.
-     *
      * @param storage Abstract storage
      */
     public GetDistTagsSlice(final Storage storage) {
@@ -39,26 +36,24 @@ public final class GetDistTagsSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-        final Headers headers,
-        final Content body) {
+    public CompletableFuture<ResponseImpl> response(final RequestLine line,
+                                                    final Headers headers,
+                                                    final Content body) {
         final String pkg = new PackageNameFromUrl(
             line.toString().replace("/dist-tags", "").replace("/-/package", "")
         ).value();
         final Key key = new Key.From(pkg, "meta.json");
-        return new AsyncResponse(
-            this.storage.exists(key).thenCompose(
-                exists -> {
-                    if (exists) {
-                        return this.storage.value(key)
-                            .thenCompose(Content::asJsonObjectFuture)
-                            .thenApply(json -> ResponseBuilder.ok()
-                                .jsonBody(json.getJsonObject("dist-tags"))
-                                .build());
-                    }
-                    return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
+        return this.storage.exists(key).thenCompose(
+            exists -> {
+                if (exists) {
+                    return this.storage.value(key)
+                        .thenCompose(Content::asJsonObjectFuture)
+                        .thenApply(json -> ResponseBuilder.ok()
+                            .jsonBody(json.getJsonObject("dist-tags"))
+                            .build());
                 }
-            )
+                return ResponseBuilder.notFound().completedFuture();
+            }
         );
     }
 }

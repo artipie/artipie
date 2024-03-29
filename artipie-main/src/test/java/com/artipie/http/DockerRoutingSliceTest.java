@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Test case for {@link DockerRoutingSlice}.
@@ -105,12 +104,10 @@ final class DockerRoutingSliceTest {
         );
     }
 
-    private static void verify(final Slice slice, final String path) throws Exception {
+    private static void verify(final Slice slice, final String path) {
         slice.response(
             new RequestLine(RqMethod.GET, path), Headers.EMPTY, Content.EMPTY
-        ).send(
-            (status, headers, body) -> CompletableFuture.completedFuture(null)
-        ).toCompletableFuture().get();
+        ).join();
     }
 
     /**

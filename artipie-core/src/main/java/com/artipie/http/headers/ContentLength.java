@@ -5,7 +5,6 @@
 package com.artipie.http.headers;
 
 import com.artipie.http.Headers;
-import com.artipie.http.rq.RqHeaders;
 
 /**
  * Content-Length header.
@@ -40,7 +39,7 @@ public final class ContentLength extends Header {
      * @param headers Headers to extract header from.
      */
     public ContentLength(final Headers headers) {
-        this(new RqHeaders.Single(headers, ContentLength.NAME).asString());
+        this(headers.single(ContentLength.NAME).getValue());
     }
 
     /**

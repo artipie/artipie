@@ -9,11 +9,10 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.streams.ContentAsStream;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.pypi.NormalizedProjectName;
 import com.artipie.pypi.meta.Metadata;
 import com.artipie.pypi.meta.PackageInfo;
@@ -38,46 +37,44 @@ public final class SearchSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
-        return new AsyncResponse(
-            new NameFromXml(body).get().thenCompose(
-                name -> {
-                    final Key.From key = new Key.From(
-                        new NormalizedProjectName.Simple(name).value()
-                    );
-                    return this.storage.list(key).thenCompose(
-                        list -> {
-                            CompletableFuture<Content> res = new CompletableFuture<>();
-                            if (list.isEmpty()) {
-                                res.complete(new Content.From(SearchSlice.empty()));
-                            } else {
-                                final Key latest = list.stream().map(Key::string)
-                                    .max(Comparator.naturalOrder())
-                                    .map(Key.From::new)
-                                    .orElseThrow(IllegalStateException::new);
-                                res = this.storage.value(latest).thenCompose(
-                                    val -> new ContentAsStream<PackageInfo>(val).process(
-                                        input ->
-                                            new Metadata.FromArchive(input, latest.string()).read()
-                                    )
-                                ).thenApply(info -> new Content.From(SearchSlice.found(info)));
-                            }
-                            return res;
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        return new NameFromXml(body).get().thenCompose(
+            name -> {
+                final Key.From key = new Key.From(
+                    new NormalizedProjectName.Simple(name).value()
+                );
+                return this.storage.list(key).thenCompose(
+                    list -> {
+                        CompletableFuture<Content> res = new CompletableFuture<>();
+                        if (list.isEmpty()) {
+                            res.complete(new Content.From(SearchSlice.empty()));
+                        } else {
+                            final Key latest = list.stream().map(Key::string)
+                                .max(Comparator.naturalOrder())
+                                .map(Key.From::new)
+                                .orElseThrow(IllegalStateException::new);
+                            res = this.storage.value(latest).thenCompose(
+                                val -> new ContentAsStream<PackageInfo>(val).process(
+                                    input ->
+                                        new Metadata.FromArchive(input, latest.string()).read()
+                                )
+                            ).thenApply(info -> new Content.From(SearchSlice.found(info)));
                         }
-                    );
-                }
-            ).handle(
-                (content, throwable) -> {
-                    if (throwable == null) {
-                        return ResponseBuilder.ok()
-                            .header("content-type", "text/xml")
-                            .body(content)
-                            .build();
+                        return res;
                     }
-                    return ResponseBuilder.internalError(throwable).build();
+                );
+            }
+        ).handle(
+            (content, throwable) -> {
+                if (throwable == null) {
+                    return ResponseBuilder.ok()
+                        .header("content-type", "text/xml")
+                        .body(content)
+                        .build();
                 }
-            )
-        );
+                return ResponseBuilder.internalError(throwable).build();
+            }
+        ).toCompletableFuture();
     }
 
     /**

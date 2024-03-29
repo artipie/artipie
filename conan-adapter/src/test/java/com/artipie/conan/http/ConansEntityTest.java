@@ -11,7 +11,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.Connection;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
@@ -134,10 +134,10 @@ class ConansEntityTest {
             new TestResource(String.join("/", ConansEntityTest.DIR_PREFIX, file))
                 .saveTo(storage, new Key.From(file));
         }
-        final Response response = factory.apply(storage).response(
+        final ResponseImpl response = factory.apply(storage).response(
             new RequestLine(RqMethod.GET, request),
             Headers.from("Host", "localhost:9300"), Content.EMPTY
-        );
+        ).join();
         final String expected = Json.createReader(
             new TestResource(json).asInputStream()
         ).readObject().toString();

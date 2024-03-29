@@ -33,7 +33,7 @@ final class CacheRepoTest {
         this.repo = new CacheRepo(
             new RepoName.Simple("test"),
             new ProxyRepo(
-                (line, headers, body) -> ResponseBuilder.ok().build(),
+                (line, headers, body) -> ResponseBuilder.ok().completedFuture(),
                 new RepoName.Simple("test-origin")
             ),
             new AstoDocker(new InMemoryStorage())

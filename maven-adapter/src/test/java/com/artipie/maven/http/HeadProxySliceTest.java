@@ -5,8 +5,8 @@
 package com.artipie.maven.http;
 
 import com.artipie.asto.Content;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
@@ -16,11 +16,8 @@ import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.collection.IsEmptyIterable;
-import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Test for {@link HeadProxySlice}.
@@ -33,21 +30,10 @@ class HeadProxySliceTest {
             RequestLine.from("HEAD /some/path HTTP/1.1"),
             Headers.from("some", "value"),
             new Content.From("000".getBytes())
-        ).send(
-            (status, headers, body) -> {
-                MatcherAssert.assertThat(
-                    "Headers are empty",
-                    headers,
-                    new IsEmptyIterable<>()
-                );
-                MatcherAssert.assertThat(
-                    "Body is empty",
-                    new Content.From(body).asBytes(),
-                    new IsEqual<>(new byte[]{})
-                );
-                return CompletableFuture.allOf();
-            }
-        );
+        ).thenAccept(resp -> {
+            Assertions.assertTrue(resp.headers().isEmpty());
+            Assertions.assertEquals(0, resp.body().asBytes().length);
+        });
     }
 
     @Test

@@ -10,7 +10,6 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
-import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rs.RsStatus;
 import com.artipie.rpm.RepoConfig;
@@ -18,6 +17,7 @@ import com.artipie.rpm.TestRpm;
 import com.artipie.scheduling.ArtifactEvent;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,14 +46,11 @@ public final class RpmUploadTest {
     void canUploadArtifact() throws Exception {
         final byte[] content = Files.readAllBytes(new TestRpm.Abc().path());
         final Optional<Queue<ArtifactEvent>> events = Optional.of(new LinkedList<>());
-        MatcherAssert.assertThat(
-            "ACCEPTED 202 returned",
-            new RpmUpload(this.storage, new RepoConfig.Simple(), events).response(
-                new RequestLine("PUT", "/uploaded.rpm"),
-                Headers.EMPTY,
+        Assertions.assertEquals(RsStatus.ACCEPTED,
+            new RpmUpload(this.storage, new RepoConfig.Simple(), events)
+                .response(new RequestLine("PUT", "/uploaded.rpm"), Headers.EMPTY,
                 new Content.From(content)
-            ),
-            new RsHasStatus(RsStatus.ACCEPTED)
+            ).join().status()
         );
         MatcherAssert.assertThat(
             "Content saved to storage",
@@ -73,13 +70,12 @@ public final class RpmUploadTest {
         final byte[] content = Files.readAllBytes(new TestRpm.Abc().path());
         final Key key = new Key.From("replaced.rpm");
         new BlockingStorage(this.storage).save(key, "uploaded package".getBytes());
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(RsStatus.ACCEPTED,
             new RpmUpload(this.storage, new RepoConfig.Simple(), Optional.empty()).response(
                 new RequestLine("PUT", "/replaced.rpm?override=true"),
                 Headers.EMPTY,
                 new Content.From(content)
-            ),
-            new RsHasStatus(RsStatus.ACCEPTED)
+            ).join().status()
         );
         MatcherAssert.assertThat(
             new BlockingStorage(this.storage).value(key),
@@ -94,13 +90,12 @@ public final class RpmUploadTest {
         final Key key = new Key.From("not-replaced.rpm");
         final Optional<Queue<ArtifactEvent>> events = Optional.of(new LinkedList<>());
         new BlockingStorage(this.storage).save(key, content);
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(RsStatus.CONFLICT,
             new RpmUpload(this.storage, new RepoConfig.Simple(), events).response(
                 new RequestLine("PUT", "/not-replaced.rpm"),
                 Headers.EMPTY,
                 new Content.From("second package content".getBytes())
-            ),
-            new RsHasStatus(RsStatus.CONFLICT)
+            ).join().status()
         );
         MatcherAssert.assertThat(
             new BlockingStorage(this.storage).value(key),
@@ -112,14 +107,12 @@ public final class RpmUploadTest {
     @Test
     void skipsUpdateWhenParamSkipIsTrue() throws Exception {
         final byte[] content = Files.readAllBytes(new TestRpm.Abc().path());
-        MatcherAssert.assertThat(
-            "ACCEPTED 202 returned",
+        Assertions.assertEquals(RsStatus.ACCEPTED,
             new RpmUpload(this.storage, new RepoConfig.Simple(), Optional.empty()).response(
                 new RequestLine("PUT", "/my-package.rpm?skip_update=true"),
                 Headers.EMPTY,
                 new Content.From(content)
-            ),
-            new RsHasStatus(RsStatus.ACCEPTED)
+            ).join().status()
         );
         MatcherAssert.assertThat(
             "Content saved to storage",
@@ -137,16 +130,14 @@ public final class RpmUploadTest {
     @Test
     void skipsUpdateIfModeIsCron() throws Exception {
         final byte[] content = Files.readAllBytes(new TestRpm.Abc().path());
-        MatcherAssert.assertThat(
-            "ACCEPTED 202 returned",
+        Assertions.assertEquals(RsStatus.ACCEPTED,
             new RpmUpload(
                 this.storage, new RepoConfig.Simple(RepoConfig.UpdateMode.CRON), Optional.empty()
             ).response(
                 new RequestLine("PUT", "/abc-package.rpm"),
                 Headers.EMPTY,
                 new Content.From(content)
-            ),
-            new RsHasStatus(RsStatus.ACCEPTED)
+            ).join().status()
         );
         MatcherAssert.assertThat(
             "Content saved to temp location",

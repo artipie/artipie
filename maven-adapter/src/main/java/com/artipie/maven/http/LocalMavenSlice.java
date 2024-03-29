@@ -10,15 +10,17 @@ import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
+import com.artipie.maven.asto.RepositoryChecksums;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,13 +54,12 @@ final class LocalMavenSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         final Matcher match = LocalMavenSlice.PTN_ARTIFACT.matcher(new KeyLastPart(key).get());
-        if (match.matches()) {
-            return this.artifactResponse(line.method(), key);
-        }
-        return this.plainResponse(line.method(), key);
+        return match.matches()
+            ? artifactResponse(line.method(), key)
+            : plainResponse(line.method(), key);
     }
 
     /**
@@ -67,11 +68,42 @@ final class LocalMavenSlice implements Slice {
      * @param artifact Artifact key
      * @return Response
      */
-    private Response artifactResponse(final RqMethod method, final Key artifact) {
+    private CompletableFuture<ResponseImpl> artifactResponse(final RqMethod method, final Key artifact) {
         return switch (method) {
-            case GET -> new ArtifactGetResponse(this.storage, artifact);
-            case HEAD -> new ArtifactHeadResponse(this.storage, artifact);
-            default -> ResponseBuilder.methodNotAllowed().build();
+            case GET -> storage.exists(artifact)
+                .thenApply(
+                    exists -> {
+                        if (exists) {
+                            return storage.value(artifact)
+                                .thenCombine(
+                                    new RepositoryChecksums(storage).checksums(artifact),
+                                    (body, checksums) ->
+                                        ResponseBuilder.ok()
+                                            .headers(ArtifactHeaders.from(artifact, checksums))
+                                            .body(body)
+                                            .build()
+                                );
+                        }
+                        return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
+                    }
+                ).thenCompose(Function.identity());
+            case HEAD ->
+//                new ArtifactHeadResponse(this.storage, artifact);
+                storage.exists(artifact).thenApply(
+                    exists -> {
+                        if (exists) {
+                            return new RepositoryChecksums(storage)
+                                .checksums(artifact)
+                                .thenApply(
+                                    checksums -> ResponseBuilder.ok()
+                                        .headers(ArtifactHeaders.from(artifact, checksums))
+                                        .build()
+                                );
+                        }
+                        return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
+                    }
+                ).thenCompose(Function.identity());
+            default -> CompletableFuture.completedFuture(ResponseBuilder.methodNotAllowed().build());
         };
     }
 
@@ -81,33 +113,33 @@ final class LocalMavenSlice implements Slice {
      * @param key Location
      * @return Response
      */
-    private Response plainResponse(final RqMethod method, final Key key) {
+    private CompletableFuture<ResponseImpl> plainResponse(final RqMethod method, final Key key) {
         return switch (method) {
-            case GET -> plainResponse(this.storage, key,
-                () -> new AsyncResponse(
-                    this.storage.value(key).thenApply(val -> ResponseBuilder.ok().body(val).build())
-                )
+            case GET -> plainResponse(
+                this.storage, key,
+                () -> this.storage.value(key).thenApply(val -> ResponseBuilder.ok().body(val).build())
             );
             case HEAD -> plainResponse(this.storage, key,
-                () -> new AsyncResponse(
-                    this.storage.metadata(key)
-                        .thenApply(
-                            meta -> ResponseBuilder.ok()
-                                .header(new ContentLength(meta.read(Meta.OP_SIZE).orElseThrow()))
-                                .build()
-                        )
-                )
+                () -> this.storage.metadata(key)
+                    .thenApply(
+                        meta -> ResponseBuilder.ok()
+                            .header(new ContentLength(meta.read(Meta.OP_SIZE).orElseThrow()))
+                            .build()
+                    )
             );
-            default -> ResponseBuilder.methodNotAllowed().build();
+            default -> CompletableFuture.completedFuture(ResponseBuilder.methodNotAllowed().build());
         };
     }
 
-    private static Response plainResponse(
-        Storage storage, Key key, Supplier<? extends Response> actual
+    private static CompletableFuture<ResponseImpl> plainResponse(
+        Storage storage, Key key, Supplier<CompletableFuture<ResponseImpl>> actual
     ) {
-        return new AsyncResponse(
-            storage.exists(key)
-                .thenApply(exists -> exists ? actual.get() : ResponseBuilder.notFound().build())
-        );
+        return storage.exists(key)
+            .thenApply(
+                exists -> exists
+                    ? actual.get()
+                    : CompletableFuture.completedFuture(ResponseBuilder.notFound().build())
+            ).thenCompose(Function.identity());
+
     }
 }

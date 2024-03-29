@@ -5,9 +5,9 @@
 package com.artipie.http.hm;
 
 import com.artipie.asto.Content;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import org.hamcrest.Description;
@@ -18,6 +18,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.reactivestreams.Publisher;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice implementation which assert request data against specified matchers.
@@ -29,7 +30,7 @@ public final class AssertSlice implements Slice {
      * @since 0.10
      */
     private static final TypeSafeMatcher<Publisher<ByteBuffer>> STUB_BODY_MATCHER =
-        new TypeSafeMatcher<Publisher<ByteBuffer>>() {
+        new TypeSafeMatcher<>() {
             @Override
             protected boolean matchesSafely(final Publisher<ByteBuffer> item) {
                 return true;
@@ -78,7 +79,7 @@ public final class AssertSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine lne, Headers headers, Content publ) {
+    public CompletableFuture<ResponseImpl> response(RequestLine lne, Headers headers, Content publ) {
         MatcherAssert.assertThat(
             "Wrong request line", lne, this.line
         );
@@ -88,6 +89,6 @@ public final class AssertSlice implements Slice {
         MatcherAssert.assertThat(
             "Wrong body", publ, this.body
         );
-        return ResponseBuilder.ok().build();
+        return ResponseBuilder.ok().completedFuture();
     }
 }

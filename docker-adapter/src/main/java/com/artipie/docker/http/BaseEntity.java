@@ -8,10 +8,11 @@ import com.artipie.asto.Content;
 import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
@@ -31,9 +32,9 @@ public final class BaseEntity implements ScopeSlice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
-        return ResponseBuilder.ok()
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        return CompletableFuture.completedFuture(ResponseBuilder.ok()
             .header("Docker-Distribution-API-Version", "registry/2.0")
-            .build();
+            .build());
     }
 }

@@ -8,9 +8,12 @@ import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
+import com.artipie.http.rs.RsStatus;
+import io.reactivex.Flowable;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.core.http.HttpServerRequest;
 import io.vertx.reactivex.core.http.HttpServerResponse;
@@ -20,6 +23,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -73,11 +77,7 @@ public final class VertxSliceServer implements Closeable {
      * @param served The slice to be served.
      * @param port The port.
      */
-    public VertxSliceServer(
-        final Vertx vertx,
-        final Slice served,
-        final Integer port
-    ) {
+    public VertxSliceServer(Vertx vertx, Slice served, Integer port) {
         this(vertx, served, new HttpServerOptions().setPort(port));
     }
 
@@ -86,11 +86,7 @@ public final class VertxSliceServer implements Closeable {
      * @param served The slice to be served.
      * @param options The options to use.
      */
-    public VertxSliceServer(
-        final Vertx vertx,
-        final Slice served,
-        final HttpServerOptions options
-    ) {
+    public VertxSliceServer(Vertx vertx, Slice served, HttpServerOptions options) {
         this.vertx = vertx;
         this.served = served;
         this.options = options;
@@ -166,7 +162,52 @@ public final class VertxSliceServer implements Closeable {
             new Content.From(
                 req.toFlowable().map(buffer -> ByteBuffer.wrap(buffer.getBytes()))
             )
-        ).send(new VertxConnection(response));
+        ).thenCompose(val -> VertxSliceServer.accept(response, val.status(), val.headers(), val.body()));
+    }
+
+
+    private static CompletionStage<Void> accept(
+        HttpServerResponse response,
+        RsStatus status,
+        Headers headers,
+        Content body
+    ) {
+        final CompletableFuture<Void> promise = new CompletableFuture<>();
+        if (status == RsStatus.CONTINUE) {
+            response.writeContinue();
+            return CompletableFuture.completedFuture(null);
+        }
+        response.setStatusCode(status.code());
+        headers.stream().forEach(h -> response.putHeader(h.getKey(), h.getValue()));
+        final Flowable<Buffer> vpb = Flowable.fromPublisher(body)
+            .map(VertxSliceServer::mapBuffer)
+            .doOnError(promise::completeExceptionally);
+        if (response.headers().contains("Content-Length")) {
+            response.setChunked(false);
+            vpb.doOnComplete(
+                () -> {
+                    response.end();
+                    promise.complete(null);
+                }
+            ).forEach(response::write);
+        } else {
+            response.setChunked(true);
+            vpb.doOnComplete(() -> promise.complete(null))
+                .subscribe(response.toSubscriber());
+        }
+        return promise;
+    }
+
+    /**
+     * Map {@link ByteBuffer} to {@link Buffer}.
+     *
+     * @param buffer Java byte buffer
+     * @return Vertx buffer
+     */
+    private static Buffer mapBuffer(final ByteBuffer buffer) {
+        final byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        return Buffer.buffer(bytes);
     }
 
     /**

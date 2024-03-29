@@ -11,9 +11,9 @@ import com.artipie.asto.cache.CacheControl;
 import com.artipie.asto.cache.FromRemoteCache;
 import com.artipie.asto.cache.Remote;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.UriClientSlice;
 import com.artipie.http.client.auth.AuthClientSlice;
@@ -21,7 +21,6 @@ import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ArtifactEvent;
 import io.reactivex.Flowable;
@@ -104,8 +103,6 @@ public final class FileProxySlice implements Slice {
     }
 
     /**
-     * Ctor.
-     *
      * @param remote Remote slice
      * @param cache Cache
      */
@@ -114,8 +111,6 @@ public final class FileProxySlice implements Slice {
     }
 
     /**
-     * Ctor.
-     *
      * @param remote Remote slice
      * @param cache Cache
      * @param events Artifact events
@@ -132,52 +127,52 @@ public final class FileProxySlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line, final Headers ignored,
-        final Content pub
+    public CompletableFuture<ResponseImpl> response(
+        RequestLine line, Headers ignored, Content pub
     ) {
         final AtomicReference<Headers> headers = new AtomicReference<>();
         final KeyFromPath key = new KeyFromPath(line.uri().getPath());
-        return new AsyncResponse(
-            this.cache.load(
-                key,
+
+        return this.cache.load(key,
                 new Remote.WithErrorHandling(
                     () -> {
-                        final CompletableFuture<Optional<? extends Content>> promise =
-                            new CompletableFuture<>();
-                        this.remote.response(line, Headers.EMPTY, Content.EMPTY).send(
-                            (rsstatus, rsheaders, rsbody) -> {
-                                final CompletableFuture<Void> term = new CompletableFuture<>();
-                                headers.set(rsheaders);
-                                if (rsstatus.success()) {
-                                    final Flowable<ByteBuffer> body = Flowable.fromPublisher(rsbody)
-                                        .doOnError(term::completeExceptionally)
-                                        .doOnTerminate(() -> term.complete(null));
-                                    promise.complete(Optional.of(new Content.From(body)));
-                                    if (this.events.isPresent()) {
-                                        final long size =
-                                            new RqHeaders(headers.get(), ContentLength.NAME)
-                                                .stream().findFirst().map(Long::parseLong)
-                                                .orElse(0L);
-                                        this.events.get().add(
-                                            new ArtifactEvent(
-                                                FileProxySlice.REPO_TYPE, this.rname, "ANONYMOUS",
-                                                key.string(), "UNKNOWN", size
-                                            )
-                                        );
+                        final CompletableFuture<Optional<? extends Content>> promise = new CompletableFuture<>();
+                        this.remote.response(line, Headers.EMPTY, Content.EMPTY)
+                            .thenApply(
+                                response -> {
+                                    final CompletableFuture<Void> term = new CompletableFuture<>();
+                                    headers.set(response.headers());
+
+                                    if (response.status().success()) {
+                                        final Flowable<ByteBuffer> body = Flowable.fromPublisher(response.body())
+                                            .doOnError(term::completeExceptionally)
+                                            .doOnTerminate(() -> term.complete(null));
+
+                                        promise.complete(Optional.of(new Content.From(body)));
+
+                                        if (this.events.isPresent()) {
+                                            final long size =
+                                                new RqHeaders(headers.get(), ContentLength.NAME)
+                                                    .stream().findFirst().map(Long::parseLong)
+                                                    .orElse(0L);
+                                            this.events.get().add(
+                                                new ArtifactEvent(
+                                                    FileProxySlice.REPO_TYPE, this.rname, "ANONYMOUS",
+                                                    key.string(), "UNKNOWN", size
+                                                )
+                                            );
+                                        }
+                                    } else {
+                                        promise.complete(Optional.empty());
                                     }
-                                } else {
-                                    promise.complete(Optional.empty());
-                                }
-                                return term;
-                            }
-                        );
+                                    return term;
+                                });
                         return promise;
                     }
                 ),
                 CacheControl.Standard.ALWAYS
-            ).handle(
-                (content, throwable) -> {
+            ).toCompletableFuture()
+            .handle((content, throwable) -> {
                     if (throwable == null && content.isPresent()) {
                         return ResponseBuilder.ok()
                             .headers(headers.get())
@@ -186,7 +181,6 @@ public final class FileProxySlice implements Slice {
                     }
                     return ResponseBuilder.notFound().build();
                 }
-            )
-        );
+            );
     }
 }

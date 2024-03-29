@@ -6,15 +6,13 @@ package com.artipie.http.client.jetty;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.HttpServer;
 import com.artipie.http.client.ProxySettings;
-import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -90,7 +88,9 @@ final class JettyClientSlicesTest {
     void shouldSupportProxy() throws Exception {
         final byte[] response = "response from proxy".getBytes();
         this.server.update(
-            (line, headers, body) -> ResponseBuilder.ok().body(response).build()
+            (line, headers, body) -> CompletableFuture.completedFuture(
+                ResponseBuilder.ok().body(response).build()
+            )
         );
         final JettyClientSlices client = new JettyClientSlices(
             new HttpClientSettings().addProxy(
@@ -99,14 +99,12 @@ final class JettyClientSlicesTest {
         );
         try {
             client.start();
-            MatcherAssert.assertThat(
-                client.http("artipie.com").response(
-                    new RequestLine(RqMethod.GET, "/"),
-                    Headers.EMPTY,
-                    Content.EMPTY
-                ),
-                new RsHasBody(response)
-            );
+            byte[] actual = client.http("artipie.com").response(
+                new RequestLine(RqMethod.GET, "/"),
+                Headers.EMPTY,
+                Content.EMPTY
+            ).join().body().asBytes();
+            Assertions.assertArrayEquals(response, actual);
         } finally {
             client.stop();
         }
@@ -116,22 +114,23 @@ final class JettyClientSlicesTest {
     void shouldNotFollowRedirectIfDisabled() {
         final RsStatus status = RsStatus.TEMPORARY_REDIRECT;
         this.server.update(
-            (line, headers, body) -> ResponseBuilder.temporaryRedirect()
+            (line, headers, body) -> CompletableFuture.completedFuture(
+                ResponseBuilder.temporaryRedirect()
                 .header("Location", "/other/path")
                 .build()
+            )
         );
         final JettyClientSlices client = new JettyClientSlices(
             new HttpClientSettings().setFollowRedirects(false)
         );
         try {
             client.start();
-            MatcherAssert.assertThat(
+
+            Assertions.assertEquals(status,
                 client.http("localhost", this.server.port()).response(
                     new RequestLine(RqMethod.GET, "/some/path"),
-                    Headers.EMPTY,
-                    Content.EMPTY
-                ),
-                new RsHasStatus(status)
+                    Headers.EMPTY, Content.EMPTY
+                ).join().status()
             );
         } finally {
             client.stop();
@@ -143,11 +142,13 @@ final class JettyClientSlicesTest {
         this.server.update(
             (line, headers, body) -> {
                 if (line.toString().contains("target")) {
-                    return ResponseBuilder.ok().build();
+                    return CompletableFuture.completedFuture(ResponseBuilder.ok().build());
                 }
-                return ResponseBuilder.temporaryRedirect()
+                return CompletableFuture.completedFuture(
+                    ResponseBuilder.temporaryRedirect()
                     .header("Location", "/target")
-                    .build();
+                        .build()
+                );
             }
         );
         final JettyClientSlices client = new JettyClientSlices(
@@ -155,13 +156,10 @@ final class JettyClientSlicesTest {
         );
         try {
             client.start();
-            MatcherAssert.assertThat(
+            Assertions.assertEquals(RsStatus.OK,
                 client.http("localhost", this.server.port()).response(
                     new RequestLine(RqMethod.GET, "/some/path"),
-                    Headers.EMPTY,
-                    Content.EMPTY
-                ),
-                new RsHasStatus(RsStatus.OK)
+                    Headers.EMPTY, Content.EMPTY).join().status()
             );
         } finally {
             client.stop();
@@ -178,12 +176,10 @@ final class JettyClientSlicesTest {
         try {
             client.start();
             final String nonroutable = "10.0.0.0";
-            final CompletionStage<Void> received = client.http(nonroutable).response(
+            final CompletionStage<ResponseImpl> received = client.http(nonroutable).response(
                 new RequestLine(RqMethod.GET, "/conn-timeout"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ).send(
-                (status, headers, body) -> CompletableFuture.allOf()
             );
             Assertions.assertThrows(
                 TimeoutException.class,
@@ -204,12 +200,10 @@ final class JettyClientSlicesTest {
         try {
             client.start();
             final String nonroutable = "10.0.0.0";
-            final CompletionStage<Void> received = client.http(nonroutable).response(
+            final CompletionStage<ResponseImpl> received = client.http(nonroutable).response(
                 new RequestLine(RqMethod.GET, "/conn-timeout"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ).send(
-                (status, headers, body) -> CompletableFuture.allOf()
             );
             Assertions.assertThrows(
                 ExecutionException.class,
@@ -223,21 +217,19 @@ final class JettyClientSlicesTest {
     @Test
     void shouldTimeoutIdleConnectionIfEnabled() throws Exception {
         final int timeout = 1_000;
-        this.server.update((line, headers, body) -> connection -> new CompletableFuture<>());
+        this.server.update((line, headers, body) -> new CompletableFuture<>());
         final JettyClientSlices client = new JettyClientSlices(
             new HttpClientSettings().setIdleTimeout(timeout)
         );
         try {
             client.start();
-            final CompletionStage<Void> received = client.http(
+            final CompletionStage<ResponseImpl> received = client.http(
                 "localhost",
                 this.server.port()
             ).response(
                 new RequestLine(RqMethod.GET, "/idle-timeout"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ).send(
-                (status, headers, body) -> CompletableFuture.allOf()
             );
             Assertions.assertThrows(
                 ExecutionException.class,
@@ -250,21 +242,19 @@ final class JettyClientSlicesTest {
 
     @Test
     void shouldNotTimeoutIdleConnectionIfDisabled() throws Exception {
-        this.server.update((line, headers, body) -> connection -> new CompletableFuture<>());
+        this.server.update((line, headers, body) -> new CompletableFuture<>());
         final JettyClientSlices client = new JettyClientSlices(
             new HttpClientSettings().setIdleTimeout(0)
         );
         try {
             client.start();
-            final CompletionStage<Void> received = client.http(
+            final CompletionStage<ResponseImpl> received = client.http(
                 "localhost",
                 this.server.port()
             ).response(
                 new RequestLine(RqMethod.GET, "/idle-timeout"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ).send(
-                (status, headers, body) -> CompletableFuture.allOf()
             );
             Assertions.assertThrows(
                 TimeoutException.class,
@@ -288,13 +278,12 @@ final class JettyClientSlicesTest {
         );
         try {
             client.start();
-            MatcherAssert.assertThat(
+            Assertions.assertEquals(
+                RsStatus.OK,
                 client.https(url).response(
                     new RequestLine(RqMethod.GET, "/"),
-                    Headers.EMPTY,
-                    Content.EMPTY
-                ),
-                new RsHasStatus(RsStatus.OK)
+                    Headers.EMPTY, Content.EMPTY
+                ).join().status()
             );
         } finally {
             client.stop();
@@ -315,19 +304,12 @@ final class JettyClientSlicesTest {
         );
         try {
             client.start();
-            final Response response = client.https(url).response(
+            final CompletableFuture<ResponseImpl> fut = client.https(url).response(
                 new RequestLine(RqMethod.GET, "/"),
-                Headers.EMPTY,
-                Content.EMPTY
+                Headers.EMPTY, Content.EMPTY
             );
             final Exception exception = Assertions.assertThrows(
-                CompletionException.class,
-                () -> response
-                    .send(
-                        (status, headers, publisher) ->
-                            CompletableFuture.allOf()
-                    )
-                    .toCompletableFuture().join()
+                CompletionException.class, fut::join
             );
             MatcherAssert.assertThat(
                 exception,

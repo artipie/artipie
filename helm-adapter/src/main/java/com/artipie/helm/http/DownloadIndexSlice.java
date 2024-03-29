@@ -11,11 +11,10 @@ import com.artipie.asto.Storage;
 import com.artipie.helm.ChartYaml;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.slice.KeyFromPath;
 
 import java.net.MalformedURLException;
@@ -63,35 +62,25 @@ final class DownloadIndexSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
+    public CompletableFuture<ResponseImpl> response(
+        RequestLine line, Headers headers, Content body
     ) {
         final String uri = line.uri().getPath();
         final Matcher matcher = DownloadIndexSlice.PTRN.matcher(uri);
         if (matcher.matches()) {
             final Key path = new KeyFromPath(uri);
-            return new AsyncResponse(
-                this.storage.exists(path).thenCompose(
-                    exists -> {
-                        final CompletionStage<Response> rsp;
-                        if (exists) {
-                            rsp = this.storage.value(path)
-                                .thenCompose(
-                                    content -> new UpdateIndexUrls(content, this.base).value()
-                                ).thenApply(
-                                    content -> ResponseBuilder.ok().body(content).build()
-                                );
-                        } else {
-                            rsp = CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
-                        }
-                        return rsp;
+            return this.storage.exists(path).thenCompose(
+                exists -> {
+                    if (exists) {
+                        return this.storage.value(path)
+                            .thenCompose(content -> new UpdateIndexUrls(content, this.base).value())
+                            .thenApply(content -> ResponseBuilder.ok().body(content).build());
                     }
-                )
+                    return ResponseBuilder.notFound().completedFuture();
+                }
             );
         }
-        return ResponseBuilder.badRequest().build();
+        return ResponseBuilder.badRequest().completedFuture();
     }
 
     /**

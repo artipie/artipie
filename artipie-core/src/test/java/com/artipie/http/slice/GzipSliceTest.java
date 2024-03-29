@@ -26,9 +26,7 @@ import java.util.zip.GZIPOutputStream;
 
 /**
  * Test for {@link GzipSlice}.
- * @since 1.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class GzipSliceTest {
 
     @Test

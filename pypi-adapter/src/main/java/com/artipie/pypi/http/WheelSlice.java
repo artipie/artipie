@@ -12,10 +12,9 @@ import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.asto.streams.ContentAsStream;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
@@ -70,51 +69,49 @@ final class WheelSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers iterable,
         final Content publisher
     ) {
         final Key.From key = new Key.From(UUID.randomUUID().toString());
-        return new AsyncResponse(
-            this.filePart(iterable, publisher, key).thenCompose(
-                filename -> this.storage.value(key).thenCompose(
-                    val -> new ContentAsStream<PackageInfo>(val).process(
-                        input -> new Metadata.FromArchive(input, filename).read()
-                    )
-                ).thenCompose(
-                    info -> {
-                        final CompletionStage<RsStatus> res;
-                        if (new ValidFilename(info, filename).valid()) {
-                            final Key name = new Key.From(
-                                new KeyFromPath(line.uri().toString()),
-                                new NormalizedProjectName.Simple(info.name()).value(),
-                                filename
-                            );
-                            CompletionStage<Void> move = this.storage.move(key, name);
-                            if (this.events.isPresent()) {
-                                move = move.thenCompose(
-                                    ignored ->
-                                        this.putArtifactToQueue(name, info, filename, iterable)
-                                );
-                            }
-                            res = move.thenApply(ignored -> RsStatus.CREATED);
-                        } else {
-                            res = this.storage.delete(key)
-                                .thenApply(nothing -> RsStatus.BAD_REQUEST);
-                        }
-                        return res.thenApply(s -> ResponseBuilder.from(s).build());
-                    }
+        return this.filePart(iterable, publisher, key).thenCompose(
+            filename -> this.storage.value(key).thenCompose(
+                val -> new ContentAsStream<PackageInfo>(val).process(
+                    input -> new Metadata.FromArchive(input, filename).read()
                 )
-            ).handle(
-                (response, throwable) -> {
-                    if(throwable != null){
-                        return ResponseBuilder.badRequest(throwable).build();
+            ).thenCompose(
+                info -> {
+                    final CompletionStage<RsStatus> res;
+                    if (new ValidFilename(info, filename).valid()) {
+                        final Key name = new Key.From(
+                            new KeyFromPath(line.uri().toString()),
+                            new NormalizedProjectName.Simple(info.name()).value(),
+                            filename
+                        );
+                        CompletionStage<Void> move = this.storage.move(key, name);
+                        if (this.events.isPresent()) {
+                            move = move.thenCompose(
+                                ignored ->
+                                    this.putArtifactToQueue(name, info, filename, iterable)
+                            );
+                        }
+                        res = move.thenApply(ignored -> RsStatus.CREATED);
+                    } else {
+                        res = this.storage.delete(key)
+                            .thenApply(nothing -> RsStatus.BAD_REQUEST);
                     }
-                    return response;
+                    return res.thenApply(s -> ResponseBuilder.from(s).build());
                 }
             )
-        );
+        ).handle(
+            (response, throwable) -> {
+                if(throwable != null){
+                    return ResponseBuilder.badRequest(throwable).build();
+                }
+                return response;
+            }
+        ).toCompletableFuture();
     }
 
     /**

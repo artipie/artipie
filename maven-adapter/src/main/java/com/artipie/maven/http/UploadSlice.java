@@ -8,13 +8,14 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.ContentWithSize;
 import com.artipie.http.slice.KeyFromPath;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This slice accepts PUT requests with jars/poms etc (any files except for metadata and
@@ -43,19 +44,17 @@ public final class UploadSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers headers,
         final Content body
     ) {
-        return new AsyncResponse(
-            this.asto.save(
-                new Key.From(
-                    UploadSlice.TEMP,
-                    new KeyFromPath(line.uri().getPath())
-                ),
-                new ContentWithSize(body, headers)
-            ).thenApply(nothing -> ResponseBuilder.created().build())
-        );
+        return this.asto.save(
+            new Key.From(
+                UploadSlice.TEMP,
+                new KeyFromPath(line.uri().getPath())
+            ),
+            new ContentWithSize(body, headers)
+        ).thenApply(nothing -> ResponseBuilder.created().build());
     }
 }

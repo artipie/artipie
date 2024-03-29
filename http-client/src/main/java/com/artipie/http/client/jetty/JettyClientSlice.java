@@ -4,11 +4,10 @@
  */
 package com.artipie.http.client.jetty;
 
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
@@ -59,30 +58,23 @@ final class JettyClientSlice implements Slice {
     private final int port;
 
     /**
-     * Ctor.
-     *
      * @param client HTTP client.
      * @param secure Secure connection flag.
      * @param host Host name.
      * @param port Port.
      */
-    JettyClientSlice(
-        final HttpClient client,
-        final boolean secure,
-        final String host,
-        final int port
-    ) {
+    JettyClientSlice(HttpClient client, boolean secure, String host, int port) {
         this.client = client;
         this.secure = secure;
         this.host = host;
         this.port = port;
     }
 
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         RequestLine line, Headers headers, com.artipie.asto.Content body
     ) {
         final Request request = this.buildRequest(headers, line);
-        final CompletableFuture<Response> res = new CompletableFuture<>();
+        final CompletableFuture<ResponseImpl> res = new CompletableFuture<>();
         final List<Content.Chunk> buffers = new LinkedList<>();
         if (line.method() != RqMethod.HEAD) {
             final AsyncRequestContent async = new AsyncRequestContent();
@@ -132,7 +124,7 @@ final class JettyClientSlice implements Slice {
                     }
                 }
         );
-        return new AsyncResponse(res);
+        return res;
     }
 
     private Headers toHeaders(HttpFields fields) {

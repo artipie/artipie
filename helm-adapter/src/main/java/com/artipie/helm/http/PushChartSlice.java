@@ -13,14 +13,14 @@ import com.artipie.helm.ChartYaml;
 import com.artipie.helm.TgzArchive;
 import com.artipie.helm.metadata.IndexYaml;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.scheduling.ArtifactEvent;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -31,10 +31,11 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A Slice which accept archived charts, save them into a storage and trigger index.yml reindexing.
- * By default it updates index file after uploading.
+ * By default, it updates index file after uploading.
  */
 final class PushChartSlice implements Slice {
 
@@ -72,14 +73,13 @@ final class PushChartSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers headers,
         final Content body
     ) {
         final Optional<String> upd = new RqParams(line.uri()).value("updateIndex");
-        return new AsyncResponse(
-            memory(body).flatMapCompletable(
+        return memory(body).flatMapCompletable(
                 tgz -> new RxStorageWrapper(this.storage).save(
                     new Key.From(tgz.name()),
                     new Content.From(tgz.bytes())
@@ -107,7 +107,8 @@ final class PushChartSlice implements Slice {
                     )
                 )
             ).andThen(Single.just(ResponseBuilder.ok().build()))
-        );
+            .to(SingleInterop.get())
+            .toCompletableFuture();
     }
 
     /**

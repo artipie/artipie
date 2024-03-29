@@ -11,6 +11,7 @@ import com.artipie.asto.Key;
 import com.artipie.http.rq.RequestLine;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice which finds repository by path.
@@ -32,12 +33,13 @@ final class SliceByPath implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final Optional<Key> key = SliceByPath.keyFromPath(line.uri().getPath());
         if (key.isEmpty()) {
-            return ResponseBuilder.notFound()
+            return CompletableFuture.completedFuture(ResponseBuilder.notFound()
                 .textBody("Failed to find a repository")
-                .build();
+                .build()
+            );
         }
         return this.slices.slice(key.get(), line.uri().getPort())
             .response(line, headers, body);

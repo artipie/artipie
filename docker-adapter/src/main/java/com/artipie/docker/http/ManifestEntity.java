@@ -15,10 +15,9 @@ import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthzSlice;
 import com.artipie.http.auth.OperationControl;
@@ -32,6 +31,8 @@ import com.artipie.security.policy.Policy;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -80,12 +81,13 @@ final class ManifestEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final ManifestReference ref = request.reference();
-            return new AsyncResponse(
-                this.docker.repo(request.name()).manifests().get(ref).thenApply(
-                    manifest -> manifest.<Response>map(
+            return this.docker.repo(request.name()).manifests()
+                .get(ref)
+                .thenApply(
+                    manifest -> manifest.map(
                         found -> baseResponse(found)
                             .header(new ContentLength(found.size()))
                             .build()
@@ -94,8 +96,7 @@ final class ManifestEntity {
                             .jsonBody(new ManifestError(ref).json())
                             .build()
                     )
-                )
-            );
+                ).toCompletableFuture();
         }
     }
 
@@ -124,13 +125,13 @@ final class ManifestEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final ManifestReference ref = request.reference();
-            return new AsyncResponse(
-                this.docker.repo(name).manifests().get(ref).thenApply(
-                    manifest -> manifest.<Response>map(
+            return this.docker.repo(name).manifests().get(ref)
+                .thenApply(
+                    manifest -> manifest.map(
                         found -> baseResponse(found)
                             .body(found.content())
                             .build()
@@ -138,9 +139,8 @@ final class ManifestEntity {
                         () -> ResponseBuilder.notFound()
                             .jsonBody(new ManifestError(ref).json())
                             .build()
-                    )
                 )
-            );
+                ).toCompletableFuture();
         }
 
     }
@@ -166,13 +166,11 @@ final class ManifestEntity {
         private final String rname;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          * @param events Artifact events queue
          * @param rname Repository name
          */
-        Put(final Docker docker, final Optional<Queue<ArtifactEvent>> events, final String rname) {
+        Put(Docker docker, Optional<Queue<ArtifactEvent>> events, String rname) {
             this.docker = docker;
             this.events = events;
             this.rname = rname;
@@ -186,12 +184,13 @@ final class ManifestEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final ManifestReference ref = request.reference();
-            return new AsyncResponse(
-                this.docker.repo(name).manifests().put(ref, new Content.From(body)).thenApply(
+            return this.docker.repo(name).manifests()
+                .put(ref, new Content.From(body))
+                .thenApply(
                     manifest -> {
                         if (this.events.isPresent() && new Tag.Valid(ref.reference()).valid()) {
                             this.events.get().add(
@@ -209,8 +208,7 @@ final class ManifestEntity {
                             .header(new DigestHeader(manifest.digest()))
                             .build();
                     }
-                )
-            );
+                ).toCompletableFuture();
         }
     }
 
@@ -257,12 +255,11 @@ final class ManifestEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final ManifestReference ref = request.reference();
-            return new AsyncResponse(
-                this.docker.repo(name).manifests().get(ref).thenApply(
+            return this.docker.repo(name).manifests().get(ref).thenApply(
                     manifest -> {
                         final OperationControl control;
                         if (manifest.isPresent()) {
@@ -288,7 +285,8 @@ final class ManifestEntity {
                         ).response(line, headers, body);
                     }
                 )
-            );
+                .toCompletableFuture()
+                .thenCompose(Function.identity());
         }
 
         @Override

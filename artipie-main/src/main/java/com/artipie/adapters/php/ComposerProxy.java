@@ -10,7 +10,7 @@ import com.artipie.composer.AstoRepository;
 import com.artipie.composer.http.proxy.ComposerProxySlice;
 import com.artipie.composer.http.proxy.ComposerStorageCache;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.RemoteConfig;
@@ -19,6 +19,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.settings.repo.RepoConfig;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Php Composer proxy slice.
@@ -53,7 +54,7 @@ public final class ComposerProxy implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         RequestLine line,
         Headers headers,
         Content body

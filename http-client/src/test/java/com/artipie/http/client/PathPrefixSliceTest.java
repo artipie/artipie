@@ -5,8 +5,8 @@
 package com.artipie.http.client;
 
 import com.artipie.asto.Content;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import org.hamcrest.MatcherAssert;
@@ -63,15 +63,9 @@ final class PathPrefixSliceTest {
                     new Content.From(rqbody).asBytesFuture().toCompletableFuture().join(),
                     new IsEqual<>(body)
                 );
-                return ResponseBuilder.ok().build();
+                return CompletableFuture.completedFuture(ResponseBuilder.ok().build());
             },
             prefix
-        ).response(
-            new RequestLine(method, line),
-            headers,
-            new Content.From(body)
-        ).send(
-            (status, rsheaders, rsbody) -> CompletableFuture.allOf()
-        );
+        ).response(new RequestLine(method, line), headers, new Content.From(body)).join();
     }
 }

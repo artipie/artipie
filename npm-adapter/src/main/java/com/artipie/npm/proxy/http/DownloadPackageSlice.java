@@ -6,18 +6,18 @@ package com.artipie.npm.proxy.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.npm.proxy.NpmProxy;
 import com.artipie.npm.proxy.json.ClientContent;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.StreamSupport;
 
 /**
@@ -44,18 +44,17 @@ public final class DownloadPackageSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
-        return new AsyncResponse(
-            this.npm.getPackage(this.path.value(line.uri().getPath()))
-                .map(
-                    pkg -> (Response) ResponseBuilder.ok()
-                        .header(ContentType.json())
-                        .header("Last-Modified", pkg.meta().lastModified())
-                        .body(this.clientFormat(pkg.content(), headers).getBytes())
-                        .build()
-                ).toSingle(ResponseBuilder.notFound().build())
-                .to(SingleInterop.get())
-        );
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        return this.npm.getPackage(this.path.value(line.uri().getPath()))
+            .map(
+                pkg -> ResponseBuilder.ok()
+                    .header(ContentType.json())
+                    .header("Last-Modified", pkg.meta().lastModified())
+                    .body(this.clientFormat(pkg.content(), headers).getBytes())
+                    .build()
+            ).toSingle(ResponseBuilder.notFound().build())
+            .to(SingleInterop.get())
+            .toCompletableFuture();
     }
 
     /**

@@ -6,17 +6,17 @@ package com.artipie.conda.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 
 import javax.json.Json;
 import javax.json.JsonStructure;
 import java.io.StringReader;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice to handle `GET /user` request.
@@ -37,10 +37,11 @@ final class GetUserSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
-        return new AsyncResponse(
-            this.scheme.authenticate(headers, line).thenApply(
+    public CompletableFuture<ResponseImpl> response(final RequestLine line, final Headers headers,
+                                                    final Content body) {
+        return this.scheme.authenticate(headers, line)
+            .toCompletableFuture()
+            .thenApply(
                 result -> {
                     if (result.status() != AuthScheme.AuthStatus.FAILED) {
                         return ResponseBuilder.ok()
@@ -51,8 +52,7 @@ final class GetUserSlice implements Slice {
                         .header(new WwwAuthenticate(result.challenge()))
                         .build();
                 }
-            )
-        );
+            );
     }
 
     /**

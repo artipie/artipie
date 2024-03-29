@@ -6,11 +6,13 @@ package com.artipie.nuget.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.ResponseBuilder;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice created from {@link Resource}.
@@ -30,7 +32,7 @@ final class SliceFromResource implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final RqMethod method = line.method();
         if (method.equals(RqMethod.GET)) {
             return this.origin.get(headers);
@@ -38,6 +40,6 @@ final class SliceFromResource implements Slice {
         if (method.equals(RqMethod.PUT)) {
             return this.origin.put(headers, body);
         }
-        return ResponseBuilder.methodNotAllowed().build();
+        return ResponseBuilder.methodNotAllowed().completedFuture();
     }
 }

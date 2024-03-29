@@ -8,13 +8,10 @@ import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.UriClientSlice;
-import com.artipie.http.client.auth.AuthClientSlice;
-import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.slice.ContentWithSize;
-import io.reactivex.Flowable;
 
 import javax.json.Json;
 import javax.json.JsonReader;
@@ -32,9 +29,6 @@ import java.util.stream.Collectors;
  */
 public final class ArtipieStorage implements Storage {
 
-    /**
-     * Remote slice.
-     */
     private final Slice remote;
 
     /**
@@ -52,15 +46,6 @@ public final class ArtipieStorage implements Storage {
         this.remote = remote;
     }
 
-    /**
-     * @param clients HTTP clients
-     * @param remote Remote URI
-     * @param auth Authenticator
-     */
-    public ArtipieStorage(ClientSlices clients, URI remote, Authenticator auth) {
-        this(new AuthClientSlice(new UriClientSlice(clients, remote), auth));
-    }
-
     @Override
     public CompletableFuture<Boolean> exists(final Key key) {
         throw new UnsupportedOperationException();
@@ -68,60 +53,45 @@ public final class ArtipieStorage implements Storage {
 
     @Override
     public CompletableFuture<Collection<Key>> list(final Key prefix) {
-        final CompletableFuture<Collection<Key>> promise = new CompletableFuture<>();
-        this.remote.response(
-            new RequestLine(RqMethod.GET, ArtipieStorage.uri(prefix)),
+        return this.remote.response(
+            new RequestLine(RqMethod.GET, "/" + prefix),
             Headers.from("Accept", "application/json"),
             Content.EMPTY
-        ).send(
-            (status, rsheaders, rsbody) -> {
-                final CompletableFuture<Void> term = new CompletableFuture<>();
-                if (status.success()) {
-                    new Content.From(
-                        Flowable.fromPublisher(rsbody)
-                            .doOnError(term::completeExceptionally)
-                            .doOnTerminate(() -> term.complete(null))
-                    ).asStringFuture().thenApply(s -> promise.complete(ArtipieStorage.parse(s)));
-                } else {
-                    promise.completeExceptionally(
-                        new ArtipieIOException(
-                            String.format(
-                                "Cannot get lists blobs contained in given path [prefix=%s, status=%s]",
-                                prefix, status
-                            )
-                        )
-                    );
-                }
-                return term;
+        ).<CompletableFuture<Collection<Key>>>thenApply(response -> {
+            if (response.status().success()) {
+                return response.body().asStringFuture()
+                    .thenApply(ArtipieStorage::parse);
             }
-        );
-        return promise;
+            return CompletableFuture.failedFuture(
+                new ArtipieIOException(
+                    String.format(
+                        "Cannot get lists blobs contained in given path [prefix=%s, status=%s]",
+                        prefix, response.status()
+                    )
+                )
+            );
+        }).thenCompose(Function.identity());
     }
 
     @Override
     public CompletableFuture<Void> save(final Key key, final Content content) {
         return this.remote.response(
-            new RequestLine(RqMethod.PUT, ArtipieStorage.uri(key)),
+            new RequestLine(RqMethod.PUT,  "/" + key),
             Headers.from(new ContentLength(content.size().orElseThrow())),
             content
-        ).send(
-            (status, rsheaders, rsbody) -> {
-                final CompletionStage<Void> res;
-                if (status.success()) {
-                    res = CompletableFuture.allOf();
-                } else {
-                    res = new FailedCompletionStage<>(
-                        new ArtipieIOException(
-                            String.format(
-                                "Entry is not created [key=%s, status=%s]",
-                                key, status
-                            )
-                        )
-                    );
-                }
-                return res;
+        ).thenCompose(response -> {
+            if (response.status().success()) {
+                return CompletableFuture.completedFuture(null);
             }
-        ).toCompletableFuture();
+            return CompletableFuture.failedFuture(
+                new ArtipieIOException(
+                    String.format(
+                        "Entry is not created [key=%s, status=%s]",
+                        key, response.status()
+                    )
+                )
+            );
+        });
     }
 
     @Override
@@ -136,64 +106,43 @@ public final class ArtipieStorage implements Storage {
 
     @Override
     public CompletableFuture<Content> value(final Key key) {
-        final CompletableFuture<Content> promise = new CompletableFuture<>();
-        this.remote.response(
-            new RequestLine(RqMethod.GET, ArtipieStorage.uri(key)),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).send(
-            (status, rsheaders, rsbody) -> {
-                final CompletableFuture<Void> term = new CompletableFuture<>();
-                if (status.success()) {
-                    promise.complete(
-                        new ContentWithSize(rsbody, rsheaders)
+        return this.remote.response(
+            new RequestLine(RqMethod.GET, "/" + key), Headers.EMPTY, Content.EMPTY
+        ).thenCompose(resp -> {
+            CompletableFuture<Content> res;
+            if (resp.status().success()) {
+                res = CompletableFuture.completedFuture(
+                    new ContentWithSize(resp.body(), resp.headers())
                     );
                 } else {
-                    promise.completeExceptionally(
-                        new ArtipieIOException(
-                            String.format(
-                                "Cannot get a value [key=%s, status=%s]",
-                                key, status
-                            )
-                        )
+                res = CompletableFuture.failedFuture(
+                    new ArtipieIOException(String.format("Cannot get a value [key=%s, status=%s]",
+                        key, resp.status()))
                     );
                 }
-                return term;
-            }
-        );
-        return promise;
+            return res;
+        });
     }
 
     @Override
     public CompletableFuture<Void> delete(final Key key) {
-        return this.remote.response(
-            new RequestLine(RqMethod.DELETE, ArtipieStorage.uri(key)),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).send(
-            (status, rsheaders, rsbody) -> {
-                final CompletionStage<Void> res;
-                if (status.success()) {
-                    res = CompletableFuture.allOf();
-                } else {
-                    res = new FailedCompletionStage<>(
-                        new ArtipieIOException(
-                            String.format(
-                                "Entry is not deleted [key=%s, status=%s]",
-                                key, status
-                            )
-                        )
-                    );
+        return this.remote.response(new RequestLine(RqMethod.DELETE, "/" + key),
+            Headers.EMPTY, Content.EMPTY
+        ).thenCompose(
+            resp -> {
+                if (resp.status().success()) {
+                    return CompletableFuture.completedFuture(null);
                 }
-                return res;
+                return CompletableFuture.failedFuture(
+                    new ArtipieIOException(String.format("Entry is not deleted [key=%s, status=%s]",
+                        key, resp.status()))
+                );
             }
-        ).toCompletableFuture();
+        );
     }
 
     @Override
-    public <T> CompletionStage<T> exclusively(
-        final Key key,
-        final Function<Storage, CompletionStage<T>> operation) {
+    public <T> CompletionStage<T> exclusively(Key key, Function<Storage, CompletionStage<T>> operation) {
         throw new UnsupportedOperationException();
     }
 
@@ -213,15 +162,5 @@ public final class ArtipieStorage implements Storage {
                 .map(js -> new Key.From(js.getString()))
                 .collect(Collectors.toList());
         }
-    }
-
-    /**
-     * Converts key to URI string.
-     *
-     * @param key Key.
-     * @return URI string.
-     */
-    private static String uri(final Key key) {
-        return String.format("/%s", key);
     }
 }

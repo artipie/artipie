@@ -9,12 +9,11 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 
 import javax.json.Json;
 import java.nio.charset.StandardCharsets;
@@ -33,13 +32,9 @@ public final class DownloadRepodataSlice implements Slice {
      */
     private static final Pattern RQ_PATH = Pattern.compile(".*/((.+)/(current_)?repodata\\.json)");
 
-    /**
-     * Abstract storage.
-     */
     private final Storage asto;
 
     /**
-     * Ctor.
      * @param asto Abstract storage
      */
     public DownloadRepodataSlice(final Storage asto) {
@@ -47,41 +42,35 @@ public final class DownloadRepodataSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
-        return new AsyncResponse(
-            CompletableFuture
-                .supplyAsync(() -> line.uri().getPath())
-                .thenCompose(
-                    path -> {
-                        final Matcher matcher = DownloadRepodataSlice.RQ_PATH.matcher(path);
-                        if (matcher.matches()) {
-                            final Key key = new Key.From(matcher.group(1));
-                            return this.asto.exists(key).thenCompose(
-                                exist -> {
-                                    if (exist) {
-                                        return this.asto.value(key);
-                                    }
-                                    return CompletableFuture.completedFuture(
-                                        new Content.From(
-                                            Json.createObjectBuilder().add(
-                                                    "info", Json.createObjectBuilder()
-                                                        .add("subdir", matcher.group(2))
-                                                ).build().toString()
-                                                .getBytes(StandardCharsets.US_ASCII)
-                                        )
-                                    );
-                                }
-                            ).thenApply(
-                                content -> ResponseBuilder.ok()
-                                    .header(new ContentFileName(new KeyLastPart(key).get()))
-                                    .body(content)
-                                    .build()
-                            );
-                        }
-                        return CompletableFuture.completedFuture(ResponseBuilder.badRequest().build());
+    public CompletableFuture<ResponseImpl> response(
+        RequestLine line, Headers headers, Content body) {
+        String path = line.uri().getPath();
+
+        final Matcher matcher = DownloadRepodataSlice.RQ_PATH.matcher(path);
+        if (matcher.matches()) {
+            final Key key = new Key.From(matcher.group(1));
+            return this.asto.exists(key).thenCompose(
+                exist -> {
+                    if (exist) {
+                        return this.asto.value(key);
                     }
-                )
-        );
+                    return CompletableFuture.completedFuture(
+                        new Content.From(
+                            Json.createObjectBuilder().add(
+                                    "info", Json.createObjectBuilder()
+                                        .add("subdir", matcher.group(2))
+                                ).build().toString()
+                                .getBytes(StandardCharsets.US_ASCII)
+                        )
+                    );
+                }
+            ).thenApply(
+                content -> ResponseBuilder.ok()
+                    .header(new ContentFileName(new KeyLastPart(key).get()))
+                    .body(content)
+                    .build()
+            );
+        }
+        return ResponseBuilder.badRequest().completedFuture();
     }
 }

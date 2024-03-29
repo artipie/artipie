@@ -6,7 +6,7 @@ package com.artipie.nuget.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.OperationControl;
@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * NuGet repository HTTP front end.
@@ -88,7 +89,7 @@ public final class NuGet implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final String path = line.uri().getPath();
         final Resource resource = this.resource(path);
         final RqMethod method = line.method();
@@ -98,7 +99,7 @@ public final class NuGet implements Slice {
         if (method.equals(RqMethod.PUT)) {
             return resource.put(headers, body);
         }
-        return ResponseBuilder.methodNotAllowed().build();
+        return ResponseBuilder.methodNotAllowed().completedFuture();
     }
 
     /**

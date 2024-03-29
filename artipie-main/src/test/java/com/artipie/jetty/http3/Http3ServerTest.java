@@ -6,9 +6,9 @@ package com.artipie.jetty.http3;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.nuget.RandomFreePort;
@@ -35,6 +35,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -194,16 +195,16 @@ class Http3ServerTest {
     static final class TestSlice implements Slice {
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             if (line.toString().contains("no_data")) {
                 return ResponseBuilder.ok()
                     .header( Http3ServerTest.RQ_METHOD, line.method().value())
-                    .build();
+                    .completedFuture();
             }
             if (line.toString().contains("small_data")) {
                 return ResponseBuilder.ok()
                     .body(Http3ServerTest.SMALL_DATA)
-                    .build();
+                    .completedFuture();
             }
             if (line.toString().contains("random_chunks")) {
                 final Random random = new Random();
@@ -219,12 +220,12 @@ class Http3ServerTest {
                             )
                             .delay(random.nextInt(5_000), TimeUnit.MILLISECONDS)
                     )
-                ).build();
+                ).completedFuture();
             }
             if (line.toString().contains("return_back")) {
-                return ResponseBuilder.ok().body(body).build();
+                return ResponseBuilder.ok().body(body).completedFuture();
             }
-            return ResponseBuilder.notFound().build();
+            return ResponseBuilder.notFound().completedFuture();
         }
     }
 

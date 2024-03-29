@@ -11,10 +11,9 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.error.BlobUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
@@ -64,18 +63,19 @@ final class BlobEntity {
         }
 
         @Override
-        public Response response(
+        public CompletableFuture<ResponseImpl> response(
             final RequestLine line,
             final Headers headers,
             final Content body
         ) {
             final Request request = new Request(line);
             final Digest digest = request.digest();
-            return new AsyncResponse(
-                this.docker.repo(request.name()).layers().get(digest).thenApply(
-                    found -> found.<Response>map(
-                        blob -> new AsyncResponse(
-                            blob.content().thenCompose(
+            return this.docker.repo(request.name())
+                .layers().get(digest)
+                .thenApply(
+                    found -> found.map(
+                        blob -> blob.content()
+                            .thenCompose(
                                 content -> content.size()
                                     .<CompletionStage<Long>>map(CompletableFuture::completedFuture)
                                     .orElseGet(blob::size)
@@ -87,14 +87,13 @@ final class BlobEntity {
                                             .build()
                                     )
                             )
-                        )
                     ).orElseGet(
-                        () -> ResponseBuilder.notFound()
+                        () -> CompletableFuture.completedFuture(ResponseBuilder.notFound()
                             .jsonBody(new BlobUnknownError(digest).json())
-                            .build()
+                            .build())
                     )
-                )
-            );
+                ).toCompletableFuture()
+                .thenCompose(val -> val);
         }
     }
 
@@ -123,28 +122,28 @@ final class BlobEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final Digest digest = request.digest();
-            return new AsyncResponse(
-                this.docker.repo(request.name()).layers().get(digest).thenApply(
-                    found -> found.<Response>map(
-                        blob -> new AsyncResponse(
-                            blob.size().thenApply(
-                                size -> ResponseBuilder.ok()
-                                    .header(new DigestHeader(blob.digest()))
-                                    .header(ContentType.mime("application/octet-stream"))
-                                    .header(new ContentLength(size))
-                                    .build()
-                            )
+            return this.docker.repo(request.name()).layers()
+                .get(digest).thenApply(
+                    found -> found.map(
+                        blob -> blob.size().thenApply(
+                            size -> ResponseBuilder.ok()
+                                .header(new DigestHeader(blob.digest()))
+                                .header(ContentType.mime("application/octet-stream"))
+                                .header(new ContentLength(size))
+                                .build()
                         )
                     ).orElseGet(
-                        () -> ResponseBuilder.notFound()
-                            .jsonBody(new BlobUnknownError(digest).json())
-                            .build()
+                        () -> CompletableFuture.completedFuture(
+                            ResponseBuilder.notFound()
+                                .jsonBody(new BlobUnknownError(digest).json())
+                                .build()
+                        )
                     )
-                )
-            );
+                ).toCompletableFuture()
+                .thenCompose(val -> val);
         }
     }
 

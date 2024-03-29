@@ -52,8 +52,6 @@ public final class AstoManifests implements Manifests {
     private final RepoName name;
 
     /**
-     * Ctor.
-     *
      * @param asto Asto storage
      * @param blobs Blobs storage.
      * @param layout Manifests layout.
@@ -72,16 +70,16 @@ public final class AstoManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
-        return content.asBytesFuture().thenCompose(
-            bytes -> this.blobs.put(new TrustedBlobSource(bytes))
+    public CompletionStage<Manifest> put(ManifestReference ref, Content content) {
+        return content.asBytesFuture()
+            .thenCompose(bytes -> this.blobs.put(new TrustedBlobSource(bytes))
                 .thenApply(blob -> new JsonManifest(blob.digest(), bytes))
                 .thenCompose(
                     manifest -> this.validate(manifest)
                         .thenCompose(nothing -> this.addManifestLinks(ref, manifest.digest()))
                         .thenApply(nothing -> manifest)
                 )
-        );
+            );
     }
 
     @Override
@@ -136,14 +134,15 @@ public final class AstoManifests implements Manifests {
         return CompletableFuture.allOf(
             Stream.concat(
                 digests.map(
-                    digest -> this.blobs.blob(digest).thenCompose(
-                        opt -> {
-                            if (opt.isEmpty()) {
-                                throw new InvalidManifestException("Blob does not exist: " + digest);
+                    digest -> this.blobs.blob(digest)
+                        .thenCompose(
+                            opt -> {
+                                if (opt.isEmpty()) {
+                                    throw new InvalidManifestException("Blob does not exist: " + digest);
+                                }
+                                return CompletableFuture.allOf();
                             }
-                            return CompletableFuture.allOf();
-                        }
-                    ).toCompletableFuture()
+                        ).toCompletableFuture()
                 ),
                 Stream.of(
                     CompletableFuture.runAsync(

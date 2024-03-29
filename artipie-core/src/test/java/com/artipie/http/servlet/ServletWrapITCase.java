@@ -34,6 +34,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Integration test for servlet slice wrapper.
@@ -76,7 +77,8 @@ final class ServletWrapITCase {
 
     @Test
     void echoSliceTest() throws Exception {
-        this.start((line, headers, body) -> ResponseBuilder.ok().body(body).build());
+        this.start((line, headers, body) -> CompletableFuture.completedFuture(
+            ResponseBuilder.ok().body(body).build()));
         final String test = "Ping";
         final String body = HttpClient.newHttpClient().send(
             this.req.copy().PUT(HttpRequest.BodyPublishers.ofString(test)).build(),
@@ -88,10 +90,11 @@ final class ServletWrapITCase {
     @Test
     void parsesHeaders() throws Exception {
         this.start(
-            (line, headers, body) -> ResponseBuilder.ok()
+            (line, headers, body) -> CompletableFuture.completedFuture(
+                ResponseBuilder.ok()
                 .headers(Headers.from("RsHeader", new RqHeaders(headers, "RqHeader").get(0)))
                 .build()
-        );
+            ));
         final String value = "some-header";
         final List<String> rsh = HttpClient.newHttpClient().send(
             this.req.copy().GET().header("RqHeader", value).build(),
@@ -113,7 +116,8 @@ final class ServletWrapITCase {
 
     @Test
     void echoNoContent() throws Exception {
-        this.start((line, headers, body) -> ResponseBuilder.ok().body(body).build());
+        this.start((line, headers, body) -> CompletableFuture.completedFuture(
+            ResponseBuilder.ok().body(body).build()));
         final byte[] body = HttpClient.newHttpClient().send(
             this.req.copy().PUT(HttpRequest.BodyPublishers.noBody()).build(),
             HttpResponse.BodyHandlers.ofByteArray()
@@ -141,10 +145,11 @@ final class ServletWrapITCase {
     @Test
     void echoQueryParams() throws Exception {
         this.start(
-            (line, header, body) -> ResponseBuilder.ok().body(
+            (line, header, body) -> CompletableFuture.completedFuture(
+                ResponseBuilder.ok().body(
                     new RqParams(line.uri().getQuery())
                         .value("foo").orElse("none").getBytes()
-            ).build()
+            ).build())
         );
         final String param = "? my & param %";
         final String echo = HttpClient.newHttpClient().send(

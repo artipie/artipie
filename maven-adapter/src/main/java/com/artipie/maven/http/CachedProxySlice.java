@@ -12,12 +12,11 @@ import com.artipie.asto.cache.DigestVerification;
 import com.artipie.asto.cache.Remote;
 import com.artipie.asto.ext.Digests;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import com.jcabi.log.Logger;
@@ -34,7 +33,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
@@ -94,64 +92,61 @@ final class CachedProxySlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers,
-                             Content body) {
+    public CompletableFuture<ResponseImpl> response(
+        RequestLine line, Headers headers, Content body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         final AtomicReference<Headers> rshdr = new AtomicReference<>(Headers.EMPTY);
-        return new AsyncResponse(
-            new RepoHead(this.client)
-                .head(line.uri().getPath()).thenCompose(
-                    head -> this.cache.load(
-                        key,
-                        new Remote.WithErrorHandling(
-                            () -> {
-                                final CompletableFuture<Optional<? extends Content>> promise =
-                                    new CompletableFuture<>();
-                                this.client.response(line, Headers.EMPTY, Content.EMPTY).send(
-                                    (rsstatus, rsheaders, rsbody) -> {
-                                        final CompletableFuture<Void> term =
-                                            new CompletableFuture<>();
-                                        if (rsstatus.success()) {
-                                            final Flowable<ByteBuffer> res =
-                                                Flowable.fromPublisher(rsbody)
+        return new RepoHead(this.client)
+            .head(line.uri().getPath()).thenCompose(
+                head -> this.cache.load(
+                    key,
+                    new Remote.WithErrorHandling(
+                        () -> {
+                            final CompletableFuture<Optional<? extends Content>> promise =
+                                new CompletableFuture<>();
+                            this.client.response(line, Headers.EMPTY, Content.EMPTY)
+                                .thenApply(resp -> {
+                                    final CompletableFuture<Void> term =
+                                        new CompletableFuture<>();
+                                    if (resp.status().success()) {
+                                        final Flowable<ByteBuffer> res =
+                                            Flowable.fromPublisher(resp.body())
                                                 .doOnError(term::completeExceptionally)
                                                 .doOnTerminate(() -> term.complete(null));
-                                            this.addEventToQueue(key);
-                                            promise.complete(Optional.of(new Content.From(res)));
-                                        } else {
-                                            promise.complete(Optional.empty());
-                                        }
-                                        rshdr.set(rsheaders);
-                                        return term;
+                                        this.addEventToQueue(key);
+                                        promise.complete(Optional.of(new Content.From(res)));
+                                    } else {
+                                        promise.complete(Optional.empty());
                                     }
-                                );
-                                return promise;
-                            }
-                        ),
-                        new CacheControl.All(
-                            StreamSupport.stream(
+                                    rshdr.set(resp.headers());
+                                    return term;
+                                });
+                            return promise;
+                        }
+                    ),
+                    new CacheControl.All(
+                        StreamSupport.stream(
                                 head.orElse(Headers.EMPTY).spliterator(),
                                 false
                             ).map(Header::new)
                             .map(CachedProxySlice::checksumControl)
-                            .collect(Collectors.toUnmodifiableList())
-                        )
-                    ).handle(
-                        (content, throwable) -> {
-                            if (throwable == null && content.isPresent()) {
-                                return ResponseBuilder.ok()
-                                    .headers(rshdr.get())
-                                    .body(content.get())
-                                    .build();
-                            }
-                            if (throwable != null) {
-                                Logger.error(this, throwable.getMessage());
-                            }
-                            return ResponseBuilder.notFound().build();
-                        }
+                            .toList()
                     )
-            )
-        );
+                ).handle(
+                    (content, throwable) -> {
+                        if (throwable == null && content.isPresent()) {
+                            return ResponseBuilder.ok()
+                                .headers(rshdr.get())
+                                .body(content.get())
+                                .build();
+                        }
+                        if (throwable != null) {
+                            Logger.error(this, throwable.getMessage());
+                        }
+                        return ResponseBuilder.notFound().build();
+                    }
+                )
+            ).toCompletableFuture();
     }
 
     /**

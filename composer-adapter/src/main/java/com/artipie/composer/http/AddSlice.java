@@ -7,20 +7,18 @@ package com.artipie.composer.http;
 import com.artipie.asto.Content;
 import com.artipie.composer.Repository;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
-import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.Slice;
+import com.artipie.http.rq.RequestLine;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Slice for adding a package to the repository in JSON format.
- *
- * @since 0.3
  */
 final class AddSlice implements Slice {
 
@@ -35,8 +33,6 @@ final class AddSlice implements Slice {
     private final Repository repository;
 
     /**
-     * Ctor.
-     *
      * @param repository Repository.
      */
     AddSlice(final Repository repository) {
@@ -44,7 +40,7 @@ final class AddSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers headers,
         final Content body
@@ -52,12 +48,10 @@ final class AddSlice implements Slice {
         final String path = line.uri().toString();
         final Matcher matcher = AddSlice.PATH_PATTERN.matcher(path);
         if (matcher.matches()) {
-            return new AsyncResponse(
-                this.repository.addJson(
-                    new Content.From(body), Optional.ofNullable(matcher.group("version"))
-                ).thenApply(nothing -> ResponseBuilder.created().build())
-            );
+            return this.repository.addJson(
+                new Content.From(body), Optional.ofNullable(matcher.group("version"))
+            ).thenApply(nothing -> ResponseBuilder.created().build());
         }
-        return ResponseBuilder.badRequest().build();
+        return ResponseBuilder.badRequest().completedFuture();
     }
 }

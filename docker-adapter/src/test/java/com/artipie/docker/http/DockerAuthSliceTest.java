@@ -5,13 +5,13 @@
 package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.WwwAuthenticate;
-import com.artipie.http.hm.ResponseMatcher;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
@@ -21,7 +21,6 @@ import org.hamcrest.core.AllOf;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * Test case for {@link DockerAuthSlice}.
@@ -36,11 +35,11 @@ public final class DockerAuthSliceTest {
         );
         MatcherAssert.assertThat(
             new DockerAuthSlice(
-                (rqline, rqheaders, rqbody) -> ResponseBuilder.unauthorized().headers(headers).build()
+                (rqline, rqheaders, rqbody) -> ResponseBuilder.unauthorized().headers(headers).completedFuture()
             ).response(
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY, Content.EMPTY
-            ),
+            ).join(),
             new AllOf<>(
                 Arrays.asList(
                     new IsUnauthorizedResponse(),
@@ -65,15 +64,15 @@ public final class DockerAuthSliceTest {
         );
         MatcherAssert.assertThat(
             new DockerAuthSlice(
-                (rqline, rqheaders, rqbody) -> ResponseBuilder.forbidden().headers(headers.copy()).build()
+                (rqline, rqheaders, rqbody) -> ResponseBuilder.forbidden().headers(headers.copy()).completedFuture()
             ).response(
                 new RequestLine(RqMethod.GET, "/file.txt"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ),
+            ).join(),
             new AllOf<>(
                 Arrays.asList(
-                    new IsDeniedResponse(),
+                    new IsErrorsResponse(RsStatus.FORBIDDEN, "DENIED"),
                     new RsHasHeaders(
                         headers.copy()
                             .add(ContentType.json())
@@ -88,19 +87,17 @@ public final class DockerAuthSliceTest {
     void shouldNotModifyNormalResponse() {
         final RsStatus status = RsStatus.OK;
         final byte[] body = "data".getBytes();
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new DockerAuthSlice(
                 (rqline, rqheaders, rqbody) -> ResponseBuilder.ok()
                     .header(ContentType.text())
                     .body(body)
-                    .build()
+                    .completedFuture()
             ).response(
                 new RequestLine(RqMethod.GET, "/some/path"),
                 Headers.EMPTY, Content.EMPTY
-            ),
-            new ResponseMatcher(
-                status, Collections.singleton(ContentType.text()), body
-            )
+            ).join(),
+            status, body, ContentType.text()
         );
     }
 }

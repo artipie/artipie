@@ -7,13 +7,14 @@ package com.artipie.nuget.http;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
@@ -32,11 +33,10 @@ final class ResourceFromSliceTest {
     void shouldDelegateGetResponse() {
         final String path = "/some/path";
         final Header header = new Header("Name", "Value");
-        final Response response = new ResourceFromSlice(
-            path,
-            (line, hdrs, body) -> ResponseBuilder.ok().headers(hdrs)
-                .body(line.toString().getBytes()).build()
-        ).get(Headers.from(Collections.singleton(header)));
+        final ResponseImpl response = new ResourceFromSlice(
+            path, (line, hdrs, body) -> ResponseBuilder.ok().headers(hdrs)
+            .body(line.toString().getBytes()).completedFuture()
+        ).get(Headers.from(Collections.singleton(header))).join();
         MatcherAssert.assertThat(
             response,
             Matchers.allOf(
@@ -59,11 +59,11 @@ final class ResourceFromSliceTest {
             path,
             (line, hdrs, body) -> ResponseBuilder.ok().headers(hdrs)
                 .body(Flowable.concat(Flowable.just(ByteBuffer.wrap(line.toString().getBytes())), body))
-                .build()
+                .completedFuture()
         ).put(
             Headers.from(Collections.singleton(header)),
             new Content.From(content.getBytes())
-        );
+        ).join();
         MatcherAssert.assertThat(
             response,
             Matchers.allOf(

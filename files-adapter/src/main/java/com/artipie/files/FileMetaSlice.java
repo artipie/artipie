@@ -9,13 +9,12 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.rs.RsWithHeaders;
 import com.artipie.http.slice.KeyFromPath;
 
 import java.net.URI;
@@ -23,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Slice that returns metadata of a file when user requests it.
@@ -56,38 +54,36 @@ public final class FileMetaSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers iterable,
         final Content publisher
     ) {
-        final Response raw = this.origin.response(line, iterable, publisher);
         final URI uri = line.uri();
         final Optional<String> meta = new RqParams(uri).value(FileMetaSlice.META_PARAM);
-        final Response response;
+        final CompletableFuture<ResponseImpl> raw = this.origin.response(line, iterable, publisher);
+        final CompletableFuture<ResponseImpl> result;
         if (meta.isPresent() && Boolean.parseBoolean(meta.get())) {
             final Key key = new KeyFromPath(uri.getPath());
-            response = new AsyncResponse(
-                this.storage.exists(key)
-                    .thenCompose(
-                        exist -> {
-                            final CompletionStage<Response> result;
-                            if (exist) {
-                                result = this.storage.metadata(key)
-                                    .thenApply(
-                                        mtd -> new RsWithHeaders(raw, from(mtd))
-                                    );
-                            } else {
-                                result = CompletableFuture.completedFuture(raw);
-                            }
-                            return result;
+            result = raw.thenCompose(
+                resp -> this.storage.exists(key)
+                    .thenCompose(exist -> {
+                        if (exist) {
+                            return this.storage.metadata(key)
+                                .thenApply(metadata -> {
+                                    ResponseBuilder builder = ResponseBuilder.from(resp.status())
+                                        .headers(resp.headers())
+                                        .body(resp.body());
+                                    from(metadata).stream().forEach(builder::header);
+                                    return builder.build();
+                                });
                         }
-                    )
-            );
+                        return CompletableFuture.completedFuture(resp);
+                    }));
         } else {
-            response = raw;
+            result = raw;
         }
-        return response;
+        return result;
     }
 
     /**

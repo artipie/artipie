@@ -7,17 +7,18 @@ package com.artipie.http.slice;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.ResponseBuilder;
 import org.apache.hc.core5.net.URIBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,7 +71,7 @@ public final class TrimPathSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final URI uri = line.uri();
         final String full = uri.getPath();
         final Matcher matcher = this.ptn.matcher(full);
@@ -93,9 +94,9 @@ public final class TrimPathSlice implements Slice {
                 body
             );
         }
-        return ResponseBuilder.internalError()
+        return CompletableFuture.completedFuture(ResponseBuilder.internalError()
             .textBody(String.format("Request path %s was not matched to %s", full, this.ptn))
-            .build();
+            .build());
     }
 
     /**

@@ -15,6 +15,7 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -27,7 +28,8 @@ class GenericAuthenticatorTest {
     void shouldProduceNothingWhenNoAuthRequested() {
         MatcherAssert.assertThat(
             new GenericAuthenticator(
-                new FakeClientSlices((line, headers, body) -> ResponseBuilder.ok().build()),
+                new FakeClientSlices((line, headers, body) -> CompletableFuture.completedFuture(
+                    ResponseBuilder.ok().build())),
                 "alice",
                 "qwerty"
             ).authenticate(Headers.EMPTY).toCompletableFuture().join(),
@@ -40,7 +42,8 @@ class GenericAuthenticatorTest {
         MatcherAssert.assertThat(
             StreamSupport.stream(
                 new GenericAuthenticator(
-                    new FakeClientSlices((line, headers, body) -> ResponseBuilder.ok().build()),
+                    new FakeClientSlices((line, headers, body) -> CompletableFuture.completedFuture(
+                        ResponseBuilder.ok().build())),
                     "Aladdin",
                     "open sesame"
                 ).authenticate(
@@ -58,9 +61,9 @@ class GenericAuthenticatorTest {
             StreamSupport.stream(
                 new GenericAuthenticator(
                     new FakeClientSlices(
-                        (line, headers, body) -> ResponseBuilder.ok()
+                        (line, headers, body) -> CompletableFuture.completedFuture(ResponseBuilder.ok()
                             .jsonBody("{\"access_token\":\"mF_9.B5f-4.1JqM\"}")
-                            .build()
+                            .build())
                     ),
                     "bob",
                     "12345"

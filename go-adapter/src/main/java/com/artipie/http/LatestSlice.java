@@ -7,7 +7,6 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.slice.KeyFromPath;
@@ -35,16 +34,10 @@ public final class LatestSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line, final Headers headers,
-        final Content body) {
-        return new AsyncResponse(
-            CompletableFuture.supplyAsync(
-                () -> LatestSlice.normalized(line)
-            ).thenCompose(
-                path -> this.storage.list(new KeyFromPath(path)).thenCompose(this::resp)
-            )
-        );
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        String path = LatestSlice.normalized(line);
+        return this.storage.list(new KeyFromPath(path))
+            .thenCompose(this::resp);
     }
 
     /**
@@ -68,7 +61,7 @@ public final class LatestSlice implements Slice {
      * @param module Module file names list from repository
      * @return Response
      */
-    private CompletableFuture<Response> resp(final Collection<Key> module) {
+    private CompletableFuture<ResponseImpl> resp(final Collection<Key> module) {
         final Optional<String> info = module.stream().map(Key::string)
             .filter(item -> item.endsWith("info"))
             .max(Comparator.naturalOrder());
@@ -79,6 +72,6 @@ public final class LatestSlice implements Slice {
                     .body(c)
                     .build());
         }
-        return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
+        return ResponseBuilder.notFound().completedFuture();
     }
 }

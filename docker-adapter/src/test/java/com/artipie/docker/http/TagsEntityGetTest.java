@@ -22,13 +22,13 @@ import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.rs.RsStatus;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Tests for {@link DockerSlice}.
@@ -77,7 +77,7 @@ class TagsEntityGetTest {
             ),
             Headers.EMPTY,
             Content.EMPTY
-        ).send((status, headers, body) -> CompletableFuture.allOf()).toCompletableFuture().join();
+        ).join();
         MatcherAssert.assertThat(
             "Parses from",
             manifests.capturedFrom().map(Tag::value),

@@ -7,21 +7,20 @@ package com.artipie.http.filter;
 import com.amihaiemil.eoyaml.YamlMapping;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice that filters content of repository.
  */
 public class FilterSlice implements Slice {
-    /**
-     * Origin slice.
-     */
+
     private final Slice origin;
 
     /**
@@ -43,7 +42,6 @@ public class FilterSlice implements Slice {
     }
 
     /**
-     * Ctor.
      * @param origin Origin slice
      * @param filters Filters
      */
@@ -53,12 +51,12 @@ public class FilterSlice implements Slice {
     }
 
     @Override
-    public final Response response(
+    public final CompletableFuture<ResponseImpl> response(
         RequestLine line, Headers headers, Content body
     ) {
         if (this.filters.allowed(line, headers)) {
             return this.origin.response(line, headers, body);
         }
-        return ResponseBuilder.forbidden().build();
+        return CompletableFuture.completedFuture(ResponseBuilder.forbidden().build());
     }
 }

@@ -11,13 +11,13 @@ import com.artipie.docker.Tag;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.ResponseBuilder;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
@@ -57,10 +57,10 @@ final class TagsEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
             final RqParams params = new RqParams(line.uri().getQuery());
-            return new AsyncResponse(
-                this.docker.repo(name(line)).manifests().tags(
+            return this.docker.repo(name(line)).manifests()
+                .tags(
                     params.value("last").map(Tag.Valid::new),
                     params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
                 ).thenApply(
@@ -68,8 +68,7 @@ final class TagsEntity {
                         .header(ContentType.json())
                         .body(tags.json())
                         .build()
-                )
-            );
+                ).toCompletableFuture();
         }
 
         /**

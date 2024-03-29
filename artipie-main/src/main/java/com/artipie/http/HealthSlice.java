@@ -6,7 +6,6 @@ package com.artipie.http;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.settings.Settings;
 
@@ -38,27 +37,25 @@ public final class HealthSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
-        return new AsyncResponse(
-            this.storageStatus()
-                .thenApply(
-                    ok -> {
-                        if (ok) {
-                            return ResponseBuilder.ok()
-                                .jsonBody(Json.createArrayBuilder()
-                                    .add(Json.createObjectBuilder().add("storage", "ok"))
-                                    .build()
-                                )
-                                .build();
-                        }
-                        return ResponseBuilder.unavailable()
-                            .jsonBody(Json.createArrayBuilder().add(
-                                Json.createObjectBuilder().add("storage", "failure")
-                            ).build())
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        return this.storageStatus()
+            .thenApply(
+                ok -> {
+                    if (ok) {
+                        return ResponseBuilder.ok()
+                            .jsonBody(Json.createArrayBuilder()
+                                .add(Json.createObjectBuilder().add("storage", "ok"))
+                                .build()
+                            )
                             .build();
                     }
-            )
-        );
+                    return ResponseBuilder.unavailable()
+                        .jsonBody(Json.createArrayBuilder().add(
+                            Json.createObjectBuilder().add("storage", "failure")
+                        ).build())
+                        .build();
+                }
+            ).toCompletableFuture();
     }
 
     /**

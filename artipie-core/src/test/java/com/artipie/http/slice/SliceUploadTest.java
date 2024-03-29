@@ -47,7 +47,7 @@ public final class SliceUploadTest {
                 new Content.From(
                     Flowable.just(ByteBuffer.wrap(data))
                 )
-            ),
+            ).join(),
             new RsHasStatus(RsStatus.CREATED)
         );
         MatcherAssert.assertThat(
@@ -73,7 +73,7 @@ public final class SliceUploadTest {
                     new RequestLine("PUT", "uploads/file.txt", "HTTP/1.1"),
                     Headers.from("Content-Size", Long.toString(data.length)),
                     new Content.From(Flowable.just(ByteBuffer.wrap(data)))
-                ),
+                ).join(),
             new RsHasStatus(RsStatus.CREATED)
         );
         MatcherAssert.assertThat("Event was added to queue", queue.size() == 1);

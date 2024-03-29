@@ -6,15 +6,14 @@ package  com.artipie.conan.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import com.google.common.base.Strings;
 
 import java.util.concurrent.CompletableFuture;
@@ -77,9 +76,11 @@ public final class UsersEntity {
         }
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
-            return new AsyncResponse(
-                new BasicAuthScheme(this.auth).authenticate(headers).thenApply(
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+            return new BasicAuthScheme(this.auth)
+                .authenticate(headers)
+                .toCompletableFuture()
+                .thenApply(
                     authResult -> {
                         assert authResult.status() != AuthScheme.AuthStatus.FAILED;
                         final String token = this.tokens.generate(authResult.user());
@@ -91,8 +92,7 @@ public final class UsersEntity {
                         }
                         return ResponseBuilder.ok().textBody(token).build();
                     }
-                )
-            );
+                );
         }
     }
 
@@ -103,9 +103,11 @@ public final class UsersEntity {
     public static final class CredsCheck implements Slice {
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
-            return new AsyncResponse(
-                CompletableFuture.supplyAsync(line::uri).thenCompose(
+        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+            // todo выглядит так, будто здесь ничего не происходит credsCheck returns "{}"
+
+            return CompletableFuture.supplyAsync(line::uri)
+                .thenCompose(
                     uri -> CredsCheck.credsCheck().thenApply(
                         content -> {
                             if (Strings.isNullOrEmpty(content)) {
@@ -118,7 +120,6 @@ public final class UsersEntity {
                                 .textBody(content)
                                 .build();
                         }
-                    )
                 )
             );
         }

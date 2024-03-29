@@ -8,11 +8,10 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.misc.DateTimeNowStr;
@@ -72,7 +71,7 @@ final class UnpublishPutSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<ResponseImpl> response(
         final RequestLine line,
         final Headers headers,
         final Content publisher
@@ -81,28 +80,26 @@ final class UnpublishPutSlice implements Slice {
             RequestLine.from(line.toString().replaceFirst("/-rev/[^\\s]+", ""))
         ).value();
         final Key key = new Key.From(pkg, "meta.json");
-        return new AsyncResponse(
-            this.asto.exists(key).thenCompose(
-                exists -> {
-                    final CompletionStage<Response> res;
-                    if (exists) {
-                        res = new Content.From(publisher).asJsonObjectFuture()
-                            .thenCompose(update -> this.updateMeta(update, key))
-                            .thenAccept(
-                                ver -> this.events.ifPresent(
-                                    queue -> queue.add(
-                                        new ArtifactEvent(
-                                            UploadSlice.REPO_TYPE, this.rname, pkg, ver
-                                        )
+        return this.asto.exists(key).thenCompose(
+            exists -> {
+                final CompletableFuture<ResponseImpl> res;
+                if (exists) {
+                    res = new Content.From(publisher).asJsonObjectFuture()
+                        .thenCompose(update -> this.updateMeta(update, key))
+                        .thenAccept(
+                            ver -> this.events.ifPresent(
+                                queue -> queue.add(
+                                    new ArtifactEvent(
+                                        UploadSlice.REPO_TYPE, this.rname, pkg, ver
                                     )
                                 )
-                            ).thenApply(nothing -> ResponseBuilder.ok().build());
-                    } else {
-                        res = CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
-                    }
-                    return res;
+                            )
+                        ).thenApply(nothing -> ResponseBuilder.ok().build());
+                } else {
+                    res = ResponseBuilder.notFound().completedFuture();
                 }
-            )
+                return res;
+            }
         );
     }
 

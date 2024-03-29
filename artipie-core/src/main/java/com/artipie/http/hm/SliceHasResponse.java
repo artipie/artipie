@@ -73,7 +73,7 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
         Content body
     ) {
         this.rsp = rsp;
-        this.responser = slice -> slice.response(line, headers, body);
+        this.responser = slice -> slice.response(line, headers, body).join();
     }
 
     @Override

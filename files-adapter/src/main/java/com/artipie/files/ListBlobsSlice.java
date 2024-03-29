@@ -8,15 +8,15 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.KeyFromPath;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
@@ -85,19 +85,17 @@ public final class ListBlobsSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
         final Key key = this.transform.apply(line.uri().getPath());
-        return new AsyncResponse(
-            this.storage.list(key)
-                .thenApply(
-                    keys -> {
-                        final String text = this.format.apply(keys);
-                        return ResponseBuilder.ok()
-                            .header(ContentType.mime(this.mtype))
-                            .body(text.getBytes(StandardCharsets.UTF_8))
-                            .build();
-                    }
-                )
-        );
+        return this.storage.list(key)
+            .thenApply(
+                keys -> {
+                    final String text = this.format.apply(keys);
+                    return ResponseBuilder.ok()
+                        .header(ContentType.mime(this.mtype))
+                        .body(text.getBytes(StandardCharsets.UTF_8))
+                        .build();
+                }
+            );
     }
 }
