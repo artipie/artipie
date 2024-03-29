@@ -76,6 +76,8 @@ SOFTWARE.
     <docker.image.name>artipie/artipie</docker.image.name>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.release>17</maven.compiler.release>
+    <header.license>LICENSE.header</header.license>
     <junit-platform.version>5.10.0</junit-platform.version>
     <vertx.version>4.5.1</vertx.version>
     <guava.version>33.0.0-jre</guava.version>
@@ -264,7 +266,7 @@ SOFTWARE.
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.11.0</version>
         <configuration>
-          <release>17</release>
+          <release>${maven.compiler.release}</release>
         </configuration>
         <executions>
           <execution>
@@ -274,7 +276,7 @@ SOFTWARE.
               <goal>testCompile</goal>
             </goals>
             <configuration>
-              <release>17</release>
+              <release>${maven.compiler.release}</release>
             </configuration>
           </execution>
         </executions>
