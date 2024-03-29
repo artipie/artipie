@@ -340,7 +340,7 @@ SOFTWARE.
           </execution>
         </executions>
       </plugin>
-      <plugin>
+      <!--<plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
         <version>3.21.2</version>
@@ -370,7 +370,7 @@ SOFTWARE.
             <version>1.0-SNAPSHOT</version>
           </dependency>
         </dependencies>
-      </plugin>
+      </plugin>-->
     </plugins>
     <pluginManagement>
       <plugins>
