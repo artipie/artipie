@@ -20,6 +20,7 @@ https://github.com/artipie/artipie/blob/master/LICENSE.txt
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <header.license>${project.basedir}/../LICENSE.header</header.license>
+    <maven.compiler.release>17</maven.compiler.release>
   </properties>
   <dependencies>
     <dependency>

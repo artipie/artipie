@@ -35,6 +35,7 @@ SOFTWARE.
   <url>https://github.com/artipie/http-client</url>
   <properties>
     <header.license>${project.basedir}/../LICENSE.header</header.license>
+    <maven.compiler.release>17</maven.compiler.release>
   </properties>
   <dependencies>
     <dependency>
@@ -98,7 +99,7 @@ SOFTWARE.
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <release>21</release>
+          <release>${maven.compiler.release}</release>
           <testExcludes>
             <exclude>**/com/artipie/http/servlet/**</exclude>
             <exclude>**/com/artipie/http/slice/SliceITCase.java</exclude>

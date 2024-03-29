@@ -14,6 +14,7 @@
   <packaging>jar</packaging>
   <properties>
     <header.license>${project.basedir}/../LICENSE.header</header.license>
+    <maven.compiler.release>17</maven.compiler.release>
   </properties>
   <dependencies>
     <dependency>
