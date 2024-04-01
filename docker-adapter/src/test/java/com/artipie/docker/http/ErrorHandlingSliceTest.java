@@ -5,24 +5,21 @@
 package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.FailedCompletionStage;
 import com.artipie.docker.error.InvalidDigestException;
 import com.artipie.docker.error.InvalidManifestException;
 import com.artipie.docker.error.InvalidRepoNameException;
 import com.artipie.docker.error.InvalidTagNameException;
 import com.artipie.docker.error.UnsupportedError;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.ResponseMatcher;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.StandardRs;
-import io.reactivex.Flowable;
+import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -32,7 +29,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -65,84 +61,50 @@ class ErrorHandlingSliceTest {
                     rqbody.asBytes(),
                     new IsEqual<>(body)
                 );
-                return StandardRs.OK;
+                return ResponseBuilder.ok().completedFuture();
             }
         ).response(
             line, Headers.from(header), new Content.From(body)
-        ).send(
-            (status, rsheaders, rsbody) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        ).join();
     }
 
     @Test
     void shouldPassResponseUnmodified() {
         final Header header = new Header("x-name", "some value");
         final byte[] body = "text".getBytes();
-        final RsStatus status = RsStatus.OK;
         final Response response = new AuthClientSlice(
-            (rsline, rsheaders, rsbody) -> new RsFull(
-                status,
-                Headers.from(header),
-                Flowable.just(ByteBuffer.wrap(body))
-            ),
+            (rsline, rsheaders, rsbody) -> ResponseBuilder.ok()
+                .header(header).body(body).completedFuture(),
             Authenticator.ANONYMOUS
-        ).response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY);
-        MatcherAssert.assertThat(
-            response,
-            new ResponseMatcher(status, body, header)
-        );
+        ).response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY)
+            .join();
+        ResponseAssert.check(response, RsStatus.OK, body, header);
     }
 
     @ParameterizedTest
     @MethodSource("exceptions")
-    void shouldHandleErrorInvalid(
-        final RuntimeException exception, final RsStatus status, final String code
-    ) {
+    void shouldHandleErrorInvalid(RuntimeException exception, RsStatus status, String code) {
         MatcherAssert.assertThat(
             new ErrorHandlingSlice(
-                (line, headers, body) -> connection -> new FailedCompletionStage<>(exception)
+                (line, headers, body) -> CompletableFuture.failedFuture(exception)
             ).response(
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY, Content.EMPTY
-            ),
+            ).join(),
             new IsErrorsResponse(status, code)
         );
     }
 
     @ParameterizedTest
     @MethodSource("exceptions")
-    void shouldHandleSliceError(
-        final RuntimeException exception, final RsStatus status, final String code
-    ) {
+    void shouldHandleSliceError(RuntimeException exception, RsStatus status, String code) {
         MatcherAssert.assertThat(
             new ErrorHandlingSlice(
                 (line, headers, body) -> {
                     throw exception;
                 }
-            ).response(
-                new RequestLine(RqMethod.GET, "/"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new IsErrorsResponse(status, code)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("exceptions")
-    void shouldHandleConnectionError(
-        final RuntimeException exception, final RsStatus status, final String code
-    ) {
-        MatcherAssert.assertThat(
-            new ErrorHandlingSlice(
-                (line, headers, body) -> connection -> {
-                    throw exception;
-                }
-            ).response(
-                new RequestLine(RqMethod.GET, "/"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
+            ).response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY).
+                join(),
             new IsErrorsResponse(status, code)
         );
     }
@@ -156,45 +118,16 @@ class ErrorHandlingSliceTest {
             }
         );
         final Exception actual = Assertions.assertThrows(
-            exception.getClass(),
-            () -> slice.response(
-                new RequestLine(RqMethod.GET, "/"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ).send(
-                (status, headers, body) -> CompletableFuture.allOf()
-            ).toCompletableFuture().join(),
+            CompletionException.class,
+            () -> slice
+                .response(new RequestLine(RqMethod.GET, "/"), Headers.EMPTY, Content.EMPTY)
+                .join(),
             "Exception not handled"
         );
-        MatcherAssert.assertThat(
-            "Original exception preserved",
-            actual,
-            new IsEqual<>(exception)
-        );
-    }
 
-    @Test
-    void shouldPassConnectionError() {
-        final RuntimeException exception = new IllegalStateException();
-        final ErrorHandlingSlice slice = new ErrorHandlingSlice(
-            (line, headers, body) -> connection -> {
-                throw exception;
-            }
-        );
-        final Exception actual = Assertions.assertThrows(
-            exception.getClass(),
-            () -> slice.response(
-                new RequestLine(RqMethod.GET, "/"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ).send(
-                (status, headers, body) -> CompletableFuture.allOf()
-            ).toCompletableFuture().join(),
-            "Exception not handled"
-        );
         MatcherAssert.assertThat(
             "Original exception preserved",
-            actual,
+            actual.getCause(),
             new IsEqual<>(exception)
         );
     }

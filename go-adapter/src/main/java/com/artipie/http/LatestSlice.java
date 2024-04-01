@@ -7,14 +7,10 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.KeyFromPath;
+
 import java.net.URI;
 import java.util.Collection;
 import java.util.Comparator;
@@ -38,16 +34,10 @@ public final class LatestSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line, final Headers headers,
-        final Content body) {
-        return new AsyncResponse(
-            CompletableFuture.supplyAsync(
-                () -> LatestSlice.normalized(line)
-            ).thenCompose(
-                path -> this.storage.list(new KeyFromPath(path)).thenCompose(this::resp)
-            )
-        );
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+        String path = LatestSlice.normalized(line);
+        return this.storage.list(new KeyFromPath(path))
+            .thenCompose(this::resp);
     }
 
     /**
@@ -75,15 +65,13 @@ public final class LatestSlice implements Slice {
         final Optional<String> info = module.stream().map(Key::string)
             .filter(item -> item.endsWith("info"))
             .max(Comparator.naturalOrder());
-        final CompletableFuture<Response> res;
         if (info.isPresent()) {
-            res = this.storage.value(new KeyFromPath(info.get()))
-                .thenApply(RsWithBody::new)
-                .thenApply(rsp -> new RsWithHeaders(rsp, "content-type", "application/json"))
-                .thenApply(rsp -> new RsWithStatus(rsp, RsStatus.OK));
-        } else {
-            res = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
+            return this.storage.value(new KeyFromPath(info.get()))
+                .thenApply(c -> ResponseBuilder.ok()
+                    .header(ContentType.json())
+                    .body(c)
+                    .build());
         }
-        return res;
+        return ResponseBuilder.notFound().completedFuture();
     }
 }

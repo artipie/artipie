@@ -10,17 +10,12 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.conan.ItemTokenizer;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.SliceUpload;
 import org.reactivestreams.Publisher;
 
@@ -29,14 +24,13 @@ import javax.json.JsonObjectBuilder;
 import javax.json.stream.JsonParser;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 
 /**
  * Slice for Conan package data uploading support.
- * @since 0.1
  */
 public final class ConanUpload {
 
@@ -113,17 +107,14 @@ public final class ConanUpload {
      */
     private static CompletableFuture<Response> generateError(final String filename) {
         return CompletableFuture.completedFuture(
-            new RsWithBody(
-                StandardRs.NOT_FOUND,
-                String.format(ConanUpload.URI_S_NOT_FOUND, filename),
-                StandardCharsets.UTF_8
-            )
+            ResponseBuilder.notFound()
+                .textBody(String.format(ConanUpload.URI_S_NOT_FOUND, filename))
+                .build()
         );
     }
 
     /**
      * Conan /v1/conans/{path}/upload_urls REST APIs.
-     * @since 0.1
      */
     public static final class UploadUrls implements Slice {
 
@@ -138,8 +129,6 @@ public final class ConanUpload {
         private final ItemTokenizer tokenizer;
 
         /**
-         * Ctor.
-         *
          * @param storage Current Artipie storage instance.
          * @param tokenizer Tokenizer for repository items.
          */
@@ -149,24 +138,14 @@ public final class ConanUpload {
         }
 
         @Override
-        public Response response(final RequestLine line,
-                                 final Headers headers, final Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Matcher matcher = matchRequest(line);
             final String path = matcher.group(ConanUpload.URI_PATH);
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
-            return new AsyncResponse(
-                this.storage.exists(new Key.From(path)).thenCompose(
-                    exist -> {
-                        final CompletableFuture<Response> result;
-                        if (exist) {
-                            result = generateError(path);
-                        } else {
-                            result = this.generateUrls(body, path, hostname);
-                        }
-                        return result;
-                    }
-                )
-            );
+            return this.storage.exists(new Key.From(path))
+                .thenCompose(
+                    exist -> exist ? generateError(path) : generateUrls(body, path, hostname)
+                );
         }
 
         /**
@@ -177,47 +156,45 @@ public final class ConanUpload {
          * @return Respose result of this operation.
          */
         private CompletableFuture<Response> generateUrls(final Publisher<ByteBuffer> body,
-            final String path, final String hostname) {
-            return new Content.From(body).asStringFuture().thenApply(
-                str -> {
-                    final JsonParser parser = Json.createParser(new StringReader(str));
-                    parser.next();
-                    final JsonObjectBuilder result = Json.createObjectBuilder();
-                    for (final String key : parser.getObject().keySet()) {
-                        final String pkgnew = "/_/_/packages/";
-                        final int ipkg = path.indexOf(pkgnew);
-                        final String fpath;
-                        final String pkgdir;
-                        if (ipkg > 0) {
-                            fpath = path.replace(pkgnew, "/_/_/0/package/");
-                            pkgdir = ConanUpload.PKG_BIN_DIR;
-                        } else {
-                            fpath = path;
-                            pkgdir = ConanUpload.PKG_SRC_DIR;
+                                                         final String path, final String hostname) {
+            return new Content.From(body).asStringFuture()
+                .thenApply(
+                    str -> {
+                        final JsonParser parser = Json.createParser(new StringReader(str));
+                        parser.next();
+                        final JsonObjectBuilder result = Json.createObjectBuilder();
+                        for (final String key : parser.getObject().keySet()) {
+                            final String pkgnew = "/_/_/packages/";
+                            final int ipkg = path.indexOf(pkgnew);
+                            final String fpath;
+                            final String pkgdir;
+                            if (ipkg > 0) {
+                                fpath = path.replace(pkgnew, "/_/_/0/package/");
+                                pkgdir = ConanUpload.PKG_BIN_DIR;
+                            } else {
+                                fpath = path;
+                                pkgdir = ConanUpload.PKG_SRC_DIR;
+                            }
+                            final String filepath = String.join(
+                                "", "/", fpath, pkgdir, key
+                            );
+                            final String url = String.join(
+                                "", ConanUpload.PROTOCOL, hostname, filepath, "?signature=",
+                                this.tokenizer.generateToken(filepath, hostname)
+                            );
+                            result.add(key, url);
                         }
-                        final String filepath = String.join(
-                            "", "/", fpath, pkgdir, key
-                        );
-                        final String url = String.join(
-                            "", ConanUpload.PROTOCOL, hostname, filepath, "?signature=",
-                            this.tokenizer.generateToken(filepath, hostname)
-                        );
-                        result.add(key, url);
+                        return ResponseBuilder.ok()
+                            .header(ConanUpload.CONTENT_TYPE, ConanUpload.JSON_TYPE)
+                            .jsonBody(result.build())
+                            .build();
                     }
-                    return (Response) new RsWithHeaders(
-                        new RsWithBody(
-                            StandardRs.OK, result.build().toString(), StandardCharsets.UTF_8
-                        ),
-                        ConanUpload.CONTENT_TYPE, ConanUpload.JSON_TYPE
-                    );
-                }
-            ).toCompletableFuture();
+                ).toCompletableFuture();
         }
     }
 
     /**
      * Conan HTTP PUT /{path/to/file}?signature={signature} REST API.
-     * @since 0.1
      */
     public static final class PutFile implements Slice {
 
@@ -242,33 +219,29 @@ public final class ConanUpload {
         }
 
         @Override
-        public Response response(final RequestLine line,
-                                 final Headers headers, final Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final String path = line.uri().getPath();
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
-            final Optional<String> token = new RqParams(
-                line.uri().getQuery()
-            ).value("signature");
-            final Response response;
+            final Optional<String> token = new RqParams(line.uri().getQuery()).value("signature");
             if (token.isPresent()) {
-                response = new AsyncResponse(
-                    this.tokenizer.authenticateToken(token.get()).thenApply(
+                return this.tokenizer.authenticateToken(token.get())
+                    .toCompletableFuture()
+                    .thenApply(
                         item -> {
-                            final Response resp;
                             if (item.isPresent() && item.get().getHostname().equals(hostname)
                                 && item.get().getPath().equals(path)) {
-                                resp = new SliceUpload(this.storage).response(line, headers, body);
-                            } else {
-                                resp = new RsWithStatus(RsStatus.UNAUTHORIZED);
+                                return new SliceUpload(this.storage)
+                                    .response(line, headers, body);
                             }
-                            return resp;
+                            return CompletableFuture.completedFuture(
+                                ResponseBuilder.unauthorized().build()
+                            );
                         }
-                    )
-                );
-            } else {
-                response = new RsWithStatus(RsStatus.UNAUTHORIZED);
+                    ).thenCompose(Function.identity());
             }
-            return response;
+            return CompletableFuture.completedFuture(
+                ResponseBuilder.unauthorized().build()
+            );
         }
     }
 }

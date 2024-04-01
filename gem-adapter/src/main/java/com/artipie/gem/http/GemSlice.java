@@ -6,13 +6,12 @@ package com.artipie.gem.http;
 
 import com.artipie.asto.Storage;
 import com.artipie.gem.GemApiKeyAuth;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.AuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -23,31 +22,24 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
+
 import java.util.Optional;
 import java.util.Queue;
 
 /**
  * A slice, which servers gem packages.
  * Ruby HTTP layer.
- * @since 0.1
  */
 @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 public final class GemSlice extends Slice.Wrap {
 
     /**
-     * Ctor.
-     *
      * @param storage The storage.
      * @param policy The policy.
      * @param auth The auth.
      * @param name Repository name
      */
-    public GemSlice(
-        final Storage storage,
-        final Policy<?> policy,
-        final Authentication auth,
-        final String name
-    ) {
+    public GemSlice(Storage storage, Policy<?> policy, Authentication auth, String name) {
         this(storage, policy, auth, name, Optional.empty());
     }
 
@@ -115,7 +107,7 @@ public final class GemSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new SliceSimple(new RsWithStatus(RsStatus.NOT_FOUND))
+                    new SliceSimple(ResponseBuilder.notFound().build())
                 )
             )
         );

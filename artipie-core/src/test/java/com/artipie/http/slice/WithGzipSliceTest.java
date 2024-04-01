@@ -14,15 +14,14 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.StandardRs;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Test for {@link WithGzipSlice}.
@@ -31,13 +30,13 @@ class WithGzipSliceTest {
 
     @Test
     void returnsGzipedResponseIfAcceptEncodingIsPassed() throws IOException {
-        final byte[] data = "some content to gzip".getBytes(StandardCharsets.UTF_8);
         MatcherAssert.assertThat(
-            new WithGzipSlice(new SliceSimple(new RsWithBody(StandardRs.OK, data))),
+            new WithGzipSlice(new SliceSimple(ResponseBuilder.ok()
+                .textBody("some content to gzip").build())),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK),
-                    new RsHasBody(GzipSliceTest.gzip(data)),
+                    new RsHasBody(GzipSliceTest.gzip("some content to gzip".getBytes(StandardCharsets.UTF_8))),
                     new RsHasHeaders(new ContentLength(20), new Header("Content-Encoding", "gzip"))
                 ),
                 new RequestLine(RqMethod.GET, "/"),
@@ -54,7 +53,10 @@ class WithGzipSliceTest {
         MatcherAssert.assertThat(
             new WithGzipSlice(
                 new SliceSimple(
-                    new RsFull(RsStatus.CREATED, Headers.from(hdr), new Content.From(data))
+                    ResponseBuilder.created()
+                        .header(hdr)
+                        .body(data)
+                        .build()
                 )
             ),
             new SliceHasResponse(

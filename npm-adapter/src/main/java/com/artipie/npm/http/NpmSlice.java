@@ -16,8 +16,7 @@ import com.artipie.http.auth.OperationControl;
 import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -28,6 +27,7 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
+
 import java.net.URL;
 import java.util.Optional;
 import java.util.Queue;
@@ -111,7 +111,7 @@ public final class NpmSlice implements Slice {
                     new RtRule.ByPath("/npm")
                 ),
                 new BearerAuthzSlice(
-                    new SliceSimple(new RsWithStatus(RsStatus.OK)),
+                    new SliceSimple(ResponseBuilder.ok().build()),
                     auth,
                     new OperationControl(
                         policy, new AdapterBasicPermission(name, Action.Standard.READ)
@@ -261,7 +261,7 @@ public final class NpmSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body) {

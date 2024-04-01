@@ -9,10 +9,10 @@ import com.artipie.asto.Splitting;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.Headers;
 import com.artipie.http.client.HttpClientSettings;
-import com.artipie.http.headers.Header;
+import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import io.reactivex.Flowable;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpFields;
@@ -29,7 +29,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -113,29 +113,20 @@ public final class JettyClientHttp3Test {
         this.client.http("localhost", this.port).response(
             new RequestLine(
                 RqMethod.GET.value(), String.format("/%s", GET_SOME_DATA), "HTTP/3"
-            ),
-            Headers.EMPTY, Content.EMPTY
-        ).send(
-            (status, headers, publisher) -> {
-                latch.countDown();
-                MatcherAssert.assertThat(status, new IsEqual<>(RsStatus.OK));
-                MatcherAssert.assertThat(
-                    headers,
-                    Matchers.contains(
-                        new Header(
-                            "content-length", String.valueOf(GET_SOME_DATA.getBytes().length)
-                        )
-                    )
-                );
-                MatcherAssert.assertThat(
-                    new Content.From(publisher).asBytes(),
-                    new IsEqual<>(GET_SOME_DATA.getBytes())
-                );
-                latch.countDown();
-                return CompletableFuture.allOf();
-            }
-        );
-        MatcherAssert.assertThat("Response was not received", latch.await(5, TimeUnit.SECONDS));
+            ), Headers.EMPTY, Content.EMPTY
+        ).thenAccept(response -> {
+            latch.countDown();
+            Assertions.assertEquals(RsStatus.OK, response.status());
+            MatcherAssert.assertThat(
+                response.headers(),
+                Matchers.contains(
+                    new ContentLength(GET_SOME_DATA.getBytes().length)
+                )
+            );
+            Assertions.assertArrayEquals(GET_SOME_DATA.getBytes(), response.body().asBytes());
+            latch.countDown();
+        });
+        Assertions.assertTrue(latch.await(5, TimeUnit.SECONDS), "Response was not received");
     }
 
     @Test
@@ -149,21 +140,19 @@ public final class JettyClientHttp3Test {
         this.client.http("localhost", this.port).response(
             new RequestLine(
                 RqMethod.GET.value(), String.format("/%s", GET_TWO_DATA_CHUNKS), "HTTP/3"
-            ),
-            Headers.EMPTY, Content.EMPTY
-        ).send(
-            (status, headers, publisher) -> {
-                MatcherAssert.assertThat(status, new IsEqual<>(RsStatus.OK));
-                MatcherAssert.assertThat(
-                    headers, Matchers.contains(new Header("content-length", String.valueOf(SIZE)))
-                );
-                Flowable.fromPublisher(publisher).doOnComplete(latch::countDown)
-                    .forEach(buffer -> received.get().put(buffer));
-                return CompletableFuture.allOf();
-            }
-        );
-        MatcherAssert.assertThat("Response was not received", latch.await(10, TimeUnit.SECONDS));
-        MatcherAssert.assertThat(received.get(), new IsEqual<>(expected));
+            ), Headers.EMPTY, Content.EMPTY
+        ).thenAccept(res -> {
+            Assertions.assertEquals(RsStatus.OK, res.status());
+            MatcherAssert.assertThat(
+                res.headers(),
+                Matchers.contains(new ContentLength(SIZE))
+            );
+            Flowable.fromPublisher(res.body())
+                .doOnComplete(latch::countDown)
+                .forEach(buffer -> received.get().put(buffer));
+        });
+        Assertions.assertTrue(latch.await(10, TimeUnit.SECONDS), "Response was not received");
+        Assertions.assertEquals(expected, received.get());
     }
 
     @Test
@@ -173,27 +162,23 @@ public final class JettyClientHttp3Test {
         final int large = 512 * 512;
         final byte[] data = new byte[large];
         random.nextBytes(data);
-        this.client.http("localhost", this.port).response(
-            new RequestLine(
-                RqMethod.PUT.value(), "/any", "HTTP/3"
-            ),
-            Headers.EMPTY,
-            new Content.From(
-                Flowable.fromArray(ByteBuffer.wrap(data)).flatMap(
-                    buffer -> new Splitting(buffer, (random.nextInt(9) + 1) * 512).publisher()
-                ).delay(random.nextInt(1_000), TimeUnit.MILLISECONDS)
-            )
-        ).send(
-            (status, headers, publisher) -> {
-                MatcherAssert.assertThat(status, new IsEqual<>(RsStatus.OK));
-                latch.countDown();
-                return CompletableFuture.allOf();
-            }
+        Content body = new Content.From(
+            Flowable.fromArray(ByteBuffer.wrap(data)).flatMap(
+                buffer -> new Splitting(buffer, (random.nextInt(9) + 1) * 512).publisher()
+            ).delay(random.nextInt(1_000), TimeUnit.MILLISECONDS)
         );
-        MatcherAssert.assertThat("Response was not received", latch.await(4, TimeUnit.MINUTES));
+        this.client.http("localhost", this.port)
+            .response(new RequestLine(RqMethod.PUT.value(), "/any", "HTTP/3"), Headers.EMPTY, body)
+            .thenApply(res -> {
+                Assertions.assertEquals(RsStatus.OK, res.status());
+                latch.countDown();
+                return CompletableFuture.completedFuture(null);
+            });
+
+        Assertions.assertTrue(latch.await(4, TimeUnit.MINUTES), "Response was not received");
         final ByteBuffer res = ByteBuffer.allocate(large);
         ((TestListener) listener).buffers.forEach(item -> res.put(item.position(0)));
-        MatcherAssert.assertThat(res.array(), new IsEqual<>(data));
+        Assertions.assertArrayEquals(data, res.array());
     }
 
     /**

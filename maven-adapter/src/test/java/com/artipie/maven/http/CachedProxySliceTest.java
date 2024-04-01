@@ -11,16 +11,10 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.scheduling.ProxyArtifactEvent;
-import java.nio.ByteBuffer;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,12 +22,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Test case for {@link CachedProxySlice}.
- *
- * @since 0.5
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CachedProxySliceTest {
 
     /**
@@ -51,7 +47,7 @@ final class CachedProxySliceTest {
         final byte[] data = "cache".getBytes();
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                (line, headers, body) -> new RsWithBody(ByteBuffer.wrap("123".getBytes())),
+                (line, headers, body) -> ResponseBuilder.ok().textBody("123").completedFuture(),
                 (key, supplier, control) -> CompletableFuture.supplyAsync(
                     () -> Optional.of(new Content.From(data))
                 ),
@@ -72,7 +68,7 @@ final class CachedProxySliceTest {
     void returnsNotFoundOnRemoteError() {
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.INTERNAL_ERROR)),
+                new SliceSimple(ResponseBuilder.internalError().build()),
                 (key, supplier, control) -> supplier.get(), Optional.of(this.events), "*"
             ),
             new SliceHasResponse(
@@ -87,7 +83,7 @@ final class CachedProxySliceTest {
     void returnsNotFoundOnRemoteAndCacheError() {
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.INTERNAL_ERROR)),
+                new SliceSimple(ResponseBuilder.internalError().build()),
                 (key, supplier, control)
                     -> new FailedCompletionStage<>(new RuntimeException("Any error")),
                 Optional.of(this.events), "*"
@@ -111,7 +107,7 @@ final class CachedProxySliceTest {
         final byte[] data = "remote".getBytes();
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                (line, headers, body) -> new RsWithBody(ByteBuffer.wrap(data)),
+                (line, headers, body) -> ResponseBuilder.ok().body(data).completedFuture(),
                 (key, supplier, control) -> supplier.get(), Optional.of(this.events), "*"
             ),
             new SliceHasResponse(
@@ -136,7 +132,7 @@ final class CachedProxySliceTest {
         final byte[] data = "remote".getBytes();
         MatcherAssert.assertThat(
             new CachedProxySlice(
-                (line, headers, body) -> new RsWithBody(ByteBuffer.wrap(data)),
+                (line, headers, body) -> ResponseBuilder.ok().body(data).completedFuture(),
                 (key, supplier, control) -> supplier.get(), Optional.of(this.events), "*"
             ),
             new SliceHasResponse(

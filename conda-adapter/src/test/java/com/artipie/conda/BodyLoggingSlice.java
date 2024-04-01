@@ -8,24 +8,20 @@ import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.jcabi.log.Logger;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice decorator to log request body.
  */
 final class BodyLoggingSlice implements Slice {
 
-    /**
-     * Origin.
-     */
     private final Slice origin;
 
     /**
-     * Ctor.
      * @param origin Origin slice
      */
     BodyLoggingSlice(final Slice origin) {
@@ -33,15 +29,14 @@ final class BodyLoggingSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers,
-                             Content body) {
-        return new AsyncResponse(
-            new Content.From(body).asBytesFuture().thenApply(
+    public CompletableFuture<Response> response(RequestLine line, Headers headers,
+                                                Content body) {
+        return new Content.From(body).asBytesFuture()
+            .thenCompose(
                 bytes -> {
                     Logger.debug(this.origin, new String(bytes, StandardCharsets.UTF_8));
                     return this.origin.response(line, headers, new Content.From(bytes));
                 }
-            )
         );
     }
 }

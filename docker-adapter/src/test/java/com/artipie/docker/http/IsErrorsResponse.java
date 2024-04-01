@@ -5,17 +5,11 @@
 package com.artipie.docker.http;
 
 import com.artipie.http.Response;
-import com.artipie.http.headers.Header;
+import com.artipie.http.RsStatus;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.rs.RsStatus;
-import java.io.ByteArrayInputStream;
-import java.util.Arrays;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonValue;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -28,10 +22,15 @@ import wtf.g4s8.hamcrest.json.JsonContains;
 import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+
 /**
  * Matcher for errors response.
- *
- * @since 0.5
  */
 public final class IsErrorsResponse extends BaseMatcher<Response> {
 
@@ -41,18 +40,16 @@ public final class IsErrorsResponse extends BaseMatcher<Response> {
     private final Matcher<Response> delegate;
 
     /**
-     * Ctor.
-     *
      * @param status Expected response status code.
      * @param code Expected error code.
      */
-    public IsErrorsResponse(final RsStatus status, final String code) {
+    public IsErrorsResponse(RsStatus status, String code) {
         this.delegate = new AllOf<>(
             Arrays.asList(
                 new RsHasStatus(status),
                 new RsHasHeaders(
                     Matchers.containsInRelativeOrder(
-                        new Header("Content-Type", "application/json; charset=utf-8")
+                        ContentType.json()
                     )
                 ),
                 new RsHasBody(
@@ -126,8 +123,6 @@ public final class IsErrorsResponse extends BaseMatcher<Response> {
         private final Matcher<JsonObject> delegate;
 
         /**
-         * Ctor.
-         *
          * @param code Expected error code.
          */
         IsError(final String code) {

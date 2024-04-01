@@ -6,13 +6,11 @@ package com.artipie.nuget.http.index;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.nuget.http.Absent;
 import com.artipie.nuget.http.Resource;
 import com.artipie.nuget.http.Route;
-import com.artipie.nuget.http.RsWithBodyNoHeaders;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -20,6 +18,7 @@ import javax.json.JsonObject;
 import javax.json.JsonWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Service index route.
@@ -65,7 +64,7 @@ public final class ServiceIndex implements Route {
     private final class Index implements Resource {
 
         @Override
-        public Response get(final Headers headers) {
+        public CompletableFuture<Response> get(final Headers headers) {
             final JsonArrayBuilder resources = Json.createArrayBuilder();
             for (final Service service : ServiceIndex.this.services) {
                 resources.add(
@@ -82,18 +81,17 @@ public final class ServiceIndex implements Route {
                 JsonWriter writer = Json.createWriter(out)) {
                 writer.writeObject(json);
                 out.flush();
-                return new RsWithStatus(
-                    new RsWithBodyNoHeaders(out.toByteArray()),
-                    RsStatus.OK
-                );
+                return ResponseBuilder.ok()
+                    .body(out.toByteArray())
+                    .completedFuture();
             } catch (final IOException ex) {
                 throw new IllegalStateException("Failed to serialize JSON to bytes", ex);
             }
         }
 
         @Override
-        public Response put(Headers headers, Content body) {
-            return new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
+        public CompletableFuture<Response> put(Headers headers, Content body) {
+            return ResponseBuilder.methodNotAllowed().completedFuture();
         }
     }
 }

@@ -10,17 +10,14 @@ import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.ResponseBuilder;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
  * Base entity in Docker HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/#base">Base</a>.
- *
- * @since 0.1
  */
 public final class BaseEntity implements ScopeSlice {
 
@@ -35,14 +32,9 @@ public final class BaseEntity implements ScopeSlice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
-        return new RsWithHeaders(
-            new RsWithStatus(RsStatus.OK),
-            "Docker-Distribution-API-Version", "registry/2.0"
-        );
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+        return CompletableFuture.completedFuture(ResponseBuilder.ok()
+            .header("Docker-Distribution-API-Version", "registry/2.0")
+            .build());
     }
 }

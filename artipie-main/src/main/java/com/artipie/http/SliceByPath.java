@@ -9,16 +9,12 @@ import com.artipie.RqPath;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice which finds repository by path.
- * @since 0.9
  */
 final class SliceByPath implements Slice {
 
@@ -37,18 +33,12 @@ final class SliceByPath implements Slice {
     }
 
     @Override
-    @SuppressWarnings("PMD.OnlyOneReturn")
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Optional<Key> key = SliceByPath.keyFromPath(line.uri().getPath());
         if (key.isEmpty()) {
-            return new RsWithBody(
-                new RsWithStatus(RsStatus.NOT_FOUND),
-                "Failed to find a repository",
-                StandardCharsets.UTF_8
+            return CompletableFuture.completedFuture(ResponseBuilder.notFound()
+                .textBody("Failed to find a repository")
+                .build()
             );
         }
         return this.slices.slice(key.get(), line.uri().getPort())
@@ -62,15 +52,13 @@ final class SliceByPath implements Slice {
      */
     private static Optional<Key> keyFromPath(final String path) {
         final String[] parts = SliceByPath.splitPath(path);
-        final Optional<Key> key;
         if (RqPath.CONDA.test(path)) {
-            key = Optional.of(new Key.From(parts[2]));
-        } else if (parts.length >= 1 && !parts[0].isBlank()) {
-            key = Optional.of(new Key.From(parts[0]));
-        } else {
-            key = Optional.empty();
+            return Optional.of(new Key.From(parts[2]));
         }
-        return key;
+        if (parts.length >= 1 && !parts[0].isBlank()) {
+            return Optional.of(new Key.From(parts[0]));
+        }
+        return Optional.empty();
     }
 
     /**

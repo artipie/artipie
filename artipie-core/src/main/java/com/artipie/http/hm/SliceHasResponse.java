@@ -9,7 +9,6 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.CachedResponse;
 import io.reactivex.Flowable;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -36,7 +35,7 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
     /**
      * Response cache.
      */
-    private Response rcache;
+    private Response response;
 
     /**
      * New response matcher for slice with request line.
@@ -54,8 +53,7 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
      * @param headers Headers
      * @param line Request line
      */
-    public SliceHasResponse(final Matcher<? extends Response> rsp, final Headers headers,
-        final RequestLine line) {
+    public SliceHasResponse(Matcher<? extends Response> rsp, Headers headers, RequestLine line) {
         this(rsp, line, headers, new Content.From(Flowable.empty()));
     }
 
@@ -73,7 +71,7 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
         Content body
     ) {
         this.rsp = rsp;
-        this.responser = slice -> slice.response(line, headers, body);
+        this.responser = slice -> slice.response(line, headers, body).join();
     }
 
     @Override
@@ -97,9 +95,9 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
      * @return Cached response
      */
     private Response response(final Slice slice) {
-        if (this.rcache == null) {
-            this.rcache = new CachedResponse(this.responser.apply(slice));
+        if (this.response == null) {
+            this.response = this.responser.apply(slice);
         }
-        return this.rcache;
+        return this.response;
     }
 }

@@ -12,21 +12,23 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.helm.test.ContentOfIndex;
 import com.artipie.http.Headers;
-import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Stream;
 
 /**
  * Test for {@link DeleteChartSlice}.
@@ -59,15 +61,11 @@ final class DeleteChartSliceTest {
         strings = {"", "/charts", "/charts/", "/charts/name/1.3.2/extra", "/wrong/name/0.1.1"}
         )
     void returnBadRequest(final String rqline) {
-        MatcherAssert.assertThat(
-            new DeleteChartSlice(
-                this.storage, Optional.of(this.events), DeleteChartSliceTest.RNAME
-            ).response(
-                new RequestLine(RqMethod.DELETE, rqline),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new RsHasStatus(RsStatus.BAD_REQUEST)
+        ResponseAssert.check(
+            new DeleteChartSlice(this.storage, Optional.of(this.events), DeleteChartSliceTest.RNAME)
+                .response(new RequestLine(RqMethod.DELETE, rqline), Headers.EMPTY, Content.EMPTY)
+                .join(),
+            RsStatus.BAD_REQUEST
         );
         MatcherAssert.assertThat(
             "None items were added into events queue", this.events.isEmpty()
@@ -80,32 +78,24 @@ final class DeleteChartSliceTest {
         final String arktwo = "ark-1.2.0.tgz";
         Stream.of("index.yaml", "ark-1.0.1.tgz", "ark-1.2.0.tgz", "tomcat-0.4.1.tgz")
             .forEach(source -> new TestResource(source).saveTo(this.storage));
-        MatcherAssert.assertThat(
-            "Response status is not 200",
-            new DeleteChartSlice(
-                this.storage, Optional.of(this.events), DeleteChartSliceTest.RNAME
-            ).response(
-                new RequestLine(RqMethod.DELETE, "/charts/ark"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new RsHasStatus(RsStatus.OK)
+        ResponseAssert.check(
+            new DeleteChartSlice(this.storage, Optional.of(this.events), DeleteChartSliceTest.RNAME)
+                .response(new RequestLine(RqMethod.DELETE, "/charts/ark"), Headers.EMPTY, Content.EMPTY)
+                .join(),
+            RsStatus.OK
         );
-        MatcherAssert.assertThat(
-            "Deleted chart is present in index",
+        Assertions.assertTrue(
             new ContentOfIndex(this.storage).index()
                 .byChart("ark").isEmpty(),
-            new IsEqual<>(true)
+            "Deleted chart is present in index"
         );
-        MatcherAssert.assertThat(
-            "Archive of deleted chart remains",
+        Assertions.assertFalse(
             this.storage.exists(new Key.From(arkone)).join(),
-            new IsEqual<>(false)
+            "Archive of deleted chart remains"
         );
-        MatcherAssert.assertThat(
-            "Archive of deleted chart remains",
+        Assertions.assertFalse(
             this.storage.exists(new Key.From(arktwo)).join(),
-            new IsEqual<>(false)
+            "Archive of deleted chart remains"
         );
         MatcherAssert.assertThat(
             "One item was added into events queue", this.events.size() == 1
@@ -116,16 +106,11 @@ final class DeleteChartSliceTest {
     void deleteByNameAndVersion() {
         Stream.of("index.yaml", "ark-1.0.1.tgz", "ark-1.2.0.tgz", "tomcat-0.4.1.tgz")
             .forEach(source -> new TestResource(source).saveTo(this.storage));
-        MatcherAssert.assertThat(
-            "Response status is not 200",
-            new DeleteChartSlice(
-                this.storage, Optional.of(this.events), DeleteChartSliceTest.RNAME
-            ).response(
-                new RequestLine(RqMethod.DELETE, "/charts/ark/1.0.1"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new RsHasStatus(RsStatus.OK)
+        ResponseAssert.check(
+            new DeleteChartSlice(this.storage, Optional.of(this.events), DeleteChartSliceTest.RNAME)
+                .response(new RequestLine(RqMethod.DELETE, "/charts/ark/1.0.1"), Headers.EMPTY, Content.EMPTY)
+                .join(),
+            RsStatus.OK
         );
         final IndexYamlMapping index = new ContentOfIndex(this.storage).index();
         MatcherAssert.assertThat(
@@ -133,15 +118,13 @@ final class DeleteChartSliceTest {
             index.byChartAndVersion("ark", "1.0.1").isPresent(),
             new IsEqual<>(false)
         );
-        MatcherAssert.assertThat(
-            "Second chart was also deleted",
+        Assertions.assertTrue(
             index.byChartAndVersion("ark", "1.2.0").isPresent(),
-            new IsEqual<>(true)
+            "Second chart was also deleted"
         );
-        MatcherAssert.assertThat(
-            "Archive of deleted chart remains",
+        Assertions.assertFalse(
             this.storage.exists(new Key.From("ark-1.0.1.tgz")).join(),
-            new IsEqual<>(false)
+            "Archive of deleted chart remains"
         );
         MatcherAssert.assertThat(
             "One item was added into events queue", this.events.size() == 1
@@ -153,15 +136,11 @@ final class DeleteChartSliceTest {
     void failsToDeleteByNotExisted(final String rqline) {
         Stream.of("index.yaml", "ark-1.0.1.tgz", "ark-1.2.0.tgz", "tomcat-0.4.1.tgz")
             .forEach(source -> new TestResource(source).saveTo(this.storage));
-        MatcherAssert.assertThat(
-            new DeleteChartSlice(
-                this.storage, Optional.ofNullable(this.events), DeleteChartSliceTest.RNAME
-            ).response(
-                new RequestLine(RqMethod.DELETE, rqline),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new RsHasStatus(RsStatus.NOT_FOUND)
+        ResponseAssert.check(
+            new DeleteChartSlice(this.storage, Optional.ofNullable(this.events), DeleteChartSliceTest.RNAME)
+                .response(new RequestLine(RqMethod.DELETE, rqline), Headers.EMPTY, Content.EMPTY)
+                .join(),
+            RsStatus.NOT_FOUND
         );
         MatcherAssert.assertThat(
             "None items were added into events queue", this.events.isEmpty()

@@ -6,18 +6,13 @@ package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasHeaders;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.hm.SliceHasResponse;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -27,35 +22,27 @@ import java.util.zip.GZIPOutputStream;
 
 /**
  * Test for {@link GzipSlice}.
- * @since 1.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class GzipSliceTest {
 
     @Test
     void returnsGzipedContentPreservesStatusAndHeaders() throws IOException {
         final byte[] data = "any byte data".getBytes(StandardCharsets.UTF_8);
         final Header hdr = new Header("any-header", "value");
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new GzipSlice(
                 new SliceSimple(
-                    new RsFull(RsStatus.FOUND, Headers.from(hdr), new Content.From(data))
+                    ResponseBuilder.from(RsStatus.MOVED_TEMPORARILY)
+                        .header(hdr).body(data).build()
                 )
-            ),
-            new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasStatus(RsStatus.FOUND),
-                    new RsHasHeaders(
-                        Headers.from(
-                            new Header("Content-encoding", "gzip"),
-                            hdr,
-                            new ContentLength(13)
-                        )
-                    ),
-                    new RsHasBody(GzipSliceTest.gzip(data))
-                ),
-                new RequestLine(RqMethod.GET, "/any")
-            )
+            ).response(
+                new RequestLine(RqMethod.GET, "/any"), Headers.EMPTY, Content.EMPTY
+            ).join(),
+            RsStatus.MOVED_TEMPORARILY,
+            GzipSliceTest.gzip(data),
+            new Header("Content-encoding", "gzip"),
+            new ContentLength(13),
+            hdr
         );
     }
 

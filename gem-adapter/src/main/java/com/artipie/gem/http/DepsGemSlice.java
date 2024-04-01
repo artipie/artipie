@@ -8,21 +8,20 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.gem.Gem;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.rs.RsWithBody;
 import io.reactivex.Flowable;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Dependency API slice implementation.
- * @since 1.3
  */
 final class DepsGemSlice implements Slice {
 
@@ -40,20 +39,20 @@ final class DepsGemSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
-        return new AsyncResponse(
-            new Gem(this.repo).dependencies(
-                Collections.unmodifiableSet(
-                    new HashSet<>(
-                        new RqParams(line.uri().getQuery()).value("gems")
-                            .map(str -> Arrays.asList(str.split(",")))
-                            .orElse(Collections.emptyList())
-                    )
+    public CompletableFuture<Response> response(final RequestLine line, final Headers headers,
+                                                final Content body) {
+        return new Gem(this.repo).dependencies(
+            Collections.unmodifiableSet(
+                new HashSet<>(
+                    new RqParams(line.uri().getQuery()).value("gems")
+                        .map(str -> Arrays.asList(str.split(",")))
+                        .orElse(Collections.emptyList())
                 )
-            ).thenApply(
-                data -> new RsWithBody(Flowable.just(data))
             )
-        );
+        ).thenApply(
+            data -> ResponseBuilder.ok()
+                .body(Flowable.just(data))
+                .build()
+        ).toCompletableFuture();
     }
 }

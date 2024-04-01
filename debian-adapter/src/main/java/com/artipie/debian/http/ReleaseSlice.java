@@ -12,17 +12,13 @@ import com.artipie.debian.metadata.Release;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.rq.RequestLine;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
-import com.artipie.http.rq.RequestLine;
 
 /**
  * Release slice decorator.
  * Checks, whether Release index exists and creates it if necessary.
- * @since 0.2
  */
 public final class ReleaseSlice implements Slice {
 
@@ -47,7 +43,6 @@ public final class ReleaseSlice implements Slice {
     private final InRelease inrelease;
 
     /**
-     * Ctor.
      * @param origin Origin
      * @param asto Storage
      * @param release Release index
@@ -62,7 +57,6 @@ public final class ReleaseSlice implements Slice {
     }
 
     /**
-     * Ctor.
      * @param origin Origin
      * @param asto Storage
      * @param config Repository configuration
@@ -72,29 +66,24 @@ public final class ReleaseSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body
     ) {
-        return new AsyncResponse(
-            this.storage.exists(this.release.key()).thenCompose(
-                exists -> {
-                    final CompletionStage<Response> res;
-                    if (exists) {
-                        res = CompletableFuture.completedFuture(
-                            this.origin.response(line, headers, body)
-                        );
-                    } else {
-                        res = this.release.create().thenCompose(
-                            nothing ->  this.inrelease.generate(this.release.key())
-                        ).thenApply(
-                            nothing -> this.origin.response(line, headers, body)
-                        );
-                    }
-                    return res;
+        return this.storage.exists(this.release.key()).thenCompose(
+            exists -> {
+                final CompletableFuture<Response> res;
+                if (exists) {
+                    res = this.origin.response(line, headers, body);
+                } else {
+                    res = this.release.create()
+                        .toCompletableFuture()
+                        .thenCompose(nothing -> this.inrelease.generate(this.release.key()))
+                        .thenCompose(nothing -> this.origin.response(line, headers, body));
                 }
-            )
+                return res;
+            }
         );
     }
 }

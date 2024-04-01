@@ -8,6 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.ContentType;
+import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RqHeaders;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -61,7 +62,7 @@ final class RqMultipartTest {
         );
         final List<String> parsed = Flowable.fromPublisher(
             new RqMultipart(
-                new ContentType("multipart/mixed; boundary=\"simple boundary\""),
+                new Header(ContentType.NAME, "multipart/mixed; boundary=\"simple boundary\""),
                 new Content.From(simple.getBytes(StandardCharsets.US_ASCII))
             ).parts()
         ).flatMapSingle(
@@ -94,7 +95,7 @@ final class RqMultipartTest {
         );
         final List<String> parsed = Flowable.fromPublisher(
             new RqMultipart(
-                new ContentType("multipart/mixed; boundary=\"92fd51d48f874720a066238b824c0146\""),
+                new Header(ContentType.NAME, "multipart/mixed; boundary=\"92fd51d48f874720a066238b824c0146\""),
                 new Content.From(payload.getBytes(StandardCharsets.US_ASCII))
             ).parts()
         ).flatMapSingle(
@@ -121,7 +122,7 @@ final class RqMultipartTest {
         MatcherAssert.assertThat(
             Flowable.fromPublisher(
                 new RqMultipart(
-                    new ContentType("multipart/mixed; boundary=\"123\""),
+                    new Header(ContentType.NAME, "multipart/mixed; boundary=\"123\""),
                     new Content.From(payload.getBytes(StandardCharsets.US_ASCII))
                 ).parts()
             ).flatMap(Flowable::fromPublisher).toList().blockingGet(),
@@ -200,7 +201,7 @@ final class RqMultipartTest {
         );
         final Publisher<ByteBuffer> body = Flowable.fromPublisher(
             new RqMultipart(
-                new ContentType("multipart/mixed; boundary=\"4f0974f4a401fd757d35fe31a4737ac2\""),
+                new Header(ContentType.NAME, "multipart/mixed; boundary=\"4f0974f4a401fd757d35fe31a4737ac2\""),
                 new Content.From(payload.getBytes(StandardCharsets.US_ASCII))
             ).filter(headers -> new ContentDisposition(headers).fieldName().equals("x-amz-signature"))
         ).flatMap(part -> part);
@@ -231,7 +232,7 @@ final class RqMultipartTest {
         );
         final List<String> parts = Flowable.fromPublisher(
             new RqMultipart(
-                new ContentType("multipart/mixed; boundary=\"bnd123\""),
+                new Header(ContentType.NAME, "multipart/mixed; boundary=\"bnd123\""),
                 new Content.From(payload.getBytes(StandardCharsets.US_ASCII))
             ).inspect(
                 (part, inspector) -> {
@@ -260,7 +261,7 @@ final class RqMultipartTest {
     void parseCondaPayload() {
         final int size = Flowable.fromPublisher(
                 new RqMultipart(
-                    new ContentType("multipart/mixed; boundary=\"92fd51d48f874720a066238b824c0146\""),
+                    new Header(ContentType.NAME, "multipart/mixed; boundary=\"92fd51d48f874720a066238b824c0146\""),
                     new Content.From(new TestResource("multipart").asBytes())
                 ).parts()
             ).flatMap(Flowable::fromPublisher)

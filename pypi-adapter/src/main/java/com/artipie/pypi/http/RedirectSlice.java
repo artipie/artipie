@@ -6,16 +6,16 @@ package com.artipie.pypi.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.pypi.NormalizedProjectName;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice to redirect to normalized url.
@@ -29,27 +29,22 @@ public final class RedirectSlice implements Slice {
     private static final String HDR_FULL_PATH = "X-FullPath";
 
     @Override
-    public Response response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body
     ) {
         final String rqline = line.uri().toString();
         final String last = rqline.split("/")[rqline.split("/").length - 1];
-        return new AsyncResponse(
-            Single.fromCallable(() -> last)
-                .map(name -> new NormalizedProjectName.Simple(name).value())
-                .map(
-                    normalized -> new RqHeaders(headers, RedirectSlice.HDR_FULL_PATH).stream()
+        return Single.fromCallable(() -> last)
+            .map(name -> new NormalizedProjectName.Simple(name).value())
+            .map(
+                normalized -> new RqHeaders(headers, RedirectSlice.HDR_FULL_PATH).stream()
                     .findFirst()
                     .orElse(rqline).replaceAll(String.format("(%s\\/?)$", last), normalized)
-                )
-                .map(
-                    url -> new RsWithHeaders(
-                        new RsWithStatus(RsStatus.MOVED_PERMANENTLY),
-                        Headers.from("Location", url)
-                    )
-                )
-        );
+            )
+            .map(
+                url -> ResponseBuilder.movedPermanently().header("Location", url).build()
+            ).to(SingleInterop.get()).toCompletableFuture();
     }
 }

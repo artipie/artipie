@@ -6,19 +6,15 @@ package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.logging.Level;
 
 /**
@@ -31,10 +27,7 @@ class LoggingSliceTest {
         new LoggingSlice(
             Level.INFO,
             new SliceSimple(
-                new RsWithHeaders(
-                    new RsWithStatus(RsStatus.OK),
-                    "Request-Header", "some; value"
-                )
+                ResponseBuilder.ok().header("Request-Header", "some; value").build()
             )
         ).response(
             RequestLine.from("GET /v2/ HTTP_1_1"),
@@ -43,9 +36,7 @@ class LoggingSliceTest {
                 new MapEntry<>("Content-Type", "whatever")
             ),
             Content.EMPTY
-        ).send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        ).join();
     }
 
     @Test
@@ -71,7 +62,7 @@ class LoggingSliceTest {
             Assertions.assertThrows(
                 Throwable.class,
                 () -> this.handle(
-                    (line, headers, body) -> conn -> {
+                    (line, headers, body) -> {
                         throw error;
                     }
                 )
@@ -80,30 +71,9 @@ class LoggingSliceTest {
         );
     }
 
-    @Test
-    void shouldLogAndPreserveAsyncExceptionInResponse() {
-        final IllegalStateException error = new IllegalStateException("Error in response async");
-        final CompletionStage<Void> result = this.handle(
-            (line, headers, body) -> conn -> {
-                final CompletableFuture<Void> future = new CompletableFuture<>();
-                future.completeExceptionally(error);
-                return future;
-            }
-        );
-        MatcherAssert.assertThat(
-            Assertions.assertThrows(
-                Throwable.class,
-                () -> result.toCompletableFuture().join()
-            ).getCause(),
-            new IsEqual<>(error)
-        );
-    }
-
-    private CompletionStage<Void> handle(final Slice slice) {
-        return new LoggingSlice(Level.INFO, slice).response(
-            RequestLine.from("GET /hello/ HTTP/1.1"),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).send((status, headers, body) -> CompletableFuture.allOf());
+    private void handle(Slice slice) {
+        new LoggingSlice(Level.INFO, slice)
+            .response(RequestLine.from("GET /hello/ HTTP/1.1"), Headers.EMPTY, Content.EMPTY)
+            .join();
     }
 }

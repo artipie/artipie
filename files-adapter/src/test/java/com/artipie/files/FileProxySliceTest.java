@@ -11,8 +11,8 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.cache.FromRemoteCache;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
@@ -21,10 +21,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -34,7 +31,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -58,13 +54,11 @@ final class FileProxySliceTest {
             new FakeClientSlices(
                 (rqline, rqheaders, rqbody) -> {
                     headers.set(rqheaders);
-                    return new AsyncResponse(
-                        new Content.From(rqbody).asBytesFuture().thenApply(
-                            bytes -> {
-                                body.set(bytes);
-                                return StandardRs.OK;
-                            }
-                        )
+                    return new Content.From(rqbody).asBytesFuture().thenApply(
+                        bytes -> {
+                            body.set(bytes);
+                            return ResponseBuilder.ok().build();
+                        }
                     );
                 }
             ),
@@ -73,9 +67,7 @@ final class FileProxySliceTest {
             new RequestLine(RqMethod.GET, "/"),
             Headers.from("X-Name", "Value"),
             new Content.From("data".getBytes())
-        ).send(
-            (status, rsheaders, rsbody) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        ).join();
         MatcherAssert.assertThat(
             "Headers are empty",
             headers.get(),
@@ -96,9 +88,9 @@ final class FileProxySliceTest {
             "Should returns body from remote",
             new FileProxySlice(
                 new SliceSimple(
-                    new RsFull(
-                        RsStatus.OK, Headers.from("header", "value"), new Content.From(body)
-                    )
+                    ResponseBuilder.ok().header("header", "value")
+                        .body(body)
+                        .build()
                 ),
                 new FromRemoteCache(this.storage)
             ),
@@ -129,7 +121,7 @@ final class FileProxySliceTest {
         MatcherAssert.assertThat(
             "Does not return body from cache",
             new FileProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.INTERNAL_ERROR)),
+                new SliceSimple(ResponseBuilder.internalError().build()),
                 new FromRemoteCache(this.storage)
             ),
             new SliceHasResponse(
@@ -154,7 +146,7 @@ final class FileProxySliceTest {
         MatcherAssert.assertThat(
             "Incorrect status, 404 is expected",
             new FileProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.BAD_REQUEST)),
+                new SliceSimple(ResponseBuilder.badRequest().build()),
                 new FromRemoteCache(this.storage)
             ),
             new SliceHasResponse(

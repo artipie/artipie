@@ -8,20 +8,19 @@ import com.artipie.http.Headers;
 import com.artipie.http.client.FakeClientSlices;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.WwwAuthenticate;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.StandardRs;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 /**
  * Tests for {@link GenericAuthenticator}.
- *
- * @since 0.3
  */
 class GenericAuthenticatorTest {
 
@@ -29,7 +28,8 @@ class GenericAuthenticatorTest {
     void shouldProduceNothingWhenNoAuthRequested() {
         MatcherAssert.assertThat(
             new GenericAuthenticator(
-                new FakeClientSlices((line, headers, body) -> StandardRs.OK),
+                new FakeClientSlices((line, headers, body) -> CompletableFuture.completedFuture(
+                    ResponseBuilder.ok().build())),
                 "alice",
                 "qwerty"
             ).authenticate(Headers.EMPTY).toCompletableFuture().join(),
@@ -42,7 +42,8 @@ class GenericAuthenticatorTest {
         MatcherAssert.assertThat(
             StreamSupport.stream(
                 new GenericAuthenticator(
-                    new FakeClientSlices((line, headers, body) -> StandardRs.OK),
+                    new FakeClientSlices((line, headers, body) -> CompletableFuture.completedFuture(
+                        ResponseBuilder.ok().build())),
                     "Aladdin",
                     "open sesame"
                 ).authenticate(
@@ -60,10 +61,9 @@ class GenericAuthenticatorTest {
             StreamSupport.stream(
                 new GenericAuthenticator(
                     new FakeClientSlices(
-                        (line, headers, body) -> new RsWithBody(
-                            StandardRs.EMPTY,
-                            "{\"access_token\":\"mF_9.B5f-4.1JqM\"}".getBytes()
-                        )
+                        (line, headers, body) -> CompletableFuture.completedFuture(ResponseBuilder.ok()
+                            .jsonBody("{\"access_token\":\"mF_9.B5f-4.1JqM\"}")
+                            .build())
                     ),
                     "bob",
                     "12345"

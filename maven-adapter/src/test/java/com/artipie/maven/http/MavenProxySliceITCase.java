@@ -11,7 +11,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import com.artipie.vertx.VertxSliceServer;
@@ -99,7 +99,7 @@ final class MavenProxySliceITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         MatcherAssert.assertThat(
             "Jar was saved to storage",
@@ -123,7 +123,7 @@ final class MavenProxySliceITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         con.disconnect();
         MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
@@ -137,7 +137,7 @@ final class MavenProxySliceITCase {
         con.setRequestMethod("GET");
         MatcherAssert.assertThat(
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.NOT_FOUND.code()))
+            new IsEqual<>(RsStatus.NOT_FOUND.code())
         );
         con.disconnect();
         MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
@@ -152,7 +152,7 @@ final class MavenProxySliceITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         MatcherAssert.assertThat(
             "Headers are returned",
@@ -178,7 +178,7 @@ final class MavenProxySliceITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         con.disconnect();
         MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());

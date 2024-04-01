@@ -13,10 +13,10 @@ import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.TrustedBlobSource;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.ResponseMatcher;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -48,18 +48,16 @@ class ManifestEntityPutTest {
     @Test
     void shouldPushManifestByTag() {
         final String path = "/v2/my-alpine/manifests/1";
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             this.slice.response(
                 new RequestLine(RqMethod.PUT, path), Headers.EMPTY, this.manifest()
-            ),
-            new ResponseMatcher(
-                RsStatus.CREATED,
-                new Header("Location", path),
-                new Header("Content-Length", "0"),
-                new Header(
-                    "Docker-Content-Digest",
-                    "sha256:ef0ff2adcc3c944a63f7cafb386abc9a1d95528966085685ae9fab2a1c0bedbf"
-                )
+            ).join(),
+            RsStatus.CREATED,
+            new Header("Location", path),
+            new Header("Content-Length", "0"),
+            new Header(
+                "Docker-Content-Digest",
+                "sha256:ef0ff2adcc3c944a63f7cafb386abc9a1d95528966085685ae9fab2a1c0bedbf"
             )
         );
         MatcherAssert.assertThat("One event was added to queue", this.events.size() == 1);
@@ -76,16 +74,14 @@ class ManifestEntityPutTest {
             "ef0ff2adcc3c944a63f7cafb386abc9a1d95528966085685ae9fab2a1c0bedbf"
         );
         final String path = String.format("/v2/my-alpine/manifests/%s", digest);
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             this.slice.response(
                 new RequestLine(RqMethod.PUT, path), Headers.EMPTY, this.manifest()
-            ),
-            new ResponseMatcher(
-                RsStatus.CREATED,
-                new Header("Location", path),
-                new Header("Content-Length", "0"),
-                new Header("Docker-Content-Digest", digest)
-            )
+            ).join(),
+            RsStatus.CREATED,
+            new Header("Location", path),
+            new Header("Content-Length", "0"),
+            new Header("Docker-Content-Digest", digest)
         );
         MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
     }

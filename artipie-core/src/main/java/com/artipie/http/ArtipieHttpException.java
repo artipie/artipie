@@ -5,17 +5,17 @@
 package com.artipie.http;
 
 import com.artipie.ArtipieException;
-import com.artipie.http.rs.RsStatus;
 import com.google.common.collect.ImmutableMap;
+
+import java.io.Serial;
 import java.util.Map;
 
 /**
  * Base HTTP exception for Artipie endpoints.
- * @since 1.0
  */
-@SuppressWarnings("PMD.OnlyOneConstructorShouldDoInitialization")
 public final class ArtipieHttpException extends ArtipieException {
 
+    @Serial
     private static final long serialVersionUID = -16695752893817954L;
 
     /**
@@ -94,7 +94,7 @@ public final class ArtipieHttpException extends ArtipieException {
      * @param cause Of the error
      */
     public ArtipieHttpException(final RsStatus status, final String message,
-        final Throwable cause) {
+                                final Throwable cause) {
         super(message, cause);
         this.code = status;
     }
@@ -112,7 +112,7 @@ public final class ArtipieHttpException extends ArtipieException {
      * @param status HTTP status code for error
      * @return Meaning string for this code
      */
-    private static String meaning(final RsStatus status) {
-        return ArtipieHttpException.MEANINGS.getOrDefault(status.code(), "Unknown");
+    private static String meaning(RsStatus status) {
+        return ArtipieHttpException.MEANINGS.getOrDefault(status.asString(), "Unknown");
     }
 }

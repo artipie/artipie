@@ -6,10 +6,11 @@ package com.artipie.http.rt;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
+import com.artipie.http.Response;
 import com.artipie.http.rq.RequestLine;
 
 /**
@@ -18,10 +19,11 @@ import com.artipie.http.rq.RequestLine;
 public interface RtPath {
     /**
      * Try respond.
-     * @param line Request line
+     *
+     * @param line    Request line
      * @param headers Headers
-     * @param body Body
+     * @param body    Body
      * @return Response if passed routing rule
      */
-    Optional<Response> response(RequestLine line, Headers headers, Content body);
+    Optional<CompletableFuture<Response>> response(RequestLine line, Headers headers, Content body);
 }

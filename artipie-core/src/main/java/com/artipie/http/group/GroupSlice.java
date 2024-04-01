@@ -6,33 +6,26 @@ package com.artipie.http.group;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RqMethod;
+import com.artipie.http.RsStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Standard group {@link Slice} implementation.
  */
 public final class GroupSlice implements Slice {
 
-    /**
-     * Methods to broadcast to all target slices.
-     */
-    private static final Set<RqMethod> BROADCAST_METHODS = Collections.unmodifiableSet(
-        new HashSet<>(
-            Arrays.asList(
-                RqMethod.GET, RqMethod.HEAD, RqMethod.OPTIONS, RqMethod.CONNECT, RqMethod.TRACE
-            )
-        )
-    );
+    private static final Logger LOGGER = LoggerFactory.getLogger(GroupSlice.class);
 
     /**
      * Target slices.
@@ -56,18 +49,20 @@ public final class GroupSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
-        final Response rsp;
-        if (GroupSlice.BROADCAST_METHODS.contains(line.method())) {
-            rsp = new GroupResponse(
-                this.targets.stream()
-                    .map(slice -> slice.response(line, headers, body))
-                    .collect(Collectors.toList())
-            );
-        } else {
-            rsp = this.targets.get(0).response(line, headers, body);
+    public CompletableFuture<Response> response(
+        RequestLine line, Headers headers, Content body
+    ) {
+        for (Slice remote : targets) {
+            try {
+                Response res = remote.response(line, headers, body).get();
+                if (res.status() != RsStatus.NOT_FOUND) {
+                    return CompletableFuture.completedFuture(res);
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                LOGGER.warn("Can't get response for remote " + remote, e);
+            }
         }
-        return rsp;
+        return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
+
     }
 }

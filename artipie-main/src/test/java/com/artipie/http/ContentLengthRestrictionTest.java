@@ -5,10 +5,9 @@
 package com.artipie.http;
 
 import com.artipie.asto.Content;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,29 +21,32 @@ class ContentLengthRestrictionTest {
     @Test
     public void shouldNotPassRequestsAboveLimit() {
         final Slice slice = new ContentLengthRestriction(
-            (line, headers, body) -> new RsWithStatus(RsStatus.OK), 10
+            (line, headers, body) -> ResponseBuilder.ok().completedFuture(), 10
         );
-        final Response response = slice.response(new RequestLine("GET", "/"), this.headers("11"), Content.EMPTY);
-        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.PAYLOAD_TOO_LARGE));
+        final Response response = slice.response(new RequestLine("GET", "/"), this.headers("11"), Content.EMPTY)
+            .join();
+        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.REQUEST_TOO_LONG));
     }
 
     @ParameterizedTest
     @CsvSource({"10,0", "10,not number", "10,1", "10,10"})
     public void shouldPassRequestsWithinLimit(int limit, String value) {
         final Slice slice = new ContentLengthRestriction(
-            (line, headers, body) -> new RsWithStatus(RsStatus.OK), limit
+            (line, headers, body) -> ResponseBuilder.ok().completedFuture(), limit
         );
-        final Response response = slice.response(new RequestLine("GET", "/"), this.headers(value), Content.EMPTY);
-        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.OK));
+        final Response response = slice.response(new RequestLine("GET", "/"), this.headers(value), Content.EMPTY)
+            .join();
+        ResponseAssert.checkOk(response);
     }
 
     @Test
     public void shouldPassRequestsWithoutContentLength() {
         final Slice slice = new ContentLengthRestriction(
-            (line, headers, body) -> new RsWithStatus(RsStatus.OK), 10
+            (line, headers, body) -> ResponseBuilder.ok().completedFuture(), 10
         );
-        final Response response = slice.response(new RequestLine("GET", "/"), Headers.EMPTY, Content.EMPTY);
-        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.OK));
+        final Response response = slice.response(new RequestLine("GET", "/"), Headers.EMPTY, Content.EMPTY)
+            .join();
+        ResponseAssert.checkOk(response);
     }
 
     private Headers headers(final String value) {

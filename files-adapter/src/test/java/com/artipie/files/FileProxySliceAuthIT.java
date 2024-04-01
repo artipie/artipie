@@ -13,20 +13,20 @@ import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.client.auth.BasicAuthenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
-import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.security.policy.PolicyByUsername;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.reactivex.core.Vertx;
-import java.net.URI;
-import java.util.Optional;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.net.URI;
+import java.util.Optional;
 
 /**
  * Test for {@link FileProxySlice} to verify it works with target requiring authentication.
@@ -93,11 +93,10 @@ final class FileProxySliceAuthIT {
 
     @Test
     void shouldGet() {
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(RsStatus.OK,
             this.proxy.response(
                 new RequestLine(RqMethod.GET, "/foo/bar"), Headers.EMPTY, Content.EMPTY
-            ),
-            new RsHasStatus(RsStatus.OK)
+            ).join().status()
         );
     }
 }

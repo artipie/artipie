@@ -33,8 +33,6 @@ public final class WwwAuthenticate extends Header {
     private static final Pattern VALUE = Pattern.compile("(?<scheme>[^\"]*)( (?<params>.*))?");
 
     /**
-     * Ctor.
-     *
      * @param value Header value.
      */
     public WwwAuthenticate(final String value) {
@@ -42,8 +40,6 @@ public final class WwwAuthenticate extends Header {
     }
 
     /**
-     * Ctor.
-     *
      * @param headers Headers to extract header from.
      */
     public WwwAuthenticate(final Headers headers) {
@@ -107,8 +103,6 @@ public final class WwwAuthenticate extends Header {
 
     /**
      * WWW-Authenticate header parameter.
-     *
-     * @since 0.12
      */
     public static class Param {
 
@@ -125,8 +119,6 @@ public final class WwwAuthenticate extends Header {
         private final String string;
 
         /**
-         * Ctor.
-         *
          * @param string Param raw string.
          */
         public Param(final String string) {

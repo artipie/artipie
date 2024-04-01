@@ -19,7 +19,7 @@ import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +61,7 @@ class UploadEntityPutTest {
             UploadEntityPutTest.requestLine(name, upload.uuid(), digest),
             Headers.EMPTY,
             Content.EMPTY
-        );
+        ).join();
         MatcherAssert.assertThat(
             "Returns 201 status and corresponding headers",
             response,
@@ -111,7 +111,7 @@ class UploadEntityPutTest {
             new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345"),
             Headers.EMPTY,
             Content.EMPTY
-        );
+        ).join();
         MatcherAssert.assertThat(
             response,
             new IsErrorsResponse(RsStatus.NOT_FOUND, "BLOB_UPLOAD_UNKNOWN")

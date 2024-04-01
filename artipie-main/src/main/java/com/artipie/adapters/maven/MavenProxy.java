@@ -21,6 +21,7 @@ import com.artipie.settings.repo.RepoConfig;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -53,7 +54,7 @@ public final class MavenProxy implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<Response> response(
         RequestLine line,
         Headers headers,
         Content body

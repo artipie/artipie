@@ -6,28 +6,23 @@ package com.artipie.gem.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Responses on api key requests.
- *
- * @since 0.3
  */
-@SuppressWarnings("PMD.OnlyOneReturn")
 final class ApiKeySlice implements Slice {
 
     /**
@@ -36,7 +31,6 @@ final class ApiKeySlice implements Slice {
     private final Authentication auth;
 
     /**
-     * The Ctor.
      * @param auth Auth.
      */
     ApiKeySlice(final Authentication auth) {
@@ -44,12 +38,8 @@ final class ApiKeySlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body) {
-        return new AsyncResponse(
-            new BasicAuthScheme(this.auth)
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+        return new BasicAuthScheme(this.auth)
                 .authenticate(headers)
                 .thenApply(
                     result -> {
@@ -60,12 +50,13 @@ final class ApiKeySlice implements Slice {
                                 .map(val -> val.substring(BasicAuthScheme.NAME.length() + 1))
                                 .findFirst();
                             if (key.isPresent()) {
-                                return new RsWithBody(key.get(), StandardCharsets.US_ASCII);
+                                return ResponseBuilder.ok()
+                                    .textBody(key.get(), StandardCharsets.US_ASCII)
+                                    .build();
                             }
                         }
-                        return new RsWithStatus(RsStatus.UNAUTHORIZED);
+                        return ResponseBuilder.unauthorized().build();
                     }
-                )
-        );
+                ).toCompletableFuture();
     }
 }

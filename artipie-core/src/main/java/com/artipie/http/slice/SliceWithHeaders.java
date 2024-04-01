@@ -6,41 +6,41 @@ package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsWithHeaders;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Decorator for {@link Slice} which adds headers to the origin.
  */
 public final class SliceWithHeaders implements Slice {
 
-    /**
-     * Origin slice.
-     */
     private final Slice origin;
+    private final Headers additional;
 
     /**
-     * Headers.
-     */
-    private final Headers headers;
-
-    /**
-     * Ctor.
      * @param origin Origin slice
      * @param headers Headers
      */
-    public SliceWithHeaders(final Slice origin, final Headers headers) {
+    public SliceWithHeaders(Slice origin, Headers headers) {
         this.origin = origin;
-        this.headers = headers;
+        this.additional = headers;
     }
 
     @Override
-    public Response response(RequestLine line, Headers hdrs, Content body) {
-        return new RsWithHeaders(
-            this.origin.response(line, hdrs, body),
-            this.headers
-        );
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+        return origin.response(line, headers, body)
+            .thenApply(
+                res -> {
+                    ResponseBuilder builder = ResponseBuilder.from(res.status())
+                        .headers(res.headers())
+                        .body(res.body());
+                    additional.stream().forEach(h -> builder.header(h.getKey(), h.getValue()));
+                    return builder.build();
+                }
+            );
     }
 }

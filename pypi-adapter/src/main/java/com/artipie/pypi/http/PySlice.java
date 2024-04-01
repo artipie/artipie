@@ -13,8 +13,7 @@ import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -61,7 +60,7 @@ public final class PySlice extends Slice.Wrap {
                     new BasicAuthzSlice(
                         new SliceWithHeaders(
                             new SliceDownload(storage),
-                            Headers.from(new ContentType("application/octet-stream"))
+                            Headers.from(ContentType.mime("application/octet-stream"))
                         ),
                         auth,
                         new OperationControl(
@@ -126,7 +125,7 @@ public final class PySlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new SliceSimple(new RsWithStatus(RsStatus.NOT_FOUND))
+                    new SliceSimple(ResponseBuilder.notFound().build())
                 )
             )
         );

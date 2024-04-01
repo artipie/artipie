@@ -6,8 +6,6 @@ package com.artipie.http;
 
 import com.artipie.RepositorySlices;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtPath;
 import com.artipie.http.rt.RtRule;
@@ -17,6 +15,7 @@ import com.artipie.misc.ArtipieProperties;
 import com.artipie.settings.Settings;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
@@ -31,14 +30,13 @@ public final class MainSlice extends Slice.Wrap {
      */
     private static final RtPath EMPTY_PATH = (line, headers, body) -> {
         final String path = line.uri().getPath();
-        final Optional<Response> res;
         if (path.equals("*") || path.equals("/")
             || path.replaceAll("^/+", "").split("/").length == 0) {
-            res = Optional.of(new RsWithStatus(RsStatus.NO_CONTENT));
-        } else {
-            res = Optional.empty();
+            return Optional.of(CompletableFuture.completedFuture(
+                ResponseBuilder.noContent().build()
+            ));
         }
-        return res;
+        return Optional.empty();
     };
 
     /**

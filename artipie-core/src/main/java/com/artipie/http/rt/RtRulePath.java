@@ -11,6 +11,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Rule-based route path.
@@ -42,7 +43,7 @@ public final class RtRulePath implements RtPath {
     }
 
     @Override
-    public Optional<Response> response(RequestLine line, Headers headers, Content body) {
+    public Optional<CompletableFuture<Response>> response(RequestLine line, Headers headers, Content body) {
         if (this.rule.apply(line, headers)) {
             return Optional.of(this.slice.response(line, headers, body));
         }

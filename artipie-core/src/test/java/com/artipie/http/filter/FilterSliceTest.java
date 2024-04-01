@@ -6,21 +6,19 @@ package com.artipie.http.filter;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.Response;
+import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Tests for {@link FilterSlice}.
- *
- * @since 1.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class FilterSliceTest {
     /**
      * Request path.
@@ -32,7 +30,7 @@ public class FilterSliceTest {
         Assertions.assertThrows(
             NullPointerException.class,
             () -> new FilterSlice(
-                (line, headers, body) -> StandardRs.OK,
+                (line, headers, body) -> CompletableFuture.completedFuture(ResponseBuilder.ok().build()),
                 FiltersTestUtil.yaml("filters:")
             )
         );
@@ -41,7 +39,7 @@ public class FilterSliceTest {
     @Test
     void shouldAllow() {
         final FilterSlice slice = new FilterSlice(
-            (line, headers, body) -> StandardRs.OK,
+            (line, headers, body) -> ResponseBuilder.ok().completedFuture(),
             FiltersTestUtil.yaml(
                 String.join(
                     System.lineSeparator(),
@@ -53,21 +51,20 @@ public class FilterSliceTest {
                 )
             )
         );
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(
+            RsStatus.OK,
             slice.response(
                 FiltersTestUtil.get(FilterSliceTest.PATH),
                 Headers.EMPTY,
                 Content.EMPTY
-            ),
-            new IsEqual<>(StandardRs.OK)
+            ).join().status()
         );
     }
 
     @Test
     void shouldForbidden() {
-        final AtomicReference<RsStatus> res = new AtomicReference<>();
-        final FilterSlice slice = new FilterSlice(
-            (line, headers, body) -> StandardRs.OK,
+        Response res = new FilterSlice(
+            (line, headers, body) -> ResponseBuilder.ok().completedFuture(),
             FiltersTestUtil.yaml(
                 String.join(
                     System.lineSeparator(),
@@ -76,22 +73,11 @@ public class FilterSliceTest {
                     "  exclude:"
                 )
             )
-        );
-        slice
-            .response(
-                FiltersTestUtil.get(FilterSliceTest.PATH),
-                Headers.EMPTY,
-                Content.EMPTY
-            )
-            .send(
-                (status, headers, body) -> {
-                    res.set(status);
-                    return null;
-                }
-            );
+        ).response(FiltersTestUtil.get(FilterSliceTest.PATH), Headers.EMPTY, Content.EMPTY)
+            .join();
         MatcherAssert.assertThat(
-            res.get(),
-            new IsEqual<>(RsStatus.FORBIDDEN)
+            res.status(),
+            Matchers.is(RsStatus.FORBIDDEN)
         );
     }
 }

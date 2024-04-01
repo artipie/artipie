@@ -11,14 +11,10 @@ import com.artipie.asto.Storage;
 import com.artipie.helm.ChartYaml;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.KeyFromPath;
 
 import java.net.MalformedURLException;
@@ -66,38 +62,25 @@ final class DownloadIndexSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
+    public CompletableFuture<Response> response(
+        RequestLine line, Headers headers, Content body
     ) {
         final String uri = line.uri().getPath();
         final Matcher matcher = DownloadIndexSlice.PTRN.matcher(uri);
-        final Response resp;
         if (matcher.matches()) {
             final Key path = new KeyFromPath(uri);
-            resp = new AsyncResponse(
-                this.storage.exists(path).thenCompose(
-                    exists -> {
-                        final CompletionStage<Response> rsp;
-                        if (exists) {
-                            rsp = this.storage.value(path)
-                                .thenCompose(
-                                    content -> new UpdateIndexUrls(content, this.base).value()
-                                ).thenApply(
-                                    content -> new RsFull(RsStatus.OK, Headers.EMPTY, content)
-                                );
-                        } else {
-                            rsp = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
-                        }
-                        return rsp;
+            return this.storage.exists(path).thenCompose(
+                exists -> {
+                    if (exists) {
+                        return this.storage.value(path)
+                            .thenCompose(content -> new UpdateIndexUrls(content, this.base).value())
+                            .thenApply(content -> ResponseBuilder.ok().body(content).build());
                     }
-                )
+                    return ResponseBuilder.notFound().completedFuture();
+                }
             );
-        } else {
-            resp = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
-        return resp;
+        return ResponseBuilder.badRequest().completedFuture();
     }
 
     /**

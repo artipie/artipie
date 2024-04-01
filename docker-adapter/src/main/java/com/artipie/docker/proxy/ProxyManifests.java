@@ -21,7 +21,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 
@@ -87,17 +87,17 @@ public final class ProxyManifests implements Manifests {
                 MANIFEST_ACCEPT_HEADERS,
                 Content.EMPTY
             ),
-            (status, headers, body) -> {
+            response -> {
                 final CompletionStage<Optional<Manifest>> result;
-                if (status == RsStatus.OK) {
-                    final Digest digest = new DigestHeader(headers).value();
-                    result = new Content.From(body).asBytesFuture().thenApply(
+                if (response.status() == RsStatus.OK) {
+                    final Digest digest = new DigestHeader(response.headers()).value();
+                    result = response.body().asBytesFuture().thenApply(
                         bytes -> Optional.of(new JsonManifest(digest, bytes))
                     );
-                } else if (status == RsStatus.NOT_FOUND) {
+                } else if (response.status() == RsStatus.NOT_FOUND) {
                     result = CompletableFuture.completedFuture(Optional.empty());
                 } else {
-                    result = unexpected(status);
+                    result = unexpected(response.status());
                 }
                 return result;
             }
@@ -115,12 +115,12 @@ public final class ProxyManifests implements Manifests {
                 Headers.EMPTY,
                 Content.EMPTY
             ),
-            (status, headers, body) -> {
+            response -> {
                 final CompletionStage<Tags> result;
-                if (status == RsStatus.OK) {
-                    result = CompletableFuture.completedFuture(()-> new Content.From(body));
+                if (response.status() == RsStatus.OK) {
+                    result = CompletableFuture.completedFuture(response::body);
                 } else {
-                    result = unexpected(status);
+                    result = unexpected(response.status());
                 }
                 return result;
             }

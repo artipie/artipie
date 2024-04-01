@@ -9,14 +9,14 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
-import com.artipie.http.hm.IsHeader;
-import com.artipie.http.hm.ResponseMatcher;
-import com.artipie.http.hm.RsHasBody;
+import com.artipie.http.Response;
+import com.artipie.http.headers.ContentLength;
+import com.artipie.http.headers.ContentType;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.cactoos.map.MapEntry;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,13 +46,13 @@ class SliceIndexTest {
         final String path = "abc/abc-0.1.tar.gz";
         final byte[] bytes = "abc".getBytes();
         this.storage.save(new Key.From(path), new Content.From(bytes)).join();
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ),
-            new RsHasBody(SliceIndexTest.html(new MapEntry<>(path, bytes)))
+            ).join(),
+            SliceIndexTest.html(new MapEntry<>(path, bytes))
         );
     }
 
@@ -61,15 +61,13 @@ class SliceIndexTest {
         final byte[] bytes = "qwerty".getBytes();
         this.storage.save(new Key.From("abc/abc-0.1.tar.gz"), new Content.From(bytes))
             .join();
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/"),
                 Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi"),
                 Content.EMPTY
-            ),
-            new RsHasBody(
-                SliceIndexTest.html(new MapEntry<>("username/pypi/abc/abc-0.1.tar.gz", bytes))
-            )
+            ).join(),
+            SliceIndexTest.html(new MapEntry<>("username/pypi/abc/abc-0.1.tar.gz", bytes))
         );
     }
 
@@ -82,16 +80,14 @@ class SliceIndexTest {
         this.storage.save(
             new Key.From("ghi", "jkl", "hij-0.3.whl"), new Content.From("000".getBytes())
         ).join();
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ),
-            new RsHasBody(
-                SliceIndexTest.html(
-                    new MapEntry<>(gzip, gzip.getBytes()), new MapEntry<>(wheel, wheel.getBytes())
-                )
+            ).join(),
+            SliceIndexTest.html(
+                new MapEntry<>(gzip, gzip.getBytes()), new MapEntry<>(wheel, wheel.getBytes())
             )
         );
     }
@@ -106,18 +102,16 @@ class SliceIndexTest {
         this.storage.save(
             new Key.From("ghi", "jkl", "hij-0.3.whl"), new Content.From("3".getBytes())
         ).join();
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
                 Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/repo/def"),
                 Content.EMPTY
-            ),
-            new RsHasBody(
+            ).join(),
                 SliceIndexTest.html(
                     new MapEntry<>("username/repo/def/def-0.1.tar.gz", one),
                     new MapEntry<>("username/repo/def/def-0.2.whl", two)
                 )
-            )
         );
     }
 
@@ -134,19 +128,17 @@ class SliceIndexTest {
         this.storage.save(
             new Key.From("def", "ghi", "hij-0.3.whl"), new Content.From("sd".getBytes())
         ).join();
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", String.format("/%s", rqline)),
                 Headers.EMPTY,
                 Content.EMPTY
-            ),
-            new RsHasBody(
-                SliceIndexTest.html(
+            ).join(),
+            SliceIndexTest.html(
                     new MapEntry<>(one, one.getBytes()),
                     new MapEntry<>(two, two.getBytes()),
                     new MapEntry<>(three, three.getBytes())
                 )
-            )
         );
     }
 
@@ -162,43 +154,46 @@ class SliceIndexTest {
         this.storage.save(
             new Key.From("def", "ghi", "hij-0.3.whl"), new Content.From("w".getBytes())
         ).join();
-        MatcherAssert.assertThat(
+        new SliceIndex(this.storage).response(
+            new RequestLine("GET", "/abc"),
+            Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/abc"),
+            Content.EMPTY
+        );
+        ResponseAssert.check(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/abc"),
                 Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/abc"),
                 Content.EMPTY
-            ),
-            new RsHasBody(
-                SliceIndexTest.html(
-                    new MapEntry<>("username/pypi/abc/file.txt", two),
-                    new MapEntry<>("username/pypi/abc/folder_one/file.txt", one),
-                    new MapEntry<>("username/pypi/abc/folder_two/abc/file.txt", three)
-                )
+            ).join(),
+            SliceIndexTest.html(
+                new MapEntry<>("username/pypi/abc/file.txt", two),
+                new MapEntry<>("username/pypi/abc/folder_one/file.txt", one),
+                new MapEntry<>("username/pypi/abc/folder_two/abc/file.txt", three)
             )
         );
     }
 
     @Test
     void returnsIndexListForEmptyStorage() {
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ),
-            new RsHasBody("<!DOCTYPE html>\n<html>\n  </body>\n\n</body>\n</html>".getBytes())
+            ).join(),
+            "<!DOCTYPE html>\n<html>\n  </body>\n\n</body>\n</html>".getBytes()
         );
     }
 
     @Test
     void returnsIndexListForEmptyStorageWithFullPath() {
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new SliceIndex(this.storage).response(
                 new RequestLine("GET", "/def"),
                 Headers.from(SliceIndexTest.HDR_FULL_PATH, "/username/pypi/def"),
                 Content.EMPTY
-            ),
-            new RsHasBody("<!DOCTYPE html>\n<html>\n  </body>\n\n</body>\n</html>".getBytes())
+            ).join(),
+            "<!DOCTYPE html>\n<html>\n  </body>\n\n</body>\n</html>".getBytes()
         );
     }
 
@@ -208,20 +203,13 @@ class SliceIndexTest {
         this.storage.save(
             new Key.From(path, "abc-0.0.1.tar.gz"), new Content.From(new byte[]{})
         ).join();
-        MatcherAssert.assertThat(
-            new SliceIndex(this.storage).response(
-                new RequestLine("GET", "/"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new ResponseMatcher(
-                RsStatus.OK,
-                new IsHeader("Content-Type", "text/html"),
-                new IsHeader("Content-Length", "179")
-            )
-        );
+        Response r = new SliceIndex(this.storage).response(
+            new RequestLine("GET", "/"), Headers.EMPTY, Content.EMPTY
+        ).join();
+        ResponseAssert.check(r, RsStatus.OK, ContentType.html(), new ContentLength(179));
     }
 
+    @SafeVarargs
     private static byte[] html(final Map.Entry<String, byte[]>... items) {
         return
             String.format(

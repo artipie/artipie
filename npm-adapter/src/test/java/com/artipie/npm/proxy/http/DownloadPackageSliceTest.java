@@ -9,9 +9,8 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.npm.RandomFreePort;
 import com.artipie.npm.proxy.NpmProxy;
@@ -21,7 +20,6 @@ import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.web.client.HttpResponse;
 import io.vertx.reactivex.ext.web.client.WebClient;
-import javax.json.Json;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterAll;
@@ -29,19 +27,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import javax.json.Json;
+
 /**
  * Test cases for {@link DownloadPackageSlice}.
- * @since 0.9
  * @todo #239:30min Fix download meta for empty prefix.
  *  Test for downloading meta hangs for some reason when empty prefix
  *  is passed. It is necessary to find out why it happens and add
  *  empty prefix to params of method DownloadPackageSliceTest#downloadMetaWorks.
  */
-@SuppressWarnings({"PMD.AvoidUsingHardCodedIP", "PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings("PMD.AvoidUsingHardCodedIP")
 final class DownloadPackageSliceTest {
-    /**
-     * Vertx.
-     */
+
     private static final Vertx VERTX = Vertx.vertx();
 
     /**
@@ -71,7 +68,7 @@ final class DownloadPackageSliceTest {
                 new DownloadPackageSlice(
                     new NpmProxy(
                         storage,
-                        new SliceSimple(StandardRs.NOT_FOUND)
+                        new SliceSimple(ResponseBuilder.notFound().build())
                     ),
                     path
                 ),
@@ -93,11 +90,10 @@ final class DownloadPackageSliceTest {
                     new NpmProxy(
                         new InMemoryStorage(),
                         new SliceSimple(
-                            new RsWithBody(
-                                StandardRs.OK,
-                                new TestResource("storage/@hello/simple-npm-project/meta.json")
-                                    .asBytes()
-                            )
+                            ResponseBuilder.ok()
+                                .body(new TestResource("storage/@hello/simple-npm-project/meta.json")
+                                    .asBytes())
+                                .build()
                         )
                     ),
                     path
@@ -109,20 +105,15 @@ final class DownloadPackageSliceTest {
         }
     }
 
-    private void pereformRequestAndChecks(
-        final String pathprefix, final VertxSliceServer server
-    ) {
+    private void pereformRequestAndChecks(String pathPrefix, VertxSliceServer server) {
         server.start();
-        final String url = String.format(
-            "http://127.0.0.1:%d%s/@hello/simple-npm-project",
-            this.port,
-            pathprefix
-        );
+        final String url = String.format("http://127.0.0.1:%d%s/@hello/simple-npm-project",
+            this.port, pathPrefix);
         final WebClient client = WebClient.create(DownloadPackageSliceTest.VERTX);
         final HttpResponse<Buffer> resp = client.getAbs(url).rxSend().blockingGet();
         MatcherAssert.assertThat(
             "Status code should be 200 OK",
-            String.valueOf(resp.statusCode()),
+            resp.statusCode(),
             new IsEqual<>(RsStatus.OK.code())
         );
         final JsonObject json = resp.body().toJsonObject();

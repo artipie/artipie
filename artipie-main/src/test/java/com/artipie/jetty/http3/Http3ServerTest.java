@@ -7,24 +7,12 @@ package com.artipie.jetty.http3;
 import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.nuget.RandomFreePort;
 import io.reactivex.Flowable;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.Random;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.http.HttpVersion;
@@ -43,6 +31,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Test for {@link Http3Server}.
@@ -198,22 +195,22 @@ class Http3ServerTest {
     static final class TestSlice implements Slice {
 
         @Override
-        public Response response(RequestLine line, Headers headers, Content body) {
-            final Response res;
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             if (line.toString().contains("no_data")) {
-                res = new RsWithHeaders(
-                    new RsWithStatus(RsStatus.OK),
-                    new Header(
-                        Http3ServerTest.RQ_METHOD, line.method().value()
-                    )
-                );
-            } else if (line.toString().contains("small_data")) {
-                res = new RsWithBody(new RsWithStatus(RsStatus.OK), Http3ServerTest.SMALL_DATA);
-            } else if (line.toString().contains("random_chunks")) {
+                return ResponseBuilder.ok()
+                    .header( Http3ServerTest.RQ_METHOD, line.method().value())
+                    .completedFuture();
+            }
+            if (line.toString().contains("small_data")) {
+                return ResponseBuilder.ok()
+                    .body(Http3ServerTest.SMALL_DATA)
+                    .completedFuture();
+            }
+            if (line.toString().contains("random_chunks")) {
                 final Random random = new Random();
                 final byte[] data = new byte[Http3ServerTest.SIZE];
                 random.nextBytes(data);
-                res = new RsWithBody(
+                return ResponseBuilder.ok().body(
                     new Content.From(
                         Flowable.fromArray(ByteBuffer.wrap(data))
                             .flatMap(
@@ -223,13 +220,12 @@ class Http3ServerTest {
                             )
                             .delay(random.nextInt(5_000), TimeUnit.MILLISECONDS)
                     )
-                );
-            } else if (line.toString().contains("return_back")) {
-                res = new RsWithBody(new RsWithStatus(RsStatus.OK), body);
-            } else {
-                res = StandardRs.NOT_FOUND;
+                ).completedFuture();
             }
-            return res;
+            if (line.toString().contains("return_back")) {
+                return ResponseBuilder.ok().body(body).completedFuture();
+            }
+            return ResponseBuilder.notFound().completedFuture();
         }
     }
 

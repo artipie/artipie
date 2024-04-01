@@ -5,7 +5,6 @@
 package com.artipie.docker.proxy;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.FailedCompletionStage;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
@@ -14,7 +13,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -52,16 +51,14 @@ public final class ProxyDocker implements Docker {
                 Headers.EMPTY,
                 Content.EMPTY
             ),
-            (status, headers, body) -> {
-                final CompletionStage<Catalog> result;
-                if (status == RsStatus.OK) {
-                    return CompletableFuture.completedFuture(() -> new Content.From(body));
-                } else {
-                    result = new FailedCompletionStage<>(
-                        new IllegalArgumentException("Unexpected status: " + status)
-                    );
+            response -> {
+                if (response.status() == RsStatus.OK) {
+                    Catalog res = response::body;
+                    return CompletableFuture.completedFuture(res);
                 }
-                return result;
+                return CompletableFuture.failedFuture(
+                    new IllegalArgumentException("Unexpected status: " + response.status())
+                );
             }
         ).result();
     }

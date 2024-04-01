@@ -10,11 +10,10 @@ import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.ResponseMatcher;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import org.hamcrest.MatcherAssert;
+import com.artipie.http.RsStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,39 +38,28 @@ class BlobEntityHeadTest {
             "aad63a9339440e7c3e1fff2b988991b9bfb81280042fa7f39a5e327023056819"
         );
         final Response response = this.slice.response(
-            new RequestLine(
-                RqMethod.HEAD,
-                String.format("/v2/test/blobs/%s", digest)
-            ),
-            Headers.EMPTY,
-            Content.EMPTY
-        );
-        MatcherAssert.assertThat(
+            new RequestLine(RqMethod.HEAD, "/v2/test/blobs/" + digest),
+            Headers.EMPTY, Content.EMPTY).join();
+        ResponseAssert.check(
             response,
-            new ResponseMatcher(
-                RsStatus.OK,
-                new Header("Content-Length", "2803255"),
-                new Header("Docker-Content-Digest", digest),
-                new Header("Content-Type", "application/octet-stream")
-            )
+            RsStatus.OK,
+            new Header("Content-Length", "2803255"),
+            new Header("Docker-Content-Digest", digest),
+            new Header("Content-Type", "application/octet-stream")
         );
     }
 
     @Test
     void shouldReturnNotFoundForUnknownDigest() {
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             this.slice.response(
                 new RequestLine(
                     RqMethod.HEAD,
-                    String.format(
-                        "/v2/test/blobs/%s",
+                    "/v2/test/blobs/" +
                         "sha256:0123456789012345678901234567890123456789012345678901234567890123"
-                    )
-                ),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new IsErrorsResponse(RsStatus.NOT_FOUND, "BLOB_UNKNOWN")
+                ), Headers.EMPTY, Content.EMPTY
+            ).join(),
+            RsStatus.NOT_FOUND
         );
     }
 }

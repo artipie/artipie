@@ -5,18 +5,16 @@
 package com.artipie.http.rt;
 
 import com.artipie.asto.Content;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Routing slice.
@@ -60,20 +58,17 @@ public final class SliceRoute implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-        final Headers headers,
-        final Content body) {
+    public CompletableFuture<Response> response(final RequestLine line,
+                                                final Headers headers,
+                                                final Content body) {
         return this.routes.stream()
             .map(item -> item.response(line, headers, body))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst()
-            .orElse(
-                new RsWithBody(
-                    new RsWithStatus(RsStatus.NOT_FOUND),
-                    "not found", StandardCharsets.UTF_8
-                )
-            );
+            .orElse(CompletableFuture.completedFuture(
+                ResponseBuilder.notFound().build()
+            ));
     }
 
     /**
@@ -103,11 +98,7 @@ public final class SliceRoute implements Slice {
         }
 
         @Override
-        public Optional<Response> response(
-            RequestLine line,
-            Headers headers,
-            Content body
-        ) {
+        public Optional<CompletableFuture<Response>> response(RequestLine line, Headers headers, Content body) {
             return this.wrapped.response(line, headers, body);
         }
     }

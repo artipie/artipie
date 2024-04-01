@@ -12,7 +12,6 @@ import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import io.reactivex.Flowable;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -69,7 +68,7 @@ public final class BearerAuthenticator implements Authenticator {
      * @param header WWW-Authenticate header.
      * @return Authorization header.
      */
-    private CompletionStage<Authorization.Bearer> authenticate(final WwwAuthenticate header) {
+    private CompletableFuture<Authorization.Bearer> authenticate(final WwwAuthenticate header) {
         final URI realm;
         try {
             realm = new URI(header.realm());
@@ -80,20 +79,13 @@ public final class BearerAuthenticator implements Authenticator {
             .filter(param -> !"realm".equals(param.name()))
             .map(param -> String.format("%s=%s", param.name(), param.value()))
             .collect(Collectors.joining("&"));
-        final CompletableFuture<String> promise = new CompletableFuture<>();
-        return new AuthClientSlice(new UriClientSlice(this.client, realm), this.auth).response(
-            new RequestLine(RqMethod.GET, String.format("?%s", query)),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).send(
-            (status, headers, body) -> new Content.From(body).asBytesFuture()
-                .thenApply(this.format::token)
-                .thenCompose(
-                    token -> {
-                        promise.complete(token);
-                        return CompletableFuture.allOf();
-                    }
-                )
-        ).thenCompose(ignored -> promise).thenApply(Authorization.Bearer::new);
+
+        return new AuthClientSlice(new UriClientSlice(this.client, realm), this.auth)
+            .response(new RequestLine(RqMethod.GET, "?" + query), Headers.EMPTY, Content.EMPTY)
+            .thenCompose(response -> response.body().asBytesFuture())
+            .thenApply(bytes -> {
+                String token = this.format.token(bytes);
+                return new Authorization.Bearer(token);
+            });
     }
 }

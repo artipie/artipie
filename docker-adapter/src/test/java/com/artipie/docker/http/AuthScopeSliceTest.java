@@ -8,11 +8,11 @@ import com.artipie.asto.Content;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.StandardRs;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -44,12 +44,8 @@ class AuthScopeSliceTest {
                 }
 
                 @Override
-                public Response response(
-                    final RequestLine line,
-                    final Headers headers,
-                    final Content body
-                ) {
-                    return StandardRs.OK;
+                public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+                    return ResponseBuilder.ok().completedFuture();
                 }
             },
             (headers, rline) -> CompletableFuture.completedFuture(
@@ -57,9 +53,7 @@ class AuthScopeSliceTest {
             ),
             authUser -> new TestCollection(perm),
             "my-repo"
-        ).response(line, Headers.EMPTY, Content.EMPTY).send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        ).response(line, Headers.EMPTY, Content.EMPTY).join();
         MatcherAssert.assertThat(
             "Request line passed to slice",
             aline.get(),

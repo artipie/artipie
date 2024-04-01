@@ -8,6 +8,7 @@ package com.artipie.hex.http.headers;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Accept;
 import com.artipie.http.headers.ContentType;
+
 import java.util.Map;
 
 /**
@@ -43,6 +44,6 @@ public class HexContentType {
                 type = header.getValue();
             }
         }
-        return this.headers.copy().add(new ContentType(type));
+        return this.headers.copy().add(ContentType.mime(type));
     }
 }

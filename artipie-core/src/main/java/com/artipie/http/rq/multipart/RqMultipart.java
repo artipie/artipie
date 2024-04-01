@@ -8,16 +8,18 @@ package com.artipie.http.rq.multipart;
 import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.headers.Header;
+import com.artipie.http.RsStatus;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
+import org.reactivestreams.Publisher;
+import wtf.g4s8.mime.MimeType;
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Predicate;
-import org.reactivestreams.Publisher;
-import wtf.g4s8.mime.MimeType;
 
 /**
  * Multipart request.
@@ -39,7 +41,7 @@ public final class RqMultipart {
     /**
      * Content type.
      */
-    private ContentType ctype;
+    private Header contentType;
 
     /**
      * Body upstream.
@@ -52,17 +54,17 @@ public final class RqMultipart {
      * @param body Upstream
      */
     public RqMultipart(final Headers headers, final Publisher<ByteBuffer> body) {
-        this(new ContentType(headers), body);
+        this(headers.single(ContentType.NAME), body);
     }
 
     /**
      * Multipart request from content type and body upstream.
      *
-     * @param ctype Content type
+     * @param contentType Content type
      * @param body Upstream
      */
-    public RqMultipart(final ContentType ctype, final Publisher<ByteBuffer> body) {
-        this.ctype = ctype;
+    public RqMultipart(final Header contentType, final Publisher<ByteBuffer> body) {
+        this.contentType = contentType;
         this.upstream = body;
     }
 
@@ -131,7 +133,7 @@ public final class RqMultipart {
      * @return Boundary string
      */
     private String boundary() {
-        final String header = MimeType.of(this.ctype.getValue()).param("boundary").orElseThrow(
+        final String header = MimeType.of(this.contentType.getValue()).param("boundary").orElseThrow(
             () -> new ArtipieHttpException(
                 RsStatus.BAD_REQUEST,
                 "Content-type boundary param missed"

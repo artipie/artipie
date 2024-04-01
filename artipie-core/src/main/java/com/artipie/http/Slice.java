@@ -7,6 +7,8 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Arti-pie slice.
  * <p>
@@ -19,12 +21,13 @@ public interface Slice {
 
     /**
      * Respond to a http request.
-     * @param line The request line
+     *
+     * @param line    The request line
      * @param headers The request headers
-     * @param body The request body
+     * @param body    The request body
      * @return The response.
      */
-    Response response(RequestLine line, Headers headers, Content body);
+    CompletableFuture<Response> response(RequestLine line, Headers headers, Content body);
 
     /**
      * SliceWrap is a simple decorative envelope for Slice.
@@ -44,7 +47,7 @@ public interface Slice {
         }
 
         @Override
-        public final Response response(RequestLine line, Headers headers, Content body) {
+        public final CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             return this.slice.response(line, headers, body);
         }
     }

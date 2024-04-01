@@ -13,11 +13,6 @@ import com.github.dockerjava.api.DockerClient;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.launcher.EtcdContainer;
 import io.etcd.jetcd.test.EtcdClusterExtension;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.concurrent.CompletionException;
-import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -29,6 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.testcontainers.DockerClientFactory;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.CompletionException;
+import java.util.stream.Collectors;
 
 /**
  * Test case for etcd-storage.

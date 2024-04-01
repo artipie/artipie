@@ -14,11 +14,10 @@ import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.perms.EmptyPermissions;
@@ -27,10 +26,10 @@ import com.artipie.security.policy.PolicyByUsername;
 import org.cactoos.text.Base64Encoded;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.PermissionCollection;
 import java.util.Arrays;
 import java.util.Optional;
@@ -43,36 +42,32 @@ public class AuthTest {
     @Test
     public void keyIsReturned() {
         final String token = "aGVsbG86d29ybGQ=";
-        final Headers headers = Headers.from(
-            new Authorization(String.format("Basic %s", token))
-        );
-        MatcherAssert.assertThat(
+        final Headers headers = Headers.from(new Authorization("Basic " + token));
+        Assertions.assertEquals(
+            token,
             new GemSlice(
                 new InMemoryStorage(),
                 Policy.FREE,
                 (name, pwd) -> Optional.of(new AuthUser("user", "test")),
                 ""
             ).response(
-                new RequestLine("GET", "/api/v1/api_key"),
-                headers,
-                Content.EMPTY
-            ), new RsHasBody(token.getBytes(StandardCharsets.UTF_8))
+                new RequestLine("GET", "/api/v1/api_key"), headers, Content.EMPTY
+            ).join().body().asString()
         );
     }
 
     @Test
     public void unauthorizedWhenNoIdentity() {
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(
+            RsStatus.UNAUTHORIZED,
             new GemSlice(
                 new InMemoryStorage(),
                 Policy.FREE,
                 (username, password) -> Optional.of(AuthUser.ANONYMOUS),
                 ""
             ).response(
-                new RequestLine("GET", "/api/v1/api_key"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ), new RsHasStatus(RsStatus.UNAUTHORIZED)
+                new RequestLine("GET", "/api/v1/api_key"), Headers.EMPTY, Content.EMPTY
+            ).join().status()
         );
     }
 
@@ -82,7 +77,8 @@ public class AuthTest {
         final String pwd = "pwd";
         final String token = new Base64Encoded(String.format("%s:%s", lgn, pwd)).asString();
         final String repo = "test";
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(
+            RsStatus.FORBIDDEN,
             new GemSlice(
                 new InMemoryStorage(),
                 user -> {
@@ -103,7 +99,7 @@ public class AuthTest {
                 new RequestLine("POST", "/api/v1/gems"),
                 Headers.from(new Authorization(token)),
                 Content.EMPTY
-            ), new RsHasStatus(RsStatus.FORBIDDEN)
+            ).join().status()
         );
     }
 
@@ -112,7 +108,8 @@ public class AuthTest {
         final String lgn = "usr";
         final String pwd = "pwd";
         final String token = new Base64Encoded(String.format("%s:%s", lgn, pwd)).asString();
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(
+            RsStatus.FORBIDDEN,
             new GemSlice(
                 new InMemoryStorage(),
                 new PolicyByUsername("another user"),
@@ -122,7 +119,7 @@ public class AuthTest {
                 new RequestLine("GET", "specs.4.8"),
                 Headers.from(new Authorization(token)),
                 Content.EMPTY
-            ), new RsHasStatus(RsStatus.FORBIDDEN)
+            ).join().status()
         );
     }
 
@@ -165,6 +162,6 @@ public class AuthTest {
             new RequestLine("POST", "/api/v1/gems"),
             Headers.from(new Authorization("Basic " + token)),
             new Content.From(new TestResource("rails-6.0.2.2.gem").asBytes())
-        );
+        ).join();
     }
 }

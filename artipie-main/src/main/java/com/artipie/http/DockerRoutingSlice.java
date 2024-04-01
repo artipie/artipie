@@ -16,6 +16,7 @@ import com.artipie.security.perms.FreePermissions;
 import com.artipie.settings.Settings;
 import org.apache.http.client.utils.URIBuilder;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,15 +57,14 @@ public final class DockerRoutingSlice implements Slice {
 
     @Override
     @SuppressWarnings("PMD.NestedIfDepthCheck")
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
+    public CompletableFuture<Response> response(final RequestLine line, final Headers headers,
+                                                final Content body) {
         final String path = line.uri().getPath();
         final Matcher matcher = PTN_PATH.matcher(path);
-        final Response rsp;
         if (matcher.matches()) {
             final String group = matcher.group(1);
             if (group.isEmpty() || group.equals("/")) {
-                rsp = new BasicAuthzSlice(
+                return new BasicAuthzSlice(
                     new BaseEntity(),
                     this.settings.authz().authentication(),
                     new OperationControl(
@@ -74,7 +74,7 @@ public final class DockerRoutingSlice implements Slice {
                     )
                 ).response(line, headers, body);
             } else {
-                rsp = this.origin.response(
+                return this.origin.response(
                     new RequestLine(
                         line.method().toString(),
                         new URIBuilder(line.uri()).setPath(group).toString(),
@@ -84,10 +84,8 @@ public final class DockerRoutingSlice implements Slice {
                     body
                 );
             }
-        } else {
-            rsp = this.origin.response(line, headers, body);
         }
-        return rsp;
+        return this.origin.response(line, headers, body);
     }
 
     /**
@@ -110,9 +108,9 @@ public final class DockerRoutingSlice implements Slice {
         }
 
         @Override
-        public Response response(final RequestLine line,
-                                 final Headers headers,
-            final Content body) {
+        public CompletableFuture<Response> response(final RequestLine line,
+                                                    final Headers headers,
+                                                    final Content body) {
             return this.origin.response(
                 new RequestLine(
                     line.method().toString(),

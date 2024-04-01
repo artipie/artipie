@@ -153,7 +153,7 @@ final class CacheComposerIT {
             "Installation failed",
             this.exec("composer", "install", "--verbose", "--no-cache"),
             new AllOf<>(
-                new ListOf<Matcher<? super String>>(
+                new ListOf<>(
                     new StringContains(false, "Installs: psr/log:1.1.3"),
                     new StringContains(false, "- Downloading psr/log (1.1.3)"),
                     new StringContains(

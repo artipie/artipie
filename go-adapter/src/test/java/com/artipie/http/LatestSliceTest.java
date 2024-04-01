@@ -7,15 +7,12 @@ package com.artipie.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.headers.Header;
-import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasHeaders;
-import com.artipie.http.hm.RsHasStatus;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutionException;
@@ -49,26 +46,23 @@ public class LatestSliceTest {
             new KeyFromPath("example.com/latest/news/@v/v0.0.2.info"),
             new Content.From(info.getBytes())
         ).get();
+        Response response = new LatestSlice(storage).response(
+            RequestLine.from("GET example.com/latest/news/@latest?a=b HTTP/1.1"),
+            Headers.EMPTY, Content.EMPTY
+        ).join();
+        Assertions.assertArrayEquals(info.getBytes(), response.body().asBytes());
         MatcherAssert.assertThat(
-            new LatestSlice(storage).response(
-                RequestLine.from("GET example.com/latest/news/@latest?a=b HTTP/1.1"),
-                Headers.EMPTY, Content.EMPTY
-            ),
-            Matchers.allOf(
-                new RsHasBody(info.getBytes()),
-                new RsHasHeaders(new Header("content-type", "application/json"))
-            )
+            response.headers(),
+            Matchers.containsInRelativeOrder(ContentType.json())
         );
     }
 
     @Test
     void returnsNotFondWhenModuleNotFound() {
-        MatcherAssert.assertThat(
-            new LatestSlice(new InMemoryStorage()).response(
-                RequestLine.from("GET example.com/first/@latest HTTP/1.1"), Headers.EMPTY, Content.EMPTY
-            ),
-            new RsHasStatus(RsStatus.NOT_FOUND)
-        );
+        Response response = new LatestSlice(new InMemoryStorage()).response(
+            RequestLine.from("GET example.com/first/@latest HTTP/1.1"), Headers.EMPTY, Content.EMPTY
+        ).join();
+        Assertions.assertEquals(RsStatus.NOT_FOUND, response.status());
     }
 
 }

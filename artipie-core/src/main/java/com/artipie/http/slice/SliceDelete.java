@@ -7,11 +7,10 @@ package com.artipie.http.slice;
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.scheduling.RepositoryEvents;
 
 import java.util.Optional;
@@ -51,25 +50,23 @@ public final class SliceDelete implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body) {
+    public CompletableFuture<Response> response(
+        RequestLine line, Headers headers, Content body
+    ) {
         final KeyFromPath key = new KeyFromPath(line.uri().getPath());
-        return new AsyncResponse(
-            this.storage.exists(key).thenCompose(
+        return this.storage.exists(key)
+            .thenCompose(
                 exists -> {
                     final CompletableFuture<Response> rsp;
                     if (exists) {
                         rsp = this.storage.delete(key).thenAccept(
                             nothing -> this.events.ifPresent(item -> item.addDeleteEventByKey(key))
-                        ).thenApply(none -> StandardRs.NO_CONTENT);
+                        ).thenApply(none -> ResponseBuilder.noContent().build());
                     } else {
-                        rsp = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
+                        rsp = CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
                     }
                     return rsp;
                 }
-            )
         );
     }
 }

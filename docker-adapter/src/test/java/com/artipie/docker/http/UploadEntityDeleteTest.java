@@ -13,10 +13,10 @@ import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.ResponseMatcher;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,14 +54,9 @@ final class UploadEntityDeleteTest {
             new RequestLine(RqMethod.DELETE, String.format("%s", path)),
             Headers.EMPTY,
             Content.EMPTY
-        );
-        MatcherAssert.assertThat(
-            get,
-            new ResponseMatcher(
-                RsStatus.OK,
-                new Header("Docker-Upload-UUID", upload.uuid())
-            )
-        );
+        ).join();
+        ResponseAssert.check(get,
+            RsStatus.OK, new Header("Docker-Upload-UUID", upload.uuid()));
     }
 
     @Test
@@ -77,9 +72,8 @@ final class UploadEntityDeleteTest {
             new RequestLine(RqMethod.DELETE, String.format("%s", path)),
             Headers.EMPTY,
             Content.EMPTY
-        );
-        MatcherAssert.assertThat(
-            get,
+        ).join();
+        MatcherAssert.assertThat(get,
             new IsErrorsResponse(RsStatus.NOT_FOUND, "BLOB_UPLOAD_UNKNOWN")
         );
     }

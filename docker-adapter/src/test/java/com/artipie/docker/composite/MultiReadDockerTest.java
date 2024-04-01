@@ -10,7 +10,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import com.artipie.docker.proxy.ProxyDocker;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ final class MultiReadDockerTest {
     void createsMultiReadRepo() {
         final MultiReadDocker docker = new MultiReadDocker(
             Arrays.asList(
-                new ProxyDocker((line, headers, body) -> StandardRs.EMPTY),
+                new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().completedFuture()),
                 new AstoDocker(new InMemoryStorage())
             )
         );

@@ -8,19 +8,16 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.scheduling.ArtifactEvent;
 
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,14 +62,13 @@ final class UnpublishForceSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body
     ) {
         final String uri = line.uri().getPath();
         final Matcher matcher = UnpublishForceSlice.PTRN.matcher(uri);
-        final Response resp;
         if (matcher.matches()) {
             final String pkg = new PackageNameFromUrl(
                 String.format(
@@ -81,7 +77,7 @@ final class UnpublishForceSlice implements Slice {
                     line.version()
                 )
             ).value();
-            CompletionStage<Void> res = this.storage.deleteAll(new Key.From(pkg));
+            CompletableFuture<Void> res = this.storage.deleteAll(new Key.From(pkg));
             if (this.events.isPresent()) {
                 res = res.thenRun(
                     () -> this.events.map(
@@ -91,10 +87,8 @@ final class UnpublishForceSlice implements Slice {
                     )
                 );
             }
-            resp = new AsyncResponse(res.thenApply(nothing -> StandardRs.OK));
-        } else {
-            resp = new RsWithStatus(RsStatus.BAD_REQUEST);
+            return res.thenApply(nothing -> ResponseBuilder.ok().build());
         }
-        return resp;
+        return ResponseBuilder.badRequest().completedFuture();
     }
 }

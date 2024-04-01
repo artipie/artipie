@@ -6,11 +6,15 @@ package com.artipie.vertx;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.Response;
+import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
+import io.reactivex.Flowable;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.core.http.HttpServerRequest;
 import io.vertx.reactivex.core.http.HttpServerResponse;
@@ -20,7 +24,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Vert.x Slice.
@@ -73,11 +79,7 @@ public final class VertxSliceServer implements Closeable {
      * @param served The slice to be served.
      * @param port The port.
      */
-    public VertxSliceServer(
-        final Vertx vertx,
-        final Slice served,
-        final Integer port
-    ) {
+    public VertxSliceServer(Vertx vertx, Slice served, Integer port) {
         this(vertx, served, new HttpServerOptions().setPort(port));
     }
 
@@ -86,11 +88,7 @@ public final class VertxSliceServer implements Closeable {
      * @param served The slice to be served.
      * @param options The options to use.
      */
-    public VertxSliceServer(
-        final Vertx vertx,
-        final Slice served,
-        final HttpServerOptions options
-    ) {
+    public VertxSliceServer(Vertx vertx, Slice served, HttpServerOptions options) {
         this.vertx = vertx;
         this.served = served;
         this.options = options;
@@ -159,14 +157,80 @@ public final class VertxSliceServer implements Closeable {
      * @return Completion of request serving.
      */
     private CompletionStage<Void> serve(final HttpServerRequest req) {
-        final HttpServerResponse response = req.response();
-        return this.served.response(
-            new RequestLine(req.method().name(), req.uri(), req.version().toString()),
-            Headers.from(req.headers()),
-            new Content.From(
-                req.toFlowable().map(buffer -> ByteBuffer.wrap(buffer.getBytes()))
-            )
-        ).send(new ContinueConnection(response, new VertxConnection(response)));
+        Headers requestHeaders = Headers.from(req.headers());
+        AtomicReference<Response> artipieResponse = new AtomicReference<>();
+        return CompletableFuture.allOf(
+            this.served.response(
+                new RequestLine(req.method().name(), req.uri(), req.version().toString()),
+                requestHeaders,
+                new Content.From(
+                    req.toFlowable().map(buffer -> ByteBuffer.wrap(buffer.getBytes()))
+                )
+            ).thenAccept(artipieResponse::set),
+            continueResponseFut(requestHeaders, req.response())
+        ).thenCompose(v -> {
+            Response resp = artipieResponse.get();
+            return VertxSliceServer.accept(req.response(), resp.status(), resp.headers(), resp.body());
+        });
+    }
+
+
+    private static CompletionStage<Void> accept(
+        HttpServerResponse response, RsStatus status, Headers headers, Content body
+    ) {
+        final CompletableFuture<Void> promise = new CompletableFuture<>();
+        if (status == RsStatus.CONTINUE) {
+            response.writeContinue();
+            return CompletableFuture.completedFuture(null);
+        }
+        response.setStatusCode(status.code());
+        headers.stream().forEach(h -> response.putHeader(h.getKey(), h.getValue()));
+        final Flowable<Buffer> vpb = Flowable.fromPublisher(body)
+            .map(VertxSliceServer::mapBuffer)
+            .doOnError(promise::completeExceptionally);
+        if (response.headers().contains("Content-Length")) {
+            response.setChunked(false);
+            vpb.doOnComplete(
+                () -> {
+                    response.end();
+                    promise.complete(null);
+                }
+            ).forEach(response::write);
+        } else {
+            response.setChunked(true);
+            vpb.doOnComplete(() -> promise.complete(null))
+                .subscribe(response.toSubscriber());
+        }
+        return promise;
+    }
+
+    /**
+     * Check if request expects {@code continue} status to be sent before sending request body.
+     *
+     * @param headers Request headers
+     * @return True if expects
+     */
+    private static CompletableFuture<Void> continueResponseFut(Headers headers, HttpServerResponse response) {
+        if (headers.find("expect")
+            .stream()
+            .anyMatch(h -> "100-continue".equalsIgnoreCase(h.getValue()))) {
+            return CompletableFuture.runAsync(() -> VertxSliceServer.accept(
+                response, RsStatus.CONTINUE, Headers.EMPTY, Content.EMPTY)
+            );
+        }
+        return CompletableFuture.completedFuture(null);
+    }
+
+    /**
+     * Map {@link ByteBuffer} to {@link Buffer}.
+     *
+     * @param buffer Java byte buffer
+     * @return Vertx buffer
+     */
+    private static Buffer mapBuffer(final ByteBuffer buffer) {
+        final byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        return Buffer.buffer(bytes);
     }
 
     /**

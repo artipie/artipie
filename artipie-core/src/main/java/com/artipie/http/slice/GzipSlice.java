@@ -6,12 +6,11 @@ package com.artipie.http.slice;
 
 import com.artipie.asto.ArtipieIOException;
 import com.artipie.asto.Content;
-import com.artipie.http.Connection;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
 import org.cqfn.rio.Buffers;
 import org.cqfn.rio.WriteGreed;
 import org.cqfn.rio.stream.ReactiveInputStream;
@@ -28,17 +27,12 @@ import java.util.zip.GZIPOutputStream;
 
 /**
  * Slice that gzips requested content.
- * @since 1.1
  */
 final class GzipSlice implements Slice {
 
-    /**
-     * Origin.
-     */
     private final Slice origin;
 
     /**
-     * Ctor.
      * @param origin Origin slice
      */
     GzipSlice(final Slice origin) {
@@ -46,39 +40,35 @@ final class GzipSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
-        return connection -> this.origin.response(line, headers, body).send(
-            (status, rsheaders, rsbody) -> GzipSlice.gzip(connection, status, rsbody, rsheaders)
-        );
+    public CompletableFuture<Response> response(
+        RequestLine line, Headers headers, Content body
+    ) {
+        return this.origin.response(line, headers, body)
+            .thenCompose(
+                r -> gzip(r.body()).thenApply(
+                    content -> ResponseBuilder.from(r.status())
+                        .headers(r.headers())
+                        .header("Content-encoding", "gzip")
+                        .body(content)
+                        .build()
+                )
+            );
     }
 
-    /**
-     * Gzip origin response publisher and pass it to connection along with status and headers.
-     * @param connection Connection
-     * @param stat Response status
-     * @param body Origin response body
-     * @param headers Origin response headers
-     * @return Completable action
-     */
     @SuppressWarnings("PMD.CloseResource")
-    private static CompletionStage<Void> gzip(final Connection connection, final RsStatus stat,
-        final Publisher<ByteBuffer> body, final Headers headers) {
-        final CompletionStage<Void> future;
-        final CompletableFuture<Void> tmp;
+    private static CompletionStage<Content> gzip(Publisher<ByteBuffer> body) {
+        CompletionStage<Content> res;
         try (PipedOutputStream resout = new PipedOutputStream();
             PipedInputStream oinput = new PipedInputStream();
-            PipedOutputStream tmpout = new PipedOutputStream(oinput)
-        ) {
-            tmp = CompletableFuture.allOf().thenCompose(
-                nothing -> new ReactiveOutputStream(tmpout).write(body, WriteGreed.SYSTEM)
-            );
+             PipedOutputStream tmpout = new PipedOutputStream(oinput)) {
             final PipedInputStream src = new PipedInputStream(resout);
-            future = tmp.thenCompose(
-                nothing -> connection.accept(
-                    stat, headers.copy().add("Content-encoding", "gzip"),
-                    new Content.From(new ReactiveInputStream(src).read(Buffers.Standard.K8))
-                )
+            CompletableFuture.allOf(
+                new ReactiveOutputStream(tmpout)
+                    .write(body, WriteGreed.SYSTEM)
+                    .toCompletableFuture()
+            );
+            res = CompletableFuture.supplyAsync(
+                () -> new Content.From(new ReactiveInputStream(src).read(Buffers.Standard.K8))
             );
             try (GZIPOutputStream gzos = new GZIPOutputStream(resout)) {
                 final byte[] buffer = new byte[1024 * 8];
@@ -96,6 +86,6 @@ final class GzipSlice implements Slice {
         } catch (final IOException err) {
             throw new ArtipieIOException(err);
         }
-        return future;
+        return res;
     }
 }

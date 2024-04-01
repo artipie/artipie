@@ -10,7 +10,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.pypi.PypiDeployment;
 import com.artipie.vertx.VertxSliceServer;
@@ -112,7 +112,7 @@ final class PyProxySliceITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         final ListOf<String> expected = new ListOf<>(
             "<!DOCTYPE html>", "Links for a2utils",
@@ -140,7 +140,7 @@ final class PyProxySliceITCase {
         MatcherAssert.assertThat(
             "Response status is 404",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.NOT_FOUND.code()))
+            new IsEqual<>(RsStatus.NOT_FOUND.code())
         );
         MatcherAssert.assertThat(
             "Nothing was added to storage",
@@ -158,7 +158,7 @@ final class PyProxySliceITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         MatcherAssert.assertThat(
             "Alarm time index page was added to storage",

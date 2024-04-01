@@ -9,24 +9,16 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.Connection;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import io.reactivex.Flowable;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.json.Json;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
@@ -137,60 +129,10 @@ class ConansEntityTest {
         final Response response = factory.apply(storage).response(
             new RequestLine(RqMethod.GET, request),
             Headers.from("Host", "localhost:9300"), Content.EMPTY
-        );
+        ).join();
         final String expected = Json.createReader(
             new TestResource(json).asInputStream()
         ).readObject().toString();
-        final AtomicReference<byte[]> out = new AtomicReference<>();
-        response.send(new FakeConnection(out)).toCompletableFuture().join();
-        final String actual = new String(out.get(), StandardCharsets.UTF_8);
-        JSONAssert.assertEquals(expected, actual, true);
-    }
-
-    /**
-     * Fake connection for testing response data.
-     * Based on com.artipie.http.hm.RsHasBody.FakeConnection.
-     * @since 0.1
-     */
-    private static final class FakeConnection implements Connection {
-
-        /**
-         * Output object for response data.
-         */
-        private final AtomicReference<byte[]> container;
-
-        /**
-         * Ctor.
-         * @param container Output object for response data.
-         */
-        FakeConnection(final AtomicReference<byte[]> container) {
-            this.container = container;
-        }
-
-        @Override
-        public CompletionStage<Void> accept(
-            final RsStatus status, final Headers headers, final Content body
-        ) {
-            return CompletableFuture.supplyAsync(
-                () -> {
-                    final ByteBuffer buffer = Flowable.fromPublisher(body).reduce(
-                        (left, right) -> {
-                            left.mark();
-                            right.mark();
-                            final ByteBuffer concat = ByteBuffer.allocate(left.remaining() + right.remaining())
-                                .put(left).put(right);
-                            left.reset();
-                            right.reset();
-                            concat.flip();
-                            return concat;
-                        }).blockingGet(ByteBuffer.allocate(0));
-                    final byte[] bytes = new byte[buffer.remaining()];
-                    buffer.mark();
-                    buffer.get(bytes);
-                    buffer.reset();
-                    this.container.set(bytes);
-                    return null;
-                });
-        }
+        JSONAssert.assertEquals(expected, response.body().asString(), true);
     }
 }

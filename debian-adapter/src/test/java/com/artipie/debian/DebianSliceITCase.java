@@ -10,7 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.debian.http.DebianSlice;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
@@ -187,7 +187,7 @@ public final class DebianSliceITCase {
         MatcherAssert.assertThat(
             "Response for upload is OK",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         MatcherAssert.assertThat("Event was added to queue", this.events.size() == 1);
         this.exec("apt-get", "update");

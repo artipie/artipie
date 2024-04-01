@@ -11,14 +11,11 @@ import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
 import com.artipie.conan.Completables;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.StandardRs;
 import io.vavr.Tuple2;
 
 import javax.json.Json;
@@ -35,7 +32,6 @@ import java.util.stream.Stream;
 
 /**
  * Base slice class for Conan REST APIs.
- * @since 0.1
  */
 abstract class BaseConanSlice implements Slice {
 
@@ -70,7 +66,7 @@ abstract class BaseConanSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body
@@ -83,27 +79,18 @@ abstract class BaseConanSlice implements Slice {
         } else {
             content = CompletableFuture.completedFuture(new RequestResult());
         }
-        return new AsyncResponse(
-            content.thenApply(
-                data -> {
-                    final Response result;
-                    if (data.isEmpty()) {
-                        result = new RsWithBody(
-                            StandardRs.NOT_FOUND,
-                            String.format(
-                                BaseConanSlice.URI_S_NOT_FOUND, line.uri(), this.getClass()
-                            ),
-                            StandardCharsets.UTF_8
-                        );
-                    } else {
-                        result = new RsWithHeaders(
-                            new RsWithBody(StandardRs.OK, data.getData()),
-                            BaseConanSlice.CONTENT_TYPE, data.getType()
-                        );
-                    }
-                    return result;
+        return content.thenApply(
+            data -> {
+                if (data.isEmpty()) {
+                    return ResponseBuilder.notFound()
+                        .textBody(String.format(BaseConanSlice.URI_S_NOT_FOUND, line.uri(), this.getClass()))
+                        .build();
                 }
-            )
+                return ResponseBuilder.ok()
+                    .header(BaseConanSlice.CONTENT_TYPE, data.getType())
+                    .body(data.getData())
+                    .build();
+            }
         );
     }
 

@@ -6,23 +6,21 @@ package com.artipie.conda.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.common.RsJson;
 
 import javax.json.Json;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Slice to handle `POST /stage/{owner_login}/{package_name}/{version}/{basename}` and
  * `POST /commit/{owner_login}/{package_name}/{version}/{basename}` requests.
- * @since 0.4
  * @todo #32:30min Implement this slice properly, it should handle post requests to create stage
  *  and commit package. For now link for full documentation is not found, check swagger
  *  https://api.anaconda.org/docs#/ and github issue for any updates.
@@ -41,7 +39,6 @@ public final class PostStageCommitSlice implements Slice {
     private final String url;
 
     /**
-     * Ctor.
      * @param url Url to upload
      */
     public PostStageCommitSlice(final String url) {
@@ -49,18 +46,14 @@ public final class PostStageCommitSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body) {
-        final Response res;
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = PostStageCommitSlice.PKG.matcher(
             line.uri().getPath()
         );
         if (matcher.matches()) {
             final String name = matcher.group(1);
-            res = new RsJson(
-                () -> Json.createReader(
+            return ResponseBuilder.ok()
+                .jsonBody(Json.createReader(
                     new StringReader(
                         String.join(
                             "\n",
@@ -100,10 +93,8 @@ public final class PostStageCommitSlice implements Slice {
                         )
                     )
                 ).read(), StandardCharsets.UTF_8
-            );
-        } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+            ).completedFuture();
         }
-        return res;
+        return ResponseBuilder.badRequest().completedFuture();
     }
 }

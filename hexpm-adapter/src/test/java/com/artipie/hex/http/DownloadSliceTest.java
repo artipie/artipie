@@ -17,7 +17,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -63,7 +63,7 @@ class DownloadSliceTest {
                 new RsHasStatus(RsStatus.OK),
                 new RequestLine(RqMethod.GET, String.format("/%s", path)),
                 Headers.from(
-                    new ContentType("application/octet-stream"),
+                    ContentType.mime("application/octet-stream"),
                     new ContentLength(bytes.length)
                 ),
                 new Content.From(bytes)

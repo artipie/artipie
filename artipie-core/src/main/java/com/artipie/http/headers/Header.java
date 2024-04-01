@@ -57,25 +57,27 @@ public class Header implements Map.Entry<String, String> {
             return false;
         }
         return this.lowercaseName().equals(header.lowercaseName())
-            && this.getValue().equals(header.getValue());
+            && this.lowercaseValue().equals(header.lowercaseValue());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.lowercaseName(), this.getValue());
+        return Objects.hash(this.lowercaseName(), this.lowercaseValue());
     }
 
     @Override
     public String toString() {
-        return String.format("%s: %s", this.name, this.getValue());
+        return "Header{" +
+            "name='" + name + '\'' +
+            ", value='" + value + '\'' +
+            '}';
     }
 
-    /**
-     * Converts name to lowercase for comparison.
-     *
-     * @return Name in lowercase.
-     */
-    private String lowercaseName() {
+    protected String lowercaseName() {
         return this.name.toLowerCase(Locale.US);
+    }
+
+    protected String lowercaseValue() {
+        return this.getValue().toLowerCase(Locale.US);
     }
 }

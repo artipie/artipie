@@ -15,7 +15,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.scheduling.ArtifactEvent;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -43,7 +43,7 @@ class UpdateSliceTest {
      * Test headers.
      */
     private static final Headers HEADERS = Headers.from(
-        new ContentType("multipart/form-data; boundary=\"simple boundary\"")
+        ContentType.mime("multipart/form-data; boundary=\"simple boundary\"")
     );
 
     /**

@@ -9,11 +9,8 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.npm.TgzArchive;
 import com.artipie.npm.misc.NextSafeAvailablePort;
@@ -46,9 +43,6 @@ final class DownloadAssetSliceTest {
      */
     private static final String RNAME = "my-npm";
 
-    /**
-     * Vertx.
-     */
     private static final Vertx VERTX = Vertx.vertx();
 
     /**
@@ -90,7 +84,7 @@ final class DownloadAssetSliceTest {
                 new DownloadAssetSlice(
                     new NpmProxy(
                         storage,
-                        new SliceSimple(StandardRs.NOT_FOUND)
+                        new SliceSimple(ResponseBuilder.notFound().build())
                     ),
                     path, Optional.of(this.packages),
                     DownloadAssetSliceTest.RNAME
@@ -113,15 +107,12 @@ final class DownloadAssetSliceTest {
                     new NpmProxy(
                         new InMemoryStorage(),
                         new SliceSimple(
-                            new RsFull(
-                                RsStatus.OK,
-                                Headers.from(new ContentType("tgz")),
-                                new Content.From(
-                                    new TestResource(
-                                        String.format("storage/%s", DownloadAssetSliceTest.TGZ)
-                                    ).asBytes()
-                                )
-                            )
+                            ResponseBuilder.ok()
+                                .header(ContentType.mime("tgz"))
+                                .body(new TestResource(
+                                    String.format("storage/%s", DownloadAssetSliceTest.TGZ)
+                                ).asBytes())
+                                .build()
                         )
                     ),
                     path,

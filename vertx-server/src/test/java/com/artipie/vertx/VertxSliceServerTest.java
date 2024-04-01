@@ -5,9 +5,8 @@
 package com.artipie.vertx;
 
 import com.artipie.asto.Content;
-import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
-import com.artipie.http.rs.RsStatus;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.reactivex.Flowable;
 import io.vertx.core.http.HttpServerOptions;
@@ -88,7 +87,9 @@ public final class VertxSliceServerTest {
     @Test
     public void serverHandlesBasicRequest() {
         this.start(
-            (line, headers, body) -> connection -> connection.accept(RsStatus.OK, headers, body)
+            (line, headers, body) -> CompletableFuture.completedFuture(
+                ResponseBuilder.ok().body(body).build()
+            )
         );
         final String expected = "Hello World!";
         final String actual = this.client.post(this.port, VertxSliceServerTest.HOST, "/hello")
@@ -102,10 +103,8 @@ public final class VertxSliceServerTest {
     public void basicGetRequest() {
         final String expected = "Hello World!!!";
         this.start(
-            (line, headers, body) -> connection -> connection.accept(
-                RsStatus.OK,
-                Headers.EMPTY,
-                new Content.From(expected.getBytes())
+            (line, headers, body) -> CompletableFuture.completedFuture(
+                ResponseBuilder.ok().body(expected.getBytes()).build()
             )
         );
         final String actual = this.client.get(this.port, VertxSliceServerTest.HOST, "/hello1")
@@ -120,18 +119,15 @@ public final class VertxSliceServerTest {
         final String clh = "Content-Length";
         final String expected = "Hello World!!!!!";
         this.start(
-            (line, headers, body) -> connection -> connection.accept(
-                RsStatus.OK,
-                Headers.from(clh, Integer.toString(expected.length())
-                ),
-                new Content.From(expected.getBytes())
+            (line, headers, body) -> CompletableFuture.completedFuture(
+                ResponseBuilder.ok()
+                    .header(clh, Integer.toString(expected.length()))
+                    .body(expected.getBytes())
+                    .build()
             )
         );
-        final HttpResponse<Buffer> response = this.client.get(
-            this.port,
-            VertxSliceServerTest.HOST,
-            "/hello2"
-        )
+        final HttpResponse<Buffer> response = this.client
+            .get(this.port, VertxSliceServerTest.HOST, "/hello2")
             .rxSend()
             .blockingGet();
         final String actual = response.bodyAsString();
@@ -161,7 +157,7 @@ public final class VertxSliceServerTest {
     public void exceptionInResponse() {
         final RuntimeException exception = new IllegalStateException("Failed to send response");
         this.start(
-            (line, headers, body) -> connection -> {
+            (line, headers, body) -> {
                 throw exception;
             }
         );
@@ -177,15 +173,11 @@ public final class VertxSliceServerTest {
             "Failed to send response async"
         );
         this.start(
-            (line, headers, body) -> connection -> CompletableFuture.runAsync(
-                () -> {
-                    throw exception;
-                }
-            )
+            (line, headers, body) -> CompletableFuture.failedFuture(exception)
         );
-        final HttpResponse<Buffer> response = this.client.get(
-            this.port, VertxSliceServerTest.HOST, ""
-        ).rxSend().blockingGet();
+        final HttpResponse<Buffer> response = this.client
+            .get(this.port, VertxSliceServerTest.HOST, "")
+            .rxSend().blockingGet();
         MatcherAssert.assertThat(response, new IsErrorResponse(exception));
     }
 
@@ -193,10 +185,8 @@ public final class VertxSliceServerTest {
     public void exceptionInBody() {
         final Throwable exception = new IllegalStateException("Failed to publish body");
         this.start(
-            (line, headers, body) -> connection -> connection.accept(
-                RsStatus.OK,
-                Headers.EMPTY,
-                new Content.From(Flowable.error(exception))
+            (line, headers, body) -> CompletableFuture.supplyAsync(
+                () -> ResponseBuilder.ok().body(new Content.From(Flowable.error(exception))).build()
             )
         );
         final HttpResponse<Buffer> response = this.client.get(
@@ -209,8 +199,9 @@ public final class VertxSliceServerTest {
     public void serverMayStartOnRandomPort() {
         final VertxSliceServer srv = new VertxSliceServer(
             this.vertx,
-            (line, headers, body) ->
-                connection -> connection.accept(RsStatus.OK, headers, body)
+            (line, headers, body) -> CompletableFuture.completedFuture(
+                ResponseBuilder.ok().headers(headers).body(body).build()
+            )
         );
         MatcherAssert.assertThat(srv.start(), new IsNot<>(new IsEqual<>(0)));
     }
@@ -220,8 +211,9 @@ public final class VertxSliceServerTest {
         final int expected = this.rndPort();
         final VertxSliceServer srv = new VertxSliceServer(
             this.vertx,
-            (line, headers, body) ->
-                connection -> connection.accept(RsStatus.OK, headers, body),
+            (line, headers, body) -> CompletableFuture.completedFuture(
+                ResponseBuilder.ok().headers(headers).body(body).build()
+            ),
             new HttpServerOptions().setPort(expected)
         );
         MatcherAssert.assertThat(srv.start(), new IsEqual<>(expected));

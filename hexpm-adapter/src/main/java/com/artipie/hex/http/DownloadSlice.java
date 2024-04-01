@@ -9,23 +9,18 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.StandardRs;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
  * This slice returns content as bytes by Key from request path.
- * @since 0.1
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class DownloadSlice implements Slice {
     /**
      * Path to packages.
@@ -55,7 +50,6 @@ public final class DownloadSlice implements Slice {
     private final Storage storage;
 
     /**
-     * Ctor.
      * @param storage Repository storage.
      */
     public DownloadSlice(final Storage storage) {
@@ -63,35 +57,23 @@ public final class DownloadSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Key.From key = new Key.From(
             line.uri().getPath().replaceFirst("/", "")
         );
-        return new AsyncResponse(
-            this.storage.exists(key).thenCompose(
-                exist -> {
-                    final CompletableFuture<Response> res;
+        return this.storage.exists(key)
+            .thenCompose(exist -> {
                     if (exist) {
-                        res = this.storage.value(key).thenApply(
-                            value ->
-                                new RsFull(
-                                    RsStatus.OK,
-                                    Headers.from(
-                                        new ContentType("application/octet-stream")
-                                    ),
-                                    value
-                                )
-                        );
-                    } else {
-                        res = CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
+                        return this.storage.value(key)
+                            .thenApply(
+                                value -> ResponseBuilder.ok()
+                                    .header(ContentType.mime("application/octet-stream"))
+                                    .body(value)
+                                    .build()
+                            );
                     }
-                    return res;
+                    return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
                 }
-            )
-        );
+            );
     }
 }

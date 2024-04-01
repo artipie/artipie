@@ -7,19 +7,13 @@ package com.artipie.jfr;
 import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.hm.SliceHasResponse;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
 import io.reactivex.Flowable;
-
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingStream;
 import org.awaitility.Awaitility;
@@ -27,6 +21,11 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Tests to check JfrSlice.
@@ -46,23 +45,19 @@ public class JfrSliceTest {
             final AtomicReference<RecordedEvent> ref = new AtomicReference<>();
             rs.onEvent("artipie.SliceResponse", ref::set);
             rs.startAsync();
-            MatcherAssert.assertThat(
-                new JfrSlice(
-                    new TestSlice(
-                        new RsFull(
-                            RsStatus.OK,
-                            Headers.EMPTY,
-                            JfrSliceTest.content(responseSize, responseChunks)
-                        )
-                    )
-                ),
-                new SliceHasResponse(
-                    new RsHasStatus(RsStatus.OK),
-                    new RequestLine(RqMethod.GET, path),
-                    Headers.EMPTY,
-                    JfrSliceTest.content(requestSize, requestChunks)
+
+            Response res = new JfrSlice(
+                new TestSlice(
+                    ResponseBuilder.ok()
+                        .body(JfrSliceTest.content(responseSize, responseChunks))
+                        .build()
                 )
-            );
+            ).response(new RequestLine(RqMethod.GET, path), Headers.EMPTY,
+                JfrSliceTest.content(requestSize, requestChunks)).join();
+
+            ResponseAssert.checkOk(res);
+            Assertions.assertTrue(res.body().asBytes().length > 0);
+
             Awaitility.waitAtMost(3, TimeUnit.SECONDS)
                 .until(() -> ref.get() != null);
             final RecordedEvent evt = ref.get();
@@ -118,32 +113,19 @@ public class JfrSliceTest {
 
     /**
      * Simple decorator for Slice.
-     *
-     * @since 0.28
      */
     private static final class TestSlice implements Slice {
 
-        /**
-         * Response.
-         */
         private final Response res;
 
-        /**
-         * Response.
-         *
-         * @param response Response.
-         */
         TestSlice(final Response response) {
             this.res = response;
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             Flowable.fromPublisher(body).blockingSubscribe();
-            return this.res;
+            return CompletableFuture.completedFuture(this.res);
         }
     }
 }

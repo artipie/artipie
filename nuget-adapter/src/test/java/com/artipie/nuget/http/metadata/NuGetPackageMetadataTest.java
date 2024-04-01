@@ -8,12 +8,11 @@ import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
-import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.nuget.AstoRepository;
 import com.artipie.nuget.PackageIdentity;
 import com.artipie.nuget.PackageKeys;
@@ -27,6 +26,7 @@ import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.AllOf;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -89,7 +89,7 @@ class NuGetPackageMetadataTest {
             ),
             TestAuthentication.HEADERS,
             Content.EMPTY
-        );
+        ).join();
         MatcherAssert.assertThat(
             response,
             new AllOf<>(
@@ -110,15 +110,10 @@ class NuGetPackageMetadataTest {
             ),
             TestAuthentication.HEADERS,
             Content.EMPTY
-        );
+        ).join();
+        Assertions.assertEquals(RsStatus.OK, response.status());
         MatcherAssert.assertThat(
-            response,
-            new AllOf<>(
-                Arrays.asList(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasBody(new IsValidRegistration())
-                )
-            )
+            response, new RsHasBody(new IsValidRegistration())
         );
     }
 
@@ -131,24 +126,20 @@ class NuGetPackageMetadataTest {
             ),
             TestAuthentication.HEADERS,
             Content.EMPTY
-        );
-        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
+        ).join();
+        Assertions.assertEquals(RsStatus.METHOD_NOT_ALLOWED, response.status());
     }
 
     @Test
     void shouldUnauthorizedGetRegistrationForAnonymousUser() {
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(
+            RsStatus.UNAUTHORIZED,
             this.nuget.response(
                 new RequestLine(
                     RqMethod.GET,
                     "/registrations/my-utils/index.json"
-                ),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            new ResponseMatcher(
-                RsStatus.UNAUTHORIZED, Headers.EMPTY
-            )
+                ), Headers.EMPTY, Content.EMPTY
+            ).join().status()
         );
     }
 

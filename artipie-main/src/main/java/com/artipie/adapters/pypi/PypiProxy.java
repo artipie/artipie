@@ -18,6 +18,7 @@ import com.artipie.settings.repo.RepoConfig;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Pypi proxy slice.
@@ -47,7 +48,7 @@ public final class PypiProxy implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body

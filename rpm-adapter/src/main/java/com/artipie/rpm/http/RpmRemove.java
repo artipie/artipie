@@ -10,12 +10,11 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.rpm.RepoConfig;
 import com.artipie.rpm.asto.AstoRepoRemove;
 import com.artipie.rpm.meta.PackageInfo;
@@ -77,49 +76,47 @@ public final class RpmRemove implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers,
-                             Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers,
+                                                Content body) {
         final RpmUpload.Request request = new RpmUpload.Request(line);
         final Key temp = new Key.From(RpmRemove.TO_RM, request.file());
-        return new AsyncResponse(
-            this.asto.save(temp, Content.EMPTY).thenApply(nothing -> RpmRemove.checksum(headers))
-                .thenCompose(
-                    checksum -> checksum.map(sum -> this.validate(request.file(), sum))
-                        .orElse(CompletableFuture.completedFuture(request.force())).thenCompose(
-                            valid -> {
-                                CompletionStage<RsStatus> res = CompletableFuture
-                                    .completedFuture(RsStatus.ACCEPTED);
-                                if (valid && this.cnfg.mode() == RepoConfig.UpdateMode.UPLOAD
-                                    && !request.skipUpdate()) {
-                                    res = this.events.map(
-                                        queue -> {
-                                            final Collection<PackageInfo> infos =
-                                                new ArrayList<>(1);
-                                            return new AstoRepoRemove(this.asto, this.cnfg, infos)
-                                                .perform().thenAccept(
-                                                    nothing -> infos.forEach(
-                                                        item -> queue.add(
-                                                            new ArtifactEvent(
-                                                                RpmUpload.REPO_TYPE,
-                                                                this.cnfg.name(), item.name(),
-                                                                item.version()
-                                                            )
+        return this.asto.save(temp, Content.EMPTY).thenApply(nothing -> RpmRemove.checksum(headers))
+            .thenCompose(
+                checksum -> checksum.map(sum -> this.validate(request.file(), sum))
+                    .orElse(CompletableFuture.completedFuture(request.force())).thenCompose(
+                        valid -> {
+                            CompletionStage<RsStatus> res = CompletableFuture
+                                .completedFuture(RsStatus.ACCEPTED);
+                            if (valid && this.cnfg.mode() == RepoConfig.UpdateMode.UPLOAD
+                                && !request.skipUpdate()) {
+                                res = this.events.map(
+                                    queue -> {
+                                        final Collection<PackageInfo> infos =
+                                            new ArrayList<>(1);
+                                        return new AstoRepoRemove(this.asto, this.cnfg, infos)
+                                            .perform().thenAccept(
+                                                nothing -> infos.forEach(
+                                                    item -> queue.add(
+                                                        new ArtifactEvent(
+                                                            RpmUpload.REPO_TYPE,
+                                                            this.cnfg.name(), item.name(),
+                                                            item.version()
                                                         )
                                                     )
-                                                );
-                                        }
-                                    ).orElseGet(
-                                        () -> new AstoRepoRemove(this.asto, this.cnfg).perform()
-                                    ).thenApply(ignored -> RsStatus.ACCEPTED);
-                                } else if (!valid) {
-                                    res = this.asto.delete(temp)
-                                        .thenApply(nothing -> RsStatus.BAD_REQUEST);
-                                }
-                                return res.thenApply(RsWithStatus::new);
+                                                )
+                                            );
+                                    }
+                                ).orElseGet(
+                                    () -> new AstoRepoRemove(this.asto, this.cnfg).perform()
+                                ).thenApply(ignored -> RsStatus.ACCEPTED);
+                            } else if (!valid) {
+                                res = this.asto.delete(temp)
+                                    .thenApply(nothing -> RsStatus.BAD_REQUEST);
                             }
-                        )
-                )
-        );
+                            return res.thenApply(s -> ResponseBuilder.from(s).build());
+                        }
+                    )
+            );
     }
 
     /**

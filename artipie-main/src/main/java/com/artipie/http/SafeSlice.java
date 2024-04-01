@@ -6,19 +6,14 @@ package com.artipie.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
 import com.jcabi.log.Logger;
 
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice which handles all exceptions and respond with 500 error in that case.
- * @since 0.9
  */
-@SuppressWarnings({"PMD.OnlyOneReturn", "PMD.AvoidCatchingGenericException"})
+@SuppressWarnings("PMD.AvoidCatchingGenericException")
 final class SafeSlice implements Slice {
 
     /**
@@ -35,57 +30,15 @@ final class SafeSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line, final Headers headers,
-                             final Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         try {
-            return new RsSafe(this.origin.response(line, headers, body));
+            return this.origin.response(line, headers, body);
         } catch (final Exception err) {
             Logger.error(this, "Failed to respond to request: %[exception]s", err);
-            return new RsWithBody(
-                new RsWithStatus(RsStatus.INTERNAL_ERROR),
-                String.format(
-                    "Failed to respond to request: %s",
-                    err.getMessage()
-                ),
-                StandardCharsets.UTF_8
+            return CompletableFuture.completedFuture(ResponseBuilder.internalError()
+                .textBody("Failed to respond to request: " + err.getMessage())
+                .build()
             );
-        }
-    }
-
-    /**
-     * Safe response, catches exceptions from underlying reponse calls and respond with 500 error.
-     * @since 0.9
-     */
-    private static final class RsSafe implements Response {
-
-        /**
-         * Origin response.
-         */
-        private final Response origin;
-
-        /**
-         * Wraps response with safe decorator.
-         * @param origin Origin response
-         */
-        RsSafe(final Response origin) {
-            this.origin = origin;
-        }
-
-        @Override
-        public CompletionStage<Void> send(final Connection connection) {
-            try {
-                return this.origin.send(connection);
-            } catch (final Exception err) {
-                Logger.error(this, "Failed to send request to connection: %[exception]s", err);
-                return new RsWithBody(
-                    new RsWithStatus(RsStatus.INTERNAL_ERROR),
-                    String.format(
-                        "Failed to send request to connection: %s",
-                        err.getMessage()
-                    ),
-                    StandardCharsets.UTF_8
-                ).send(connection);
-            }
         }
     }
 }

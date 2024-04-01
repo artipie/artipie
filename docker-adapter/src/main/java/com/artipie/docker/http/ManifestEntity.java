@@ -16,28 +16,23 @@ import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthzSlice;
 import com.artipie.http.auth.OperationControl;
-import com.artipie.http.headers.Accept;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Location;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -58,16 +53,11 @@ final class ManifestEntity {
      */
     private static final String REPO_TYPE = "docker";
 
-    /**
-     * Ctor.
-     */
     private ManifestEntity() {
     }
 
     /**
      * Slice for HEAD method, checking manifest existence.
-     *
-     * @since 0.2
      */
     public static class Head implements ScopeSlice {
 
@@ -91,33 +81,27 @@ final class ManifestEntity {
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final ManifestReference ref = request.reference();
-            return new AsyncResponse(
-                this.docker.repo(request.name()).manifests().get(ref).thenApply(
-                    manifest -> manifest.<Response>map(
-                        found -> new RsWithHeaders(
-                            new BaseResponse(
-                                found.convert(new HashSet<>(new Accept(headers).values()))
-                            ),
-                            new ContentLength(found.size())
-                        )
+            return this.docker.repo(request.name()).manifests()
+                .get(ref)
+                .thenApply(
+                    manifest -> manifest.map(
+                        found -> baseResponse(found)
+                            .header(new ContentLength(found.size()))
+                            .build()
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new ManifestError(ref))
+                        () -> ResponseBuilder.notFound()
+                            .jsonBody(new ManifestError(ref).json())
+                            .build()
                     )
-                )
-            );
+                ).toCompletableFuture();
         }
     }
 
     /**
      * Slice for GET method, getting manifest content.
-     *
-     * @since 0.2
      */
     public static class Get implements ScopeSlice {
 
@@ -127,8 +111,6 @@ final class ManifestEntity {
         private final Docker docker;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          */
         Get(final Docker docker) {
@@ -143,36 +125,28 @@ final class ManifestEntity {
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body
-        ) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final ManifestReference ref = request.reference();
-            return new AsyncResponse(
-                this.docker.repo(name).manifests().get(ref).thenApply(
-                    manifest -> manifest.<Response>map(
-                        found -> {
-                            final Manifest mnf = found.convert(
-                                new HashSet<>(new Accept(headers).values())
-                            );
-                            return new RsWithBody(new BaseResponse(mnf), mnf.content());
-                        }
+            return this.docker.repo(name).manifests().get(ref)
+                .thenApply(
+                    manifest -> manifest.map(
+                        found -> baseResponse(found)
+                            .body(found.content())
+                            .build()
                     ).orElseGet(
-                        () -> new ErrorsResponse(RsStatus.NOT_FOUND, new ManifestError(ref))
-                    )
+                        () -> ResponseBuilder.notFound()
+                            .jsonBody(new ManifestError(ref).json())
+                            .build()
                 )
-            );
+                ).toCompletableFuture();
         }
 
     }
 
     /**
      * Slice for PUT method, uploading manifest content.
-     *
-     * @since 0.2
      */
     public static class Put implements ScopeSlice {
 
@@ -192,13 +166,11 @@ final class ManifestEntity {
         private final String rname;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          * @param events Artifact events queue
          * @param rname Repository name
          */
-        Put(final Docker docker, final Optional<Queue<ArtifactEvent>> events, final String rname) {
+        Put(Docker docker, Optional<Queue<ArtifactEvent>> events, String rname) {
             this.docker = docker;
             this.events = events;
             this.rname = rname;
@@ -212,16 +184,13 @@ final class ManifestEntity {
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body
-        ) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final ManifestReference ref = request.reference();
-            return new AsyncResponse(
-                this.docker.repo(name).manifests().put(ref, new Content.From(body)).thenApply(
+            return this.docker.repo(name).manifests()
+                .put(ref, new Content.From(body))
+                .thenApply(
                     manifest -> {
                         if (this.events.isPresent() && new Tag.Valid(ref.reference()).valid()) {
                             this.events.get().add(
@@ -233,24 +202,18 @@ final class ManifestEntity {
                                 )
                             );
                         }
-                        return new RsWithHeaders(
-                            new RsWithStatus(RsStatus.CREATED),
-                            new Location(
-                                String.format("/v2/%s/manifests/%s", name.value(), ref.reference())
-                            ),
-                            new ContentLength("0"),
-                            new DigestHeader(manifest.digest())
-                        );
+                        return ResponseBuilder.created()
+                            .header(new Location(String.format("/v2/%s/manifests/%s", name.value(), ref.reference())))
+                            .header(new ContentLength("0"))
+                            .header(new DigestHeader(manifest.digest()))
+                            .build();
                     }
-                )
-            );
+                ).toCompletableFuture();
         }
     }
 
     /**
      * Auth slice for PUT method, checks whether overwrite is allowed.
-     *
-     * @since 0.12
      */
     public static class PutAuth implements ScopeSlice {
 
@@ -258,10 +221,6 @@ final class ManifestEntity {
          * Docker repository.
          */
         private final Docker docker;
-
-        /**
-         * Origin.
-         */
         private final ScopeSlice origin;
 
         /**
@@ -277,10 +236,9 @@ final class ManifestEntity {
         /**
          * Artipie repository name.
          */
-        private final String rname;
+        private final String repoName;
 
         /**
-         * Ctor.
          * @param docker Docker
          * @param origin Origin slice
          * @param auth Authentication
@@ -293,49 +251,42 @@ final class ManifestEntity {
             this.origin = origin;
             this.policy = policy;
             this.auth = auth;
-            this.rname = name;
+            this.repoName = name;
         }
 
         @Override
-        public Response response(
-            final RequestLine line, final Headers headers,
-            final Content body
-        ) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final ManifestReference ref = request.reference();
-            return new AsyncResponse(
-                this.docker.repo(name).manifests().get(ref).thenApply(
+            return this.docker.repo(name).manifests().get(ref).thenApply(
                     manifest -> {
                         final OperationControl control;
                         if (manifest.isPresent()) {
                             control = new OperationControl(
-                                this.policy, this.permission(line, this.rname)
+                                this.policy, this.permission(line, this.repoName)
                             );
                         } else {
                             final String img = new Request(line).name().value();
                             control = new OperationControl(
                                 this.policy,
                                 new DockerRepositoryPermission(
-                                    this.rname, img,
+                                    this.repoName, img,
                                     DockerActions.PUSH.mask()
                                 ),
                                 new DockerRepositoryPermission(
-                                    this.rname, img,
+                                    this.repoName, img,
                                     DockerActions.OVERWRITE.mask()
                                 )
                             );
                         }
                         return new DockerAuthSlice(
-                            new AuthzSlice(
-                                this.origin,
-                                this.auth,
-                                control
-                            )
+                            new AuthzSlice(this.origin, this.auth, control)
                         ).response(line, headers, body);
                     }
                 )
-            );
+                .toCompletableFuture()
+                .thenCompose(Function.identity());
         }
 
         @Override
@@ -349,8 +300,6 @@ final class ManifestEntity {
 
     /**
      * HTTP request to manifest entity.
-     *
-     * @since 0.2
      */
     static final class Request {
 
@@ -388,26 +337,9 @@ final class ManifestEntity {
 
     }
 
-    /**
-     * Manifest base response.
-     * @since 0.2
-     */
-    static final class BaseResponse extends Response.Wrap {
-
-        /**
-         * Ctor.
-         *
-         * @param mnf Manifest
-         */
-        BaseResponse(final Manifest mnf) {
-            super(
-                new RsWithHeaders(
-                    StandardRs.EMPTY,
-                    new ContentType(String.join(",", mnf.mediaTypes())),
-                    new DigestHeader(mnf.digest())
-                )
-            );
-        }
-
+    private static ResponseBuilder baseResponse(Manifest manifest) {
+        return ResponseBuilder.ok()
+            .header(ContentType.mime(manifest.mediaType()))
+            .header(new DigestHeader(manifest.digest()));
     }
 }

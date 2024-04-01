@@ -6,25 +6,19 @@ package com.artipie.http;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.common.RsJson;
 import com.artipie.settings.Settings;
 
+import javax.json.Json;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import javax.json.Json;
 
 /**
  * Health check slice.
  * <p>
  * Returns JSON with verbose status checks,
  * response status is {@code OK} if all status passed and {@code UNAVAILABLE} if any failed.
- * </p>
- * @since 0.10
  */
 @SuppressWarnings("PMD.AvoidCatchingGenericException")
 public final class HealthSlice implements Slice {
@@ -43,21 +37,25 @@ public final class HealthSlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-                             final Headers headers, final Content body) {
-        return new AsyncResponse(
-            this.storageStatus().thenApply(
-                ok ->
-                    new RsWithStatus(
-                        new RsJson(
-                            Json.createArrayBuilder().add(
-                                Json.createObjectBuilder().add("storage", ok ? "ok" : "failure")
-                            ).build()
-                        ),
-                        ok ? RsStatus.OK : RsStatus.UNAVAILABLE
-                    )
-            )
-        );
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+        return this.storageStatus()
+            .thenApply(
+                ok -> {
+                    if (ok) {
+                        return ResponseBuilder.ok()
+                            .jsonBody(Json.createArrayBuilder()
+                                .add(Json.createObjectBuilder().add("storage", "ok"))
+                                .build()
+                            )
+                            .build();
+                    }
+                    return ResponseBuilder.unavailable()
+                        .jsonBody(Json.createArrayBuilder().add(
+                            Json.createObjectBuilder().add("storage", "failure")
+                        ).build())
+                        .build();
+                }
+            ).toCompletableFuture();
     }
 
     /**

@@ -7,19 +7,19 @@ package com.artipie.composer.http.proxy;
 import com.artipie.asto.cache.Cache;
 import com.artipie.composer.Repository;
 import com.artipie.composer.http.PackageMetadataSlice;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.UriClientSlice;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.http.slice.SliceSimple;
+
 import java.net.URI;
 
 /**
@@ -73,7 +73,11 @@ public class ComposerProxySlice extends Slice.Wrap {
                         new RtRule.ByPath(PackageMetadataSlice.ALL_PACKAGES),
                         new ByMethodsRule(RqMethod.GET)
                     ),
-                    new EmptyAllPackagesSlice()
+                    new SliceSimple(
+                        ResponseBuilder.ok()
+                            .jsonBody("{\"packages\":{}, \"metadata-url\":\"/p2/%package%.json\"}")
+                            .build()
+                    )
                 ),
                 new RtRulePath(
                     new RtRule.All(
@@ -84,7 +88,7 @@ public class ComposerProxySlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     RtRule.FALLBACK,
-                    new SliceSimple(new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED))
+                    new SliceSimple(ResponseBuilder.methodNotAllowed().build())
                 )
             )
         );

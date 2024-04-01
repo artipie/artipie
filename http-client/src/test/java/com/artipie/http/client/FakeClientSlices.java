@@ -4,7 +4,10 @@
  */
 package com.artipie.http.client;
 
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
+
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -35,9 +38,12 @@ public final class FakeClientSlices implements ClientSlices {
      */
     private final Slice result;
 
+
+    public FakeClientSlices(Response response) {
+        this((line, headers, body)-> CompletableFuture.completedFuture(response));
+    }
+
     /**
-     * Ctor.
-     *
      * @param result Slice returned by requests.
      */
     public FakeClientSlices(final Slice result) {

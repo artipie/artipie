@@ -11,7 +11,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.cache.FromStorageCache;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.Headers;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
@@ -19,9 +19,8 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.scheduling.ProxyArtifactEvent;
 import org.hamcrest.MatcherAssert;
@@ -65,10 +64,9 @@ class ProxySliceTest {
             "Returns body from remote",
             new ProxySlice(
                 new SliceSimple(
-                    new RsFull(
-                        RsStatus.OK, Headers.from("content-type", "smth"),
-                        new Content.From(body)
-                    )
+                    ResponseBuilder.ok().header(ContentType.mime("smth"))
+                        .body(body)
+                        .build()
                 ),
                 new FromStorageCache(this.storage), Optional.of(this.events), "my-pypi-proxy"
             ),
@@ -76,7 +74,7 @@ class ProxySliceTest {
                 Matchers.allOf(
                     new RsHasBody(body),
                     new RsHasHeaders(
-                        new Header("content-type", "smth"),
+                        ContentType.mime("smth"),
                         new Header("Content-Length", "9")
                     )
                 ),
@@ -104,14 +102,14 @@ class ProxySliceTest {
         MatcherAssert.assertThat(
             "Returns body from cache",
             new ProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.INTERNAL_ERROR)),
+                new SliceSimple(ResponseBuilder.internalError().build()),
                 new FromStorageCache(this.storage), Optional.of(this.events), "my-pypi-proxy"
             ),
             new SliceHasResponse(
                 Matchers.allOf(
                     new RsHasStatus(RsStatus.OK), new RsHasBody(body),
                     new RsHasHeaders(
-                        new Header("content-type", header),
+                        ContentType.mime(header),
                         new Header("Content-Length", String.valueOf(body.length))
                     )
                 ),
@@ -131,7 +129,7 @@ class ProxySliceTest {
         MatcherAssert.assertThat(
             "Status 400 returned",
             new ProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.BAD_REQUEST)),
+                new SliceSimple(ResponseBuilder.badRequest().build()),
                 new FromStorageCache(this.storage), Optional.of(this.events), "my-pypi-proxy"
             ),
             new SliceHasResponse(
@@ -160,10 +158,8 @@ class ProxySliceTest {
             "Returns body from remote",
             new ProxySlice(
                 new SliceSimple(
-                    new RsFull(
-                        RsStatus.OK, Headers.from("content-type", "smth"),
-                        new Content.From(body)
-                    )
+                    ResponseBuilder.ok().header(ContentType.mime("smth"))
+                        .body(body).build()
                 ),
                 new FromStorageCache(this.storage), Optional.empty(), "my-pypi-proxy"
             ),
@@ -171,7 +167,7 @@ class ProxySliceTest {
                 Matchers.allOf(
                     new RsHasBody(body),
                     new RsHasHeaders(
-                        new Header("content-type", "smth"),
+                        ContentType.mime("smth"),
                         new Header("Content-Length", String.valueOf(body.length))
                     )
                 ),
@@ -190,7 +186,7 @@ class ProxySliceTest {
         MatcherAssert.assertThat(
             "Status 400 returned",
             new ProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.BAD_REQUEST)),
+                new SliceSimple(ResponseBuilder.badRequest().build()),
                 (key, remote, cache) ->
                     new FailedCompletionStage<>(
                         new IllegalStateException("Failed to obtain item from cache")

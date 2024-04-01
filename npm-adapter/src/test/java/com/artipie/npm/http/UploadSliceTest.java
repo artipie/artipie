@@ -10,15 +10,12 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Slice;
-import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.KeyFromPath;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.npm.Publish;
 import com.artipie.scheduling.ArtifactEvent;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +24,6 @@ import javax.json.Json;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * UploadSliceTest.
@@ -71,19 +67,18 @@ public final class UploadSliceTest {
             .add("dist-tags", Json.createObjectBuilder())
             .add("_attachments", Json.createObjectBuilder())
             .build().toString();
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(
+            RsStatus.OK,
             slice.response(
                 RequestLine.from("PUT /ctx/package HTTP/1.1"),
                 Headers.EMPTY,
                 new Content.From(json.getBytes())
-            ),
-            new RsHasStatus(RsStatus.OK)
+            ).join().status()
         );
-        MatcherAssert.assertThat(
-            this.storage.exists(new KeyFromPath("package/meta.json")).get(),
-            new IsEqual<>(true)
+        Assertions.assertTrue(
+            this.storage.exists(new KeyFromPath("package/meta.json")).get()
         );
-        MatcherAssert.assertThat("Events queue has one item", this.events.size() == 1);
+        Assertions.assertEquals(1, this.events.size());
     }
 
     @Test
@@ -100,10 +95,8 @@ public final class UploadSliceTest {
                 RequestLine.from("PUT /my-repo/my-package HTTP/1.1"),
                 Headers.EMPTY,
                 new Content.From("{}".getBytes())
-            ).send(
-                (rsStatus, headers, publisher) -> CompletableFuture.allOf()
-            ).toCompletableFuture().join()
+            ).join()
         );
-        MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
+        Assertions.assertTrue(this.events.isEmpty());
     }
 }

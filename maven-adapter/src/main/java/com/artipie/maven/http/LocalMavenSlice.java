@@ -10,19 +10,17 @@ import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.slice.KeyFromPath;
+import com.artipie.maven.asto.RepositoryChecksums;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,24 +49,17 @@ final class LocalMavenSlice implements Slice {
      *
      * @param storage Repository storage
      */
-    LocalMavenSlice(final Storage storage) {
+    LocalMavenSlice(Storage storage) {
         this.storage = storage;
     }
 
     @Override
-    public Response response(
-        final RequestLine line, final Headers headers,
-        final Content body
-    ) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         final Matcher match = LocalMavenSlice.PTN_ARTIFACT.matcher(new KeyLastPart(key).get());
-        final Response response;
-        if (match.matches()) {
-            response = this.artifactResponse(line.method(), key);
-        } else {
-            response = this.plainResponse(line.method(), key);
-        }
-        return response;
+        return match.matches()
+            ? artifactResponse(line.method(), key)
+            : plainResponse(line.method(), key);
     }
 
     /**
@@ -77,20 +68,43 @@ final class LocalMavenSlice implements Slice {
      * @param artifact Artifact key
      * @return Response
      */
-    private Response artifactResponse(final RqMethod method, final Key artifact) {
-        final Response response;
-        switch (method) {
-            case GET:
-                response = new ArtifactGetResponse(this.storage, artifact);
-                break;
-            case HEAD:
-                response = new ArtifactHeadResponse(this.storage, artifact);
-                break;
-            default:
-                response = new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
-                break;
-        }
-        return response;
+    private CompletableFuture<Response> artifactResponse(final RqMethod method, final Key artifact) {
+        return switch (method) {
+            case GET -> storage.exists(artifact)
+                .thenApply(
+                    exists -> {
+                        if (exists) {
+                            return storage.value(artifact)
+                                .thenCombine(
+                                    new RepositoryChecksums(storage).checksums(artifact),
+                                    (body, checksums) ->
+                                        ResponseBuilder.ok()
+                                            .headers(ArtifactHeaders.from(artifact, checksums))
+                                            .body(body)
+                                            .build()
+                                );
+                        }
+                        return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
+                    }
+                ).thenCompose(Function.identity());
+            case HEAD ->
+//                new ArtifactHeadResponse(this.storage, artifact);
+                storage.exists(artifact).thenApply(
+                    exists -> {
+                        if (exists) {
+                            return new RepositoryChecksums(storage)
+                                .checksums(artifact)
+                                .thenApply(
+                                    checksums -> ResponseBuilder.ok()
+                                        .headers(ArtifactHeaders.from(artifact, checksums))
+                                        .build()
+                                );
+                        }
+                        return CompletableFuture.completedFuture(ResponseBuilder.notFound().build());
+                    }
+                ).thenCompose(Function.identity());
+            default -> CompletableFuture.completedFuture(ResponseBuilder.methodNotAllowed().build());
+        };
     }
 
     /**
@@ -99,63 +113,33 @@ final class LocalMavenSlice implements Slice {
      * @param key Location
      * @return Response
      */
-    private Response plainResponse(final RqMethod method, final Key key) {
-        final Response response;
-        switch (method) {
-            case GET:
-                response = new PlainResponse(
-                    this.storage, key,
-                    () -> new AsyncResponse(this.storage.value(key).thenApply(RsWithBody::new))
-                );
-                break;
-            case HEAD:
-                response = new PlainResponse(
-                    this.storage, key,
-                    () -> new AsyncResponse(
-                        this.storage.metadata(key).thenApply(
-                            meta -> new RsWithHeaders(
-                                StandardRs.OK, new ContentLength(meta.read(Meta.OP_SIZE).get())
-                            )
-                        )
+    private CompletableFuture<Response> plainResponse(final RqMethod method, final Key key) {
+        return switch (method) {
+            case GET -> plainResponse(
+                this.storage, key,
+                () -> this.storage.value(key).thenApply(val -> ResponseBuilder.ok().body(val).build())
+            );
+            case HEAD -> plainResponse(this.storage, key,
+                () -> this.storage.metadata(key)
+                    .thenApply(
+                        meta -> ResponseBuilder.ok()
+                            .header(new ContentLength(meta.read(Meta.OP_SIZE).orElseThrow()))
+                            .build()
                     )
-                );
-                break;
-            default:
-                response = new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
-                break;
-        }
-        return response;
+            );
+            default -> CompletableFuture.completedFuture(ResponseBuilder.methodNotAllowed().build());
+        };
     }
 
-    /**
-     * Plain non-artifact response for key.
-     * @since 0.10
-     */
-    private static final class PlainResponse extends Response.Wrap {
+    private static CompletableFuture<Response> plainResponse(
+        Storage storage, Key key, Supplier<CompletableFuture<Response>> actual
+    ) {
+        return storage.exists(key)
+            .thenApply(
+                exists -> exists
+                    ? actual.get()
+                    : CompletableFuture.completedFuture(ResponseBuilder.notFound().build())
+            ).thenCompose(Function.identity());
 
-        /**
-         * New plain response.
-         * @param storage Storage
-         * @param key Location
-         * @param actual Actual response with body or not
-         */
-        PlainResponse(final Storage storage, final Key key,
-            final Supplier<? extends Response> actual) {
-            super(
-                new AsyncResponse(
-                    storage.exists(key).thenApply(
-                        exists -> {
-                            final Response res;
-                            if (exists) {
-                                res = actual.get();
-                            } else {
-                                res = StandardRs.NOT_FOUND;
-                            }
-                            return res;
-                        }
-                    )
-                )
-            );
-        }
     }
 }

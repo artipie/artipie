@@ -12,8 +12,7 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.http.content.PackageContent;
 import com.artipie.nuget.http.index.ServiceIndex;
@@ -28,6 +27,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * NuGet repository HTTP front end.
@@ -89,23 +89,17 @@ public final class NuGet implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
-        final Response response;
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final String path = line.uri().getPath();
         final Resource resource = this.resource(path);
         final RqMethod method = line.method();
         if (method.equals(RqMethod.GET)) {
-            response = resource.get(headers);
-        } else if (method.equals(RqMethod.PUT)) {
-            response = resource.put(headers, body);
-        } else {
-            response = new RsWithStatus(RsStatus.METHOD_NOT_ALLOWED);
+            return resource.get(headers);
         }
-        return response;
+        if (method.equals(RqMethod.PUT)) {
+            return resource.put(headers, body);
+        }
+        return ResponseBuilder.methodNotAllowed().completedFuture();
     }
 
     /**

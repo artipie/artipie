@@ -8,19 +8,13 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.StandardRs;
 
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 /**
@@ -62,34 +56,25 @@ public final class SliceDownload implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Key key = this.transform.apply(line.uri().getPath());
-        return new AsyncResponse(
-            this.storage.exists(key)
+        return this.storage.exists(key)
                 .thenCompose(
                     exist -> {
-                        final CompletionStage<Response> result;
                         if (exist) {
-                            result = this.storage.value(key)
-                                .thenApply(
-                                    content -> new RsFull(
-                                        RsStatus.OK,
-                                        Headers.from(new ContentFileName(line.uri())),
-                                        content
-                                    )
-                                );
-                        } else {
-                            result = CompletableFuture.completedFuture(
-                                new RsWithBody(
-                                    StandardRs.NOT_FOUND,
-                                    String.format("Key %s not found", key.string()),
-                                    StandardCharsets.UTF_8
-                                )
+                            return this.storage.value(key).thenApply(
+                                content -> ResponseBuilder.ok()
+                                    .header(new ContentFileName(line.uri()))
+                                    .body(content)
+                                    .build()
                             );
                         }
-                        return result;
+                        return CompletableFuture.completedFuture(
+                            ResponseBuilder.notFound()
+                                .textBody(String.format("Key %s not found", key.string()))
+                                .build()
+                        );
                     }
-                )
         );
     }
 }

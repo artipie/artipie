@@ -6,14 +6,13 @@ package com.artipie.http.slice;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Slice;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.RsStatus;
 import com.artipie.http.hm.AssertSlice;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.hm.RqHasHeader;
 import com.artipie.http.hm.RqLineHasUri;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.StandardRs;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -29,114 +28,83 @@ import java.util.regex.Pattern;
 final class TrimPathSliceTest {
 
     @Test
-    void changesOnlyUriPath() throws Exception {
-        verify(
-            new TrimPathSlice(
-                new AssertSlice(
-                    new RqLineHasUri(
-                        new IsEqual<>(URI.create("http://www.w3.org/WWW/TheProject.html"))
-                    )
-                ),
-                "pub/"
+    void changesOnlyUriPath() {
+        new TrimPathSlice(
+            new AssertSlice(
+                new RqLineHasUri(
+                    new IsEqual<>(URI.create("http://www.w3.org/WWW/TheProject.html"))
+                )
             ),
-            requestLine("http://www.w3.org/pub/WWW/TheProject.html")
-        );
+            "pub/"
+        ).response(requestLine("http://www.w3.org/pub/WWW/TheProject.html"),
+            Headers.EMPTY, Content.EMPTY).join();
     }
 
     @Test
     void failIfUriPathDoesntMatch() throws Exception {
-        new TrimPathSlice((line, headers, body) -> StandardRs.EMPTY, "none").response(
-            requestLine("http://www.w3.org"),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).send(
-            (status, headers, body) -> {
-                MatcherAssert.assertThat(
-                    "Not failed",
-                    status,
-                    IsEqual.equalTo(RsStatus.INTERNAL_ERROR)
-                );
-                return CompletableFuture.allOf();
-            }
-        ).toCompletableFuture().get();
-    }
-
-    @Test
-    void replacesFirstPartOfAbsoluteUriPath() throws Exception {
-        verify(
-            new TrimPathSlice(
-                new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/three"))),
-                "/one/two/"
-            ),
-            requestLine("/one/two/three")
+        ResponseAssert.check(
+            new TrimPathSlice((line, headers, body) ->
+                CompletableFuture.completedFuture(ResponseBuilder.ok().build()), "none")
+                .response(requestLine("http://www.w3.org"), Headers.EMPTY, Content.EMPTY)
+                .join(),
+            RsStatus.INTERNAL_ERROR
         );
     }
 
     @Test
-    void replaceFullUriPath() throws Exception {
+    void replacesFirstPartOfAbsoluteUriPath() {
+        new TrimPathSlice(
+            new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/three"))),
+            "/one/two/"
+        ).response(requestLine("/one/two/three"), Headers.EMPTY, Content.EMPTY).join();
+    }
+
+    @Test
+    void replaceFullUriPath() {
         final String path = "/foo/bar";
-        verify(
-            new TrimPathSlice(
-                new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/"))),
-                path
-            ),
-            requestLine(path)
-        );
+        new TrimPathSlice(
+            new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/"))),
+            path
+        ).response(requestLine(path), Headers.EMPTY, Content.EMPTY).join();
     }
 
     @Test
-    void appendsFullPathHeaderToRequest() throws Exception {
+    void appendsFullPathHeaderToRequest() {
         final String path = "/a/b/c";
-        verify(
+        new TrimPathSlice(
+            new AssertSlice(
+                Matchers.anything(),
+                new RqHasHeader.Single("x-fullpath", path),
+                Matchers.anything()
+            ),
+            "/a/b"
+        ).response(requestLine(path), Headers.EMPTY, Content.EMPTY).join();
+    }
+
+    @Test
+    void trimPathByPattern() {
+        final String path = "/repo/version/artifact";
+        new TrimPathSlice(
+            new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/version/artifact"))),
+            Pattern.compile("/[a-zA-Z0-9]+/")
+        ).response(requestLine(path), Headers.EMPTY, Content.EMPTY).join();
+    }
+
+    @Test
+    void dontTrimTwice() {
+        final String prefix = "/one";
+        new TrimPathSlice(
             new TrimPathSlice(
                 new AssertSlice(
-                    Matchers.anything(),
-                    new RqHasHeader.Single("x-fullpath", path),
-                    Matchers.anything()
-                ),
-                "/a/b"
-            ),
-            requestLine(path)
-        );
-    }
-
-    @Test
-    void trimPathByPattern() throws Exception {
-        final String path = "/repo/version/artifact";
-        verify(
-            new TrimPathSlice(
-                new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/version/artifact"))),
-                Pattern.compile("/[a-zA-Z0-9]+/")
-            ),
-            requestLine(path)
-        );
-    }
-
-    @Test
-    void dontTrimTwice() throws Exception {
-        final String prefix = "/one";
-        verify(
-            new TrimPathSlice(
-                new TrimPathSlice(
-                    new AssertSlice(
-                        new RqLineHasUri(new RqLineHasUri.HasPath("/one/two"))
-                    ),
-                    prefix
+                    new RqLineHasUri(new RqLineHasUri.HasPath("/one/two"))
                 ),
                 prefix
             ),
-            requestLine("/one/one/two")
-        );
+            prefix
+        ).response(requestLine("/one/one/two"), Headers.EMPTY, Content.EMPTY).join();
     }
 
     private static RequestLine requestLine(final String path) {
         return new RequestLine("GET", path, "HTTP/1.1");
-    }
-
-    private static void verify(final Slice slice, final RequestLine line) throws Exception {
-        slice.response(line, Headers.EMPTY, Content.EMPTY)
-            .send((status, headers, body) -> CompletableFuture.completedFuture(null))
-            .toCompletableFuture()
-            .get();
     }
 }

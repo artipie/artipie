@@ -6,25 +6,19 @@ package com.artipie.http.client.jetty;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.vertx.VertxSliceServer;
 import io.reactivex.Flowable;
 import io.vertx.reactivex.core.Vertx;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
 import org.cactoos.text.TextOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -33,6 +27,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Tests for {@link JettyClientSlices} and vertx.
@@ -74,7 +74,7 @@ final class JettyClientSlicesAndVertxITCase {
         MatcherAssert.assertThat(
             "Response status is 200",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         MatcherAssert.assertThat(
             "Response body is some html",
@@ -119,7 +119,7 @@ final class JettyClientSlicesAndVertxITCase {
         }
 
         @Override
-        public Response response(
+        public CompletableFuture<Response> response(
             final RequestLine line,
             final Headers headers,
             final Content pub
@@ -136,17 +136,17 @@ final class JettyClientSlicesAndVertxITCase {
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY,
                 Content.EMPTY
-            ).send(
-                (status, rsheaders, body) -> {
-                    final CompletableFuture<Void> terminated = new CompletableFuture<>();
-                    final Flowable<ByteBuffer> termbody = Flowable.fromPublisher(body)
-                        .doOnError(terminated::completeExceptionally)
-                        .doOnTerminate(() -> terminated.complete(null));
-                    promise.complete(new RsFull(status, rsheaders, termbody));
-                    return terminated;
-                }
-            );
-            return new AsyncResponse(promise);
+            ).thenAccept(resp -> {
+                final CompletableFuture<Void> terminated = new CompletableFuture<>();
+                final Flowable<ByteBuffer> termbody = Flowable.fromPublisher(resp.body())
+                    .doOnError(terminated::completeExceptionally)
+                    .doOnTerminate(() -> terminated.complete(null));
+                promise.complete(ResponseBuilder.from(resp.status())
+                    .headers(resp.headers())
+                    .body(termbody)
+                    .build());
+            });
+            return promise;
         }
     }
 }

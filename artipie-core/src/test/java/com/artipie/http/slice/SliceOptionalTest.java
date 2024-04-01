@@ -4,23 +4,21 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
-import java.util.Optional;
+import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 /**
  * Test for {@link SliceOptional}.
- * @since 0.21
  */
 class SliceOptionalTest {
 
@@ -30,7 +28,7 @@ class SliceOptionalTest {
             new SliceOptional<>(
                 Optional.empty(),
                 Optional::isPresent,
-                ignored -> new SliceSimple(StandardRs.OK)
+                ignored -> new SliceSimple(ResponseBuilder.ok().build())
             ),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NOT_FOUND),
@@ -45,7 +43,7 @@ class SliceOptionalTest {
             new SliceOptional<>(
                 Optional.of("abc"),
                 Optional::isPresent,
-                ignored -> new SliceSimple(StandardRs.NO_CONTENT)
+                ignored -> new SliceSimple(ResponseBuilder.noContent().build())
             ),
             new SliceHasResponse(
                 new RsHasStatus(RsStatus.NO_CONTENT),
@@ -62,7 +60,7 @@ class SliceOptionalTest {
                 Optional.of(body),
                 Optional::isPresent,
                 hello -> new SliceSimple(
-                    new RsWithBody(new RsWithStatus(RsStatus.OK), hello.get().getBytes())
+                    ResponseBuilder.ok().body(hello.orElseThrow().getBytes()).build()
                 )
             ),
             new SliceHasResponse(

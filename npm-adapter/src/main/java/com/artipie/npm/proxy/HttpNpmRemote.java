@@ -17,15 +17,14 @@ import com.artipie.npm.proxy.json.CachedContent;
 import com.artipie.npm.proxy.model.NpmAsset;
 import com.artipie.npm.proxy.model.NpmPackage;
 import com.jcabi.log.Logger;
-import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * Base NPM Remote client implementation. It calls remote NPM repository
@@ -40,7 +39,6 @@ public final class HttpNpmRemote implements NpmRemote {
     private final Slice origin;
 
     /**
-     * Ctor.
      * @param origin Client slice
      */
     public HttpNpmRemote(final Slice origin) {
@@ -106,35 +104,27 @@ public final class HttpNpmRemote implements NpmRemote {
      * @return Completable action with content and headers
      */
     private CompletableFuture<Pair<Content, Headers>> performRemoteRequest(final String name) {
-        final CompletableFuture<Pair<Content, Headers>> promise = new CompletableFuture<>();
-        this.origin.response(
+        return this.origin.response(
             new RequestLine(RqMethod.GET, String.format("/%s", name)),
             Headers.EMPTY, Content.EMPTY
-        ).send(
-            (rsstatus, rsheaders, rsbody) -> {
-                final CompletableFuture<Void> term = new CompletableFuture<>();
-                if (rsstatus.success()) {
-                    final Flowable<ByteBuffer> body = Flowable.fromPublisher(rsbody)
-                        .doOnError(term::completeExceptionally)
-                        .doOnTerminate(() -> term.complete(null));
-                    promise.complete(new ImmutablePair<>(new Content.From(body), rsheaders));
-                } else {
-                    promise.completeExceptionally(new ArtipieHttpException(rsstatus));
-                }
-                return term;
+        ).<CompletableFuture<Pair<Content, Headers>>>thenApply(response -> {
+            if (response.status().success()) {
+                return CompletableFuture.completedFuture(
+                    new ImmutablePair<>(response.body(), response.headers())
+                );
             }
-        );
-        return promise;
+            return CompletableFuture.failedFuture(new ArtipieHttpException(response.status()));
+        }).thenCompose(Function.identity());
     }
 
     /**
      * Tries to get header {@code Last-Modified} from remote response
      * or returns current time.
-     * @param hdrs Remote headers
+     * @param headers Remote headers
      * @return Time value.
      */
-    private static String lastModifiedOrNow(final Headers hdrs) {
-        final RqHeaders hdr = new RqHeaders(hdrs, "Last-Modified");
+    private static String lastModifiedOrNow(final Headers headers) {
+        final RqHeaders hdr = new RqHeaders(headers, "Last-Modified");
         String res = new DateTimeNowStr().value();
         if (!hdr.isEmpty()) {
             res = hdr.get(0);
@@ -145,11 +135,11 @@ public final class HttpNpmRemote implements NpmRemote {
     /**
      * Tries to get header {@code ContentType} from remote response
      * or returns {@code application/octet-stream}.
-     * @param hdrs Remote headers
+     * @param headers Remote headers
      * @return Content type value
      */
-    private static String contentType(final Headers hdrs) {
-        final RqHeaders hdr = new RqHeaders(hdrs, ContentType.NAME);
+    private static String contentType(final Headers headers) {
+        final RqHeaders hdr = new RqHeaders(headers, ContentType.NAME);
         String res = "application/octet-stream";
         if (!hdr.isEmpty()) {
             res = hdr.get(0);

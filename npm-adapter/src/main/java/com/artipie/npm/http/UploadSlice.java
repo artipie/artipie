@@ -11,13 +11,11 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Remaining;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.npm.PackageNameFromUrl;
 import com.artipie.npm.Publish;
 import com.artipie.scheduling.ArtifactEvent;
@@ -26,6 +24,7 @@ import hu.akarnokd.rxjava2.interop.SingleInterop;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * UploadSlice.
@@ -74,27 +73,20 @@ public final class UploadSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body) {
+    public CompletableFuture<Response> response(
+        RequestLine line, Headers headers, Content body
+    ) {
         final String pkg = new PackageNameFromUrl(line).value();
-        final Key uploaded = new Key.From(
-            String.format(
-                "%s-%s-uploaded",
-                pkg,
-                UUID.randomUUID().toString()
-            )
-        );
-        return new AsyncResponse(
-            new Concatenation(body).single()
-                .map(Remaining::new)
-                .map(Remaining::bytes)
-                .to(SingleInterop.get())
-                .thenCompose(bytes -> this.storage.save(uploaded, new Content.From(bytes)))
-                .thenCompose(
-                    ignored -> this.events.map(
-                        queue ->  this.npm.publishWithInfo(new Key.From(pkg), uploaded).thenAccept(
+        final Key uploaded = new Key.From(String.format("%s-%s-uploaded", pkg, UUID.randomUUID()));
+        return new Concatenation(body).single()
+            .map(Remaining::new)
+            .map(Remaining::bytes)
+            .to(SingleInterop.get())
+            .thenCompose(bytes -> this.storage.save(uploaded, new Content.From(bytes)))
+            .thenCompose(
+                ignored -> this.events.map(
+                    queue -> this.npm.publishWithInfo(new Key.From(pkg), uploaded)
+                        .thenAccept(
                             info -> this.events.get().add(
                                 new ArtifactEvent(
                                     UploadSlice.REPO_TYPE, this.rname,
@@ -103,10 +95,10 @@ public final class UploadSlice implements Slice {
                                 )
                             )
                         )
-                    ).orElseGet(() -> this.npm.publish(new Key.From(pkg), uploaded))
-                )
-                .thenCompose(ignored -> this.storage.delete(uploaded))
-                .thenApply(ignored -> new RsWithStatus(RsStatus.OK))
-        );
+                ).orElseGet(() -> this.npm.publish(new Key.From(pkg), uploaded))
+            )
+            .thenCompose(ignored -> this.storage.delete(uploaded))
+            .thenApply(ignored -> ResponseBuilder.ok().build())
+            .toCompletableFuture();
     }
 }

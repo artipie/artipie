@@ -4,56 +4,16 @@
  */
 package com.artipie.http;
 
-import com.artipie.http.rs.StandardRs;
+import com.artipie.asto.Content;
 
-import java.util.concurrent.CompletionStage;
+public record Response(RsStatus status, Headers headers, Content body) {
 
-/**
- * HTTP response.
- * @see <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html">RFC2616</a>
- * @since 0.1
- */
-public interface Response {
-
-    /**
-     * Empty response.
-     * @deprecated Use {@link StandardRs#EMPTY}.
-     */
-    @Deprecated
-    Response EMPTY = StandardRs.EMPTY;
-
-    /**
-     * Send the response.
-     *
-     * @param connection Connection to send the response to
-     * @return Completion stage for sending response to the connection.
-     */
-    CompletionStage<Void> send(Connection connection);
-
-    /**
-     * Abstract decorator for Response.
-     *
-     * @since 0.9
-     */
-    abstract class Wrap implements Response {
-
-        /**
-         * Origin response.
-         */
-        private final Response response;
-
-        /**
-         * Ctor.
-         *
-         * @param response Response.
-         */
-        protected Wrap(final Response response) {
-            this.response = response;
-        }
-
-        @Override
-        public final CompletionStage<Void> send(final Connection connection) {
-            return this.response.send(connection);
-        }
+    @Override
+    public String toString() {
+        return "Response{" +
+            "status=" + status +
+            ", headers=" + headers +
+            ", hasBody=" + body.size().map(s -> s > 0).orElse(false) +
+            '}';
     }
 }

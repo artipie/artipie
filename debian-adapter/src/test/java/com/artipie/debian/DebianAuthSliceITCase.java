@@ -10,7 +10,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.debian.http.DebianSlice;
 import com.artipie.http.auth.Authentication;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.LoggingSlice;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
@@ -105,7 +105,7 @@ public final class DebianAuthSliceITCase {
         MatcherAssert.assertThat(
             "Response for upload is OK",
             con.getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.OK.code()))
+            new IsEqual<>(RsStatus.OK.code())
         );
         this.cntn.execInContainer("apt-get", "update");
         final Container.ExecResult res =
@@ -124,7 +124,7 @@ public final class DebianAuthSliceITCase {
         MatcherAssert.assertThat(
             "Response is UNAUTHORIZED",
             this.getConnection("mark:abc", method).getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.UNAUTHORIZED.code()))
+            new IsEqual<>(RsStatus.UNAUTHORIZED.code())
         );
     }
 
@@ -148,7 +148,7 @@ public final class DebianAuthSliceITCase {
         MatcherAssert.assertThat(
             "Response is FORBIDDEN",
             this.getConnection(DebianAuthSliceITCase.AUTH, method).getResponseCode(),
-            new IsEqual<>(Integer.parseInt(RsStatus.FORBIDDEN.code()))
+            new IsEqual<>(RsStatus.FORBIDDEN.code())
         );
     }
 

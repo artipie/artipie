@@ -16,7 +16,7 @@ import com.artipie.http.hm.IsJson;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import io.vertx.core.Vertx;
 import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;
@@ -51,17 +51,17 @@ public class ConanUploadUrlsTest {
         final String payload =
             "{\"conan_export.tgz\": \"\", \"conanfile.py\":\"\", \"conanmanifest.txt\": \"\"}";
         final byte[] data = payload.getBytes(StandardCharsets.UTF_8);
-        final Response response = new ConanUpload.UploadUrls(storage, new ItemTokenizer(Vertx.vertx())).response(
+        final Response response = new ConanUpload.UploadUrls(storage, new ItemTokenizer(Vertx.vertx()))
+            .response(
             new RequestLine(
-                "POST",
-                "/v1/conans/zmqpp/4.2.0/_/_/upload_urls"
+                "POST", "/v1/conans/zmqpp/4.2.0/_/_/upload_urls"
             ),
             Headers.from(
                 new Header("Content-Size", Long.toString(data.length)),
                 new Header("Host", "localhost")
             ),
             new Content.From(data)
-        );
+            ).join();
         MatcherAssert.assertThat(
             "Response body must match",
             response,

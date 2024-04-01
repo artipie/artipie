@@ -6,13 +6,10 @@ package com.artipie.npm.proxy;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.test.TestResource;
-import com.artipie.http.Headers;
-import com.artipie.http.Response;
 import com.artipie.http.Slice;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.npm.proxy.http.RsNotFound;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.npm.proxy.model.NpmAsset;
 import com.artipie.npm.proxy.model.NpmPackage;
 import org.apache.commons.io.IOUtils;
@@ -146,27 +143,21 @@ public final class HttpNpmRemoteTest {
 
     private Slice prepareClientSlice() {
         return (line, headers, body) -> {
-            final Response res;
             final String path = line.uri().getPath();
             if (path.equalsIgnoreCase("/asdas")) {
-                res = new RsFull(
-                    RsStatus.OK,
-                    Headers.from("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
-                    new Content.From(new TestResource("json/original.json").asBytes())
-                );
-            } else if (path.equalsIgnoreCase("/asdas/-/asdas-1.0.0.tgz")) {
-                res = new RsFull(
-                    RsStatus.OK,
-                    Headers.from(
-                        new Header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED),
-                        new Header("Content-Type", HttpNpmRemoteTest.DEF_CONTENT_TYPE)
-                    ),
-                    new Content.From(HttpNpmRemoteTest.DEF_CONTENT.getBytes(StandardCharsets.UTF_8))
-                );
-            } else {
-                res = new RsNotFound();
+                return ResponseBuilder.ok()
+                    .header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED)
+                    .body(new TestResource("json/original.json").asBytes())
+                    .completedFuture();
             }
-            return res;
+            if (path.equalsIgnoreCase("/asdas/-/asdas-1.0.0.tgz")) {
+                return ResponseBuilder.ok()
+                    .header(new Header("Last-Modified", HttpNpmRemoteTest.LAST_MODIFIED))
+                    .header(ContentType.mime(HttpNpmRemoteTest.DEF_CONTENT_TYPE))
+                    .body(HttpNpmRemoteTest.DEF_CONTENT.getBytes(StandardCharsets.UTF_8))
+                    .completedFuture();
+            }
+            return ResponseBuilder.notFound().completedFuture();
         };
     }
 }

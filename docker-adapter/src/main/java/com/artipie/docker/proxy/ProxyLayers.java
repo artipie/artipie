@@ -5,7 +5,6 @@
 package com.artipie.docker.proxy;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.FailedCompletionStage;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
@@ -16,7 +15,8 @@ import com.artipie.http.Slice;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -63,29 +63,25 @@ public final class ProxyLayers implements Layers {
     public CompletionStage<Optional<Blob>> get(final Digest digest) {
         String blobPath = String.format("/v2/%s/blobs/%s", this.name.value(), digest.string());
         return new ResponseSink<>(
-            this.remote.response(
-                new RequestLine(RqMethod.HEAD, blobPath),
-                Headers.EMPTY,
-                Content.EMPTY
-            ),
-            (status, headers, body) -> {
+            this.remote.response(new RequestLine(RqMethod.HEAD, blobPath), Headers.EMPTY, Content.EMPTY),
+            response -> {
                 final CompletionStage<Optional<Blob>> result;
-                if (status == RsStatus.OK) {
+                if (response.status() == RsStatus.OK) {
                     result = CompletableFuture.completedFuture(
                         Optional.of(
                             new ProxyBlob(
                                 this.remote,
                                 this.name,
                                 digest,
-                                new ContentLength(headers).longValue()
+                                new ContentLength(response.headers()).longValue()
                             )
                         )
                     );
-                } else if (status == RsStatus.NOT_FOUND) {
+                } else if (response.status() == RsStatus.NOT_FOUND) {
                     result = CompletableFuture.completedFuture(Optional.empty());
                 } else {
-                    result = new FailedCompletionStage<>(
-                        new IllegalArgumentException(String.format("Unexpected status: %s", status))
+                    result = CompletableFuture.failedFuture(
+                        new IllegalArgumentException("Unexpected status: " + response.status())
                     );
                 }
                 return result;

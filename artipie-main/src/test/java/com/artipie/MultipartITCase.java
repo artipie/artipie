@@ -8,27 +8,17 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.multipart.RqMultipart;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.vertx.VertxSliceServer;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.vertx.reactivex.core.Vertx;
-
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -41,6 +31,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Integration tests for multipart feature.
@@ -75,7 +71,7 @@ final class MultipartITCase {
     void parseMultiparRequest() throws Exception {
         final AtomicReference<String> result = new AtomicReference<>();
         this.container.deploy(
-            (line, headers, body) -> new AsyncResponse(
+            (line, headers, body) ->
                 new Content.From(
                     Flowable.fromPublisher(
                         new RqMultipart(headers, body).inspect(
@@ -94,9 +90,8 @@ final class MultipartITCase {
                         )
                     ).flatMap(part -> part)
                 ).asStringFuture().thenAccept(result::set).thenApply(
-                    none -> StandardRs.OK
+                    none -> ResponseBuilder.ok().build()
                 )
-            )
         );
         final String data = "hello-multipart";
         try (CloseableHttpClient cli = HttpClients.createDefault()) {
@@ -123,7 +118,7 @@ final class MultipartITCase {
     void parseBigMultiparRequest() throws Exception {
         final AtomicReference<String> result = new AtomicReference<>();
         this.container.deploy(
-            (line, headers, body) -> new AsyncResponse(
+            (line, headers, body) ->
                 new Content.From(
                     Flowable.fromPublisher(
                         new RqMultipart(headers, body).inspect(
@@ -142,9 +137,8 @@ final class MultipartITCase {
                         )
                     ).flatMap(part -> part)
                 ).asStringFuture().thenAccept(result::set).thenApply(
-                    none -> StandardRs.OK
+                    none -> ResponseBuilder.ok().build()
                 )
-            )
         );
         final byte[] buf = testData();
         try (CloseableHttpClient cli = HttpClients.createDefault()) {
@@ -170,10 +164,9 @@ final class MultipartITCase {
     }
 
     @Test
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     void saveMultipartToFile(@TempDir final Path path) throws Exception {
         this.container.deploy(
-            (line, headers, body) -> new AsyncResponse(
+            (line, headers, body) ->
                 Flowable.fromPublisher(
                     new RqMultipart(headers, body).inspect(
                         (part, sink) -> {
@@ -184,9 +177,7 @@ final class MultipartITCase {
                             } else {
                                 sink.ignore(part);
                             }
-                            final CompletableFuture<Void> res = new CompletableFuture<>();
-                            res.complete(null);
-                            return res;
+                            return CompletableFuture.completedFuture(null);
                         }
                     )
                 ).flatMapSingle(
@@ -196,8 +187,10 @@ final class MultipartITCase {
                             new Content.From(part)
                         ).thenApply(none -> 0)
                     )
-                ).toList().to(SingleInterop.get()).thenApply(none -> StandardRs.OK)
-            )
+                    ).toList()
+                    .to(SingleInterop.get())
+                    .toCompletableFuture()
+                    .thenApply(none -> ResponseBuilder.ok().build())
         );
         final byte[] buf = testData();
         final String filename = "data.bin";
@@ -239,7 +232,6 @@ final class MultipartITCase {
 
     /**
      * Container for slice with dynamic deployment.
-     * @since 1.2
      */
     private static final class SliceContainer implements Slice {
 
@@ -249,17 +241,11 @@ final class MultipartITCase {
         private volatile Slice target;
 
         @Override
-        @SuppressWarnings("PMD.OnlyOneReturn")
-        public Response response(final RequestLine line,
-            final Headers headers,
-            final Content body) {
-            if (this.target == null) {
-                return new RsWithBody(
-                    new RsWithStatus(RsStatus.UNAVAILABLE),
-                    "target is not set", StandardCharsets.US_ASCII
-                );
-            }
-            return this.target.response(line, headers, body);
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+            return target != null ? target.response(line, headers, body)
+                : CompletableFuture.completedFuture(ResponseBuilder.unavailable()
+                .textBody("target is not set").build());
+
         }
 
         /**

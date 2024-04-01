@@ -19,15 +19,12 @@ import com.artipie.hex.tarball.MetadataConfig;
 import com.artipie.hex.tarball.TarReader;
 import com.artipie.hex.utils.Gzip;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -54,7 +51,7 @@ import java.util.regex.Pattern;
 /**
  * This slice creates package meta-info from request body(tar-archive) and saves this tar-archive.
  */
-@SuppressWarnings("PMD.ExcessiveMethodLength")
+@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.SingularField"})
 public final class UploadSlice implements Slice {
     /**
      * Path to publish.
@@ -90,17 +87,17 @@ public final class UploadSlice implements Slice {
      * Ctor.
      * @param storage Repository storage.
      * @param events Artifact events
-     * @param rname Repository name
+     * @param repoName Repository name
      */
-    public UploadSlice(final Storage storage, final Optional<Queue<ArtifactEvent>> events,
-        final String rname) {
+    public UploadSlice(Storage storage, Optional<Queue<ArtifactEvent>> events,
+                       String repoName) {
         this.storage = storage;
         this.events = events;
-        this.rname = rname;
+        this.rname = repoName;
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body
@@ -110,7 +107,7 @@ public final class UploadSlice implements Slice {
         final Matcher pathmatcher = UploadSlice.PUBLISH.matcher(path);
         final String query = Objects.nonNull(uri.getQuery()) ? uri.getQuery() : "";
         final Matcher querymatcher = UploadSlice.QUERY.matcher(query);
-        final Response res;
+        final CompletableFuture<Response> res;
         if (pathmatcher.matches() && querymatcher.matches()) {
             final boolean replace = Boolean.parseBoolean(querymatcher.group("replace"));
             final AtomicReference<String> name = new AtomicReference<>();
@@ -121,16 +118,11 @@ public final class UploadSlice implements Slice {
             final AtomicReference<List<PackageOuterClass.Release>> releases =
                 new AtomicReference<>();
             final AtomicReference<Key> packagekey = new AtomicReference<>();
-            res = new AsyncResponse(UploadSlice.asBytes(body)
+            res = UploadSlice.asBytes(body)
                 .thenAccept(
                     bytes -> UploadSlice.readVarsFromTar(
-                        bytes,
-                        name,
-                        version,
-                        innerchcksum,
-                        outerchcksum,
-                        tarcontent,
-                        packagekey
+                        bytes, name, version, innerchcksum,
+                        outerchcksum, tarcontent, packagekey
                     )
                 ).thenCompose(
                     nothing -> this.storage.exists(packagekey.get())
@@ -143,33 +135,26 @@ public final class UploadSlice implements Slice {
                         nothing -> UploadSlice.handleReleases(releases, replace, version)
                     ).thenApply(
                         nothing -> UploadSlice.constructSignedPackage(
-                            name,
-                            version,
-                            innerchcksum,
-                            outerchcksum,
-                            releases
+                            name, version, innerchcksum, outerchcksum, releases
                         )
                     ).thenCompose(
                         signedPackage -> this.saveSignedPackageToStorage(
-                            packagekey,
-                            signedPackage
+                            packagekey, signedPackage
                         )
                     ).thenCompose(
                         nothing -> this.saveTarContentToStorage(
-                            name,
-                            version,
-                            tarcontent
+                            name, version, tarcontent
                         )
                     )
                 ).handle(
                     (content, throwable) -> {
                         final Response result;
                         if (throwable == null) {
-                            result = new RsFull(
-                                RsStatus.CREATED,
-                                new HexContentType(headers).fill(),
-                                Content.EMPTY
-                            );
+                            result = ResponseBuilder.created()
+                                .headers(new HexContentType(headers).fill())
+                                // todo https://github.com/artipie/artipie/issues/1435
+                                .header(new ContentLength(0))
+                                .build();
                             this.events.ifPresent(
                                 queue -> queue.add(
                                     new ArtifactEvent(
@@ -180,17 +165,15 @@ public final class UploadSlice implements Slice {
                                 )
                             );
                         } else {
-                            result = new RsWithBody(
-                                new RsWithStatus(RsStatus.INTERNAL_ERROR),
-                                throwable.getMessage().getBytes()
-                            );
+                            result = ResponseBuilder.internalError()
+                                .body(throwable.getMessage().getBytes())
+                                .build();
                         }
                         return result;
                     }
-                )
-            );
+                ).toCompletableFuture();
         } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+            res = ResponseBuilder.badRequest().completedFuture();
         }
         return res;
     }

@@ -5,14 +5,10 @@
 package com.artipie.http.hm;
 
 import com.artipie.http.Response;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rs.RsStatus;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.core.AllOf;
-
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Response matcher.
@@ -65,77 +61,6 @@ public final class ResponseMatcher extends AllOf<Response> {
     }
 
     /**
-     * @param status Expected status
-     * @param body Expected body
-     */
-    public ResponseMatcher(final RsStatus status, final String body) {
-        this(
-            status,
-            body,
-            StandardCharsets.UTF_8
-        );
-    }
-
-    /**
-     * @param body Expected body
-     */
-    public ResponseMatcher(final Matcher<String> body) {
-        this(body, StandardCharsets.UTF_8);
-    }
-
-    /**
-     * @param body Expected body
-     */
-    public ResponseMatcher(final String body) {
-        this(Matchers.is(body));
-    }
-
-    /**
-     * @param body Expected body
-     * @param charset Character set
-     */
-    public ResponseMatcher(final Matcher<String> body, final Charset charset) {
-        this(RsStatus.OK, body, charset);
-    }
-
-    /**
-     * @param body Expected body
-     * @param charset Character set
-     */
-    public ResponseMatcher(final String body, final Charset charset) {
-        this(RsStatus.OK, body, charset);
-    }
-
-    /**
-     * @param status Expected status
-     * @param body Expected body
-     * @param charset Character set
-     */
-    public ResponseMatcher(final RsStatus status, final String body, final Charset charset) {
-        this(
-            status,
-            Matchers.is(body),
-            charset
-        );
-    }
-
-    /**
-     * @param status Expected status
-     * @param body Expected body
-     * @param charset Character set
-     */
-    public ResponseMatcher(
-        final RsStatus status,
-        final Matcher<String> body,
-        final Charset charset
-    ) {
-        super(
-            new RsHasStatus(status),
-            new RsHasBody(body, charset)
-        );
-    }
-
-    /**
      * @param body Expected body
      */
     public ResponseMatcher(final byte[] body) {
@@ -146,10 +71,7 @@ public final class ResponseMatcher extends AllOf<Response> {
      * @param headers Expected headers
      */
     public ResponseMatcher(Iterable<? extends Header> headers) {
-        this(
-            RsStatus.OK,
-            new RsHasHeaders(headers)
-        );
+        this(RsStatus.OK, new RsHasHeaders(headers));
     }
 
     /**

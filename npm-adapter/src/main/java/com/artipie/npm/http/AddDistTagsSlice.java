@@ -8,13 +8,10 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 
 import javax.json.Json;
 import java.nio.charset.StandardCharsets;
@@ -50,48 +47,41 @@ final class AddDistTagsSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = AddDistTagsSlice.PTRN.matcher(line.uri().getPath());
-        final Response resp;
         if (matcher.matches()) {
             final Key meta = new Key.From(matcher.group("pkg"), "meta.json");
             final String tag = matcher.group("tag");
-            resp = new AsyncResponse(
-                this.storage.exists(meta).thenCompose(
-                    exists -> {
-                        if (exists) {
-                            return this.storage.value(meta)
-                                .thenCompose(Content::asJsonObjectFuture)
-                                .thenCombine(
-                                    new Content.From(body).asStringFuture(),
-                                    (json, val) -> Json.createObjectBuilder(json).add(
-                                        AddDistTagsSlice.DIST_TAGS,
-                                        Json.createObjectBuilder()
-                                            .addAll(
-                                                Json.createObjectBuilder(
-                                                    json.getJsonObject(AddDistTagsSlice.DIST_TAGS)
-                                                )
-                                            ).add(tag, val.replaceAll("\"", ""))
-                                    ).build()
-                                ).thenApply(
-                                    json -> {
-                                        byte[] bytes = json.toString().getBytes(StandardCharsets.UTF_8);
-                                        this.storage.save(meta, new Content.From(bytes));
-                                        return StandardRs.OK;
-                                    }
-                                );
-                        }
-                        return CompletableFuture.completedFuture(StandardRs.NOT_FOUND);
+            return this.storage.exists(meta).thenCompose(
+                exists -> {
+                    if (exists) {
+                        return this.storage.value(meta)
+                            .thenCompose(Content::asJsonObjectFuture)
+                            .thenCombine(
+                                new Content.From(body).asStringFuture(),
+                                (json, val) -> Json.createObjectBuilder(json).add(
+                                    AddDistTagsSlice.DIST_TAGS,
+                                    Json.createObjectBuilder()
+                                        .addAll(
+                                            Json.createObjectBuilder(
+                                                json.getJsonObject(AddDistTagsSlice.DIST_TAGS)
+                                            )
+                                        ).add(tag, val.replaceAll("\"", ""))
+                                ).build()
+                            ).thenApply(
+                                json -> {
+                                    byte[] bytes = json.toString().getBytes(StandardCharsets.UTF_8);
+                                    this.storage.save(meta, new Content.From(bytes));
+                                    return ResponseBuilder.ok().build();
+                                }
+                            );
                     }
-                )
+                    return CompletableFuture.completedFuture(
+                        ResponseBuilder.notFound().build()
+                    );
+                }
             );
-        } else {
-            resp = new RsWithStatus(RsStatus.BAD_REQUEST);
         }
-        return resp;
+        return ResponseBuilder.badRequest().completedFuture();
     }
 }

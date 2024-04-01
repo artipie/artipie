@@ -10,19 +10,17 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.ResponseBuilder;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice that filters content of repository.
  */
 public class FilterSlice implements Slice {
-    /**
-     * Origin slice.
-     */
+
     private final Slice origin;
 
     /**
@@ -44,7 +42,6 @@ public class FilterSlice implements Slice {
     }
 
     /**
-     * Ctor.
      * @param origin Origin slice
      * @param filters Filters
      */
@@ -54,12 +51,12 @@ public class FilterSlice implements Slice {
     }
 
     @Override
-    public final Response response(
+    public final CompletableFuture<Response> response(
         RequestLine line, Headers headers, Content body
     ) {
         if (this.filters.allowed(line, headers)) {
             return this.origin.response(line, headers, body);
         }
-        return new RsWithStatus(RsStatus.FORBIDDEN);
+        return CompletableFuture.completedFuture(ResponseBuilder.forbidden().build());
     }
 }

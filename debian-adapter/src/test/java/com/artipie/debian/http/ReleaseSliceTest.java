@@ -14,17 +14,19 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.SliceSimple;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test for {@link ReleaseSlice}.
@@ -49,7 +51,7 @@ class ReleaseSliceTest {
         MatcherAssert.assertThat(
             "Response is CREATED",
             new ReleaseSlice(
-                new SliceSimple(new RsWithStatus(RsStatus.CREATED)),
+                new SliceSimple(ResponseBuilder.created().build()),
                 this.asto,
                 release,
                 inrelease
@@ -80,7 +82,7 @@ class ReleaseSliceTest {
         MatcherAssert.assertThat(
             "Response is OK",
             new ReleaseSlice(
-                new SliceSimple(new RsWithStatus(RsStatus.OK)),
+                new SliceSimple(ResponseBuilder.ok().build()),
                 this.asto,
                 release,
                 inrelease
@@ -90,16 +92,10 @@ class ReleaseSliceTest {
                 new RequestLine(RqMethod.GET, "/not/important")
             )
         );
-        MatcherAssert.assertThat(
-            "Release file was not created",
-            release.count.get(),
-            new IsEqual<>(0)
-        );
-        MatcherAssert.assertThat(
-            "InRelease file was not created",
-            inrelease.count.get(),
-            new IsEqual<>(0)
-        );
+        Assertions.assertEquals(0, release.count.get(),
+            "Release file was not created");
+        Assertions.assertEquals(0, inrelease.count.get(),
+            "InRelease file was not created");
     }
 
     /**

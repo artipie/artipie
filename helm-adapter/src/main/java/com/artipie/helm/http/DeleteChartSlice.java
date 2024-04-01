@@ -11,14 +11,12 @@ import com.artipie.helm.ChartYaml;
 import com.artipie.helm.TgzArchive;
 import com.artipie.helm.metadata.IndexYaml;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.scheduling.ArtifactEvent;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Single;
 
 import java.net.URI;
@@ -42,9 +40,6 @@ final class DeleteChartSlice implements Slice {
         "^/charts/(?<name>[a-zA-Z\\-\\d.]+)/?(?<version>[a-zA-Z\\-\\d.]*)$"
     );
 
-    /**
-     * The Storage.
-     */
     private final Storage storage;
 
     /**
@@ -55,51 +50,40 @@ final class DeleteChartSlice implements Slice {
     /**
      * Repository name.
      */
-    private final String rname;
+    private final String repoName;
 
     /**
-     * Ctor.
-     *
      * @param storage The storage.
      * @param events Events queue
-     * @param rname Repository name
+     * @param repoName Repository name
      */
-    DeleteChartSlice(final Storage storage, final Optional<Queue<ArtifactEvent>> events,
-        final String rname) {
+    DeleteChartSlice(Storage storage, Optional<Queue<ArtifactEvent>> events, String repoName) {
         this.storage = storage;
         this.events = events;
-        this.rname = rname;
+        this.repoName = repoName;
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
-    ) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final URI uri = line.uri();
         final Matcher matcher = DeleteChartSlice.PTRN_DEL_CHART.matcher(uri.getPath());
-        final Response res;
         if (matcher.matches()) {
             final String chart = matcher.group("name");
             final String vers = matcher.group("version");
             if (vers.isEmpty()) {
-                res = new AsyncResponse(
-                    new IndexYaml(this.storage)
-                        .deleteByName(chart)
-                        .andThen(this.deleteArchives(chart, Optional.empty()))
-                );
-            } else {
-                res = new AsyncResponse(
-                    new IndexYaml(this.storage)
-                        .deleteByNameAndVersion(chart, vers)
-                        .andThen(this.deleteArchives(chart, Optional.of(vers)))
-                );
+                return new IndexYaml(this.storage)
+                    .deleteByName(chart)
+                    .andThen(this.deleteArchives(chart, Optional.empty()))
+                    .to(SingleInterop.get())
+                    .toCompletableFuture();
             }
-        } else {
-            res = new RsWithStatus(RsStatus.BAD_REQUEST);
+            return new IndexYaml(this.storage)
+                .deleteByNameAndVersion(chart, vers)
+                .andThen(this.deleteArchives(chart, Optional.of(vers)))
+                .to(SingleInterop.get())
+                .toCompletableFuture();
         }
-        return res;
+        return ResponseBuilder.badRequest().completedFuture();
     }
 
     /**
@@ -144,18 +128,18 @@ final class DeleteChartSlice implements Slice {
                                     queue -> queue.add(
                                         vers.map(
                                             item -> new ArtifactEvent(
-                                                PushChartSlice.REPO_TYPE, this.rname, name, item
+                                                PushChartSlice.REPO_TYPE, this.repoName, name, item
                                             )
                                         ).orElseGet(
                                             () -> new ArtifactEvent(
-                                                PushChartSlice.REPO_TYPE, this.rname, name
+                                                PushChartSlice.REPO_TYPE, this.repoName, name
                                             )
                                         )
                                     )
                                 );
-                                return StandardRs.OK;
+                                return ResponseBuilder.ok().build();
                             }
-                            return StandardRs.NOT_FOUND;
+                            return ResponseBuilder.notFound().build();
                         }
                     )
                 )

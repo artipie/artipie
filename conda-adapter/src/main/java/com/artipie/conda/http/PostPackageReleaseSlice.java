@@ -6,33 +6,29 @@ package com.artipie.conda.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.common.RsJson;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
+
 import javax.json.Json;
+import java.io.StringReader;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice to handle `POST /release/{owner_login}/{package_name}/{version}` and
  * `POST /package/{owner_login}/{package_name}`.
- * @since 0.4
  * @todo #32:30min Implement this slice properly, it should handle post requests to create package
  *  and release. For now link for full documentation is not found, check swagger
  *  https://api.anaconda.org/docs#/ and github issue for any updates.
  *  https://github.com/Anaconda-Platform/anaconda-client/issues/580
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class PostPackageReleaseSlice implements Slice {
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body) {
-        return new RsJson(
-            () -> Json.createReader(
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+        return ResponseBuilder.ok()
+            .jsonBody(Json.createReader(
                 new StringReader(
                     String.join(
                         "\n",
@@ -67,8 +63,7 @@ public final class PostPackageReleaseSlice implements Slice {
                         "}"
                     )
                 )
-            ).read(),
-            StandardCharsets.UTF_8
-        );
+            ).read()
+        ).completedFuture();
     }
 }

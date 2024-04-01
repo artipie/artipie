@@ -6,9 +6,10 @@ package com.artipie.nuget.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Absent resource, sends HTTP 404 Not Found response to every request.
@@ -16,12 +17,12 @@ import com.artipie.http.rs.RsWithStatus;
 public final class Absent implements Resource {
 
     @Override
-    public Response get(final Headers headers) {
-        return new RsWithStatus(RsStatus.NOT_FOUND);
+    public CompletableFuture<Response> get(final Headers headers) {
+        return ResponseBuilder.notFound().completedFuture();
     }
 
     @Override
-    public Response put(Headers headers, Content body) {
-        return new RsWithStatus(RsStatus.NOT_FOUND);
+    public CompletableFuture<Response> put(Headers headers, Content body) {
+        return ResponseBuilder.notFound().completedFuture();
     }
 }

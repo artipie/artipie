@@ -19,6 +19,7 @@ import com.artipie.http.rq.RequestLine;
 import com.artipie.settings.repo.RepoConfig;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Php Composer proxy slice.
@@ -53,7 +54,7 @@ public final class ComposerProxy implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<Response> response(
         RequestLine line,
         Headers headers,
         Content body

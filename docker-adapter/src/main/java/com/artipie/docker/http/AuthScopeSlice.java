@@ -14,10 +14,10 @@ import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.security.policy.Policy;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Slice that implements authorization for {@link ScopeSlice}.
- *
- * @since 0.11
  */
 final class AuthScopeSlice implements Slice {
 
@@ -62,7 +62,7 @@ final class AuthScopeSlice implements Slice {
     }
 
     @Override
-    public Response response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body

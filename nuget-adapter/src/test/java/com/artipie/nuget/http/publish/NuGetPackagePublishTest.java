@@ -8,12 +8,12 @@ import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
 import com.artipie.nuget.AstoRepository;
 import com.artipie.nuget.http.NuGet;
 import com.artipie.nuget.http.TestAuthentication;
@@ -23,6 +23,7 @@ import com.google.common.io.Resources;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.core5.http.HttpEntity;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +32,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -82,13 +82,11 @@ class NuGetPackagePublishTest {
 
     @Test
     void shouldFailPutSamePackage() throws Exception {
-        this.putPackage(nupkg()).send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        this.putPackage(nupkg());
         MatcherAssert.assertThat(
             "Should fail to add same package when it is already present in the repository",
-            this.putPackage(nupkg()),
-            new RsHasStatus(RsStatus.CONFLICT)
+            this.putPackage(nupkg()).status(),
+            Matchers.is(RsStatus.CONFLICT)
         );
         MatcherAssert.assertThat("Events queue is contains one item", this.events.size() == 1);
     }
@@ -99,8 +97,8 @@ class NuGetPackagePublishTest {
             new RequestLine(RqMethod.GET, "/package"),
             TestAuthentication.HEADERS,
             Content.EMPTY
-        );
-        MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.METHOD_NOT_ALLOWED));
+        ).join();
+        MatcherAssert.assertThat(response.status(), Matchers.is(RsStatus.METHOD_NOT_ALLOWED));
         MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
     }
 
@@ -111,7 +109,7 @@ class NuGetPackagePublishTest {
                 new RequestLine(RqMethod.PUT, "/package"),
                 Headers.EMPTY,
                 new Content.From("data".getBytes())
-            ),
+            ).join(),
             new ResponseMatcher(
                 RsStatus.UNAUTHORIZED, Headers.EMPTY
             )
@@ -132,7 +130,7 @@ class NuGetPackagePublishTest {
                 new Header("Content-Type", entity.getContentType())
             ),
             new Content.From(sink.toByteArray())
-        );
+        ).join();
     }
 
     private static byte[] nupkg() throws Exception {

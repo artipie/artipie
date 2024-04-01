@@ -8,15 +8,14 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsFull;
-import com.artipie.http.rs.RsStatus;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
@@ -82,32 +81,17 @@ public final class SliceListing implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Key key = this.transform.apply(line.uri().getPath());
-        return new AsyncResponse(
-            this.storage.list(key)
+        return this.storage.list(key)
                 .thenApply(
                     keys -> {
                         final String text = this.format.apply(keys);
-                        return new RsFull(
-                            RsStatus.OK,
-                            Headers.from(
-                                new ContentType(
-                                    String.format(
-                                        "%s; charset=%s",
-                                        this.mime,
-                                        StandardCharsets.UTF_8
-                                    )
-                                )
-                            ),
-                            new Content.From(
-                                text.getBytes(
-                                    StandardCharsets.UTF_8
-                                )
-                            )
-                        );
+                        return ResponseBuilder.ok()
+                            .header(ContentType.mime(this.mime, StandardCharsets.UTF_8))
+                            .body(text.getBytes(StandardCharsets.UTF_8))
+                            .build();
                     }
-                )
         );
     }
 }

@@ -6,19 +6,14 @@ package com.artipie.http.client.auth;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.headers.Authorization;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -27,8 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -43,15 +36,12 @@ final class AuthClientSliceTest {
     void shouldAuthenticateFirstRequestWithEmptyHeadersFirst() {
         final FakeAuthenticator fake = new FakeAuthenticator(Headers.EMPTY);
         new AuthClientSlice(
-            (line, headers, body) -> StandardRs.EMPTY,
-            fake
+            (line, headers, body) -> ResponseBuilder.ok().completedFuture(), fake
         ).response(
             new RequestLine(RqMethod.GET, "/"),
             Headers.from("X-Header", "The Value"),
             Content.EMPTY
-        ).send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        ).join();
         MatcherAssert.assertThat(
             fake.capture(0),
             new IsEqual<>(Headers.EMPTY)
@@ -67,17 +57,14 @@ final class AuthClientSliceTest {
             (line, headers, body) -> {
                 Headers aa = headers.copy();
                 capture.set(aa);
-                return StandardRs.EMPTY;
+                return ResponseBuilder.ok().completedFuture();
             },
             new FakeAuthenticator(Headers.from(auth))
         ).response(
             new RequestLine(RqMethod.GET, "/resource"),
             Headers.from(original),
             Content.EMPTY
-        ).send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
-
+        ).join();
         MatcherAssert.assertThat(
             capture.get(),
             Matchers.containsInAnyOrder(original, auth)
@@ -89,18 +76,11 @@ final class AuthClientSliceTest {
         final Header rsheader = new Header("Abc", "Def");
         final FakeAuthenticator fake = new FakeAuthenticator(Headers.EMPTY, Headers.EMPTY);
         new AuthClientSlice(
-            (line, headers, body) -> new RsWithHeaders(
-                new RsWithStatus(RsStatus.UNAUTHORIZED),
-                Headers.from(rsheader)
-            ),
-            fake
+            (line, headers, body) ->
+                ResponseBuilder.unauthorized().header(rsheader).completedFuture(), fake
         ).response(
             new RequestLine(RqMethod.GET, "/foo/bar"),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+            Headers.EMPTY, Content.EMPTY).join();
         MatcherAssert.assertThat(
             fake.capture(1),
             Matchers.containsInAnyOrder(rsheader)
@@ -113,16 +93,14 @@ final class AuthClientSliceTest {
         new AuthClientSlice(
             (line, headers, body) -> {
                 capture.incrementAndGet();
-                return new RsWithStatus(RsStatus.UNAUTHORIZED);
+                return ResponseBuilder.unauthorized().completedFuture();
             },
             Authenticator.ANONYMOUS
         ).response(
             new RequestLine(RqMethod.GET, "/secret/resource"),
             Headers.EMPTY,
             Content.EMPTY
-        ).send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        ).join();
         MatcherAssert.assertThat(
             capture.get(),
             new IsEqual<>(1)
@@ -137,45 +115,17 @@ final class AuthClientSliceTest {
         new AuthClientSlice(
             (line, headers, body) -> {
                 capture.set(headers);
-                return new RsWithStatus(RsStatus.UNAUTHORIZED);
+                return ResponseBuilder.unauthorized().completedFuture();
             },
             new FakeAuthenticator(Headers.EMPTY, Headers.from(auth))
         ).response(
             new RequestLine(RqMethod.GET, "/top/secret"),
             Headers.from(original),
             Content.EMPTY
-        ).send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        ).join();
         MatcherAssert.assertThat(
             capture.get(),
             Matchers.containsInAnyOrder(original, auth)
-        );
-    }
-
-    @Test
-    void shouldNotCompleteOriginSentWhenAuthSentNotComplete() {
-        final AtomicReference<CompletionStage<Void>> capture = new AtomicReference<>();
-        new AuthClientSlice(
-            (line, headers, body) -> connection -> {
-                final CompletionStage<Void> sent = StandardRs.EMPTY.send(connection);
-                capture.set(sent);
-                return sent;
-            },
-            new FakeAuthenticator(Headers.EMPTY)
-        ).response(
-            new RequestLine(RqMethod.GET, "/path"),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).send(
-            (status, headers, body) -> new CompletableFuture<>()
-        );
-        Assertions.assertThrows(
-            TimeoutException.class,
-            () -> {
-                final int timeout = 500;
-                capture.get().toCompletableFuture().get(timeout, TimeUnit.MILLISECONDS);
-            }
         );
     }
 
@@ -185,22 +135,19 @@ final class AuthClientSliceTest {
         final byte[] request = "request".getBytes();
         final AtomicReference<List<byte[]>> capture = new AtomicReference<>(new ArrayList<>(0));
         new AuthClientSlice(
-            (line, headers, body) -> new AsyncResponse(
+            (line, headers, body) ->
                 new Content.From(body).asBytesFuture().thenApply(
                     bytes -> {
                         capture.get().add(bytes);
-                        return new RsWithStatus(RsStatus.UNAUTHORIZED);
+                        return ResponseBuilder.unauthorized().build();
                     }
-                )
             ),
             new FakeAuthenticator(auth, auth)
         ).response(
             new RequestLine(RqMethod.GET, "/api"),
             Headers.EMPTY,
             new Content.OneTime(new Content.From(request))
-        ).send(
-            (status, headers, body) -> CompletableFuture.allOf()
-        ).toCompletableFuture().join();
+        ).join();
         MatcherAssert.assertThat(
             "Body sent in first request",
             capture.get().get(0),

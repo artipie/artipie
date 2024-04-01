@@ -5,12 +5,12 @@
 package com.artipie.maven.http;
 
 import com.artipie.asto.Storage;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.StandardRs;
 import com.artipie.http.rt.ByMethodsRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -23,6 +23,7 @@ import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
 import com.artipie.security.policy.Policy;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -143,7 +144,7 @@ public final class MavenSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
-                    RtRule.FALLBACK, new SliceSimple(StandardRs.NOT_FOUND)
+                    RtRule.FALLBACK, new SliceSimple(ResponseBuilder.notFound().build())
                 )
             )
         );

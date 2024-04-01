@@ -6,14 +6,13 @@ package com.artipie.http.auth;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Slice with authorization.
@@ -54,13 +53,12 @@ public final class AuthzSlice implements Slice {
     }
 
     @Override
-    public Response response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
+    public CompletableFuture<Response> response(
+        RequestLine line, Headers headers, Content body
     ) {
-        return new AsyncResponse(
-            this.auth.authenticate(headers, line).thenApply(
+        return this.auth.authenticate(headers, line)
+            .toCompletableFuture()
+            .thenCompose(
                 result -> {
                     if (result.status() == AuthScheme.AuthStatus.AUTHENTICATED) {
                         if (this.control.allowed(result.user())) {
@@ -70,7 +68,7 @@ public final class AuthzSlice implements Slice {
                                 body
                             );
                         }
-                        return new RsWithStatus(RsStatus.FORBIDDEN);
+                        return CompletableFuture.completedFuture(ResponseBuilder.forbidden().build());
                     }
                     // The case of anonymous user
                     if (result.status() == AuthScheme.AuthStatus.NO_CREDENTIALS
@@ -81,12 +79,11 @@ public final class AuthzSlice implements Slice {
                             body
                         );
                     }
-                    return new RsWithHeaders(
-                        new RsWithStatus(RsStatus.UNAUTHORIZED),
-                        Headers.from(new WwwAuthenticate(result.challenge()))
+                    return CompletableFuture.completedFuture(ResponseBuilder.unauthorized()
+                        .header(new WwwAuthenticate(result.challenge()))
+                        .build()
                     );
                 }
-            )
         );
     }
 }

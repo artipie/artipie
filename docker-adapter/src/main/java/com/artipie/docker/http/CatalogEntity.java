@@ -10,15 +10,13 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
-import com.artipie.http.async.AsyncResponse;
+import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithHeaders;
-import com.artipie.http.rs.RsWithStatus;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
@@ -32,16 +30,12 @@ final class CatalogEntity {
      */
     public static final Pattern PATH = Pattern.compile("^/v2/_catalog$");
 
-    /**
-     * Ctor.
-     */
     private CatalogEntity() {
+        // No-op.
     }
 
     /**
      * Slice for GET method, getting catalog.
-     *
-     * @since 0.8
      */
     public static class Get implements ScopeSlice {
 
@@ -51,8 +45,6 @@ final class CatalogEntity {
         private final Docker docker;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          */
         Get(final Docker docker) {
@@ -65,26 +57,17 @@ final class CatalogEntity {
         }
 
         @Override
-        public Response response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body
-        ) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final RqParams params = new RqParams(line.uri().getQuery());
-            return new AsyncResponse(
-                this.docker.catalog(
-                    params.value("last").map(RepoName.Simple::new),
-                    params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
-                ).thenApply(
-                    catalog -> new RsWithBody(
-                        new RsWithHeaders(
-                            new RsWithStatus(RsStatus.OK),
-                            new JsonContentType()
-                        ),
-                        catalog.json()
-                    )
-                )
-            );
+            return this.docker.catalog(
+                params.value("last").map(RepoName.Simple::new),
+                params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
+            ).thenApply(
+                catalog -> ResponseBuilder.ok()
+                    .header(ContentType.json())
+                    .body(catalog.json())
+                    .build()
+            ).toCompletableFuture();
         }
     }
 }

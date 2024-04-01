@@ -8,15 +8,15 @@ import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.RemoteConfig;
 import com.artipie.http.client.UriClientSlice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.google.common.collect.Iterables;
+import com.artipie.http.RsStatus;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * Slice augmenting requests with authentication when needed.
@@ -57,37 +57,34 @@ public final class AuthClientSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
-        return new AsyncResponse(
-            body.asBytesFuture().thenApply(
-                array -> new Content.From(Arrays.copyOf(array, array.length))
-            ).thenApply(
-                copy -> connection -> this.auth.authenticate(Headers.EMPTY)
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+        return body.asBytesFuture()
+            .thenApply(data -> {
+                Content copyContent = new Content.From(Arrays.copyOf(data, data.length));
+                return this.auth.authenticate(Headers.EMPTY)
+                    .toCompletableFuture()
                     .thenCompose(
-                        first -> this.origin.response(
-                            line,
-                            headers.copy().addAll(first),
-                            copy
-                        ).send(
-                            (rsstatus, rsheaders, rsbody) -> {
-                                if (rsstatus == RsStatus.UNAUTHORIZED) {
-                                    return this.auth.authenticate(rsheaders)
-                                        .thenCompose(
-                                            authHeaders -> {
-                                                if (Iterables.isEmpty(authHeaders)) {
-                                                    return connection.accept(rsstatus, rsheaders, rsbody);
+                        authFirst -> this.origin.response(
+                                line, headers.copy().addAll(authFirst), copyContent
+                            ).thenApply(
+                                response -> {
+                                    if (response.status() == RsStatus.UNAUTHORIZED) {
+                                        return this.auth.authenticate(response.headers())
+                                            .thenCompose(
+                                                authSecond -> {
+                                                    if (authSecond.isEmpty()) {
+                                                        return CompletableFuture.completedFuture(response);
+                                                    }
+                                                    return this.origin.response(
+                                                        line, headers.copy().addAll(authSecond), copyContent
+                                                    );
                                                 }
-                                                return this.origin.response(
-                                                    line, headers.copy().addAll(authHeaders), copy
-                                                ).send(connection);
-                                            }
-                                        );
-                                }
-                                return connection.accept(rsstatus, rsheaders, rsbody);
-                            }
-                        )
-                    )
-            )
-        );
+                                            );
+                                    }
+                                    return CompletableFuture.completedFuture(response);
+                                })
+                            .thenCompose(Function.identity())
+                    );
+            }).thenCompose(Function.identity());
     }
 }

@@ -5,12 +5,15 @@
 package com.artipie.http.headers;
 
 import com.artipie.http.Headers;
-import com.artipie.http.rq.RqHeaders;
 
 /**
  * Content-Length header.
  */
 public final class ContentLength extends Header {
+
+    public static Header with(long size) {
+        return new ContentLength(String.valueOf(size));
+    }
 
     /**
      * Header name.
@@ -18,7 +21,6 @@ public final class ContentLength extends Header {
     public static final String NAME = "Content-Length";
 
     /**
-     * Ctor.
      * @param length Length number
      */
     public ContentLength(final Number length) {
@@ -26,8 +28,6 @@ public final class ContentLength extends Header {
     }
 
     /**
-     * Ctor.
-     *
      * @param value Header value.
      */
     public ContentLength(final String value) {
@@ -35,12 +35,10 @@ public final class ContentLength extends Header {
     }
 
     /**
-     * Ctor.
-     *
      * @param headers Headers to extract header from.
      */
     public ContentLength(final Headers headers) {
-        this(new RqHeaders.Single(headers, ContentLength.NAME).asString());
+        this(headers.single(ContentLength.NAME).getValue());
     }
 
     /**

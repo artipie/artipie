@@ -12,7 +12,6 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.cache.FromRemoteCache;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.composer.AstoRepository;
-import com.artipie.http.Response;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
@@ -20,13 +19,10 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithBody;
-import com.artipie.http.rs.RsWithStatus;
-import com.artipie.http.rs.StandardRs;
+import com.artipie.http.ResponseBuilder;
+import com.artipie.http.RsStatus;
 import com.artipie.http.slice.SliceSimple;
 import org.cactoos.list.ListOf;
-import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
@@ -36,7 +32,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link CachedProxySlice}.
- * @since 0.4
  * @todo #77:30min Enable tests or remove them.
  *  Now caching functionality is not implemented for class because
  *  the index for a specific package is obtained by combining info
@@ -44,11 +39,8 @@ import org.junit.jupiter.api.Test;
  *  investigate issue how to cache this information and does it
  *  require to be cached at all. After that enable tests or remove them.
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 final class CachedProxySliceTest {
-    /**
-     * Test storage.
-     */
+
     private Storage storage;
 
     @BeforeEach
@@ -67,14 +59,14 @@ final class CachedProxySliceTest {
             "Returns body from remote",
             new CachedProxySlice(
                 new SliceSimple(
-                    new RsWithBody(StandardRs.OK, new Content.From(remote))
+                    ResponseBuilder.ok().textBody("remote content").build()
                 ),
                 new AstoRepository(this.storage),
                 new FromRemoteCache(this.storage)
             ),
             new SliceHasResponse(
                 new AllOf<>(
-                    new ListOf<Matcher<? super Response>>(
+                    new ListOf<>(
                         new RsHasStatus(RsStatus.OK),
                         new RsHasHeaders(new ContentLength(remote.length)),
                         new RsHasBody(remote)
@@ -99,7 +91,7 @@ final class CachedProxySliceTest {
             "Returns body from remote",
             new CachedProxySlice(
                 new SliceSimple(
-                    new RsWithBody(StandardRs.OK, new Content.From(body))
+                    ResponseBuilder.ok().textBody("some info").build()
                 ),
                 new AstoRepository(this.storage),
                 new FromRemoteCache(this.storage)
@@ -125,13 +117,13 @@ final class CachedProxySliceTest {
         MatcherAssert.assertThat(
             "Returns body from cache",
             new CachedProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.INTERNAL_ERROR)),
+                new SliceSimple(ResponseBuilder.internalError().build()),
                 new AstoRepository(this.storage),
                 new FromRemoteCache(this.storage)
             ),
             new SliceHasResponse(
                 new AllOf<>(
-                    new ListOf<Matcher<? super Response>>(
+                    new ListOf<>(
                         new RsHasStatus(RsStatus.OK),
                         new RsHasHeaders(new ContentLength(body.length)),
                         new RsHasBody(body)
@@ -152,7 +144,7 @@ final class CachedProxySliceTest {
         MatcherAssert.assertThat(
             "Status 400 is returned",
             new CachedProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.BAD_REQUEST)),
+                new SliceSimple(ResponseBuilder.badRequest().build()),
                 new AstoRepository(this.storage),
                 new FromRemoteCache(this.storage)
             ),
@@ -169,7 +161,7 @@ final class CachedProxySliceTest {
         MatcherAssert.assertThat(
             "Status is 400 returned",
             new CachedProxySlice(
-                new SliceSimple(new RsWithStatus(RsStatus.BAD_REQUEST)),
+                new SliceSimple(ResponseBuilder.badRequest().build()),
                 new AstoRepository(this.storage),
                 (key, remote, cache) ->
                     new FailedCompletionStage<>(

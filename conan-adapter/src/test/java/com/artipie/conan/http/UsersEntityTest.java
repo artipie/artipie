@@ -14,12 +14,13 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
-import javax.json.Json;
+import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.Test;
+
+import javax.json.Json;
 
 /**
  * Test for {@link UsersEntity}.
@@ -57,7 +58,8 @@ public class UsersEntityTest {
             new UsersEntity.CredsCheck().response(
                 new RequestLine(RqMethod.GET, "/v1/users/check_credentials"),
                 Headers.from("Host", "localhost"), Content.EMPTY
-            ), Matchers.allOf(
+            ).join(),
+            Matchers.allOf(
                 new RsHasBody(
                     new IsJson(new IsEqual<>(Json.createObjectBuilder().build()))
                 ),

@@ -9,12 +9,10 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.scheduling.RepositoryEvents;
 
 import java.util.Optional;
@@ -81,7 +79,7 @@ public final class SliceUpload implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         Key key = transform.apply(line.uri().getPath());
         CompletableFuture<Void> res = this.storage.save(key, new ContentWithSize(body, headers));
         if (this.events.isPresent()) {
@@ -94,8 +92,6 @@ public final class SliceUpload implements Slice {
                     )
             );
         }
-        return new AsyncResponse(
-            res.thenApply(rsp -> new RsWithStatus(RsStatus.CREATED))
-        );
+        return res.thenApply(rsp -> ResponseBuilder.created().build());
     }
 }

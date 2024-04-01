@@ -9,29 +9,28 @@ import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.Slice;
-
 import com.artipie.http.rq.RequestLine;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 /**
  * Simple decorator for Slice.
  */
 public final class SliceSimple implements Slice {
 
-    /**
-     * Response.
-     */
-    private final Response res;
+    private final Supplier<Response> res;
 
-    /**
-     * Response.
-     * @param response Response.
-     */
-    public SliceSimple(final Response response) {
-        this.res = response;
+    public SliceSimple(Response response) {
+        this.res = () -> response;
+    }
+
+    public SliceSimple(Supplier<Response> res) {
+        this.res = res;
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers, Content body) {
-        return this.res;
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+        return CompletableFuture.completedFuture(this.res.get());
     }
 }

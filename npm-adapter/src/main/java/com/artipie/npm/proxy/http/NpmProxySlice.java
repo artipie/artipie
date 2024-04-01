@@ -7,6 +7,7 @@ package com.artipie.npm.proxy.http;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
@@ -21,6 +22,7 @@ import com.artipie.scheduling.ProxyArtifactEvent;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Main HTTP slice NPM Proxy adapter.
@@ -65,7 +67,7 @@ public final class NpmProxySlice implements Slice {
                 RtRule.FALLBACK,
                 new LoggingSlice(
                     new SliceSimple(
-                        new RsNotFound()
+                        ResponseBuilder.notFound().jsonBody("{\"error\" : \"not found\"}").build()
                     )
                 )
             )
@@ -73,9 +75,9 @@ public final class NpmProxySlice implements Slice {
     }
 
     @Override
-    public Response response(final RequestLine line,
-        final Headers headers,
-        final Content body) {
+    public CompletableFuture<Response> response(final RequestLine line,
+                                                    final Headers headers,
+                                                    final Content body) {
         return this.route.response(line, headers, body);
     }
 }

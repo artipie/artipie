@@ -15,7 +15,7 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rs.RsStatus;
+import com.artipie.http.RsStatus;
 import com.artipie.npm.JsonFromMeta;
 import com.artipie.scheduling.ArtifactEvent;
 import org.hamcrest.MatcherAssert;
@@ -32,7 +32,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 /**
@@ -144,15 +143,13 @@ final class UnpublishPutSliceTest {
                 RequestLine.from("PUT /@hello%2fsimple-npm-project/-rev/undefined HTTP/1.1"),
                 Headers.from("referer", "unpublish"),
                 new Content.From(new TestResource("json/dist-tags.json").asBytes())
-            ).send(
-                (status, headers, publisher) -> CompletableFuture.allOf()
-            ).toCompletableFuture().join()
+            ).join()
         );
         MatcherAssert.assertThat(
             thr.getCause(),
             new IsInstanceOf(ArtipieException.class)
         );
-        MatcherAssert.assertThat("Events queue is empty", this.events.size() == 0);
+        MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
     }
 
     private void saveSourceMeta() {

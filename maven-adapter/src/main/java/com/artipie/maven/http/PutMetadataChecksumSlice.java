@@ -14,12 +14,10 @@ import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
-import com.artipie.http.async.AsyncResponse;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rs.RsStatus;
-import com.artipie.http.rs.RsWithStatus;
 import com.artipie.maven.Maven;
 import com.artipie.maven.ValidUpload;
 import com.artipie.scheduling.ArtifactEvent;
@@ -57,11 +55,6 @@ public final class PutMetadataChecksumSlice implements Slice {
      * Repository type.
      */
     private static final String REPO_TYPE = "maven";
-
-    /**
-     * Response with status BAD_REQUEST.
-     */
-    private static final Response BAD_REQUEST = new RsWithStatus(RsStatus.BAD_REQUEST);
 
     /**
      * Abstract storage.
@@ -107,43 +100,42 @@ public final class PutMetadataChecksumSlice implements Slice {
     }
 
     @Override
-    public Response response(RequestLine line, Headers headers,
-                             Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers,
+                                                Content body) {
         final Matcher matcher = PutMetadataChecksumSlice.PTN.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final String alg = matcher.group("alg");
             final String pkg = matcher.group("pkg");
-            return new AsyncResponse(
-                this.findAndSave(body, alg, pkg).thenCompose(
+            return this.findAndSave(body, alg, pkg)
+                .thenCompose(
                     key -> {
                         final CompletionStage<Response> resp;
                         if (key.isPresent() && key.get().parent().isPresent()
                             && key.get().parent().get().parent().isPresent()) {
                             final Key location = key.get().parent().get().parent().get();
-                            resp = this.valid.ready(location).thenCompose(
-                                ready -> {
-                                    final CompletionStage<Response> action;
-                                    if (ready) {
-                                        action = this.validateAndUpdate(pkg, location, headers);
-                                    } else {
-                                        action = CompletableFuture.completedFuture(
-                                            new RsWithStatus(RsStatus.CREATED)
+                            resp = this.valid.ready(location)
+                                .thenCompose(
+                                    ready -> {
+                                        if (ready) {
+                                            return this.validateAndUpdate(pkg, location, headers);
+                                        }
+                                        return CompletableFuture.completedFuture(
+                                            ResponseBuilder.created().build()
                                         );
                                     }
-                                    return action;
-                                }
-                            );
+                                );
                         } else {
                             resp = CompletableFuture.completedFuture(
-                                PutMetadataChecksumSlice.BAD_REQUEST
+                                ResponseBuilder.badRequest().build()
                             );
                         }
                         return resp;
                     }
-                )
-            );
+            ).toCompletableFuture();
         }
-        return new RsWithStatus(RsStatus.BAD_REQUEST);
+        return CompletableFuture.completedFuture(
+            ResponseBuilder.badRequest().build()
+        );
     }
 
     /**
@@ -153,34 +145,38 @@ public final class PutMetadataChecksumSlice implements Slice {
      * @param headers Request headers
      * @return Response: BAD_REQUEST if not valid, CREATED otherwise
      */
-    private CompletionStage<Response> validateAndUpdate(
+    private CompletableFuture<Response> validateAndUpdate(
         String pkg, Key location, Headers headers) {
-        return this.valid.validate(location, new Key.From(pkg)).thenCompose(
-            correct -> {
-                final CompletionStage<Response> upd;
-                if (correct) {
-                    CompletionStage<Void> res = this.mvn.update(location, new Key.From(pkg));
-                    if (this.events.isPresent()) {
-                        final String version = new KeyLastPart(location).get();
-                        res = res.thenCompose(
-                            ignored -> this.artifactSize(new Key.From(pkg, version))
-                        ).thenAccept(
-                            size -> this.events.get().add(
-                                new ArtifactEvent(
-                                    PutMetadataChecksumSlice.REPO_TYPE, this.rname,
-                                    new Login(headers).getValue(),
-                                    MavenSlice.EVENT_INFO.formatArtifactName(pkg), version, size
+        return this.valid.validate(location, new Key.From(pkg))
+            .thenCompose(
+                correct -> {
+                    final CompletableFuture<Response> upd;
+                    if (correct) {
+                        CompletionStage<Void> res = this.mvn.update(location, new Key.From(pkg));
+                        if (this.events.isPresent()) {
+                            final String version = new KeyLastPart(location).get();
+                            res = res.thenCompose(
+                                ignored -> this.artifactSize(new Key.From(pkg, version))
+                            ).thenAccept(
+                                size -> this.events.get().add(
+                                    new ArtifactEvent(
+                                        PutMetadataChecksumSlice.REPO_TYPE, this.rname,
+                                        new Login(headers).getValue(),
+                                        MavenSlice.EVENT_INFO.formatArtifactName(pkg), version, size
+                                    )
                                 )
-                            )
+                            );
+                        }
+                        upd = res.toCompletableFuture()
+                            .thenApply(ignored -> ResponseBuilder.created().build());
+                    } else {
+                        upd = CompletableFuture.completedFuture(
+                            ResponseBuilder.badRequest().build()
                         );
                     }
-                    upd = res.thenApply(ignored -> new RsWithStatus(RsStatus.CREATED));
-                } else {
-                    upd = CompletableFuture.completedFuture(PutMetadataChecksumSlice.BAD_REQUEST);
+                    return upd;
                 }
-                return upd;
-            }
-        );
+            ).toCompletableFuture();
     }
 
     /**
