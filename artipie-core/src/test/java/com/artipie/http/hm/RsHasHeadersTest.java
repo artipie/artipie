@@ -5,9 +5,9 @@
 package com.artipie.http.hm;
 
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
-import com.artipie.http.headers.Header;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.headers.Header;
 import org.cactoos.map.MapEntry;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -27,7 +27,7 @@ class RsHasHeadersTest {
         final MapEntry<String, String> length = new MapEntry<>(
             "Content-Length", "123"
         );
-        final Response response = ResponseBuilder.ok().headers(Headers.from(type, length)).build();
+        final ResponseImpl response = ResponseBuilder.ok().headers(Headers.from(type, length)).build();
         final RsHasHeaders matcher = new RsHasHeaders(Headers.from(length, type));
         Assertions.assertTrue(matcher.matches(response));
     }
@@ -35,7 +35,7 @@ class RsHasHeadersTest {
     @Test
     void shouldMatchOneHeader() {
         Header header = new Header("header1", "value1");
-        final Response response = ResponseBuilder.ok()
+        final ResponseImpl response = ResponseBuilder.ok()
             .header(header)
             .header(new Header("header2", "value2"))
             .header(new Header("header3", "value3"))

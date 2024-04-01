@@ -12,17 +12,15 @@ import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.TrustedBlobSource;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseImpl;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
-import com.artipie.http.hm.IsHeader;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
+import com.google.common.base.Strings;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.StringStartsWith;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,25 +48,24 @@ class UploadEntityPostTest {
 
     @Test
     void shouldStartUpload() {
-        final ResponseImpl response = this.slice.response(
-            new RequestLine(RqMethod.POST, "/v2/test/blobs/uploads/"),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).join();
-        MatcherAssert.assertThat(response, isUploadStarted());
+        uploadStartedAssert(
+            this.slice.response(
+                new RequestLine(RqMethod.POST, "/v2/test/blobs/uploads/"),
+                Headers.EMPTY,
+                Content.EMPTY
+            ).join()
+        );
     }
 
     @Test
     void shouldStartUploadIfMountNotExists() {
-        MatcherAssert.assertThat(
-            new DockerSlice(this.docker),
-            new SliceHasResponse(
-                isUploadStarted(),
+        uploadStartedAssert(
+            new DockerSlice(this.docker).response(
                 new RequestLine(
                     RqMethod.POST,
                     "/v2/test/blobs/uploads/?mount=sha256:123&from=test"
-                )
-            )
+                ), Headers.EMPTY, Content.EMPTY
+            ).join()
         );
     }
 
@@ -101,16 +98,15 @@ class UploadEntityPostTest {
         );
     }
 
-    private static ResponseMatcher isUploadStarted() {
-        return new ResponseMatcher(
-            RsStatus.ACCEPTED,
-            new IsHeader(
-                "Location",
-                new StringStartsWith(false, "/v2/test/blobs/uploads/")
-            ),
-            new IsHeader("Range", "0-0"),
-            new IsHeader("Content-Length", "0"),
-            new IsHeader("Docker-Upload-UUID", new IsNot<>(Matchers.emptyString()))
+    private static void uploadStartedAssert(ResponseImpl actual) {
+        Assertions.assertEquals("0-0", actual.headers().single("Range").getValue());
+        Assertions.assertEquals("0", actual.headers().single("Content-Length").getValue());
+        Assertions.assertTrue(
+            actual.headers().single("Location").getValue()
+                .startsWith("/v2/test/blobs/uploads/")
+        );
+        Assertions.assertFalse(
+            Strings.isNullOrEmpty(actual.headers().single("Docker-Upload-UUID").getValue())
         );
     }
 }

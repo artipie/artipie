@@ -6,7 +6,6 @@ package com.artipie.http.hm;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
 import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
@@ -26,7 +25,7 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
     /**
      * Response matcher.
      */
-    private final Matcher<? extends Response> rsp;
+    private final Matcher<? extends ResponseImpl> rsp;
 
     /**
      * Function to get response from slice.

@@ -6,16 +6,15 @@ package com.artipie.nuget.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.ResponseImpl;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasHeaders;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
 import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;

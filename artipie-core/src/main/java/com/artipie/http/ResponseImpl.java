@@ -6,7 +6,7 @@ package com.artipie.http;
 
 import com.artipie.asto.Content;
 
-public record ResponseImpl(RsStatus status, Headers headers, Content body) implements Response {
+public record ResponseImpl(RsStatus status, Headers headers, Content body) {
 
     @Override
     public String toString() {

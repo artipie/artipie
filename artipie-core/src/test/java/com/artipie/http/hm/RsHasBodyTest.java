@@ -5,7 +5,6 @@
 package com.artipie.http.hm;
 
 import com.artipie.asto.Content;
-import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.ResponseImpl;
 import io.reactivex.Flowable;
@@ -51,7 +50,7 @@ final class RsHasBodyTest {
 
     @Test
     void shouldNotMatchNotEqualBody() {
-        final Response response = ResponseBuilder.ok()
+        final ResponseImpl response = ResponseBuilder.ok()
             .body(new Content.From(Flowable.fromArray(ByteBuffer.wrap("1".getBytes()))))
             .build();
         MatcherAssert.assertThat(
@@ -66,7 +65,7 @@ final class RsHasBodyTest {
     void shouldMatchResponseTwice(final String chunks) {
         final String[] elements = chunks.split(",");
         final byte[] data = String.join("", elements).getBytes();
-        final Response response = ResponseBuilder.ok().body(
+        final ResponseImpl response = ResponseBuilder.ok().body(
             Flowable.fromIterable(
                 Stream.of(elements)
                     .map(String::getBytes)

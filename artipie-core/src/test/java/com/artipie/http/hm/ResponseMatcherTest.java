@@ -5,11 +5,10 @@
 package com.artipie.http.hm;
 
 import com.artipie.http.Headers;
-import com.artipie.http.headers.ContentLength;
-import com.artipie.http.headers.Header;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.RsStatus;
-import org.hamcrest.Matcher;
+import com.artipie.http.headers.ContentLength;
+import com.artipie.http.headers.Header;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNot;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.llorllale.cactoos.matchers.Matches;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 /**
  * Test for {@link ResponseMatcher}.
@@ -118,18 +116,6 @@ class ResponseMatcherTest {
                 ResponseBuilder.forbidden().headers(headers)
                     .body(body).build()
             )
-        );
-    }
-
-    @Test
-    void matchesStatusAndHeaderMatcher() {
-        final String header = "Some-header";
-        final String value = "Some value";
-        final Matcher<? super Map.Entry<String, String>> matcher = new IsHeader(header, value);
-        Assertions.assertTrue(
-            new ResponseMatcher(RsStatus.ACCEPTED, matcher)
-                .matches(ResponseBuilder.accepted()
-                    .header(header, value).build())
         );
     }
 
