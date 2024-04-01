@@ -6,9 +6,10 @@ package com.artipie.vertx;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseImpl;
+import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.RsStatus;
 import io.reactivex.Flowable;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerOptions;
@@ -25,6 +26,7 @@ import java.net.HttpURLConnection;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Vert.x Slice.
@@ -155,22 +157,26 @@ public final class VertxSliceServer implements Closeable {
      * @return Completion of request serving.
      */
     private CompletionStage<Void> serve(final HttpServerRequest req) {
-        final HttpServerResponse response = req.response();
-        return this.served.response(
-            new RequestLine(req.method().name(), req.uri(), req.version().toString()),
-            Headers.from(req.headers()),
-            new Content.From(
-                req.toFlowable().map(buffer -> ByteBuffer.wrap(buffer.getBytes()))
-            )
-        ).thenCompose(val -> VertxSliceServer.accept(response, val.status(), val.headers(), val.body()));
+        Headers requestHeaders = Headers.from(req.headers());
+        AtomicReference<ResponseImpl> artipieResponse = new AtomicReference<>();
+        return CompletableFuture.allOf(
+            this.served.response(
+                new RequestLine(req.method().name(), req.uri(), req.version().toString()),
+                requestHeaders,
+                new Content.From(
+                    req.toFlowable().map(buffer -> ByteBuffer.wrap(buffer.getBytes()))
+                )
+            ).thenAccept(artipieResponse::set),
+            continueResponseFut(requestHeaders, req.response())
+        ).thenCompose(v -> {
+            ResponseImpl resp = artipieResponse.get();
+            return VertxSliceServer.accept(req.response(), resp.status(), resp.headers(), resp.body());
+        });
     }
 
 
     private static CompletionStage<Void> accept(
-        HttpServerResponse response,
-        RsStatus status,
-        Headers headers,
-        Content body
+        HttpServerResponse response, RsStatus status, Headers headers, Content body
     ) {
         final CompletableFuture<Void> promise = new CompletableFuture<>();
         if (status == RsStatus.CONTINUE) {
@@ -196,6 +202,23 @@ public final class VertxSliceServer implements Closeable {
                 .subscribe(response.toSubscriber());
         }
         return promise;
+    }
+
+    /**
+     * Check if request expects {@code continue} status to be sent before sending request body.
+     *
+     * @param headers Request headers
+     * @return True if expects
+     */
+    private static CompletableFuture<Void> continueResponseFut(Headers headers, HttpServerResponse response) {
+        if (headers.find("expect")
+            .stream()
+            .anyMatch(h -> "100-continue".equalsIgnoreCase(h.getValue()))) {
+            return CompletableFuture.runAsync(() -> VertxSliceServer.accept(
+                response, RsStatus.CONTINUE, Headers.EMPTY, Content.EMPTY)
+            );
+        }
+        return CompletableFuture.completedFuture(null);
     }
 
     /**

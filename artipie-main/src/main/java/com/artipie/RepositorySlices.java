@@ -29,9 +29,9 @@ import com.artipie.gem.http.GemSlice;
 import com.artipie.helm.http.HelmSlice;
 import com.artipie.hex.http.HexSlice;
 import com.artipie.http.ContentLengthRestriction;
-import com.artipie.http.ContinueSlice;
 import com.artipie.http.DockerRoutingSlice;
 import com.artipie.http.GoSlice;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
@@ -39,7 +39,6 @@ import com.artipie.http.auth.Tokens;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.filter.FilterSlice;
 import com.artipie.http.filter.Filters;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.http.slice.TrimPathSlice;
 import com.artipie.maven.http.MavenSlice;
@@ -338,11 +337,9 @@ public class RepositorySlices {
             .filtersCache()
             .filters(cfg.name(), cfg.repoYaml());
         Slice res = opt.isPresent() ? new FilterSlice(origin, opt.get()) : origin;
-        return new ContinueSlice(
-            cfg.contentLengthMax()
-                .<Slice>map(limit -> new ContentLengthRestriction(res, limit))
-                .orElse(res)
-        );
+        return cfg.contentLengthMax()
+            .<Slice>map(limit -> new ContentLengthRestriction(res, limit))
+            .orElse(res);
     }
 
     private Authentication authentication() {
