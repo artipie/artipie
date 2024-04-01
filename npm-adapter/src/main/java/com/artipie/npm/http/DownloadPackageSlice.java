@@ -10,7 +10,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
@@ -39,7 +39,7 @@ public final class DownloadPackageSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final String pkg = new PackageNameFromUrl(line).value();
         final Key key = new Key.From(pkg, "meta.json");
         return this.storage.exists(key).thenCompose(

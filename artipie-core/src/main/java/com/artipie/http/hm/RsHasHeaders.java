@@ -4,7 +4,7 @@
  */
 package com.artipie.http.hm;
 
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -18,7 +18,7 @@ import java.util.stream.StreamSupport;
 /**
  * Matcher to verify response headers.
  */
-public final class RsHasHeaders extends TypeSafeMatcher<ResponseImpl> {
+public final class RsHasHeaders extends TypeSafeMatcher<Response> {
 
     /**
      * Headers matcher.
@@ -60,12 +60,12 @@ public final class RsHasHeaders extends TypeSafeMatcher<ResponseImpl> {
     }
 
     @Override
-    public boolean matchesSafely(final ResponseImpl item) {
+    public boolean matchesSafely(final Response item) {
         return this.headers.matches(item.headers());
     }
 
     @Override
-    public void describeMismatchSafely(final ResponseImpl item, final Description desc) {
+    public void describeMismatchSafely(final Response item, final Description desc) {
         desc.appendText("was ").appendValue(item.headers().asString());
     }
 

@@ -9,7 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 
@@ -47,7 +47,7 @@ final class AddDistTagsSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = AddDistTagsSlice.PTRN.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final Key meta = new Key.From(matcher.group("pkg"), "meta.json");

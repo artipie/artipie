@@ -7,7 +7,7 @@ package com.artipie.nuget.http;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -17,12 +17,12 @@ import java.util.concurrent.CompletableFuture;
 public final class Absent implements Resource {
 
     @Override
-    public CompletableFuture<ResponseImpl> get(final Headers headers) {
+    public CompletableFuture<Response> get(final Headers headers) {
         return ResponseBuilder.notFound().completedFuture();
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> put(Headers headers, Content body) {
+    public CompletableFuture<Response> put(Headers headers, Content body) {
         return ResponseBuilder.notFound().completedFuture();
     }
 }

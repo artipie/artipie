@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
@@ -46,7 +46,7 @@ public class JfrSliceTest {
             rs.onEvent("artipie.SliceResponse", ref::set);
             rs.startAsync();
 
-            ResponseImpl res = new JfrSlice(
+            Response res = new JfrSlice(
                 new TestSlice(
                     ResponseBuilder.ok()
                         .body(JfrSliceTest.content(responseSize, responseChunks))
@@ -116,14 +116,14 @@ public class JfrSliceTest {
      */
     private static final class TestSlice implements Slice {
 
-        private final ResponseImpl res;
+        private final Response res;
 
-        TestSlice(final ResponseImpl response) {
+        TestSlice(final Response response) {
             this.res = response;
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             Flowable.fromPublisher(body).blockingSubscribe();
             return CompletableFuture.completedFuture(this.res);
         }

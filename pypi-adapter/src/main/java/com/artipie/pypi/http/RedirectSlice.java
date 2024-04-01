@@ -7,7 +7,7 @@ package com.artipie.pypi.http;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
@@ -29,7 +29,7 @@ public final class RedirectSlice implements Slice {
     private static final String HDR_FULL_PATH = "X-FullPath";
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body

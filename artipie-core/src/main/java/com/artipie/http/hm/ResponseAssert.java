@@ -5,7 +5,7 @@
 package com.artipie.http.hm;
 
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
 import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
@@ -19,31 +19,31 @@ import java.util.stream.Collectors;
 
 public class ResponseAssert {
 
-    public static void checkOk(ResponseImpl actual) {
+    public static void checkOk(Response actual) {
         check(actual, RsStatus.OK);
     }
 
-    public static void check(ResponseImpl actual, RsStatus status) {
+    public static void check(Response actual, RsStatus status) {
         MatcherAssert.assertThat(actual.status(), Matchers.is(status));
     }
 
-    public static void check(ResponseImpl actual, RsStatus status, Header... headers) {
+    public static void check(Response actual, RsStatus status, Header... headers) {
         MatcherAssert.assertThat(actual.status(), Matchers.is(status));
         checkHeaders(actual.headers(), headers);
     }
 
-    public static void check(ResponseImpl actual, RsStatus status, byte[] body, Header... headers) {
+    public static void check(Response actual, RsStatus status, byte[] body, Header... headers) {
         MatcherAssert.assertThat(actual.status(), Matchers.is(status));
         checkHeaders(actual.headers(), headers);
         MatcherAssert.assertThat(actual.body().asBytes(), Matchers.is(body));
     }
 
-    public static void check(ResponseImpl actual, RsStatus status, byte[] body) {
+    public static void check(Response actual, RsStatus status, byte[] body) {
         MatcherAssert.assertThat(actual.status(), Matchers.is(status));
         MatcherAssert.assertThat(actual.body().asBytes(), Matchers.is(body));
     }
 
-    public static void check(ResponseImpl actual, byte[] body) {
+    public static void check(Response actual, byte[] body) {
         MatcherAssert.assertThat(actual.body().asBytes(), Matchers.is(body));
     }
 

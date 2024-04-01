@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.conda.http.auth.TokenAuthScheme;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Tokens;
 import com.artipie.http.headers.Authorization;
@@ -41,8 +41,8 @@ final class DeleteTokenSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(final RequestLine line,
-                                                    final Headers headers, final Content body) {
+    public CompletableFuture<Response> response(final RequestLine line,
+                                                final Headers headers, final Content body) {
 
         Optional<String> opt = new RqHeaders(headers, Authorization.NAME)
             .stream().findFirst().map(Authorization::new)

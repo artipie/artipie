@@ -9,7 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.hm.ResponseAssert;
@@ -203,7 +203,7 @@ class SliceIndexTest {
         this.storage.save(
             new Key.From(path, "abc-0.0.1.tar.gz"), new Content.From(new byte[]{})
         ).join();
-        ResponseImpl r = new SliceIndex(this.storage).response(
+        Response r = new SliceIndex(this.storage).response(
             new RequestLine("GET", "/"), Headers.EMPTY, Content.EMPTY
         ).join();
         ResponseAssert.check(r, RsStatus.OK, ContentType.html(), new ContentLength(179));

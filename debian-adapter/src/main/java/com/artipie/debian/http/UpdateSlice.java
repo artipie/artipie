@@ -18,7 +18,7 @@ import com.artipie.debian.metadata.Release;
 import com.artipie.debian.metadata.UniquePackage;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
@@ -74,8 +74,8 @@ public final class UpdateSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(final RequestLine line, final Headers headers,
-                                                    final Content body) {
+    public CompletableFuture<Response> response(final RequestLine line, final Headers headers,
+                                                final Content body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         return this.asto.save(key, new Content.From(body))
             .thenCompose(nothing -> this.asto.value(key))
@@ -88,7 +88,7 @@ public final class UpdateSlice implements Slice {
                     final List<String> common = new ControlField.Architecture().value(control)
                         .stream().filter(item -> this.config.archs().contains(item))
                         .collect(Collectors.toList());
-                    final CompletableFuture<ResponseImpl> res;
+                    final CompletableFuture<Response> res;
                     if (common.isEmpty()) {
                         res = this.asto.delete(key).thenApply(
                             nothing -> ResponseBuilder.badRequest().build()
@@ -107,7 +107,7 @@ public final class UpdateSlice implements Slice {
                 }
             ).handle(
                 (resp, throwable) -> {
-                    final CompletableFuture<ResponseImpl> res;
+                    final CompletableFuture<Response> res;
                     if (throwable == null) {
                         return CompletableFuture.completedFuture(resp);
                     } else {

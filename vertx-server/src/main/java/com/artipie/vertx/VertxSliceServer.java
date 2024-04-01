@@ -6,7 +6,7 @@ package com.artipie.vertx;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
@@ -158,7 +158,7 @@ public final class VertxSliceServer implements Closeable {
      */
     private CompletionStage<Void> serve(final HttpServerRequest req) {
         Headers requestHeaders = Headers.from(req.headers());
-        AtomicReference<ResponseImpl> artipieResponse = new AtomicReference<>();
+        AtomicReference<Response> artipieResponse = new AtomicReference<>();
         return CompletableFuture.allOf(
             this.served.response(
                 new RequestLine(req.method().name(), req.uri(), req.version().toString()),
@@ -169,7 +169,7 @@ public final class VertxSliceServer implements Closeable {
             ).thenAccept(artipieResponse::set),
             continueResponseFut(requestHeaders, req.response())
         ).thenCompose(v -> {
-            ResponseImpl resp = artipieResponse.get();
+            Response resp = artipieResponse.get();
             return VertxSliceServer.accept(req.response(), resp.status(), resp.headers(), resp.body());
         });
     }

@@ -11,7 +11,7 @@ import com.artipie.asto.ext.ContentDigest;
 import com.artipie.asto.ext.Digests;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.RsStatus;
@@ -76,8 +76,8 @@ public final class RpmRemove implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers,
-                                                    Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers,
+                                                Content body) {
         final RpmUpload.Request request = new RpmUpload.Request(line);
         final Key temp = new Key.From(RpmRemove.TO_RM, request.file());
         return this.asto.save(temp, Content.EMPTY).thenApply(nothing -> RpmRemove.checksum(headers))

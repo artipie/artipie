@@ -8,7 +8,7 @@ package com.artipie.nuget.http.publish;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.Login;
 import com.artipie.http.RsStatus;
 import com.artipie.nuget.InvalidPackageException;
@@ -108,12 +108,12 @@ public final class PackagePublish implements Route {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> get(final Headers headers) {
+        public CompletableFuture<Response> get(final Headers headers) {
             return ResponseBuilder.methodNotAllowed().completedFuture();
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> put(Headers headers, Content body) {
+        public CompletableFuture<Response> put(Headers headers, Content body) {
             return CompletableFuture.supplyAsync(
                 () -> new Multipart(headers, body).first()
             ).thenCompose(this.repository::add).handle(

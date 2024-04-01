@@ -14,7 +14,7 @@ import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.Location;
@@ -74,7 +74,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName target = request.name();
             final Optional<Digest> mount = request.mount();
@@ -93,7 +93,7 @@ public final class UploadEntity {
          * @param target Target repository name.
          * @return HTTP response.
          */
-        private CompletableFuture<ResponseImpl> mount(
+        private CompletableFuture<Response> mount(
             Digest digest, RepoName source, RepoName target
         ) {
             return this.docker.repo(source).layers().get(digest)
@@ -116,7 +116,7 @@ public final class UploadEntity {
          * @param name Repository name.
          * @return HTTP response.
          */
-        private CompletableFuture<ResponseImpl> startUpload(final RepoName name) {
+        private CompletableFuture<Response> startUpload(final RepoName name) {
             return this.docker.repo(name).uploads().start()
                 .thenCompose(upload -> acceptedResponse(name, upload.uuid(), 0))
                 .toCompletableFuture();
@@ -152,7 +152,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(
+        public CompletableFuture<Response> response(
             final RequestLine line,
             final Headers headers,
             final Content body
@@ -204,7 +204,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(
+        public CompletableFuture<Response> response(
             final RequestLine line,
             final Headers headers,
             final Content body
@@ -257,7 +257,7 @@ public final class UploadEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final String uuid = request.uuid();
@@ -357,7 +357,7 @@ public final class UploadEntity {
         }
     }
 
-    private static CompletableFuture<ResponseImpl> acceptedResponse(RepoName name, String uuid, long offset) {
+    private static CompletableFuture<Response> acceptedResponse(RepoName name, String uuid, long offset) {
         return ResponseBuilder.accepted()
             .header(new Location(String.format("/v2/%s/blobs/uploads/%s", name.value(), uuid)))
             .header(new Header("Range", String.format("0-%d", offset)))
@@ -366,7 +366,7 @@ public final class UploadEntity {
             .completedFuture();
     }
 
-    private static CompletableFuture<ResponseImpl> createdResponse(RepoName name, Digest digest) {
+    private static CompletableFuture<Response> createdResponse(RepoName name, Digest digest) {
         return ResponseBuilder.created()
             .header(new Location(String.format("/v2/%s/blobs/%s", name.value(), digest.string())))
             .header(new ContentLength("0"))
@@ -401,11 +401,11 @@ public final class UploadEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final String uuid = request.uuid();
-            return (CompletableFuture<ResponseImpl>) this.docker.repo(name).uploads().get(uuid)
+            return (CompletableFuture<Response>) this.docker.repo(name).uploads().get(uuid)
                 .thenCompose(
                     x -> x.map(
                         upload -> upload.cancel().toCompletableFuture()

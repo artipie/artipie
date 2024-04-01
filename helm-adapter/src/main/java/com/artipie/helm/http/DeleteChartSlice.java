@@ -12,7 +12,7 @@ import com.artipie.helm.TgzArchive;
 import com.artipie.helm.metadata.IndexYaml;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.scheduling.ArtifactEvent;
@@ -64,7 +64,7 @@ final class DeleteChartSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final URI uri = line.uri();
         final Matcher matcher = DeleteChartSlice.PTRN_DEL_CHART.matcher(uri.getPath());
         if (matcher.matches()) {
@@ -92,7 +92,7 @@ final class DeleteChartSlice implements Slice {
      * @param vers Version of chart. If it is empty, all versions will be deleted.
      * @return OK - archives were successfully removed, NOT_FOUND - in case of absence.
      */
-    private Single<ResponseImpl> deleteArchives(final String name, final Optional<String> vers) {
+    private Single<Response> deleteArchives(final String name, final Optional<String> vers) {
         final AtomicBoolean wasdeleted = new AtomicBoolean();
         return Single.fromFuture(
             this.storage.list(Key.ROOT)

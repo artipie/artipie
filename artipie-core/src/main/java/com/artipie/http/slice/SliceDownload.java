@@ -9,7 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.rq.RequestLine;
@@ -56,7 +56,7 @@ public final class SliceDownload implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Key key = this.transform.apply(line.uri().getPath());
         return this.storage.exists(key)
                 .thenCompose(

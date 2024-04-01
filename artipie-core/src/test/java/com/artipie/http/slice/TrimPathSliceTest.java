@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.RsStatus;
-import com.artipie.http.Slice;
 import com.artipie.http.hm.AssertSlice;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.hm.RqHasHeader;
@@ -29,18 +28,16 @@ import java.util.regex.Pattern;
 final class TrimPathSliceTest {
 
     @Test
-    void changesOnlyUriPath() throws Exception {
-        verify(
-            new TrimPathSlice(
-                new AssertSlice(
-                    new RqLineHasUri(
-                        new IsEqual<>(URI.create("http://www.w3.org/WWW/TheProject.html"))
-                    )
-                ),
-                "pub/"
+    void changesOnlyUriPath() {
+        new TrimPathSlice(
+            new AssertSlice(
+                new RqLineHasUri(
+                    new IsEqual<>(URI.create("http://www.w3.org/WWW/TheProject.html"))
+                )
             ),
-            requestLine("http://www.w3.org/pub/WWW/TheProject.html")
-        );
+            "pub/"
+        ).response(requestLine("http://www.w3.org/pub/WWW/TheProject.html"),
+            Headers.EMPTY, Content.EMPTY).join();
     }
 
     @Test
@@ -56,77 +53,58 @@ final class TrimPathSliceTest {
 
     @Test
     void replacesFirstPartOfAbsoluteUriPath() {
-        verify(
-            new TrimPathSlice(
-                new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/three"))),
-                "/one/two/"
-            ),
-            requestLine("/one/two/three")
-        );
+        new TrimPathSlice(
+            new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/three"))),
+            "/one/two/"
+        ).response(requestLine("/one/two/three"), Headers.EMPTY, Content.EMPTY).join();
     }
 
     @Test
     void replaceFullUriPath() {
         final String path = "/foo/bar";
-        verify(
-            new TrimPathSlice(
-                new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/"))),
-                path
-            ),
-            requestLine(path)
-        );
+        new TrimPathSlice(
+            new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/"))),
+            path
+        ).response(requestLine(path), Headers.EMPTY, Content.EMPTY).join();
     }
 
     @Test
     void appendsFullPathHeaderToRequest() {
         final String path = "/a/b/c";
-        verify(
-            new TrimPathSlice(
-                new AssertSlice(
-                    Matchers.anything(),
-                    new RqHasHeader.Single("x-fullpath", path),
-                    Matchers.anything()
-                ),
-                "/a/b"
+        new TrimPathSlice(
+            new AssertSlice(
+                Matchers.anything(),
+                new RqHasHeader.Single("x-fullpath", path),
+                Matchers.anything()
             ),
-            requestLine(path)
-        );
+            "/a/b"
+        ).response(requestLine(path), Headers.EMPTY, Content.EMPTY).join();
     }
 
     @Test
     void trimPathByPattern() {
         final String path = "/repo/version/artifact";
-        verify(
-            new TrimPathSlice(
-                new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/version/artifact"))),
-                Pattern.compile("/[a-zA-Z0-9]+/")
-            ),
-            requestLine(path)
-        );
+        new TrimPathSlice(
+            new AssertSlice(new RqLineHasUri(new RqLineHasUri.HasPath("/version/artifact"))),
+            Pattern.compile("/[a-zA-Z0-9]+/")
+        ).response(requestLine(path), Headers.EMPTY, Content.EMPTY).join();
     }
 
     @Test
     void dontTrimTwice() {
         final String prefix = "/one";
-        verify(
+        new TrimPathSlice(
             new TrimPathSlice(
-                new TrimPathSlice(
-                    new AssertSlice(
-                        new RqLineHasUri(new RqLineHasUri.HasPath("/one/two"))
-                    ),
-                    prefix
+                new AssertSlice(
+                    new RqLineHasUri(new RqLineHasUri.HasPath("/one/two"))
                 ),
                 prefix
             ),
-            requestLine("/one/one/two")
-        );
+            prefix
+        ).response(requestLine("/one/one/two"), Headers.EMPTY, Content.EMPTY).join();
     }
 
     private static RequestLine requestLine(final String path) {
         return new RequestLine("GET", path, "HTTP/1.1");
-    }
-
-    private static void verify(final Slice slice, final RequestLine line) {
-        slice.response(line, Headers.EMPTY, Content.EMPTY).join();
     }
 }

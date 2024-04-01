@@ -7,7 +7,7 @@ package com.artipie.micrometer;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import io.micrometer.core.instrument.Counter;
@@ -68,8 +68,8 @@ public final class MicrometerSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(final RequestLine line, final Headers head,
-                                                    final Content body) {
+    public CompletableFuture<Response> response(final RequestLine line, final Headers head,
+                                                final Content body) {
         final String method = line.method().value();
         final Counter.Builder requestCounter = Counter.builder("artipie.request.counter")
             .description("HTTP requests counter")
@@ -96,7 +96,7 @@ public final class MicrometerSlice implements Slice {
                     .completedFuture();
             }).handle(
                 (resp, err) -> {
-                    CompletableFuture<ResponseImpl> res;
+                    CompletableFuture<Response> res;
                     String name = "artipie.slice.response";
                     if (err != null) {
                         name = String.format("%s.error", name);

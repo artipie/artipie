@@ -9,7 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.rq.RequestLine;
@@ -241,7 +241,7 @@ final class MultipartITCase {
         private volatile Slice target;
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             return target != null ? target.response(line, headers, body)
                 : CompletableFuture.completedFuture(ResponseBuilder.unavailable()
                 .textBody("target is not set").build());

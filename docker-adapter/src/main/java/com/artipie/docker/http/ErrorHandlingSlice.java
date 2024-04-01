@@ -9,7 +9,7 @@ import com.artipie.docker.error.DockerError;
 import com.artipie.docker.error.UnsupportedError;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 
@@ -33,7 +33,7 @@ final class ErrorHandlingSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body
@@ -41,7 +41,7 @@ final class ErrorHandlingSlice implements Slice {
         try {
             return this.origin.response(line, headers, body)
                 .handle((response, error) -> {
-                    CompletableFuture<ResponseImpl> res;
+                    CompletableFuture<Response> res;
                     if (error != null) {
                         res = handle(error)
                             .map(CompletableFuture::completedFuture)
@@ -65,7 +65,7 @@ final class ErrorHandlingSlice implements Slice {
      * @param throwable Throwable to translate.
      * @return Result response, empty that throwable cannot be handled.
      */
-    private static Optional<ResponseImpl> handle(final Throwable throwable) {
+    private static Optional<Response> handle(final Throwable throwable) {
         if (throwable instanceof DockerError error) {
             return Optional.of(ResponseBuilder.badRequest().jsonBody(error.json()).build());
         }

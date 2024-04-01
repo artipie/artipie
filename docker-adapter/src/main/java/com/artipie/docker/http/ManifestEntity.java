@@ -17,7 +17,7 @@ import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthzSlice;
 import com.artipie.http.auth.OperationControl;
@@ -81,7 +81,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final ManifestReference ref = request.reference();
             return this.docker.repo(request.name()).manifests()
@@ -125,7 +125,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final ManifestReference ref = request.reference();
@@ -184,7 +184,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final ManifestReference ref = request.reference();
@@ -255,7 +255,7 @@ final class ManifestEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final RepoName name = request.name();
             final ManifestReference ref = request.reference();

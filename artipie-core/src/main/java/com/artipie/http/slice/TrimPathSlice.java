@@ -8,7 +8,7 @@ import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
@@ -71,7 +71,7 @@ public final class TrimPathSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final URI uri = line.uri();
         final String full = uri.getPath();
         final Matcher matcher = this.ptn.matcher(full);

@@ -4,34 +4,26 @@
  */
 package com.artipie.http.slice;
 
+import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.http.Headers;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.ContentLength;
-import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasHeaders;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.hm.SliceHasResponse;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
 import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link HeadSlice}.
- *
- * @since 0.26.2
  */
 final class HeadSliceTest {
 
-    /**
-     * Storage.
-     */
     private final Storage storage = new InMemoryStorage();
 
     @Test
@@ -40,30 +32,24 @@ final class HeadSliceTest {
         final Key another = new Key.From("bar");
         new BlockingStorage(this.storage).save(key, "anything".getBytes());
         new BlockingStorage(this.storage).save(another, "another".getBytes());
-        MatcherAssert.assertThat(
-            new HeadSlice(this.storage),
-            new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasHeaders(
-                        new ContentLength(8),
-                        new ContentDisposition("attachment; filename=\"foo\"")
-                    ),
-                    new RsHasBody(StringUtils.EMPTY)
-                ),
-                new RequestLine(RqMethod.HEAD, "/foo")
-            )
+        ResponseAssert.check(
+            new HeadSlice(this.storage).response(
+                new RequestLine(RqMethod.HEAD, "/foo"), Headers.EMPTY, Content.EMPTY
+            ).join(),
+            RsStatus.OK,
+            StringUtils.EMPTY.getBytes(),
+            new ContentLength(8),
+            new ContentDisposition("attachment; filename=\"foo\"")
         );
     }
 
     @Test
     void returnsNotFound() {
-        MatcherAssert.assertThat(
-            new SliceDelete(this.storage),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.NOT_FOUND),
-                new RequestLine(RqMethod.DELETE, "/bar")
-            )
+        ResponseAssert.check(
+            new SliceDelete(this.storage).response(
+                new RequestLine(RqMethod.DELETE, "/bar"), Headers.EMPTY, Content.EMPTY
+            ).join(),
+            RsStatus.NOT_FOUND
         );
     }
 }

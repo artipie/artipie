@@ -9,7 +9,7 @@ import com.artipie.asto.Meta;
 import com.artipie.composer.Repository;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
@@ -80,7 +80,7 @@ final class AddArchiveSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final String uri = line.uri().getPath();
         final Matcher matcher = AddArchiveSlice.PATH.matcher(uri);
         if (matcher.matches()) {

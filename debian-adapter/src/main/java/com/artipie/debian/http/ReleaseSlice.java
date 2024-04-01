@@ -10,7 +10,7 @@ import com.artipie.debian.Config;
 import com.artipie.debian.metadata.InRelease;
 import com.artipie.debian.metadata.Release;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 
@@ -66,14 +66,14 @@ public final class ReleaseSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body
     ) {
         return this.storage.exists(this.release.key()).thenCompose(
             exists -> {
-                final CompletableFuture<ResponseImpl> res;
+                final CompletableFuture<Response> res;
                 if (exists) {
                     res = this.origin.response(line, headers, body);
                 } else {

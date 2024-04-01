@@ -10,7 +10,7 @@ import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
@@ -54,15 +54,15 @@ public final class FileMetaSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers iterable,
         final Content publisher
     ) {
         final URI uri = line.uri();
         final Optional<String> meta = new RqParams(uri).value(FileMetaSlice.META_PARAM);
-        final CompletableFuture<ResponseImpl> raw = this.origin.response(line, iterable, publisher);
-        final CompletableFuture<ResponseImpl> result;
+        final CompletableFuture<Response> raw = this.origin.response(line, iterable, publisher);
+        final CompletableFuture<Response> result;
         if (meta.isPresent() && Boolean.parseBoolean(meta.get())) {
             final Key key = new KeyFromPath(uri.getPath());
             result = raw.thenCompose(

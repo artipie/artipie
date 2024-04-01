@@ -46,7 +46,7 @@ public class LatestSliceTest {
             new KeyFromPath("example.com/latest/news/@v/v0.0.2.info"),
             new Content.From(info.getBytes())
         ).get();
-        ResponseImpl response = new LatestSlice(storage).response(
+        Response response = new LatestSlice(storage).response(
             RequestLine.from("GET example.com/latest/news/@latest?a=b HTTP/1.1"),
             Headers.EMPTY, Content.EMPTY
         ).join();
@@ -59,7 +59,7 @@ public class LatestSliceTest {
 
     @Test
     void returnsNotFondWhenModuleNotFound() {
-        ResponseImpl response = new LatestSlice(new InMemoryStorage()).response(
+        Response response = new LatestSlice(new InMemoryStorage()).response(
             RequestLine.from("GET example.com/first/@latest HTTP/1.1"), Headers.EMPTY, Content.EMPTY
         ).join();
         Assertions.assertEquals(RsStatus.NOT_FOUND, response.status());

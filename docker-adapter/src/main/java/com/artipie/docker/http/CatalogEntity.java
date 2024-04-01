@@ -11,7 +11,7 @@ import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqParams;
@@ -57,7 +57,7 @@ final class CatalogEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final RqParams params = new RqParams(line.uri().getQuery());
             return this.docker.catalog(
                 params.value("last").map(RepoName.Simple::new),

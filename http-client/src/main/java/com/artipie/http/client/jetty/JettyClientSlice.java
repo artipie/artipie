@@ -6,7 +6,7 @@ package com.artipie.http.client.jetty;
 
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
@@ -70,11 +70,11 @@ final class JettyClientSlice implements Slice {
         this.port = port;
     }
 
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         RequestLine line, Headers headers, com.artipie.asto.Content body
     ) {
         final Request request = this.buildRequest(headers, line);
-        final CompletableFuture<ResponseImpl> res = new CompletableFuture<>();
+        final CompletableFuture<Response> res = new CompletableFuture<>();
         final List<Content.Chunk> buffers = new LinkedList<>();
         if (line.method() != RqMethod.HEAD) {
             final AsyncRequestContent async = new AsyncRequestContent();

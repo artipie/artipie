@@ -7,7 +7,7 @@ package com.artipie.http.hm;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import org.hamcrest.Description;
@@ -45,49 +45,49 @@ public final class AssertSlice implements Slice {
     /**
      * Request line matcher.
      */
-    private final Matcher<? super RequestLine> line;
+    private final Matcher<? super RequestLine> lineMatcher;
 
     /**
      * Request headers matcher.
      */
-    private final Matcher<? super Headers> head;
+    private final Matcher<? super Headers> headersMatcher;
 
     /**
      * Request body matcher.
      */
-    private final Matcher<? super Publisher<ByteBuffer>> body;
+    private final Matcher<? super Publisher<ByteBuffer>> bodyMatcher;
 
     /**
      * Assert slice request line.
-     * @param line Request line matcher
+     * @param lineMatcher Request line matcher
      */
-    public AssertSlice(final Matcher<? super RequestLine> line) {
-        this(line, Matchers.any(Headers.class), AssertSlice.STUB_BODY_MATCHER);
+    public AssertSlice(final Matcher<? super RequestLine> lineMatcher) {
+        this(lineMatcher, Matchers.any(Headers.class), AssertSlice.STUB_BODY_MATCHER);
     }
 
     /**
-     * Ctor.
-     * @param line Request line matcher
-     * @param head Request headers matcher
-     * @param body Request body matcher
+     * @param lineMatcher Request line matcher
+     * @param headersMatcher Request headers matcher
+     * @param bodyMatcher Request body matcher
      */
-    public AssertSlice(final Matcher<? super RequestLine> line,
-        final Matcher<? super Headers> head, final Matcher<? super Publisher<ByteBuffer>> body) {
-        this.line = line;
-        this.head = head;
-        this.body = body;
+    public AssertSlice(Matcher<? super RequestLine> lineMatcher,
+                       Matcher<? super Headers> headersMatcher,
+                       Matcher<? super Publisher<ByteBuffer>> bodyMatcher) {
+        this.lineMatcher = lineMatcher;
+        this.headersMatcher = headersMatcher;
+        this.bodyMatcher = bodyMatcher;
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine lne, Headers headers, Content publ) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         MatcherAssert.assertThat(
-            "Wrong request line", lne, this.line
+            "Wrong request line", line, this.lineMatcher
         );
         MatcherAssert.assertThat(
-            "Wrong headers", headers, this.head
+            "Wrong headers", headers, this.headersMatcher
         );
         MatcherAssert.assertThat(
-            "Wrong body", publ, this.body
+            "Wrong body", body, this.bodyMatcher
         );
         return ResponseBuilder.ok().completedFuture();
     }

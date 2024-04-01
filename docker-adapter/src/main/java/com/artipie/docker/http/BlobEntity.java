@@ -13,7 +13,7 @@ import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
@@ -63,7 +63,7 @@ final class BlobEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(
+        public CompletableFuture<Response> response(
             final RequestLine line,
             final Headers headers,
             final Content body
@@ -122,7 +122,7 @@ final class BlobEntity {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
             final Digest digest = request.digest();
             return this.docker.repo(request.name()).layers()

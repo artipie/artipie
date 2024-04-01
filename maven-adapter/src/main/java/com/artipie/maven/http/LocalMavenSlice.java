@@ -11,7 +11,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.rq.RequestLine;
@@ -54,7 +54,7 @@ final class LocalMavenSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         final Matcher match = LocalMavenSlice.PTN_ARTIFACT.matcher(new KeyLastPart(key).get());
         return match.matches()
@@ -68,7 +68,7 @@ final class LocalMavenSlice implements Slice {
      * @param artifact Artifact key
      * @return Response
      */
-    private CompletableFuture<ResponseImpl> artifactResponse(final RqMethod method, final Key artifact) {
+    private CompletableFuture<Response> artifactResponse(final RqMethod method, final Key artifact) {
         return switch (method) {
             case GET -> storage.exists(artifact)
                 .thenApply(
@@ -113,7 +113,7 @@ final class LocalMavenSlice implements Slice {
      * @param key Location
      * @return Response
      */
-    private CompletableFuture<ResponseImpl> plainResponse(final RqMethod method, final Key key) {
+    private CompletableFuture<Response> plainResponse(final RqMethod method, final Key key) {
         return switch (method) {
             case GET -> plainResponse(
                 this.storage, key,
@@ -131,8 +131,8 @@ final class LocalMavenSlice implements Slice {
         };
     }
 
-    private static CompletableFuture<ResponseImpl> plainResponse(
-        Storage storage, Key key, Supplier<CompletableFuture<ResponseImpl>> actual
+    private static CompletableFuture<Response> plainResponse(
+        Storage storage, Key key, Supplier<CompletableFuture<Response>> actual
     ) {
         return storage.exists(key)
             .thenApply(

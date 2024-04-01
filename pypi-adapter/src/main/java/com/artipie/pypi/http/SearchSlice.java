@@ -10,7 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.streams.ContentAsStream;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.pypi.NormalizedProjectName;
@@ -37,7 +37,7 @@ public final class SearchSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         return new NameFromXml(body).get().thenCompose(
             name -> {
                 final Key.From key = new Key.From(

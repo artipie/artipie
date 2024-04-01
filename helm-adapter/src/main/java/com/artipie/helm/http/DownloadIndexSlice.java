@@ -12,7 +12,7 @@ import com.artipie.helm.ChartYaml;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.slice.KeyFromPath;
@@ -62,7 +62,7 @@ final class DownloadIndexSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         RequestLine line, Headers headers, Content body
     ) {
         final String uri = line.uri().getPath();

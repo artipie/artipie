@@ -7,7 +7,7 @@ package com.artipie.jfr;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 
@@ -28,7 +28,7 @@ public final class JfrSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         RequestLine line, Headers headers, Content body
     ) {
         final SliceResponseEvent event = new SliceResponseEvent();
@@ -47,7 +47,7 @@ public final class JfrSlice implements Slice {
      * @param event JFR event
      * @return The response.
      */
-    private CompletableFuture<ResponseImpl> wrapResponse(
+    private CompletableFuture<Response> wrapResponse(
         RequestLine line,
         Headers headers,
         Content body,

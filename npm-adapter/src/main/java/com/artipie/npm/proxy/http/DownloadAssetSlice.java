@@ -7,8 +7,8 @@ package com.artipie.npm.proxy.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
+import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Login;
@@ -62,9 +62,9 @@ public final class DownloadAssetSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(final RequestLine line,
-                                                    final Headers rqheaders,
-                                                    final Content body) {
+    public CompletableFuture<Response> response(final RequestLine line,
+                                                final Headers rqheaders,
+                                                final Content body) {
         final String tgz = this.path.value(line.uri().getPath());
         return this.npm.getAsset(tgz).map(
                 asset -> {

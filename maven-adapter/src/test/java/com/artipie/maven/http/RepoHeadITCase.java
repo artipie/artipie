@@ -7,7 +7,7 @@ package com.artipie.maven.http;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.jetty.JettyClientSlices;
@@ -111,7 +111,7 @@ class RepoHeadITCase {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(
+        public CompletableFuture<Response> response(
             final RequestLine line,
             final Headers headers,
             final Content body
@@ -120,7 +120,7 @@ class RepoHeadITCase {
                 .head(line.uri().toString())
                 .handle(
                     (head, throwable) -> {
-                        final CompletionStage<ResponseImpl> res;
+                        final CompletionStage<Response> res;
                         if (throwable == null) {
                             if (head.isPresent()) {
                                 res = CompletableFuture.completedFuture(

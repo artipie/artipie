@@ -9,7 +9,7 @@ import com.artipie.gem.JsonMetaFormat;
 import com.artipie.gem.YamlMetaFormat;
 import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 
 import javax.json.Json;
@@ -19,13 +19,13 @@ import java.util.function.Function;
 /**
  * Gem meta response format.
  */
-enum MetaResponseFormat implements Function<MetaInfo, ResponseImpl> {
+enum MetaResponseFormat implements Function<MetaInfo, Response> {
     /**
      * JSON response format.
      */
     JSON {
         @Override
-        public ResponseImpl apply(final MetaInfo meta) {
+        public Response apply(final MetaInfo meta) {
             final JsonObjectBuilder json = Json.createObjectBuilder();
             meta.print(new JsonMetaFormat(json));
             return ResponseBuilder.ok().jsonBody(json.build())
@@ -38,7 +38,7 @@ enum MetaResponseFormat implements Function<MetaInfo, ResponseImpl> {
      */
     YAML {
         @Override
-        public ResponseImpl apply(final MetaInfo meta) {
+        public Response apply(final MetaInfo meta) {
             final YamlMetaFormat.Yamler yamler = new YamlMetaFormat.Yamler();
             meta.print(new YamlMetaFormat(yamler));
             return ResponseBuilder.ok()

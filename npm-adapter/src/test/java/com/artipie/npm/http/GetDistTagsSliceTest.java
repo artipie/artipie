@@ -8,26 +8,21 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.hm.SliceHasResponse;
+import com.artipie.http.Headers;
+import com.artipie.http.RsStatus;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
-import java.nio.charset.StandardCharsets;
-import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Test for {@link GetDistTagsSlice}.
- * @since 0.8
  */
 class GetDistTagsSliceTest {
 
-    /**
-     * Test storage.
-     */
     private Storage storage;
 
     @BeforeEach
@@ -52,26 +47,23 @@ class GetDistTagsSliceTest {
 
     @Test
     void readsDistTagsFromMeta() {
-        MatcherAssert.assertThat(
-            new GetDistTagsSlice(this.storage),
-            new SliceHasResponse(
-                new RsHasBody(
-                    "{\"latest\":\"1.0.3\",\"second\":\"1.0.2\",\"first\":\"1.0.1\"}",
-                    StandardCharsets.UTF_8
-                ),
-                new RequestLine(RqMethod.GET, "/-/package/@hello%2fsimple-npm-project/dist-tags")
-            )
+        Assertions.assertEquals(
+            "{\"latest\":\"1.0.3\",\"second\":\"1.0.2\",\"first\":\"1.0.1\"}",
+            new GetDistTagsSlice(this.storage).response(
+                new RequestLine(RqMethod.GET, "/-/package/@hello%2fsimple-npm-project/dist-tags"),
+                Headers.EMPTY, Content.EMPTY
+            ).join().body().asString()
         );
     }
 
     @Test
     void returnsNotFoundIfMetaIsNotFound() {
-        MatcherAssert.assertThat(
-            new GetDistTagsSlice(this.storage),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.NOT_FOUND),
-                new RequestLine(RqMethod.GET, "/-/package/@hello%2fanother-npm-project/dist-tags")
-            )
+        Assertions.assertEquals(
+            RsStatus.NOT_FOUND,
+            new GetDistTagsSlice(this.storage).response(
+                new RequestLine(RqMethod.GET, "/-/package/@hello%2fanother-npm-project/dist-tags"),
+                Headers.EMPTY, Content.EMPTY
+            ).join().status()
         );
     }
 

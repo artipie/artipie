@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.slice.KeyFromPath;
@@ -27,8 +27,8 @@ import java.util.concurrent.CompletableFuture;
 public final class GetPackageSlice implements Slice {
 
     @Override
-    public CompletableFuture<ResponseImpl> response(final RequestLine line, final Headers headers,
-                                                    final Content body) {
+    public CompletableFuture<Response> response(final RequestLine line, final Headers headers,
+                                                final Content body) {
         return ResponseBuilder.notFound()
             .jsonBody(Json.createObjectBuilder().add(
                 "error", String.format(

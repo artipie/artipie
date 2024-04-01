@@ -7,7 +7,7 @@ package com.artipie.nuget.http.metadata;
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.hm.RsHasBody;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.rq.RequestLine;
@@ -82,7 +82,7 @@ class NuGetPackageMetadataTest {
             new PackageIdentity(nuspec.id(), nuspec.version()).nuspecKey(),
             new Content.From(nuspec.bytes())
         ).join();
-        final ResponseImpl response = this.nuget.response(
+        final Response response = this.nuget.response(
             new RequestLine(
                 RqMethod.GET,
                 "/registrations/newtonsoft.json/index.json"
@@ -103,7 +103,7 @@ class NuGetPackageMetadataTest {
 
     @Test
     void shouldGetRegistrationsWhenEmpty() {
-        final ResponseImpl response = this.nuget.response(
+        final Response response = this.nuget.response(
             new RequestLine(
                 RqMethod.GET,
                 "/registrations/my.lib/index.json"
@@ -119,7 +119,7 @@ class NuGetPackageMetadataTest {
 
     @Test
     void shouldFailPutRegistration() {
-        final ResponseImpl response = this.nuget.response(
+        final Response response = this.nuget.response(
             new RequestLine(
                 RqMethod.PUT,
                 "/registrations/newtonsoft.json/index.json"

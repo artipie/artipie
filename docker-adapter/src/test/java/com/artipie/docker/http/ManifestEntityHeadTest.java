@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
@@ -101,7 +101,7 @@ class ManifestEntityHeadTest {
         );
     }
 
-    public static void assertResponse(ResponseImpl actual, String digest, long size) {
+    public static void assertResponse(Response actual, String digest, long size) {
         ResponseAssert.check(
             actual, RsStatus.OK,
             ContentType.mime("application/vnd.docker.distribution.manifest.v2+json"),

@@ -153,7 +153,7 @@ class GoSliceTest {
      * @param header Content-type
      * @return List of matchers
      */
-    private static AllOf<ResponseImpl> matchers(String body, Header header) {
+    private static AllOf<Response> matchers(String body, Header header) {
         return new AllOf<>(
             new RsHasBody(body.getBytes()),
             new RsHasHeaders(header)

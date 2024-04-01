@@ -10,7 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.RsStatus;
@@ -58,7 +58,7 @@ class NuGetPackageContentTest {
             new Key.From("package", "1.0.0", "content.nupkg"),
             data
         );
-        ResponseImpl response = this.nuget.response(
+        Response response = this.nuget.response(
             new RequestLine(
                 RqMethod.GET,
                 "/content/package/1.0.0/content.nupkg"
@@ -70,7 +70,7 @@ class NuGetPackageContentTest {
 
     @Test
     void shouldFailGetPackageContentWhenNotExists() {
-        ResponseImpl response = this.nuget.response(
+        Response response = this.nuget.response(
             new RequestLine(
                 RqMethod.GET,
                 "/content/package/1.0.0/logo.png"
@@ -81,7 +81,7 @@ class NuGetPackageContentTest {
 
     @Test
     void shouldFailPutPackageContent() {
-        final ResponseImpl response = this.nuget.response(
+        final Response response = this.nuget.response(
             new RequestLine(
                 RqMethod.PUT,
                 "/content/package/1.0.0/content.nupkg"
@@ -97,7 +97,7 @@ class NuGetPackageContentTest {
             new Key.From("package2", "index.json"),
             data
         );
-        final ResponseImpl response = this.nuget.response(
+        final Response response = this.nuget.response(
             new RequestLine(
                 RqMethod.GET,
                 "/content/package2/index.json"
@@ -109,7 +109,7 @@ class NuGetPackageContentTest {
 
     @Test
     void shouldFailGetPackageVersionsWhenNotExists() {
-        final ResponseImpl response = this.nuget.response(
+        final Response response = this.nuget.response(
             new RequestLine(
                 RqMethod.GET,
                 "/content/unknown-package/index.json"
@@ -120,7 +120,7 @@ class NuGetPackageContentTest {
 
     @Test
     void shouldUnauthorizedGetPackageContentByAnonymousUser() {
-        final ResponseImpl response = this.nuget.response(
+        final Response response = this.nuget.response(
             new RequestLine(
                 RqMethod.GET,
                 "/content/package/2.0.0/content.nupkg"

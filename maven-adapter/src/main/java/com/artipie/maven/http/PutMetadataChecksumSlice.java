@@ -13,8 +13,8 @@ import com.artipie.asto.ext.Digests;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.asto.rx.RxStorageWrapper;
 import com.artipie.http.Headers;
+import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Login;
 import com.artipie.http.rq.RequestLine;
@@ -100,8 +100,8 @@ public final class PutMetadataChecksumSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers,
-                                                    Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers,
+                                                Content body) {
         final Matcher matcher = PutMetadataChecksumSlice.PTN.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final String alg = matcher.group("alg");
@@ -109,7 +109,7 @@ public final class PutMetadataChecksumSlice implements Slice {
             return this.findAndSave(body, alg, pkg)
                 .thenCompose(
                     key -> {
-                        final CompletionStage<ResponseImpl> resp;
+                        final CompletionStage<Response> resp;
                         if (key.isPresent() && key.get().parent().isPresent()
                             && key.get().parent().get().parent().isPresent()) {
                             final Key location = key.get().parent().get().parent().get();
@@ -145,12 +145,12 @@ public final class PutMetadataChecksumSlice implements Slice {
      * @param headers Request headers
      * @return Response: BAD_REQUEST if not valid, CREATED otherwise
      */
-    private CompletableFuture<ResponseImpl> validateAndUpdate(
+    private CompletableFuture<Response> validateAndUpdate(
         String pkg, Key location, Headers headers) {
         return this.valid.validate(location, new Key.From(pkg))
             .thenCompose(
                 correct -> {
-                    final CompletableFuture<ResponseImpl> upd;
+                    final CompletableFuture<Response> upd;
                     if (correct) {
                         CompletionStage<Void> res = this.mvn.update(location, new Key.From(pkg));
                         if (this.events.isPresent()) {

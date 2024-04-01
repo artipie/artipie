@@ -34,7 +34,7 @@ public final class LatestSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         String path = LatestSlice.normalized(line);
         return this.storage.list(new KeyFromPath(path))
             .thenCompose(this::resp);
@@ -61,7 +61,7 @@ public final class LatestSlice implements Slice {
      * @param module Module file names list from repository
      * @return Response
      */
-    private CompletableFuture<ResponseImpl> resp(final Collection<Key> module) {
+    private CompletableFuture<Response> resp(final Collection<Key> module) {
         final Optional<String> info = module.stream().map(Key::string)
             .filter(item -> item.endsWith("info"))
             .max(Comparator.naturalOrder());

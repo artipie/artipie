@@ -5,7 +5,7 @@
 
 package com.artipie.http.hm;
 
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -15,7 +15,7 @@ import org.hamcrest.core.IsEqual;
 /**
  * Matcher to verify response status.
  */
-public final class RsHasStatus extends TypeSafeMatcher<ResponseImpl> {
+public final class RsHasStatus extends TypeSafeMatcher<Response> {
 
     /**
      * Status code matcher.
@@ -42,7 +42,7 @@ public final class RsHasStatus extends TypeSafeMatcher<ResponseImpl> {
     }
 
     @Override
-    public boolean matchesSafely(final ResponseImpl item) {
+    public boolean matchesSafely(final Response item) {
         return this.status.matches(item.status());
     }
 }

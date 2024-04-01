@@ -7,7 +7,7 @@ package com.artipie.http.client.jetty;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.HttpServer;
 import com.artipie.http.client.ProxySettings;
@@ -176,7 +176,7 @@ final class JettyClientSlicesTest {
         try {
             client.start();
             final String nonroutable = "10.0.0.0";
-            final CompletionStage<ResponseImpl> received = client.http(nonroutable).response(
+            final CompletionStage<Response> received = client.http(nonroutable).response(
                 new RequestLine(RqMethod.GET, "/conn-timeout"),
                 Headers.EMPTY,
                 Content.EMPTY
@@ -200,7 +200,7 @@ final class JettyClientSlicesTest {
         try {
             client.start();
             final String nonroutable = "10.0.0.0";
-            final CompletionStage<ResponseImpl> received = client.http(nonroutable).response(
+            final CompletionStage<Response> received = client.http(nonroutable).response(
                 new RequestLine(RqMethod.GET, "/conn-timeout"),
                 Headers.EMPTY,
                 Content.EMPTY
@@ -223,7 +223,7 @@ final class JettyClientSlicesTest {
         );
         try {
             client.start();
-            final CompletionStage<ResponseImpl> received = client.http(
+            final CompletionStage<Response> received = client.http(
                 "localhost",
                 this.server.port()
             ).response(
@@ -248,7 +248,7 @@ final class JettyClientSlicesTest {
         );
         try {
             client.start();
-            final CompletionStage<ResponseImpl> received = client.http(
+            final CompletionStage<Response> received = client.http(
                 "localhost",
                 this.server.port()
             ).response(
@@ -304,7 +304,7 @@ final class JettyClientSlicesTest {
         );
         try {
             client.start();
-            final CompletableFuture<ResponseImpl> fut = client.https(url).response(
+            final CompletableFuture<Response> fut = client.https(url).response(
                 new RequestLine(RqMethod.GET, "/"),
                 Headers.EMPTY, Content.EMPTY
             );

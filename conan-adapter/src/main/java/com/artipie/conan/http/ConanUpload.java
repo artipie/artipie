@@ -11,7 +11,7 @@ import com.artipie.asto.Storage;
 import com.artipie.conan.ItemTokenizer;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
@@ -105,7 +105,7 @@ public final class ConanUpload {
      * @param filename Requested file name.
      * @return Error message for the response.
      */
-    private static CompletableFuture<ResponseImpl> generateError(final String filename) {
+    private static CompletableFuture<Response> generateError(final String filename) {
         return CompletableFuture.completedFuture(
             ResponseBuilder.notFound()
                 .textBody(String.format(ConanUpload.URI_S_NOT_FOUND, filename))
@@ -138,7 +138,7 @@ public final class ConanUpload {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Matcher matcher = matchRequest(line);
             final String path = matcher.group(ConanUpload.URI_PATH);
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
@@ -155,8 +155,8 @@ public final class ConanUpload {
          * @param hostname Server host name.
          * @return Respose result of this operation.
          */
-        private CompletableFuture<ResponseImpl> generateUrls(final Publisher<ByteBuffer> body,
-            final String path, final String hostname) {
+        private CompletableFuture<Response> generateUrls(final Publisher<ByteBuffer> body,
+                                                         final String path, final String hostname) {
             return new Content.From(body).asStringFuture()
                 .thenApply(
                     str -> {
@@ -219,7 +219,7 @@ public final class ConanUpload {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final String path = line.uri().getPath();
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
             final Optional<String> token = new RqParams(line.uri().getQuery()).value("signature");

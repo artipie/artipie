@@ -7,7 +7,7 @@ package com.artipie.nuget.http.publish;
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
@@ -62,7 +62,7 @@ class NuGetPackagePublishTest {
 
     @Test
     void shouldPutPackagePublish() throws Exception {
-        final ResponseImpl response = this.putPackage(nupkg());
+        final Response response = this.putPackage(nupkg());
         MatcherAssert.assertThat(
             response,
             new RsHasStatus(RsStatus.CREATED)
@@ -93,7 +93,7 @@ class NuGetPackagePublishTest {
 
     @Test
     void shouldFailGetPackagePublish() {
-        final ResponseImpl response = this.nuget.response(
+        final Response response = this.nuget.response(
             new RequestLine(RqMethod.GET, "/package"),
             TestAuthentication.HEADERS,
             Content.EMPTY
@@ -117,7 +117,7 @@ class NuGetPackagePublishTest {
         MatcherAssert.assertThat("Events queue is empty", this.events.isEmpty());
     }
 
-    private ResponseImpl putPackage(final byte[] pack) throws Exception {
+    private Response putPackage(final byte[] pack) throws Exception {
         final HttpEntity entity = MultipartEntityBuilder.create()
             .addBinaryBody("package.nupkg", pack)
             .build();

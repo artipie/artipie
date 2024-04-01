@@ -27,7 +27,7 @@ public interface Slice {
      * @param body    The request body
      * @return The response.
      */
-    CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body);
+    CompletableFuture<Response> response(RequestLine line, Headers headers, Content body);
 
     /**
      * SliceWrap is a simple decorative envelope for Slice.
@@ -47,7 +47,7 @@ public interface Slice {
         }
 
         @Override
-        public final CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public final CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             return this.slice.response(line, headers, body);
         }
     }

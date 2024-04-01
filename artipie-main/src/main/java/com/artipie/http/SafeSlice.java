@@ -9,7 +9,6 @@ import com.artipie.http.rq.RequestLine;
 import com.jcabi.log.Logger;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Slice which handles all exceptions and respond with 500 error in that case.
@@ -31,7 +30,7 @@ final class SafeSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         try {
             return this.origin.response(line, headers, body);
         } catch (final Exception err) {

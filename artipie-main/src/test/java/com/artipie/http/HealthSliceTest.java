@@ -8,20 +8,16 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
-import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.hm.SliceHasResponse;
+import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.test.TestSettings;
-import java.nio.charset.StandardCharsets;
+import org.junit.jupiter.api.Test;
+
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
 
 /**
  * Test case for {@link HealthSlice}.
@@ -36,7 +32,13 @@ final class HealthSliceTest {
 
     @Test
     void returnsOkForValidStorage() {
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
+            new HealthSlice(new TestSettings()).response(
+                REQ_LINE, Headers.EMPTY, Content.EMPTY
+            ).join(),
+            RsStatus.OK, "[{\"storage\":\"ok\"}]".getBytes()
+        );
+        /*MatcherAssert.assertThat(
             new HealthSlice(new TestSettings()),
             new SliceHasResponse(
                 Matchers.allOf(
@@ -45,12 +47,18 @@ final class HealthSliceTest {
                 ),
                 HealthSliceTest.REQ_LINE
             )
-        );
+        );*/
     }
 
     @Test
     void returnsBadRequestForBrokenStorage() {
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
+            new HealthSlice(new TestSettings(new FakeStorage())).response(
+                REQ_LINE, Headers.EMPTY, Content.EMPTY
+            ).join(),
+            RsStatus.SERVICE_UNAVAILABLE, "[{\"storage\":\"failure\"}]".getBytes()
+        );
+        /*MatcherAssert.assertThat(
             new HealthSlice(new TestSettings(new FakeStorage())),
             new SliceHasResponse(
                 Matchers.allOf(
@@ -59,7 +67,7 @@ final class HealthSliceTest {
                 ),
                 HealthSliceTest.REQ_LINE
             )
-        );
+        );*/
     }
 
     /**

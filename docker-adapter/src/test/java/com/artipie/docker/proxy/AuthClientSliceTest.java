@@ -7,7 +7,7 @@ package com.artipie.docker.proxy;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.headers.Header;
@@ -28,7 +28,7 @@ class AuthClientSliceTest {
         final RequestLine line = new RequestLine(RqMethod.GET, "/file.txt");
         final Header header = new Header("x-name", "some value");
         final byte[] body = "text".getBytes();
-        final ResponseImpl response = new AuthClientSlice(
+        final Response response = new AuthClientSlice(
             (rsline, rsheaders, rsbody) -> {
                 if (!rsline.equals(line)) {
                     throw new IllegalArgumentException(String.format("Line modified: %s", rsline));

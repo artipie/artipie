@@ -8,22 +8,15 @@ import com.artipie.asto.Content;
 import com.artipie.asto.fs.FileStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.Headers;
-import com.artipie.http.headers.Header;
-import com.artipie.http.hm.IsJson;
-import com.artipie.http.hm.RsHasBody;
-import com.artipie.http.hm.RsHasHeaders;
-import com.artipie.http.hm.SliceHasResponse;
+import com.artipie.http.Response;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import wtf.g4s8.hamcrest.json.JsonHas;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * A test for gem submit operation.
@@ -32,36 +25,30 @@ final class ApiGetSliceTest {
     @Test
     void queryResultsInOkResponse(@TempDir final Path tmp) throws IOException {
         new TestResource("gviz-0.3.5.gem").saveTo(tmp.resolve("./gviz-0.3.5.gem"));
-        MatcherAssert.assertThat(
-            new ApiGetSlice(new FileStorage(tmp)),
-            new SliceHasResponse(
-                new RsHasBody(new IsJson(new JsonHas("name", "gviz"))),
+        Response resp = new ApiGetSlice(new FileStorage(tmp))
+            .response(
                 new RequestLine(RqMethod.GET, "/api/v1/gems/gviz.json"),
-                Headers.EMPTY,
-                Content.EMPTY
-            )
+                Headers.EMPTY, Content.EMPTY
+            ).join();
+        Assertions.assertTrue(
+            resp.body().asString().contains("\"name\":\"gviz\""),
+            resp.body().asString()
         );
     }
 
     @Test
     void returnsValidResponseForYamlRequest(@TempDir final Path tmp) throws IOException {
         new TestResource("gviz-0.3.5.gem").saveTo(tmp.resolve("./gviz-0.3.5.gem"));
-        MatcherAssert.assertThat(
-            new ApiGetSlice(new FileStorage(tmp)),
-            new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasHeaders(
-                        Matchers.equalTo(
-                            new Header("Content-Type", "text/x-yaml; charset=utf-8")
-                        ),
-                        Matchers.anything()
-                    ),
-                    new RsHasBody(new StringContains("name: gviz"), StandardCharsets.UTF_8)
-                ),
-                new RequestLine(RqMethod.GET, "/api/v1/gems/gviz.yaml"),
-                Headers.EMPTY,
-                Content.EMPTY
-            )
+        Response resp = new ApiGetSlice(new FileStorage(tmp)).response(
+            new RequestLine(RqMethod.GET, "/api/v1/gems/gviz.yaml"),
+            Headers.EMPTY, Content.EMPTY
+        ).join();
+        Assertions.assertEquals(
+            "text/x-yaml; charset=utf-8",
+            resp.headers().single("Content-Type").getValue()
+        );
+        Assertions.assertTrue(
+            resp.body().asString().contains("name: gviz")
         );
     }
 }

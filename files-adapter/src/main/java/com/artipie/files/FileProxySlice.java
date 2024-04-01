@@ -12,7 +12,7 @@ import com.artipie.asto.cache.FromRemoteCache;
 import com.artipie.asto.cache.Remote;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.UriClientSlice;
@@ -127,7 +127,7 @@ public final class FileProxySlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         RequestLine line, Headers ignored, Content pub
     ) {
         final AtomicReference<Headers> headers = new AtomicReference<>();

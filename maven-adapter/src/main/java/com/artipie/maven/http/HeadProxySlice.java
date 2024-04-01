@@ -7,7 +7,7 @@ package com.artipie.maven.http;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 
@@ -33,7 +33,7 @@ final class HeadProxySlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         RequestLine line, Headers headers, Content body
     ) {
         return this.client.response(line, Headers.EMPTY, Content.EMPTY)

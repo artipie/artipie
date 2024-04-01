@@ -7,7 +7,7 @@ package com.artipie.http.client.jetty;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.auth.AuthClientSlice;
@@ -119,12 +119,12 @@ final class JettyClientSlicesAndVertxITCase {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(
+        public CompletableFuture<Response> response(
             final RequestLine line,
             final Headers headers,
             final Content pub
         ) {
-            final CompletableFuture<ResponseImpl> promise = new CompletableFuture<>();
+            final CompletableFuture<Response> promise = new CompletableFuture<>();
             final Slice origin = this.client.https("blog.artipie.com");
             final Slice slice;
             if (this.anonymous) {

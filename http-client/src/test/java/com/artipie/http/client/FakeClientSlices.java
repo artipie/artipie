@@ -4,7 +4,7 @@
  */
 package com.artipie.http.client;
 
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +39,7 @@ public final class FakeClientSlices implements ClientSlices {
     private final Slice result;
 
 
-    public FakeClientSlices(ResponseImpl response) {
+    public FakeClientSlices(Response response) {
         this((line, headers, body)-> CompletableFuture.completedFuture(response));
     }
 

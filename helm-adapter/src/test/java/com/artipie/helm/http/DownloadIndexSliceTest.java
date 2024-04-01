@@ -13,7 +13,7 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.helm.ChartYaml;
 import com.artipie.helm.metadata.IndexYamlMapping;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
@@ -54,7 +54,7 @@ final class DownloadIndexSliceTest {
 //        final AtomicReference<RsStatus> cstatus = new AtomicReference<>();
         new TestResource("index.yaml").saveTo(this.storage);
 
-        ResponseImpl resp = new DownloadIndexSlice(base, this.storage)
+        Response resp = new DownloadIndexSlice(base, this.storage)
             .response(new RequestLine(RqMethod.GET, "/index.yaml"),
                 Headers.EMPTY, Content.EMPTY)
             .join();

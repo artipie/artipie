@@ -6,7 +6,7 @@ package com.artipie.http.hm;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import io.reactivex.Flowable;
@@ -25,24 +25,24 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
     /**
      * Response matcher.
      */
-    private final Matcher<? extends ResponseImpl> rsp;
+    private final Matcher<? extends Response> rsp;
 
     /**
      * Function to get response from slice.
      */
-    private final Function<? super Slice, ? extends ResponseImpl> responser;
+    private final Function<? super Slice, ? extends Response> responser;
 
     /**
      * Response cache.
      */
-    private ResponseImpl response;
+    private Response response;
 
     /**
      * New response matcher for slice with request line.
      * @param rsp Response matcher
      * @param line Request line
      */
-    public SliceHasResponse(final Matcher<? extends ResponseImpl> rsp, final RequestLine line) {
+    public SliceHasResponse(final Matcher<? extends Response> rsp, final RequestLine line) {
         this(rsp, line, Headers.EMPTY, new Content.From(Flowable.empty()));
     }
 
@@ -53,7 +53,7 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
      * @param headers Headers
      * @param line Request line
      */
-    public SliceHasResponse(Matcher<? extends ResponseImpl> rsp, Headers headers, RequestLine line) {
+    public SliceHasResponse(Matcher<? extends Response> rsp, Headers headers, RequestLine line) {
         this(rsp, line, headers, new Content.From(Flowable.empty()));
     }
 
@@ -65,7 +65,7 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
      * @param body Body
      */
     public SliceHasResponse(
-        Matcher<? extends ResponseImpl> rsp,
+        Matcher<? extends Response> rsp,
         RequestLine line,
         Headers headers,
         Content body
@@ -94,7 +94,7 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
      * @param slice Target slice
      * @return Cached response
      */
-    private ResponseImpl response(final Slice slice) {
+    private Response response(final Slice slice) {
         if (this.response == null) {
             this.response = this.responser.apply(slice);
         }

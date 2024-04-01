@@ -7,7 +7,7 @@ package com.artipie.micrometer;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
 import com.artipie.http.hm.ResponseAssert;
@@ -72,9 +72,9 @@ class MicrometerSliceTest {
         ).forEach(m -> MatcherAssert.assertThat(actual, m));
     }
 
-    private void assertResponse(ResponseImpl res, RequestLine line, RsStatus expected) {
+    private void assertResponse(Response res, RequestLine line, RsStatus expected) {
         Slice slice = new MicrometerSlice(new SliceSimple(res), this.registry);
-        ResponseImpl actual = slice.response(line, Headers.EMPTY, Content.EMPTY).join();
+        Response actual = slice.response(line, Headers.EMPTY, Content.EMPTY).join();
         ResponseAssert.check(actual, expected);
         actual.body().asString();
     }

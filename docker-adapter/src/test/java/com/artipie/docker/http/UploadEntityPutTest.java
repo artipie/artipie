@@ -13,7 +13,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.Upload;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.SliceHasResponse;
@@ -57,7 +57,7 @@ class UploadEntityPutTest {
             "sha256",
             "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7"
         );
-        final ResponseImpl response = this.slice.response(
+        final Response response = this.slice.response(
             UploadEntityPutTest.requestLine(name, upload.uuid(), digest),
             Headers.EMPTY,
             Content.EMPTY
@@ -107,7 +107,7 @@ class UploadEntityPutTest {
 
     @Test
     void shouldReturnNotFoundWhenUploadNotExists() {
-        final ResponseImpl response = this.slice.response(
+        final Response response = this.slice.response(
             new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345"),
             Headers.EMPTY,
             Content.EMPTY

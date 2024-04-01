@@ -37,7 +37,7 @@ public final class HealthSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         return this.storageStatus()
             .thenApply(
                 ok -> {

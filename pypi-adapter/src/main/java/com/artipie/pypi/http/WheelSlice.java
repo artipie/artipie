@@ -13,7 +13,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.streams.ContentAsStream;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
@@ -69,7 +69,7 @@ final class WheelSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers iterable,
         final Content publisher

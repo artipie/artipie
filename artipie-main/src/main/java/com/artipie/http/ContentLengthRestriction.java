@@ -37,7 +37,7 @@ public final class ContentLengthRestriction implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         if (new RqHeaders(headers, "Content-Length").stream().allMatch(this::withinLimit)) {
             return this.delegate.response(line, headers, body);
         }

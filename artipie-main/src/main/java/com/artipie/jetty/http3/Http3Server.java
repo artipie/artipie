@@ -7,7 +7,7 @@ package com.artipie.jetty.http3;
 import com.artipie.ArtipieException;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
@@ -149,7 +149,7 @@ public final class Http3Server {
         }
     }
 
-    private static CompletionStage<Void> send(Stream.Server stream, ResponseImpl artipieRes) {
+    private static CompletionStage<Void> send(Stream.Server stream, Response artipieRes) {
         RsStatus status = artipieRes.status();
         final MetaData.Response response = new MetaData.Response(
             status.code(), HttpStatus.getMessage(status.code()),

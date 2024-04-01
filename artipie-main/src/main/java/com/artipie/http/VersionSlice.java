@@ -23,7 +23,7 @@ public final class VersionSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         return ResponseBuilder.ok()
             .jsonBody(Json.createArrayBuilder()
                 .add(Json.createObjectBuilder().add("version", this.properties.version()))

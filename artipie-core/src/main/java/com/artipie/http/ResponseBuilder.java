@@ -196,7 +196,7 @@ public class ResponseBuilder {
         return this;
     }
 
-    public ResponseImpl build() {
+    public Response build() {
         if (headers.isEmpty() && body == Content.EMPTY) {
             return switch (status) {
                 case CONTINUE -> RSP_CONTINUE;
@@ -225,35 +225,35 @@ public class ResponseBuilder {
                 case SERVICE_UNAVAILABLE -> RSP_SERVICE_UNAVAILABLE;
             };
         }
-        return new ResponseImpl(status, new UnmodifiableHeaders(headers.asList()), body);
+        return new Response(status, new UnmodifiableHeaders(headers.asList()), body);
     }
 
-    public CompletableFuture<ResponseImpl> completedFuture() {
+    public CompletableFuture<Response> completedFuture() {
         return CompletableFuture.completedFuture(build());
     }
 
-    private final static ResponseImpl RSP_OK = new ResponseImpl(RsStatus.OK, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_NOT_FOUND = new ResponseImpl(RsStatus.NOT_FOUND, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_CONTINUE = new ResponseImpl(RsStatus.CONTINUE, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_CREATED = new ResponseImpl(RsStatus.CREATED, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_ACCEPTED = new ResponseImpl(RsStatus.ACCEPTED, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_NO_CONTENT = new ResponseImpl(RsStatus.NO_CONTENT, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_MOVED_PERMANENTLY = new ResponseImpl(RsStatus.MOVED_PERMANENTLY, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_MOVED_TEMPORARILY = new ResponseImpl(RsStatus.MOVED_TEMPORARILY, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_NOT_MODIFIED = new ResponseImpl(RsStatus.NOT_MODIFIED, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_TEMPORARY_REDIRECT = new ResponseImpl(RsStatus.TEMPORARY_REDIRECT, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_BAD_REQUEST = new ResponseImpl(RsStatus.BAD_REQUEST, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_UNAUTHORIZED = new ResponseImpl(RsStatus.UNAUTHORIZED, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_FORBIDDEN = new ResponseImpl(RsStatus.FORBIDDEN, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_METHOD_NOT_ALLOWED = new ResponseImpl(RsStatus.METHOD_NOT_ALLOWED, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_REQUEST_TIMEOUT = new ResponseImpl(RsStatus.REQUEST_TIMEOUT, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_CONFLICT = new ResponseImpl(RsStatus.CONFLICT, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_LENGTH_REQUIRED = new ResponseImpl(RsStatus.LENGTH_REQUIRED, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_REQUEST_TOO_LONG = new ResponseImpl(RsStatus.REQUEST_TOO_LONG, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_REQUESTED_RANGE_NOT_SATISFIABLE = new ResponseImpl(RsStatus.REQUESTED_RANGE_NOT_SATISFIABLE, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_EXPECTATION_FAILED = new ResponseImpl(RsStatus.EXPECTATION_FAILED, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_TOO_MANY_REQUESTS = new ResponseImpl(RsStatus.TOO_MANY_REQUESTS, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_INTERNAL_ERROR = new ResponseImpl(RsStatus.INTERNAL_ERROR, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_NOT_IMPLEMENTED = new ResponseImpl(RsStatus.NOT_IMPLEMENTED, Headers.EMPTY, Content.EMPTY);
-    private final static ResponseImpl RSP_SERVICE_UNAVAILABLE = new ResponseImpl(RsStatus.SERVICE_UNAVAILABLE, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_OK = new Response(RsStatus.OK, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_NOT_FOUND = new Response(RsStatus.NOT_FOUND, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_CONTINUE = new Response(RsStatus.CONTINUE, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_CREATED = new Response(RsStatus.CREATED, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_ACCEPTED = new Response(RsStatus.ACCEPTED, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_NO_CONTENT = new Response(RsStatus.NO_CONTENT, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_MOVED_PERMANENTLY = new Response(RsStatus.MOVED_PERMANENTLY, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_MOVED_TEMPORARILY = new Response(RsStatus.MOVED_TEMPORARILY, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_NOT_MODIFIED = new Response(RsStatus.NOT_MODIFIED, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_TEMPORARY_REDIRECT = new Response(RsStatus.TEMPORARY_REDIRECT, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_BAD_REQUEST = new Response(RsStatus.BAD_REQUEST, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_UNAUTHORIZED = new Response(RsStatus.UNAUTHORIZED, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_FORBIDDEN = new Response(RsStatus.FORBIDDEN, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_METHOD_NOT_ALLOWED = new Response(RsStatus.METHOD_NOT_ALLOWED, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_REQUEST_TIMEOUT = new Response(RsStatus.REQUEST_TIMEOUT, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_CONFLICT = new Response(RsStatus.CONFLICT, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_LENGTH_REQUIRED = new Response(RsStatus.LENGTH_REQUIRED, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_REQUEST_TOO_LONG = new Response(RsStatus.REQUEST_TOO_LONG, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_REQUESTED_RANGE_NOT_SATISFIABLE = new Response(RsStatus.REQUESTED_RANGE_NOT_SATISFIABLE, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_EXPECTATION_FAILED = new Response(RsStatus.EXPECTATION_FAILED, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_TOO_MANY_REQUESTS = new Response(RsStatus.TOO_MANY_REQUESTS, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_INTERNAL_ERROR = new Response(RsStatus.INTERNAL_ERROR, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_NOT_IMPLEMENTED = new Response(RsStatus.NOT_IMPLEMENTED, Headers.EMPTY, Content.EMPTY);
+    private final static Response RSP_SERVICE_UNAVAILABLE = new Response(RsStatus.SERVICE_UNAVAILABLE, Headers.EMPTY, Content.EMPTY);
 }

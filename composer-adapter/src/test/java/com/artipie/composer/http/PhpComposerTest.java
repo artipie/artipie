@@ -13,7 +13,7 @@ import com.artipie.asto.test.TestResource;
 import com.artipie.composer.AllPackages;
 import com.artipie.composer.AstoRepository;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import com.artipie.http.RsStatus;
@@ -63,7 +63,7 @@ class PhpComposerTest {
             new Key.From("vendor", "package.json"),
             data
         );
-        final ResponseImpl response = this.php.response(
+        final Response response = this.php.response(
             new RequestLine(RqMethod.GET, "/p/vendor/package.json"),
             Headers.EMPTY,
             Content.EMPTY
@@ -74,7 +74,7 @@ class PhpComposerTest {
 
     @Test
     void shouldFailGetPackageMetadataWhenNotExists() {
-        final ResponseImpl response = this.php.response(
+        final Response response = this.php.response(
             new RequestLine(RqMethod.GET, "/p/vendor/unknown-package.json"),
             Headers.EMPTY,
             Content.EMPTY
@@ -86,7 +86,7 @@ class PhpComposerTest {
     void shouldGetAllPackages() throws Exception {
         final byte[] data = "all packages".getBytes();
         new BlockingStorage(this.storage).save(new AllPackages(), data);
-        final ResponseImpl response = this.php.response(
+        final Response response = this.php.response(
             PhpComposerTest.GET_PACKAGES,
             Headers.EMPTY,
             Content.EMPTY
@@ -97,7 +97,7 @@ class PhpComposerTest {
 
     @Test
     void shouldFailGetAllPackagesWhenNotExists() {
-        final ResponseImpl response = this.php.response(
+        final Response response = this.php.response(
             PhpComposerTest.GET_PACKAGES,
             Headers.EMPTY,
             Content.EMPTY
@@ -107,7 +107,7 @@ class PhpComposerTest {
 
     @Test
     void shouldPutRoot() {
-        final ResponseImpl response = this.php.response(
+        final Response response = this.php.response(
             new RequestLine(RqMethod.PUT, "/"),
             Headers.EMPTY,
             new Content.From(

@@ -6,7 +6,7 @@ package com.artipie.http.client;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
@@ -43,7 +43,7 @@ public final class UriClientSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body

@@ -10,7 +10,7 @@ import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
@@ -42,7 +42,7 @@ class BlobEntityGetTest {
             "sha256",
             "aad63a9339440e7c3e1fff2b988991b9bfb81280042fa7f39a5e327023056819"
         );
-        final ResponseImpl response = this.slice.response(
+        final Response response = this.slice.response(
             new RequestLine(
                 RqMethod.GET,
                 String.format("/v2/test/blobs/%s", digest)

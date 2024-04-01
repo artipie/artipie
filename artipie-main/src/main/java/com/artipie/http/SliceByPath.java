@@ -33,7 +33,7 @@ final class SliceByPath implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Optional<Key> key = SliceByPath.keyFromPath(line.uri().getPath());
         if (key.isEmpty()) {
             return CompletableFuture.completedFuture(ResponseBuilder.notFound()

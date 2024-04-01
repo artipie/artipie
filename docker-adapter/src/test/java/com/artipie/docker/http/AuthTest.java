@@ -16,7 +16,7 @@ import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.BasicAuthScheme;
@@ -185,7 +185,7 @@ public final class AuthTest {
     void shouldNotReturnUnauthorizedOrForbiddenWhenUserHasPermissions(
         Method method, RequestLine line, Permission permission
     ) {
-        final ResponseImpl response = method.slice(permission).response(
+        final Response response = method.slice(permission).response(
             line, method.headers(TestAuthentication.ALICE), Content.EMPTY
         ).join();
         Assertions.assertNotEquals(RsStatus.FORBIDDEN, response.status());
@@ -199,7 +199,7 @@ public final class AuthTest {
         final RequestLine line,
         final Permission permission
     ) {
-        final ResponseImpl response = method.slice(new TestPolicy(permission, "anonymous", "Alice"))
+        final Response response = method.slice(new TestPolicy(permission, "anonymous", "Alice"))
             .response(line, Headers.EMPTY, Content.EMPTY).join();
         MatcherAssert.assertThat(
             response,

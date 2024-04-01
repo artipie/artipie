@@ -11,7 +11,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.TrustedBlobSource;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
@@ -98,7 +98,7 @@ class UploadEntityPostTest {
         );
     }
 
-    private static void uploadStartedAssert(ResponseImpl actual) {
+    private static void uploadStartedAssert(Response actual) {
         Assertions.assertEquals("0-0", actual.headers().single("Range").getValue());
         Assertions.assertEquals("0", actual.headers().single("Content-Length").getValue());
         Assertions.assertTrue(

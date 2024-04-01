@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
@@ -32,7 +32,7 @@ class BaseEntityGetTest {
 
     @Test
     void shouldRespondOkToVersionCheck() {
-        final ResponseImpl response = this.slice
+        final Response response = this.slice
             .response(new RequestLine(RqMethod.GET, "/v2/"), Headers.EMPTY, Content.EMPTY)
             .join();
         ResponseAssert.check(response, RsStatus.OK,

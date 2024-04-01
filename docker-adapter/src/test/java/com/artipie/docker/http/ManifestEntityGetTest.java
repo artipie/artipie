@@ -9,7 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
@@ -124,7 +124,7 @@ class ManifestEntityGetTest {
     /**
      * Response matcher.
      */
-    private static final class ResponseMatcher extends AllOf<ResponseImpl> {
+    private static final class ResponseMatcher extends AllOf<Response> {
 
         /**
          * @param digest Digest

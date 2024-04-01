@@ -7,7 +7,7 @@ package com.artipie.nuget.http.metadata;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.nuget.PackageKeys;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.Versions;
@@ -59,7 +59,7 @@ class Registration implements Resource {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> get(final Headers headers) {
+    public CompletableFuture<Response> get(final Headers headers) {
         return this.pages()
             .thenCompose(
                 pages -> new CompletionStages<>(pages.stream().map(RegistrationPage::json)).all()
@@ -88,7 +88,7 @@ class Registration implements Resource {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> put(Headers headers, Content body) {
+    public CompletableFuture<Response> put(Headers headers, Content body) {
         return ResponseBuilder.methodNotAllowed().completedFuture();
     }
 

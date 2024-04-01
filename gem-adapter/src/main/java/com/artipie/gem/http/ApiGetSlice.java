@@ -9,7 +9,7 @@ import com.artipie.asto.Storage;
 import com.artipie.gem.Gem;
 import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.RsStatus;
@@ -51,7 +51,7 @@ final class ApiGetSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = PATH_PATTERN.matcher(line.uri().toString());
         if (!matcher.find()) {
             throw new ArtipieHttpException(

@@ -7,7 +7,7 @@ package com.artipie.conda.http;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.headers.WwwAuthenticate;
@@ -37,8 +37,8 @@ final class GetUserSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(final RequestLine line, final Headers headers,
-                                                    final Content body) {
+    public CompletableFuture<Response> response(final RequestLine line, final Headers headers,
+                                                final Content body) {
         return this.scheme.authenticate(headers, line)
             .toCompletableFuture()
             .thenApply(

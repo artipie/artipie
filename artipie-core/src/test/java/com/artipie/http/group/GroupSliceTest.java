@@ -7,7 +7,7 @@ package com.artipie.http.group;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
@@ -29,7 +29,7 @@ final class GroupSliceTest {
     @Timeout(1)
     void returnsFirstOrderedSuccessResponse() {
         final String expects = "ok-150";
-        ResponseImpl response = new GroupSlice(
+        Response response = new GroupSlice(
             slice(RsStatus.NOT_FOUND, "not-found-250", Duration.ofMillis(250)),
             slice(RsStatus.NOT_FOUND, "not-found-50", Duration.ofMillis(50)),
             slice(RsStatus.OK, expects, Duration.ofMillis(150)),
@@ -44,7 +44,7 @@ final class GroupSliceTest {
 
     @Test
     void returnsNotFoundIfAllFails() {
-        ResponseImpl res = new GroupSlice(
+        Response res = new GroupSlice(
             slice(RsStatus.NOT_FOUND, "not-found-140", Duration.ofMillis(250)),
             slice(RsStatus.NOT_FOUND, "not-found-10", Duration.ofMillis(50)),
             slice(RsStatus.NOT_FOUND, "not-found-110", Duration.ofMillis(200))

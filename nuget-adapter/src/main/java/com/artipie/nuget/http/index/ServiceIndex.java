@@ -7,7 +7,7 @@ package com.artipie.nuget.http.index;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.nuget.http.Absent;
 import com.artipie.nuget.http.Resource;
 import com.artipie.nuget.http.Route;
@@ -64,7 +64,7 @@ public final class ServiceIndex implements Route {
     private final class Index implements Resource {
 
         @Override
-        public CompletableFuture<ResponseImpl> get(final Headers headers) {
+        public CompletableFuture<Response> get(final Headers headers) {
             final JsonArrayBuilder resources = Json.createArrayBuilder();
             for (final Service service : ServiceIndex.this.services) {
                 resources.add(
@@ -90,7 +90,7 @@ public final class ServiceIndex implements Route {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> put(Headers headers, Content body) {
+        public CompletableFuture<Response> put(Headers headers, Content body) {
             return ResponseBuilder.methodNotAllowed().completedFuture();
         }
     }

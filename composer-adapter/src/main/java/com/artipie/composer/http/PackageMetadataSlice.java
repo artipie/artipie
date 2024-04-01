@@ -10,7 +10,7 @@ import com.artipie.composer.Packages;
 import com.artipie.composer.Repository;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 
@@ -49,7 +49,7 @@ public final class PackageMetadataSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         return this.packages(line.uri().getPath())
             .toCompletableFuture()
             .thenApply(

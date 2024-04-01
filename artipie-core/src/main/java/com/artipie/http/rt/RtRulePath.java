@@ -6,7 +6,7 @@ package com.artipie.http.rt;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 
@@ -43,7 +43,7 @@ public final class RtRulePath implements RtPath {
     }
 
     @Override
-    public Optional<CompletableFuture<ResponseImpl>> response(RequestLine line, Headers headers, Content body) {
+    public Optional<CompletableFuture<Response>> response(RequestLine line, Headers headers, Content body) {
         if (this.rule.apply(line, headers)) {
             return Optional.of(this.slice.response(line, headers, body));
         }

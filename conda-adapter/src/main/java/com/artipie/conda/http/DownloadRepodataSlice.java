@@ -10,7 +10,7 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.ContentFileName;
 import com.artipie.http.rq.RequestLine;
@@ -42,7 +42,7 @@ public final class DownloadRepodataSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         RequestLine line, Headers headers, Content body) {
         String path = line.uri().getPath();
 

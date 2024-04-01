@@ -6,7 +6,7 @@ package com.artipie.nuget.http;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -39,12 +39,12 @@ public final class RoutingResource implements Resource {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> get(final Headers headers) {
+    public CompletableFuture<Response> get(final Headers headers) {
         return this.resource().get(headers);
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> put(Headers headers, Content body) {
+    public CompletableFuture<Response> put(Headers headers, Content body) {
         return this.resource().put(headers, body);
     }
 

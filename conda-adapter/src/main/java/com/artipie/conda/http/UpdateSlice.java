@@ -15,7 +15,7 @@ import com.artipie.conda.asto.AstoMergedJson;
 import com.artipie.conda.meta.InfoIndex;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.ContentDisposition;
 import com.artipie.http.headers.Login;
@@ -89,7 +89,7 @@ public final class UpdateSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final Matcher matcher = UpdateSlice.PKG.matcher(line.uri().getPath());
         if (matcher.matches()) {
             final Key temp = new Key.From(UpdateSlice.TMP, matcher.group(1));

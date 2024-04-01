@@ -10,7 +10,7 @@ import com.artipie.http.Headers;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.rq.RequestLine;
 
 /**
@@ -25,5 +25,5 @@ public interface RtPath {
      * @param body    Body
      * @return Response if passed routing rule
      */
-    Optional<CompletableFuture<ResponseImpl>> response(RequestLine line, Headers headers, Content body);
+    Optional<CompletableFuture<Response>> response(RequestLine line, Headers headers, Content body);
 }

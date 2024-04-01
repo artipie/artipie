@@ -8,8 +8,8 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
+import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.npm.PackageNameFromUrl;
@@ -37,7 +37,6 @@ public final class DeprecateSlice implements Slice {
     private final Storage storage;
 
     /**
-     * Ctor.
      * @param storage Abstract storage
      */
     public DeprecateSlice(final Storage storage) {
@@ -45,7 +44,7 @@ public final class DeprecateSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers iterable, Content publisher) {
+    public CompletableFuture<Response> response(RequestLine line, Headers iterable, Content publisher) {
         final String pkg = new PackageNameFromUrl(line).value();
         final Key key = new Key.From(pkg, "meta.json");
         return this.storage.exists(key).thenCompose(

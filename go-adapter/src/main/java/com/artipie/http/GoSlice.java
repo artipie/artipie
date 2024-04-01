@@ -77,7 +77,7 @@ public final class GoSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         final RequestLine line, final Headers headers,
         final Content body) {
         return this.origin.response(line, headers, body);

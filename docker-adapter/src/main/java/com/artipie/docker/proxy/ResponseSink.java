@@ -4,7 +4,7 @@
  */
 package com.artipie.docker.proxy;
 
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -20,7 +20,7 @@ final class ResponseSink<T> {
     /**
      * Response.
      */
-    private final CompletableFuture<ResponseImpl> fut;
+    private final CompletableFuture<Response> fut;
 
     /**
      * Response transformation.
@@ -31,7 +31,7 @@ final class ResponseSink<T> {
      * @param fut Response future.
      * @param transform Response transformation.
      */
-    ResponseSink(CompletableFuture<ResponseImpl> fut, final Transformation<T> transform) {
+    ResponseSink(CompletableFuture<Response> fut, final Transformation<T> transform) {
         this.fut = fut;
         this.transform = transform;
     }
@@ -57,6 +57,6 @@ final class ResponseSink<T> {
          *
          * @param response Response.
          */
-        CompletionStage<T> transform(ResponseImpl response);
+        CompletionStage<T> transform(Response response);
     }
 }

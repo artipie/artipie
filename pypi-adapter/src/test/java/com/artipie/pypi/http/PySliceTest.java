@@ -9,7 +9,7 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
@@ -54,7 +54,7 @@ class PySliceTest {
         final byte[] content = "python package".getBytes();
         final String key = "simple/simple-0.1-py3-cp33m-linux_x86.whl";
         this.storage.save(new Key.From(key), new Content.From(content)).join();
-        ResponseImpl resp = this.slice.response(
+        Response resp = this.slice.response(
             new RequestLine("GET", "/simple"),
             Headers.EMPTY,
             Content.EMPTY
@@ -74,7 +74,7 @@ class PySliceTest {
         final byte[] content = "python package".getBytes();
         final String key = "simple/alarmtime-0.1.5.tar.gz";
         this.storage.save(new Key.From(key), new Content.From(content)).join();
-        ResponseImpl resp = this.slice.response(
+        Response resp = this.slice.response(
             new RequestLine("GET", "/"),
             Headers.EMPTY,
             Content.EMPTY

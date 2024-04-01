@@ -13,7 +13,7 @@ import com.artipie.asto.ext.Digests;
 import com.artipie.asto.ext.KeyLastPart;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RequestLinePrefix;
@@ -43,7 +43,7 @@ final class SliceIndex implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content publisher) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content publisher) {
         final Key rqkey = new KeyFromPath(line.uri().toString());
         final String prefix = new RequestLinePrefix(rqkey.string(), headers).get();
         return SingleInterop.fromFuture(this.storage.list(rqkey))

@@ -20,7 +20,7 @@ import com.artipie.hex.tarball.TarReader;
 import com.artipie.hex.utils.Gzip;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Login;
@@ -97,7 +97,7 @@ public final class UploadSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         final RequestLine line,
         final Headers headers,
         final Content body
@@ -107,7 +107,7 @@ public final class UploadSlice implements Slice {
         final Matcher pathmatcher = UploadSlice.PUBLISH.matcher(path);
         final String query = Objects.nonNull(uri.getQuery()) ? uri.getQuery() : "";
         final Matcher querymatcher = UploadSlice.QUERY.matcher(query);
-        final CompletableFuture<ResponseImpl> res;
+        final CompletableFuture<Response> res;
         if (pathmatcher.matches() && querymatcher.matches()) {
             final boolean replace = Boolean.parseBoolean(querymatcher.group("replace"));
             final AtomicReference<String> name = new AtomicReference<>();
@@ -148,7 +148,7 @@ public final class UploadSlice implements Slice {
                     )
                 ).handle(
                     (content, throwable) -> {
-                        final ResponseImpl result;
+                        final Response result;
                         if (throwable == null) {
                             result = ResponseBuilder.created()
                                 .headers(new HexContentType(headers).fill())

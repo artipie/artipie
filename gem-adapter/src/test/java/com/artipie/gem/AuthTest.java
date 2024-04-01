@@ -9,7 +9,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.asto.test.TestResource;
 import com.artipie.gem.http.GemSlice;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.headers.Authorization;
@@ -144,7 +144,7 @@ public class AuthTest {
         );
     }
 
-    private static ResponseImpl postWithBasicAuth(final boolean authorized) throws IOException {
+    private static Response postWithBasicAuth(final boolean authorized) throws IOException {
         final String user = "alice";
         final String pswd = "123";
         final String token;

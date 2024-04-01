@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.nuget.PackageIdentity;
 import com.artipie.nuget.Repository;
 import com.artipie.nuget.http.Resource;
@@ -105,8 +105,8 @@ public final class PackageContent implements Route, ContentLocation {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> get(final Headers headers) {
-            return this.key().<CompletableFuture<ResponseImpl>>map(
+        public CompletableFuture<Response> get(final Headers headers) {
+            return this.key().<CompletableFuture<Response>>map(
                 key -> this.repository.content(key)
                     .thenApply(
                         existing -> existing.map(
@@ -117,7 +117,7 @@ public final class PackageContent implements Route, ContentLocation {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> put(Headers headers, Content body) {
+        public CompletableFuture<Response> put(Headers headers, Content body) {
             return ResponseBuilder.methodNotAllowed().completedFuture();
         }
 

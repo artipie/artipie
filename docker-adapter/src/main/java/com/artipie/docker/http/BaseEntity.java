@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
 
@@ -32,7 +32,7 @@ public final class BaseEntity implements ScopeSlice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         return CompletableFuture.completedFuture(ResponseBuilder.ok()
             .header("Docker-Distribution-API-Version", "registry/2.0")
             .build());

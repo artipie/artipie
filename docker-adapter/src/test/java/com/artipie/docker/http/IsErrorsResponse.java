@@ -4,7 +4,7 @@
  */
 package com.artipie.docker.http;
 
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.hm.RsHasBody;
@@ -32,12 +32,12 @@ import java.util.Arrays;
 /**
  * Matcher for errors response.
  */
-public final class IsErrorsResponse extends BaseMatcher<ResponseImpl> {
+public final class IsErrorsResponse extends BaseMatcher<Response> {
 
     /**
      * Delegate matcher.
      */
-    private final Matcher<ResponseImpl> delegate;
+    private final Matcher<Response> delegate;
 
     /**
      * @param status Expected response status code.

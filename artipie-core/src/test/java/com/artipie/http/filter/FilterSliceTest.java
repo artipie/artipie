@@ -7,7 +7,7 @@ package com.artipie.http.filter;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -63,7 +63,7 @@ public class FilterSliceTest {
 
     @Test
     void shouldForbidden() {
-        ResponseImpl res = new FilterSlice(
+        Response res = new FilterSlice(
             (line, headers, body) -> ResponseBuilder.ok().completedFuture(),
             FiltersTestUtil.yaml(
                 String.join(

@@ -13,7 +13,7 @@ import com.artipie.composer.Packages;
 import com.artipie.composer.Repository;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.jcabi.log.Logger;
@@ -45,7 +45,7 @@ final class CachedProxySlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         final String name = line
             .uri().getPath().replaceAll("^/p2?/", "")
             .replaceAll("~.*", "")

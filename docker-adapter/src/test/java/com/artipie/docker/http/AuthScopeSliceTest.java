@@ -9,7 +9,7 @@ import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.rq.RequestLine;
@@ -44,7 +44,7 @@ class AuthScopeSliceTest {
                 }
 
                 @Override
-                public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+                public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
                     return ResponseBuilder.ok().completedFuture();
                 }
             },

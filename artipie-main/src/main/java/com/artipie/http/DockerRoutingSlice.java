@@ -57,8 +57,8 @@ public final class DockerRoutingSlice implements Slice {
 
     @Override
     @SuppressWarnings("PMD.NestedIfDepthCheck")
-    public CompletableFuture<ResponseImpl> response(final RequestLine line, final Headers headers,
-                                                    final Content body) {
+    public CompletableFuture<Response> response(final RequestLine line, final Headers headers,
+                                                final Content body) {
         final String path = line.uri().getPath();
         final Matcher matcher = PTN_PATH.matcher(path);
         if (matcher.matches()) {
@@ -108,9 +108,9 @@ public final class DockerRoutingSlice implements Slice {
         }
 
         @Override
-        public CompletableFuture<ResponseImpl> response(final RequestLine line,
-                                                        final Headers headers,
-                                                        final Content body) {
+        public CompletableFuture<Response> response(final RequestLine line,
+                                                    final Headers headers,
+                                                    final Content body) {
             return this.origin.response(
                 new RequestLine(
                     line.method().toString(),

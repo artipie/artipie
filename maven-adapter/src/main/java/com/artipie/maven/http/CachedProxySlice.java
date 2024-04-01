@@ -13,7 +13,7 @@ import com.artipie.asto.cache.Remote;
 import com.artipie.asto.ext.Digests;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
@@ -92,7 +92,7 @@ final class CachedProxySlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         RequestLine line, Headers headers, Content body) {
         final Key key = new KeyFromPath(line.uri().getPath());
         final AtomicReference<Headers> rshdr = new AtomicReference<>(Headers.EMPTY);

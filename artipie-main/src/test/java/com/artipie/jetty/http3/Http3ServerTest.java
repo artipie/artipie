@@ -8,7 +8,7 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Splitting;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.nuget.RandomFreePort;
@@ -195,7 +195,7 @@ class Http3ServerTest {
     static final class TestSlice implements Slice {
 
         @Override
-        public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             if (line.toString().contains("no_data")) {
                 return ResponseBuilder.ok()
                     .header( Http3ServerTest.RQ_METHOD, line.method().value())

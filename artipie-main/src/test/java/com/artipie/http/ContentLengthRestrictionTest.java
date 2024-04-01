@@ -23,7 +23,7 @@ class ContentLengthRestrictionTest {
         final Slice slice = new ContentLengthRestriction(
             (line, headers, body) -> ResponseBuilder.ok().completedFuture(), 10
         );
-        final ResponseImpl response = slice.response(new RequestLine("GET", "/"), this.headers("11"), Content.EMPTY)
+        final Response response = slice.response(new RequestLine("GET", "/"), this.headers("11"), Content.EMPTY)
             .join();
         MatcherAssert.assertThat(response, new RsHasStatus(RsStatus.REQUEST_TOO_LONG));
     }
@@ -34,7 +34,7 @@ class ContentLengthRestrictionTest {
         final Slice slice = new ContentLengthRestriction(
             (line, headers, body) -> ResponseBuilder.ok().completedFuture(), limit
         );
-        final ResponseImpl response = slice.response(new RequestLine("GET", "/"), this.headers(value), Content.EMPTY)
+        final Response response = slice.response(new RequestLine("GET", "/"), this.headers(value), Content.EMPTY)
             .join();
         ResponseAssert.checkOk(response);
     }
@@ -44,7 +44,7 @@ class ContentLengthRestrictionTest {
         final Slice slice = new ContentLengthRestriction(
             (line, headers, body) -> ResponseBuilder.ok().completedFuture(), 10
         );
-        final ResponseImpl response = slice.response(new RequestLine("GET", "/"), Headers.EMPTY, Content.EMPTY)
+        final Response response = slice.response(new RequestLine("GET", "/"), Headers.EMPTY, Content.EMPTY)
             .join();
         ResponseAssert.checkOk(response);
     }

@@ -12,7 +12,7 @@ import com.artipie.docker.error.InvalidTagNameException;
 import com.artipie.docker.error.UnsupportedError;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
 import com.artipie.http.headers.Header;
@@ -72,7 +72,7 @@ class ErrorHandlingSliceTest {
     void shouldPassResponseUnmodified() {
         final Header header = new Header("x-name", "some value");
         final byte[] body = "text".getBytes();
-        final ResponseImpl response = new AuthClientSlice(
+        final Response response = new AuthClientSlice(
             (rsline, rsheaders, rsbody) -> ResponseBuilder.ok()
                 .header(header).body(body).completedFuture(),
             Authenticator.ANONYMOUS

@@ -7,7 +7,7 @@ package com.artipie.http.group;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.RsStatus;
@@ -49,12 +49,12 @@ public final class GroupSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(
+    public CompletableFuture<Response> response(
         RequestLine line, Headers headers, Content body
     ) {
         for (Slice remote : targets) {
             try {
-                ResponseImpl res = remote.response(line, headers, body).get();
+                Response res = remote.response(line, headers, body).get();
                 if (res.status() != RsStatus.NOT_FOUND) {
                     return CompletableFuture.completedFuture(res);
                 }

@@ -11,7 +11,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.Upload;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
@@ -45,7 +45,7 @@ public final class UploadEntityGetTest {
             .start()
             .toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
-        final ResponseImpl response = this.slice.response(
+        final Response response = this.slice.response(
             new RequestLine(RqMethod.GET, path),
             Headers.EMPTY, Content.EMPTY
         ).join();
@@ -67,7 +67,7 @@ public final class UploadEntityGetTest {
             .toCompletableFuture().join();
         upload.append(new Content.From(new byte[1])).toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
-        final ResponseImpl response = this.slice.response(
+        final Response response = this.slice.response(
             new RequestLine(RqMethod.GET, path), Headers.EMPTY, Content.EMPTY
         ).join();
         ResponseAssert.check(
@@ -88,7 +88,7 @@ public final class UploadEntityGetTest {
             .toCompletableFuture().join();
         upload.append(new Content.From(new byte[128])).toCompletableFuture().join();
         final String path = String.format("/v2/%s/blobs/uploads/%s", name, upload.uuid());
-        final ResponseImpl get = this.slice.response(
+        final Response get = this.slice.response(
             new RequestLine(RqMethod.GET, path), Headers.EMPTY, Content.EMPTY
         ).join();
         ResponseAssert.check(
@@ -102,7 +102,7 @@ public final class UploadEntityGetTest {
 
     @Test
     void shouldReturnNotFoundWhenUploadNotExists() {
-        final ResponseImpl response = this.slice.response(
+        final Response response = this.slice.response(
             new RequestLine(RqMethod.GET, "/v2/test/blobs/uploads/12345"),
             Headers.EMPTY, Content.EMPTY
         ).join();

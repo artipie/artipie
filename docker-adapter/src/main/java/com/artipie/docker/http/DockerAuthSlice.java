@@ -9,7 +9,7 @@ import com.artipie.docker.error.DeniedError;
 import com.artipie.docker.error.UnauthorizedError;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.RsStatus;
@@ -35,7 +35,7 @@ final class DockerAuthSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine rqline, Headers rqheaders, Content rqbody) {
+    public CompletableFuture<Response> response(RequestLine rqline, Headers rqheaders, Content rqbody) {
         return this.origin.response(rqline, rqheaders, rqbody)
             .thenApply(response -> {
                 if (response.status() == RsStatus.UNAUTHORIZED) {

@@ -6,7 +6,7 @@ package com.artipie.http.client.auth;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.RemoteConfig;
@@ -57,7 +57,7 @@ public final class AuthClientSlice implements Slice {
     }
 
     @Override
-    public CompletableFuture<ResponseImpl> response(RequestLine line, Headers headers, Content body) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         return body.asBytesFuture()
             .thenApply(data -> {
                 Content copyContent = new Content.From(Arrays.copyOf(data, data.length));

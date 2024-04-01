@@ -7,7 +7,7 @@ package com.artipie.nuget.http;
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
 import com.artipie.http.ResponseBuilder;
-import com.artipie.http.ResponseImpl;
+import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.RsHasBody;
@@ -32,7 +32,7 @@ final class ResourceFromSliceTest {
     void shouldDelegateGetResponse() {
         final String path = "/some/path";
         final Header header = new Header("Name", "Value");
-        final ResponseImpl response = new ResourceFromSlice(
+        final Response response = new ResourceFromSlice(
             path, (line, hdrs, body) -> ResponseBuilder.ok().headers(hdrs)
             .body(line.toString().getBytes()).completedFuture()
         ).get(Headers.from(Collections.singleton(header))).join();
@@ -54,7 +54,7 @@ final class ResourceFromSliceTest {
         final String path = "/some/other/path";
         final Header header = new Header("X-Name", "Something");
         final String content = "body";
-        final ResponseImpl response = new ResourceFromSlice(
+        final Response response = new ResourceFromSlice(
             path,
             (line, hdrs, body) -> ResponseBuilder.ok().headers(hdrs)
                 .body(Flowable.concat(Flowable.just(ByteBuffer.wrap(line.toString().getBytes())), body))
