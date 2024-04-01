@@ -6,14 +6,12 @@ package com.artipie.http.auth;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.headers.Authorization;
-import com.artipie.http.headers.Header;
-import com.artipie.http.hm.RsHasHeaders;
-import com.artipie.http.hm.RsHasStatus;
-import com.artipie.http.hm.SliceHasResponse;
-import com.artipie.http.rq.RequestLine;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.RsStatus;
+import com.artipie.http.headers.Authorization;
+import com.artipie.http.headers.Header;
+import com.artipie.http.hm.ResponseAssert;
+import com.artipie.http.rq.RequestLine;
 import com.artipie.http.slice.SliceSimple;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
@@ -36,7 +34,7 @@ class BasicAuthzSliceTest {
     @Test
     void proxyToOriginSliceIfAllowed() {
         final String user = "test_user";
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new BasicAuthzSlice(
                 (rqline, headers, body) -> CompletableFuture.completedFuture(
                     ResponseBuilder.ok().headers(headers).build()),
@@ -45,24 +43,17 @@ class BasicAuthzSliceTest {
                     Policy.FREE,
                     new AdapterBasicPermission("any_repo_name", Action.ALL)
                 )
-            ),
-            new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasHeaders(
-                        new Header(AuthzSlice.LOGIN_HDR, user)
-                    )
-                ),
+            ).response(
                 new RequestLine("GET", "/foo"),
                 Headers.from(new Authorization.Basic(user, "pwd")),
                 Content.EMPTY
-            )
-        );
+            ).join(),
+            RsStatus.OK, new Header(AuthzSlice.LOGIN_HDR, user));
     }
 
     @Test
     void returnsUnauthorizedErrorIfCredentialsAreWrong() {
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new BasicAuthzSlice(
                 new SliceSimple(ResponseBuilder.ok().build()),
                 (user, pswd) -> Optional.empty(),
@@ -70,22 +61,19 @@ class BasicAuthzSliceTest {
                     user -> EmptyPermissions.INSTANCE,
                     new AdapterBasicPermission("any", Action.NONE)
                 )
-            ),
-            new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasStatus(RsStatus.UNAUTHORIZED),
-                    new RsHasHeaders(new Header("WWW-Authenticate", "Basic realm=\"artipie\""))
-                ),
+            ).response(
+                new RequestLine("POST", "/bar", "HTTP/1.2"),
                 Headers.from(new Authorization.Basic("aaa", "bbbb")),
-                new RequestLine("POST", "/bar", "HTTP/1.2")
-            )
+                Content.EMPTY
+            ).join(),
+            RsStatus.UNAUTHORIZED, new Header("WWW-Authenticate", "Basic realm=\"artipie\"")
         );
     }
 
     @Test
     void returnsForbiddenIfNotAllowed() {
         final String name = "john";
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new BasicAuthzSlice(
                 new SliceSimple(ResponseBuilder.ok().build()),
                 (user, pswd) -> Optional.of(new AuthUser(name)),
@@ -93,19 +81,18 @@ class BasicAuthzSliceTest {
                     user -> EmptyPermissions.INSTANCE,
                     new AdapterBasicPermission("any", Action.NONE)
                 )
-            ),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.FORBIDDEN),
+            ).response(
                 new RequestLine("DELETE", "/baz", "HTTP/1.3"),
                 Headers.from(new Authorization.Basic(name, "123")),
                 Content.EMPTY
-            )
+            ).join(),
+            RsStatus.FORBIDDEN
         );
     }
 
     @Test
     void returnsUnauthorizedForAnonymousUser() {
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new BasicAuthzSlice(
                 new SliceSimple(ResponseBuilder.ok().build()),
                 (user, pswd) -> Assertions.fail("Shouldn't be called"),
@@ -119,13 +106,12 @@ class BasicAuthzSliceTest {
                     },
                     new AdapterBasicPermission("any", Action.NONE)
                 )
-            ),
-            new SliceHasResponse(
-                new RsHasStatus(RsStatus.UNAUTHORIZED),
+            ).response(
                 new RequestLine("DELETE", "/baz", "HTTP/1.3"),
                 Headers.from(new Header("WWW-Authenticate", "Basic realm=\"artipie\"")),
                 Content.EMPTY
-            )
+            ).join(),
+            RsStatus.UNAUTHORIZED
         );
     }
 
@@ -133,7 +119,7 @@ class BasicAuthzSliceTest {
     void parsesHeaders() {
         final String aladdin = "Aladdin";
         final String pswd = "open sesame";
-        MatcherAssert.assertThat(
+        ResponseAssert.check(
             new BasicAuthzSlice(
                 (rqline, headers, body) -> CompletableFuture.completedFuture(
                     ResponseBuilder.ok().headers(headers).build()),
@@ -142,16 +128,12 @@ class BasicAuthzSliceTest {
                     new PolicyByUsername(aladdin),
                     new AdapterBasicPermission("any", Action.ALL)
                 )
-            ),
-            new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasHeaders(new Header(AuthzSlice.LOGIN_HDR, "Aladdin"))
-                ),
+            ).response(
                 new RequestLine("PUT", "/my-endpoint"),
                 Headers.from(new Authorization.Basic(aladdin, pswd)),
                 Content.EMPTY
-            )
+            ).join(),
+            RsStatus.OK, new Header(AuthzSlice.LOGIN_HDR, "Aladdin")
         );
     }
 }

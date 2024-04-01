@@ -32,8 +32,6 @@ Artipie gather the following metrics:
 | artipie_response_body_size_bytes    | summary | Response body size and chunks         | method         |
 | artipie_request_body_size_bytes     | summary | Request body size and chunks          | method         |
 | artipie_request_counter_total       | counter | Requests counter                      | method, status |
-| artipie_response_send_seconds       | summary | Response.send execution time          |                |
-| artipie_connection_accept_seconds   | summary | Connection.accept execution time      | status         |
 | artipie_slice_response_seconds      | summary | Slice.response execution time         | status         |
 | artipie_storage_value_seconds       | summary | Time to read value from storage       | id             |
 | artipie_storage_value_size_bytes    | summary | Storage value size and chunks         | id             |

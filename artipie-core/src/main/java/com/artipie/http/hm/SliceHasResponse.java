@@ -66,7 +66,7 @@ public final class SliceHasResponse extends TypeSafeMatcher<Slice> {
      * @param body Body
      */
     public SliceHasResponse(
-        Matcher<? extends Response> rsp,
+        Matcher<? extends ResponseImpl> rsp,
         RequestLine line,
         Headers headers,
         Content body

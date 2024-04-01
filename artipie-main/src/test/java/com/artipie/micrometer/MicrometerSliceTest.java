@@ -61,19 +61,14 @@ class MicrometerSliceTest {
         String actual = registry.getMetersAsString();
 
         List.of(
-            //todo MY_TODO эти тесты нужно перенести в VertxSliceServerTest
-            // ?? если они вообще нужны ?? возможно, что это дубли уже существующих в вертыксе
-//            Matchers.containsString("artipie.connection.accept(TIMER)[status='OK']; count=2.0, total_time"),
-//            Matchers.containsString("artipie.connection.accept(TIMER)[status='CONTINUE']; count=1.0, total_time="),
             Matchers.containsString("artipie.request.body.size(DISTRIBUTION_SUMMARY)[method='POST']; count=0.0, total=0.0 bytes, max=0.0 bytes"),
             Matchers.containsString("artipie.request.body.size(DISTRIBUTION_SUMMARY)[method='GET']; count=0.0, total=0.0 bytes, max=0.0 bytes"),
             Matchers.containsString("artipie.request.counter(COUNTER)[method='POST', status='CONTINUE']; count=1.0"),
             Matchers.containsString("artipie.request.counter(COUNTER)[method='GET', status='OK']; count=2.0"),
             Matchers.containsString("artipie.response.body.size(DISTRIBUTION_SUMMARY)[method='POST']; count=0.0, total=0.0 bytes, max=0.0 bytes"),
-            Matchers.containsString("artipie.response.body.size(DISTRIBUTION_SUMMARY)[method='GET']; count=3.0, total=15.0 bytes, max=6.0 bytes")
-//            Matchers.containsString("artipie.response.send(TIMER)[]; count=3.0, total_time="),
-//            Matchers.containsString("artipie.slice.response(TIMER)[status='OK']; count=2.0, total_time"),
-//            Matchers.containsString("artipie.slice.response(TIMER)[status='CONTINUE']; count=1.0, total_time")
+            Matchers.containsString("artipie.response.body.size(DISTRIBUTION_SUMMARY)[method='GET']; count=3.0, total=15.0 bytes, max=6.0 bytes"),
+            Matchers.containsString("artipie.slice.response(TIMER)[status='OK']; count=2.0, total_time"),
+            Matchers.containsString("artipie.slice.response(TIMER)[status='CONTINUE']; count=1.0, total_time")
         ).forEach(m -> MatcherAssert.assertThat(actual, m));
     }
 
