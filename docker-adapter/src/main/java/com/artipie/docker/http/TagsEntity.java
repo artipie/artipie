@@ -52,13 +52,13 @@ final class TagsEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
+        public DockerRepositoryPermission permission(RequestLine line, String name) {
             return new DockerRepositoryPermission(name, new Scope.Repository.Pull(name(line)));
         }
 
         @Override
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
-            final RqParams params = new RqParams(line.uri().getQuery());
+            final RqParams params = new RqParams(line.uri());
             return this.docker.repo(name(line)).manifests()
                 .tags(
                     params.value("last").map(Tag.Valid::new),
@@ -77,7 +77,7 @@ final class TagsEntity {
          * @param line Request line.
          * @return Repository name.
          */
-        private static RepoName.Valid name(final RequestLine line) {
+        private static RepoName.Valid name(RequestLine line) {
             return new RepoName.Valid(new RqByRegex(line, TagsEntity.PATH).path().group("name"));
         }
     }

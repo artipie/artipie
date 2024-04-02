@@ -58,7 +58,7 @@ final class CatalogEntity {
 
         @Override
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
-            final RqParams params = new RqParams(line.uri().getQuery());
+            final RqParams params = new RqParams(line.uri());
             return this.docker.catalog(
                 params.value("last").map(RepoName.Simple::new),
                 params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)

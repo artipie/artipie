@@ -61,9 +61,7 @@ final class AuthScopeSlice implements Slice {
 
     @Override
     public CompletableFuture<Response> response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
+        RequestLine line, Headers headers, Content body
     ) {
         return new AuthzSlice(
             this.origin,

@@ -11,8 +11,6 @@ import java.security.Permission;
 
 /**
  * Slice requiring authorization specified by {@link Scope}.
- *
- * @since 0.11
  */
 public interface ScopeSlice extends Slice {
 

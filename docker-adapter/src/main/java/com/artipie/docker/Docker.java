@@ -11,7 +11,6 @@ import java.util.concurrent.CompletionStage;
 /**
  * Docker registry storage main object.
  * @see com.artipie.docker.asto.AstoDocker
- * @since 0.1
  */
 public interface Docker {
 
