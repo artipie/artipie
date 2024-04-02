@@ -52,10 +52,16 @@ public final class GemApiKeyAuth implements AuthScheme {
                         final String[] cred = new String(
                             Base64.decodeBase64(str.getBytes(StandardCharsets.UTF_8))
                         ).split(":");
-                        final Optional<AuthUser> user = this.auth.user(
-                            cred[0].trim(), cred[1].trim()
-                        );
-                        res = CompletableFuture.completedFuture(AuthScheme.result(user, ""));
+                        if (cred.length < 2) {
+                            res = CompletableFuture.completedFuture(
+                                AuthScheme.result(AuthUser.ANONYMOUS, "")
+                            );
+                        } else {
+                            final Optional<AuthUser> user = this.auth.user(
+                                cred[0].trim(), cred[1].trim()
+                            );
+                            res = CompletableFuture.completedFuture(AuthScheme.result(user, ""));
+                        }
                     }
                     return res;
                 }
