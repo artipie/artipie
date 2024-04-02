@@ -14,8 +14,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link AstoRepo}.
- *
- * @since 0.3
  */
 final class AstoRepoTest {
 
@@ -26,9 +24,8 @@ final class AstoRepoTest {
 
     @BeforeEach
     void setUp() {
-        final InMemoryStorage storage = new InMemoryStorage();
         final RepoName name = new RepoName.Valid("test");
-        this.repo = new AstoRepo(storage, new Layout(), name);
+        this.repo = new AstoRepo(new InMemoryStorage(), name);
     }
 
     @Test

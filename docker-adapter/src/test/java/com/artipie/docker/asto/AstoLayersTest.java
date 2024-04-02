@@ -37,8 +37,7 @@ final class AstoLayersTest {
 
     @BeforeEach
     void setUp() {
-        final InMemoryStorage storage = new InMemoryStorage();
-        this.blobs = new AstoBlobs(storage, new Layout());
+        this.blobs = new AstoBlobs(new InMemoryStorage());
         this.layers = new AstoLayers(this.blobs);
     }
 
@@ -47,7 +46,7 @@ final class AstoLayersTest {
         final byte[] data = "data".getBytes();
         final Digest digest = this.layers.put(new TrustedBlobSource(data))
             .toCompletableFuture().join().digest();
-        final Optional<Blob> found = this.blobs.blob(digest).toCompletableFuture().join();
+        final Optional<Blob> found = this.blobs.blob(digest).join();
         MatcherAssert.assertThat(found.isPresent(), new IsEqual<>(true));
         MatcherAssert.assertThat(bytes(found.orElseThrow()), new IsEqual<>(data));
     }

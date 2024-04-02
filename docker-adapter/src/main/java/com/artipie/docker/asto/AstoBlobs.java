@@ -11,6 +11,7 @@ import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -24,22 +25,15 @@ public final class AstoBlobs implements BlobStore {
     private final Storage asto;
 
     /**
-     * Blobs layout.
-     */
-    private final Layout layout;
-
-    /**
      * @param asto Storage
-     * @param layout Blobs layout.
      */
-    public AstoBlobs(final Storage asto, final Layout layout) {
+    public AstoBlobs(final Storage asto) {
         this.asto = asto;
-        this.layout = layout;
     }
 
     @Override
-    public CompletionStage<Optional<Blob>> blob(final Digest digest) {
-        final Key key = this.layout.blob(digest);
+    public CompletableFuture<Optional<Blob>> blob(final Digest digest) {
+        final Key key = Layout.blob(digest);
         return this.asto.exists(key).thenApply(
             exists -> {
                 final Optional<Blob> blob;
@@ -56,7 +50,7 @@ public final class AstoBlobs implements BlobStore {
     @Override
     public CompletionStage<Blob> put(final BlobSource source) {
         final Digest digest = source.digest();
-        final Key key = this.layout.blob(digest);
+        final Key key = Layout.blob(digest);
         return source.saveTo(this.asto, key)
             .thenApply(
                 nothing -> new AstoBlob(this.asto, key, digest)

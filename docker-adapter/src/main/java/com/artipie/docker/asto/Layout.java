@@ -14,26 +14,26 @@ import com.artipie.docker.RepoName;
  */
 public final class Layout {
 
-    public Key repositories() {
+    public static Key repositories() {
         return new Key.From("repositories");
     }
 
-    public Key blob(final Digest digest) {
+    public static Key blob(Digest digest) {
         return new Key.From(
             "blobs", digest.alg(), digest.hex().substring(0, 2), digest.hex(), "data"
         );
     }
 
-    public Key manifest(final RepoName repo, final ManifestReference ref) {
-        return new Key.From(this.manifests(repo), ref.link().string());
+    public static Key manifest(RepoName repo, final ManifestReference ref) {
+        return new Key.From(manifests(repo), ref.link().string());
     }
 
-    public Key tags(final RepoName repo) {
-        return new Key.From(this.manifests(repo), "tags");
+    public static Key tags(RepoName repo) {
+        return new Key.From(manifests(repo), "tags");
     }
 
-    public Key upload(final RepoName name, final String uuid) {
-        return Uploads.uploadKey(name, uuid);
+    public static Key upload(RepoName name, final String uuid) {
+        return new Key.From(repositories(), name.value(), "_uploads", uuid);
     }
 
     /**
@@ -42,7 +42,7 @@ public final class Layout {
      * @param repo Repository name.
      * @return Manifests key.
      */
-    private Key manifests(final RepoName repo) {
-        return new Key.From(this.repositories(), repo.value(), "_manifests");
+    private static Key manifests(final RepoName repo) {
+        return new Key.From(repositories(), repo.value(), "_manifests");
     }
 }

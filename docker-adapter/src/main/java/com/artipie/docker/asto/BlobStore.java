@@ -8,6 +8,7 @@ package com.artipie.docker.asto;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -18,10 +19,11 @@ public interface BlobStore {
 
     /**
      * Load blob by digest.
+     *
      * @param digest Blob digest
      * @return Async publisher output
      */
-    CompletionStage<Optional<Blob>> blob(Digest digest);
+    CompletableFuture<Optional<Blob>> blob(Digest digest);
 
     /**
      * Put blob into the store from source.

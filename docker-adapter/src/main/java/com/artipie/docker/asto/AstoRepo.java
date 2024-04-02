@@ -29,20 +29,11 @@ public final class AstoRepo implements Repo {
     private final RepoName name;
 
     /**
-     * Storage layout.
-     */
-    private final Layout layout;
-
-    /**
-     * Ctor.
-     *
      * @param asto Asto storage
-     * @param layout Storage layout.
      * @param name Repository name
      */
-    public AstoRepo(final Storage asto, final Layout layout, final RepoName name) {
+    public AstoRepo(final Storage asto, final RepoName name) {
         this.asto = asto;
-        this.layout = layout;
         this.name = name;
     }
 
@@ -53,12 +44,12 @@ public final class AstoRepo implements Repo {
 
     @Override
     public Manifests manifests() {
-        return new AstoManifests(this.asto, this.blobs(), this.layout, this.name);
+        return new AstoManifests(this.asto, this.blobs(), this.name);
     }
 
     @Override
     public Uploads uploads() {
-        return new Uploads(this.asto, this.layout, this.name);
+        return new Uploads(this.asto, this.name);
     }
 
     /**
@@ -67,6 +58,6 @@ public final class AstoRepo implements Repo {
      * @return Blobs storage.
      */
     private AstoBlobs blobs() {
-        return new AstoBlobs(this.asto, this.layout);
+        return new AstoBlobs(this.asto);
     }
 }

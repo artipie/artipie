@@ -44,7 +44,6 @@ final class ReadWriteRepoTest {
     void createsWriteUploads() {
         final Uploads uploads = new Uploads(
             new InMemoryStorage(),
-            new Layout(),
             new RepoName.Simple("test")
         );
         MatcherAssert.assertThat(
@@ -74,7 +73,6 @@ final class ReadWriteRepoTest {
     private static Repo repo() {
         return new AstoRepo(
             new InMemoryStorage(),
-            new Layout(),
             new RepoName.Simple("test-repo")
         );
     }

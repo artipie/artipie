@@ -14,10 +14,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link Uploads}.
- *
- * @since 0.5
  */
-@SuppressWarnings("PMD.TooManyMethods")
 final class UploadsTest {
     /**
      * Slice being tested.
@@ -38,11 +35,7 @@ final class UploadsTest {
     void setUp() {
         this.storage = new InMemoryStorage();
         this.reponame = new RepoName.Valid("test");
-        this.uploads = new Uploads(
-            this.storage,
-            new Layout(),
-            this.reponame
-        );
+        this.uploads = new Uploads(this.storage, this.reponame);
     }
 
     @Test
@@ -66,7 +59,7 @@ final class UploadsTest {
             .uuid();
         MatcherAssert.assertThat(
             this.storage.list(
-                Uploads.uploadKey(this.reponame, uuid)
+                Layout.upload(this.reponame, uuid)
             ).join().isEmpty(),
             new IsEqual<>(false)
         );
