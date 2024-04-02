@@ -222,7 +222,7 @@ public final class ConanUpload {
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final String path = line.uri().getPath();
             final String hostname = new RqHeaders.Single(headers, ConanUpload.HOST).asString();
-            final Optional<String> token = new RqParams(line.uri().getQuery()).value("signature");
+            final Optional<String> token = new RqParams(line.uri()).value("signature");
             if (token.isPresent()) {
                 return this.tokenizer.authenticateToken(token.get())
                     .toCompletableFuture()

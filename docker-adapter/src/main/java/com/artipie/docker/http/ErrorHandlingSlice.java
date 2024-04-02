@@ -8,8 +8,8 @@ import com.artipie.asto.Content;
 import com.artipie.docker.error.DockerError;
 import com.artipie.docker.error.UnsupportedError;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 
@@ -34,9 +34,7 @@ final class ErrorHandlingSlice implements Slice {
 
     @Override
     public CompletableFuture<Response> response(
-        final RequestLine line,
-        final Headers headers,
-        final Content body
+        RequestLine line, Headers headers, Content body
     ) {
         try {
             return this.origin.response(line, headers, body)

@@ -13,8 +13,6 @@ import com.artipie.security.perms.Action;
  * Operation scope described in Docker Registry auth specification.
  * Scope is an authentication scope for performing an action on resource.
  * See <a href="https://docs.docker.com/registry/spec/auth/scope/">Token Scope Documentation</a>.
- *
- * @since 0.10
  */
 public interface Scope {
 
@@ -194,8 +192,6 @@ public interface Scope {
         private final RegistryCategory category;
 
         /**
-         * Ctor.
-         *
          * @param category Resource category.
          */
         public Registry(final RegistryCategory category) {

@@ -13,8 +13,6 @@ import io.vertx.reactivex.core.Vertx;
 
 /**
  * Docker HTTP server, using provided {@link Docker} instance as back-end.
- *
- * @since 0.3
  */
 public final class DockerRepository {
 
@@ -39,8 +37,6 @@ public final class DockerRepository {
     private int port;
 
     /**
-     * Ctor.
-     *
      * @param docker Docker back-end.
      */
     public DockerRepository(final Docker docker) {
@@ -48,8 +44,6 @@ public final class DockerRepository {
     }
 
     /**
-     * Ctor.
-     *
      * @param slice Docker slice.
      */
     public DockerRepository(final DockerSlice slice) {

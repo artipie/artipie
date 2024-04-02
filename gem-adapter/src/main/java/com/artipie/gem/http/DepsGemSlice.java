@@ -44,7 +44,7 @@ final class DepsGemSlice implements Slice {
         return new Gem(this.repo).dependencies(
             Collections.unmodifiableSet(
                 new HashSet<>(
-                    new RqParams(line.uri().getQuery()).value("gems")
+                    new RqParams(line.uri()).value("gems")
                         .map(str -> Arrays.asList(str.split(",")))
                         .orElse(Collections.emptyList())
                 )

@@ -22,14 +22,10 @@ import java.util.Queue;
 /**
  * Slice implementing Docker Registry HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/">Docker Registry HTTP API V2</a>.
- *
- * @since 0.1
  */
 public final class DockerSlice extends Slice.Wrap {
 
     /**
-     * Ctor.
-     *
      * @param docker Docker repository.
      */
     public DockerSlice(final Docker docker) {
@@ -37,8 +33,6 @@ public final class DockerSlice extends Slice.Wrap {
     }
 
     /**
-     * Ctor.
-     *
      * @param docker Docker repository.
      * @param events Artifact events
      */
@@ -47,8 +41,6 @@ public final class DockerSlice extends Slice.Wrap {
     }
 
     /**
-     * Ctor.
-     *
      * @param docker Docker repository.
      * @param perms Access permissions.
      * @param auth Authentication mechanism used in BasicAuthScheme.
@@ -60,17 +52,19 @@ public final class DockerSlice extends Slice.Wrap {
     }
 
     /**
-     * Ctor.
-     *
      * @param docker Docker repository.
      * @param policy Access policy.
      * @param auth Authentication scheme.
      * @param events Artifact events queue
      * @param name Repository name
      */
-    @SuppressWarnings("PMD.ExcessiveMethodLength")
-    public DockerSlice(final Docker docker, final Policy<?> policy, final AuthScheme auth,
-        final Optional<Queue<ArtifactEvent>> events, final String name) {
+    public DockerSlice(
+        Docker docker,
+        Policy<?> policy,
+        AuthScheme auth,
+        Optional<Queue<ArtifactEvent>> events,
+        String name
+    ) {
         super(
             new ErrorHandlingSlice(
                 new SliceRoute(
