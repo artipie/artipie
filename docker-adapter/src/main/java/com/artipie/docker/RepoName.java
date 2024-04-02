@@ -9,8 +9,7 @@ import com.artipie.docker.error.InvalidRepoNameException;
 import java.util.regex.Pattern;
 
 /**
- * Docker repository name.
- * @since 0.1
+ * Docker image repository name.
  */
 public interface RepoName {
 

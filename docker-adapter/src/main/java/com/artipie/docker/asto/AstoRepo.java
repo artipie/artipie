@@ -10,7 +10,6 @@ import com.artipie.docker.Layers;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.Uploads;
 
 /**
  * Asto implementation of {@link Repo}.
@@ -59,7 +58,7 @@ public final class AstoRepo implements Repo {
 
     @Override
     public Uploads uploads() {
-        return new AstoUploads(this.asto, this.layout, this.name);
+        return new Uploads(this.asto, this.layout, this.name);
     }
 
     /**

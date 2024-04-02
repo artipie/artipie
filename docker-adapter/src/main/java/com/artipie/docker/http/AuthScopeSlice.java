@@ -42,8 +42,6 @@ final class AuthScopeSlice implements Slice {
     private final String name;
 
     /**
-     * Ctor.
-     *
      * @param origin Origin slice.
      * @param auth Authentication scheme.
      * @param policy Access permissions.

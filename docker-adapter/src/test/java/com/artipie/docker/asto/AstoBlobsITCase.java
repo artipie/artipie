@@ -34,7 +34,7 @@ final class AstoBlobsITCase {
         final InMemoryStorage storage = new InMemoryStorage();
         final AstoBlobs blobs = new AstoBlobs(
             new SubStorage(RegistryRoot.V2, storage),
-            new DefaultLayout()
+            new Layout()
         );
         final byte[] bytes = new byte[]{0x00, 0x01, 0x02, 0x03};
         final Digest digest = blobs.put(new TrustedBlobSource(bytes))
@@ -62,7 +62,7 @@ final class AstoBlobsITCase {
     void failsOnDigestMismatch() {
         final InMemoryStorage storage = new InMemoryStorage();
         final AstoBlobs blobs = new AstoBlobs(
-            storage, new DefaultLayout()
+            storage, new Layout()
         );
         final String digest = "123";
         blobs.put(
@@ -100,7 +100,7 @@ final class AstoBlobsITCase {
     @Test
     void writeAndReadBlob() throws Exception {
         final AstoBlobs blobs = new AstoBlobs(
-            new InMemoryStorage(), new DefaultLayout()
+            new InMemoryStorage(), new Layout()
         );
         final byte[] bytes = {0x05, 0x06, 0x07, 0x08};
         final Digest digest = blobs.put(new TrustedBlobSource(bytes))
@@ -117,7 +117,7 @@ final class AstoBlobsITCase {
     @Test
     void readAbsentBlob() throws Exception {
         final AstoBlobs blobs = new AstoBlobs(
-            new InMemoryStorage(), new DefaultLayout()
+            new InMemoryStorage(), new Layout()
         );
         final Digest digest = new Digest.Sha256(
             "0123456789012345678901234567890123456789012345678901234567890123"

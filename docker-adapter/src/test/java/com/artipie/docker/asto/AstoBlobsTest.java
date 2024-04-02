@@ -34,7 +34,7 @@ final class AstoBlobsTest {
         );
         final FakeStorage storage = new FakeStorage();
         final AstoBlobs blobs = new AstoBlobs(
-            storage, new DefaultLayout()
+            storage, new Layout()
         );
         blobs.put(new TrustedBlobSource(new Content.From(bytes), digest))
             .toCompletableFuture().join();

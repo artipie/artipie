@@ -7,19 +7,18 @@ package com.artipie.docker.asto;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.Uploads;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link AstoUploads}.
+ * Test for {@link Uploads}.
  *
  * @since 0.5
  */
 @SuppressWarnings("PMD.TooManyMethods")
-final class AstoUploadsTest {
+final class UploadsTest {
     /**
      * Slice being tested.
      */
@@ -39,9 +38,9 @@ final class AstoUploadsTest {
     void setUp() {
         this.storage = new InMemoryStorage();
         this.reponame = new RepoName.Valid("test");
-        this.uploads = new AstoUploads(
+        this.uploads = new Uploads(
             this.storage,
-            new DefaultLayout(),
+            new Layout(),
             this.reponame
         );
     }
@@ -67,7 +66,7 @@ final class AstoUploadsTest {
             .uuid();
         MatcherAssert.assertThat(
             this.storage.list(
-                new UploadKey(this.reponame, uuid)
+                Uploads.uploadKey(this.reponame, uuid)
             ).join().isEmpty(),
             new IsEqual<>(false)
         );

@@ -26,13 +26,13 @@ public final class AstoBlobs implements BlobStore {
     /**
      * Blobs layout.
      */
-    private final BlobsLayout layout;
+    private final Layout layout;
 
     /**
      * @param asto Storage
      * @param layout Blobs layout.
      */
-    public AstoBlobs(final Storage asto, final BlobsLayout layout) {
+    public AstoBlobs(final Storage asto, final Layout layout) {
         this.asto = asto;
         this.layout = layout;
     }

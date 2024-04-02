@@ -35,8 +35,6 @@ public final class AstoBlob implements Blob {
     private final Digest dig;
 
     /**
-     * Ctor.
-     *
      * @param storage Storage.
      * @param key Blob key.
      * @param digest Blob digest.

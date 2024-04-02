@@ -11,7 +11,7 @@ import com.artipie.docker.Layers;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.Uploads;
+import com.artipie.docker.asto.Uploads;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -65,10 +65,10 @@ class TrimmedDockerTest {
         ",username/11/some_package"
     })
     void cutsIfPrefixStartsWithSlash(final String prefix, final String name) {
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(
+            name,
             ((FakeRepo) new TrimmedDocker(TrimmedDockerTest.FAKE, prefix)
-                .repo(new RepoName.Simple(String.format("%s/%s", prefix, name)))).name(),
-            new IsEqual<>(name)
+                .repo(new RepoName.Simple(prefix + '/' + name))).name()
         );
     }
 

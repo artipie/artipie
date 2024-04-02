@@ -13,9 +13,9 @@ import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.Upload;
 import com.artipie.docker.error.InvalidDigestException;
 import com.artipie.docker.misc.DigestedFlowable;
+
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collection;
@@ -25,22 +25,17 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 /**
- * Asto implementation of {@link Upload}.
- *
- * @since 0.2
+ * Blob upload.
+ * See <a href="https://docs.docker.com/registry/spec/api/#blob-upload">Blob Upload</a>
  */
-@SuppressWarnings("PMD.TooManyMethods")
-public final class AstoUpload implements Upload {
+public final class Upload {
 
-    /**
-     * Storage.
-     */
     private final Storage storage;
 
     /**
      * Uploads layout.
      */
-    private final UploadsLayout layout;
+    private final Layout layout;
 
     /**
      * Repository name.
@@ -50,22 +45,16 @@ public final class AstoUpload implements Upload {
     /**
      * Upload UUID.
      */
-    @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
     private final String uuid;
 
     /**
-     * Ctor.
-     *
      * @param storage Storage.
      * @param layout Uploads layout.
      * @param name Repository name.
      * @param uuid Upload UUID.
      */
-    public AstoUpload(
-        final Storage storage,
-        final UploadsLayout layout,
-        final RepoName name,
-        final String uuid
+    public Upload(
+        Storage storage, Layout layout, RepoName name, String uuid
     ) {
         this.storage = storage;
         this.layout = layout;
@@ -73,12 +62,30 @@ public final class AstoUpload implements Upload {
         this.uuid = uuid;
     }
 
-    @Override
+    /**
+     * Read UUID.
+     *
+     * @return UUID.
+     */
     public String uuid() {
         return this.uuid;
     }
 
-    @Override
+    /**
+     * Start upload with {@code Instant.now()} upload start time.
+     *
+     * @return Completion or error signal.
+     */
+    public CompletableFuture<Void> start() {
+        return this.start(Instant.now());
+    }
+
+    /**
+     * Start upload.
+     *
+     * @param time Upload start time
+     * @return Future
+     */
     public CompletableFuture<Void> start(final Instant time) {
         return this.storage.save(
             this.started(),
@@ -86,7 +93,11 @@ public final class AstoUpload implements Upload {
         );
     }
 
-    @Override
+    /**
+     * Cancel upload.
+     *
+     * @return Completion or error signal.
+     */
     public CompletionStage<Void> cancel() {
         final Key key = this.started();
         return this.storage
@@ -94,7 +105,12 @@ public final class AstoUpload implements Upload {
             .thenCompose(found -> this.storage.delete(key));
     }
 
-    @Override
+    /**
+     * Appends a chunk of data to upload.
+     *
+     * @param chunk Chunk of data.
+     * @return Offset after appending chunk.
+     */
     public CompletionStage<Long> append(final Content chunk) {
         return this.chunks().thenCompose(
             chunks -> {
@@ -116,7 +132,11 @@ public final class AstoUpload implements Upload {
         );
     }
 
-    @Override
+    /**
+     * Get offset for the uploaded content.
+     *
+     * @return Offset.
+     */
     public CompletionStage<Long> offset() {
         return this.chunks().thenCompose(
             chunks -> {
@@ -134,7 +154,14 @@ public final class AstoUpload implements Upload {
         );
     }
 
-    @Override
+    /**
+     * Puts uploaded data to {@link Layers} creating a {@link Blob} with specified {@link Digest}.
+     * If upload data mismatch provided digest then error occurs and operation does not complete.
+     *
+     * @param layers Target layers.
+     * @param digest Expected blob digest.
+     * @return Created blob.
+     */
     public CompletionStage<Blob> putTo(Layers layers, Digest digest) {
         final Key source = this.chunk(digest);
         return this.storage.exists(source).thenCompose(

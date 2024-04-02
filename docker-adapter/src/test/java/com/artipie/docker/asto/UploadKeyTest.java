@@ -11,9 +11,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test case for {@link UploadKey}.
- *
- * @since 0.3
+ * Test case for {@code AstoUploads.uploadKey}.
  */
 public final class UploadKeyTest {
 
@@ -22,7 +20,7 @@ public final class UploadKeyTest {
         final String name = "test";
         final String uuid = UUID.randomUUID().toString();
         MatcherAssert.assertThat(
-            new UploadKey(new RepoName.Valid(name), uuid).string(),
+            Uploads.uploadKey(new RepoName.Valid(name), uuid).string(),
             Matchers.equalTo(
                 String.format("repositories/%s/_uploads/%s", name, uuid)
             )
