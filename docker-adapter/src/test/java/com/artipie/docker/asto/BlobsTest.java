@@ -20,9 +20,9 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 /**
- * Tests for {@link AstoBlobs}.
+ * Tests for {@link Blobs}.
  */
-final class AstoBlobsTest {
+final class BlobsTest {
 
     @Test
     void shouldNotSaveExistingBlob() {
@@ -31,7 +31,7 @@ final class AstoBlobsTest {
             "054edec1d0211f624fed0cbca9d4f9400b0e491c43742af2c5b0abebf0c990d8"
         );
         final FakeStorage storage = new FakeStorage();
-        final AstoBlobs blobs = new AstoBlobs(storage);
+        final Blobs blobs = new Blobs(storage);
         blobs.put(new TrustedBlobSource(new Content.From(bytes), digest))
             .toCompletableFuture().join();
         blobs.put(new TrustedBlobSource(new Content.From(bytes), digest))

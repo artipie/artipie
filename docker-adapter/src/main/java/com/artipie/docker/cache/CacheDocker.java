@@ -12,7 +12,7 @@ import com.artipie.docker.misc.JoinedCatalogSource;
 import com.artipie.scheduling.ArtifactEvent;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Cache {@link Docker} implementation.
@@ -65,7 +65,7 @@ public final class CacheDocker implements Docker {
     }
 
     @Override
-    public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+    public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
         return new JoinedCatalogSource(from, limit, this.origin, this.cache).catalog();
     }
 }

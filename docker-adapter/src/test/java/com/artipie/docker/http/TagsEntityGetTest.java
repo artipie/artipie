@@ -27,7 +27,7 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -135,7 +135,7 @@ class TagsEntityGetTest {
         }
 
         @Override
-        public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+        public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
             throw new UnsupportedOperationException();
         }
     }

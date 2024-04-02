@@ -18,8 +18,6 @@ import org.reactivestreams.Subscriber;
 
 /**
  * {@link Flowable} that calculates digest of origin {@link Publisher} bytes when they pass by.
- *
- * @since 0.12
  */
 public final class DigestedFlowable extends Flowable<ByteBuffer> {
 
@@ -34,8 +32,6 @@ public final class DigestedFlowable extends Flowable<ByteBuffer> {
     private final AtomicReference<Digest> dig;
 
     /**
-     * Ctor.
-     *
      * @param origin Origin publisher.
      */
     public DigestedFlowable(final Publisher<ByteBuffer> origin) {

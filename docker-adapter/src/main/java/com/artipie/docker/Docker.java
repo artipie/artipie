@@ -6,7 +6,7 @@
 package com.artipie.docker;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Docker registry storage main object.
@@ -24,9 +24,9 @@ public interface Docker {
     /**
      * Docker repositories catalog.
      *
-     * @param from From which tag to start, exclusive.
+     * @param from  From which tag to start, exclusive.
      * @param limit Maximum number of tags returned.
      * @return Catalog.
      */
-    CompletionStage<Catalog> catalog(Optional<RepoName> from, int limit);
+    CompletableFuture<Catalog> catalog(Optional<RepoName> from, int limit);
 }

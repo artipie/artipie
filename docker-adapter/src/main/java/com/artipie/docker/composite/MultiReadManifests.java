@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Multi-read {@link Manifests} implementation.
@@ -49,12 +48,12 @@ public final class MultiReadManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return CompletableFuture.supplyAsync(() -> {
             for (Manifests m : manifests) {
                 Optional<Manifest> res = m.get(ref).handle(
@@ -78,7 +77,7 @@ public final class MultiReadManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
         return new JoinedTagsSource(this.name, this.manifests, from, limit).tags();
     }
 }

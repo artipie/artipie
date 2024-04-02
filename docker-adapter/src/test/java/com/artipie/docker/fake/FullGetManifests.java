@@ -15,7 +15,6 @@ import com.artipie.docker.manifest.Manifest;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Manifests implementation that contains manifest.
@@ -53,12 +52,12 @@ public final class FullGetManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content ignored) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content ignored) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return CompletableFuture.completedFuture(
             Optional.of(
                 new JsonManifest(
@@ -70,7 +69,7 @@ public final class FullGetManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
         throw new UnsupportedOperationException();
     }
 }

@@ -25,13 +25,13 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Integration test for {@link AstoBlobs}.
+ * Integration test for {@link Blobs}.
  */
-final class AstoBlobsITCase {
+final class BlobsITCase {
     @Test
     void saveBlobDataAtCorrectPath() throws Exception {
         final InMemoryStorage storage = new InMemoryStorage();
-        final AstoBlobs blobs = new AstoBlobs(
+        final Blobs blobs = new Blobs(
             new SubStorage(RegistryRoot.V2, storage)
         );
         final byte[] bytes = new byte[]{0x00, 0x01, 0x02, 0x03};
@@ -59,7 +59,7 @@ final class AstoBlobsITCase {
     @Test
     void failsOnDigestMismatch() {
         final InMemoryStorage storage = new InMemoryStorage();
-        final AstoBlobs blobs = new AstoBlobs(storage);
+        final Blobs blobs = new Blobs(storage);
         final String digest = "123";
         blobs.put(
             new CheckedBlobSource(new Content.From("data".getBytes()), new Digest.Sha256(digest))
@@ -95,7 +95,7 @@ final class AstoBlobsITCase {
 
     @Test
     void writeAndReadBlob() throws Exception {
-        final AstoBlobs blobs = new AstoBlobs(
+        final Blobs blobs = new Blobs(
             new InMemoryStorage()
         );
         final byte[] bytes = {0x05, 0x06, 0x07, 0x08};
@@ -111,7 +111,7 @@ final class AstoBlobsITCase {
 
     @Test
     void readAbsentBlob() throws Exception {
-        final AstoBlobs blobs = new AstoBlobs(
+        final Blobs blobs = new Blobs(
             new InMemoryStorage()
         );
         final Digest digest = new Digest.Sha256(

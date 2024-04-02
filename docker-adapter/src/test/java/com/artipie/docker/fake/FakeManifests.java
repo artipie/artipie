@@ -12,7 +12,7 @@ import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Auxiliary class for tests for {@link com.artipie.docker.cache.CacheManifests}.
@@ -30,17 +30,17 @@ public final class FakeManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content content) {
         return this.mnfs.put(ref, content);
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return this.mnfs.get(ref);
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
         return this.mnfs.tags(from, limit);
     }
 

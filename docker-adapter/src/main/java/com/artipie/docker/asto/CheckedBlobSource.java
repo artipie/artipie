@@ -10,12 +10,11 @@ import com.artipie.asto.Storage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.error.InvalidDigestException;
 import com.artipie.docker.misc.DigestedFlowable;
-import java.util.concurrent.CompletionStage;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * BlobSource which content is checked against digest on saving.
- *
- * @since 0.12
  */
 public final class CheckedBlobSource implements BlobSource {
 
@@ -27,33 +26,31 @@ public final class CheckedBlobSource implements BlobSource {
     /**
      * Blob digest.
      */
-    private final Digest dig;
+    private final Digest digest;
 
     /**
-     * Ctor.
-     *
      * @param content Blob content.
-     * @param dig Blob digest.
+     * @param digest Blob digest.
      */
-    public CheckedBlobSource(final Content content, final Digest dig) {
+    public CheckedBlobSource(Content content, Digest digest) {
         this.content = content;
-        this.dig = dig;
+        this.digest = digest;
     }
 
     @Override
     public Digest digest() {
-        return this.dig;
+        return this.digest;
     }
 
     @Override
-    public CompletionStage<Void> saveTo(final Storage storage, final Key key) {
+    public CompletableFuture<Void> saveTo(Storage storage, Key key) {
         final DigestedFlowable digested = new DigestedFlowable(this.content);
         final Content checked = new Content.From(
             this.content.size(),
             digested.doOnComplete(
                 () -> {
                     final String calculated = digested.digest().hex();
-                    final String expected = this.dig.hex();
+                    final String expected = this.digest.hex();
                     if (!expected.equals(calculated)) {
                         throw new InvalidDigestException(
                             String.format("calculated: %s expected: %s", calculated, expected)
@@ -62,6 +59,12 @@ public final class CheckedBlobSource implements BlobSource {
                 }
             )
         );
-        return new TrustedBlobSource(checked, this.dig).saveTo(storage, key);
+        return storage
+            .exists(key)
+            .thenCompose(
+                exists -> exists
+                    ? CompletableFuture.completedFuture(null)
+                    : storage.save(key, checked)
+            );
     }
 }

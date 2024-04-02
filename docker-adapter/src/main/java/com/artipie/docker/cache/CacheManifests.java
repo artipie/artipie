@@ -82,12 +82,12 @@ public final class CacheManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return this.origin.manifests().get(ref).handle(
             (original, throwable) -> {
                 final CompletionStage<Optional<Manifest>> result;
@@ -115,7 +115,7 @@ public final class CacheManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
         return new JoinedTagsSource(
             this.name, from, limit, this.origin.manifests(), this.cache.manifests()
         ).tags();

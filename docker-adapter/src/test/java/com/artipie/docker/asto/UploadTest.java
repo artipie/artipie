@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -194,7 +193,7 @@ class UploadTest {
         private volatile byte[] content;
 
         @Override
-        public CompletionStage<Blob> put(final BlobSource source) {
+        public CompletableFuture<Blob> put(final BlobSource source) {
             final Key key = new Key.From(UUID.randomUUID().toString());
             source.saveTo(UploadTest.this.storage, key).toCompletableFuture().join();
             this.content = UploadTest.this.storage.value(key)
@@ -203,12 +202,12 @@ class UploadTest {
         }
 
         @Override
-        public CompletionStage<Blob> mount(final Blob blob) {
+        public CompletableFuture<Blob> mount(final Blob blob) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public CompletionStage<Optional<Blob>> get(final Digest digest) {
+        public CompletableFuture<Optional<Blob>> get(final Digest digest) {
             throw new UnsupportedOperationException();
         }
 

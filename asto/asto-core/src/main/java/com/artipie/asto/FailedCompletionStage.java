@@ -18,7 +18,7 @@ import java.util.function.Function;
  * @param <T> Stage result type.
  * @since 0.30
  */
-@SuppressWarnings("PMD.TooManyMethods")
+@Deprecated
 public final class FailedCompletionStage<T> implements CompletionStage<T> {
 
     /**

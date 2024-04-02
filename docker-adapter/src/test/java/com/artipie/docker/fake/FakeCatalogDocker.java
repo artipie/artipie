@@ -10,7 +10,6 @@ import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -72,7 +71,7 @@ public final class FakeCatalogDocker implements Docker {
     }
 
     @Override
-    public CompletionStage<Catalog> catalog(final Optional<RepoName> pfrom, final int plimit) {
+    public CompletableFuture<Catalog> catalog(final Optional<RepoName> pfrom, final int plimit) {
         this.cfrom.set(pfrom);
         this.climit.set(plimit);
         return CompletableFuture.completedFuture(this.ctlg);

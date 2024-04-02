@@ -5,7 +5,6 @@
 package com.artipie.docker.asto;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.FailedCompletionStage;
 import com.artipie.asto.Key;
 import com.artipie.asto.MetaCommon;
 import com.artipie.asto.Storage;
@@ -77,10 +76,10 @@ public final class Upload {
      * @param time Upload start time
      * @return Future
      */
-    public CompletableFuture<Void> start(final Instant time) {
+    public CompletableFuture<Void> start(Instant time) {
         return this.storage.save(
             this.started(),
-            new Content.From(time.toString().getBytes(StandardCharsets.US_ASCII))
+            new Content.From(time.toString().getBytes(StandardCharsets.UTF_8))
         );
     }
 
@@ -116,7 +115,8 @@ public final class Upload {
                         return this.storage.move(tmp, key).thenApply(ignored -> key);
                     }
                 ).thenCompose(
-                    key -> this.storage.metadata(key).thenApply(meta -> new MetaCommon(meta).size())
+                    key -> this.storage.metadata(key)
+                        .thenApply(meta -> new MetaCommon(meta).size())
                         .thenApply(updated -> updated - 1)
                 );
             }
@@ -167,7 +167,7 @@ public final class Upload {
                             }
 
                             @Override
-                            public CompletionStage<Void> saveTo(final Storage asto, final Key key) {
+                            public CompletableFuture<Void> saveTo(final Storage asto, final Key key) {
                                 return asto.move(source, key);
                             }
                         }
@@ -175,9 +175,7 @@ public final class Upload {
                         blob -> this.delete().thenApply(nothing -> blob)
                     );
                 } else {
-                    result = new FailedCompletionStage<>(
-                        new InvalidDigestException(digest.toString())
-                    );
+                    result = CompletableFuture.failedFuture(new InvalidDigestException(digest.toString()));
                 }
                 return result;
             }
