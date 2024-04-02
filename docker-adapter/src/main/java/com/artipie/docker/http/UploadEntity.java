@@ -13,8 +13,8 @@ import com.artipie.docker.error.UploadUnknownError;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
 import com.artipie.http.headers.Location;
@@ -125,8 +125,6 @@ public final class UploadEntity {
 
     /**
      * Slice for PATCH method.
-     *
-     * @since 0.2
      */
     public static final class Patch implements ScopeSlice {
 
@@ -136,8 +134,6 @@ public final class UploadEntity {
         private final Docker docker;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          */
         Patch(final Docker docker) {
@@ -153,9 +149,7 @@ public final class UploadEntity {
 
         @Override
         public CompletableFuture<Response> response(
-            final RequestLine line,
-            final Headers headers,
-            final Content body
+            RequestLine line, Headers headers, Content body
         ) {
             final Request request = new Request(line);
             final RepoName name = request.name();
@@ -353,7 +347,7 @@ public final class UploadEntity {
          * @return Request query parameters.
          */
         private RqParams params() {
-            return new RqParams(this.line.uri().getQuery());
+            return new RqParams(this.line.uri());
         }
     }
 
@@ -385,8 +379,6 @@ public final class UploadEntity {
         private final Docker docker;
 
         /**
-         * Ctor.
-         *
          * @param docker Docker repository.
          */
         Delete(final Docker docker) {
