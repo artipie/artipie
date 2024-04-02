@@ -5,7 +5,6 @@
 package com.artipie.docker.fake;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.FailedCompletionStage;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Tag;
@@ -27,7 +26,7 @@ public final class FaultyGetManifests implements Manifests {
 
     @Override
     public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
-        return new FailedCompletionStage<>(new IllegalStateException());
+        return CompletableFuture.failedFuture(new IllegalStateException());
     }
 
     @Override

@@ -84,7 +84,7 @@ public final class JoinedTagsSource {
      *
      * @return Tags.
      */
-    public CompletionStage<Tags> tags() {
+    public CompletableFuture<Tags> tags() {
         CompletableFuture<List<String>>[] futs = new CompletableFuture[manifests.size()];
         for (int i = 0; i < manifests.size(); i++) {
             futs[i] = manifests.get(i).tags(from, limit)

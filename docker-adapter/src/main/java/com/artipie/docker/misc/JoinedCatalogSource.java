@@ -74,7 +74,7 @@ public final class JoinedCatalogSource {
      *
      * @return Catalog.
      */
-    public CompletionStage<Catalog> catalog() {
+    public CompletableFuture<Catalog> catalog() {
         final List<CompletionStage<List<RepoName>>> all = this.dockers.stream().map(
             docker -> docker.catalog(this.from, this.limit)
                 .thenApply(ParsedCatalog::new)
