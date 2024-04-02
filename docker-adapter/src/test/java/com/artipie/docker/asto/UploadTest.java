@@ -58,7 +58,6 @@ class UploadTest {
         this.storage = new InMemoryStorage();
         this.upload = new Upload(
             this.storage,
-            new Layout(),
             new RepoName.Valid("test"),
             UUID.randomUUID().toString()
         );

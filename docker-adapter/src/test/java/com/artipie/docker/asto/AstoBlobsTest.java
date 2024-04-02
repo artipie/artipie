@@ -21,8 +21,6 @@ import java.util.function.Function;
 
 /**
  * Tests for {@link AstoBlobs}.
- *
- * @since 0.6
  */
 final class AstoBlobsTest {
 
@@ -33,9 +31,7 @@ final class AstoBlobsTest {
             "054edec1d0211f624fed0cbca9d4f9400b0e491c43742af2c5b0abebf0c990d8"
         );
         final FakeStorage storage = new FakeStorage();
-        final AstoBlobs blobs = new AstoBlobs(
-            storage, new Layout()
-        );
+        final AstoBlobs blobs = new AstoBlobs(storage);
         blobs.put(new TrustedBlobSource(new Content.From(bytes), digest))
             .toCompletableFuture().join();
         blobs.put(new TrustedBlobSource(new Content.From(bytes), digest))

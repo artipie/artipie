@@ -34,17 +34,12 @@ public final class AstoManifests implements Manifests {
     /**
      * Asto storage.
      */
-    private final Storage asto;
+    private final Storage storage;
 
     /**
      * Blobs storage.
      */
     private final BlobStore blobs;
-
-    /**
-     * Manifests layout.
-     */
-    private final Layout layout;
 
     /**
      * Repository name.
@@ -54,18 +49,11 @@ public final class AstoManifests implements Manifests {
     /**
      * @param asto Asto storage
      * @param blobs Blobs storage.
-     * @param layout Manifests layout.
      * @param name Repository name
      */
-    public AstoManifests(
-        final Storage asto,
-        final BlobStore blobs,
-        final Layout layout,
-        final RepoName name
-    ) {
-        this.asto = asto;
+    public AstoManifests(Storage asto, BlobStore blobs, RepoName name) {
+        this.storage = asto;
         this.blobs = blobs;
-        this.layout = layout;
         this.name = name;
     }
 
@@ -104,8 +92,8 @@ public final class AstoManifests implements Manifests {
 
     @Override
     public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
-        final Key root = this.layout.tags(this.name);
-        return this.asto.list(root).thenApply(
+        final Key root = Layout.tags(this.name);
+        return this.storage.list(root).thenApply(
             keys -> new AstoTags(this.name, root, keys, from, limit)
         );
     }
@@ -179,8 +167,8 @@ public final class AstoManifests implements Manifests {
      * @return Link key.
      */
     private CompletableFuture<Void> addLink(final ManifestReference ref, final Digest digest) {
-        return this.asto.save(
-            this.layout.manifest(this.name, ref),
+        return this.storage.save(
+            Layout.manifest(this.name, ref),
             new Content.From(digest.string().getBytes(StandardCharsets.US_ASCII))
         ).toCompletableFuture();
     }
@@ -192,11 +180,11 @@ public final class AstoManifests implements Manifests {
      * @return Blob digest, empty if no link found.
      */
     private CompletableFuture<Optional<Digest>> readLink(final ManifestReference ref) {
-        final Key key = this.layout.manifest(this.name, ref);
-        return this.asto.exists(key).thenCompose(
+        final Key key = Layout.manifest(this.name, ref);
+        return this.storage.exists(key).thenCompose(
             exists -> {
                 if (exists) {
-                    return this.asto.value(key)
+                    return this.storage.value(key)
                         .thenCompose(Content::asStringFuture)
                         .thenApply(val -> Optional.of(new Digest.FromString(val)));
                 }

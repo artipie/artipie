@@ -11,15 +11,13 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test case for {@link Layout}.
- *
- * @since 0.8
  */
 public final class LayoutTest {
 
     @Test
     public void buildsRepositories() {
         MatcherAssert.assertThat(
-            new Layout().repositories().string(),
+            Layout.repositories().string(),
             new IsEqual<>("repositories")
         );
     }
@@ -27,7 +25,7 @@ public final class LayoutTest {
     @Test
     public void buildsTags() {
         MatcherAssert.assertThat(
-            new Layout().tags(new RepoName.Simple("my-alpine")).string(),
+            Layout.tags(new RepoName.Simple("my-alpine")).string(),
             new IsEqual<>("repositories/my-alpine/_manifests/tags")
         );
     }

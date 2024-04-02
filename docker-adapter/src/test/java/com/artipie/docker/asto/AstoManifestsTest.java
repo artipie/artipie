@@ -47,10 +47,9 @@ final class AstoManifestsTest {
     @BeforeEach
     void setUp() {
         final Storage storage = new ExampleStorage();
-        final Layout layout = new Layout();
         final RepoName name = new RepoName.Simple("my-alpine");
-        this.blobs = new AstoBlobs(storage, layout);
-        this.manifests = new AstoManifests(storage, this.blobs, layout, name);
+        this.blobs = new AstoBlobs(storage);
+        this.manifests = new AstoManifests(storage, this.blobs, name);
     }
 
     @Test

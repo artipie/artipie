@@ -26,15 +26,13 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Integration test for {@link AstoBlobs}.
- * @since 0.1
  */
 final class AstoBlobsITCase {
     @Test
     void saveBlobDataAtCorrectPath() throws Exception {
         final InMemoryStorage storage = new InMemoryStorage();
         final AstoBlobs blobs = new AstoBlobs(
-            new SubStorage(RegistryRoot.V2, storage),
-            new Layout()
+            new SubStorage(RegistryRoot.V2, storage)
         );
         final byte[] bytes = new byte[]{0x00, 0x01, 0x02, 0x03};
         final Digest digest = blobs.put(new TrustedBlobSource(bytes))
@@ -61,9 +59,7 @@ final class AstoBlobsITCase {
     @Test
     void failsOnDigestMismatch() {
         final InMemoryStorage storage = new InMemoryStorage();
-        final AstoBlobs blobs = new AstoBlobs(
-            storage, new Layout()
-        );
+        final AstoBlobs blobs = new AstoBlobs(storage);
         final String digest = "123";
         blobs.put(
             new CheckedBlobSource(new Content.From("data".getBytes()), new Digest.Sha256(digest))
@@ -100,30 +96,29 @@ final class AstoBlobsITCase {
     @Test
     void writeAndReadBlob() throws Exception {
         final AstoBlobs blobs = new AstoBlobs(
-            new InMemoryStorage(), new Layout()
+            new InMemoryStorage()
         );
         final byte[] bytes = {0x05, 0x06, 0x07, 0x08};
         final Digest digest = blobs.put(new TrustedBlobSource(bytes))
             .toCompletableFuture().get().digest();
         final byte[] read = Flowable.fromPublisher(
-            blobs.blob(digest)
-                .toCompletableFuture().get()
+            blobs.blob(digest).get()
                 .get().content()
                 .toCompletableFuture().get()
-        ).toList().blockingGet().get(0).array();
+        ).toList().blockingGet().getFirst().array();
         MatcherAssert.assertThat(read, Matchers.equalTo(bytes));
     }
 
     @Test
     void readAbsentBlob() throws Exception {
         final AstoBlobs blobs = new AstoBlobs(
-            new InMemoryStorage(), new Layout()
+            new InMemoryStorage()
         );
         final Digest digest = new Digest.Sha256(
             "0123456789012345678901234567890123456789012345678901234567890123"
         );
         MatcherAssert.assertThat(
-            blobs.blob(digest).toCompletableFuture().get().isPresent(),
+            blobs.blob(digest).get().isPresent(),
             new IsEqual<>(false)
         );
     }

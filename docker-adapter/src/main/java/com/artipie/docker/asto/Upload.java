@@ -33,11 +33,6 @@ public final class Upload {
     private final Storage storage;
 
     /**
-     * Uploads layout.
-     */
-    private final Layout layout;
-
-    /**
      * Repository name.
      */
     private final RepoName name;
@@ -49,15 +44,11 @@ public final class Upload {
 
     /**
      * @param storage Storage.
-     * @param layout Uploads layout.
      * @param name Repository name.
      * @param uuid Upload UUID.
      */
-    public Upload(
-        Storage storage, Layout layout, RepoName name, String uuid
-    ) {
+    public Upload(Storage storage, RepoName name, String uuid) {
         this.storage = storage;
-        this.layout = layout;
         this.name = name;
         this.uuid = uuid;
     }
@@ -199,7 +190,7 @@ public final class Upload {
      * @return Root key.
      */
     Key root() {
-        return this.layout.upload(this.name, this.uuid);
+        return Layout.upload(this.name, this.uuid);
     }
 
     /**
