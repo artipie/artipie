@@ -10,14 +10,14 @@ import com.artipie.asto.Meta;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Digest;
-import com.artipie.docker.RepoName;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.IsEqual;
+import org.junit.jupiter.api.Test;
+
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link AstoBlobs}.
@@ -34,7 +34,7 @@ final class AstoBlobsTest {
         );
         final FakeStorage storage = new FakeStorage();
         final AstoBlobs blobs = new AstoBlobs(
-            storage, new DefaultLayout(), new RepoName.Simple("any")
+            storage, new DefaultLayout()
         );
         blobs.put(new TrustedBlobSource(new Content.From(bytes), digest))
             .toCompletableFuture().join();

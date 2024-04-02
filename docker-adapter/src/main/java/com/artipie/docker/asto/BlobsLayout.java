@@ -6,7 +6,6 @@ package com.artipie.docker.asto;
 
 import com.artipie.asto.Key;
 import com.artipie.docker.Digest;
-import com.artipie.docker.RepoName;
 
 /**
  * Blobs layout in storage. Used to evaluate location for blobs in storage.
@@ -18,9 +17,8 @@ public interface BlobsLayout {
     /**
      * Get blob key by it's digest.
      *
-     * @param repo Repository name.
      * @param digest Blob digest.
      * @return Key for storing blob.
      */
-    Key blob(RepoName repo, Digest digest);
+    Key blob(Digest digest);
 }

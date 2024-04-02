@@ -68,6 +68,6 @@ public final class AstoRepo implements Repo {
      * @return Blobs storage.
      */
     private AstoBlobs blobs() {
-        return new AstoBlobs(this.asto, this.layout, this.name);
+        return new AstoBlobs(this.asto, this.layout);
     }
 }

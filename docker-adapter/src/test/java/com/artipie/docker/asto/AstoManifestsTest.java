@@ -49,7 +49,7 @@ final class AstoManifestsTest {
         final Storage storage = new ExampleStorage();
         final Layout layout = new DefaultLayout();
         final RepoName name = new RepoName.Simple("my-alpine");
-        this.blobs = new AstoBlobs(storage, layout, name);
+        this.blobs = new AstoBlobs(storage, layout);
         this.manifests = new AstoManifests(storage, this.blobs, layout, name);
     }
 
