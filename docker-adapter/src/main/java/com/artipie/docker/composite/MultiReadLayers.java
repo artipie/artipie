@@ -11,12 +11,9 @@ import com.artipie.docker.asto.BlobSource;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Multi-read {@link Layers} implementation.
- *
- * @since 0.3
  */
 public final class MultiReadLayers implements Layers {
 
@@ -26,8 +23,6 @@ public final class MultiReadLayers implements Layers {
     private final List<Layers> layers;
 
     /**
-     * Ctor.
-     *
      * @param layers Layers for reading.
      */
     public MultiReadLayers(final List<Layers> layers) {
@@ -35,17 +30,17 @@ public final class MultiReadLayers implements Layers {
     }
 
     @Override
-    public CompletionStage<Blob> put(final BlobSource source) {
+    public CompletableFuture<Blob> put(final BlobSource source) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Blob> mount(final Blob blob) {
+    public CompletableFuture<Blob> mount(final Blob blob) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Blob>> get(final Digest digest) {
+    public CompletableFuture<Optional<Blob>> get(final Digest digest) {
         final CompletableFuture<Optional<Blob>> promise = new CompletableFuture<>();
         CompletableFuture.allOf(
             this.layers.stream()

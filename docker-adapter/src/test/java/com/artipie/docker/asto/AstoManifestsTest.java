@@ -37,7 +37,7 @@ final class AstoManifestsTest {
     /**
      * Blobs used in tests.
      */
-    private AstoBlobs blobs;
+    private Blobs blobs;
 
     /**
      * Repository manifests being tested.
@@ -48,7 +48,7 @@ final class AstoManifestsTest {
     void setUp() {
         final Storage storage = new ExampleStorage();
         final RepoName name = new RepoName.Simple("my-alpine");
-        this.blobs = new AstoBlobs(storage);
+        this.blobs = new Blobs(storage);
         this.manifests = new AstoManifests(storage, this.blobs, name);
     }
 

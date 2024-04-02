@@ -13,7 +13,7 @@ import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Manifests implementation that fails to get manifest.
@@ -21,17 +21,17 @@ import java.util.concurrent.CompletionStage;
 public final class FaultyGetManifests implements Manifests {
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return new FailedCompletionStage<>(new IllegalStateException());
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
         throw new UnsupportedOperationException();
     }
 }

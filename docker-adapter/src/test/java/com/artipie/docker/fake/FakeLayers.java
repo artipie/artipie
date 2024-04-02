@@ -9,7 +9,7 @@ import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
 import com.artipie.docker.asto.BlobSource;
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Auxiliary class for tests for {@link com.artipie.docker.cache.CacheLayers}.
@@ -32,17 +32,17 @@ public final class FakeLayers implements Layers {
     }
 
     @Override
-    public CompletionStage<Blob> put(final BlobSource source) {
+    public CompletableFuture<Blob> put(final BlobSource source) {
         return this.layers.put(source);
     }
 
     @Override
-    public CompletionStage<Blob> mount(final Blob blob) {
+    public CompletableFuture<Blob> mount(final Blob blob) {
         return this.layers.mount(blob);
     }
 
     @Override
-    public CompletionStage<Optional<Blob>> get(final Digest digest) {
+    public CompletableFuture<Optional<Blob>> get(final Digest digest) {
         return this.layers.get(digest);
     }
 

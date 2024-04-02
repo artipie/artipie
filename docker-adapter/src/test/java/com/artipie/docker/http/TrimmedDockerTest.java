@@ -25,7 +25,7 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Test for {@link TrimmedDocker}.
@@ -42,7 +42,7 @@ class TrimmedDockerTest {
         }
 
         @Override
-        public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+        public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
             throw new UnsupportedOperationException();
         }
     };

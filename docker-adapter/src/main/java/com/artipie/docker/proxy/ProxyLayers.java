@@ -50,22 +50,22 @@ public final class ProxyLayers implements Layers {
     }
 
     @Override
-    public CompletionStage<Blob> put(final BlobSource source) {
+    public CompletableFuture<Blob> put(final BlobSource source) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Blob> mount(final Blob blob) {
+    public CompletableFuture<Blob> mount(final Blob blob) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Blob>> get(final Digest digest) {
+    public CompletableFuture<Optional<Blob>> get(final Digest digest) {
         String blobPath = String.format("/v2/%s/blobs/%s", this.name.value(), digest.string());
         return new ResponseSink<>(
             this.remote.response(new RequestLine(RqMethod.HEAD, blobPath), Headers.EMPTY, Content.EMPTY),
             response -> {
-                final CompletionStage<Optional<Blob>> result;
+                final CompletableFuture<Optional<Blob>> result;
                 if (response.status() == RsStatus.OK) {
                     result = CompletableFuture.completedFuture(
                         Optional.of(

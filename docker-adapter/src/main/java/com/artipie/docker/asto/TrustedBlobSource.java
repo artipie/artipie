@@ -54,7 +54,7 @@ public final class TrustedBlobSource implements BlobSource {
     }
 
     @Override
-    public CompletionStage<Void> saveTo(final Storage storage, final Key key) {
+    public CompletableFuture<Void> saveTo(final Storage storage, final Key key) {
         return storage.exists(key).thenCompose(
             exists -> {
                 final CompletionStage<Void> result;

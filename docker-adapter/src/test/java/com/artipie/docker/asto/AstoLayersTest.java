@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Tests for {@link AstoLayers}.
@@ -28,7 +27,7 @@ final class AstoLayersTest {
     /**
      * Blobs storage.
      */
-    private AstoBlobs blobs;
+    private Blobs blobs;
 
     /**
      * Layers tested.
@@ -37,7 +36,7 @@ final class AstoLayersTest {
 
     @BeforeEach
     void setUp() {
-        this.blobs = new AstoBlobs(new InMemoryStorage());
+        this.blobs = new Blobs(new InMemoryStorage());
         this.layers = new AstoLayers(this.blobs);
     }
 
@@ -84,12 +83,12 @@ final class AstoLayersTest {
                 }
 
                 @Override
-                public CompletionStage<Long> size() {
+                public CompletableFuture<Long> size() {
                     return CompletableFuture.completedFuture((long) data.length);
                 }
 
                 @Override
-                public CompletionStage<Content> content() {
+                public CompletableFuture<Content> content() {
                     return CompletableFuture.completedFuture(new Content.From(data));
                 }
             }

@@ -9,7 +9,7 @@ import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Read-write {@link Docker} implementation.
@@ -49,7 +49,7 @@ public final class ReadWriteDocker implements Docker {
     }
 
     @Override
-    public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+    public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
         return this.read.catalog(from, limit);
     }
 }

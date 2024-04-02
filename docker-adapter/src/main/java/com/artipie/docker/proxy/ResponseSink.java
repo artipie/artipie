@@ -7,7 +7,6 @@ package com.artipie.docker.proxy;
 import com.artipie.http.Response;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Sink that accepts response data (status, headers and body) and transforms it into result object.
@@ -41,7 +40,7 @@ final class ResponseSink<T> {
      *
      * @return Result object.
      */
-    public CompletionStage<T> result() {
+    public CompletableFuture<T> result() {
         return fut.thenCompose(this.transform::transform);
     }
 
@@ -57,6 +56,6 @@ final class ResponseSink<T> {
          *
          * @param response Response.
          */
-        CompletionStage<T> transform(Response response);
+        CompletableFuture<T> transform(Response response);
     }
 }

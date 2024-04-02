@@ -33,13 +33,13 @@ public final class Uploads {
         this.name = name;
     }
 
-    public CompletionStage<Upload> start() {
+    public CompletableFuture<Upload> start() {
         final String uuid = UUID.randomUUID().toString();
         final Upload upload = new Upload(this.storage, this.name, uuid);
         return upload.start().thenApply(ignored -> upload);
     }
 
-    public CompletionStage<Optional<Upload>> get(final String uuid) {
+    public CompletableFuture<Optional<Upload>> get(final String uuid) {
         final CompletableFuture<Optional<Upload>> result;
         if (uuid.isEmpty()) {
             result = CompletableFuture.completedFuture(Optional.empty());

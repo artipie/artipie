@@ -13,7 +13,7 @@ import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Asto {@link Docker} implementation.
@@ -26,25 +26,10 @@ public final class AstoDocker implements Docker {
     private final Storage storage;
 
     /**
-     * Storage layout.
-     */
-    private final Layout layout;
-
-    /**
-     * Ctor.
-     * @param storage Asto storage
-     */
-    public AstoDocker(final Storage storage) {
-        this(storage, new Layout());
-    }
-
-    /**
      * @param storage Storage.
-     * @param layout Storage layout.
      */
-    public AstoDocker(Storage storage, Layout layout) {
+    public AstoDocker(Storage storage) {
         this.storage = storage;
-        this.layout = layout;
     }
 
     @Override
@@ -53,7 +38,7 @@ public final class AstoDocker implements Docker {
     }
 
     @Override
-    public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+    public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
         final Key root = Layout.repositories();
         return this.storage.list(root).thenApply(keys -> new AstoCatalog(root, keys, from, limit));
     }

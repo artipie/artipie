@@ -39,7 +39,7 @@ public final class AstoManifests implements Manifests {
     /**
      * Blobs storage.
      */
-    private final BlobStore blobs;
+    private final Blobs blobs;
 
     /**
      * Repository name.
@@ -51,14 +51,14 @@ public final class AstoManifests implements Manifests {
      * @param blobs Blobs storage.
      * @param name Repository name
      */
-    public AstoManifests(Storage asto, BlobStore blobs, RepoName name) {
+    public AstoManifests(Storage asto, Blobs blobs, RepoName name) {
         this.storage = asto;
         this.blobs = blobs;
         this.name = name;
     }
 
     @Override
-    public CompletionStage<Manifest> put(ManifestReference ref, Content content) {
+    public CompletableFuture<Manifest> put(ManifestReference ref, Content content) {
         return content.asBytesFuture()
             .thenCompose(bytes -> this.blobs.put(new TrustedBlobSource(bytes))
                 .thenApply(blob -> new JsonManifest(blob.digest(), bytes))
@@ -71,7 +71,7 @@ public final class AstoManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return this.readLink(ref).thenCompose(
             digestOpt -> digestOpt.map(
                 digest -> this.blobs.blob(digest)
@@ -91,7 +91,7 @@ public final class AstoManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
         final Key root = Layout.tags(this.name);
         return this.storage.list(root).thenApply(
             keys -> new AstoTags(this.name, root, keys, from, limit)

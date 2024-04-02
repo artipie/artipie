@@ -11,7 +11,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.CatalogPage;
 import com.artipie.docker.misc.ParsedCatalog;
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -48,7 +48,7 @@ public final class TrimmedDocker implements Docker {
     }
 
     @Override
-    public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+    public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
         return this.origin.catalog(from.map(this::trim), limit).thenCompose(
             catalog -> new ParsedCatalog(catalog).repos()
         ).thenApply(

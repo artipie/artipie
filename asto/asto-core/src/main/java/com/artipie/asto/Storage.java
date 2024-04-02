@@ -18,10 +18,7 @@ import java.util.function.Function;
  * to abstract the binary storage. You may use {@link FileStorage} if you
  * want to work with files. Otherwise, for S3 or something else, you have
  * to implement it yourself.
- *
- * @since 0.1
  */
-@SuppressWarnings("PMD.TooManyMethods")
 public interface Storage {
 
     /**
@@ -155,8 +152,6 @@ public interface Storage {
         private final Storage delegate;
 
         /**
-         * Ctor.
-         *
          * @param delegate Delegate storage
          */
         protected Wrap(final Storage delegate) {

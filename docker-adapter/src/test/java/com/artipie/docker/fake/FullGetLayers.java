@@ -13,7 +13,6 @@ import com.artipie.docker.asto.AstoBlob;
 import com.artipie.docker.asto.BlobSource;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Layers implementation that contains blob.
@@ -23,17 +22,17 @@ import java.util.concurrent.CompletionStage;
 public final class FullGetLayers implements Layers {
 
     @Override
-    public CompletionStage<Blob> put(final BlobSource source) {
+    public CompletableFuture<Blob> put(final BlobSource source) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Blob> mount(final Blob blob) {
+    public CompletableFuture<Blob> mount(final Blob blob) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Blob>> get(final Digest digest) {
+    public CompletableFuture<Optional<Blob>> get(final Digest digest) {
         return CompletableFuture.completedFuture(
             Optional.of(new AstoBlob(new InMemoryStorage(), new Key.From("test"), digest))
         );

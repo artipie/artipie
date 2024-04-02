@@ -13,7 +13,6 @@ import com.artipie.docker.manifest.Manifest;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -50,17 +49,17 @@ public final class FullTagsManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content ignored) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content ignored) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> pfrom, final int plimit) {
+    public CompletableFuture<Tags> tags(final Optional<Tag> pfrom, final int plimit) {
         this.from.set(pfrom);
         this.limit.set(plimit);
         return CompletableFuture.completedFuture(this.tgs);

@@ -17,7 +17,6 @@ import com.artipie.http.RsStatus;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Proxy {@link Docker} implementation.
@@ -44,7 +43,7 @@ public final class ProxyDocker implements Docker {
     }
 
     @Override
-    public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+    public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
         return new ResponseSink<>(
             this.remote.response(
                 new RequestLine(RqMethod.GET, new CatalogUri(from, limit).string()),

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Tests for {@link ReadWriteManifests}.
@@ -97,18 +96,18 @@ final class ReadWriteManifestsTest {
         private volatile ManifestReference refcheck;
 
         @Override
-        public CompletionStage<Manifest> put(ManifestReference ref, Content content) {
+        public CompletableFuture<Manifest> put(ManifestReference ref, Content content) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public CompletionStage<Optional<Manifest>> get(ManifestReference ref) {
+        public CompletableFuture<Optional<Manifest>> get(ManifestReference ref) {
             this.refcheck = ref;
             return CompletableFuture.completedFuture(Optional.empty());
         }
 
         @Override
-        public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+        public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
             throw new UnsupportedOperationException();
         }
 
@@ -135,19 +134,19 @@ final class ReadWriteManifestsTest {
         private volatile Content contentcheck;
 
         @Override
-        public CompletionStage<Manifest> put(ManifestReference ref, Content content) {
+        public CompletableFuture<Manifest> put(ManifestReference ref, Content content) {
             this.refcheck = ref;
             this.contentcheck = content;
             return CompletableFuture.completedFuture(null);
         }
 
         @Override
-        public CompletionStage<Optional<Manifest>> get(ManifestReference ref) {
+        public CompletableFuture<Optional<Manifest>> get(ManifestReference ref) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+        public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
             throw new UnsupportedOperationException();
         }
 

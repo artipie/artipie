@@ -5,7 +5,8 @@
 package com.artipie.docker;
 
 import com.artipie.asto.Content;
-import java.util.concurrent.CompletionStage;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Blob stored in repository.
@@ -26,12 +27,12 @@ public interface Blob {
      *
      * @return Size of blob in bytes.
      */
-    CompletionStage<Long> size();
+    CompletableFuture<Long> size();
 
     /**
      * Read blob content.
      *
      * @return Content.
      */
-    CompletionStage<Content> content();
+    CompletableFuture<Content> content();
 }

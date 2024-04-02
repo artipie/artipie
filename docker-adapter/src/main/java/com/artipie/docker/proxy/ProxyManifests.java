@@ -75,12 +75,12 @@ public final class ProxyManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return new ResponseSink<>(
             this.remote.response(
                 new RequestLine(RqMethod.GET, new ManifestPath(this.name, ref).string()),
@@ -88,7 +88,7 @@ public final class ProxyManifests implements Manifests {
                 Content.EMPTY
             ),
             response -> {
-                final CompletionStage<Optional<Manifest>> result;
+                final CompletableFuture<Optional<Manifest>> result;
                 if (response.status() == RsStatus.OK) {
                     final Digest digest = new DigestHeader(response.headers()).value();
                     result = response.body().asBytesFuture().thenApply(
@@ -105,7 +105,7 @@ public final class ProxyManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
         String fromStr = from.map(Tag::value).orElse(null);
         return new ResponseSink<>(
             this.remote.response(
@@ -116,7 +116,7 @@ public final class ProxyManifests implements Manifests {
                 Content.EMPTY
             ),
             response -> {
-                final CompletionStage<Tags> result;
+                final CompletableFuture<Tags> result;
                 if (response.status() == RsStatus.OK) {
                     result = CompletableFuture.completedFuture(response::body);
                 } else {
@@ -134,9 +134,9 @@ public final class ProxyManifests implements Manifests {
      * @param <T> Completion stage result type.
      * @return Failed completion stage.
      */
-    private static <T> CompletionStage<T> unexpected(final RsStatus status) {
-        return new FailedCompletionStage<>(
-            new IllegalArgumentException(String.format("Unexpected status: %s", status))
+    private static <T> CompletableFuture<T> unexpected(RsStatus status) {
+        return CompletableFuture.failedFuture(
+            new IllegalArgumentException("Unexpected status: " + status)
         );
     }
 }

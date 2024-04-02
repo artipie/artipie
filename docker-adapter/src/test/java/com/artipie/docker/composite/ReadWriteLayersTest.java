@@ -12,7 +12,7 @@ import com.artipie.docker.asto.BlobSource;
 import com.artipie.docker.asto.TrustedBlobSource;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
+
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -80,17 +80,17 @@ final class ReadWriteLayersTest {
         private volatile Digest digestcheck;
 
         @Override
-        public CompletionStage<Blob> put(final BlobSource source) {
+        public CompletableFuture<Blob> put(final BlobSource source) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public CompletionStage<Blob> mount(final Blob blob) {
+        public CompletableFuture<Blob> mount(final Blob blob) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public CompletionStage<Optional<Blob>> get(final Digest digest) {
+        public CompletableFuture<Optional<Blob>> get(final Digest digest) {
             this.digestcheck = digest;
             return CompletableFuture.completedFuture(Optional.empty());
         }
@@ -110,26 +110,26 @@ final class ReadWriteLayersTest {
         /**
          * Captured source.
          */
-        private volatile BlobSource csource;
+        private volatile BlobSource source;
 
         @Override
-        public CompletionStage<Blob> put(final BlobSource source) {
-            this.csource = source;
+        public CompletableFuture<Blob> put(final BlobSource source) {
+            this.source = source;
             return CompletableFuture.completedFuture(null);
         }
 
         @Override
-        public CompletionStage<Blob> mount(final Blob blob) {
+        public CompletableFuture<Blob> mount(final Blob blob) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public CompletionStage<Optional<Blob>> get(final Digest digest) {
+        public CompletableFuture<Optional<Blob>> get(final Digest digest) {
             throw new UnsupportedOperationException();
         }
 
         public BlobSource source() {
-            return this.csource;
+            return this.source;
         }
     }
 
@@ -156,18 +156,18 @@ final class ReadWriteLayersTest {
         }
 
         @Override
-        public CompletionStage<Blob> put(final BlobSource source) {
+        public CompletableFuture<Blob> put(final BlobSource source) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public CompletionStage<Blob> mount(final Blob pblob) {
+        public CompletableFuture<Blob> mount(final Blob pblob) {
             this.cblob = pblob;
             return CompletableFuture.completedFuture(this.rblob);
         }
 
         @Override
-        public CompletionStage<Optional<Blob>> get(final Digest digest) {
+        public CompletableFuture<Optional<Blob>> get(final Digest digest) {
             throw new UnsupportedOperationException();
         }
 
@@ -189,12 +189,12 @@ final class ReadWriteLayersTest {
         }
 
         @Override
-        public CompletionStage<Long> size() {
+        public CompletableFuture<Long> size() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public CompletionStage<Content> content() {
+        public CompletableFuture<Content> content() {
             throw new UnsupportedOperationException();
         }
     }

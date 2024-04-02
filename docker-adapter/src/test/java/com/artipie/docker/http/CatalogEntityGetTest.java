@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -106,7 +105,7 @@ class CatalogEntityGetTest {
         }
 
         @Override
-        public CompletionStage<Catalog> catalog(final Optional<RepoName> pfrom, final int plimit) {
+        public CompletableFuture<Catalog> catalog(final Optional<RepoName> pfrom, final int plimit) {
             this.from.set(pfrom);
             this.limit.set(plimit);
             return CompletableFuture.completedFuture(this.ctlg);
