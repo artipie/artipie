@@ -16,14 +16,13 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Asto {@link Docker} implementation.
- * @since 0.1
  */
 public final class AstoDocker implements Docker {
 
     /**
      * Asto storage.
      */
-    private final Storage asto;
+    private final Storage storage;
 
     /**
      * Storage layout.
@@ -32,31 +31,29 @@ public final class AstoDocker implements Docker {
 
     /**
      * Ctor.
-     * @param asto Asto storage
+     * @param storage Asto storage
      */
-    public AstoDocker(final Storage asto) {
-        this(asto, new DefaultLayout());
+    public AstoDocker(final Storage storage) {
+        this(storage, new Layout());
     }
 
     /**
-     * Ctor.
-     *
-     * @param asto Storage.
+     * @param storage Storage.
      * @param layout Storage layout.
      */
-    public AstoDocker(final Storage asto, final Layout layout) {
-        this.asto = asto;
+    public AstoDocker(Storage storage, Layout layout) {
+        this.storage = storage;
         this.layout = layout;
     }
 
     @Override
     public Repo repo(final RepoName name) {
-        return new AstoRepo(this.asto, this.layout, name);
+        return new AstoRepo(this.storage, this.layout, name);
     }
 
     @Override
     public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
         final Key root = this.layout.repositories();
-        return this.asto.list(root).thenApply(keys -> new AstoCatalog(root, keys, from, limit));
+        return this.storage.list(root).thenApply(keys -> new AstoCatalog(root, keys, from, limit));
     }
 }

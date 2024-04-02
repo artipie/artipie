@@ -12,7 +12,7 @@ import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
-import com.artipie.docker.Uploads;
+import com.artipie.docker.asto.Uploads;
 import com.artipie.docker.fake.FullTagsManifests;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;

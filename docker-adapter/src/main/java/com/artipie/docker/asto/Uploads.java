@@ -4,10 +4,10 @@
  */
 package com.artipie.docker.asto;
 
+import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.Upload;
-import com.artipie.docker.Uploads;
+
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -15,20 +15,24 @@ import java.util.concurrent.CompletionStage;
 
 /**
  * Asto implementation of {@link Uploads}.
- *
- * @since 0.3
  */
-public final class AstoUploads implements Uploads {
+public final class Uploads {
+
+    public static Key uploadKey(RepoName name, String uuid) {
+        return new Key.From(
+            "repositories", name.value(), "_uploads", uuid
+        );
+    }
 
     /**
      * Asto storage.
      */
-    private final Storage asto;
+    private final Storage storage;
 
     /**
      * Uploads layout.
      */
-    private final UploadsLayout layout;
+    private final Layout layout;
 
     /**
      * Repository name.
@@ -38,37 +42,35 @@ public final class AstoUploads implements Uploads {
     /**
      * Ctor.
      *
-     * @param asto Asto storage
+     * @param storage Asto storage
      * @param layout Uploads layout.
      * @param name Repository name
      */
-    public AstoUploads(final Storage asto, final UploadsLayout layout, final RepoName name) {
-        this.asto = asto;
+    public Uploads(final Storage storage, final Layout layout, final RepoName name) {
+        this.storage = storage;
         this.layout = layout;
         this.name = name;
     }
 
-    @Override
     public CompletionStage<Upload> start() {
         final String uuid = UUID.randomUUID().toString();
-        final AstoUpload upload = new AstoUpload(this.asto, this.layout, this.name, uuid);
+        final Upload upload = new Upload(this.storage, this.layout, this.name, uuid);
         return upload.start().thenApply(ignored -> upload);
     }
 
-    @Override
     public CompletionStage<Optional<Upload>> get(final String uuid) {
         final CompletableFuture<Optional<Upload>> result;
         if (uuid.isEmpty()) {
             result = CompletableFuture.completedFuture(Optional.empty());
         } else {
-            result = this.asto.list(this.layout.upload(this.name, uuid)).thenApply(
+            result = this.storage.list(this.layout.upload(this.name, uuid)).thenApply(
                 list -> {
                     final Optional<Upload> upload;
                     if (list.isEmpty()) {
                         upload = Optional.empty();
                     } else {
                         upload = Optional.of(
-                            new AstoUpload(this.asto, this.layout, this.name, uuid)
+                            new Upload(this.storage, this.layout, this.name, uuid)
                         );
                     }
                     return upload;

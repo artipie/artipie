@@ -7,7 +7,7 @@ package com.artipie.docker.composite;
 import com.artipie.docker.Layers;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
-import com.artipie.docker.Uploads;
+import com.artipie.docker.asto.Uploads;
 
 /**
  * Read-write {@link Repo} implementation.

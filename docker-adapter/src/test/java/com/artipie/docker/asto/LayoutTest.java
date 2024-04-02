@@ -10,16 +10,16 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test case for {@link DefaultLayout}.
+ * Test case for {@link Layout}.
  *
  * @since 0.8
  */
-public final class DefaultLayoutTest {
+public final class LayoutTest {
 
     @Test
     public void buildsRepositories() {
         MatcherAssert.assertThat(
-            new DefaultLayout().repositories().string(),
+            new Layout().repositories().string(),
             new IsEqual<>("repositories")
         );
     }
@@ -27,7 +27,7 @@ public final class DefaultLayoutTest {
     @Test
     public void buildsTags() {
         MatcherAssert.assertThat(
-            new DefaultLayout().tags(new RepoName.Simple("my-alpine")).string(),
+            new Layout().tags(new RepoName.Simple("my-alpine")).string(),
             new IsEqual<>("repositories/my-alpine/_manifests/tags")
         );
     }

@@ -9,10 +9,9 @@ import com.artipie.docker.Layers;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.Uploads;
 import com.artipie.docker.asto.AstoRepo;
-import com.artipie.docker.asto.AstoUploads;
-import com.artipie.docker.asto.DefaultLayout;
+import com.artipie.docker.asto.Uploads;
+import com.artipie.docker.asto.Layout;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
@@ -43,9 +42,9 @@ final class ReadWriteRepoTest {
 
     @Test
     void createsWriteUploads() {
-        final Uploads uploads = new AstoUploads(
+        final Uploads uploads = new Uploads(
             new InMemoryStorage(),
-            new DefaultLayout(),
+            new Layout(),
             new RepoName.Simple("test")
         );
         MatcherAssert.assertThat(
@@ -75,7 +74,7 @@ final class ReadWriteRepoTest {
     private static Repo repo() {
         return new AstoRepo(
             new InMemoryStorage(),
-            new DefaultLayout(),
+            new Layout(),
             new RepoName.Simple("test-repo")
         );
     }

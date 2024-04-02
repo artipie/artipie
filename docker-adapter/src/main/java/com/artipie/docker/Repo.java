@@ -5,6 +5,8 @@
 
 package com.artipie.docker;
 
+import com.artipie.docker.asto.Uploads;
+
 /**
  * Docker repository files and metadata.
  * @since 0.1

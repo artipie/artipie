@@ -13,7 +13,6 @@ import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
 import com.artipie.docker.RepoName;
-import com.artipie.docker.Upload;
 import io.reactivex.Flowable;
 import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;
@@ -40,14 +39,14 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Tests for {@link AstoUpload}.
+ * Tests for {@link Upload}.
  */
-class AstoUploadTest {
+class UploadTest {
 
     /**
      * Slice being tested.
      */
-    private AstoUpload upload;
+    private Upload upload;
 
     /**
      * Storage.
@@ -57,9 +56,9 @@ class AstoUploadTest {
     @BeforeEach
     void setUp() {
         this.storage = new InMemoryStorage();
-        this.upload = new AstoUpload(
+        this.upload = new Upload(
             this.storage,
-            new DefaultLayout(),
+            new Layout(),
             new RepoName.Valid("test"),
             UUID.randomUUID().toString()
         );
@@ -198,8 +197,8 @@ class AstoUploadTest {
         @Override
         public CompletionStage<Blob> put(final BlobSource source) {
             final Key key = new Key.From(UUID.randomUUID().toString());
-            source.saveTo(AstoUploadTest.this.storage, key).toCompletableFuture().join();
-            this.content = AstoUploadTest.this.storage.value(key)
+            source.saveTo(UploadTest.this.storage, key).toCompletableFuture().join();
+            this.content = UploadTest.this.storage.value(key)
                 .thenCompose(Content::asBytesFuture).join();
             return CompletableFuture.completedFuture(null);
         }

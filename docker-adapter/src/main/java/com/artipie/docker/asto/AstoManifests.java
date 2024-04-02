@@ -44,7 +44,7 @@ public final class AstoManifests implements Manifests {
     /**
      * Manifests layout.
      */
-    private final ManifestsLayout layout;
+    private final Layout layout;
 
     /**
      * Repository name.
@@ -60,7 +60,7 @@ public final class AstoManifests implements Manifests {
     public AstoManifests(
         final Storage asto,
         final BlobStore blobs,
-        final ManifestsLayout layout,
+        final Layout layout,
         final RepoName name
     ) {
         this.asto = asto;
