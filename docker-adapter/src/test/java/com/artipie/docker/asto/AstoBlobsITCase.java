@@ -10,11 +10,9 @@ import com.artipie.asto.SubStorage;
 import com.artipie.asto.blocking.BlockingStorage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Digest;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.error.InvalidDigestException;
 import com.google.common.base.Throwables;
 import io.reactivex.Flowable;
-import java.util.concurrent.CompletableFuture;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -23,6 +21,8 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Integration test for {@link AstoBlobs}.
@@ -34,8 +34,7 @@ final class AstoBlobsITCase {
         final InMemoryStorage storage = new InMemoryStorage();
         final AstoBlobs blobs = new AstoBlobs(
             new SubStorage(RegistryRoot.V2, storage),
-            new DefaultLayout(),
-            new RepoName.Simple("does not matter")
+            new DefaultLayout()
         );
         final byte[] bytes = new byte[]{0x00, 0x01, 0x02, 0x03};
         final Digest digest = blobs.put(new TrustedBlobSource(bytes))
@@ -63,7 +62,7 @@ final class AstoBlobsITCase {
     void failsOnDigestMismatch() {
         final InMemoryStorage storage = new InMemoryStorage();
         final AstoBlobs blobs = new AstoBlobs(
-            storage, new DefaultLayout(), new RepoName.Simple("any")
+            storage, new DefaultLayout()
         );
         final String digest = "123";
         blobs.put(
@@ -101,7 +100,7 @@ final class AstoBlobsITCase {
     @Test
     void writeAndReadBlob() throws Exception {
         final AstoBlobs blobs = new AstoBlobs(
-            new InMemoryStorage(), new DefaultLayout(), new RepoName.Simple("test")
+            new InMemoryStorage(), new DefaultLayout()
         );
         final byte[] bytes = {0x05, 0x06, 0x07, 0x08};
         final Digest digest = blobs.put(new TrustedBlobSource(bytes))
@@ -118,7 +117,7 @@ final class AstoBlobsITCase {
     @Test
     void readAbsentBlob() throws Exception {
         final AstoBlobs blobs = new AstoBlobs(
-            new InMemoryStorage(), new DefaultLayout(), new RepoName.Simple("whatever")
+            new InMemoryStorage(), new DefaultLayout()
         );
         final Digest digest = new Digest.Sha256(
             "0123456789012345678901234567890123456789012345678901234567890123"

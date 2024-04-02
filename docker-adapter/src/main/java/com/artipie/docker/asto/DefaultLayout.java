@@ -22,8 +22,10 @@ public final class DefaultLayout implements Layout {
     }
 
     @Override
-    public Key blob(final RepoName repo, final Digest digest) {
-        return new BlobKey(digest);
+    public Key blob(final Digest digest) {
+        return new Key.From(
+            "blobs", digest.alg(), digest.hex().substring(0, 2), digest.hex(), "data"
+        );
     }
 
     @Override
