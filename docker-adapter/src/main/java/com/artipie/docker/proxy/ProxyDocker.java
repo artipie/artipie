@@ -9,13 +9,13 @@ import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.http.Headers;
+import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -43,10 +43,10 @@ public final class ProxyDocker implements Docker {
     }
 
     @Override
-    public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+    public CompletableFuture<Catalog> catalog(Pagination pagination) {
         return new ResponseSink<>(
             this.remote.response(
-                new RequestLine(RqMethod.GET, new CatalogUri(from, limit).string()),
+                new RequestLine(RqMethod.GET, pagination.uriWithPagination("/v2/_catalog")),
                 Headers.EMPTY,
                 Content.EMPTY
             ),

@@ -14,6 +14,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.asto.Uploads;
 import com.artipie.docker.fake.FullTagsManifests;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
@@ -135,7 +136,7 @@ class TagsEntityGetTest {
         }
 
         @Override
-        public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+        public CompletableFuture<Catalog> catalog(Pagination pagination) {
             throw new UnsupportedOperationException();
         }
     }

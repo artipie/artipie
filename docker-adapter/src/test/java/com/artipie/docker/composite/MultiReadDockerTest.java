@@ -9,6 +9,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
@@ -20,7 +21,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,9 +54,9 @@ final class MultiReadDockerTest {
                 ).map(
                     json -> new FakeCatalogDocker(() -> new Content.From(json.getBytes()))
                 ).collect(Collectors.toList())
-            ).catalog(Optional.of(new RepoName.Simple("four")), limit).thenCompose(
-                catalog -> catalog.json().asStringFuture()
-            ).toCompletableFuture().join(),
+            ).catalog(Pagination.from("four", limit))
+                .thenCompose(catalog -> catalog.json().asStringFuture())
+                .join(),
             new StringIsJson.Object(
                 new JsonHas(
                     "repositories",

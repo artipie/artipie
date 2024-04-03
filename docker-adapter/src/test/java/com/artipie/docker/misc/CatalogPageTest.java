@@ -45,12 +45,11 @@ final class CatalogPageTest {
         ",2,1;2",
         "2,2,3;4"
     })
-    void shouldSupportPaging(final String from, final Integer limit, final String result) {
+    void shouldSupportPaging(String from, Integer limit, String result) {
         MatcherAssert.assertThat(
             new CatalogPage(
                 this.names,
-                Optional.ofNullable(from).map(RepoName.Simple::new),
-                Optional.ofNullable(limit).orElse(Integer.MAX_VALUE)
+                Pagination.from(from, limit)
             ).json().asJsonObject(),
             new JsonHas(
                 "repositories",

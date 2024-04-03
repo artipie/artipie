@@ -9,9 +9,10 @@ import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.JoinedCatalogSource;
+import com.artipie.docker.misc.Pagination;
+
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -60,7 +61,7 @@ public final class MultiReadDocker implements Docker {
     }
 
     @Override
-    public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
-        return new JoinedCatalogSource(this.dockers, from, limit).catalog();
+    public CompletableFuture<Catalog> catalog(Pagination pagination) {
+        return new JoinedCatalogSource(this.dockers, pagination).catalog();
     }
 }

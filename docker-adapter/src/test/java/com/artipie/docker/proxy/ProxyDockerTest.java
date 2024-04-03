@@ -7,6 +7,7 @@ package com.artipie.docker.proxy;
 import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.headers.Header;
 import org.hamcrest.MatcherAssert;
@@ -17,7 +18,6 @@ import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -55,7 +55,7 @@ final class ProxyDockerTest {
                     }
                 );
             }
-        ).catalog(Optional.of(new RepoName.Simple(name)), limit).toCompletableFuture().join();
+        ).catalog(Pagination.from(name, limit)).join();
         MatcherAssert.assertThat(
             "Sends expected line to remote",
             cline.get(),
@@ -79,9 +79,9 @@ final class ProxyDockerTest {
         MatcherAssert.assertThat(
             new ProxyDocker(
                 (line, headers, body) -> ResponseBuilder.ok().body(bytes).completedFuture()
-            ).catalog(Optional.empty(), Integer.MAX_VALUE).thenCompose(
+            ).catalog(Pagination.empty()).thenCompose(
                 catalog -> catalog.json().asBytesFuture()
-            ).toCompletableFuture().join(),
+            ).join(),
             new IsEqual<>(bytes)
         );
     }
@@ -90,7 +90,7 @@ final class ProxyDockerTest {
     void shouldFailReturnCatalogWhenRemoteRespondsWithNotOk() {
         final CompletionStage<Catalog> stage = new ProxyDocker(
             (line, headers, body) -> ResponseBuilder.notFound().completedFuture()
-        ).catalog(Optional.empty(), Integer.MAX_VALUE);
+        ).catalog(Pagination.empty());
         Assertions.assertThrows(
             Exception.class,
             () -> stage.toCompletableFuture().join()

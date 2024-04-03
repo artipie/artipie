@@ -5,18 +5,20 @@
 package com.artipie.docker.proxy;
 
 import com.artipie.docker.RepoName;
-import java.util.Optional;
+import com.artipie.docker.misc.Pagination;
+import com.google.common.base.Strings;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 /**
- * Tests for {@link CatalogUri}.
- *
- * @since 0.10
+ * Tests for {@link Pagination}.
  */
-class CatalogUriTest {
+class CatalogPaginationTest {
 
     @ParameterizedTest
     @CsvSource({
@@ -25,13 +27,14 @@ class CatalogUriTest {
         ",10,/v2/_catalog?n=10",
         "my-alpine,20,/v2/_catalog?n=20&last=my-alpine"
     })
-    void shouldBuildPathString(final String repo, final int limit, final String uri) {
+    void shouldBuildPathString(String repo, int limit, String uri) {
+        Pagination p = new Pagination(
+            Strings.isNullOrEmpty(repo) ? null : new RepoName.Simple(repo),
+            limit
+        );
         MatcherAssert.assertThat(
-            new CatalogUri(
-                Optional.ofNullable(repo).map(RepoName.Simple::new),
-                limit
-            ).string(),
-            new IsEqual<>(uri)
+            URLDecoder.decode(p.uriWithPagination("/v2/_catalog"), StandardCharsets.UTF_8),
+            Matchers.is(uri)
         );
     }
 }
