@@ -8,8 +8,6 @@ import com.artipie.asto.Content;
 
 /**
  * Docker repositories catalog.
- *
- * @since 0.8
  */
 public interface Catalog {
 

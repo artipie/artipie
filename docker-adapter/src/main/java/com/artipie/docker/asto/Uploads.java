@@ -10,10 +10,9 @@ import com.artipie.docker.RepoName;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
- * Asto implementation of {@link Uploads}.
+ * Docker repository files and metadata.
  */
 public final class Uploads {
 
@@ -33,31 +32,34 @@ public final class Uploads {
         this.name = name;
     }
 
+    /**
+     * Start new upload.
+     *
+     * @return Upload.
+     */
     public CompletableFuture<Upload> start() {
         final String uuid = UUID.randomUUID().toString();
         final Upload upload = new Upload(this.storage, this.name, uuid);
         return upload.start().thenApply(ignored -> upload);
     }
 
+    /**
+     * Find upload by UUID.
+     *
+     * @param uuid Upload UUID.
+     * @return Upload.
+     */
     public CompletableFuture<Optional<Upload>> get(final String uuid) {
-        final CompletableFuture<Optional<Upload>> result;
         if (uuid.isEmpty()) {
-            result = CompletableFuture.completedFuture(Optional.empty());
-        } else {
-            result = this.storage.list(Layout.upload(this.name, uuid)).thenApply(
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+        return this.storage.list(Layout.upload(this.name, uuid)).thenApply(
                 list -> {
-                    final Optional<Upload> upload;
                     if (list.isEmpty()) {
-                        upload = Optional.empty();
-                    } else {
-                        upload = Optional.of(
-                            new Upload(this.storage, this.name, uuid)
-                        );
+                        return Optional.empty();
                     }
-                    return upload;
+                    return Optional.of(new Upload(this.storage, this.name, uuid));
                 }
             );
-        }
-        return result;
     }
 }

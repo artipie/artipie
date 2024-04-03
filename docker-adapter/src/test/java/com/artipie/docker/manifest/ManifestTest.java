@@ -23,13 +23,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Tests for {@link JsonManifest}.
+ * Tests for {@link Manifest}.
  */
-class JsonManifestTest {
+class ManifestTest {
 
     @Test
     void shouldReadMediaType() {
-        final JsonManifest manifest = new JsonManifest(
+        final Manifest manifest = new Manifest(
             new Digest.Sha256("123"),
             "{\"mediaType\":\"something\"}".getBytes()
         );
@@ -38,7 +38,7 @@ class JsonManifestTest {
 
     @Test
     void shouldFailWhenMediaTypeIsAbsent() {
-        final JsonManifest manifest = new JsonManifest(
+        final Manifest manifest = new Manifest(
             new Digest.Sha256("123"),
             "{\"abc\":\"123\"}".getBytes()
         );
@@ -49,46 +49,9 @@ class JsonManifestTest {
     }
 
     @Test
-    void shouldConvertToSameType() {
-        final JsonManifest manifest = new JsonManifest(
-            new Digest.Sha256("123"),
-            "{\"mediaType\":\"type2\"}".getBytes()
-        );
-        MatcherAssert.assertThat(
-            manifest.convert(hashSet("type1", "type2")),
-            new IsEqual<>(manifest)
-        );
-    }
-
-    @Test
-    void shouldConvertToWildcardType() {
-        final JsonManifest manifest = new JsonManifest(
-            new Digest.Sha256("123"), "{\"mediaType\":\"my-type\"}".getBytes()
-        );
-        MatcherAssert.assertThat(
-            manifest.convert(hashSet("*/*")),
-            new IsEqual<>(manifest)
-        );
-    }
-
-    @Test
-    void shouldConvertForMultiType() {
-        final JsonManifest manifest = new JsonManifest(
-            new Digest.Sha256("qwe"),
-            "{\"mediaType\":\"application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json,application/vnd.docker.distribution.manifest.v1+json,application/vnd.docker.distribution.manifest.list.v2+json\"}".getBytes()
-        );
-        MatcherAssert.assertThat(
-            manifest.convert(
-                hashSet("application/vnd.docker.distribution.manifest.v2+json")
-            ),
-            new IsEqual<>(manifest)
-        );
-    }
-
-    @Test
     void shouldReadConfig() {
         final String digest = "sha256:def";
-        final JsonManifest manifest = new JsonManifest(
+        final Manifest manifest = new Manifest(
             new Digest.Sha256("123"),
             Json.createObjectBuilder().add(
                 "config",
@@ -104,7 +67,7 @@ class JsonManifestTest {
     @Test
     void shouldReadLayerDigests() {
         final String[] digests = {"sha256:123", "sha256:abc"};
-        final JsonManifest manifest = new JsonManifest(
+        final Manifest manifest = new Manifest(
             new Digest.Sha256("12345"),
             Json.createObjectBuilder().add(
                 "layers",
@@ -117,7 +80,7 @@ class JsonManifestTest {
         );
         MatcherAssert.assertThat(
             manifest.layers().stream()
-                .map(Layer::digest)
+                .map(ManifestLayer::digest)
                 .map(Digest::string)
                 .collect(Collectors.toList()),
             Matchers.containsInAnyOrder(digests)
@@ -127,7 +90,7 @@ class JsonManifestTest {
     @Test
     void shouldReadLayerUrls() throws Exception {
         final String url = "https://artipie.com/";
-        final JsonManifest manifest = new JsonManifest(
+        final Manifest manifest = new Manifest(
             new Digest.Sha256("123"),
             Json.createObjectBuilder().add(
                 "layers",
@@ -151,7 +114,7 @@ class JsonManifestTest {
 
     @Test
     void shouldFailWhenLayersAreAbsent() {
-        final JsonManifest manifest = new JsonManifest(
+        final Manifest manifest = new Manifest(
             new Digest.Sha256("123"),
             "{\"any\":\"value\"}".getBytes()
         );
@@ -164,7 +127,7 @@ class JsonManifestTest {
     @Test
     void shouldReadDigest() {
         final String digest = "sha256:123";
-        final JsonManifest manifest = new JsonManifest(
+        final Manifest manifest = new Manifest(
             new Digest.FromString(digest),
             "{ \"schemaVersion\": 2 }".getBytes()
         );
@@ -174,7 +137,7 @@ class JsonManifestTest {
     @Test
     void shouldReadContent() {
         final byte[] data = "{ \"schemaVersion\": 2 }".getBytes();
-        final JsonManifest manifest = new JsonManifest(
+        final Manifest manifest = new Manifest(
             new Digest.Sha256("123"),
             data
         );
