@@ -10,14 +10,14 @@ import com.artipie.docker.ManifestReference;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.error.ManifestError;
-import com.artipie.docker.manifest.Layer;
+import com.artipie.docker.manifest.ManifestLayer;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthzSlice;
 import com.artipie.http.auth.OperationControl;
@@ -198,7 +198,7 @@ final class ManifestEntity {
                                     ManifestEntity.REPO_TYPE, this.rname,
                                     new Login(headers).getValue(),
                                     name.value(), ref.reference(),
-                                    manifest.layers().stream().mapToLong(Layer::size).sum()
+                                    manifest.layers().stream().mapToLong(ManifestLayer::size).sum()
                                 )
                             );
                         }

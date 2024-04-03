@@ -10,7 +10,6 @@ import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
-import com.artipie.docker.manifest.JsonManifest;
 import com.artipie.docker.manifest.Manifest;
 
 import java.util.Optional;
@@ -60,7 +59,7 @@ public final class FullGetManifests implements Manifests {
     public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return CompletableFuture.completedFuture(
             Optional.of(
-                new JsonManifest(
+                new Manifest(
                     new Digest.Sha256(this.hex),
                     this.content.getBytes()
                 )

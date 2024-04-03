@@ -13,7 +13,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.asto.CheckedBlobSource;
-import com.artipie.docker.manifest.Layer;
+import com.artipie.docker.manifest.ManifestLayer;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.JoinedTagsSource;
 import com.artipie.scheduling.ArtifactEvent;
@@ -95,7 +95,7 @@ public final class CacheManifests implements Manifests {
                     if (original.isPresent()) {
                         Manifest manifest = original.get();
                         if (Manifest.MANIFEST_SCHEMA2.equals(manifest.mediaType()) ||
-                                Manifest.MANIFEST_OCI_V1.equals(manifest.mediaType())) {
+                            Manifest.MANIFEST_OCI_V1.equals(manifest.mediaType())) {
                             result = this.copy(ref).thenApply(unused -> original);
                         } else {
                             LOGGER.warn("Cannot add manifest to cache: [manifest={}, mediaType={}]",
@@ -146,7 +146,7 @@ public final class CacheManifests implements Manifests {
                             new ArtifactEvent(
                                 CacheManifests.REPO_TYPE, this.rname,
                                 ArtifactEvent.DEF_OWNER, this.name.value(), ref.reference(),
-                                manifest.layers().stream().mapToLong(Layer::size).sum()
+                                manifest.layers().stream().mapToLong(ManifestLayer::size).sum()
                             )
                         )
                     );

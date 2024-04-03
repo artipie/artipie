@@ -6,36 +6,63 @@ package com.artipie.docker.manifest;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
+import com.artipie.docker.error.InvalidManifestException;
+import com.google.common.base.Strings;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * An image manifest representation.
- * <p>See <a href="https://distribution.github.io/distribution/#image-manifest">Image manifest</a>
- * <p>See <a href="https://github.com/opencontainers/image-spec/tree/main">Open Container Initiative (OCI) Spec</a>
+ * Image manifest in JSON format.
  */
-public interface Manifest {
+public final class Manifest {
 
     /**
      * New image manifest format (schemaVersion = 2).
      */
-    String MANIFEST_SCHEMA2 = "application/vnd.docker.distribution.manifest.v2+json";
+    public static final String MANIFEST_SCHEMA2 = "application/vnd.docker.distribution.manifest.v2+json";
 
     /**
      * Image Manifest OCI Specification.
      */
-    String MANIFEST_OCI_V1 = "application/vnd.oci.image.manifest.v1+json";
+    public static final String MANIFEST_OCI_V1 = "application/vnd.oci.image.manifest.v1+json";
 
     /**
-     * Read manifest types.
-     *
-     * @return Type string.
+     * Manifest digest.
      */
-    @Deprecated
-    default Set<String> mediaTypes() {
-        return Collections.singleton(this.mediaType());
+    private final Digest manifestDigest;
+
+    /**
+     * JSON bytes.
+     */
+    private final byte[] source;
+
+    private final JsonObject json;
+
+    /**
+     * @param manifestDigest Manifest digest.
+     * @param source JSON bytes.
+     */
+    public Manifest(final Digest manifestDigest, final byte[] source) {
+        this.manifestDigest = manifestDigest;
+        this.source = Arrays.copyOf(source, source.length);
+        this.json = readJson(this.source);
+    }
+
+    private static JsonObject readJson(final byte[] data) {
+        try (JsonReader reader = Json.createReader(new ByteArrayInputStream(data))) {
+            return reader.readObject();
+        } catch (JsonException e){
+            throw new InvalidManifestException("JSON reading error", e);
+        }
     }
 
     /**
@@ -43,19 +70,12 @@ public interface Manifest {
      *
      * @return The MIME type.
      */
-    String mediaType();
-
-    /**
-     * Converts manifest to one of types.
-     *
-     * @param options Types the manifest may be converted to.
-     * @return Converted manifest.
-     * @Depricated There is no needing to convert manifests.
-     * Converting of manifests is the docker client's responsibility.
-     */
-    @Deprecated
-    default Manifest convert(final Set<? extends String> options) {
-        return this;
+    public String mediaType() {
+        String res = this.json.getString("mediaType", null);
+        if (Strings.isNullOrEmpty(res)) {
+            throw new InvalidManifestException("Required field `mediaType` is absent");
+        }
+        return res;
     }
 
     /**
@@ -63,33 +83,54 @@ public interface Manifest {
      *
      * @return Config digests.
      */
-    Digest config();
+    public Digest config() {
+        JsonObject config = this.json.getJsonObject("config");
+        if (config == null) {
+            throw new InvalidManifestException("Required field `config` is absent");
+        }
+        return new Digest.FromString(config.getString("digest"));
+    }
 
     /**
      * Read layer digests.
      *
      * @return Layer digests.
      */
-    Collection<Layer> layers();
+    public Collection<ManifestLayer> layers() {
+        JsonArray array = this.json.getJsonArray("layers");
+        if (array == null) {
+            throw new InvalidManifestException("Required field `layers` is absent");
+        }
+        return array.getValuesAs(JsonValue::asJsonObject)
+                .stream()
+                .map(ManifestLayer::new)
+                .collect(Collectors.toList());
+    }
 
     /**
      * Manifest digest.
      *
      * @return Digest.
      */
-    Digest digest();
+    public Digest digest() {
+        return this.manifestDigest;
+    }
 
     /**
      * Read manifest binary content.
      *
      * @return Manifest binary content.
      */
-    Content content();
+    public Content content() {
+        return new Content.From(this.source);
+    }
 
     /**
      * Manifest size.
      *
      * @return Size of the manifest.
      */
-    long size();
+    public long size() {
+        return this.source.length;
+    }
 }

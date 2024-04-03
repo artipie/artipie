@@ -14,8 +14,7 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.error.InvalidManifestException;
-import com.artipie.docker.manifest.JsonManifest;
-import com.artipie.docker.manifest.Layer;
+import com.artipie.docker.manifest.ManifestLayer;
 import com.artipie.docker.manifest.Manifest;
 import com.google.common.base.Strings;
 
@@ -61,7 +60,7 @@ public final class AstoManifests implements Manifests {
     public CompletableFuture<Manifest> put(ManifestReference ref, Content content) {
         return content.asBytesFuture()
             .thenCompose(bytes -> this.blobs.put(new TrustedBlobSource(bytes))
-                .thenApply(blob -> new JsonManifest(blob.digest(), bytes))
+                .thenApply(blob -> new Manifest(blob.digest(), bytes))
                 .thenCompose(
                     manifest -> this.validate(manifest)
                         .thenCompose(nothing -> this.addManifestLinks(ref, manifest.digest()))
@@ -80,8 +79,8 @@ public final class AstoManifests implements Manifests {
                             .map(
                                 blob -> blob.content()
                                     .thenCompose(Content::asBytesFuture)
-                                    .thenApply(bytes -> Optional.<Manifest>of(
-                                        new JsonManifest(blob.digest(), bytes))
+                                    .thenApply(bytes -> Optional.of(
+                                        new Manifest(blob.digest(), bytes))
                                     )
                             )
                             .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()))
@@ -111,7 +110,7 @@ public final class AstoManifests implements Manifests {
                 Stream.of(manifest.config()),
                 manifest.layers().stream()
                     .filter(layer -> layer.urls().isEmpty())
-                    .map(Layer::digest)
+                    .map(ManifestLayer::digest)
             );
         } catch (final JsonException ex) {
             throw new InvalidManifestException(

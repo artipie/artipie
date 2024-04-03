@@ -5,7 +5,6 @@
 package com.artipie.docker.proxy;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.FailedCompletionStage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
@@ -14,20 +13,18 @@ import com.artipie.docker.RepoName;
 import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.http.DigestHeader;
-import com.artipie.docker.manifest.JsonManifest;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.http.Headers;
+import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Proxy implementation of {@link Repo}.
@@ -92,7 +89,7 @@ public final class ProxyManifests implements Manifests {
                 if (response.status() == RsStatus.OK) {
                     final Digest digest = new DigestHeader(response.headers()).value();
                     result = response.body().asBytesFuture().thenApply(
-                        bytes -> Optional.of(new JsonManifest(digest, bytes))
+                        bytes -> Optional.of(new Manifest(digest, bytes))
                     );
                 } else if (response.status() == RsStatus.NOT_FOUND) {
                     result = CompletableFuture.completedFuture(Optional.empty());
