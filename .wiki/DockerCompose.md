@@ -3,7 +3,7 @@
 Make sure you have already installed both [Docker Engine](https://docs.docker.com/get-docker/) and
 [Docker Compose](https://docs.docker.com/compose/install/).
 Then, obtain `docker-compose.yaml` file from the repository:
-you can [open it from the browser](https://github.com/artipie/artipie/blob/master/docker-compose.yaml),
+you can [open it from the browser](https://github.com/artipie/artipie/blob/master/artipie-main/docker-compose.yaml),
 copy content and save it locally or use [git](https://git-scm.com/) and [clone](https://git-scm.com/docs/git-clone) the repository.
 Open command line, `cd` to the location with the compose file and run Artipie service:
 
