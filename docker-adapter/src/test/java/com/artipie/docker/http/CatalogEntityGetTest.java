@@ -9,20 +9,19 @@ import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.http.Headers;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -60,43 +59,32 @@ class CatalogEntityGetTest {
         ).join();
         MatcherAssert.assertThat(
             "Parses from",
-            docker.from.get().map(RepoName::value),
-            new IsEqual<>(Optional.of(from))
+            docker.paginationRef.get().last().value(),
+            Matchers.is(from)
         );
         MatcherAssert.assertThat(
             "Parses limit",
-            docker.limit.get(),
-            new IsEqual<>(limit)
+            docker.paginationRef.get().limit(),
+            Matchers.is(limit)
         );
     }
 
     /**
      * Docker implementation with specified catalog.
      * Values of parameters `from` and `limit` from last call of `catalog` method are captured.
-     *
-     * @since 0.8
      */
     private static class FakeDocker implements Docker {
 
-        /**
-         * Catalog.
-         */
-        private final Catalog ctlg;
+        private final Catalog catalog;
 
         /**
          * From parameter captured.
          */
-        private final AtomicReference<Optional<RepoName>> from;
+        private final AtomicReference<Pagination> paginationRef;
 
-        /**
-         * Limit parameter captured.
-         */
-        private final AtomicInteger limit;
-
-        FakeDocker(final Catalog ctlg) {
-            this.ctlg = ctlg;
-            this.from = new AtomicReference<>();
-            this.limit = new AtomicInteger();
+        FakeDocker(Catalog catalog) {
+            this.catalog = catalog;
+            this.paginationRef = new AtomicReference<>();
         }
 
         @Override
@@ -105,10 +93,9 @@ class CatalogEntityGetTest {
         }
 
         @Override
-        public CompletableFuture<Catalog> catalog(final Optional<RepoName> pfrom, final int plimit) {
-            this.from.set(pfrom);
-            this.limit.set(plimit);
-            return CompletableFuture.completedFuture(this.ctlg);
+        public CompletableFuture<Catalog> catalog(Pagination pagination) {
+            this.paginationRef.set(pagination);
+            return CompletableFuture.completedFuture(this.catalog);
         }
     }
 }

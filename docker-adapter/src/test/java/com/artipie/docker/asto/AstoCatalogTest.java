@@ -5,7 +5,7 @@
 package com.artipie.docker.asto;
 
 import com.artipie.asto.Key;
-import com.artipie.docker.RepoName;
+import com.artipie.docker.misc.Pagination;
 import com.google.common.base.Splitter;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,6 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -51,8 +50,7 @@ final class AstoCatalogTest {
             new AstoCatalog(
                 new Key.From("foo"),
                 this.keys,
-                Optional.ofNullable(from).map(RepoName.Simple::new),
-                Optional.ofNullable(limit).orElse(Integer.MAX_VALUE)
+                Pagination.from(from, limit)
             ).json().asJsonObject(),
             new JsonHas(
                 "repositories",

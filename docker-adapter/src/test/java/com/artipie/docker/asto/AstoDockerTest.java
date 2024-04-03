@@ -11,12 +11,11 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
+import com.artipie.docker.misc.Pagination;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 /**
  * Test case for {@link AstoDocker}.
@@ -36,14 +35,14 @@ final class AstoDockerTest {
         storage.save(
             new Key.From("repositories/my-alpine/something"),
             new Content.From("1".getBytes())
-        ).toCompletableFuture().join();
+        ).join();
         storage.save(
             new Key.From("repositories/test/foo/bar"),
             new Content.From("2".getBytes())
-        ).toCompletableFuture().join();
+        ).join();
         final Catalog catalog = new AstoDocker(storage)
-            .catalog(Optional.empty(), Integer.MAX_VALUE)
-            .toCompletableFuture().join();
+            .catalog(Pagination.empty())
+            .join();
         MatcherAssert.assertThat(
             catalog.json().asString(),
             new IsEqual<>("{\"repositories\":[\"my-alpine\",\"test\"]}")

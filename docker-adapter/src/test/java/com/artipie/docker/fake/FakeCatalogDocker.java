@@ -8,9 +8,9 @@ import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
-import java.util.Optional;
+import com.artipie.docker.misc.Pagination;
+
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -24,27 +24,16 @@ public final class FakeCatalogDocker implements Docker {
     /**
      * Catalog.
      */
-    private final Catalog ctlg;
+    private final Catalog catalog;
 
     /**
      * From parameter captured.
      */
-    private final AtomicReference<Optional<RepoName>> cfrom;
+    private final AtomicReference<Pagination> paginationRef;
 
-    /**
-     * Limit parameter captured.
-     */
-    private final AtomicInteger climit;
-
-    /**
-     * Ctor.
-     *
-     * @param ctlg Catalog.
-     */
-    public FakeCatalogDocker(final Catalog ctlg) {
-        this.ctlg = ctlg;
-        this.cfrom = new AtomicReference<>();
-        this.climit = new AtomicInteger();
+    public FakeCatalogDocker(Catalog catalog) {
+        this.catalog = catalog;
+        this.paginationRef = new AtomicReference<>();
     }
 
     /**
@@ -52,8 +41,8 @@ public final class FakeCatalogDocker implements Docker {
      *
      * @return Captured from parameter.
      */
-    public Optional<RepoName> from() {
-        return this.cfrom.get();
+    public RepoName from() {
+        return this.paginationRef.get().last();
     }
 
     /**
@@ -62,7 +51,7 @@ public final class FakeCatalogDocker implements Docker {
      * @return Captured limit parameter.
      */
     public int limit() {
-        return this.climit.get();
+        return this.paginationRef.get().limit();
     }
 
     @Override
@@ -71,9 +60,8 @@ public final class FakeCatalogDocker implements Docker {
     }
 
     @Override
-    public CompletableFuture<Catalog> catalog(final Optional<RepoName> pfrom, final int plimit) {
-        this.cfrom.set(pfrom);
-        this.climit.set(plimit);
-        return CompletableFuture.completedFuture(this.ctlg);
+    public CompletableFuture<Catalog> catalog(Pagination pagination) {
+        this.paginationRef.set(pagination);
+        return CompletableFuture.completedFuture(this.catalog);
     }
 }

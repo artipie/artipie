@@ -15,7 +15,6 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,8 +34,7 @@ final class JoinedCatalogSourceTest {
                 ).map(
                     json -> new FakeCatalogDocker(() -> new Content.From(json.getBytes()))
                 ).collect(Collectors.toList()),
-                Optional.of(new RepoName.Simple("four")),
-                limit
+                new Pagination(new RepoName.Simple("four"), limit)
             ).catalog().thenCompose(
                 catalog -> catalog.json().asStringFuture()
             ).toCompletableFuture().join(),
@@ -56,8 +54,7 @@ final class JoinedCatalogSourceTest {
         final String json = "{\"repositories\":[\"library/busybox\"]}";
         MatcherAssert.assertThat(
             new JoinedCatalogSource(
-                Optional.empty(),
-                Integer.MAX_VALUE,
+                Pagination.empty(),
                 new FakeCatalogDocker(
                     () -> {
                         throw new IllegalStateException();

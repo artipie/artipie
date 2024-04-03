@@ -5,7 +5,8 @@
 
 package com.artipie.docker;
 
-import java.util.Optional;
+import com.artipie.docker.misc.Pagination;
+
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -24,9 +25,8 @@ public interface Docker {
     /**
      * Docker repositories catalog.
      *
-     * @param from  From which tag to start, exclusive.
-     * @param limit Maximum number of tags returned.
+     * @param pagination  Pagination parameters.
      * @return Catalog.
      */
-    CompletableFuture<Catalog> catalog(Optional<RepoName> from, int limit);
+    CompletableFuture<Catalog> catalog(Pagination pagination);
 }

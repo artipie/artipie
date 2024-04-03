@@ -9,6 +9,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
@@ -47,9 +48,8 @@ final class CacheDockerTest {
             new CacheDocker(
                 fake("{\"repositories\":[\"one\",\"three\",\"four\"]}"),
                 fake("{\"repositories\":[\"one\",\"two\"]}"), Optional.empty(), "*"
-            ).catalog(Optional.of(new RepoName.Simple("four")), limit).thenCompose(
-                catalog -> catalog.json().asStringFuture()
-            ).toCompletableFuture().join(),
+            ).catalog(Pagination.from("four", limit))
+                .thenCompose(catalog -> catalog.json().asStringFuture()).join(),
             new StringIsJson.Object(
                 new JsonHas(
                     "repositories",

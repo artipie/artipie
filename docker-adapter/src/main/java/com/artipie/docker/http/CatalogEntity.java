@@ -6,15 +6,14 @@ package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Docker;
-import com.artipie.docker.RepoName;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.docker.perms.DockerRegistryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RqParams;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -58,16 +57,11 @@ final class CatalogEntity {
 
         @Override
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
-            final RqParams params = new RqParams(line.uri());
-            return this.docker.catalog(
-                params.value("last").map(RepoName.Simple::new),
-                params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
-            ).thenApply(
-                catalog -> ResponseBuilder.ok()
+            return this.docker.catalog(Pagination.from(line.uri()))
+                .thenApply(catalog -> ResponseBuilder.ok()
                     .header(ContentType.json())
                     .body(catalog.json())
-                    .build()
-            ).toCompletableFuture();
+                    .build());
         }
     }
 }

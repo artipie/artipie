@@ -11,6 +11,7 @@ import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
+import com.artipie.docker.misc.Pagination;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -33,13 +34,13 @@ public final class AstoDocker implements Docker {
     }
 
     @Override
-    public Repo repo(final RepoName name) {
+    public Repo repo(RepoName name) {
         return new AstoRepo(this.storage, name);
     }
 
     @Override
-    public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+    public CompletableFuture<Catalog> catalog(Pagination pagination) {
         final Key root = Layout.repositories();
-        return this.storage.list(root).thenApply(keys -> new AstoCatalog(root, keys, from, limit));
+        return this.storage.list(root).thenApply(keys -> new AstoCatalog(root, keys, pagination));
     }
 }

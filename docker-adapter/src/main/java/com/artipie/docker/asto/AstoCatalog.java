@@ -9,8 +9,9 @@ import com.artipie.asto.Key;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.CatalogPage;
+import com.artipie.docker.misc.Pagination;
+
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -29,40 +30,22 @@ final class AstoCatalog implements Catalog {
      * List of keys inside repositories root.
      */
     private final Collection<Key> keys;
+    private final Pagination pagination;
 
     /**
-     * From which name to start, exclusive.
-     */
-    private final Optional<RepoName> from;
-
-    /**
-     * Maximum number of names returned.
-     */
-    private final int limit;
-
-    /**
-     * Ctor.
-     *
      * @param root Repositories root key.
      * @param keys List of keys inside repositories root.
-     * @param from From which tag to start, exclusive.
-     * @param limit Maximum number of tags returned.
+     * @param pagination Pagination parameters.
      */
-    AstoCatalog(
-        final Key root,
-        final Collection<Key> keys,
-        final Optional<RepoName> from,
-        final int limit
-    ) {
+    AstoCatalog(Key root, Collection<Key> keys, Pagination pagination) {
         this.root = root;
         this.keys = keys;
-        this.from = from;
-        this.limit = limit;
+        this.pagination = pagination;
     }
 
     @Override
     public Content json() {
-        return new CatalogPage(this.repos(), this.from, this.limit).json();
+        return new CatalogPage(this.repos(), this.pagination).json();
     }
 
     /**

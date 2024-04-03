@@ -10,14 +10,14 @@ import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 /**
  * Tests for {@link ReadWriteDocker}.
@@ -40,7 +40,6 @@ final class ReadWriteDockerTest {
 
     @Test
     void delegatesCatalog() {
-        final Optional<RepoName> from = Optional.of(new RepoName.Simple("foo"));
         final int limit = 123;
         final Catalog catalog = () -> new Content.From("{...}".getBytes());
         final FakeCatalogDocker fake = new FakeCatalogDocker(catalog);
@@ -48,11 +47,11 @@ final class ReadWriteDockerTest {
             fake,
             new AstoDocker(new InMemoryStorage())
         );
-        final Catalog result = docker.catalog(from, limit).toCompletableFuture().join();
+        final Catalog result = docker.catalog(Pagination.from("foo", limit)).join();
         MatcherAssert.assertThat(
             "Forwards from",
-            fake.from(),
-            new IsEqual<>(from)
+            fake.from().value(),
+            Matchers.is("foo")
         );
         MatcherAssert.assertThat(
             "Forwards limit",

@@ -8,7 +8,8 @@ import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
-import java.util.Optional;
+import com.artipie.docker.misc.Pagination;
+
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -17,8 +18,6 @@ import java.util.concurrent.CompletableFuture;
  * This class can be used to create virtual repository
  * by composing {@link com.artipie.docker.proxy.ProxyDocker}
  * and {@link com.artipie.docker.asto.AstoDocker}.
- *
- * @since 0.3
  */
 public final class ReadWriteDocker implements Docker {
 
@@ -33,8 +32,6 @@ public final class ReadWriteDocker implements Docker {
     private final Docker write;
 
     /**
-     * Ctor.
-     *
      * @param read Docker for reading.
      * @param write Docker for writing.
      */
@@ -49,7 +46,7 @@ public final class ReadWriteDocker implements Docker {
     }
 
     @Override
-    public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
-        return this.read.catalog(from, limit);
+    public CompletableFuture<Catalog> catalog(Pagination pagination) {
+        return this.read.catalog(pagination);
     }
 }

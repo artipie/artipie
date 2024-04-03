@@ -13,6 +13,7 @@ import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.Uploads;
 import com.artipie.docker.fake.FakeCatalogDocker;
+import com.artipie.docker.misc.Pagination;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
@@ -24,7 +25,6 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -42,7 +42,7 @@ class TrimmedDockerTest {
         }
 
         @Override
-        public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+        public CompletableFuture<Catalog> catalog(Pagination pagination) {
             throw new UnsupportedOperationException();
         }
     };
@@ -74,18 +74,17 @@ class TrimmedDockerTest {
 
     @Test
     void trimsCatalog() {
-        final Optional<RepoName> from = Optional.of(new RepoName.Simple("foo/bar"));
         final int limit = 123;
         final Catalog catalog = () -> new Content.From(
             "{\"repositories\":[\"one\",\"two\"]}".getBytes()
         );
         final FakeCatalogDocker fake = new FakeCatalogDocker(catalog);
         final TrimmedDocker docker = new TrimmedDocker(fake, "foo");
-        final Catalog result = docker.catalog(from, limit).toCompletableFuture().join();
+        final Catalog result = docker.catalog(Pagination.from("foo/bar", limit)).join();
         MatcherAssert.assertThat(
             "Forwards from without prefix",
-            fake.from().map(RepoName::value),
-            new IsEqual<>(Optional.of("bar"))
+            fake.from().value(),
+            new IsEqual<>("bar")
         );
         MatcherAssert.assertThat(
             "Forwards limit",
@@ -118,7 +117,6 @@ class TrimmedDockerTest {
         private final RepoName rname;
 
         /**
-         * Ctor.
          * @param name Repo name
          */
         FakeRepo(final RepoName name) {

@@ -7,10 +7,10 @@ package com.artipie.docker.misc;
 import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.RepoName;
-import java.util.Collection;
-import java.util.Optional;
+
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+import java.util.Collection;
 
 /**
  * {@link Catalog} that is a page of given repository names list.
@@ -24,42 +24,26 @@ public final class CatalogPage implements Catalog {
      */
     private final Collection<RepoName> names;
 
-    /**
-     * From which name to start, exclusive.
-     */
-    private final Optional<RepoName> from;
+    private final Pagination pagination;
 
     /**
-     * Maximum number of names returned.
-     */
-    private final int limit;
-
-    /**
-     * Ctor.
-     *
      * @param names Repository names.
-     * @param from From which tag to start, exclusive.
-     * @param limit Maximum number of tags returned.
+     * @param pagination Pagination parameters.
      */
-    public CatalogPage(
-        final Collection<RepoName> names,
-        final Optional<RepoName> from,
-        final int limit
-    ) {
+    public CatalogPage(Collection<RepoName> names, Pagination pagination) {
         this.names = names;
-        this.from = from;
-        this.limit = limit;
+        this.pagination = pagination;
     }
 
     @Override
     public Content json() {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
         this.names.stream()
+            .filter(pagination::lessThan)
             .map(RepoName::value)
-            .filter(name -> this.from.map(last -> name.compareTo(last.value()) > 0).orElse(true))
             .sorted()
             .distinct()
-            .limit(this.limit)
+            .limit(pagination.limit())
             .forEach(builder::add);
         return new Content.From(
             Json.createObjectBuilder()

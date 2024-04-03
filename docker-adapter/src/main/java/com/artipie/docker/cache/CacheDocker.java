@@ -9,6 +9,7 @@ import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
 import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.JoinedCatalogSource;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.scheduling.ArtifactEvent;
 import java.util.Optional;
 import java.util.Queue;
@@ -65,7 +66,7 @@ public final class CacheDocker implements Docker {
     }
 
     @Override
-    public CompletableFuture<Catalog> catalog(final Optional<RepoName> from, final int limit) {
-        return new JoinedCatalogSource(from, limit, this.origin, this.cache).catalog();
+    public CompletableFuture<Catalog> catalog(Pagination pagination) {
+        return new JoinedCatalogSource(pagination, this.origin, this.cache).catalog();
     }
 }
