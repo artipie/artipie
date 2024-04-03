@@ -27,7 +27,7 @@ public final class BaseSlice extends DockerActionSlice {
 
     @Override
     public DockerRegistryPermission permission(final RequestLine line) {
-        return new DockerRegistryPermission(docker.registryName(), RegistryCategory.ALL.mask());
+        return new DockerRegistryPermission(docker.registryName(), RegistryCategory.BASE.mask());
     }
 
     @Override
