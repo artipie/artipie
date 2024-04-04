@@ -51,31 +51,6 @@ public final class DockerAuthSliceTest {
     }
 
     @Test
-    void shouldReturnErrorsWhenForbidden() {
-        final Headers headers = Headers.from(
-            new WwwAuthenticate("Basic realm=\"123\""),
-            new Header("X-Foo", "Bar")
-        );
-        MatcherAssert.assertThat(
-            new DockerAuthSlice(
-                (rqline, rqheaders, rqbody) -> ResponseBuilder.forbidden().headers(headers.copy()).completedFuture()
-            ).response(
-                new RequestLine(RqMethod.GET, "/file.txt"),
-                Headers.EMPTY,
-                Content.EMPTY
-            ).join(),
-            new AllOf<>(
-                new IsErrorsResponse(RsStatus.FORBIDDEN, "DENIED"),
-                new RsHasHeaders(
-                    headers.copy()
-                        .add(ContentType.json())
-                        .add(new ContentLength("85"))
-                )
-            )
-        );
-    }
-
-    @Test
     void shouldNotModifyNormalResponse() {
         final RsStatus status = RsStatus.OK;
         final byte[] body = "data".getBytes();

@@ -27,8 +27,8 @@ public final class BaseEntity implements ScopeSlice {
     public static final Pattern PATH = Pattern.compile("^/v2/$");
 
     @Override
-    public DockerRegistryPermission permission(final RequestLine line, final String name) {
-        return new DockerRegistryPermission(name, new Scope.Registry(RegistryCategory.BASE));
+    public DockerRegistryPermission permission(final RequestLine line, final String registryName) {
+        return new DockerRegistryPermission(registryName, new Scope.Registry(RegistryCategory.BASE));
     }
 
     @Override

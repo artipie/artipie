@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * Catalog entity in Docker HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/#catalog">Catalog</a>.
  */
-final class CatalogEntity {
+public final class CatalogEntity {
 
     /**
      * RegEx pattern for path.
@@ -51,8 +51,8 @@ final class CatalogEntity {
         }
 
         @Override
-        public DockerRegistryPermission permission(final RequestLine line, final String name) {
-            return new DockerRegistryPermission(name, new Scope.Registry(RegistryCategory.CATALOG));
+        public DockerRegistryPermission permission(final RequestLine line, final String registryName) {
+            return new DockerRegistryPermission(registryName, new Scope.Registry(RegistryCategory.CATALOG));
         }
 
         @Override

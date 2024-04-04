@@ -59,8 +59,6 @@ public interface Scope {
         private final Scope scope;
 
         /**
-         * Ctor.
-         *
          * @param scope Origin scope.
          */
         public Wrap(final Scope scope) {
@@ -179,7 +177,7 @@ public interface Scope {
         /**
          * @param category Resource category.
          */
-        public Registry(final RegistryCategory category) {
+        public Registry(RegistryCategory category) {
             this.category = category;
         }
 

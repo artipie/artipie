@@ -56,9 +56,9 @@ final class BlobEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String registryName) {
             return new DockerRepositoryPermission(
-                name, new Scope.Repository.Pull(new Request(line).name())
+                registryName, new Scope.Repository.Pull(new Request(line).name())
             );
         }
 
@@ -115,9 +115,9 @@ final class BlobEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(RequestLine line, String name) {
+        public DockerRepositoryPermission permission(RequestLine line, String registryName) {
             return new DockerRepositoryPermission(
-                name, new Scope.Repository.Pull(new Request(line).name())
+                registryName, new Scope.Repository.Pull(new Request(line).name())
             );
         }
 

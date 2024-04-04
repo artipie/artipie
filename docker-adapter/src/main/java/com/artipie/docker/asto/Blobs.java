@@ -18,9 +18,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class Blobs {
 
-    /**
-     * Storage.
-     */
     private final Storage storage;
 
     /**
@@ -38,10 +35,10 @@ public final class Blobs {
      */
     public CompletableFuture<Optional<Blob>> blob(Digest digest) {
         final Key key = Layout.blob(digest);
-        return this.storage.exists(key)
+        return storage.exists(key)
             .thenApply(
                 exists -> exists
-                    ? Optional.of(new AstoBlob(this.storage, key, digest))
+                    ? Optional.of(new AstoBlob(storage, key, digest))
                     : Optional.empty()
         );
     }
@@ -55,9 +52,7 @@ public final class Blobs {
     public CompletableFuture<Blob> put(BlobSource source) {
         final Digest digest = source.digest();
         final Key key = Layout.blob(digest);
-        return source.saveTo(this.storage, key)
-            .thenApply(
-                nothing -> new AstoBlob(this.storage, key, digest)
-            );
+        return source.saveTo(storage, key)
+            .thenApply(nothing -> new AstoBlob(storage, key, digest));
     }
 }

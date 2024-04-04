@@ -36,7 +36,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
- * Manifest entity in Docker HTTP API..
+ * Manifest entity in Docker HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/#manifest">Manifest</a>.
  */
 final class ManifestEntity {
@@ -44,9 +44,7 @@ final class ManifestEntity {
     /**
      * RegEx pattern for path.
      */
-    public static final Pattern PATH = Pattern.compile(
-        "^/v2/(?<name>.*)/manifests/(?<reference>.*)$"
-    );
+    public static final Pattern PATH = Pattern.compile("^/v2/(?<name>.*)/manifests/(?<reference>.*)$");
 
     /**
      * Repository type.
@@ -74,9 +72,9 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String registryName) {
             return new DockerRepositoryPermission(
-                name, new Scope.Repository.Pull(new Request(line).name())
+                registryName, new Scope.Repository.Pull(new Request(line).name())
             );
         }
 
@@ -118,9 +116,9 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String registryName) {
             return new DockerRepositoryPermission(
-                name, new Scope.Repository.Pull(new Request(line).name())
+                registryName, new Scope.Repository.Pull(new Request(line).name())
             );
         }
 
@@ -177,9 +175,9 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String registryName) {
             return new DockerRepositoryPermission(
-                name, new Scope.Repository.Push(new Request(line).name())
+                registryName, new Scope.Repository.Push(new Request(line).name())
             );
         }
 
@@ -291,9 +289,9 @@ final class ManifestEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(final RequestLine line, final String name) {
+        public DockerRepositoryPermission permission(final RequestLine line, final String registryName) {
             return new DockerRepositoryPermission(
-                name,
+                registryName,
                 new Scope.Repository.OverwriteTags(new Request(line).name())
             );
         }
@@ -335,7 +333,6 @@ final class ManifestEntity {
         ManifestReference reference() {
             return ManifestReference.from(this.rqregex.path().group("reference"));
         }
-
     }
 
     private static ResponseBuilder baseResponse(Manifest manifest) {

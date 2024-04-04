@@ -14,18 +14,6 @@ import java.security.Permission;
  */
 public interface ScopeSlice extends Slice {
 
-    /**
-     * Evaluate authentication scope from HTTP request line.
-     *
-     * @param line HTTP request line.
-     * @param name Repository name
-     * @return Scope.
-     */
-    @Deprecated
-    default Permission permission(String line, String name){
-        return permission(RequestLine.from(line), name);
-    }
-
-    Permission permission(RequestLine line, String name);
+    Permission permission(RequestLine line, String registryName);
 
 }

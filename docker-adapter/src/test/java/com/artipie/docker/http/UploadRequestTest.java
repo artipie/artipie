@@ -4,63 +4,55 @@
  */
 package com.artipie.docker.http;
 
-import com.artipie.docker.Digest;
+import com.artipie.docker.http.upload.UploadRequest;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
-import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 /**
- * Tests for {@link UploadEntity.Request}.
- *
- * @since 0.2
+ * Tests for {@link UploadRequest}.
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
-class UploadEntityRequestTest {
+class UploadRequestTest {
 
     @Test
     void shouldReadName() {
-        final UploadEntity.Request request = new UploadEntity.Request(
-            new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/")
+        MatcherAssert.assertThat(
+            UploadRequest.from(new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/"))
+                .name(),
+            Matchers.is("my-repo")
         );
-        MatcherAssert.assertThat(request.name(), new IsEqual<>("my-repo"));
     }
 
     @Test
     void shouldReadCompositeName() {
         final String name = "zero-one/two.three/four_five";
         MatcherAssert.assertThat(
-            new UploadEntity.Request(
-                new RequestLine(
-                    RqMethod.POST, String.format("/v2/%s/blobs/uploads/", name)
-                )
-            ).name(),
-            new IsEqual<>(name)
+            UploadRequest.from(new RequestLine(RqMethod.POST, String.format("/v2/%s/blobs/uploads/", name)))
+                .name(),
+            Matchers.is(name)
         );
     }
 
     @Test
     void shouldReadUuid() {
-        final UploadEntity.Request request = new UploadEntity.Request(
-            new RequestLine(
-                RqMethod.PATCH,
+        UploadRequest request = UploadRequest.from(
+            new RequestLine(RqMethod.PATCH,
                 "/v2/my-repo/blobs/uploads/a9e48d2a-c939-441d-bb53-b3ad9ab67709"
             )
         );
         MatcherAssert.assertThat(
             request.uuid(),
-            new IsEqual<>("a9e48d2a-c939-441d-bb53-b3ad9ab67709")
+            Matchers.is("a9e48d2a-c939-441d-bb53-b3ad9ab67709")
         );
     }
 
     @Test
     void shouldReadEmptyUuid() {
-        final UploadEntity.Request request = new UploadEntity.Request(
+        UploadRequest request = UploadRequest.from(
             new RequestLine(RqMethod.PATCH, "/v2/my-repo/blobs/uploads//123")
         );
         MatcherAssert.assertThat(
@@ -71,13 +63,12 @@ class UploadEntityRequestTest {
 
     @Test
     void shouldReadDigest() {
-        final UploadEntity.Request request = new UploadEntity.Request(
-            new RequestLine(
-                RqMethod.PUT,
+        UploadRequest request = UploadRequest.from(
+            new RequestLine(RqMethod.PUT,
                 "/v2/my-repo/blobs/uploads/123-abc?digest=sha256:12345"
             )
         );
-        MatcherAssert.assertThat(request.digest().string(), new IsEqual<>("sha256:12345"));
+        MatcherAssert.assertThat(request.digest().string(), Matchers.is("sha256:12345"));
     }
 
     @Test
@@ -85,11 +76,11 @@ class UploadEntityRequestTest {
         MatcherAssert.assertThat(
             Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> new UploadEntity.Request(
+                () -> UploadRequest.from(
                     new RequestLine(RqMethod.PUT, "/one/two")
                 ).name()
             ).getMessage(),
-            new StringContains(false, "Unexpected path")
+            Matchers.containsString("Unexpected path")
         );
     }
 
@@ -98,64 +89,57 @@ class UploadEntityRequestTest {
         MatcherAssert.assertThat(
             Assertions.assertThrows(
                 IllegalStateException.class,
-                () -> new UploadEntity.Request(
-                    new RequestLine(
-                        RqMethod.PUT,
+                () -> UploadRequest.from(
+                    new RequestLine(RqMethod.PUT,
                         "/v2/my-repo/blobs/uploads/123-abc?what=nothing"
                     )
                 ).digest()
             ).getMessage(),
-            new StringContains(false, "Unexpected query")
+            Matchers.containsString("Request parameter `digest` is not exist")
         );
     }
 
     @Test
     void shouldReadMountWhenPresent() {
-        final UploadEntity.Request request = new UploadEntity.Request(
-            new RequestLine(
-                RqMethod.POST,
+        UploadRequest request = UploadRequest.from(
+            new RequestLine(RqMethod.POST,
                 "/v2/my-repo/blobs/uploads/?mount=sha256:12345&from=foo"
             )
         );
         MatcherAssert.assertThat(
-            request.mount().map(Digest::string),
-            new IsEqual<>(Optional.of("sha256:12345"))
+            request.mount().orElseThrow().string(), Matchers.is("sha256:12345")
         );
     }
 
     @Test
     void shouldReadMountWhenAbsent() {
-        final UploadEntity.Request request = new UploadEntity.Request(
+        UploadRequest request = UploadRequest.from(
             new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/")
         );
         MatcherAssert.assertThat(
-            request.mount().isPresent(),
-            new IsEqual<>(false)
+            request.mount().isEmpty(), Matchers.is(true)
         );
     }
 
     @Test
     void shouldReadFromWhenPresent() {
-        final UploadEntity.Request request = new UploadEntity.Request(
-            new RequestLine(
-                RqMethod.POST,
+        UploadRequest request = UploadRequest.from(
+            new RequestLine(RqMethod.POST,
                 "/v2/my-repo/blobs/uploads/?mount=sha256:12345&from=foo"
             )
         );
         MatcherAssert.assertThat(
-            request.from(),
-            new IsEqual<>(Optional.of("foo"))
+            request.from().orElseThrow(), Matchers.is("foo")
         );
     }
 
     @Test
     void shouldReadFromWhenAbsent() {
-        final UploadEntity.Request request = new UploadEntity.Request(
+        UploadRequest request = UploadRequest.from(
             new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/")
         );
         MatcherAssert.assertThat(
-            request.from().isPresent(),
-            new IsEqual<>(false)
+            request.from().isEmpty(), Matchers.is(true)
         );
     }
 }

@@ -106,11 +106,10 @@ class UploadEntityPutTest {
 
     @Test
     void shouldReturnNotFoundWhenUploadNotExists() {
-        final Response response = this.slice.response(
-            new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345"),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).join();
+        final Response response = this.slice
+            .response(new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345"),
+                Headers.EMPTY, Content.EMPTY)
+            .join();
         MatcherAssert.assertThat(
             response,
             new IsErrorsResponse(RsStatus.NOT_FOUND, "BLOB_UPLOAD_UNKNOWN")
