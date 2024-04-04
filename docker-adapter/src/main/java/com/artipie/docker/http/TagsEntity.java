@@ -51,8 +51,8 @@ final class TagsEntity {
         }
 
         @Override
-        public DockerRepositoryPermission permission(RequestLine line, String name) {
-            return new DockerRepositoryPermission(name, new Scope.Repository.Pull(name(line)));
+        public DockerRepositoryPermission permission(RequestLine line, String registryName) {
+            return new DockerRepositoryPermission(registryName, new Scope.Repository.Pull(name(line)));
         }
 
         @Override

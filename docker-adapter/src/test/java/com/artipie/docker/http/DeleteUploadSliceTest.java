@@ -9,6 +9,7 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Docker;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.Upload;
+import com.artipie.docker.http.upload.DeleteUploadSlice;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
@@ -21,10 +22,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link UploadEntity.Delete}.
+ * Tests for {@link DeleteUploadSlice}.
  * Upload DElETE endpoint.
  */
-final class UploadEntityDeleteTest {
+final class DeleteUploadSliceTest {
     /**
      * Docker registry used in tests.
      */

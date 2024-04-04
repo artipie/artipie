@@ -6,8 +6,8 @@ package com.artipie.http.auth;
 
 import com.artipie.asto.Content;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.headers.WwwAuthenticate;
 import com.artipie.http.rq.RequestLine;
@@ -40,13 +40,11 @@ public final class AuthzSlice implements Slice {
     private final OperationControl control;
 
     /**
-     * Ctor.
-     *
      * @param origin Origin slice.
      * @param auth Authentication scheme.
      * @param control Access control by permission.
      */
-    public AuthzSlice(final Slice origin, final AuthScheme auth, final OperationControl control) {
+    public AuthzSlice(Slice origin, AuthScheme auth, OperationControl control) {
         this.origin = origin;
         this.auth = auth;
         this.control = control;
@@ -79,10 +77,9 @@ public final class AuthzSlice implements Slice {
                             body
                         );
                     }
-                    return CompletableFuture.completedFuture(ResponseBuilder.unauthorized()
+                    return ResponseBuilder.unauthorized()
                         .header(new WwwAuthenticate(result.challenge()))
-                        .build()
-                    );
+                        .completedFuture();
                 }
         );
     }

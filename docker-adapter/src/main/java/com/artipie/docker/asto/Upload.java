@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 
 /**
  * Blob upload.
@@ -154,31 +153,32 @@ public final class Upload {
      */
     public CompletionStage<Blob> putTo(Layers layers, Digest digest) {
         final Key source = this.chunk(digest);
-        return this.storage.exists(source).thenCompose(
-            exists -> {
-                final CompletionStage<Blob> result;
-                if (exists) {
-                    result = layers.put(
-                        new BlobSource() {
-                            @Override
-                            public Digest digest() {
-                                return digest;
-                            }
+        return this.storage.exists(source)
+            .thenCompose(
+                exists -> {
+                    final CompletionStage<Blob> result;
+                    if (exists) {
+                        result = layers.put(
+                            new BlobSource() {
+                                @Override
+                                public Digest digest() {
+                                    return digest;
+                                }
 
-                            @Override
-                            public CompletableFuture<Void> saveTo(final Storage asto, final Key key) {
-                                return asto.move(source, key);
+                                @Override
+                                public CompletableFuture<Void> saveTo(Storage asto, Key key) {
+                                    return asto.move(source, key);
+                                }
                             }
-                        }
-                    ).thenCompose(
-                        blob -> this.delete().thenApply(nothing -> blob)
-                    );
-                } else {
-                    result = CompletableFuture.failedFuture(new InvalidDigestException(digest.toString()));
+                        ).thenCompose(
+                            blob -> this.delete().thenApply(nothing -> blob)
+                        );
+                    } else {
+                        result = CompletableFuture.failedFuture(new InvalidDigestException(digest.toString()));
+                    }
+                    return result;
                 }
-                return result;
-            }
-        );
+            );
     }
 
     /**
@@ -206,7 +206,7 @@ public final class Upload {
      * @return Chunk key.
      */
     private Key chunk(final Digest digest) {
-        return new Key.From(this.root(), String.format("%s_%s", digest.alg(), digest.hex()));
+        return new Key.From(this.root(), digest.alg() + '_' + digest.hex());
     }
 
     /**
@@ -215,11 +215,12 @@ public final class Upload {
      * @return Chunk keys.
      */
     private CompletableFuture<Collection<Key>> chunks() {
-        return this.storage.list(this.root()).thenApply(
-            keys -> keys.stream()
-                .filter(key -> !key.string().equals(this.started().string()))
-                .collect(Collectors.toList())
-        );
+        return this.storage.list(this.root())
+            .thenApply(
+                keys -> keys.stream()
+                    .filter(key -> !key.string().equals(this.started().string()))
+                    .toList()
+            );
     }
 
     /**
@@ -231,7 +232,8 @@ public final class Upload {
         return this.storage.list(this.root())
             .thenCompose(
                 list -> CompletableFuture.allOf(
-                    list.stream().map(file -> this.storage.delete(file).toCompletableFuture())
+                    list.stream()
+                        .map(this.storage::delete)
                         .toArray(CompletableFuture[]::new)
                 )
             );

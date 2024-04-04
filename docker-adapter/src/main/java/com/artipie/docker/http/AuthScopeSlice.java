@@ -37,36 +37,29 @@ final class AuthScopeSlice implements Slice {
     private final Policy<?> policy;
 
     /**
-     * Artipie repository name.
+     * Docker registry name.
      */
-    private final String name;
+    private final String registryName;
 
     /**
      * @param origin Origin slice.
      * @param auth Authentication scheme.
      * @param policy Access permissions.
-     * @param name Repository name
+     * @param registryName Docker registry name.
      */
-    AuthScopeSlice(
-        final ScopeSlice origin,
-        final AuthScheme auth,
-        final Policy<?> policy,
-        final String name
-    ) {
+    AuthScopeSlice(ScopeSlice origin, AuthScheme auth, Policy<?> policy, String registryName) {
         this.origin = origin;
         this.auth = auth;
         this.policy = policy;
-        this.name = name;
+        this.registryName = registryName;
     }
 
     @Override
-    public CompletableFuture<Response> response(
-        RequestLine line, Headers headers, Content body
-    ) {
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
         return new AuthzSlice(
             this.origin,
             this.auth,
-            new OperationControl(this.policy, this.origin.permission(line, this.name))
+            new OperationControl(this.policy, this.origin.permission(line, this.registryName))
         ).response(line, headers, body);
     }
 }

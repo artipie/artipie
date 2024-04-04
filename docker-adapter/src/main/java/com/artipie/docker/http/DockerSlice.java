@@ -5,6 +5,12 @@
 package com.artipie.docker.http;
 
 import com.artipie.docker.Docker;
+import com.artipie.docker.http.upload.DeleteUploadSlice;
+import com.artipie.docker.http.upload.GetUploadSlice;
+import com.artipie.docker.http.upload.PatchUploadSlice;
+import com.artipie.docker.http.upload.PostUploadSlice;
+import com.artipie.docker.http.upload.PutUploadSlice;
+import com.artipie.docker.http.upload.UploadSlice;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.Authentication;
@@ -16,6 +22,7 @@ import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.policy.Policy;
+
 import java.util.Optional;
 import java.util.Queue;
 
@@ -55,15 +62,15 @@ public final class DockerSlice extends Slice.Wrap {
      * @param docker Docker repository.
      * @param policy Access policy.
      * @param auth Authentication scheme.
-     * @param events Artifact events queue
-     * @param name Repository name
+     * @param events Artifact events queue.
+     * @param registryName Docker registry name.
      */
     public DockerSlice(
         Docker docker,
         Policy<?> policy,
         AuthScheme auth,
         Optional<Queue<ArtifactEvent>> events,
-        String name
+        String registryName
     ) {
         super(
             new ErrorHandlingSlice(
@@ -73,21 +80,21 @@ public final class DockerSlice extends Slice.Wrap {
                             new RtRule.ByPath(BaseEntity.PATH),
                             ByMethodsRule.Standard.GET
                         ),
-                        auth(new BaseEntity(), policy, auth, name)
+                        auth(new BaseEntity(), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
                             new RtRule.ByPath(ManifestEntity.PATH),
                             new ByMethodsRule(RqMethod.HEAD)
                         ),
-                        auth(new ManifestEntity.Head(docker), policy, auth, name)
+                        auth(new ManifestEntity.Head(docker), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
                             new RtRule.ByPath(ManifestEntity.PATH),
                             ByMethodsRule.Standard.GET
                         ),
-                        auth(new ManifestEntity.Get(docker), policy, auth, name)
+                        auth(new ManifestEntity.Get(docker), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
@@ -95,7 +102,7 @@ public final class DockerSlice extends Slice.Wrap {
                             ByMethodsRule.Standard.PUT
                         ),
                         new ManifestEntity.PutAuth(
-                            docker, new ManifestEntity.Put(docker, events, name), auth, policy, name
+                            docker, new ManifestEntity.Put(docker, events, registryName), auth, policy, registryName
                         )
                     ),
                     new RtRulePath(
@@ -103,63 +110,63 @@ public final class DockerSlice extends Slice.Wrap {
                             new RtRule.ByPath(TagsEntity.PATH),
                             ByMethodsRule.Standard.GET
                         ),
-                        auth(new TagsEntity.Get(docker), policy, auth, name)
+                        auth(new TagsEntity.Get(docker), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
                             new RtRule.ByPath(BlobEntity.PATH),
                             new ByMethodsRule(RqMethod.HEAD)
                         ),
-                        auth(new BlobEntity.Head(docker), policy, auth, name)
+                        auth(new BlobEntity.Head(docker), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
                             new RtRule.ByPath(BlobEntity.PATH),
                             ByMethodsRule.Standard.GET
                         ),
-                        auth(new BlobEntity.Get(docker), policy, auth, name)
+                        auth(new BlobEntity.Get(docker), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
-                            new RtRule.ByPath(UploadEntity.PATH),
+                            new RtRule.ByPath(UploadSlice.PATH),
                             ByMethodsRule.Standard.POST
                         ),
-                        auth(new UploadEntity.Post(docker), policy, auth, name)
+                        auth( new PostUploadSlice(docker), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
-                            new RtRule.ByPath(UploadEntity.PATH),
+                            new RtRule.ByPath(UploadSlice.PATH),
                             new ByMethodsRule(RqMethod.PATCH)
                         ),
-                        auth(new UploadEntity.Patch(docker), policy, auth, name)
+                        auth(new PatchUploadSlice(docker), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
-                            new RtRule.ByPath(UploadEntity.PATH),
+                            new RtRule.ByPath(UploadSlice.PATH),
                             ByMethodsRule.Standard.PUT
                         ),
-                        auth(new UploadEntity.Put(docker), policy, auth, name)
+                        auth(new PutUploadSlice(docker), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
-                            new RtRule.ByPath(UploadEntity.PATH),
+                            new RtRule.ByPath(UploadSlice.PATH),
                             ByMethodsRule.Standard.GET
                         ),
-                        auth(new UploadEntity.Get(docker), policy, auth, name)
+                        auth(new GetUploadSlice(docker), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
-                            new RtRule.ByPath(UploadEntity.PATH),
+                            new RtRule.ByPath(UploadSlice.PATH),
                             ByMethodsRule.Standard.DELETE
                         ),
-                        auth(new UploadEntity.Delete(docker), policy, auth, name)
+                        auth(new DeleteUploadSlice(docker), policy, auth, registryName)
                     ),
                     new RtRulePath(
                         new RtRule.All(
                             new RtRule.ByPath(CatalogEntity.PATH),
                             ByMethodsRule.Standard.GET
                         ),
-                        auth(new CatalogEntity.Get(docker), policy, auth, name)
+                        auth(new CatalogEntity.Get(docker), policy, auth, registryName)
                     )
                 )
             )
@@ -172,15 +179,15 @@ public final class DockerSlice extends Slice.Wrap {
      * @param origin Origin slice.
      * @param policy Access permissions.
      * @param auth Authentication scheme.
-     * @param name Repository name
+     * @param registryName Repository name
      * @return Authorized slice.
      */
     private static Slice auth(
         final ScopeSlice origin,
         final Policy<?> policy,
         final AuthScheme auth,
-        final String name
+        final String registryName
     ) {
-        return new DockerAuthSlice(new AuthScopeSlice(origin, auth, policy, name));
+        return new DockerAuthSlice(new AuthScopeSlice(origin, auth, policy, registryName));
     }
 }

@@ -8,6 +8,7 @@ package com.artipie.docker.asto;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -34,10 +35,9 @@ public final class AstoLayers implements Layers {
     }
 
     @Override
-    public CompletableFuture<Blob> mount(final Blob blob) {
-        return blob.content().thenCompose(
-            content -> this.blobs.put(new TrustedBlobSource(content, blob.digest()))
-        );
+    public CompletableFuture<Blob> mount(Blob blob) {
+        return blob.content()
+            .thenCompose(content -> blobs.put(new TrustedBlobSource(content, blob.digest())));
     }
 
     @Override

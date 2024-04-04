@@ -17,6 +17,7 @@ public interface Docker {
 
     /**
      * Docker repo by name.
+     *
      * @param name Repository name
      * @return Repository object
      */

@@ -5,6 +5,7 @@
 package com.artipie.docker.perms;
 
 import com.artipie.security.perms.Action;
+
 import java.util.Collections;
 import java.util.Set;
 
@@ -41,8 +42,6 @@ public enum RegistryCategory implements Action {
     private final int mask;
 
     /**
-     * Ctor.
-     *
      * @param name Category name
      * @param mask Category mask
      */
@@ -67,15 +66,12 @@ public enum RegistryCategory implements Action {
      * @return The mask
      * @throws IllegalArgumentException is the category not valid
      */
-    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
-    public static int maskByCategory(final String name) {
-        for (final Action item : values()) {
+    public static int maskByCategory(String name) {
+        for (Action item : values()) {
             if (item.names().contains(name)) {
                 return item.mask();
             }
         }
-        throw new IllegalArgumentException(
-            String.format("Unknown permission action %s", name)
-        );
+        throw new IllegalArgumentException("Unknown permission action " + name);
     }
 }

@@ -68,21 +68,16 @@ public final class DockerRepositoryPermission extends Permission  {
      * @param resource Resource (or image) name
      * @param actions Actions list
      */
-    public DockerRepositoryPermission(
-        final String name, final String resource, final Collection<String> actions
-    ) {
+    public DockerRepositoryPermission(String name, String resource, Collection<String> actions) {
         this(name, resource, maskFromActions(actions));
     }
 
     /**
-     * Ctor.
      * @param name Permission name
      * @param resource Resource name
      * @param mask Action mask
      */
-    public DockerRepositoryPermission(
-        final String name, final String resource, final int mask
-    ) {
+    public DockerRepositoryPermission(String name, String resource, int mask) {
         super(name);
         this.resource = resource;
         this.mask = mask;

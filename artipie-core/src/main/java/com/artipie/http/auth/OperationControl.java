@@ -17,7 +17,6 @@ import java.util.List;
  * <p/>
  * Instances of this class are created in the adapter with users' policies and required
  * permission for the adapter's operation.
- * @since 1.2
  */
 public final class OperationControl {
 
