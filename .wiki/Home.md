@@ -48,18 +48,18 @@ It's time to add a `maven-proxy` repository config file, call it `my-maven.yaml`
 ```yaml
 repo:
  type: maven-proxy
+ port: 8085
+ storage:
+  type: fs
+  path: /var/artipie/data
  remotes:
   - url: https://repo.maven.apache.org/maven2
-    cache:
-     storage:
-      type: fs
-      path: /var/artipie/data
 ```
 - field `type` describes repository type, in our case it's `maven-proxy`.
 - field `url` points to a remote maven repository.
 - field `cache` describes storage to keep artifacts gotten from the remote maven repository.
 
-Detailed description for every supported repository type can be found [here](https://github.com/artipie/artipie/tree/master/examples).
+Detailed description for every supported repository type can be found [here](https://github.com/artipie/artipie/tree/master/artipie-main/examples).
 
 As long as we defined `/var/artipie/repo` as path for configuration file system storage,
 the file `my-maven.yaml` has to be placed on the path `/var/artipie/repo/my-maven.yaml`
