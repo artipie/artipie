@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Tests for {@link DockerSlice}.
  * Tags list GET endpoint.
  */
-class TagsEntityGetTest {
+class TagsSliceGetTest {
 
     @Test
     void shouldReturnTags() {

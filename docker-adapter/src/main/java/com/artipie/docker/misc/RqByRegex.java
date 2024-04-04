@@ -14,28 +14,15 @@ import java.util.regex.Pattern;
  */
 public final class RqByRegex {
 
-    /**
-     * Request line.
-     */
-    private final RequestLine line;
+    private final Matcher path;
 
-    /**
-     * Pattern.
-     */
-    private final Pattern regex;
-
-    /**
-     * @param line Request line
-     * @param regex Regex
-     */
-    @Deprecated
-    public RqByRegex(final String line, final Pattern regex) {
-        this(RequestLine.from(line), regex);
-    }
-
-    public RqByRegex(final RequestLine line, final Pattern regex) {
-        this.line = line;
-        this.regex = regex;
+    public RqByRegex(RequestLine line, Pattern regex) {
+        String path = line.uri().getPath();
+        Matcher matcher = regex.matcher(path);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Unexpected path: " + path);
+        }
+        this.path = matcher;
     }
 
     /**
@@ -44,11 +31,6 @@ public final class RqByRegex {
      * @return Path matcher.
      */
     public Matcher path() {
-        final String path = this.line.uri().getPath();
-        final Matcher matcher = this.regex.matcher(path);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException(String.format("Unexpected path: %s", path));
-        }
-        return matcher;
+        return path;
     }
 }

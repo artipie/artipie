@@ -22,46 +22,35 @@ import java.util.regex.Pattern;
  * Catalog entity in Docker HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/#catalog">Catalog</a>.
  */
-public final class CatalogEntity {
+public final class CatalogSlice implements ScopeSlice {
 
     /**
      * RegEx pattern for path.
      */
     public static final Pattern PATH = Pattern.compile("^/v2/_catalog$");
 
-    private CatalogEntity() {
-        // No-op.
+    /**
+     * Docker repository.
+     */
+    private final Docker docker;
+
+    public CatalogSlice(Docker docker) {
+        this.docker = docker;
     }
 
-    /**
-     * Slice for GET method, getting catalog.
-     */
-    public static class Get implements ScopeSlice {
+    @Override
+    public DockerRegistryPermission permission(final RequestLine line, final String registryName) {
+        return new DockerRegistryPermission(registryName, RegistryCategory.CATALOG.mask());
+    }
 
-        /**
-         * Docker repository.
-         */
-        private final Docker docker;
-
-        /**
-         * @param docker Docker repository.
-         */
-        Get(final Docker docker) {
-            this.docker = docker;
-        }
-
-        @Override
-        public DockerRegistryPermission permission(final RequestLine line, final String registryName) {
-            return new DockerRegistryPermission(registryName, new Scope.Registry(RegistryCategory.CATALOG));
-        }
-
-        @Override
-        public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
-            return this.docker.catalog(Pagination.from(line.uri()))
-                .thenApply(catalog -> ResponseBuilder.ok()
+    @Override
+    public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
+        return this.docker.catalog(Pagination.from(line.uri()))
+            .thenApply(
+                catalog -> ResponseBuilder.ok()
                     .header(ContentType.json())
                     .body(catalog.json())
-                    .build());
-        }
+                    .build()
+            );
     }
 }

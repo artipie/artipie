@@ -4,23 +4,23 @@
  */
 package com.artipie.docker.misc;
 
-import java.util.regex.Pattern;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import com.artipie.http.rq.RequestLine;
+import com.artipie.http.rq.RqMethod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.regex.Pattern;
+
 /**
  * Test for {@link RqByRegex}.
- * @since 0.3
  */
 class RqByRegexTest {
 
     @Test
     void shouldMatchPath() {
-        MatcherAssert.assertThat(
-            new RqByRegex("GET /v2/some/repo HTTP/1.1", Pattern.compile("/v2/.*")).path().matches(),
-            new IsEqual<>(true)
+        Assertions.assertTrue(
+            new RqByRegex(new RequestLine(RqMethod.GET, "/v2/some/repo"),
+                Pattern.compile("/v2/.*")).path().matches()
         );
     }
 
@@ -28,8 +28,8 @@ class RqByRegexTest {
     void shouldThrowExceptionIsDoesNotMatch() {
         Assertions.assertThrows(
             IllegalArgumentException.class,
-            () -> new RqByRegex("GET /v3/my-repo/blobs HTTP/1.1", Pattern.compile("/v2/.*/blobs"))
-                .path()
+            () -> new RqByRegex(new RequestLine(RqMethod.GET, "/v3/my-repo/blobs"),
+                Pattern.compile("/v2/.*/blobs")).path()
         );
     }
 

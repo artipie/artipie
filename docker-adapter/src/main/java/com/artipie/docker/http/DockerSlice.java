@@ -107,11 +107,12 @@ public final class DockerSlice extends Slice.Wrap {
                     ),
                     new RtRulePath(
                         new RtRule.All(
-                            new RtRule.ByPath(TagsEntity.PATH),
+                            new RtRule.ByPath(TagsSlice.PATH),
                             ByMethodsRule.Standard.GET
                         ),
-                        auth(new TagsEntity.Get(docker), policy, auth, registryName)
+                        auth(new TagsSlice(docker), policy, auth, registryName)
                     ),
+
                     new RtRulePath(
                         new RtRule.All(
                             new RtRule.ByPath(BlobEntity.PATH),
@@ -126,6 +127,7 @@ public final class DockerSlice extends Slice.Wrap {
                         ),
                         auth(new BlobEntity.Get(docker), policy, auth, registryName)
                     ),
+
                     new RtRulePath(
                         new RtRule.All(
                             new RtRule.ByPath(UploadSlice.PATH),
@@ -163,10 +165,10 @@ public final class DockerSlice extends Slice.Wrap {
                     ),
                     new RtRulePath(
                         new RtRule.All(
-                            new RtRule.ByPath(CatalogEntity.PATH),
+                            new RtRule.ByPath(CatalogSlice.PATH),
                             ByMethodsRule.Standard.GET
                         ),
-                        auth(new CatalogEntity.Get(docker), policy, auth, registryName)
+                        auth(new CatalogSlice(docker), policy, auth, registryName)
                     )
                 )
             )

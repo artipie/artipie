@@ -47,7 +47,7 @@ public final class RequestLine {
      * @param method Request method.
      * @param uri Request URI.
      */
-    public RequestLine(final RqMethod method, final String uri) {
+    public RequestLine(RqMethod method, String uri) {
         this(method.value(), uri);
     }
 

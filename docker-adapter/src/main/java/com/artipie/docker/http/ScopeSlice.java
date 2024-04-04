@@ -10,7 +10,7 @@ import com.artipie.http.rq.RequestLine;
 import java.security.Permission;
 
 /**
- * Slice requiring authorization specified by {@link Scope}.
+ * Slice requiring authorization.
  */
 public interface ScopeSlice extends Slice {
 

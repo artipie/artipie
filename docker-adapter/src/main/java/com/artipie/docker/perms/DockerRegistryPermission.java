@@ -4,7 +4,6 @@
  */
 package com.artipie.docker.perms;
 
-import com.artipie.docker.http.Scope;
 import com.artipie.security.perms.Action;
 
 import java.io.Serial;
@@ -46,16 +45,6 @@ public final class DockerRegistryPermission extends Permission {
     public DockerRegistryPermission(final String name, final int mask) {
         super(name);
         this.mask = mask;
-    }
-
-    /**
-     * Constructs a permission with the specified name and scope.
-     *
-     * @param name Name of the Permission object being created.
-     * @param scope Permission scope, see {@link Scope.Registry}
-     */
-    public DockerRegistryPermission(final String name, final Scope scope) {
-        this(name, scope.action().mask());
     }
 
     /**

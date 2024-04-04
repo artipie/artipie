@@ -74,7 +74,7 @@ final class ManifestEntity {
         @Override
         public DockerRepositoryPermission permission(final RequestLine line, final String registryName) {
             return new DockerRepositoryPermission(
-                registryName, new Scope.Repository.Pull(new Request(line).name())
+                registryName, new Request(line).name(), DockerActions.PULL.mask()
             );
         }
 
@@ -118,7 +118,7 @@ final class ManifestEntity {
         @Override
         public DockerRepositoryPermission permission(final RequestLine line, final String registryName) {
             return new DockerRepositoryPermission(
-                registryName, new Scope.Repository.Pull(new Request(line).name())
+                registryName, new Request(line).name(), DockerActions.PULL.mask()
             );
         }
 
@@ -177,7 +177,7 @@ final class ManifestEntity {
         @Override
         public DockerRepositoryPermission permission(final RequestLine line, final String registryName) {
             return new DockerRepositoryPermission(
-                registryName, new Scope.Repository.Push(new Request(line).name())
+                registryName, new Request(line).name(), DockerActions.PUSH.mask()
             );
         }
 
@@ -291,9 +291,7 @@ final class ManifestEntity {
         @Override
         public DockerRepositoryPermission permission(final RequestLine line, final String registryName) {
             return new DockerRepositoryPermission(
-                registryName,
-                new Scope.Repository.OverwriteTags(new Request(line).name())
-            );
+                registryName, new Request(line).name(), DockerActions.OVERWRITE.mask());
         }
     }
 

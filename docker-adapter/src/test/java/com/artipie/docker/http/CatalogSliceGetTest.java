@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Tests for {@link DockerSlice}.
  * Catalog GET endpoint.
  */
-class CatalogEntityGetTest {
+class CatalogSliceGetTest {
 
     @Test
     void shouldReturnCatalog() {
