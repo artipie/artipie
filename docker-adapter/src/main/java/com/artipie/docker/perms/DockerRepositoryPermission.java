@@ -4,7 +4,6 @@
  */
 package com.artipie.docker.perms;
 
-import com.artipie.docker.http.Scope;
 import com.artipie.security.perms.Action;
 
 import java.io.Serial;
@@ -22,8 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * <li>name (artipie repository name)</li>
  * <li>resource name (or image name, on the adapter side it's obtained from the request line)</li>
  * <li>the set of action, see {@link DockerActions}</li>
- *
- * @since 0.18
  */
 public final class DockerRepositoryPermission extends Permission  {
 
@@ -50,16 +47,6 @@ public final class DockerRepositoryPermission extends Permission  {
      * Action mask.
      */
     private final transient int mask;
-
-    /**
-     * Constructs a permission with the specified name.
-     *
-     * @param name Name of repository
-     * @param scope The scope
-     */
-    public DockerRepositoryPermission(final String name, final Scope scope) {
-        this(name, scope.name(), scope.action().mask());
-    }
 
     /**
      * Constructs a permission with the specified name.
@@ -130,14 +117,6 @@ public final class DockerRepositoryPermission extends Permission  {
     @Override
     public PermissionCollection newPermissionCollection() {
         return new DockerRepositoryPermissionCollection();
-    }
-
-    /**
-     * Get permission resource.
-     * @return Resource (image) name
-     */
-    public String permResource() {
-        return this.resource;
     }
 
     /**

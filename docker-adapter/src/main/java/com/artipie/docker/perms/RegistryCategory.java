@@ -4,6 +4,7 @@
  */
 package com.artipie.docker.perms;
 
+import com.artipie.docker.http.CatalogSlice;
 import com.artipie.security.perms.Action;
 
 import java.util.Collections;
@@ -22,7 +23,7 @@ public enum RegistryCategory implements Action {
     BASE("base", 0x4),
 
     /**
-     * Catalog category, check {@link com.artipie.docker.http.CatalogEntity}.
+     * Catalog category, check {@link CatalogSlice}.
      */
     CATALOG("catalog", 0x2),
 

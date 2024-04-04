@@ -10,6 +10,7 @@ import com.artipie.docker.Docker;
 import com.artipie.docker.error.BlobUnknownError;
 import com.artipie.docker.misc.ImageRepositoryName;
 import com.artipie.docker.misc.RqByRegex;
+import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
@@ -58,7 +59,7 @@ final class BlobEntity {
         @Override
         public DockerRepositoryPermission permission(final RequestLine line, final String registryName) {
             return new DockerRepositoryPermission(
-                registryName, new Scope.Repository.Pull(new Request(line).name())
+                registryName, new Request(line).name(), DockerActions.PULL.mask()
             );
         }
 
@@ -117,7 +118,7 @@ final class BlobEntity {
         @Override
         public DockerRepositoryPermission permission(RequestLine line, String registryName) {
             return new DockerRepositoryPermission(
-                registryName, new Scope.Repository.Pull(new Request(line).name())
+                registryName, new Request(line).name(), DockerActions.PULL.mask()
             );
         }
 

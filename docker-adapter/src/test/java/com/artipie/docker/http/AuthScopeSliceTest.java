@@ -38,8 +38,8 @@ class AuthScopeSliceTest {
         new AuthScopeSlice(
             new ScopeSlice() {
                 @Override
-                public DockerRepositoryPermission permission(RequestLine rqline, String registryName) {
-                    aline.set(rqline);
+                public DockerRepositoryPermission permission(RequestLine line, String registryName) {
+                    aline.set(line);
                     return new DockerRepositoryPermission(registryName, "bar", DockerActions.PULL.mask());
                 }
 

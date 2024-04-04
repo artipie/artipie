@@ -28,7 +28,7 @@ public final class BaseEntity implements ScopeSlice {
 
     @Override
     public DockerRegistryPermission permission(final RequestLine line, final String registryName) {
-        return new DockerRegistryPermission(registryName, new Scope.Registry(RegistryCategory.BASE));
+        return new DockerRegistryPermission(registryName, RegistryCategory.BASE.mask());
     }
 
     @Override
