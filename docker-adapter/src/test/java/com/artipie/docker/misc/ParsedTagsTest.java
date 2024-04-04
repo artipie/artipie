@@ -36,7 +36,7 @@ class ParsedTagsTest {
         MatcherAssert.assertThat(
             new ParsedTags(
                 () -> new Content.From("{\"name\":\"foo\"}".getBytes())
-            ).repo().toCompletableFuture().join().value(),
+            ).repo().toCompletableFuture().join(),
             new IsEqual<>("foo")
         );
     }

@@ -10,10 +10,8 @@ import com.artipie.asto.Storage;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.Pagination;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -34,7 +32,7 @@ public final class AstoDocker implements Docker {
     }
 
     @Override
-    public Repo repo(RepoName name) {
+    public Repo repo(String name) {
         return new AstoRepo(this.storage, name);
     }
 

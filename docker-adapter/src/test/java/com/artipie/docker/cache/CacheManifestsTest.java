@@ -13,13 +13,12 @@ import com.artipie.docker.Layers;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.Uploads;
 import com.artipie.docker.fake.FakeManifests;
 import com.artipie.docker.fake.FullTagsManifests;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.scheduling.ArtifactEvent;
 import com.google.common.base.Stopwatch;
 import org.hamcrest.MatcherAssert;
@@ -59,7 +58,7 @@ final class CacheManifestsTest {
         final String expected
     ) {
         final CacheManifests manifests = new CacheManifests(
-            new RepoName.Simple("test"),
+            "test",
             new SimpleRepo(new FakeManifests(origin, "origin")),
             new SimpleRepo(new FakeManifests(cache, "cache")),
             Optional.empty(), "*"
@@ -78,10 +77,9 @@ final class CacheManifestsTest {
         final ManifestReference ref = ManifestReference.from("1");
         final Queue<ArtifactEvent> events = new ConcurrentLinkedQueue<>();
         final Repo cache = new AstoDocker(new LoggingStorage(new InMemoryStorage()))
-            .repo(new RepoName.Simple("my-cache"));
-        new CacheManifests(
-            new RepoName.Simple("cache-alpine"),
-            new AstoDocker(new ExampleStorage()).repo(new RepoName.Simple("my-alpine")),
+            .repo("my-cache");
+        new CacheManifests("cache-alpine",
+            new AstoDocker(new ExampleStorage()).repo("my-alpine"),
             cache, Optional.of(events), "my-docker-proxy"
         ).get(ref).toCompletableFuture().join();
         final Stopwatch stopwatch = Stopwatch.createStarted();
@@ -119,7 +117,7 @@ final class CacheManifestsTest {
         final String name = "tags-test";
         MatcherAssert.assertThat(
             new CacheManifests(
-                new RepoName.Simple(name),
+                name,
                 new SimpleRepo(
                     new FullTagsManifests(
                         () -> new Content.From("{\"tags\":[\"one\",\"three\",\"four\"]}".getBytes())
@@ -130,7 +128,7 @@ final class CacheManifestsTest {
                         () -> new Content.From("{\"tags\":[\"one\",\"two\"]}".getBytes())
                     )
                 ), Optional.empty(), "*"
-            ).tags(Optional.of(new Tag.Valid("four")), limit).thenCompose(
+            ).tags(Pagination.from("four", limit)).thenCompose(
                 tags -> tags.json().asStringFuture()
             ).toCompletableFuture().join(),
             new StringIsJson.Object(

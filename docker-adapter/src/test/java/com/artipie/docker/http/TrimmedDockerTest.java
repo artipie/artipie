@@ -10,12 +10,11 @@ import com.artipie.docker.Docker;
 import com.artipie.docker.Layers;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.Uploads;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import com.artipie.docker.misc.Pagination;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,7 +36,7 @@ class TrimmedDockerTest {
      */
     private static final Docker FAKE = new Docker() {
         @Override
-        public Repo repo(final RepoName name) {
+        public Repo repo(String name) {
             return new FakeRepo(name);
         }
 
@@ -51,8 +50,7 @@ class TrimmedDockerTest {
     void failsIfPrefixNotFound() {
         Assertions.assertThrows(
             IllegalArgumentException.class,
-            () -> new TrimmedDocker(TrimmedDockerTest.FAKE, "abc/123")
-                .repo(new RepoName.Simple("xfe/oiu"))
+            () -> new TrimmedDocker(TrimmedDockerTest.FAKE, "abc/123").repo("xfe/oiu")
         );
     }
 
@@ -68,7 +66,7 @@ class TrimmedDockerTest {
         Assertions.assertEquals(
             name,
             ((FakeRepo) new TrimmedDocker(TrimmedDockerTest.FAKE, prefix)
-                .repo(new RepoName.Simple(prefix + '/' + name))).name()
+                .repo(prefix + '/' + name)).name()
         );
     }
 
@@ -83,13 +81,13 @@ class TrimmedDockerTest {
         final Catalog result = docker.catalog(Pagination.from("foo/bar", limit)).join();
         MatcherAssert.assertThat(
             "Forwards from without prefix",
-            fake.from().value(),
-            new IsEqual<>("bar")
+            fake.from(),
+            Matchers.is("bar")
         );
         MatcherAssert.assertThat(
             "Forwards limit",
             fake.limit(),
-            new IsEqual<>(limit)
+            Matchers.is(limit)
         );
         MatcherAssert.assertThat(
             "Returns catalog with prefixes",
@@ -114,12 +112,12 @@ class TrimmedDockerTest {
         /**
          * Repo name.
          */
-        private final RepoName rname;
+        private final String rname;
 
         /**
          * @param name Repo name
          */
-        FakeRepo(final RepoName name) {
+        FakeRepo(String name) {
             this.rname = name;
         }
 
@@ -143,7 +141,7 @@ class TrimmedDockerTest {
          * @return Name
          */
         public String name() {
-            return this.rname.value();
+            return this.rname;
         }
     }
 

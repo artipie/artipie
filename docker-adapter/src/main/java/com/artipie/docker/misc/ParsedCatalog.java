@@ -6,7 +6,6 @@ package com.artipie.docker.misc;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
-import com.artipie.docker.RepoName;
 
 import javax.json.Json;
 import javax.json.JsonString;
@@ -27,8 +26,6 @@ public final class ParsedCatalog implements Catalog {
     private final Catalog origin;
 
     /**
-     * Ctor.
-     *
      * @param origin Origin catalog.
      */
     public ParsedCatalog(final Catalog origin) {
@@ -45,13 +42,13 @@ public final class ParsedCatalog implements Catalog {
      *
      * @return Repository names list.
      */
-    public CompletionStage<List<RepoName>> repos() {
+    public CompletionStage<List<String>> repos() {
         return this.origin.json().asBytesFuture().thenApply(
             bytes -> Json.createReader(new ByteArrayInputStream(bytes)).readObject()
         ).thenApply(root -> root.getJsonArray("repositories")).thenApply(
             repos -> repos.getValuesAs(JsonString.class).stream()
                 .map(JsonString::getString)
-                .map(RepoName.Valid::new)
+                .map(ImageRepositoryName::validate)
                 .collect(Collectors.toList())
         );
     }

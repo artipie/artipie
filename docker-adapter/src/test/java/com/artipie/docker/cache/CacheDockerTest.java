@@ -6,7 +6,6 @@ package com.artipie.docker.cache;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import com.artipie.docker.misc.Pagination;
@@ -36,7 +35,7 @@ final class CacheDockerTest {
             new AstoDocker(new InMemoryStorage()), Optional.empty(), "*"
         );
         MatcherAssert.assertThat(
-            docker.repo(new RepoName.Simple("test")),
+            docker.repo("test"),
             new IsInstanceOf(CacheRepo.class)
         );
     }

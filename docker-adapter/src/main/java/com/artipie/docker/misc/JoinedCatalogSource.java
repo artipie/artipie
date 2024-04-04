@@ -6,7 +6,6 @@ package com.artipie.docker.misc;
 
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
-import com.artipie.docker.RepoName;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,16 +51,14 @@ public final class JoinedCatalogSource {
      * @return Catalog.
      */
     public CompletableFuture<Catalog> catalog() {
-        final List<CompletionStage<List<RepoName>>> all = this.dockers.stream().map(
+        final List<CompletionStage<List<String>>> all = this.dockers.stream().map(
             docker -> docker.catalog(pagination)
                 .thenApply(ParsedCatalog::new)
                 .thenCompose(ParsedCatalog::repos)
                 .exceptionally(err -> Collections.emptyList())
         ).collect(Collectors.toList());
-        return CompletableFuture.allOf(all.toArray(new CompletableFuture<?>[0])).thenApply(
-            nothing -> all.stream().flatMap(
-                stage -> stage.toCompletableFuture().join().stream()
-            ).collect(Collectors.toList())
-        ).thenApply(names -> new CatalogPage(names, pagination));
+        return CompletableFuture.allOf(all.toArray(new CompletableFuture<?>[0]))
+            .thenApply(nothing -> all.stream().flatMap(stage -> stage.toCompletableFuture().join().stream()).toList())
+            .thenApply(names -> new CatalogPage(names, pagination));
     }
 }

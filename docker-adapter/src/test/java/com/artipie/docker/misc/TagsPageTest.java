@@ -4,8 +4,6 @@
  */
 package com.artipie.docker.misc;
 
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.google.common.base.Splitter;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -17,7 +15,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -38,10 +35,9 @@ final class TagsPageTest {
         final String repo = "my-alpine";
         MatcherAssert.assertThat(
             new TagsPage(
-                new RepoName.Simple(repo),
+                repo,
                 Arrays.asList("3", "1", "2", "4", "5", "4"),
-                Optional.ofNullable(from).map(Tag.Valid::new),
-                Optional.ofNullable(limit).orElse(Integer.MAX_VALUE)
+                Pagination.from(from, limit)
             ).json().asString(),
             new StringIsJson.Object(
                 Matchers.allOf(

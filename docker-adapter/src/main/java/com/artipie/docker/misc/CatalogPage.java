@@ -6,7 +6,6 @@ package com.artipie.docker.misc;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
-import com.artipie.docker.RepoName;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -22,7 +21,7 @@ public final class CatalogPage implements Catalog {
     /**
      * Repository names.
      */
-    private final Collection<RepoName> names;
+    private final Collection<String> names;
 
     private final Pagination pagination;
 
@@ -30,7 +29,7 @@ public final class CatalogPage implements Catalog {
      * @param names Repository names.
      * @param pagination Pagination parameters.
      */
-    public CatalogPage(Collection<RepoName> names, Pagination pagination) {
+    public CatalogPage(Collection<String> names, Pagination pagination) {
         this.names = names;
         this.pagination = pagination;
     }
@@ -40,7 +39,6 @@ public final class CatalogPage implements Catalog {
         final JsonArrayBuilder builder = Json.createArrayBuilder();
         this.names.stream()
             .filter(pagination::lessThan)
-            .map(RepoName::value)
             .sorted()
             .distinct()
             .limit(pagination.limit())

@@ -4,7 +4,6 @@
  */
 package com.artipie.docker.asto;
 
-import com.artipie.docker.RepoName;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,7 @@ public final class LayoutTest {
     @Test
     public void buildsTags() {
         MatcherAssert.assertThat(
-            Layout.tags(new RepoName.Simple("my-alpine")).string(),
+            Layout.tags("my-alpine").string(),
             new IsEqual<>("repositories/my-alpine/_manifests/tags")
         );
     }

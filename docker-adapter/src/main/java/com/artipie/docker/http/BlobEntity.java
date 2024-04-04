@@ -7,13 +7,13 @@ package com.artipie.docker.http;
 import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Docker;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.error.BlobUnknownError;
+import com.artipie.docker.misc.ImageRepositoryName;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
@@ -169,8 +169,8 @@ final class BlobEntity {
          *
          * @return Repository name.
          */
-        RepoName name() {
-            return new RepoName.Valid(this.reqRegex.path().group("name"));
+        String name() {
+            return ImageRepositoryName.validate(this.reqRegex.path().group("name"));
         }
 
         /**

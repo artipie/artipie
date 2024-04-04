@@ -7,7 +7,6 @@ package com.artipie.docker.composite;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.Pagination;
 
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +40,7 @@ public final class ReadWriteDocker implements Docker {
     }
 
     @Override
-    public Repo repo(final RepoName name) {
+    public Repo repo(String name) {
         return new ReadWriteRepo(this.read.repo(name), this.write.repo(name));
     }
 

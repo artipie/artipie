@@ -7,10 +7,10 @@ package com.artipie.docker.cache;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.JoinedCatalogSource;
 import com.artipie.docker.misc.Pagination;
 import com.artipie.scheduling.ArtifactEvent;
+
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -59,7 +59,7 @@ public final class CacheDocker implements Docker {
     }
 
     @Override
-    public Repo repo(final RepoName name) {
+    public Repo repo(final String name) {
         return new CacheRepo(
             name, this.origin.repo(name), this.cache.repo(name), this.events, this.rname
         );

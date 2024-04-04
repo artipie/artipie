@@ -5,8 +5,6 @@
 package com.artipie.docker.misc;
 
 import com.artipie.asto.Content;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.fake.FullTagsManifests;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -16,7 +14,6 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,15 +28,14 @@ final class JoinedTagsSourceTest {
         final String name = "my-test";
         MatcherAssert.assertThat(
             new JoinedTagsSource(
-                new RepoName.Valid(name),
+                name,
                 Stream.of(
                     "{\"tags\":[\"one\",\"two\"]}",
                     "{\"tags\":[\"one\",\"three\",\"four\"]}"
                 ).map(
                     json -> new FullTagsManifests(() -> new Content.From(json.getBytes()))
                 ).collect(Collectors.toList()),
-                Optional.of(new Tag.Valid("four")),
-                limit
+                Pagination.from("four", limit)
             ).tags().thenCompose(
                 tags -> tags.json().asStringFuture()
             ).toCompletableFuture().join(),

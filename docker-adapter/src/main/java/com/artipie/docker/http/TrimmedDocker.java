@@ -7,8 +7,8 @@ package com.artipie.docker.http;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.CatalogPage;
+import com.artipie.docker.misc.ImageRepositoryName;
 import com.artipie.docker.misc.Pagination;
 import com.artipie.docker.misc.ParsedCatalog;
 
@@ -32,7 +32,6 @@ public final class TrimmedDocker implements Docker {
     private final String prefix;
 
     /**
-     * Ctor.
      * @param origin Docker origin
      * @param prefix Prefix to cut
      */
@@ -42,7 +41,7 @@ public final class TrimmedDocker implements Docker {
     }
 
     @Override
-    public Repo repo(RepoName name) {
+    public Repo repo(String name) {
         return this.origin.repo(trim(name));
     }
 
@@ -54,8 +53,7 @@ public final class TrimmedDocker implements Docker {
         return this.origin.catalog(trimmed)
             .thenCompose(catalog -> new ParsedCatalog(catalog).repos())
             .thenApply(names -> names.stream()
-                .map(name -> String.format("%s/%s", this.prefix, name.value()))
-                .<RepoName>map(RepoName.Valid::new)
+                .map(name -> String.format("%s/%s", this.prefix, name))
                 .toList())
             .thenApply(names -> new CatalogPage(names, pagination));
     }
@@ -66,19 +64,19 @@ public final class TrimmedDocker implements Docker {
      * @param name Original name.
      * @return Name reminder.
      */
-    private RepoName trim(RepoName name) {
+    private String trim(String name) {
         if (name != null) {
             final Pattern pattern = Pattern.compile(String.format("(?:%s)\\/(.+)", this.prefix));
-            final Matcher matcher = pattern.matcher(name.value());
+            final Matcher matcher = pattern.matcher(name);
             if (!matcher.matches()) {
                 throw new IllegalArgumentException(
                     String.format(
                         "Invalid image name: name `%s` must start with `%s/`",
-                        name.value(), this.prefix
+                        name, this.prefix
                     )
                 );
             }
-            return new RepoName.Valid(matcher.group(1));
+            return ImageRepositoryName.validate(matcher.group(1));
         }
         return null;
     }

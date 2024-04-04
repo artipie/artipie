@@ -5,13 +5,11 @@
 package com.artipie.docker.misc;
 
 import com.artipie.asto.Content;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.Tags;
 
 import javax.json.JsonString;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 
 /**
  * Parsed {@link Tags} that is capable of extracting tags list and repository name
@@ -43,10 +41,10 @@ public final class ParsedTags implements Tags {
      *
      * @return Repository name.
      */
-    public CompletionStage<RepoName> repo() {
+    public CompletionStage<String> repo() {
         return origin.json()
             .asJsonObjectFuture()
-            .thenApply(root -> new RepoName.Valid(root.getString("name")));
+            .thenApply(root -> ImageRepositoryName.validate(root.getString("name")));
     }
 
     /**
@@ -60,8 +58,8 @@ public final class ParsedTags implements Tags {
             .thenApply(root -> root.getJsonArray("tags")
                 .getValuesAs(JsonString.class)
                 .stream()
-                .map(val->Validator.validateTag(val.getString()))
-                .collect(Collectors.toList()));
+                .map(val -> ImageTag.validate(val.getString()))
+                .toList());
     }
 
 }

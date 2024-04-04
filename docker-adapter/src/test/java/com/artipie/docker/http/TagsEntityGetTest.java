@@ -10,21 +10,19 @@ import com.artipie.docker.Docker;
 import com.artipie.docker.Layers;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.asto.Uploads;
 import com.artipie.docker.fake.FullTagsManifests;
 import com.artipie.docker.misc.Pagination;
 import com.artipie.http.Headers;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -60,8 +58,8 @@ class TagsEntityGetTest {
         );
         MatcherAssert.assertThat(
             "Gets tags for expected repository name",
-            docker.capture.get().value(),
-            new IsEqual<>("my-alpine")
+            docker.capture.get(),
+            Matchers.is("my-alpine")
         );
     }
 
@@ -81,13 +79,13 @@ class TagsEntityGetTest {
         ).join();
         MatcherAssert.assertThat(
             "Parses from",
-            manifests.capturedFrom().map(Tag::value),
-            new IsEqual<>(Optional.of(from))
+            manifests.capturedFrom(),
+            Matchers.is(Optional.of(from))
         );
         MatcherAssert.assertThat(
             "Parses limit",
             manifests.capturedLimit(),
-            new IsEqual<>(limit)
+            Matchers.is(limit)
         );
     }
 
@@ -107,7 +105,7 @@ class TagsEntityGetTest {
         /**
          * Captured repository name.
          */
-        private final AtomicReference<RepoName> capture;
+        private final AtomicReference<String> capture;
 
         FakeDocker(final Manifests manifests) {
             this.manifests = manifests;
@@ -115,7 +113,7 @@ class TagsEntityGetTest {
         }
 
         @Override
-        public Repo repo(final RepoName name) {
+        public Repo repo(String name) {
             this.capture.set(name);
             return new Repo() {
                 @Override

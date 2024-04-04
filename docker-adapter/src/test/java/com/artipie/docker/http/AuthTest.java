@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Docker;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.TrustedBlobSource;
 import com.artipie.docker.perms.DockerActions;
@@ -17,6 +16,7 @@ import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.BasicAuthScheme;
@@ -28,7 +28,6 @@ import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
 import com.artipie.security.perms.EmptyPermissions;
 import com.artipie.security.policy.Policy;
 import org.hamcrest.MatcherAssert;
@@ -224,7 +223,7 @@ public final class AuthTest {
      */
     private Content manifest() {
         final byte[] content = "config".getBytes();
-        final Blob config = this.docker.repo(new RepoName.Valid("my-alpine")).layers()
+        final Blob config = this.docker.repo("my-alpine").layers()
             .put(new TrustedBlobSource(content))
             .toCompletableFuture().join();
         final byte[] data = String.format(

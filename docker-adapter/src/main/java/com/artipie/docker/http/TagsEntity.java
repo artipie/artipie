@@ -6,16 +6,15 @@ package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Docker;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
+import com.artipie.docker.misc.ImageRepositoryName;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RqParams;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -58,17 +57,15 @@ final class TagsEntity {
 
         @Override
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
-            final RqParams params = new RqParams(line.uri());
             return this.docker.repo(name(line)).manifests()
                 .tags(
-                    params.value("last").map(Tag.Valid::new),
-                    params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
+                    Pagination.from(line.uri())
                 ).thenApply(
                     tags -> ResponseBuilder.ok()
                         .header(ContentType.json())
                         .body(tags.json())
                         .build()
-                ).toCompletableFuture();
+                );
         }
 
         /**
@@ -77,8 +74,8 @@ final class TagsEntity {
          * @param line Request line.
          * @return Repository name.
          */
-        private static RepoName.Valid name(RequestLine line) {
-            return new RepoName.Valid(new RqByRegex(line, TagsEntity.PATH).path().group("name"));
+        private static String name(RequestLine line) {
+            return ImageRepositoryName.validate(new RqByRegex(line, TagsEntity.PATH).path().group("name"));
         }
     }
 }

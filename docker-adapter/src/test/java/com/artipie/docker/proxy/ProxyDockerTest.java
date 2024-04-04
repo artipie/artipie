@@ -6,11 +6,11 @@ package com.artipie.docker.proxy;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.Pagination;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.headers.Header;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyIterable;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
@@ -31,7 +31,7 @@ final class ProxyDockerTest {
         final ProxyDocker docker = new ProxyDocker((line, headers, body) ->
             ResponseBuilder.ok().completedFuture());
         MatcherAssert.assertThat(
-            docker.repo(new RepoName.Simple("test")),
+            docker.repo("test"),
             new IsInstanceOf(ProxyRepo.class)
         );
     }
@@ -69,7 +69,7 @@ final class ProxyDockerTest {
         MatcherAssert.assertThat(
             "Sends no body to remote",
             cbody.get().length,
-            new IsEqual<>(0)
+            Matchers.is(0)
         );
     }
 

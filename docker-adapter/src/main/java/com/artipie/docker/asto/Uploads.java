@@ -5,7 +5,6 @@
 package com.artipie.docker.asto;
 
 import com.artipie.asto.Storage;
-import com.artipie.docker.RepoName;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -21,13 +20,13 @@ public final class Uploads {
     /**
      * Repository name.
      */
-    private final RepoName name;
+    private final String name;
 
     /**
      * @param storage Asto storage
      * @param name Repository name
      */
-    public Uploads(final Storage storage, final RepoName name) {
+    public Uploads(Storage storage, String name) {
         this.storage = storage;
         this.name = name;
     }

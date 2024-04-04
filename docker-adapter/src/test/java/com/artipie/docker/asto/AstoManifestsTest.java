@@ -10,10 +10,10 @@ import com.artipie.asto.Storage;
 import com.artipie.docker.Blob;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.ManifestReference;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.Tags;
 import com.artipie.docker.error.InvalidManifestException;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -47,9 +47,8 @@ final class AstoManifestsTest {
     @BeforeEach
     void setUp() {
         final Storage storage = new ExampleStorage();
-        final RepoName name = new RepoName.Simple("my-alpine");
         this.blobs = new Blobs(storage);
-        this.manifests = new AstoManifests(storage, this.blobs, name);
+        this.manifests = new AstoManifests(storage, this.blobs, "my-alpine");
     }
 
     @Test
@@ -134,7 +133,7 @@ final class AstoManifestsTest {
     @Test
     @Timeout(5)
     void shouldReadTags() {
-        final Tags tags = this.manifests.tags(Optional.empty(), Integer.MAX_VALUE)
+        final Tags tags = this.manifests.tags(Pagination.empty())
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             tags.json().asString(),

@@ -5,7 +5,6 @@
 package com.artipie.docker.misc;
 
 import com.artipie.asto.Content;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -34,7 +33,7 @@ final class JoinedCatalogSourceTest {
                 ).map(
                     json -> new FakeCatalogDocker(() -> new Content.From(json.getBytes()))
                 ).collect(Collectors.toList()),
-                new Pagination(new RepoName.Simple("four"), limit)
+                new Pagination("four", limit)
             ).catalog().thenCompose(
                 catalog -> catalog.json().asStringFuture()
             ).toCompletableFuture().join(),

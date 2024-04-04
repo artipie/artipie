@@ -12,7 +12,6 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
-import com.artipie.docker.RepoName;
 import io.reactivex.Flowable;
 import org.hamcrest.Description;
 import org.hamcrest.MatcherAssert;
@@ -55,11 +54,7 @@ class UploadTest {
     @BeforeEach
     void setUp() {
         this.storage = new InMemoryStorage();
-        this.upload = new Upload(
-            this.storage,
-            new RepoName.Valid("test"),
-            UUID.randomUUID().toString()
-        );
+        this.upload = new Upload(this.storage, "test", UUID.randomUUID().toString());
     }
 
     @Test

@@ -7,7 +7,6 @@ package com.artipie.docker.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Docker;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.TrustedBlobSource;
 import com.artipie.http.Headers;
@@ -77,7 +76,7 @@ class UploadEntityPostTest {
             "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7"
         );
         final String from = "my-alpine";
-        this.docker.repo(new RepoName.Simple(from)).layers().put(
+        this.docker.repo(from).layers().put(
             new TrustedBlobSource("data".getBytes())
         ).toCompletableFuture().join();
         final String name = "test";

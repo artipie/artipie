@@ -4,7 +4,6 @@
  */
 package com.artipie.docker.http;
 
-import com.artipie.docker.RepoName;
 import com.artipie.docker.perms.RegistryCategory;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
@@ -20,7 +19,7 @@ class ScopeTest {
     @Test
     void repositoryPullScope() {
         MatcherAssert.assertThat(
-            new Scope.Repository.Pull(new RepoName.Valid("samalba/my-app")).string(),
+            new Scope.Repository.Pull("samalba/my-app").string(),
             new IsEqual<>("repository:samalba/my-app:PULL")
         );
     }
@@ -28,7 +27,7 @@ class ScopeTest {
     @Test
     void repositoryPushScope() {
         MatcherAssert.assertThat(
-            new Scope.Repository.Push(new RepoName.Valid("busybox")).string(),
+            new Scope.Repository.Push("busybox").string(),
             new IsEqual<>("repository:busybox:PUSH")
         );
     }

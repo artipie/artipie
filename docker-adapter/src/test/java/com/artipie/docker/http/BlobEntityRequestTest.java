@@ -25,7 +25,7 @@ class BlobEntityRequestTest {
                 new RequestLine(
                     RqMethod.HEAD, String.format("/v2/%s/blobs/sha256:098", name)
                 )
-            ).name().value(),
+            ).name(),
             new IsEqual<>(name)
         );
     }
@@ -51,7 +51,7 @@ class BlobEntityRequestTest {
                 new RequestLine(
                     RqMethod.HEAD, String.format("/v2/%s/blobs/sha256:234434df", name)
                 )
-            ).name().value(),
+            ).name(),
             new IsEqual<>(name)
         );
     }

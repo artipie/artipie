@@ -6,10 +6,10 @@ package com.artipie.docker.proxy;
 
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
-import com.artipie.docker.RepoName;
-import com.artipie.http.headers.ContentLength;
 import com.artipie.http.ResponseBuilder;
+import com.artipie.http.headers.ContentLength;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
@@ -33,16 +33,16 @@ class ProxyLayersTest {
                     .header(new ContentLength(String.valueOf(size)))
                     .completedFuture();
             },
-            new RepoName.Valid("test")
+            "test"
         ).get(new Digest.FromString(digest)).toCompletableFuture().join();
         MatcherAssert.assertThat(blob.isPresent(), new IsEqual<>(true));
         MatcherAssert.assertThat(
             blob.orElseThrow().digest().string(),
-            new IsEqual<>(digest)
+            Matchers.is(digest)
         );
         MatcherAssert.assertThat(
             blob.get().size().toCompletableFuture().join(),
-            new IsEqual<>(size)
+            Matchers.is(size)
         );
     }
 
@@ -57,7 +57,7 @@ class ProxyLayersTest {
                 }
                 return ResponseBuilder.notFound().completedFuture();
             },
-            new RepoName.Valid(repo)
+            repo
         ).get(new Digest.FromString(digest)).toCompletableFuture().join();
         MatcherAssert.assertThat(found.isPresent(), new IsEqual<>(false));
     }

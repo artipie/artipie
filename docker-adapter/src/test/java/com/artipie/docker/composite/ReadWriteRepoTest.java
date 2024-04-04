@@ -8,10 +8,8 @@ import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Layers;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoRepo;
 import com.artipie.docker.asto.Uploads;
-import com.artipie.docker.asto.Layout;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
@@ -42,10 +40,7 @@ final class ReadWriteRepoTest {
 
     @Test
     void createsWriteUploads() {
-        final Uploads uploads = new Uploads(
-            new InMemoryStorage(),
-            new RepoName.Simple("test")
-        );
+        final Uploads uploads = new Uploads(new InMemoryStorage(), "test");
         MatcherAssert.assertThat(
             new ReadWriteRepo(
                 repo(),
@@ -71,9 +66,6 @@ final class ReadWriteRepoTest {
     }
 
     private static Repo repo() {
-        return new AstoRepo(
-            new InMemoryStorage(),
-            new RepoName.Simple("test-repo")
-        );
+        return new AstoRepo(new InMemoryStorage(), "test-repo");
     }
 }

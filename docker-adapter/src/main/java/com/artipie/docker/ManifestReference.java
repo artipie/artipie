@@ -5,7 +5,7 @@
 package com.artipie.docker;
 
 import com.artipie.asto.Key;
-import com.artipie.docker.misc.Validator;
+import com.artipie.docker.misc.ImageTag;
 
 import java.util.Arrays;
 
@@ -49,7 +49,7 @@ public record ManifestReference(Key link, String reference) {
      * @return Manifest reference record
      */
     public static ManifestReference fromTag(String tag) {
-        String validated = Validator.validateTag(tag);
+        String validated = ImageTag.validate(tag);
         return new ManifestReference(
             new Key.From(Arrays.asList("tags", validated, "current", "link")),
             validated
